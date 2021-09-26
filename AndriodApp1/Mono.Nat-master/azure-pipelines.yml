@@ -1,0 +1,16 @@
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: 'Mono.Nat.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+
+- task: VSBuild@1
+  inputs:
+    msbuildArgs: '/restore'
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'

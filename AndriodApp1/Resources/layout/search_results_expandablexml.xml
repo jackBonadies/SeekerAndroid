@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/searchResultSelection"
+    android:background="@color/cellback"
+    android:orientation="vertical"
+    android:paddingTop="25dp"
+    android:paddingBottom="20dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<!--        <TextView
+        android:text="Expandable: Expanded"
+        android:textSize="22sp"
+        android:textColor="@color/mainTextColor"
+    android:layout_width="match_parent"
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+    android:layout_height="wrap_content"
+    />
+
+        <TextView
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:text="Expandable: Collapsed"
+        android:textSize="22sp"
+        android:textColor="@color/mainTextColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    />
+
+        <TextView
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        android:text="Medium"
+        android:textSize="22sp"
+        android:textColor="@color/mainTextColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    />
+
+    <TextView
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
+        android:paddingRight="10dp"
+        android:paddingLeft="10dp"
+        
+        android:text="Minimal"
+        android:textSize="22sp"
+        android:textColor="@color/mainTextColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    />-->
+
+        <TextView
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
+        android:paddingRight="2dp"
+        android:paddingLeft="2dp"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:text="@string/search_result_style"
+        android:textSize="22sp"
+        android:textColor="@color/mainTextColor"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    />
+
+       <RadioGroup
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/radioGroup">
+         <RadioButton
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/search_result_style_expanded"
+         android:id="@+id/radioButtonExpanded"
+         android:checked="false"
+                        android:layout_marginTop="6dp"
+
+        android:textSize="18sp"
+            android:buttonTint="@color/slskAccent"
+        android:textColor="@color/mainTextColor"
+            />
+
+      <RadioButton
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/search_result_style_collapsed"
+         android:id="@+id/radioButtonCollapsed"
+         android:checked="false"
+        android:textSize="18sp"
+                        android:layout_marginTop="4dp"
+            android:buttonTint="@color/slskAccent"
+        android:textColor="@color/mainTextColor"
+          />
+      <RadioButton
+                        android:layout_marginTop="4dp"
+
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:id="@+id/radioButtonMedium"
+         android:checked="false"
+        android:text="@string/search_result_style_medium"
+        android:textSize="18sp"
+            android:buttonTint="@color/slskAccent"
+        android:textColor="@color/mainTextColor"
+            />
+
+      <RadioButton
+            android:layout_marginTop="4dp"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:text="@string/search_result_style_minimal"
+         android:id="@+id/radioButtonMinimal"
+         android:checked="false"
+        android:textSize="18sp"
+            android:buttonTint="@color/slskAccent"
+        android:textColor="@color/mainTextColor"
+          />
+   </RadioGroup>
+
+</LinearLayout>

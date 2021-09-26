@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--For all properties see: https://aka.ms/android-menu-resource-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item android:id="@+id/getFolderContents"
+      android:title="@string/get_folder"/>
+  <item android:id="@+id/browseAtLocation"
+    android:title="@string/browse_at_location" />
+  <item android:id="@+id/moreInfo"
+      android:title="@string/quick_info" />
+  <item android:id="@+id/getUserInfo"
+    android:title="@string/get_user_info" />
+
+
+
+  
+</menu>
+
+

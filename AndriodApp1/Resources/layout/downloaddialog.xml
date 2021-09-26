@@ -1,0 +1,212 @@
+
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    android:layout_gravity="center"
+    <TextView
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:textSize="14dp"
+        android:gravity="center_vertical"
+        android:padding = "5dp"
+        android:text = "     User: dummy"
+        android:background="@color/mainPurple"
+        android:textColor="#ffffff"
+        app:drawableRightCompat="@drawable/ic_expand_more_black_32dp"
+        android:id="@+id/userHeader"
+        android:clickable="true"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/userHeader"
+        android:background="@color/mainPurple"
+        android:id="@+id/header1">
+        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = "5"
+            android:gravity = "center"
+            android:background = "@drawable/header_cell_shape_w_top"
+            android:padding = "5dp"
+            android:text = "@string/file_column"
+            android:textSize="12sp"
+            android:textColor = "#ffffff" />
+        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = "2"
+            android:gravity = "center"
+            android:background = "@drawable/header_cell_shape_w_top"
+            android:textSize="12sp"
+            android:padding = "5dp"
+            android:text = "@string/size_column"
+            android:textColor = "#ffffff"/>
+        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = "2"
+            android:background = "@drawable/header_cell_shape_top_only"
+            android:gravity = "center"
+            android:paddingHorizontal="2dp"
+            android:paddingVertical="5dp"
+            android:text = "@string/attribute_column"
+            android:textSize="12sp"
+            android:textColor = "#ffffff" />
+    </LinearLayout>
+    <ListView
+        android:layout_below = "@id/header1"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="120dp"
+        android:clipToPadding="false"
+        android:id="@+id/listView1" />
+<!--    <FrameLayout
+        android:layout_below="@id/listView1"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"/>-->
+        <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop = "60dp"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+    android:orientation="vertical">
+                <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+        android:layout_gravity="center"
+    android:orientation="horizontal">
+                <Button
+                android:foreground="@drawable/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonDownload"
+            android:text="@string/download_folder"
+            android:background="@color/mainPurple"
+            android:textColor="#ffffff"
+                android:textSize="13sp"
+                android:layout_weight="0.4"
+            android:layout_marginLeft="20dp" 
+                      android:paddingLeft="10dp"
+                android:layout_marginRight="10dp" 
+      android:paddingRight="10dp"
+            />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+                android:foreground="@drawable/button"
+            android:id="@+id/buttonDownloadSelected"
+            android:text="@string/download_selected"
+                android:textSize="13sp"
+            android:background="@color/mainPurple"
+            android:textColor="#ffffff"
+            android:layout_weight="0.4"
+            android:layout_marginLeft="10dp" 
+            android:layout_marginRight="20dp"
+            android:paddingLeft="10dp"
+       android:paddingRight="10dp"
+                
+             />
+            </LinearLayout>
+                        <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop = "10dp"
+            android:layout_marginBottom="10dp"
+        android:layout_gravity="center"
+    android:orientation="horizontal">
+            <Button
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonRequestDirectories"
+                android:foreground="@drawable/button"
+                android:text="@string/request_directories"
+                android:textSize="13sp"
+                android:background="@color/mainPurple"
+                android:textColor="#ffffff"
+                android:layout_weight="0.4"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="10dp"
+                android:layout_gravity="fill_vertical"
+                android:paddingRight="10dp"
+                android:layout_width="match_parent" 
+            />
+            <Button
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonCancel"
+                android:text="@string/close_download_diag"
+                android:foreground="@drawable/button"
+                android:layout_gravity="fill_vertical"
+                android:textSize="13sp"
+                android:background="@color/mainPurple"
+                android:textColor="#ffffff"
+                android:layout_weight="0.4"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:layout_width="match_parent" 
+  
+            />
+             </LinearLayout>
+        </LinearLayout>
+ <!--   <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="105dp"
+        android:layout_gravity="center"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonDownload"
+            android:text="Download Folder"
+            android:background="@color/mainPurple"
+            android:padding="0dp"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="34.5dp" 
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/buttonDownload"
+            android:padding="0dp"
+            android:id="@+id/buttonDownloadSelected"
+            android:text="Download Selected"
+            android:background="@color/mainPurple"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="32.5dp" 
+             />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonDownload"
+            android:padding="0dp"
+            android:id="@+id/buttonRequestDirectories"
+            android:text="Request Directories"
+            android:background="@color/mainPurple"
+            android:textColor="#ffffff"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@id/buttonCancel"
+            android:layout_marginLeft="46.0dp" 
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonCancel"
+            android:padding="0dp"
+            android:text="Close"
+            android:background="@color/mainPurple"
+            android:textColor="#ffffff"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="50.0dp" 
+  
+            />
+    </RelativeLayout>-->
+</RelativeLayout >

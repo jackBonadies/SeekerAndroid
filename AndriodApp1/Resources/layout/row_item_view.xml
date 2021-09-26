@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:p1="http://schemas.android.com/apk/res/android"
+    xmlns:android="asdifakljdfyuaihdf">
+    <TextView
+        p1:text="Text"
+        p1:layout_width="wrap_content"
+        p1:layout_height="wrap_content"
+        p1:minWidth="25dp"
+        p1:minHeight="25dp"
+        p1:id="@+id/textView1" />
+    <TextView
+        p1:text="Text"
+        p1:layout_width="wrap_content"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/textView2"
+        p1:layout_marginLeft="60dp" />
+    <TextView
+        p1:text="Text"
+        p1:layout_width="wrap_content"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/textView3"
+        p1:layout_marginLeft="100dp" />
+    <TextView
+        p1:text="Text"
+        p1:layout_width="match_parent"
+        p1:layout_height="match_parent"
+        p1:id="@+id/textView4" />
+</merge>

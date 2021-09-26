@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Soulseek.NET Ruleset" Description="Global code analysis rules for Soulseek.NET projects up for consumption" ToolsVersion="15.0">
+  <!-- Hides VS provides rulesets to have the same kind of errors and warnings in VS, VSCode and CLI builds. -->
+  <Include Path="AllRules.ruleset" Action="Hidden" />
+  <Rules AnalyzerId="Microsoft.CodeQuality.Analyzers" RuleNamespace="Microsoft.CodeQuality.Analyzers">
+    <Rule Id="CA1016" Action="Warning" />
+    <Rule Id="CA1033" Action="Warning" />
+    <Rule Id="CA1060" Action="Warning" />
+    <Rule Id="CA1061" Action="Warning" />
+    <Rule Id="CA1062" Action="None" />
+    <Rule Id="CA1063" Action="Warning" />
+    <Rule Id="CA1065" Action="Warning" />
+    <Rule Id="CA1303" Action="None" />
+    <Rule Id="CA2200" Action="Warning" />
+    <Rule Id="CA2214" Action="Warning" />
+    <Rule Id="CA2231" Action="Warning" />
+    <Rule Id="CA2007" Action="None" />
+    <Rule Id="CA1714" Action="Warning" />
+    <Rule Id="CA1822" Action="None" />
+    <Rule Id="CA1819" Action="None" />
+    <Rule Id="CA1717" Action="Warning" />
+    <Rule Id="CA1711" Action="None" />
+    <Rule Id="CA1725" Action="Warning" />
+    <Rule Id="CA1707" Action="None" />
+    <Rule Id="CA1030" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeQuality.CSharp.Analyzers" RuleNamespace="Microsoft.CodeQuality.CSharp.Analyzers">
+    <Rule Id="CA1001" Action="Warning" />
+    <Rule Id="CA1821" Action="Warning" />
+  </Rules>
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA1101" Action="None" />
+    <Rule Id="SA1124" Action="None" />
+    <Rule Id="SA1516" Action="None" />
+    <Rule Id="SA1600" Action="None" />
+    <Rule Id="SA1652" Action="None" />
+    <Rule Id="SA1133" Action="None" />
+    <Rule Id="SA1201" Action="None" />
+    <Rule Id="SA1129" Action="None" />
+    <Rule Id="SA1202" Action="None" />
+    <Rule Id="SA1008" Action="None" />
+    <Rule Id="SA1009" Action="None" />
+    <Rule Id="SA0001" Action="Info" />
+  </Rules>
+  <Rules AnalyzerId="SonarAnalyzer.CSharp" RuleNamespace="SonarAnalyzer.CSharp">
+    <Rule Id="S3241" Action="None" />
+  </Rules>
+</RuleSet>

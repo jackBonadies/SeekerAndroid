@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--For all properties see: https://aka.ms/android-menu-resource-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+  <item android:id="@+id/removeUser"
+      android:title="@string/remove_user" />
+  <item android:id="@+id/browseUsersFiles"
+      android:title="@string/browse_files" />
+  <item android:id="@+id/searchUserFiles"
+      android:title="@string/search_user_files" />
+  <item android:id="@+id/messageUser"
+    android:title="@string/msg_user" />
+  <item android:id="@+id/getUserInfo"
+    android:title="@string/get_user_info" />
+
+  <!--<item android:id="@+id/openDownloadsDir"
+        android:title="Open Downloads Folder"/>-->
+
+
+  <!--<item android:id="@+id/action_search"
+         android:showAsAction="always"
+        android:text="Search"
+         android:actionViewClass="android.widget.SearchView"/>-->
+
+</menu>

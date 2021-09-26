@@ -1,0 +1,126 @@
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbarLayout"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/view_user_info_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/mainPurple"
+            android:minHeight="100dp"
+            android:theme="?attr/actionBarTheme"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <ScrollView
+        android:paddingBottom="60dp"
+        android:clipToPadding="false"
+        android:layout_width="fill_parent"
+        android:layout_below="@id/appbarLayout"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textColor="@color/normalTextColor"
+                android:text="@string/user_info_stats_header"
+                />
+
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="12dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/normalTextColor"
+                android:id="@+id/user_info_stats"
+                />
+
+
+
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textColor="@color/normalTextColor"
+                android:text="@string/user_info_bio"
+                />
+            <TextView
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/user_has_no_bio"
+                android:textColor="@color/normalTextColor"
+                android:gravity="top|start"
+                android:layout_weight="1"
+                android:id="@+id/textViewBio"
+                android:padding="6dp"
+                android:background="@drawable/rounded_corner_background"
+                android:layout_marginBottom="12dp"
+                />
+
+            <TextView
+                android:layout_marginLeft="2dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textColor="@color/normalTextColor"
+                android:text="@string/user_info_picture"
+
+                />
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:text="@string/user_has_no_pic"
+                android:id="@+id/user_info_no_picture"
+                android:padding="6dp"
+                android:textColor="@color/normalTextColor"
+                android:background="@drawable/rounded_corner_background"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="6dp"
+                />
+
+            <ImageView
+                android:id="@+id/user_info_picture"
+                android:layout_gravity="center"
+                android:foregroundGravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

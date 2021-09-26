@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--For all properties see: https://aka.ms/android-menu-resource-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item android:id="@+id/clearAllComplete"
+        android:title="@string/clear_all_complete" />
+    <item android:id="@+id/cancelAndClearAll"
+        android:title="@string/cancel_and_clear_all" />
+  <!--<item android:id="@+id/openDownloadsDir"
+        android:title="Open Downloads Folder"/>-->
+
+
+  <!--<item android:id="@+id/action_search"
+         android:showAsAction="always"
+        android:text="Search"
+         android:actionViewClass="android.widget.SearchView"/>-->
+  
+</menu>
+
+<!-- Code to implement into Activity:
+
+Android.Widget.SearchView searchView;
+public override bool OnCreateOptionsMenu(IMenu menu)
+{
+  this.MenuInflater.Inflate(Resource.Menu.transfers_options, menu);
+
+  var searchItem = menu.FindItem(Resource.Id.action_search);
+
+  searchView = searchItem.ActionProvider.JavaCast<Android.Widget.SearchView>();
+
+  searchView.QueryTextSubmit += (sender, args) =>
+  {
+    Toast.MakeText(this, "You searched: " + args.Query, ToastLength.Short).Show();
+
+  };
+
+
+  return base.OnCreateOptionsMenu(menu);
+}
+
+-->

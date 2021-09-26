@@ -1,0 +1,75 @@
+﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <!--<item android:id="@+id/action_search"
+       android:title="@string/action_settings"
+       android:icon="@android:drawable/ic_menu_search"
+       app:showAsAction="ifRoom|collapseActionView"
+       android:layout_width="match_parent"
+       android:iconifiedByDefault="false"
+       app:actionViewClass="android.support.v7.widget.SearchView" />-->
+
+
+  <!-- "Mark Favorite", should appear as action button if possible -->
+  <item
+      android:id="@+id/view_user_list_action"
+      android:icon="@drawable/baseline_add_white_24"
+      android:title="@string/view_users"
+      app:showAsAction="never"/>
+
+
+  <item
+    android:id="@+id/show_all_tickers_action"
+    android:icon="@drawable/baseline_refresh_white_24"
+    android:title="@string/view_all_tickers"
+    app:showAsAction="never"/>
+
+  <item
+    android:id="@+id/set_ticker_action"
+    android:icon="@drawable/baseline_refresh_white_24"
+    android:title="@string/setticker"
+    app:showAsAction="never"/>
+
+  <item
+  android:id="@+id/toggle_autojoin_action"
+  android:icon="@drawable/baseline_refresh_white_24"
+  android:title="@string/auto_join_off"
+  app:showAsAction="never"/>
+
+  <item
+  android:id="@+id/toggle_notify_room_action"
+  android:icon="@drawable/baseline_refresh_white_24"
+  android:title="@string/notification_off"
+  app:showAsAction="never"/>
+
+  <item
+  android:id="@+id/search_room_action"
+  android:icon="@drawable/baseline_refresh_white_24"
+  android:title="@string/search_room"
+  app:showAsAction="never"/>
+
+  <item
+  android:id="@+id/invite_user_action"
+  android:icon="@drawable/baseline_refresh_white_24"
+  android:title="@string/inviteuser"
+  app:showAsAction="never"/>
+
+  <item
+  android:id="@+id/give_up_room_action"
+  android:icon="@drawable/baseline_refresh_white_24"
+  android:title="@string/give_up_room"
+  app:showAsAction="never"/>
+
+  <item
+android:id="@+id/give_up_membership_action"
+android:icon="@drawable/baseline_refresh_white_24"
+android:title="@string/give_up_membership"
+app:showAsAction="never"/>
+  <!-- Settings, should always be in the overflow -->
+  <!--
+  <item android:id="@+id/action_settings"
+        android:title="@string/abc_menu_enter_shortcut_label"
+        app:showAsAction="always"/>-->
+
+</menu>

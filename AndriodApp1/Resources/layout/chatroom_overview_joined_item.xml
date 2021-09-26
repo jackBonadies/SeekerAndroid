@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp"
+    android:orientation="horizontal"
+    android:descendantFocusability="afterDescendants"
+    android:id="@+id/linearLayoutChatroomOverview">
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="6"
+        android:id="@+id/roomName"
+        android:text="roomNameDummy"
+        android:textSize="22sp"
+        />
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_weight="1"
+        android:text="90"
+        android:id="@+id/usersInRoom"
+        android:textSize="22sp"
+        />
+    <ImageView
+        android:layout_marginLeft="6dp"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clickable="true"
+        app:srcCompat="@drawable/outline_cancel_white_24"
+        android:id="@+id/leaveRoom"
+        android:tint="@color/mainTextColor"
+        />
+</LinearLayout>

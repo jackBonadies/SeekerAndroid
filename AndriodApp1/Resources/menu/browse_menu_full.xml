@@ -1,0 +1,43 @@
+﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <item android:id="@+id/action_up_directory"
+android:title="Up Directory"
+android:icon="@drawable/baseline_arrow_upward_white_24"
+app:showAsAction="always"
+android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_browse_user"
+android:title="@string/browse_user"
+android:icon="@drawable/baseline_add_white_24"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_download_files"
+android:title="@string/download_folder"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_download_selected_files"
+android:title="@string/download_selected"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_add_user"
+android:title="@string/add_user"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_get_user_info"
+android:title="@string/get_user_info"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+</menu>

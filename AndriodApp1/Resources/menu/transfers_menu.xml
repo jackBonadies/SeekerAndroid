@@ -1,0 +1,35 @@
+﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <item android:id="@+id/action_clear_all_complete"
+android:title="@string/clear_all_complete"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+<item android:id="@+id/action_cancel_and_clear_all"
+android:title="@string/cancel_and_clear_all"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/retry_all_failed"
+ android:title="@string/retry_all_failed"
+ app:showAsAction="never"
+ android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_pause_all"
+  android:title="@string/pause_all"
+  app:showAsAction="never"
+  android:iconifiedByDefault="false"
+ />
+
+  <item android:id="@+id/action_resume_all"
+ android:title="@string/resume_all"
+ app:showAsAction="never"
+ android:iconifiedByDefault="false"
+ />
+
+</menu>

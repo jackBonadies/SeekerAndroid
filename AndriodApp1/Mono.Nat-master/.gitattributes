@@ -1,0 +1,6 @@
+*.cs text
+*.md text
+*.proj text
+*.props text
+*.sln text eol=crlf
+*.targets text

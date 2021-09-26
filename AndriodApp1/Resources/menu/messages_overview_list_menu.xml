@@ -1,0 +1,33 @@
+﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+  <!--<item android:id="@+id/action_search"
+       android:title="@string/action_settings"
+       android:icon="@android:drawable/ic_menu_search"
+       app:showAsAction="ifRoom|collapseActionView"
+       android:layout_width="match_parent"
+       android:iconifiedByDefault="false"
+       app:actionViewClass="android.support.v7.widget.SearchView" />-->
+
+
+  <!-- "Mark Favorite", should appear as action button if possible -->
+  <item
+      android:id="@+id/message_user_action"
+      android:icon="@drawable/baseline_add_white_24"
+      android:title="@string/add_user"
+      app:showAsAction="always"/>
+
+  <item
+  android:id="@+id/action_delete_all_messages"
+  android:icon="@drawable/baseline_delete_outline_white_24"
+  android:title="@string/delete_all_messages"
+  app:showAsAction="never"/>
+
+  <!-- Settings, should always be in the overflow -->
+  <!--
+  <item android:id="@+id/action_settings"
+        android:title="@string/abc_menu_enter_shortcut_label"
+        app:showAsAction="always"/>-->
+
+</menu>

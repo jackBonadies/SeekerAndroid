@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2c3e50</color>
+    <color name="colorPrimaryDark">#1B3147</color>
+    <color name="colorAccent">#3498db</color>
+    <color name="cellbackSelected">#3498db</color>
+    <color name="cellback">#ffffff</color>
+    <color name="mainPurple">#4f58c4</color>
+    <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
+    <color name="lightPurpleNotTransparent">#959BDC</color>
+    <color name="whitePurple">#bcc1f7</color>
+    <color name="mainTextColor">#4f58c4</color>
+  <color name="mainTextColorHinted">#959BDC</color>
+  <color name="cellbackColor">#00000000</color>
+  <color name="cellbackColorDownloadDialog">#00000000</color>
+    <color name="cellStroke">#994f58c4</color>
+    <color name="cellTextColor">#2c3e50</color>
+  <color name="secondaryColor">#cccccc</color>
+  <color name="offline">#F7636A</color>
+  <color name="away">#FFCD87</color>
+  <color name="online">#89B38F</color>
+  <color name="slskAccent">#437eab</color>
+  <color name="expandIconColor">#959BDC</color>
+  <color name="queueColor">#F7636A</color>
+  <color name="hardErrorRed">#cc0000</color>
+  <color name="colorButtonText">#437eab</color>
+  <color name="mainPurpleTurnedOff">#77437eab</color>
+  <color name="chatBoxSplitterElevation">#e0e0e0</color>
+  <color name="normalTextColor">#000000</color>
+  <color name="slightContrastColor">#c7c7c7</color>
+  <color name="slightestContrastColor">#e0e0e0</color>
+</resources>

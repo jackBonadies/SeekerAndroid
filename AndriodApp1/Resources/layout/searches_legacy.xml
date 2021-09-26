@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="android.PageFragment"
+    android:id="@+id/relativeLayout1">
+        <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searching">
+        <EditText
+            android:layout_width = "wrap_content"
+            android:layout_height = "wrap_content"
+            android:layout_weight="10"
+            android:id = "@+id/searchHere"
+            android:hint = "Search Here"
+            android:completionThreshold="0"
+            android:singleLine="true"
+            android:focusable = "true"
+            android:inputType="text"
+            android:imeOptions="actionDone"
+            android:textColorHighlight = "@color/mainPurple"
+            android:textColorHint = "@color/mainPurple"
+            android:layout_below = "@id/textView"
+            android:layout_alignParentLeft = "true"
+            android:layout_alignParentStart = "true"
+            android:layout_alignParentRight = "true"
+            android:layout_alignParentEnd = "true" />
+    <Button
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        
+        android:clickable="true"
+            android:layout_weight="1"
+            android:layout_marginBottom="2dp"
+            
+        android:focusable="true"
+        android:foreground="@drawable/button"
+        android:background="@color/mainPurple"
+        android:textColor="#ffffff"
+        android:id="@+id/button2"
+        android:layout_alignRight="@id/searchHere"
+        />
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/searching"
+        android:background="@color/mainPurple"
+        android:id="@+id/header1">
+        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = "1.5"
+            android:background="@drawable/header_cell_shape"
+            android:gravity = "center"
+            android:padding = "5dp"
+            android:text = "Username"
+            android:textSize="12dp"
+            android:textColor = "#ffffff" />
+
+        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = "3"
+            android:gravity = "center"
+            android:background="@drawable/header_cell_shape"
+            android:textSize="12dp"
+            android:padding = "5dp"
+            android:text = "Folder"
+            android:textColor = "#ffffff"/>
+
+        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = ".65"
+            android:gravity = "center"
+            android:padding = "2dp"
+            android:text = "Kb/s"
+            android:id="@+id/searchesKbs"
+            android:textSize="12dp"
+            android:textColor = "#ffffff" />
+
+<!--        <TextView
+            android:layout_width = "0dp"
+            android:layout_height = "wrap_content"
+            android:layout_weight = ".5"
+            android:gravity = "center"
+            android:padding = "2dp"
+            android:text = "Queue"
+            android:id="@+id/searchesQueue"
+            android:textSize="10dp"
+            android:textColor = "#ffffff" />-->
+    </LinearLayout>
+    <ListView
+        android:layout_below = "@id/header1"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView1" />
+
+</RelativeLayout>

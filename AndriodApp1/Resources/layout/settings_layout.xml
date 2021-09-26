@@ -1,0 +1,757 @@
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbarLayout"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/setting_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/mainPurple"
+            android:minHeight="100dp"
+            android:theme="?attr/actionBarTheme"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <ScrollView
+        android:paddingBottom="60dp"
+        android:clipToPadding="false"
+        android:layout_width="fill_parent"
+        android:layout_below="@id/appbarLayout"
+        android:layout_height="fill_parent">
+
+        <RelativeLayout
+            android:orientation="vertical"
+            android:padding="4dip"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <Button
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/change_download_folder"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop = "40dp"
+                android:layout_marginBottom = "50dp"
+                style="@style/SeekerButtonStyle"
+                android:foreground="@drawable/button"
+                android:id="@+id/changeDirSettings"
+       />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/changeDirSettings"
+                android:layout_marginTop = "10dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/searchResLayout"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/max_search_results"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.4"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_below="@id/changeDirSettings"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textColor="@color/normalTextColor"
+                    android:id="@+id/searchResults"
+       />
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0.4"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_toRightOf="@+id/searchResults"
+                    android:layout_below="@id/changeDirSettings"
+                    android:id="@+id/searchNumberSpinner"
+        />
+            </LinearLayout>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/searchResLayout"
+                android:text="@string/only_show_free_slots"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/freeUploadSlots"
+                android:layout_marginBottom = "10dp"/>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/freeUploadSlots"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "2dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/keepAliveLayout"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/start_service_on_startup"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="10dp"
+                    android:id="@+id/startServiceOnStartupCheckBox"
+       />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="START/STOPDUMMY"
+                    android:textSize="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textAllCaps="false"
+                    android:minHeight="16dp"
+                    android:foreground="@drawable/button"
+                    style="@style/SeekerButtonStyle"
+                    android:paddingLeft="7dp"
+                    android:paddingRight="7dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:id="@+id/startServiceOnStartupButton"
+        />
+                <ImageView
+                    android:layout_marginTop = "0dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginBottom = "0dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+
+                    android:layout_gravity="center_vertical"
+                    app:srcCompat="@drawable/help_circle_outline"
+                    android:id="@+id/helpServiceOnStartup"
+                    android:tint="@color/mainTextColor"
+                />
+
+            </LinearLayout>
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/keepAliveLayout"
+                android:text="@string/allow_private_room_invitations"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/allowPrivateRoomInvitations"
+                android:layout_marginBottom = "10dp"/>
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/allowPrivateRoomInvitations"
+                android:text="@string/auto_clear_complete"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/autoClearComplete"
+                android:layout_marginBottom = "10dp"/>
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/autoClearComplete"
+                android:text="@string/disable_bottom_notifs_complete"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/disableToastNotificationOnDownload"
+                android:layout_marginBottom = "10dp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/disableToastNotificationOnDownload"
+                android:layout_marginTop = "10dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/searchHistoryLayout"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/remember_search_history"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/searchHistoryRemember"
+       />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/clear_search_history"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:textAllCaps="false"
+                    android:minHeight="16dp"
+                    android:foreground="@drawable/button"
+                    style="@style/SeekerButtonStyle"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:id="@+id/clearHistory"
+        />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/searchHistoryLayout"
+                android:layout_marginTop = "2dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/memoryFileDownloadSwitch"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_backed_downloads"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/memoryFileDownloadSwitchCheckBox"
+       />
+                <ImageView
+                    android:layout_marginTop = "0dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginBottom = "0dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+  
+                    android:layout_gravity="center_vertical"
+                    app:srcCompat="@drawable/help_circle_outline"
+                    android:id="@+id/memoryFileDownloadSwitchIcon"
+                    android:tint="@color/mainTextColor"
+                />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/memoryFileDownloadSwitch"
+                android:layout_marginTop = "2dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/nightModeOptionLayout"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/night_mode_options"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.4"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="10dp"
+                    android:textColor="@color/normalTextColor"
+                    android:paddingRight="10dp"
+                    android:id="@+id/nightModeText"
+       />
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.4"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_toRightOf="@+id/nightModeText"
+                    android:id="@+id/nightModeSpinner"
+        />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_below="@id/nightModeOptionLayout"
+                android:id="@+id/sharingLayoutParent"
+                android:background="@drawable/border_group_box"
+                android:orientation="vertical"
+                >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "2dp"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/sharingLayout"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal|fill_horizontal|center">
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_sharing"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/enableSharing"
+       />
+
+
+                                        <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/moreInfoButton"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="@color/mainTextColor"
+            />
+
+
+
+
+
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/sharingLayout"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_marginLeft = "32dp"
+
+                    android:id="@+id/moreInfoLayout"
+                    android:orientation="horizontal">
+
+
+                                        <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/set_shared_folder"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        android:minHeight="16dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginBottom = "10dp"
+                        android:id="@+id/setSharedFolder"
+        />
+                    <ImageView
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        app:srcCompat="@drawable/ic_filter_list_black_32dp"
+                        android:id="@+id/sharedStatus"
+                        android:tint="@color/mainTextColor"
+                />
+
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/browse_yourself"
+                        android:textSize="12dp"
+                        android:layout_marginLeft="10dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        android:minHeight="16dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginRight="6dp"
+                        android:layout_marginBottom = "10dp"
+                        android:id="@+id/browseSelfButton"
+        />
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_below="@id/sharingLayoutParent"
+                android:id="@+id/listeningLayout"
+                android:background="@drawable/border_group_box"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/listeningRow1"
+                    android:orientation="horizontal">
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_listening"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/enableListening"
+            />
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/listeningHelp"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="@color/mainTextColor"
+            />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginLeft="26dp"
+                    android:id="@+id/listeningRow2"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Port: 10000DUMMY"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:textColor="@color/normalTextColor"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/portView"
+            />
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/change_port"
+                        android:id="@+id/changePort"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        
+                        android:layout_gravity="center_vertical"
+                        android:minHeight="16dp"
+                        android:layout_marginRight="10dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        
+                        
+                        
+                        
+                        
+            />
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/check_your_port_status"
+                        android:id="@+id/checkStatus"
+                        android:layout_marginLeft="10dp"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:layout_gravity="center_vertical"
+                        
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        android:minHeight="16dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        
+                        
+                        
+            />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginLeft="26dp"
+                    android:id="@+id/listeningRow3"
+                    android:orientation="horizontal">
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/use_pnp_for_port_forwarding"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/useUPnPCheckBox"
+            />
+                    <ImageView
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:id="@+id/UPnPStatus"
+                        android:tint="@color/mainTextColor"
+                        
+            />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/listeningLayout"
+                android:id="@+id/privLayout"
+    android:layout_height="wrap_content">
+
+ <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Privileges: STATUSDUMMY"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:textColor="@color/normalTextColor"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/privStatusView"
+     />
+
+    <Button
+                    
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Get"
+                        android:id="@+id/getPriv"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        
+                        android:layout_gravity="center_vertical"
+                        android:minHeight="16dp"
+                        android:layout_marginRight="10dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="2dp"
+                        android:paddingRight="2dp"
+                   
+        />
+
+    <Button
+                    
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Check"
+                        android:id="@+id/checkPriv"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        
+                        android:layout_gravity="center_vertical"
+                        android:minHeight="16dp"
+                        android:layout_marginRight="10dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="2dp"
+                        android:paddingRight="2dp"
+                   
+        />
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/privHelp"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="@color/mainTextColor"
+            />
+
+</LinearLayout>
+
+            
+            <Button
+                android:layout_below="@id/privLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_your_user_info"
+                android:layout_marginLeft="10dp"
+                android:foreground="@drawable/button"
+                style="@style/SeekerButtonStyle"
+                android:paddingLeft="7dp"
+                android:paddingRight="7dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
+                android:id="@+id/editUserInfoButton"
+       />
+
+
+
+            <Button
+                android:layout_below="@id/editUserInfoButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/restore_default_settings"
+                android:layout_marginLeft="10dp"
+                android:foreground="@drawable/button"
+                style="@style/SeekerButtonStyle"
+                android:paddingLeft="7dp"
+                android:paddingRight="7dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
+                android:id="@+id/restoreDefaults"
+       />
+
+
+        </RelativeLayout>
+
+    </ScrollView>
+    <!--            <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop = "60dp"
+            android:layout_marginBottom = "10dp"
+            android:orientation="horizontal">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Restore Defaults"
+                android:layout_marginLeft="10dp"
+                android:foreground="@drawable/button"
+                android:layout_marginRight="10dp"
+                android:layout_weight="0.2"
+                android:layout_marginTop = "60dp"
+style="@style/SeekerButtonStyle"
+                
+                android:id="@+id/restoreDefaults"
+       />
+-->
+    <!--            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Close"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:foreground="@drawable/button"
+                android:layout_marginTop = "60dp"
+                android:layout_weight="0.6"
+style="@style/SeekerButtonStyle"
+                
+                android:id="@+id/closeSettings"
+       />-->
+    <!--
+
+ 
+
+        </LinearLayout>-->
+
+</RelativeLayout>

@@ -1,0 +1,24 @@
+﻿
+  <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/baseline_home_white_24"
+        android:title="@string/home_tab" />
+
+    <item
+        android:id="@+id/navigation_search"
+        android:icon="@drawable/baseline_search_white_24"
+        android:title="@string/searches_tab2" />
+
+    <item
+        android:id="@+id/navigation_transfers"
+        android:icon="@drawable/baseline_swap_vert_white_24"
+        android:title="@string/transfer_tab" />
+
+    <item
+      android:id="@+id/navigation_browse"
+      android:icon="@drawable/baseline_folder_white_24"
+      android:title="@string/browse_tab" />
+
+  </menu>
