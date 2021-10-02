@@ -1,9 +1,0 @@
-# Ignore monodevelop generated files and directories
-*.userprefs
-*.pidb
-.vs/
-
-bin/
-obj/
-
-*.suo

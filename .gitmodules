@@ -1,0 +1,6 @@
+[submodule "AndriodApp1/Soulseek.NET"]
+	path = AndriodApp1/Soulseek.NET
+	url = https://github.com/jpdillingham/Soulseek.NET
+[submodule "AndriodApp1/Mono.Nat"]
+	path = AndriodApp1/Mono.Nat
+	url = https://github.com/alanmcgovern/Mono.Nat
