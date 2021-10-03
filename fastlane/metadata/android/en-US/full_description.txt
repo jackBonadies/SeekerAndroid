@@ -1,0 +1,9 @@
+Features:
+* Searching (including wishlists and filters)
+* Browsing User Directories
+* Downloads and Uploads
+* Port Forwarding via UPnP
+* Chatrooms and Messages
+* Adding Users
+* Get and Set User Info
+* Privileges
