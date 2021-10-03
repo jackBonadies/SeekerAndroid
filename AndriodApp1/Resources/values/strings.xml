@@ -562,5 +562,32 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 \n\nSource code is <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">here</a>.
 </string>
 
+  <string name="give_privileges">Give Privileges</string>
+  <string name="error_days_entered_no_parse">Days entered must be a whole number.</string>
+  <string name="error_days_entered_not_positive">Days entered must be a positive number.</string>
+  <string name="error_insufficient_days">You do not have {0} days to give.</string>
+  <string name="give_to_">Give to {0}</string>
+  <string name="error_give_priv">Give Privileges Failed</string>
+  <string name="give_priv_success">Successly gave {0} days of privileges to {1}.</string>
+  <string name="sending__">Sending...</string>
+  <string name="give_hint"># of days</string>
+  <string name="type_notes_here">type notes about user here</string>
+  <string name="edit_note">Edit Note</string>
+  <string name="add_note">Add Note</string>
+  <string name="note_title">{0}\'s Note</string>
+  <string name="more_options">More Options</string>
+  <string name="remove_from_user_list">Remove from User List</string>
+
+  <string name="filter_is_on">Filter is on</string>
+  <string name="filter_is_on_body">Would you like to download the full folder or just filtered items?</string>
+  <string name="all">All</string>
+  <string name="just_filtered">Just Filtered</string>
+
+  <string name="item_total_singular">{0} item total</string>
+  <string name="item_total_plural">{0} items total</string>
+
+  <string name="subfolders_warning">This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
+  <string name="current_folder_only">Current Folder Only</string>
+  <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
 
 </resources>

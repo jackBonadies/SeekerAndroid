@@ -41,8 +41,18 @@ namespace AndriodApp1
             return base.OnCreateOptionsMenu(menu);
         }
 
+        public override bool OnPrepareOptionsMenu(IMenu menu)
+        {
+            Helpers.SetMenuTitles(menu, UserToView);
+            return base.OnPrepareOptionsMenu(menu);
+        }
+
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
+            if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
+            {
+                return true;
+            }
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
@@ -68,7 +78,7 @@ namespace AndriodApp1
 
 
                     //do browse thing...
-                    DownloadDialog.RequestFilesApi(UserToView, null, null, null);
+                    DownloadDialog.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;

@@ -1167,6 +1167,12 @@ namespace AndriodApp1
 
     public class SearchFragment : Fragment
     {
+        public override void OnStart()
+        {
+            //this fixes the same bug as the MainActivity OnStart fixes.
+            SearchFragment.Instance = this;
+            base.OnStart();
+        }
         public override void OnResume()
         {
             base.OnResume();
@@ -1857,8 +1863,8 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    MainActivity.LogInfoFirebase("search fragment from activities fragment manager is good, setting it");
-                    //SearchFragment.Instance = f; Todo add back...
+                    MainActivity.LogInfoFirebase("search fragment from activities fragment manager is good, though not setting it");
+                    //SearchFragment.Instance = f; 
                 }
                 MainActivity.LogFirebase("SearchFragment.Instance.IsAdded == false, currently searching: " + SearchTabHelper.CurrentlySearching);
             }
@@ -2822,8 +2828,9 @@ namespace AndriodApp1
 
         private void Actv_KeyPress(object sender, View.KeyEventArgs e)
         {
-            if (e.KeyCode == Keycode.Enter)
+            if (e.KeyCode == Keycode.Enter && e.Event.Action == KeyEventActions.Down)
             {
+                MainActivity.LogDebug("ENTER PRESSED " + e.KeyCode.ToString());
                 var transitionDrawable = GetTransitionDrawable();
                 if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                 {
@@ -2850,7 +2857,7 @@ namespace AndriodApp1
                 (sender as AutoCompleteTextView).OnKeyDown(e.KeyCode, e.Event);
                 return;
             }
-            else if(e.Event.Action == KeyEventActions.Down && (e.KeyCode == Android.Views.Keycode.VolumeUp || e.KeyCode == Android.Views.Keycode.VolumeDown))
+            else if((e.Event.Action == KeyEventActions.Down || e.Event.Action == KeyEventActions.Up) && (e.KeyCode == Android.Views.Keycode.Back || e.KeyCode == Android.Views.Keycode.VolumeUp || e.KeyCode == Android.Views.Keycode.VolumeDown))
             {
                 //for some reason e.Handled is always true coming in.  also only on down volume press does anything.
                 e.Handled = false;
@@ -5267,6 +5274,23 @@ namespace AndriodApp1
         public override bool OnContextItemSelected(IMenuItem item)
         {
             int position = recyclerTransferAdapter.getPosition();
+            TransferItem ti = null;
+            try
+            {
+                ti = transferItems[position]; //UI
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                return base.OnContextItemSelected(item);
+            }
+            if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),ti.Username,SoulSeekState.ActiveActivityRef,this.View))
+            {
+                MainActivity.LogDebug("handled by commons");
+                return base.OnContextItemSelected(item);
+            }
+
             switch (item.ItemId)
             {
                 case 0:
@@ -6082,6 +6106,14 @@ namespace AndriodApp1
                 {
                     menu.Add(4,4,4, Resource.String.play_file);
                 }
+                var subMenu = menu.AddSubMenu(5,5,5,"User Options");
+                subMenu.Add(6,6,6,Resource.String.browse_user);
+                subMenu.Add(7,7,7, Resource.String.search_user_files);
+                Helpers.AddAddRemoveUserMenuItem(subMenu, 8, 8, 8, tvh.InnerTransferItem.Username, false);
+                subMenu.Add(9,9,9,Resource.String.msg_user);
+                subMenu.Add(10,10,10, Resource.String.get_user_info);
+                Helpers.AddUserNoteMenuItem(subMenu, 11, 11, 11, tvh.InnerTransferItem.Username);
+                Helpers.AddGivePrivilegesIfApplicable(subMenu, 12);
 
             }
 

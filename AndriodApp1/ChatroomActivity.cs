@@ -927,9 +927,26 @@ namespace AndriodApp1
     {
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
+            //its possible to get here without the AdapterLongClick depending on what part you hold down on the message.  I am not sure why...
+            if(v is GroupMessageInnerViewReceived)
+            {
+                ChatroomInnerFragment.MessagesLongClickData = (v as GroupMessageInnerViewReceived).DataItem;
+            }
+            else
+            {
+                MainActivity.LogFirebase("sender for GroupMessageInnerViewReceivedHolder.GroupMessageInnerViewReceived is " + v.GetType().Name);
+            }
+
             menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
             menu.Add(1, 1, 1, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
-            menu.Add(2, 2, 2, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.add_user));
+            Helpers.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
+            var subMenu = menu.AddSubMenu(3,3,3,SoulSeekState.ActiveActivityRef.GetString(Resource.String.more_options));
+            subMenu.Add(4,4,4,Resource.String.search_user_files);
+            subMenu.Add(5,5,5,Resource.String.browse_user);
+            subMenu.Add(6,6,6,Resource.String.get_user_info);
+            subMenu.Add(7,7,7,Resource.String.msg_user);
+            //subMenu.Add(8,8,8,Resource.String.give_privileges);
+            Helpers.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
         }
 
         public GroupMessageInnerViewReceived messageInnerView;
@@ -942,7 +959,7 @@ namespace AndriodApp1
 
             messageInnerView = (GroupMessageInnerViewReceived)view;
             messageInnerView.ViewHolder = this;
-            view.SetOnCreateContextMenuListener(this);
+            view.SetOnCreateContextMenuListener(this); //otherwise no listener
         }
 
         public GroupMessageInnerViewReceived getUnderlyingView()
@@ -986,7 +1003,7 @@ namespace AndriodApp1
         {
             DataItem = msg;
             viewTimeStamp.Text = Helpers.GetNiceDateTimeGroupChat(msg.LocalDateTime);
-            viewMessage.Text = msg.MessageText;
+            Helpers.SetMessageTextView(viewMessage,msg);
             if(msg.SameAsLastUser)
             {
                 viewUsername.Visibility = ViewStates.Gone;
@@ -1112,11 +1129,19 @@ namespace AndriodApp1
                 }));
             }
         }
+
+        //TODO: Why is this sometimes a popup anchored at (x,y) and otherwise a full screen context menu??
+        //It goes through LongPress sometimes but other times it just shows the context menu on its own...
         public static Message MessagesLongClickData = null;
         public override bool OnContextItemSelected(IMenuItem item)
         {
             //MainActivity.LogDebug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
             string username = MessagesLongClickData.Username;
+            if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, this.View))
+            {
+                MainActivity.LogDebug("Handled by commons");
+                return base.OnContextItemSelected(item);
+            }
             switch (item.ItemId)
             {
                 case 0: //"Copy Text"
@@ -1273,6 +1298,7 @@ namespace AndriodApp1
             }
             editTextEnterMessage.TextChanged += EditTextEnterMessage_TextChanged;
             editTextEnterMessage.EditorAction += EditTextEnterMessage_EditorAction;
+            editTextEnterMessage.KeyPress += EditTextEnterMessage_KeyPress;
             sendMessage.Click += SendMessage_Click;
 
             //TextView noMessagesView = rootView.FindViewById<TextView>(Resource.Id.noMessagesView);
@@ -1302,6 +1328,7 @@ namespace AndriodApp1
             return rootView;
 
         }
+
 
         private void CurrentTickerView_Click(object sender, EventArgs e)
         {
@@ -1346,6 +1373,23 @@ namespace AndriodApp1
                 {
                     MainActivity.LogDebug("null ticker view");
                 }
+            }
+        }
+
+
+        private void EditTextEnterMessage_KeyPress(object sender, View.KeyEventArgs e)
+        {
+            if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+            {
+                e.Handled = true;
+                //send the message and record our send message..
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+
+                editTextEnterMessage.Text = string.Empty;
+            }
+            else
+            {
+                e.Handled = false;
             }
         }
 
@@ -3548,6 +3592,11 @@ namespace AndriodApp1
         public override bool OnContextItemSelected(IMenuItem item)
         {
             var userdata = longClickedUserData;
+            if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom)))
+            {
+                MainActivity.LogDebug("Handled by commons");
+                return base.OnContextItemSelected(item);
+            }
             switch (item.ItemId)
             {
                 case 0: //"Remove User"
@@ -3754,16 +3803,16 @@ namespace AndriodApp1
             //normal - add to user list, browse, etc...
             menu.Add(1, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user));
             menu.Add(1, 4, 4, SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_user_files));
-            menu.Add(1, 5, 5, SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list));
+            Helpers.AddAddRemoveUserMenuItem(menu, 1, 5, 5, roomUserItemView.DataItem.Username, true);
             menu.Add(1, 6, 6, SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user));
             menu.Add(1, 7, 7, SoulSeekState.ActiveActivityRef.GetString(Resource.String.msg_user));
+            Helpers.AddUserNoteMenuItem(menu, 1, 8, 8, roomUserItemView.DataItem.Username);
 
             var hackFixDialogContext = new FixForDialogFragmentContext();
             for (int i = 0; i < menu.Size(); i++)
             {
                 menu.GetItem(i).SetOnMenuItemClickListener(hackFixDialogContext);
             }
-            
 
         }
 

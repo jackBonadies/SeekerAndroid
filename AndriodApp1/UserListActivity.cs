@@ -314,6 +314,8 @@ namespace AndriodApp1
                 PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
                 popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
                 popup.Inflate(Resource.Menu.selected_user_options);
+                Helpers.AddUserNoteMenuItem(popup.Menu, -1, -1, -1, PopUpMenuOwnerHack);
+                Helpers.AddGivePrivilegesIfApplicable(popup.Menu, -1);
                 popup.Show();
             }
             catch (System.Exception error)
@@ -327,7 +329,16 @@ namespace AndriodApp1
 
         public bool OnMenuItemClick(IMenuItem item)
         {
-            switch(item.ItemId)
+            if(item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
+            {
+                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId)))
+                {
+                    MainActivity.LogDebug("handled by commons");
+                    return true;
+                }
+            }
+            //TODO: handle common is below because actions like remove user also do an additional call.  it would be good to move that to an event.. OnResume to subscribe etc...
+            switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
                     //do browse thing...
@@ -350,11 +361,11 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.removeUser:
                     MainActivity.UserListRemoveUser(PopUpMenuOwnerHack);
-                    this.RefreshUserList();
+                    this.RefreshUserList(); //TODO event
                     return true;
                 case Resource.Id.removeUserFromIgnored:
                     SeekerApplication.RemoveFromIgnoreList(PopUpMenuOwnerHack);
-                    this.RefreshUserList();
+                    this.RefreshUserList(); //TODO event
                     return true;
                 case Resource.Id.messageUser:
                     Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));

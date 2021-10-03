@@ -228,6 +228,11 @@ namespace AndriodApp1
             }
         }
 
+        public void SubtractDays(int days)
+        {
+            SecondsRemainingAtLastCheck -= (days * 24 * 3600);
+        }
+
         private volatile int SecondsRemainingAtLastCheck = int.MinValue;
         private DateTime LastCheckTime = DateTime.MinValue;
         public int GetRemainingSeconds()
@@ -247,6 +252,15 @@ namespace AndriodApp1
                 int remainingSeconds = SecondsRemainingAtLastCheck - secondsSinceLastCheck;
                 return Math.Max(remainingSeconds,0);
             }
+        }
+
+        /// <summary>
+        /// Get Remaining Days (rounded down)
+        /// </summary>
+        /// <returns></returns>
+        public int GetRemainingDays()
+        {
+            return GetRemainingSeconds()/(24*3600);
         }
 
         public string GetPrivilegeStatus()
@@ -934,6 +948,20 @@ namespace AndriodApp1
 
         }
 
+        public static string GetVersionString()
+        {
+            try
+            {
+                PackageInfo pInfo = SoulSeekState.ActiveActivityRef.PackageManager.GetPackageInfo(SoulSeekState.ActiveActivityRef.PackageName,0);
+                return pInfo.VersionName;
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("GetVersionString: " + e.Message);
+                return string.Empty;
+            }
+        }
+
 
         //this is a cache for localized strings accessed in tight loops...
         private static string strings_kbs;
@@ -1382,6 +1410,8 @@ namespace AndriodApp1
                 SoulSeekState.UserInfoBio = sharedPreferences.GetString(SoulSeekState.M_UserInfoBio, string.Empty);
                 SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
 
+                SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
+
                 SearchTabHelper.RestoreStateFromSharedPreferences();
             }
         }
@@ -1405,6 +1435,36 @@ namespace AndriodApp1
                 editor.PutInt(SoulSeekState.M_ListenerPort, SoulSeekState.ListenerPort);
                 editor.PutBoolean(SoulSeekState.M_ListenerUPnpEnabled, SoulSeekState.ListenerUPnpEnabled);
                 editor.Commit();
+            }
+        }
+
+        public static System.Collections.Concurrent.ConcurrentDictionary<string,string> RestoreUserNotesFromString(string base64userNotes)
+        {
+            if (base64userNotes == string.Empty)
+            {
+                return new System.Collections.Concurrent.ConcurrentDictionary<string,string>();
+            }
+            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64userNotes)))
+            {
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, string>;
+            }
+        }
+
+        public static string SaveUserNotesToString(System.Collections.Concurrent.ConcurrentDictionary<string, string> userNotes)
+        {
+            if (userNotes == null || userNotes.Keys.Count == 0)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                using (System.IO.MemoryStream userNotesStream = new System.IO.MemoryStream())
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(userNotesStream, userNotes);
+                    return Convert.ToBase64String(userNotesStream.ToArray());
+                }
             }
         }
 
@@ -1562,7 +1622,7 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("Wishlist interval is: " + searchIntervalMilliseconds);
                 searchIntervalMilliseconds = 2* 60 * 1000; //min of 2 mins...
             }
-            WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds); //TODO replace this!!
+            WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
             WishlistTimer.AutoReset = true;
             WishlistTimer.Elapsed += WishlistTimer_Elapsed;
             WishlistTimer.Start();
@@ -3126,6 +3186,17 @@ namespace AndriodApp1
                 // GetIncompleteStream(@"testdir\testdir1\testfname.mp3", out Android.Net.Uri int2);
             }
 
+        protected override void OnStart()
+        {
+            //this fixes a bug as follows:
+            //previously we only set MainActivityRef on Create.
+            //therefore if one launches MainActivity via a new intent (i.e. go to user list, then search users files) it will be set with the new search user activity.
+            //then if you press back twice you will see the original activity but the MainActivityRef will still be set to the now destroyed activity since it was last to call onCreate.
+            //so then the FragmentManager will be null among other things...
+            SoulSeekState.MainActivityRef = this;
+            base.OnStart();
+        }
+
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
@@ -3170,6 +3241,18 @@ namespace AndriodApp1
             {
                 MainActivity.LogInfoFirebase("from browse self");
                 pager.SetCurrentItem(3, false);
+            }
+            else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
+            {
+                pager.SetCurrentItem(3, false);
+            }
+            else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
+            {
+                //var navigator = SoulSeekState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
+                //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
+                //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
+                pager.SetCurrentItem(1, false);
             }
         }
 
@@ -3382,8 +3465,11 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.about_action:
                     var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+                    //var diag = builder.SetMessage(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
+                    //((TextView)diag.FindViewById(Android.Resource.Id.Message)).LinksClickable = true;
+                    //((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString()));
                     ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = (Android.Text.Method.LinkMovementMethod.Instance);
                     return true;
             }
@@ -4472,9 +4558,25 @@ namespace AndriodApp1
             return continuationActionSaveFile;
         }
 
+
+        public static void ToastUI(int msgCode)
+        {
+            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(msgCode), ToastLength.Long).Show();
+        }
+
+        public static void ToastUI_short(int msgCode)
+        {
+            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(msgCode), ToastLength.Short).Show();
+        }
+
         public static void ToastUI(string msg)
         {
             Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Long).Show();
+        }
+
+        public static void ToastUI_short(string msg)
+        {
+            Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
         }
 
         /// <summary>
@@ -6004,9 +6106,7 @@ namespace AndriodApp1
         public static bool IsParsing = false;
         public static List<UserListItem> IgnoreUserList = new List<UserListItem>();
         public static List<UserListItem> UserList = new List<UserListItem>();
-
-
-        
+        public static System.Collections.Concurrent.ConcurrentDictionary<string,string> UserNotes = null;
 
         public static string UserInfoBio = string.Empty;
         public static string UserInfoPictureName = string.Empty; //filename only. The picture will be in (internal storage) FilesDir/user_info_pic/filename.
@@ -6082,7 +6182,7 @@ namespace AndriodApp1
         /// </summary>
         public static volatile Activity ActiveActivityRef = null;
         public static ISharedPreferences SharedPreferences;
-        public static MainActivity MainActivityRef;
+        public static volatile MainActivity MainActivityRef;
 
 
 
@@ -6159,6 +6259,7 @@ namespace AndriodApp1
 
         public const string M_UserInfoBio = "Momento_UserInfoBio";
         public const string M_UserInfoPicture = "Momento_UserInfoPicture";
+        public const string M_UserNotes = "Momento_UserNotes";
 
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
@@ -6308,6 +6409,239 @@ namespace AndriodApp1
             }
         }
 
+        /// <summary>
+        /// true if '/me ' message
+        /// </summary>
+        /// <returns>true if special message</returns>
+        public static bool IsSpecialMessage(string msg)
+        {
+            if(string.IsNullOrEmpty(msg))
+            {
+                return false;
+            }
+            if(msg.StartsWith(@"/me "))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static string ParseSpecialMessage(string msg)
+        {
+            if (!IsSpecialMessage(msg))
+            {
+                return msg;
+            }
+            else
+            {
+                //"/me goes to the store"
+                //"goes to the store" + style
+                return msg.Substring(4,msg.Length-4);
+            }
+        }
+
+        public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
+        {
+            string title = null;
+            if(SoulSeekState.UserNotes.ContainsKey(username))
+            {
+                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note);
+            }
+            else
+            {
+                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note);
+            }
+            if(i!=-1)
+            {
+                menu.Add(i, j, k, title);
+            }
+            else
+            {
+                menu.Add(title);
+            }
+        }
+
+        private static void SetAddRemoveTitle(IMenuItem menuItem, string username)
+        {
+            if (menuItem != null && !string.IsNullOrEmpty(username))
+            {
+                if (MainActivity.UserListContainsUser(username)) //if we already have added said user, change title add to remove..
+                {
+                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
+                    {
+                        menuItem.SetTitle(Resource.String.remove_from_user_list);
+                    }
+                    else if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_user))
+                    {
+                        menuItem.SetTitle(Resource.String.remove_user);
+                    }
+                }
+                else
+                {
+                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list))
+                    {
+                        menuItem.SetTitle(Resource.String.add_to_user_list);
+                    }
+                    else if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user))
+                    {
+                        menuItem.SetTitle(Resource.String.add_user);
+                    }
+                }
+            }
+        }
+
+        public static void SetMenuTitles(IMenu menu, string username)
+        {
+            var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
+            SetAddRemoveTitle(menuItem,username);
+            menuItem = menu.FindItem(Resource.Id.action_add_user);
+            SetAddRemoveTitle(menuItem, username);
+            menuItem = menu.FindItem(Resource.Id.addUser);
+            SetAddRemoveTitle(menuItem, username);
+        }
+
+        public static void AddAddRemoveUserMenuItem(IMenu menu, int i, int j, int k, string username, bool full_title = false)
+        {
+            string title = null;
+            if (!MainActivity.UserListContainsUser(username))
+            {
+                if(full_title)
+                {
+                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list);
+                }
+                else
+                {
+                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_user);
+                }
+            }
+            else
+            {
+                if (full_title)
+                {
+                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list);
+                }
+                else
+                {
+                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user);
+                }
+            }
+            if (i != -1)
+            {
+                menu.Add(i, j, k, title);
+            }
+            else
+            {
+                menu.Add(title);
+            }
+        }
+
+        public static void AddGivePrivilegesIfApplicable(IMenu menu, int indexToUse)
+        {
+            if(PrivilegesManager.Instance.GetRemainingDays()>=1)
+            {
+                if(indexToUse==-1)
+                {
+                    menu.Add(Resource.String.give_privileges);
+                }
+                else
+                {
+                    menu.Add(indexToUse, indexToUse, indexToUse, Resource.String.give_privileges);
+                }
+            }
+        }
+
+        /// <summary>
+        /// returns true if found and handled.  a time saver for the more generic context menu items..
+        /// </summary>
+        /// <returns></returns>
+        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView)
+        {
+            if(activity==null)
+            {
+                activity = SoulSeekState.ActiveActivityRef;
+            }
+            if(contextMenuTitle == activity.GetString(Resource.String.ignore_user))
+            {
+                SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
+                return true;
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.msg_user))
+            {
+                Intent intentMsg = new Intent(activity, typeof(MessagesActivity));
+                intentMsg.AddFlags(ActivityFlags.SingleTop);
+                intentMsg.PutExtra(MessageController.FromUserName, usernameInQuestion); //so we can go to this user..
+                intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
+                activity.StartActivity(intentMsg);
+                return true;
+            }
+            else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) || 
+                contextMenuTitle == activity.GetString(Resource.String.add_user))
+            {
+                UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, usernameInQuestion, null);
+                return true;
+            }
+            else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
+                contextMenuTitle == activity.GetString(Resource.String.remove_user))
+            {
+                MainActivity.ToastUI_short(string.Format("Removing user: {0}", usernameInQuestion));
+                MainActivity.UserListRemoveUser(usernameInQuestion);
+                return true;
+            }
+            else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
+            {
+                SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
+                SearchTabHelper.SearchTargetChosenUser = usernameInQuestion;
+                //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
+                Intent intent = new Intent(activity, typeof(MainActivity));
+                intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
+                intent.AddFlags(ActivityFlags.SingleTop); //??
+                activity.StartActivity(intent);
+                return true;
+            }
+            else if (contextMenuTitle == activity.GetString(Resource.String.browse_user))
+            {
+                Action<View> action = new Action<View>((v) => {
+                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                    intent.AddFlags(ActivityFlags.SingleTop); //??
+                    activity.StartActivity(intent);
+                    //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                });
+                DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
+                return true;
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.get_user_info))
+            {
+                RequestedUserInfoHelper.RequestUserInfoApi(usernameInQuestion);
+                return true;
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.give_privileges))
+            {
+                ShowGivePrilegesDialog(usernameInQuestion);
+                return true;
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.edit_note) ||
+                    contextMenuTitle == activity.GetString(Resource.String.add_note))
+            {
+                ShowEditAddNoteDialog(usernameInQuestion);
+                return true;
+            }
+            return false;
+        }
+
+        public static void SetMessageTextView(TextView viewMessage, Message msg)
+        {
+            if (Helpers.IsSpecialMessage(msg.MessageText))
+            {
+                viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
+                viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
+            }
+            else
+            {
+                viewMessage.Text = msg.MessageText;
+                viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
+            }
+        }
 
         public static string GetNiceDateTimeGroupChat(DateTime dt)
         {
@@ -6573,6 +6907,265 @@ namespace AndriodApp1
 
 
 
+        }
+
+        /// <summary>
+        /// Since this is always called by the UI it handles showing toasts etc.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="numDays"></param>
+        /// <returns>false if operation could not be attempted, true if successfully met prereqs and was attempted</returns>
+        public static bool GivePrilegesAPI(string username, string numDays)
+        {
+            int numDaysInt = int.MinValue;
+            if(!int.TryParse(numDays,out numDaysInt))
+            {
+                MainActivity.ToastUI(Resource.String.error_days_entered_no_parse);
+                return false;
+            }
+            if(numDaysInt<=0)
+            {
+                MainActivity.ToastUI(Resource.String.error_days_entered_not_positive);
+                return false;
+            }
+            if(PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
+            {
+                MainActivity.ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days),numDaysInt));
+                return false;
+            }
+            if (!SoulSeekState.currentlyLoggedIn)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
+                return false;
+            }
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
+                {
+                    return false; //if we get here we already did a toast message.
+                }
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        {
+
+                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+
+                        });
+                        return;
+                    }
+                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
+                }));
+                return true;
+            }
+            else
+            {
+                GivePrivilegesLogic(username, numDaysInt);
+                return true;
+            }
+        }
+
+
+        private static void GivePrivilegesLogic(string username, int numDaysInt)
+        {
+            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.sending__),ToastLength.Short);
+            SoulSeekState.SoulseekClient.GrantUserPrivilegesAsync(username,numDaysInt).ContinueWith(new Action<Task>
+                ((Task t) => {
+                    if (t.IsFaulted)
+                    {
+                        if (t.Exception.InnerException is TimeoutException)
+                        {
+                            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                        }
+                        else
+                        {
+                            MainActivity.LogFirebase(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
+                            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
+                        }
+                        return;
+                    }
+                    else
+                    {
+                        //now there is a chance the user does not exist or something happens.  in which case our days will be incorrect...
+                        PrivilegesManager.Instance.SubtractDays(numDaysInt); 
+                       
+                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt,username), ToastLength.Long);
+
+                        //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
+                        //in the rare case that it fails they do get a message so they can figure it out
+                    }
+                }));
+        }
+
+        public static void ShowEditAddNoteDialog(string username)
+        {
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
+            builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.note_title), username));
+            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.user_note_dialog, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
+            // Set up the input
+            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.editUserNote);
+
+            string existingNote = null;
+            SoulSeekState.UserNotes.TryGetValue(username, out existingNote);
+            if(existingNote!=null)
+            {
+                input.Text = existingNote;
+            }
+
+
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            {
+                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
+                //you cannot input '.' or negative even with physical keyboard, etc.
+                string newText = input.Text;
+                bool isEmpty = string.IsNullOrEmpty(newText);
+                bool wasEmpty = string.IsNullOrEmpty(existingNote);
+                if(isEmpty != wasEmpty)
+                {
+                    //either we cleared an existing note or added a new note
+                    if(!wasEmpty && isEmpty)
+                    {
+                        //we removed the note
+                        SoulSeekState.UserNotes.TryRemove(username, out _);
+                        SaveUserNotes();
+                    }
+                    else
+                    {
+                        //we added a note
+                        SoulSeekState.UserNotes[username] = newText;
+                        SaveUserNotes();
+                    }
+                }
+                else if(isEmpty && wasEmpty)
+                {
+                    //nothing was there and nothing is there now
+                    return;
+                }
+                else //something was there and is there now
+                {
+                    if(newText == existingNote)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        //update note and save prefs..
+                        SoulSeekState.UserNotes[username] = newText;
+                        SaveUserNotes();
+                    }
+                }
+                
+            });
+            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+            });
+
+            //System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
+            //{
+            //    if (e.ActionId == Android.Views.InputMethods.ImeAction.Send || //in this case it is Send (blue checkmark)
+            //        e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
+            //        e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
+            //        e.ActionId == Android.Views.InputMethods.ImeAction.Search)
+            //    {
+            //        MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+            //        //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+            //        //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+            //        //overriding this, the keyboard fails to go down by default for some reason.....
+            //        try
+            //        {
+            //            Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+            //            imm.HideSoftInputFromWindow(SoulSeekState.ActiveActivityRef.Window.DecorView.WindowToken, 0);
+            //        }
+            //        catch (System.Exception ex)
+            //        {
+            //            MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+            //        }
+            //        //Do the Browse Logic...
+            //        eventHandler(sender, null);
+            //    }
+            //};
+
+            //input.EditorAction += editorAction;
+
+            builder.SetPositiveButton(Resource.String.okay, eventHandler);
+            builder.SetNegativeButton(Resource.String.close, eventHandlerCancel);
+            // Set up the buttons
+
+            builder.Show();
+        }
+
+        private static void SaveUserNotes()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutString(SoulSeekState.M_UserNotes, SeekerApplication.SaveUserNotesToString(SoulSeekState.UserNotes));
+                editor.Commit();
+            }
+        }
+
+
+        public static void ShowGivePrilegesDialog(string username)
+        {
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
+            builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_to_), username));
+            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.give_privileges_layout, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
+            // Set up the input
+            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.givePrivilegesEditText);
+
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            {
+                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
+                //you cannot input '.' or negative even with physical keyboard, etc.
+                GivePrilegesAPI(username,input.Text);
+            });
+            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+            });
+
+            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
+            {
+                if (e.ActionId == Android.Views.InputMethods.ImeAction.Send || //in this case it is Send (blue checkmark)
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
+                {
+                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(SoulSeekState.ActiveActivityRef.Window.DecorView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    }
+                    //Do the Browse Logic...
+                    eventHandler(sender, null);
+                }
+            };
+
+            input.EditorAction += editorAction;
+
+            builder.SetPositiveButton(Resource.String.send, eventHandler);
+            builder.SetNegativeButton(Resource.String.close, eventHandlerCancel);
+            // Set up the buttons
+
+            builder.Show();
         }
     }
 

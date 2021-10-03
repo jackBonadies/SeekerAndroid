@@ -41,6 +41,20 @@ namespace AndriodApp1
             return base.OnCreateOptionsMenu(menu);
         }
 
+
+        public override bool OnPrepareOptionsMenu(IMenu menu)
+        {
+            if (PendingText == SoulSeekState.UserInfoBio)
+            {
+                menu.FindItem(Resource.Id.save_user_action).SetVisible(false);
+            }
+            else
+            {
+                menu.FindItem(Resource.Id.save_user_action).SetVisible(true);
+            }
+            return base.OnPrepareOptionsMenu(menu);
+        }
+
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
             switch (item.ItemId)
@@ -54,6 +68,7 @@ namespace AndriodApp1
                     {
                         SaveBio();
                         Toast.MakeText(this, this.Resources.GetString(Resource.String.saved), ToastLength.Short).Show();
+                        this.InvalidateOptionsMenu();
                     }
                     return true;
                 case Resource.Id.view_self_info_action:
@@ -188,7 +203,6 @@ namespace AndriodApp1
             }
         }
 
-
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data) //UI thread.  as all lifecycle methods.
         {
             if (requestCode == PICTURE_SELECTED)
@@ -292,7 +306,13 @@ namespace AndriodApp1
         public static string PendingText = string.Empty;
         private void EditText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
+            bool wasSame = (PendingText == SoulSeekState.UserInfoBio);
             PendingText = e.Text.ToString();
+            bool isSame = (PendingText == SoulSeekState.UserInfoBio);
+            if(isSame!=wasSame)
+            {
+                this.InvalidateOptionsMenu();
+            }
         }
     }
 }

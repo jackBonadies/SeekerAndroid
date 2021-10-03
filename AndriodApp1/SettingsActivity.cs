@@ -1131,7 +1131,7 @@ namespace AndriodApp1
                     this.RunOnUiThread(new Action(() =>
                     {
                         UpdateShareImageView();
-                        int dirs = SoulSeekState.SharedFileCache.DirectoryCount;
+                        int dirs = SoulSeekState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
                         int files = SoulSeekState.SharedFileCache.FileCount;
                         Toast.MakeText(this, string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum),dirs,files), ToastLength.Long).Show();
                     }));

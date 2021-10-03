@@ -23,6 +23,7 @@ using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
+using Android.Text;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
@@ -89,6 +90,7 @@ namespace AndriodApp1
             else if(fInner!= null && fInner.IsVisible)
             {
                 MenuInflater.Inflate(Resource.Menu.messages_inner_list_menu, menu);
+                
             }
             else
             {
@@ -97,8 +99,18 @@ namespace AndriodApp1
             return base.OnCreateOptionsMenu(menu);
         }
 
+        public override bool OnPrepareOptionsMenu(IMenu menu)
+        {
+            Helpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
+            return base.OnPrepareOptionsMenu(menu);
+        }
+
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
+            if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username,this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+            {
+                return true;
+            }
             switch (item.ItemId)
             {
                 case Resource.Id.message_user_action:
@@ -836,6 +848,7 @@ namespace AndriodApp1
             }
             editTextEnterMessage.TextChanged += EditTextEnterMessage_TextChanged;
             editTextEnterMessage.EditorAction += EditTextEnterMessage_EditorAction;
+            editTextEnterMessage.KeyPress += EditTextEnterMessage_KeyPress;
             sendMessage.Click += SendMessage_Click;
 
             //TextView noMessagesView = rootView.FindViewById<TextView>(Resource.Id.noMessagesView);
@@ -861,6 +874,22 @@ namespace AndriodApp1
             }
             created = true;
             return rootView;
+        }
+
+        private void EditTextEnterMessage_KeyPress(object sender, View.KeyEventArgs e)
+        {
+            if(e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+            {
+                e.Handled = true;
+                //send the message and record our send message..
+                SendMessageAPI(new Message(Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+
+                editTextEnterMessage.Text = string.Empty;
+            }
+            else
+            {
+                e.Handled = false;
+            }
         }
 
         private void EditTextEnterMessage_EditorAction(object sender, TextView.EditorActionEventArgs e)
@@ -1365,7 +1394,7 @@ namespace AndriodApp1
             {
                 viewTimeStamp.Text = Helpers.GetNiceDateTime( msg.LocalDateTime );
             }
-            viewMessage.Text = msg.MessageText;
+            Helpers.SetMessageTextView(viewMessage, msg);
         }
     }
 
@@ -1400,7 +1429,7 @@ namespace AndriodApp1
         public void setItem(Message msg)
         {
             viewTimeStamp.Text = Helpers.GetNiceDateTime( msg.LocalDateTime );
-            viewMessage.Text = msg.MessageText;
+            Helpers.SetMessageTextView(viewMessage, msg);
         }
     }
 
