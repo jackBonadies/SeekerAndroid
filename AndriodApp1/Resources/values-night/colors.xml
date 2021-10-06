@@ -30,4 +30,7 @@
   <color name="normalTextColor">#FFFFFF</color>
   <color name="slightContrastColor">#6d6d6d</color>
   <color name="slightestContrastColor">#4E4E4E</color>
+
+
+  <color name="subTextColor">#ffC7C7C7</color>
 </resources>
