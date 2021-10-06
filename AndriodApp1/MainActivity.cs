@@ -838,7 +838,7 @@ namespace AndriodApp1
                     }
                     else if(LastSetLifeTime < 2*3600)
                     {
-                        MainActivity.LogFirebase("less than 2 hours: " + LastSetLifeTime);
+                        MainActivity.LogFirebase("less than 2 hours: " + LastSetLifeTime); //20 mins
                         LastSetLifeTime = 2 * 3600;
                     }
 
@@ -884,13 +884,14 @@ namespace AndriodApp1
         {
             base.OnCreate();
             ApplicationContext = this;
-
+            #if !IzzySoft
             Firebase.FirebaseApp app = Firebase.FirebaseApp.InitializeApp(this);
             if(app==null)
             {
                 MainActivity.crashlyticsEnabled = false;
             }
-            //MainActivity.LogFirebase("testing---");
+            #endif
+            //MainActivity.LogFirebase("testing release");
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
@@ -1985,23 +1986,27 @@ namespace AndriodApp1
         }
         public static void LogFirebase(string msg)
         {
+#if !IzzySoft
             if(crashlyticsEnabled)
             {
                 Firebase.Crashlytics.FirebaseCrashlytics.Instance.RecordException(new Java.Lang.Throwable(msg));
             }
-            #if ADB_LOGCAT
+#endif
+#if ADB_LOGCAT
                         log.Debug(logCatTag, msg);
-            #endif
+#endif
         }
         public static void LogInfoFirebase(string msg)
         {
+#if !IzzySoft
             if(crashlyticsEnabled)
             {
                 Firebase.Crashlytics.FirebaseCrashlytics.Instance.Log(msg);
             }
-            #if ADB_LOGCAT
+#endif
+#if ADB_LOGCAT
                         log.Debug(logCatTag, msg);
-            #endif
+#endif
         }
 
 
@@ -3468,8 +3473,8 @@ namespace AndriodApp1
                     //var diag = builder.SetMessage(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
-                    //((TextView)diag.FindViewById(Android.Resource.Id.Message)).LinksClickable = true;
-                    //((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString()));
+                    var origString = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body), SeekerApplication.GetVersionString()); //this is a literal CDATA string.
+                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString,Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
                     ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = (Android.Text.Method.LinkMovementMethod.Instance);
                     return true;
             }

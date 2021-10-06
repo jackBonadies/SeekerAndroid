@@ -3832,6 +3832,8 @@ namespace AndriodApp1
         private TextView viewNumFiles;
         private TextView viewSpeed;
         private TextView viewOperatorStatus;
+        private ImageView imageFriendIgnored;
+        private ImageView imageNoted;
         public Soulseek.UserData DataItem;
 
         public RoomUserItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -3856,6 +3858,8 @@ namespace AndriodApp1
             viewNumFiles = FindViewById<TextView>(Resource.Id.numFiles);
             viewSpeed = FindViewById<TextView>(Resource.Id.speed);
             viewOperatorStatus = FindViewById<TextView>(Resource.Id.operatorStatus);
+            imageFriendIgnored = FindViewById<ImageView>(Resource.Id.friend_ignored_image);
+            imageNoted = FindViewById<ImageView>(Resource.Id.noted_image);
         }
 
         public void setItem(Soulseek.UserData userData)
@@ -3885,7 +3889,28 @@ namespace AndriodApp1
             {
                 viewOperatorStatus.Visibility = ViewStates.Gone;
             }
-            
+            if(SoulSeekState.UserNotes.ContainsKey(userData.Username))
+            {
+                imageNoted.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                imageNoted.Visibility = ViewStates.Invisible;
+            }
+            if(SeekerApplication.IsUserInIgnoreList(userData.Username))
+            {
+                imageFriendIgnored.SetImageResource(Resource.Drawable.account_cancel);
+                imageFriendIgnored.Visibility = ViewStates.Visible;
+            }
+            else if(MainActivity.UserListContainsUser(userData.Username))
+            {
+                imageFriendIgnored.SetImageResource(Resource.Drawable.account_star);
+                imageFriendIgnored.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                imageFriendIgnored.Visibility = ViewStates.Invisible;
+            }
         }
     }
 

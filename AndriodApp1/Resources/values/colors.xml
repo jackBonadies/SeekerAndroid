@@ -29,4 +29,8 @@
   <color name="normalTextColor">#000000</color>
   <color name="slightContrastColor">#c7c7c7</color>
   <color name="slightestContrastColor">#e0e0e0</color>
+  
+  
+  <color name="subTextColor">#ff757575</color>
+  
 </resources>

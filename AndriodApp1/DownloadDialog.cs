@@ -1246,6 +1246,11 @@ namespace AndriodApp1
                         MainActivity.LogFirebase("The dirname is empty!!");
                         return true;
                     }
+                    if (!SoulSeekState.currentlyLoggedIn)
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
+                        return true;
+                    }
                     if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                     {
                         //we disconnected. login then do the rest.
@@ -1275,7 +1280,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(searchResponse.Username, dirname);
+                        Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(searchResponse.Username, dirname); //throws not logged in...
                         t.ContinueWith(DirectoryReceivedContAction);
                     }
                     return true;

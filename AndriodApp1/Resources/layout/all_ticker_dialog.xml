@@ -7,7 +7,7 @@
         android:layout_below = "@id/header1"
         android:minWidth="25px"
         android:minHeight="25px"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="120dp"
         android:clipToPadding="false"
