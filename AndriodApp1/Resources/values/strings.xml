@@ -556,11 +556,7 @@ Directory Count: {5}"</string>
 
 
   <string name="about_title">About</string>
-<string name="about_body">
-Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
-\n\nPlease help translate Seeker <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">here</a>.
-\n\nSource code is <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">here</a>.
-</string>
+
 
   <string name="give_privileges">Give Privileges</string>
   <string name="error_days_entered_no_parse">Days entered must be a whole number.</string>
@@ -589,5 +585,15 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
   <string name="subfolders_warning">This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
   <string name="current_folder_only">Current Folder Only</string>
   <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
+
+  <string name="about_body">
+<![CDATA[
+Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
+<br><br>Please help translate Seeker <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">here</a>.
+<br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
+<br><br>Version: {0}.
+]]>
+  </string>
+  <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
 
 </resources>

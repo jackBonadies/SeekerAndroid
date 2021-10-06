@@ -2218,19 +2218,19 @@ namespace AndriodApp1
                 switch(target)
                 {
                     case SearchTarget.AllUsers:
-                        actv.Hint = SoulSeekState.MainActivityRef.GetString(Resource.String.search_here);
+                        actv.Hint = SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_here);
                         break;
                     case SearchTarget.UserList:
-                        actv.Hint = SoulSeekState.MainActivityRef.GetString(Resource.String.saerch_user_list);
+                        actv.Hint = SoulSeekState.ActiveActivityRef.GetString(Resource.String.saerch_user_list);
                         break;
                     case SearchTarget.Room:
-                        actv.Hint = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.search_room_),SearchTabHelper.SearchTargetChosenRoom);
+                        actv.Hint = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_room_),SearchTabHelper.SearchTargetChosenRoom);
                         break;
                     case SearchTarget.ChosenUser:
-                        actv.Hint = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.search_user_),SearchTabHelper.SearchTargetChosenUser); 
+                        actv.Hint = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_user_),SearchTabHelper.SearchTargetChosenUser); 
                         break;
                     case SearchTarget.Wishlist:
-                        actv.Hint = SoulSeekState.MainActivityRef.GetString(Resource.String.wishlist_search);
+                        actv.Hint = SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist_search);
                         break;
                 }
             }
@@ -3573,7 +3573,7 @@ namespace AndriodApp1
                     //go to search tab instead (there is always one)
                     string listOfKeys2 = System.String.Join(",",SearchTabHelper.SearchTabCollection.Keys);
                     MainActivity.LogInfoFirebase("list of Keys: " + listOfKeys2);
-                    int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key=>key>=0).First();
+                    int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key=>key>=0).First(); //TODO: no elements
                     SearchFragment.Instance.GoToTab(tabToGoTo, true);
                 }
                 else
@@ -3594,10 +3594,20 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    //remove it for real
-                    SearchTabHelper.SearchTabCollection.Remove(tabToRemove, out _);
-                    localDataSet.RemoveAt(position);
-                    SearchTabDialog.Instance.recycleSearchesAdapter.NotifyItemRemoved(position);
+                    
+                    if(SearchTabHelper.SearchTabCollection.Keys.Where(key => key >= 0).Count() == 1)
+                    {
+                        //it is the only non wishlist tab, so just clear it...  this can happen if we are on a wishlist tab and we clear all the normal tabs.
+                        SearchTabHelper.SearchTabCollection[tabToRemove] = new SearchTab();
+                        SearchTabDialog.Instance.recycleSearchesAdapter.NotifyItemChanged(position);
+                    }
+                    else
+                    {
+                        //remove it for real
+                        SearchTabHelper.SearchTabCollection.Remove(tabToRemove, out _);
+                        localDataSet.RemoveAt(position);
+                        SearchTabDialog.Instance.recycleSearchesAdapter.NotifyItemRemoved(position);
+                    }
                 }
             }
             if(isWishlist)

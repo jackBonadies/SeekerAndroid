@@ -51,10 +51,25 @@
             android:text="speedDummy"
             android:textSize="16sp"
             />
-        <FrameLayout
+       <FrameLayout
             android:layout_width="0dp"
-            android:layout_weight="6"
+            android:layout_weight="4"
             android:layout_height="match_parent"/>
+
+        <ImageView
+            android:id="@+id/noted_image"
+            android:layout_width="wrap_content"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/note_text_outline"
+            android:tint="@color/subTextColor"
+            android:layout_height="wrap_content"/>
+        <ImageView
+            android:id="@+id/friend_ignored_image"
+            android:layout_width="wrap_content"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/account_star"
+            android:tint="@color/subTextColor"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
     <!--    <TextView
             android:layout_width="0dp"

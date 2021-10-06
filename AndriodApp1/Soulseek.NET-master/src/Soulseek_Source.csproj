@@ -3,6 +3,7 @@
     <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <IsPackable>true</IsPackable>
+    <Configurations>Debug;Release;Release IzzySoft</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,6 +20,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Soulseek.xml</DocumentationFile>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release IzzySoft|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard2.0\Soulseek.xml</DocumentationFile>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
