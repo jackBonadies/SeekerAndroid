@@ -1,9 +1,11 @@
-Features:
-* Searching (including wishlists and filters)
-* Browsing User Directories
-* Downloads and Uploads
-* Port Forwarding via UPnP
-* Chatrooms and Messages
-* Adding Users
-* Get and Set User Info
-* Privileges
+<p><i>Seeker</i> is an unofficial client for <a href='https://en.wikipedia.org/wiki/Soulseek'>Soulseek</a>. It uses the <a href='https://github.com/jpdillingham/Soulseek.NET'>Soulseek.NET</a> library for communicating with Soulseek server and peers.</p>
+<p><br><b>Features:</b></p><ul>
+<li>Searching (including wishlists and filters)</li>
+<li>Browsing User Directories</li>
+<li>Downloads and Uploads</li>
+<li>Port Forwarding via UPnP</li>
+<li>Chatrooms and Messages</li>
+<li>Adding Users</li>
+<li>Get and Set User Info</li>
+<li>Privileges</li>
+</ul>
