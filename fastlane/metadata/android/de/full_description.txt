@@ -1,0 +1,11 @@
+<p><i>Seeker</i> ist ein inoffizieller Client für <a href='https://de.wikipedia.org/wiki/Soulseek'>Soulseek</a>. <i>Seeker</i> nutzt <a href='https://github.com/jpdillingham/Soulseek.NET'>Soulseek.NET</a> für die Kommunikation mit Soulseek Peers und Server.</p>
+<p><br><b>Features:</b></p><ul>
+<li>Suchen (einschließlich Wunschlisten und Filter)</li>
+<li>Durchsuchen von Benutzerverzeichnissen</li>
+<li>Downloads und Uploads</li>
+<li>Portweiterleitung über UPnP</li>
+<li>Chatrooms und Nachrichten</li>
+<li>Hinzufügen von Benutzern</li>
+<li>Benutzerinformationen abrufen und einstellen</li>
+<li>Privilegien</li>
+</ul>
