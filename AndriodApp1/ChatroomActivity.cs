@@ -3589,24 +3589,48 @@ namespace AndriodApp1
         //    //throw new NotImplementedException();
         //}
 
+        private void NotifyItemChanged(Soulseek.UserData userData)
+        {
+            int i = this.roomUserListAdapter.GetPositionForUserData(longClickedUserData);
+            if (i == -1)
+            {
+                return;
+            }
+            this.roomUserListAdapter.NotifyItemChanged(i);
+        }
+
+        private Action GetUpdateUserListRoomAction(Soulseek.UserData longClickedUserData)
+        {
+            Action a = new Action( () => {
+                NotifyItemChanged(longClickedUserData);
+            });
+            return a;
+        }
+
         public override bool OnContextItemSelected(IMenuItem item)
         {
             var userdata = longClickedUserData;
-            if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom)))
+            if(item.ItemId!=0) //this is "Remove User" as in Remove User from Room!
             {
-                MainActivity.LogDebug("Handled by commons");
-                return base.OnContextItemSelected(item);
+                if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomAction(userdata)))
+                {
+                    MainActivity.LogDebug("Handled by commons");
+                    return base.OnContextItemSelected(item);
+                }
             }
             switch (item.ItemId)
             {
                 case 0: //"Remove User"
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username,true,false,true);
+//                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 1: //"Remove Moderator Privilege"
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, true);
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 2:
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, false);
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 3: //browse user
                     Action<View> action = new Action<View>((v) => {
@@ -3625,12 +3649,6 @@ namespace AndriodApp1
                     Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
-                    return true;
-                case 5: //add to user list
-                    UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, userdata.Username, null);
-                    return true;
-                case 6: //add to ignored
-                    SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, userdata.Username);
                     return true;
                 case 7: //message user
                     Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
@@ -3654,6 +3672,19 @@ namespace AndriodApp1
         private List<Soulseek.UserData> localDataSet;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
+
+        public int GetPositionForUserData(Soulseek.UserData userData)
+        {
+            string uname = userData.Username;
+            for(int i = 0;i<localDataSet.Count;i++)
+            {
+                if(uname==localDataSet[i].Username)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {

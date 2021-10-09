@@ -475,6 +475,39 @@ namespace Soulseek
             }
         }
 
+        ///// <summary>
+        ///// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
+        ///// </summary>
+        ///// <param name="username"></param>
+        ///// <param name="filename"></param>
+        ///// <param name="token">The token for the transfer</param>
+        ///// <returns></returns>
+        //public bool IsTransferInDownloads(string username, string filename, out int token)
+        //{
+        //    var dlInQuestion = Downloads.Values.Where(d => d.Username == username && d.Filename == filename);
+        //    if (dlInQuestion.Count()==0)
+        //    {
+        //        token = int.MinValue;
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        token = dlInQuestion.First().Token;
+        //        return true;
+        //    }
+        //}
+
+        /// <summary>
+        /// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public bool IsTransferInDownloads(string username, string filename)
+        {
+            return Downloads.Values.Any(d => d.Username == username && d.Filename == filename);
+        }
+
         /// <summary>
         /// If we are successfully listening
         /// </summary>

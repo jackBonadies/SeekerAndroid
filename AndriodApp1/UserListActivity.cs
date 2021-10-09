@@ -144,13 +144,13 @@ namespace AndriodApp1
                     //failed to add user
                     if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.ToLower().Contains("the wait timed out"))
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                             Toast.MakeText(c, Resource.String.error_adding_user_timeout, ToastLength.Short).Show();
                         });
                     }
                     else if (t.Exception != null && t.Exception != null && t.Exception.InnerException is Soulseek.UserNotFoundException)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                             Toast.MakeText(c, Resource.String.error_adding_user_not_found, ToastLength.Short).Show();
                         });
                     }
@@ -169,9 +169,7 @@ namespace AndriodApp1
                     }
                     if (UIaction != null)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => {
-                            UIaction();
-                        });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(UIaction);
                     }
                 }
             };

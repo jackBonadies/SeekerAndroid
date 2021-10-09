@@ -4402,17 +4402,35 @@ namespace AndriodApp1
                         //action = () => { ToastUI("The task was cancelled."); };
                         //this.RunOnUiThread(action);
                     }
+
+                    if(e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
+                    {
+                        e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
+                        try
+                        {
+                            //retry download.
+                            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                            Android.Net.Uri incompleteUri = null;
+                            Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
+                            retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception))));
+                        }
+                        catch (System.Exception e)
+                        {
+                            MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                        }
+                    }
+
                     return;
                 }
                 else if (task.Status == TaskStatus.Faulted)
                 {
                     if (task.Exception.InnerException is System.TimeoutException)
                     {
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.timeout_peer)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
                     }
                     else if (task.Exception.InnerException is Soulseek.TransferException)
                     {
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer)); };
+                        action = () => { ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer),e.dlInfo.username)); };
                     }
                     else if (task.Exception.InnerException is Soulseek.UserOfflineException)
                     {
@@ -4420,38 +4438,38 @@ namespace AndriodApp1
                     }
                     else if (task.Exception.InnerException is Soulseek.TransferRejectedException)
                     {
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.transfer_rejected)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected)); };
                     }
                     else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                             task.Exception.InnerException.Message != null &&
                             task.Exception.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
                     {
                         LogDebug("Task Exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                     {
                         MainActivity.LogFirebase("read error: remote connection closed");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
                     {
                         MainActivity.LogFirebase("Network Subsystem is Down");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.network_down)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_down)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
                     {
                         MainActivity.LogFirebase("Reported as failed by uploader");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.reported_as_failed)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect message connection"))
                     {
                         MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
                     }
                     else
                     {
@@ -4470,7 +4488,7 @@ namespace AndriodApp1
 
                                 if(task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)"))
                                 {
-                                    action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.error_no_space)); };
+                                    action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
                                 }
 
                                 //this is to help with the collection was modified
@@ -6559,7 +6577,7 @@ namespace AndriodApp1
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
         /// <returns></returns>
-        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView)
+        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote=null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored=null)
         {
             if(activity==null)
             {
@@ -6568,6 +6586,7 @@ namespace AndriodApp1
             if(contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
                 SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
                 return true;
             }
             else if(contextMenuTitle == activity.GetString(Resource.String.msg_user))
@@ -6582,7 +6601,7 @@ namespace AndriodApp1
             else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) || 
                 contextMenuTitle == activity.GetString(Resource.String.add_user))
             {
-                UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, usernameInQuestion, null);
+                UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
@@ -6590,6 +6609,7 @@ namespace AndriodApp1
             {
                 MainActivity.ToastUI_short(string.Format("Removing user: {0}", usernameInQuestion));
                 MainActivity.UserListRemoveUser(usernameInQuestion);
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
@@ -6628,7 +6648,7 @@ namespace AndriodApp1
             else if(contextMenuTitle == activity.GetString(Resource.String.edit_note) ||
                     contextMenuTitle == activity.GetString(Resource.String.add_note))
             {
-                ShowEditAddNoteDialog(usernameInQuestion);
+                ShowEditAddNoteDialog(usernameInQuestion, uiUpdateActionNote);
                 return true;
             }
             return false;
@@ -6700,6 +6720,22 @@ namespace AndriodApp1
             return mimeType;
         }
 
+        public static void ViewUri(Android.Net.Uri httpUri, Context c)
+        {
+            try
+            {
+                Intent intent = new Intent(Intent.ActionView, httpUri);
+                c.StartActivity(intent);
+            }
+            catch (Exception e)
+            {
+                if (e.Message.ToLower().Contains("no activity found to handle"))
+                {
+                    MainActivity.LogFirebase("viewUri: " + e.Message + httpUri.ToString());
+                    SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()),ToastLength.Long);
+                }
+            }
+        }
 
         public static string GetFolderNameFromFile(string filename)
         {
@@ -7005,7 +7041,7 @@ namespace AndriodApp1
                 }));
         }
 
-        public static void ShowEditAddNoteDialog(string username)
+        public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction=null)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
             builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.note_title), username));
@@ -7031,7 +7067,8 @@ namespace AndriodApp1
                 string newText = input.Text;
                 bool isEmpty = string.IsNullOrEmpty(newText);
                 bool wasEmpty = string.IsNullOrEmpty(existingNote);
-                if(isEmpty != wasEmpty)
+                bool addedOrRemoved = isEmpty != wasEmpty;
+                if (addedOrRemoved)
                 {
                     //either we cleared an existing note or added a new note
                     if(!wasEmpty && isEmpty)
@@ -7039,6 +7076,7 @@ namespace AndriodApp1
                         //we removed the note
                         SoulSeekState.UserNotes.TryRemove(username, out _);
                         SaveUserNotes();
+                        
                     }
                     else
                     {
@@ -7046,6 +7084,11 @@ namespace AndriodApp1
                         SoulSeekState.UserNotes[username] = newText;
                         SaveUserNotes();
                     }
+                    if(uiUpdateAction!=null)
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
+                    }
+
                 }
                 else if(isEmpty && wasEmpty)
                 {

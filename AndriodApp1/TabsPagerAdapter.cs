@@ -4296,6 +4296,7 @@ namespace AndriodApp1
         public long Size;
         public bool Queued = false;
         private int queuelength = 0;
+        public bool CancelAndRetryFlag = false;
         public int QueueLength
         {
             get
@@ -4679,7 +4680,7 @@ namespace AndriodApp1
         {
             switch (item.ItemId)
             {
-                case Resource.Id.action_clear_all_complete:
+                case Resource.Id.action_clear_all_complete: //clear all complete
                     MainActivity.LogInfoFirebase("Clear All Complete Pressed");
                     lock (transferItems)
                     {
@@ -4696,7 +4697,7 @@ namespace AndriodApp1
                         refreshListView();
                     }
                     return true;
-                case Resource.Id.action_cancel_and_clear_all:
+                case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     MainActivity.LogInfoFirebase("action_cancel_and_clear_all Pressed");
                     lock (transferItems)
                     {
@@ -4810,7 +4811,7 @@ namespace AndriodApp1
         {
             try
             {
-                MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+
             }
             catch(System.Exception)
             {
@@ -4869,6 +4870,7 @@ namespace AndriodApp1
                 }
             }
         }
+
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -4933,20 +4935,17 @@ namespace AndriodApp1
 
 
 
-            SoulSeekState.ClearDownloadAddedEventsFromTarget(this);
-            SoulSeekState.DownloadAdded += SoulSeekState_DownloadAdded;
-            SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-            SoulSeekState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
-            SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
-            SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
-            MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
-
             MainActivity.LogInfoFirebase("AutoClear: " + SoulSeekState.AutoClearComplete);
             MainActivity.LogInfoFirebase("AutoRetry: " + SoulSeekState.AutoRetryDownload);
 
             return rootView;
         }
 
+        /// <summary>
+        /// This is a UI event handler
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TranferQueueStateChanged(object sender, TransferItem e)
         {
             SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
@@ -5056,14 +5055,20 @@ namespace AndriodApp1
         }
 
 
-        public override void OnDestroyView()
-        {
-            //SoulSeekState.DownloadAdded -= SoulSeekState_DownloadAdded;
-            //SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-            //SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
-            base.OnDestroyView();
+        //public override void OnDestroyView()
+        //{
+        //    try
+        //    {
+        //        SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
+        //        SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
+        //        MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+        //    }
+        //    catch (System.Exception)
+        //    {
 
-        }
+        //    }
+        //    base.OnDestroyView();
+        //}
 
         //public override void OnDestroy()
         //{
@@ -5223,8 +5228,15 @@ namespace AndriodApp1
                 return;
             }
 
-
-
+            //int tokenNum = int.MinValue;
+            if(SoulSeekState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
+            {
+                MainActivity.LogDebug("transfer is in Downloads !!! " + item1.FullFilename);
+                item1.CancelAndRetryFlag = true;
+                ClearTransferForRetry(item1, position);
+                item1.CancellationTokenSource.Cancel();
+                return; //the dl continuation method will take care of it....
+            }
 
             //TransferItem item1 = transferItems[info.Position];  
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -5259,22 +5271,22 @@ namespace AndriodApp1
                 SoulSeekState.MainActivityRef.RunOnUiThread(a);
                 return; //otherwise null ref with task!
             }
+            ClearTransferForRetry(item1,position);
+        }
 
-
-
-            //save to disk, update ui.
-            //task.ContinueWith(SoulSeekState.MainActivityRef.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username,item1.FullFilename,item1.Size,task, cancellationTokenSource))));
+        private void ClearTransferForRetry(TransferItem item1, int position)
+        {
             item1.Progress = 0; //no longer red... some good user feedback
             item1.QueueLength = 0; //let the State Changed update this for us...
             item1.Failed = false;
             var refreshOnlySelected = new Action(() => {
 
-                MainActivity.LogDebug("notifyItemChanged " + position); 
+                MainActivity.LogDebug("notifyItemChanged " + position);
 
-                recyclerTransferAdapter.NotifyItemChanged(position); 
-                
-                
-                });
+                recyclerTransferAdapter.NotifyItemChanged(position);
+
+
+            });
             lock (transferItems)
             { //also can update this to do a partial refresh...
                 refreshListView(refreshOnlySelected);
@@ -5727,6 +5739,9 @@ namespace AndriodApp1
                             }
                             else
                             {
+                                //there was a bug where there were multiple instances of tabspageradapter and one would always get their event handler before the other
+                                //basically updating a recyclerview that wasnt even visible, while the other was never getting to update due to the throttler.
+                                //this is fixed by attaching and dettaching the event handlers on start / stop.
                                 return;
                             }
 
@@ -5806,7 +5821,10 @@ namespace AndriodApp1
             //recyclerViewTransferItems.GetAdapter().NotifyItemChanged(indexToRefresh); //this index is the index in the transferItem list...
 
             //METHOD 2 of updating (no flicker)
-            ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView;
+
+            //so this guys adapter is good and up to date.  but anything regarding View is bogus. Including the Views TextViews and InnerTransferItems. but its Adapter is good and visually everything looks fine...
+
+            ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView; //its doing the wrong one!!! also its a bogus view, not shown anywhere on screen...
             if(v!=null) //it scrolled out of view which is find bc it will get updated when it gets rebound....
             {
                 v.progressBar.Progress = progress;
@@ -5817,14 +5835,14 @@ namespace AndriodApp1
                 }
             }
 
-                //recyclerViewTransferItems.GetChildAt(indexToRefresh - recyclerViewTransferItems.GetLayoutManager().FindViewByPositionFirstVisiblePosition);
-                //            if (v == null)
-                //            {
-                //                //this is when its not visible i.e. you scroll.  it is null in that case.
-                //                return;
-                //            }
-                //            ProgressBar progressBar = v.FindViewById<ProgressBar>(Resource.Id.simpleProgressBar) as ProgressBar;
-                //            progressBar.Progress = progress;
+            //recyclerViewTransferItems.GetChildAt(indexToRefresh - recyclerViewTransferItems.GetLayoutManager().FindViewByPositionFirstVisiblePosition);
+            //            if (v == null)
+            //            {
+            //                //this is when its not visible i.e. you scroll.  it is null in that case.
+            //                return;
+            //            }
+            //            ProgressBar progressBar = v.FindViewById<ProgressBar>(Resource.Id.simpleProgressBar) as ProgressBar;
+            //            progressBar.Progress = progress;
 
 
             //            if (relevantItem.Failed)
@@ -5838,23 +5856,23 @@ namespace AndriodApp1
             //                else
             //                {
             //                    progressBar.ProgressDrawable.SetColorFilter(Color.Red, PorterDuff.Mode.Multiply);
-            //                }
-            //#pragma warning restore 0618
-            //            }
-            //            else
-            //            {
-            //#pragma warning disable 0618
-            //                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-            //                {
-            //                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
-            //                }
-            //                else
-            //                {
-            //                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
-            //                }
-            //#pragma warning restore 0618
-            //            }
         }
+        //#pragma warning restore 0618
+        //            }
+        //            else
+        //            {
+        //#pragma warning disable 0618
+        //                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+        //                {
+        //                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
+        //                }
+        //                else
+        //                {
+        //                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
+        //                }
+        //#pragma warning restore 0618
+        //            }
+    }
 
         private void refreshListViewSpecificItem(int indexOfItem)
         {
@@ -6129,9 +6147,36 @@ namespace AndriodApp1
 
         }
 
+        public override void OnStart()
+        {
+            SoulSeekState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
+            SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
+            MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
+            base.OnStart();
+        }
+
+        public override void OnStop()
+        {
+            SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
+            SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
+            MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+            base.OnStop();
+        }
+
+        //NOTE: there can be several TransfersFragment at a time.
+        //this can be done by having many MainActivitys in the back stack
+        //i.e. go to UserList > press browse files > go to UserList > press browse files --> 3 TransferFragments, 2 of which are stopped but not Destroyed.
+        public override void OnCreate(Bundle savedInstanceState)
+        {
+
+            SoulSeekState.ClearDownloadAddedEventsFromTarget(this);
+            SoulSeekState.DownloadAdded += SoulSeekState_DownloadAdded;
+
+            base.OnCreate(savedInstanceState);
+        }
 
 
-    private void SoulSeekState_DownloadAdded(object sender, DownloadAddedEventArgs e)
+        private void SoulSeekState_DownloadAdded(object sender, DownloadAddedEventArgs e)
         {
             MainActivity.LogDebug("SoulSeekState_DownloadAdded");
             TransferItem transferItem = new TransferItem();

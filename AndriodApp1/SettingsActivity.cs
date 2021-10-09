@@ -295,9 +295,9 @@ namespace AndriodApp1
                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
             }
-            Android.Net.Uri uri = Android.Net.Uri.Parse("http://www.slsknet.org/userlogin.php?username=" + SoulSeekState.Username); // missing 'http://' will cause crashed
-            Intent intent = new Intent(Intent.ActionView, uri);
-            this.StartActivity(intent);
+            //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
+            Android.Net.Uri uri = Android.Net.Uri.Parse("https://www.slsknet.org/userlogin.php?username=" + Android.Net.Uri.Encode(SoulSeekState.Username)); // missing 'http://' will cause crash.
+            Helpers.ViewUri(uri,this);
         }
 
         private void EditUserInfo_Click(object sender, EventArgs e)
@@ -353,11 +353,10 @@ namespace AndriodApp1
         }
 
 
-        private void CheckStatus_Click(object sender, EventArgs e)
+        private void CheckStatus_Click(object sender, EventArgs e) //TODO: helper with optional arg "tryHttps" for when failure. and show toast if both fail.. rather than crash.. and log the url..  A web browser is required to handle this request.
         {
-            Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed
-            Intent intent = new Intent(Intent.ActionView, uri);
-            this.StartActivity(intent);
+            Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
+            Helpers.ViewUri(uri,this);
         }
         private static AndroidX.AppCompat.App.AlertDialog changePortDialog = null;
         private void ChangePort_Click(object sender, EventArgs e)
