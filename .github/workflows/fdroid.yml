@@ -1,0 +1,22 @@
+name: Generate F-Droid repo
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  apps:
+    name: "Generate repo from apps listing"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install F-Droid server software
+        run: sudo apt-get install fdroidserver
+
+      - name: Set up repo secrets
+        run: |
+          echo "${{ secrets.KEYSTORE_JKS }}" | base64 -d - > fdroid/keystore.jks
+          echo "${{ secrets.CONFIG_PY }}" | base64 -d - > fdroid/config.py
