@@ -62,12 +62,12 @@ notality:
   git: https://github.com/xarantolus/notality
   description: |
     Notality is a very simple note taking app. I mostly built it to learn how Flutter works, but it's functional and you can use it.
+
     <b>Features</b>
-    <ul>
-      <li>Create, edit, delete and reorder notes</li>
-      <li>Automatic dark/light mode depending on the system-wide setting</li>
-      <li>Localization for English and German</li>
-    </ul>
+
+    - Create, edit, delete and reorder notes
+    - Automatic dark/light mode depending on the system-wide setting
+    - Localization for English and German
 
 another_app:
   git: https://github.com/xarantolus/myotherapp
