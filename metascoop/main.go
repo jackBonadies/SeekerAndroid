@@ -178,6 +178,7 @@ func main() {
 		setIfEmpty(meta, "Name", apkInfo.Name())
 		setIfEmpty(meta, "SourceCode", apkInfo.GitURL)
 		setIfEmpty(meta, "License", apkInfo.License)
+		setIfEmpty(meta, "Description", apkInfo.Description)
 
 		var summary = apkInfo.Summary
 		// See https://f-droid.org/en/docs/Build_Metadata_Reference/#Summary for max length
@@ -223,7 +224,7 @@ func main() {
 }
 
 func setIfEmpty(m map[string]interface{}, key string, value string) {
-	if m[key] == nil || m[key] == "" || m[key] == "Unknown" {
+	if value != "" && m[key] == nil || m[key] == "" || m[key] == "Unknown" {
 		m[key] = value
 	}
 }
