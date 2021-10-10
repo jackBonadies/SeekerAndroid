@@ -51,6 +51,8 @@ This guide will show you how to set up an F-Droid repo with this tool. It makes 
     And now create another secret with the name `KEYSTORE_P12`, and again paste the content of `out.txt`.
 
 6. Then open [this page](https://github.com/settings/tokens/new?description=f-droid%20repo) and generate a new GitHub personal access token without any scopes. Set the expiration date to "No expiration" (or really any timeframe on how often you want to manually update this secret). Copy the token and set it as the `GH_ACCESS_TOKEN` repository secret.
+   
+That should be it. You can now also generate a new QR code for your repo using online tools, then replace the file in `.github/qrcode.png`. And of course, you should now add your apps!
 
 ### Add a new app
 Now you can edit the `apps.yaml` file to include a new app. Usually you just need to input the GitHub link and everything should work:
