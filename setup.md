@@ -12,15 +12,15 @@ You should also set `archive_older` to `0`.
 
 After finishing your edits, you can run the following command:
 
-    base64 config.py > out.txt
+    base64 config.yml > out.txt
 
-Copy the contents of `out.txt` and set up a new repository secred called `CONFIG_PY`. Just paste the content of `out.txt` into the value field.
+Copy the contents of `out.txt` and set up a new repository secred called `CONFIG_YML`. Just paste the content of `out.txt` into the value field.
 
 Then do the same with the keystore file:
 
-    base64 keystore.jks > out.txt
+    base64 keystore.p12 > out.txt
 
-And now create another secret with the name `KEYSTORE_JKS`, and again paste the content of `out.txt`.
+And now create another secret with the name `KEYSTORE_P12`, and again paste the content of `out.txt`.
 
 
 Then go to `https://github.com/settings/tokens/new?description=f-droid repo` and generate a token, no scopes required

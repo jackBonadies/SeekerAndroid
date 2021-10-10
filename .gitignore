@@ -3,3 +3,6 @@ keystore.jks
 out.txt
 **.tmp
 .vscode
+keystore.p12
+config.yml
+fdroid/tmp

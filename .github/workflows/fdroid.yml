@@ -14,9 +14,12 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install F-Droid server software
-        run: sudo apt-get install fdroidserver
+        run: |
+         sudo add-apt-repository ppa:fdroid/fdroidserver
+         sudo apt-get update
+         sudo apt-get install fdroidserver
 
       - name: Set up repo secrets
         run: |
-          echo "${{ secrets.KEYSTORE_JKS }}" | base64 -d - > fdroid/keystore.jks
-          echo "${{ secrets.CONFIG_PY }}" | base64 -d - > fdroid/config.py
+          echo "${{ secrets.KEYSTORE_P12 }}" | base64 -d - > fdroid/keystore.p12
+          echo "${{ secrets.CONFIG_YML }}" | base64 -d - > fdroid/config.yml
