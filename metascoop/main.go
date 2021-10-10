@@ -6,12 +6,14 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"metascoop/apps"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/go-github/v39/github"
@@ -48,6 +50,9 @@ func main() {
 		log.Fatalf("creating repo directory: %s\n", err.Error())
 	}
 
+	// map[apkName]info
+	var apkInfoMap = make(map[string]apps.AppInfo)
+
 	for _, app := range appsList {
 		log.SetPrefix(fmt.Sprintf("%s/%s", app.Author(), app.Name()))
 
@@ -56,6 +61,13 @@ func main() {
 			log.Printf("Error while getting repo info from URL %q: %s", app.GitURL, err.Error())
 			haveError = true
 			continue
+		}
+
+		if app.Summary == "" {
+			gitHubRepo, _, err := githubClient.Repositories.Get(context.Background(), repo.Author, repo.Name)
+			if err == nil {
+				app.Summary = gitHubRepo.GetDescription()
+			}
 		}
 
 		releases, err := apps.ListAllReleases(githubClient, repo.Author, repo.Name)
@@ -81,6 +93,8 @@ func main() {
 			}
 
 			appName := apps.GenerateReleaseFilename(app.Name(), *release.TagName)
+
+			apkInfoMap[appName] = app
 
 			appTargetPath := filepath.Join(*repoDir, appName)
 
@@ -113,8 +127,75 @@ func main() {
 	log.SetPrefix("")
 
 	// Now, we run the fdroid update command
-
 	cmd := exec.Command("fdroid", "update", "-c")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Dir = filepath.Dir(*repoDir)
+
+	err = cmd.Run()
+	if err != nil {
+		log.Println("Error while running \"fdroid update -c\":", err.Error())
+		os.Exit(1)
+	}
+
+	fdroidIndex, err := apps.ReadIndex(filepath.Join(*repoDir, "index-v1.json"))
+	if err != nil {
+		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
+	}
+
+	walkPath := filepath.Join(filepath.Dir(*repoDir), "metadata")
+	err = filepath.WalkDir(walkPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".yml") {
+			return err
+		}
+
+		pkgname := strings.TrimSuffix(filepath.Base(path), ".yml")
+
+		meta, err := apps.ReadMetaFile(path)
+		if err != nil {
+			log.Printf("Reading meta file %q: %s", path, err.Error())
+			return nil
+		}
+
+		latestPackage, ok := fdroidIndex.FindLatestPackage(pkgname)
+		if !ok {
+			return nil
+		}
+
+		apkInfo, ok := apkInfoMap[latestPackage.ApkName]
+		if !ok {
+			return nil
+		}
+
+		// Now update with some info
+		delete(meta, "CurrentVersionCode")
+
+		setIfEmpty(meta, "AuthorName", apkInfo.Author())
+		setIfEmpty(meta, "Name", apkInfo.Name())
+		setIfEmpty(meta, "SourceCode", apkInfo.GitURL)
+
+		if apkInfo.Summary != "" {
+			meta["Summary"] = apkInfo.Summary
+		}
+
+		meta["CurrentVersion"] = latestPackage.VersionName
+
+		err = apps.WriteMetaFile(path, meta)
+		if err != nil {
+			log.Printf("Writing meta file %q: %s", path, err.Error())
+			return nil
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Printf("Error while walking metadata: %s", err.Error())
+		os.Exit(1)
+	}
+
+	// Now, we run the fdroid update command again to regenerate the index with our new metadata
+	cmd = exec.Command("fdroid", "update")
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
@@ -128,6 +209,12 @@ func main() {
 
 	if haveError {
 		os.Exit(1)
+	}
+}
+
+func setIfEmpty(m map[string]interface{}, key string, value string) {
+	if m[key] == nil || m[key] == "" {
+		m[key] = value
 	}
 }
 

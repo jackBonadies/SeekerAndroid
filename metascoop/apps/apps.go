@@ -10,7 +10,8 @@ import (
 )
 
 type AppInfo struct {
-	GitURL string `yaml:"git"`
+	GitURL  string `yaml:"git"`
+	Summary string `yaml:"summary"`
 
 	AuthorName string `yaml:"author"`
 	repoAuthor string
