@@ -10,6 +10,7 @@ import (
 	"metascoop/apps"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -110,6 +111,20 @@ func main() {
 		}
 	}
 	log.SetPrefix("")
+
+	// Now, we run the fdroid update command
+
+	cmd := exec.Command("fdroid", "update", "-c")
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	cmd.Dir = filepath.Dir(*repoDir)
+
+	err = cmd.Run()
+	if err != nil {
+		log.Println("Error while running \"fdroid update -c\":", err.Error())
+		os.Exit(1)
+	}
 
 	if haveError {
 		os.Exit(1)

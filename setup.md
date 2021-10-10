@@ -23,4 +23,5 @@ Then do the same with the keystore file:
 And now create another secret with the name `KEYSTORE_P12`, and again paste the content of `out.txt`.
 
 
-Then go to `https://github.com/settings/tokens/new?description=f-droid repo` and generate a token, no scopes required
+Then go to `https://github.com/settings/tokens/new?description=f-droid repo` and generate a token, no scopes required. Set it as the `GH_ACCESS_TOKEN` secret
+
