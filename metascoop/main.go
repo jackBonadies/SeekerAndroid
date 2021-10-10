@@ -173,7 +173,6 @@ func main() {
 		}
 
 		// Now update with some info
-		delete(meta, "CurrentVersionCode")
 
 		setIfEmpty(meta, "AuthorName", apkInfo.Author())
 		setIfEmpty(meta, "Name", apkInfo.Name())
@@ -190,6 +189,7 @@ func main() {
 		setIfEmpty(meta, "Summary", summary)
 
 		meta["CurrentVersion"] = latestPackage.VersionName
+		meta["CurrentVersionCode"] = latestPackage.VersionCode
 
 		err = apps.WriteMetaFile(path, meta)
 		if err != nil {
@@ -202,13 +202,6 @@ func main() {
 	if err != nil {
 		log.Printf("Error while walking metadata: %s", err.Error())
 		os.Exit(1)
-	}
-
-	fdroidIndex.RemoveVersionCode()
-
-	err = apps.WriteIndex(indexFilePath, fdroidIndex)
-	if err != nil {
-		log.Printf("Writing back repo index: %s", err.Error())
 	}
 
 	// Now, we run the fdroid update command again to regenerate the index with our new metadata

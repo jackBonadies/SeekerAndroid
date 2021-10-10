@@ -56,18 +56,6 @@ func (r *RepoIndex) FindLatestPackage(pkgName string) (p PackageInfo, ok bool) {
 	return pkgs[len(pkgs)-1], true
 }
 
-func (r *RepoIndex) RemoveVersionCode() {
-	for i := range r.Apps {
-		delete(r.Apps[i], "suggestedVersionCode")
-	}
-
-	for pkg := range r.Packages {
-		for i := range r.Packages[pkg] {
-			r.Packages[pkg][i].VersionCode = 0
-		}
-	}
-}
-
 func ReadIndex(path string) (index *RepoIndex, err error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -78,25 +66,4 @@ func ReadIndex(path string) (index *RepoIndex, err error) {
 	err = json.NewDecoder(f).Decode(&index)
 
 	return
-}
-
-func WriteIndex(path string, index *RepoIndex) (err error) {
-	tmpPath := path + ".tmp"
-	f, err := os.Create(tmpPath)
-	if err != nil {
-		return
-	}
-
-	err = json.NewEncoder(f).Encode(index)
-	if err != nil {
-		_ = f.Close()
-		return
-	}
-
-	err = f.Close()
-	if err != nil {
-		return
-	}
-
-	return os.Rename(tmpPath, path)
 }
