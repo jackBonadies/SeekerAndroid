@@ -18,6 +18,8 @@ type AppInfo struct {
 
 	FriendlyName string `yaml:"name"`
 	keyName      string
+
+	License string 
 }
 
 func (a AppInfo) Name() string {

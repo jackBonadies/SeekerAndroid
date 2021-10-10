@@ -63,10 +63,12 @@ func main() {
 			continue
 		}
 
-		if app.Summary == "" {
-			gitHubRepo, _, err := githubClient.Repositories.Get(context.Background(), repo.Author, repo.Name)
-			if err == nil {
-				app.Summary = gitHubRepo.GetDescription()
+		gitHubRepo, _, err := githubClient.Repositories.Get(context.Background(), repo.Author, repo.Name)
+		if err == nil {
+			app.Summary = gitHubRepo.GetDescription()
+
+			if gitHubRepo.License != nil && gitHubRepo.License.SPDXID != nil {
+				app.License = *gitHubRepo.License.SPDXID
 			}
 		}
 
@@ -174,10 +176,16 @@ func main() {
 		setIfEmpty(meta, "AuthorName", apkInfo.Author())
 		setIfEmpty(meta, "Name", apkInfo.Name())
 		setIfEmpty(meta, "SourceCode", apkInfo.GitURL)
+		setIfEmpty(meta, "License", apkInfo.License)
 
-		if apkInfo.Summary != "" {
-			meta["Summary"] = apkInfo.Summary
+		var summary = apkInfo.Summary
+		// See https://f-droid.org/en/docs/Build_Metadata_Reference/#Summary for max length
+		const maxSummaryLength = 80
+		if len(summary) > maxSummaryLength {
+			summary = summary[:maxSummaryLength-3] + "..."
 		}
+
+		setIfEmpty(meta, "Summary", summary)
 
 		meta["CurrentVersion"] = latestPackage.VersionName
 
@@ -213,7 +221,7 @@ func main() {
 }
 
 func setIfEmpty(m map[string]interface{}, key string, value string) {
-	if m[key] == nil || m[key] == "" {
+	if m[key] == nil || m[key] == "" || m[key] == "Unknown" {
 		m[key] = value
 	}
 }
