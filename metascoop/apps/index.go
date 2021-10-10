@@ -39,6 +39,10 @@ func (r *RepoIndex) FindLatestPackage(pkgName string) (p PackageInfo, ok bool) {
 	}
 
 	sort.Slice(pkgs, func(i, j int) bool {
+		if pkgs[i].VersionCode != pkgs[j].VersionCode {
+			return pkgs[i].VersionCode < pkgs[j].VersionCode
+		}
+
 		v1, err := version.NewVersion(pkgs[i].VersionName)
 		if err != nil {
 			return true
