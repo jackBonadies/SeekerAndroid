@@ -9,9 +9,9 @@ import (
 )
 
 type RepoIndex struct {
-	Repo     map[string]interface{} `json:"repo"`
-	Requests map[string]interface{} `json:"requests"`
-	Apps     []interface{}          `json:"apps"`
+	Repo     map[string]interface{}   `json:"repo"`
+	Requests map[string]interface{}   `json:"requests"`
+	Apps     []map[string]interface{} `json:"apps"`
 
 	Packages map[string][]PackageInfo `json:"packages"`
 }
@@ -28,7 +28,7 @@ type PackageInfo struct {
 	Signer           string   `json:"signer"`
 	Size             int      `json:"size"`
 	TargetSdkVersion int      `json:"targetSdkVersion"`
-	VersionCode      int      `json:"versionCode"`
+	VersionCode      int      `json:"versionCode,omitempty"`
 	VersionName      string   `json:"versionName"`
 }
 
@@ -56,7 +56,19 @@ func (r *RepoIndex) FindLatestPackage(pkgName string) (p PackageInfo, ok bool) {
 	return pkgs[len(pkgs)-1], true
 }
 
-func ReadIndex(path string) (index RepoIndex, err error) {
+func (r *RepoIndex) RemoveVersionCode() {
+	for i := range r.Apps {
+		delete(r.Apps[i], "suggestedVersionCode")
+	}
+
+	for pkg := range r.Packages {
+		for i := range r.Packages[pkg] {
+			r.Packages[pkg][i].VersionCode = 0
+		}
+	}
+}
+
+func ReadIndex(path string) (index *RepoIndex, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return
@@ -66,4 +78,25 @@ func ReadIndex(path string) (index RepoIndex, err error) {
 	err = json.NewDecoder(f).Decode(&index)
 
 	return
+}
+
+func WriteIndex(path string, index *RepoIndex) (err error) {
+	tmpPath := path + ".tmp"
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return
+	}
+
+	err = json.NewEncoder(f).Encode(index)
+	if err != nil {
+		_ = f.Close()
+		return
+	}
+
+	err = f.Close()
+	if err != nil {
+		return
+	}
+
+	return os.Rename(tmpPath, path)
 }

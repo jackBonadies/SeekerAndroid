@@ -141,7 +141,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	fdroidIndex, err := apps.ReadIndex(filepath.Join(*repoDir, "index-v1.json"))
+	indexFilePath := filepath.Join(*repoDir, "index-v1.json")
+
+	fdroidIndex, err := apps.ReadIndex(indexFilePath)
 	if err != nil {
 		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
 	}
@@ -200,6 +202,13 @@ func main() {
 	if err != nil {
 		log.Printf("Error while walking metadata: %s", err.Error())
 		os.Exit(1)
+	}
+
+	fdroidIndex.RemoveVersionCode()
+
+	err = apps.WriteIndex(indexFilePath, fdroidIndex)
+	if err != nil {
+		log.Printf("Writing back repo index: %s", err.Error())
 	}
 
 	// Now, we run the fdroid update command again to regenerate the index with our new metadata

@@ -38,7 +38,3 @@ func WriteMetaFile(path string, data map[string]interface{}) (err error) {
 
 	return os.Rename(tmpPath, path)
 }
-
-func UpdateMetaNode(d *yaml.Node) {
-
-}
