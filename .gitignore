@@ -1,3 +1,5 @@
 config.py
 keystore.jks
 out.txt
+**.tmp
+.vscode
