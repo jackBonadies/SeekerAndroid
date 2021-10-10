@@ -35,7 +35,7 @@ using AndroidX.RecyclerView.Widget;
 namespace AndriodApp1
 {
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar")]
-    public class UserListActivity : Android.Support.V7.App.AppCompatActivity, Android.Widget.PopupMenu.IOnMenuItemClickListener
+    public class UserListActivity : Android.Support.V7.App.AppCompatActivity
     {
         public static string PopUpMenuOwnerHack = string.Empty; //hack to get which listview item owns the popup menu (for on menu item click).
         public static string IntentUserGoToBrowse = "GoToBrowse";
@@ -45,6 +45,90 @@ namespace AndriodApp1
         {
             MenuInflater.Inflate(Resource.Menu.user_list_menu, menu);
             return base.OnCreateOptionsMenu(menu);
+        }
+
+        private void NotifyItemChanged(string username)
+        {
+            int i = this.recyclerAdapter.GetPositionForUsername(username);
+            if (i == -1)
+            {
+                return;
+            }
+            this.recyclerAdapter.NotifyItemChanged(i);
+        }
+
+        private Action GetUpdateUserListItemAction(string username)
+        {
+            Action a = new Action(() => {
+                NotifyItemChanged(username);
+            });
+            return a;
+        }
+
+        private void NotifyItemRemoved(string username)
+        {
+            int i = this.recyclerAdapter.GetPositionForUsername(username);
+            if (i == -1)
+            {
+                return;
+            }
+            this.recyclerAdapter.RemoveFromDataSet(i);
+            this.recyclerAdapter.NotifyItemRemoved(i);
+        }
+
+
+        public override bool OnContextItemSelected(IMenuItem item)
+        {
+            if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
+            {
+                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null,null))
+                {
+                    MainActivity.LogDebug("handled by commons");
+                    return true;
+                }
+            }
+            //TODO: handle common is below because actions like remove user also do an additional call.  it would be good to move that to an event.. OnResume to subscribe etc...
+            switch (item.ItemId)
+            {
+                case Resource.Id.browseUsersFiles:
+                    //do browse thing...
+                    Action<View> action = new Action<View>((v) => {
+                        Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
+                        intent.PutExtra(IntentUserGoToBrowse, 3);
+                        this.StartActivity(intent);
+                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                    });
+                    View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
+                    DownloadDialog.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
+                    return true;
+                case Resource.Id.searchUserFiles:
+                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
+                    SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
+                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
+                    Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
+                    intent.PutExtra(IntentUserGoToSearch, 1);
+                    this.StartActivity(intent);
+                    return true;
+                case Resource.Id.removeUser:
+                    MainActivity.UserListRemoveUser(PopUpMenuOwnerHack);
+                    this.NotifyItemRemoved(PopUpMenuOwnerHack);
+                    return true;
+                case Resource.Id.removeUserFromIgnored:
+                    SeekerApplication.RemoveFromIgnoreList(PopUpMenuOwnerHack);
+                    this.NotifyItemRemoved(PopUpMenuOwnerHack);
+                    return true;
+                case Resource.Id.messageUser:
+                    Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
+                    intentMsg.AddFlags(ActivityFlags.SingleTop);
+                    intentMsg.PutExtra(MessageController.FromUserName, PopUpMenuOwnerHack); //so we can go to this user..
+                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
+                    this.StartActivity(intentMsg);
+                    return true;
+                case Resource.Id.getUserInfo:
+                    RequestedUserInfoHelper.RequestUserInfoApi(PopUpMenuOwnerHack);
+                    return true;
+            }
+            return true; //idk
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
@@ -61,7 +145,7 @@ namespace AndriodApp1
             return base.OnOptionsItemSelected(item);
         }
         private LinearLayoutManager recycleLayoutManager;
-        private RecyclerUserListAdapter recyclerAdapter;
+        public RecyclerUserListAdapter recyclerAdapter;
         private RecyclerView recyclerViewUserList;
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -114,8 +198,8 @@ namespace AndriodApp1
             {
                 lock (SoulSeekState.UserList)
                 {
-                    RecyclerUserListAdapter customAdapter = new RecyclerUserListAdapter(this,ParseUserListForPresentation());
-                    recyclerViewUserList.SetAdapter(customAdapter);
+                    recyclerAdapter = new RecyclerUserListAdapter(this,ParseUserListForPresentation());
+                    recyclerViewUserList.SetAdapter(recyclerAdapter);
                 }
             }
         }
@@ -285,99 +369,45 @@ namespace AndriodApp1
             builder.Show();
         }
 
-        public void IgnoredUserListItemMoreOptionsClick(object sender, EventArgs e) //this can get attached very many times...
-        {
-            try
-            {
-                PopUpMenuOwnerHack = ((sender as View).Parent as ViewGroup).FindViewById<TextView>(Resource.Id.textViewUser).Text; //this is a hack.....
-                PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
-                popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
-                popup.Inflate(Resource.Menu.selected_ignored_user_menu);
-                popup.Show();
-            }
-            catch (System.Exception error)
-            {
-                //in response to a crash android.view.WindowManager.BadTokenException
-                //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
-                //in this case not showing it is probably best... as opposed to a crash...
-                MainActivity.LogFirebase(error.Message + " IGNORE POPUP BAD ERROR");
-            }
-        }
+        //public void IgnoredUserListItemMoreOptionsClick(object sender, EventArgs e) //this can get attached very many times...
+        //{
+        //    try
+        //    {
+        //        PopUpMenuOwnerHack = ((sender as View).Parent as ViewGroup).FindViewById<TextView>(Resource.Id.textViewUser).Text; //this is a hack.....
+        //        PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
+        //        popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
+        //        popup.Inflate(Resource.Menu.selected_ignored_user_menu);
+        //        popup.Show();
+        //    }
+        //    catch (System.Exception error)
+        //    {
+        //        //in response to a crash android.view.WindowManager.BadTokenException
+        //        //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
+        //        //in this case not showing it is probably best... as opposed to a crash...
+        //        MainActivity.LogFirebase(error.Message + " IGNORE POPUP BAD ERROR");
+        //    }
+        //}
 
-        public void UserListItemMoreOptionsClick(object sender, EventArgs e) //this can get attached very many times...
-        {
-            try
-            {
-                PopUpMenuOwnerHack = ((sender as View).Parent as ViewGroup).FindViewById<TextView>(Resource.Id.textViewUser).Text; //this is a hack.....
-                PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
-                popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
-                popup.Inflate(Resource.Menu.selected_user_options);
-                Helpers.AddUserNoteMenuItem(popup.Menu, -1, -1, -1, PopUpMenuOwnerHack);
-                Helpers.AddGivePrivilegesIfApplicable(popup.Menu, -1);
-                popup.Show();
-            }
-            catch (System.Exception error)
-            {
-                //in response to a crash android.view.WindowManager.BadTokenException
-                //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
-                //in this case not showing it is probably best... as opposed to a crash...
-                MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
-            }
-        }
-
-        public bool OnMenuItemClick(IMenuItem item)
-        {
-            if(item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
-            {
-                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId)))
-                {
-                    MainActivity.LogDebug("handled by commons");
-                    return true;
-                }
-            }
-            //TODO: handle common is below because actions like remove user also do an additional call.  it would be good to move that to an event.. OnResume to subscribe etc...
-            switch (item.ItemId)
-            {
-                case Resource.Id.browseUsersFiles:
-                    //do browse thing...
-                    Action<View> action = new Action<View>((v) => {
-                        Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
-                        intent.PutExtra(IntentUserGoToBrowse, 3);
-                        this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                    });
-                    View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
-                    DownloadDialog.RequestFilesApi(PopUpMenuOwnerHack, snackView, action ,null);
-                    return true;
-                case Resource.Id.searchUserFiles:
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
-                    intent.PutExtra(IntentUserGoToSearch, 1);
-                    this.StartActivity(intent);
-                    return true;
-                case Resource.Id.removeUser:
-                    MainActivity.UserListRemoveUser(PopUpMenuOwnerHack);
-                    this.RefreshUserList(); //TODO event
-                    return true;
-                case Resource.Id.removeUserFromIgnored:
-                    SeekerApplication.RemoveFromIgnoreList(PopUpMenuOwnerHack);
-                    this.RefreshUserList(); //TODO event
-                    return true;
-                case Resource.Id.messageUser:
-                    Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
-                    intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, PopUpMenuOwnerHack); //so we can go to this user..
-                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                    this.StartActivity(intentMsg);
-                    return true;
-                case Resource.Id.getUserInfo:
-                    RequestedUserInfoHelper.RequestUserInfoApi(PopUpMenuOwnerHack);
-                    return true;
-            }
-            return true; //idk
-        }
+        //public void UserListItemMoreOptionsClick(object sender, EventArgs e) //this can get attached very many times...
+        //{
+        //    try
+        //    {
+        //        PopUpMenuOwnerHack = ((sender as View).Parent as ViewGroup).FindViewById<TextView>(Resource.Id.textViewUser).Text; //this is a hack.....
+        //        PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
+        //        popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
+        //        popup.Inflate(Resource.Menu.selected_user_options);
+        //        Helpers.AddUserNoteMenuItem(popup.Menu, -1, -1, -1, PopUpMenuOwnerHack);
+        //        Helpers.AddGivePrivilegesIfApplicable(popup.Menu, -1);
+        //        popup.Show();
+        //    }
+        //    catch (System.Exception error)
+        //    {
+        //        //in response to a crash android.view.WindowManager.BadTokenException
+        //        //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
+        //        //in this case not showing it is probably best... as opposed to a crash...
+        //        MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
+        //    }
+        //}
     }
 
 
@@ -439,6 +469,23 @@ namespace AndriodApp1
             localDataSet = ti;
         }
 
+        public void RemoveFromDataSet(int position)
+        {
+            localDataSet.RemoveAt(position);
+        }
+
+        public int GetPositionForUsername(string uname)
+        {
+            for (int i = 0; i < localDataSet.Count; i++)
+            {
+                if (uname == localDataSet[i].Username && localDataSet[i].Role != UserRole.Category)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             if (localDataSet[position].Role == UserRole.Friend)
@@ -477,22 +524,24 @@ namespace AndriodApp1
             {
                 UserRowView view = UserRowView.inflate(parent);
                 view.setupChildren();
-                view.viewMoreOptions.Click += this.UserListActivity.UserListItemMoreOptionsClick;
+                //view.viewMoreOptions.Click += this.UserListActivity.UserListItemMoreOptionsClick;
                 view.viewUserStatus.Click += view.ViewUserStatus_Click; 
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
+                (view as View).LongClick += UserRowView_LongClick;
                 return new UserRowViewHolder(view as View);
             }
             else if (viewType == (int)UserRole.Ignored)
             {
                 UserRowView view = UserRowView.inflate(parent);
                 view.setupChildren();
-                view.viewMoreOptions.Click += this.UserListActivity.IgnoredUserListItemMoreOptionsClick;
+                //view.viewMoreOptions.Click += this.UserListActivity.IgnoredUserListItemMoreOptionsClick;
                 view.viewUserStatus.Click += view.ViewUserStatus_Click;
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).LongClick += ChatroomReceivedAdapter_LongClick;
+                (view as View).LongClick += UserRowView_LongClick;
                 return new UserRowViewHolder(view as View);
             }
             else// if(viewType == CATEGORY)
@@ -506,12 +555,15 @@ namespace AndriodApp1
 
         }
 
-
-
+        private void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
+        {
+            setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (sender as View).ShowContextMenu();
+        }
     }
 
 
-    public class UserRowViewHolder : RecyclerView.ViewHolder
+    public class UserRowViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
     {
         public UserRowView userRowView;
 
@@ -523,23 +575,56 @@ namespace AndriodApp1
 
             userRowView = (UserRowView)view;
             userRowView.ViewHolder = this;
-            //(ChatroomOverviewView as View).SetOnCreateContextMenuListener(this);
+            userRowView.SetOnCreateContextMenuListener(this);
         }
 
         public UserRowView getUnderlyingView()
         {
             return userRowView;
         }
+
+        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+
+            //base.OnCreateContextMenu(menu, v, menuInfo);
+            UserRowView userRowView = v as UserRowView;
+            string username = userRowView.viewUsername.Text;
+            UserListActivity.PopUpMenuOwnerHack = username;
+            MainActivity.LogDebug(username + " clicked");
+            UserListItem userListItem = userRowView.BoundItem;
+            bool isIgnored = userListItem.Role == UserRole.Ignored;
+
+            if(isIgnored)
+            {
+                SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
+                Helpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+            }
+            else
+            {
+                SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
+                Helpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                Helpers.AddGivePrivilegesIfApplicable(menu, -1);
+            }
+        }
     }
 
 
     public class UserRowView : RelativeLayout
     {
+        public UserListItem BoundItem;
+
         public UserRowViewHolder ViewHolder;
         public UserListActivity UserListActivity = null;
-        private TextView viewUsername;
+        public TextView viewUsername;
         public ImageView viewUserStatus;
         public ImageView viewMoreOptions;
+        public TextView viewNumFiles;
+        public TextView viewSpeed;
+        public TextView viewNote;
+
+        public ViewGroup viewNoteLayout;
+        public ViewGroup viewStatsLayout;
+
         //private TextView viewQueue;
         public UserRowView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -562,7 +647,13 @@ namespace AndriodApp1
         {
             viewUsername = FindViewById<TextView>(Resource.Id.textViewUser);
             viewUserStatus = FindViewById<ImageView>(Resource.Id.userStatus);
-            viewMoreOptions = FindViewById<ImageView>(Resource.Id.options);
+            viewNumFiles = FindViewById<TextView>(Resource.Id.numFiles);
+            viewSpeed = FindViewById<TextView>(Resource.Id.speed);
+            viewNote = FindViewById<TextView>(Resource.Id.textViewNote);
+
+            viewNoteLayout = FindViewById<ViewGroup>(Resource.Id.noteLayout);
+            viewStatsLayout = FindViewById<ViewGroup>(Resource.Id.statsLayout);
+            //viewMoreOptions = FindViewById<ImageView>(Resource.Id.options);
         }
 
         public void ViewUserStatus_Click(object sender, EventArgs e)
@@ -572,9 +663,31 @@ namespace AndriodApp1
 
         public void setItem(UserListItem item)
         {
+            BoundItem = item;
             viewUsername.Text = item.Username;
             try
             {
+                if(item.Role == UserRole.Ignored)
+                {
+                    viewStatsLayout.Visibility = ViewStates.Gone;
+                }
+                else
+                {
+                    viewStatsLayout.Visibility = ViewStates.Visible;
+                }
+
+                if(SoulSeekState.UserNotes.ContainsKey(item.Username))
+                {
+                    viewNoteLayout.Visibility = ViewStates.Visible;
+                    string note = null;
+                    SoulSeekState.UserNotes.TryGetValue(item.Username, out note);
+                    viewNote.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.note) + ": " + note;
+                }
+                else
+                {
+                    viewNoteLayout.Visibility = ViewStates.Gone;
+                }
+
                 //both item.UserStatus and item.UserData have status
                 bool statusExists = false;
                 Soulseek.UserPresence status = Soulseek.UserPresence.Away;
@@ -589,7 +702,20 @@ namespace AndriodApp1
                     status = item.UserData.Status;
                 }
 
-                if(statusExists)
+
+                if(item.Role == UserRole.Ignored)
+                {
+                    string ignoredString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignored);
+                    if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                    {
+                        viewUserStatus.TooltipText = ignoredString; //api26+ otherwise crash...
+                    }
+                    else
+                    {
+                        AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(viewUserStatus, ignoredString);
+                    }
+                }
+                else if (statusExists)
                 {
                     var drawable = DrawableCompat.Wrap(viewUserStatus.Drawable);
                     var mutableDrawable = drawable.Mutate();
@@ -633,9 +759,32 @@ namespace AndriodApp1
                             break;
                     }
                 }
-                
-            //viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
-            //viewSpeed.Text = (item.UploadSpeed / 1024).ToString(); //kb/s
+
+
+                //int fCount=-1;
+                //int speed = -1;
+
+                bool userDataExists = false;
+                if (item.UserData != null)
+                {
+                    userDataExists = true;
+                    //fCount = item.UserData.FileCount;
+                    //speed = item.UserData.AverageSpeed;
+                }
+
+                if(userDataExists)
+                {
+                    viewNumFiles.Text = item.UserData.FileCount.ToString("N0") + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.files);
+                    viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SeekerApplication.STRINGS_KBS;
+                }
+                else
+                {
+                    viewNumFiles.Text = "-";
+                    viewSpeed.Text = "-";
+                }
+
+                //viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
+                //viewSpeed.Text = (item.UploadSpeed / 1024).ToString(); //kb/s
             }
             catch (Exception e)
             {

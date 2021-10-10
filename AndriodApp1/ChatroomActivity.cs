@@ -3835,7 +3835,7 @@ namespace AndriodApp1
             menu.Add(1, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user));
             menu.Add(1, 4, 4, SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_user_files));
             Helpers.AddAddRemoveUserMenuItem(menu, 1, 5, 5, roomUserItemView.DataItem.Username, true);
-            menu.Add(1, 6, 6, SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user));
+            Helpers.AddIgnoreUnignoreUserMenuItem(menu, 1, 6, 6, roomUserItemView.DataItem.Username);
             menu.Add(1, 7, 7, SoulSeekState.ActiveActivityRef.GetString(Resource.String.msg_user));
             Helpers.AddUserNoteMenuItem(menu, 1, 8, 8, roomUserItemView.DataItem.Username);
 

@@ -1,49 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:id = "@+id/relativeLayout1"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width = "fill_parent"
     android:background = "@drawable/header_cell_shape_bottom"
     android:layout_height = "wrap_content"
-    
-    >
 
+  android:paddingLeft="6dp"
+    android:paddingBottom="4dp"
+    >
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content">
           <ImageView
-                android:layout_marginTop = "8dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginBottom = "8dp"
-                android:layout_width="wrap_content"
+
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+      
+      android:layout_weight = "2"
+
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                app:srcCompat="@drawable/ic_full_circle_24dp"
+                app:srcCompat="@drawable/checkbox_blank_circle"
                 android:id="@+id/userStatus"
                 android:tint="@color/mainTextColor"
                 />
 
-    <TextView
-        android:id = "@+id/textViewUser"
-        android:layout_width = "0dp"
-        android:layout_height = "match_parent"
-        android:layout_weight = "3"
-        android:paddingLeft="10dp"
-        android:gravity="center_vertical"
-        android:textColor="@color/cellTextColor"
-        android:ellipsize = "end"
-        android:text = "2"
-        android:textSize="22dp"
-        android:singleLine = "true" />
+        <TextView
+            android:id = "@+id/textViewUser"
+            android:layout_width = "0dp"
+            android:layout_height = "match_parent"
+            android:layout_weight = "16"
 
-           <ImageView
-        android:layout_marginTop = "4dp"
-         android:layout_marginBottom = "4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-android:gravity="center_vertical"                
-        app:srcCompat="@drawable/ic_more_vert_white_vector_32dp"
-                android:id="@+id/options"
-                android:tint="@color/mainTextColor"
-                />
+            android:gravity="center_vertical"
+            android:textColor="@color/cellTextColor"
+            android:ellipsize = "end"
+            android:text = "2"
+            android:textSize="22dp"
+            android:singleLine = "true" />
 
+     <!--          <ImageView
+            android:layout_marginTop = "4dp"
+             android:layout_marginBottom = "4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+    android:gravity="center_vertical"                
+            app:srcCompat="@drawable/ic_more_vert_white_vector_32dp"
+                    android:id="@+id/options"
+                    android:tint="@color/mainTextColor"
+                    />-->
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+    android:id = "@+id/statsLayout"
+        android:layout_height="wrap_content">
+                <FrameLayout
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="match_parent"/>
+                <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:id="@+id/numFiles"
+            android:text="filesDummy"
+            android:textSize="14sp"
+            />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:id="@+id/speed"
+            android:text="speedDummy"
+            android:textSize="14sp"
+            />
+                <FrameLayout
+            android:layout_width="0dp"
+            android:layout_weight="4"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:id = "@+id/noteLayout"
+        android:layout_height="wrap_content">                
+            <FrameLayout
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="match_parent"/>
+                <TextView
+            android:id = "@+id/textViewNote"
+            android:layout_width = "0dp"
+            android:layout_height = "match_parent"
+            android:layout_weight = "16"
+            android:gravity="center_vertical"
+            
+            android:ellipsize = "end"
+            android:text = "Note: dummy testing testing testing testing testing testing testing testing"
+            android:textSize="14sp"
+            android:singleLine = "true" />
+
+    </LinearLayout>
 </LinearLayout>
