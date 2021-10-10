@@ -353,7 +353,7 @@ namespace AndriodApp1
         }
 
 
-        private void CheckStatus_Click(object sender, EventArgs e) //TODO: helper with optional arg "tryHttps" for when failure. and show toast if both fail.. rather than crash.. and log the url..  A web browser is required to handle this request.
+        private void CheckStatus_Click(object sender, EventArgs e)
         {
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
             Helpers.ViewUri(uri,this);

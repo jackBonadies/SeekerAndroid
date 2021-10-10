@@ -3573,7 +3573,7 @@ namespace AndriodApp1
                     //go to search tab instead (there is always one)
                     string listOfKeys2 = System.String.Join(",",SearchTabHelper.SearchTabCollection.Keys);
                     MainActivity.LogInfoFirebase("list of Keys: " + listOfKeys2);
-                    int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key=>key>=0).First(); //TODO: no elements
+                    int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key=>key>=0).First();
                     SearchFragment.Instance.GoToTab(tabToGoTo, true);
                 }
                 else
@@ -5856,24 +5856,22 @@ namespace AndriodApp1
             //                else
             //                {
             //                    progressBar.ProgressDrawable.SetColorFilter(Color.Red, PorterDuff.Mode.Multiply);
+            //#pragma warning restore 0618
+            //            }
+            //            else
+            //            {
+            //#pragma warning disable 0618
+            //                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            //                {
+            //                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
+            //                }
+            //                else
+            //                {
+            //                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
+            //                }
+            //#pragma warning restore 0618
+            //            }
         }
-        //#pragma warning restore 0618
-        //            }
-        //            else
-        //            {
-        //#pragma warning disable 0618
-        //                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-        //                {
-        //                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
-        //                }
-        //                else
-        //                {
-        //                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
-        //                }
-        //#pragma warning restore 0618
-        //            }
-    }
-
         private void refreshListViewSpecificItem(int indexOfItem)
         {
             //creating the TransferAdapter can cause a Collection was Modified error due to transferItems.

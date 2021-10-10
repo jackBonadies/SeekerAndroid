@@ -1205,6 +1205,8 @@ namespace AndriodApp1
             }
         }
 
+
+
         /// <summary>
         /// Add To User List and save user list to shared prefs.  false if already added
         /// </summary>
@@ -1230,6 +1232,18 @@ namespace AndriodApp1
                 editor.Commit();
             }
             return true;
+        }
+
+        public static void RemoveFromIgnoreListFeedback(Context c, string username)
+        {
+            if (RemoveFromIgnoreList(username))
+            {
+                Toast.MakeText(c, string.Format(c.GetString(Resource.String.removed_user_from_ignored_list), username), ToastLength.Short).Show();
+            }
+            else
+            {
+                //Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short).Show();
+            }
         }
 
         /// <summary>
@@ -3599,6 +3613,13 @@ namespace AndriodApp1
                     //this is the normal case..
                     var item = new UserListItem(userData.Username);
                     item.UserData = userData;
+                    
+                    //if added an ignored user, then unignore the user.  the two are mutually exclusive.....
+                    if(SeekerApplication.IsUserInIgnoreList(userData.Username))
+                    {
+                        SeekerApplication.RemoveFromIgnoreList(userData.Username);
+                    }
+
                     SoulSeekState.UserList.Add(item);
                     return false;
                 }
@@ -6523,6 +6544,7 @@ namespace AndriodApp1
             SetAddRemoveTitle(menuItem, username);
         }
 
+
         public static void AddAddRemoveUserMenuItem(IMenu menu, int i, int j, int k, string username, bool full_title = false)
         {
             string title = null;
@@ -6547,6 +6569,32 @@ namespace AndriodApp1
                 {
                     title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user);
                 }
+            }
+            if (i != -1)
+            {
+                menu.Add(i, j, k, title);
+            }
+            else
+            {
+                menu.Add(title);
+            }
+        }
+
+        public static void AddIgnoreUnignoreUserMenuItem(IMenu menu, int i, int j, int k, string username)
+        {
+            //ignored and added are mutually exclusive.  you cannot have a user be both ignored and added.
+            if (MainActivity.UserListContainsUser(username))
+            {
+                return;
+            }
+            string title = null;
+            if (!SeekerApplication.IsUserInIgnoreList(username))
+            {
+                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user);
+            }
+            else
+            {
+                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored);
             }
             if (i != -1)
             {
@@ -6586,6 +6634,12 @@ namespace AndriodApp1
             if(contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
                 SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                return true;
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
+            {
+                SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
                 return true;
             }

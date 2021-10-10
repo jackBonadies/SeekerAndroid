@@ -595,5 +595,8 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 ]]>
   </string>
   <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
+    <string name="note">Note</string>
+      <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
+
 
 </resources>
