@@ -251,6 +251,7 @@ func main() {
 		}
 
 		if insignificant {
+			log.Println("There were no significant changes, exiting")
 			os.Exit(2)
 		}
 	}

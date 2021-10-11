@@ -1,8 +1,7 @@
 #!/bin/bash
 
 cd metascoop
-go run main.go -ap=../apps.yaml -rd=../fdroid/repo -pat="$GH_ACCESS_TOKEN"
-EXIT_CODE=$?
+go run main.go -ap=../apps.yaml -rd=../fdroid/repo -pat="$GH_ACCESS_TOKEN" || EXIT_CODE=$? || true
 cd ..
 
 set -e
