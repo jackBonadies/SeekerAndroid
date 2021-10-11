@@ -1,15 +1,18 @@
 #!/bin/bash
 
 cd metascoop
-go run main.go -ap=../apps.yaml -rd=../fdroid/repo -pat="$GH_ACCESS_TOKEN" || EXIT_CODE=$? || true
+go run main.go -ap=../apps.yaml -rd=../fdroid/repo -pat="$GH_ACCESS_TOKEN" $1
+EXIT_CODE=$?
 cd ..
+
+echo "Scoop had an exit code of $EXIT_CODE"
 
 set -e
 
-if test $EXIT_CODE -eq 2; then
+if [ $EXIT_CODE -eq 2 ]; then
     # Exit code 2 means that there were no significant changes
     exit 0
-elif test $EXIT_CODE -eq 0; then
+elif [ $EXIT_CODE -eq 0 ]; then
     # Exit code 0 means that we can commit everything & push
 
     git config --global user.name 'github-actions'

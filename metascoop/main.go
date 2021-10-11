@@ -235,7 +235,7 @@ func main() {
 		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
 	}
 
-	if !apps.HasSignificandChanges(initialFdroidIndex, fdroidIndex) {
+	if !apps.HasSignificantChanges(initialFdroidIndex, fdroidIndex) {
 		changedFiles, err := git.GetChangedFileNames(*repoDir)
 		if err != nil {
 			log.Fatalf("getting changed files: %s\n", err.Error())
