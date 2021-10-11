@@ -255,6 +255,10 @@ func main() {
 			return nil
 		}
 
+		screenshotsPath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "images")
+
+		_ = os.RemoveAll(screenshotsPath)
+
 		var sccounter int = 1
 		for _, sc := range metadata.Screenshots {
 			var ext = filepath.Ext(sc)
@@ -262,8 +266,7 @@ func main() {
 				continue
 			}
 
-			var newFilePath = filepath.Join(walkPath, latestPackage.PackageName,
-				"en-US", "images", fmt.Sprintf("%d%s", sccounter, ext))
+			var newFilePath = filepath.Join(screenshotsPath, fmt.Sprintf("%d%s", sccounter, ext))
 
 			err = os.MkdirAll(filepath.Dir(newFilePath), os.ModePerm)
 			if err != nil {
