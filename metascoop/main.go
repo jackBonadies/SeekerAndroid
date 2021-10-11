@@ -148,7 +148,7 @@ func main() {
 	if !*debugMode {
 		fmt.Println("::group::F-Droid: Creating metadata stubs")
 		// Now, we run the fdroid update command
-		cmd := exec.Command("fdroid", "update", "-c")
+		cmd := exec.Command("fdroid", "update", "--create-metadata", "--use-date-from-apk", "--delete-unknown")
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
@@ -238,7 +238,7 @@ func main() {
 		fmt.Println("::group::F-Droid: Reading updated metadata")
 
 		// Now, we run the fdroid update command again to regenerate the index with our new metadata
-		cmd := exec.Command("fdroid", "update")
+		cmd := exec.Command("fdroid", "update", "--use-date-from-apk", "--delete-unknown")
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
