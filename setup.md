@@ -1,12 +1,17 @@
 ### Set up for you own apps
 This guide will show you how to set up an F-Droid repo with this tool. It makes some assumptions you need to know about:
-* You use GitHub to host your app repository
-* You create GitHub releases for your app that contain exactly one artifact with an `.apk` suffix
-  * My recommendation is to create a GitHub Actions workflow in your app repo that builds & signs your APK, then publishes it as a release (maybe as a draft release so you have more control). If you want to see how I did it with a Flutter app, go [here](https://github.com/xarantolus/notality/blob/main/.github/workflows/android_build.yml) 
-* Your release tag names are something like `v1.2.3` (not a hard requirement, but recommended)
+* You use GitHub to host the repositories of your app(s)
+* You create GitHub releases for your app(s) that contain exactly one artifact with an `.apk` suffix
+  * My recommendation is to create a GitHub Actions workflow in your app repo that builds & signs your APK, then publishes it as a release (maybe as a draft release so you have more control). If you want to see how I did it with a Flutter app, go [here](https://github.com/xarantolus/notality/blob/main/.github/workflows/android_build.yml).
+* Your release tag names are something like `v1.2.3` (recommended, but should work anyways regardless)
+
+This tool does not build your apps from source. It assumes that the build process runs in the application's repository.
+
+When building/releasing a new version of your app, you need to make sure that you update not only the `versionName`, but also the `versionCode`. It seems like the latter is preferred by F-Droid for comparing versions. 
+* In Flutter, you have something like `version: 1.2.3+4` in your `pubspec.yaml` file. The `1.2.3` is the `versionName`, the `versionCode` is after the `+`, so `4` in this case. You should update both for F-Droid to recognize an update.
 
 ### Install & initialize your F-Droid repository
-1. First of all, clone this repository and delete everything from the `fdroid` directory. This deletes my repo files; you can now use it for your own apps.
+1. First of all, clone this repository and delete everything from the `fdroid` directory. This deletes my repo files; you can now use it for your own apps. If you want to reduce the size of the repository, you can also delete the `.git` directory, then `git init` again (you need to force-push/create a new repo after that). 
 
 2. Now you can [install the F-Droid server tools](https://f-droid.org/en/docs/Installing_the_Server_and_Repo_Tools/) by running the following:
 
