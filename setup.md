@@ -80,6 +80,21 @@ another_app:
 
 If the repository has APK releases, they should be imported into this repo the next time GitHub Actions run.
 
+### Metadata and screenshots
+Metadata can be added in two places: the `apps.yaml` file and the app repositories.
+
+#### Metadata file
+**Description**: As described in [Add a new app](#add-a-new-app), you can set a git URL and a description in the `apps.yaml` file
+
+#### Metadata from the repository
+**Screenshots**: This tool will make any file from the git repository for which the path contains `screenshot` available as screenshot. Basically, if you run `find .  -type f | grep -i screenshot` in your app repo you should find all files that will be used.
+
+**Changelog**: To display a "what's new" changelog in F-Droid, you just need to fill out the body/text of the GitHub release.
+
+**License**: The License `spdx_id` given by GitHub. Make sure GitHub recognizes the license type of your app. 
+
+**Tag line**: The tag line of the app shown in F-Droid is the same text as the repository description on GitHub.
+
 ### Repository URL
 When you link to your repository, you can also add the fingerprint to the URL.
 To get the fingerprint, you need to look at the `fdroid` command output (or search for the following lines in GitHub Actions):
