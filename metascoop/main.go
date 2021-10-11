@@ -113,9 +113,11 @@ func main() {
 
 				appName := apps.GenerateReleaseFilename(app.Name(), *release.TagName)
 
-				app.ReleaseDescription = release.GetBody()
+				appClone := app
 
-				apkInfoMap[appName] = app
+				appClone.ReleaseDescription = release.GetBody()
+
+				apkInfoMap[appName] = appClone
 
 				appTargetPath := filepath.Join(*repoDir, appName)
 
@@ -257,7 +259,6 @@ func main() {
 		fmt.Println("::group::F-Droid: Reading updated metadata")
 
 		// Now, we run the fdroid update command again to regenerate the index with our new metadata
-		// fdroid update --use-date-from-apk --delete-unknown
 		cmd := exec.Command("fdroid", "update", "--delete-unknown")
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
