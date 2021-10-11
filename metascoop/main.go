@@ -255,7 +255,7 @@ func main() {
 			return nil
 		}
 
-		screenshotsPath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "graphics", "phone-screenshots")
+		screenshotsPath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "phoneScreenshots")
 
 		_ = os.RemoveAll(screenshotsPath)
 
