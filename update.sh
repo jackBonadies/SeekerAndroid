@@ -1,7 +1,11 @@
 #!/bin/bash
 
 cd metascoop
-go run main.go -ap=../apps.yaml -rd=../fdroid/repo -pat="$GH_ACCESS_TOKEN" $1
+echo "Building metascoop executable"
+go build -o metascoop
+
+echo "Running metascoop"
+./metascoop -ap=../apps.yaml -rd=../fdroid/repo -pat="$GH_ACCESS_TOKEN" $1
 EXIT_CODE=$?
 cd ..
 
