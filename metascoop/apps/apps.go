@@ -21,6 +21,8 @@ type AppInfo struct {
 
 	Description string `yaml:"description"`
 
+	ReleaseDescription string
+
 	License string
 }
 

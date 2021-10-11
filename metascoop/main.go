@@ -113,6 +113,8 @@ func main() {
 
 				appName := apps.GenerateReleaseFilename(app.Name(), *release.TagName)
 
+				app.ReleaseDescription = release.GetBody()
+
 				apkInfoMap[appName] = app
 
 				appTargetPath := filepath.Join(*repoDir, appName)
@@ -141,6 +143,7 @@ func main() {
 				}
 
 				log.Printf("Successfully downloaded %q", appTargetPath)
+
 			}
 		}()
 	}
@@ -219,6 +222,22 @@ func main() {
 		if err != nil {
 			log.Printf("Writing meta file %q: %s", path, err.Error())
 			return nil
+		}
+
+		if apkInfo.ReleaseDescription != "" {
+			destFilePath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "changelogs", fmt.Sprintf("%d.txt", latestPackage.VersionCode))
+
+			err = os.MkdirAll(filepath.Dir(destFilePath), os.ModePerm)
+			if err != nil {
+				log.Printf("Creating directory for changelog file %q: %s", destFilePath, err.Error())
+				return err
+			}
+
+			err = os.WriteFile(destFilePath, []byte(apkInfo.ReleaseDescription), os.ModePerm)
+			if err != nil {
+				log.Printf("Writing changelog file %q: %s", destFilePath, err.Error())
+				return err
+			}
 		}
 
 		log.Printf("Updated metadata file %q", path)
