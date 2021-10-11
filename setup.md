@@ -75,3 +75,19 @@ another_app:
 
 If the repository has APK releases, they should be imported into this repo the next time GitHub Actions run.
 
+### Repository URL
+When you link to your repository, you can also add the fingerprint to the URL.
+To get the fingerprint, you need to look at the `fdroid` command output (or search for the following lines in GitHub Actions):
+
+    2021-10-11 06:01:21,726 INFO: Creating signed index with this key (SHA256):
+    2021-10-11 06:01:21,726 INFO: 08 08 98 AE 43 09 AE CE B5 89 15 E4 3A 4B 7C 4A 3E 2C DA 40 C9 17 38 E2 C0 2F 58 33 9A B2 FB D7
+
+Just remove all spaces from after "INFO" in the second line and you'll end up with your fingerprint:
+
+    080898AE4309AECEB58915E43A4B7C4A3E2CDA40C91738E2C02F58339AB2FBD7
+
+Now add it to your repo URL (add a `?fingerprint=`, then your key): 
+
+    https://raw.githubusercontent.com/xarantolus/fdroid/main/fdroid/repo?fingerprint=080898AE4309AECEB58915E43A4B7C4A3E2CDA40C91738E2C02F58339AB2FBD7
+
+You should of course replace the username in the URL. This is the URL your users should add to the F-Droid client. You can also generate a QR code for this URL.
