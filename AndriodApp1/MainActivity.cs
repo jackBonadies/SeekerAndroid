@@ -921,6 +921,9 @@ namespace AndriodApp1
                 //SoulSeekState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
                 SoulSeekState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
+                SoulSeekState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
+                SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged; ;
+
                 SoulSeekState.SoulseekClient.Connected += SoulseekClient_Connected;
                 SoulSeekState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
                 SoulSeekState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
@@ -947,6 +950,194 @@ namespace AndriodApp1
             //shouldnt we also connect??? TODO TODO
 
 
+        }
+
+        public class ProgressUpdatedUI : EventArgs
+        {
+            public ProgressUpdatedUI(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete)
+            {
+                ti=_ti;
+                wasFailed=_wasFailed;
+                fullRefresh=_fullRefresh;
+                percentComplete = _percentComplete;
+            }
+            public TransferItem ti;
+            public bool wasFailed;
+            public bool fullRefresh;
+            public double percentComplete;
+        }
+
+        public static EventHandler<int> StateChangedAtIndex;
+        public static EventHandler<ProgressUpdatedUI> ProgressUpdated;
+
+        private void SoulseekClient_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
+        {
+            try
+            {
+                MainActivity.KeepAliveInactivityKillTimer.Stop();
+                MainActivity.KeepAliveInactivityKillTimer.Start();
+            }
+            catch (System.Exception err)
+            {
+                MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
+            }
+            int indexOfItem = -1;
+            TransferItem relevantItem = TransfersFragment.GetTransferItemByFileName(e.Transfer?.Filename, out indexOfItem);
+            if (relevantItem != null)
+            {
+                relevantItem.State = e.Transfer.State;
+            }
+            if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut))
+            {
+                if(relevantItem == null)
+                {
+                    return;
+                }
+                relevantItem.Failed = true;
+                StateChangedAtIndex?.Invoke(null, indexOfItem);
+            }
+            else if (e.Transfer.State.HasFlag(TransferStates.Queued))
+            {
+                if (relevantItem == null)
+                {
+                    return;
+                }
+                relevantItem.Queued = true;
+                if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
+                {
+                    //nothing to do, bc its already set..
+                    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                }
+                else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
+                {
+                    //GET QUEUE LENGTH AND UPDATE...
+                    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                }
+                StateChangedAtIndex?.Invoke(null, indexOfItem);
+            }
+            else if (e.Transfer.State.HasFlag(TransferStates.Initializing))
+            {
+                if (relevantItem == null)
+                {
+                    return;
+                }
+                //clear queued flag...
+                relevantItem.Queued = false;
+                relevantItem.QueueLength = 0;
+                StateChangedAtIndex?.Invoke(null, indexOfItem);
+            }
+            else if (e.Transfer.State.HasFlag(TransferStates.Completed))
+            {
+                if (relevantItem == null)
+                {
+                    return;
+                }
+                if (!e.Transfer.State.HasFlag(TransferStates.Cancelled))
+                {
+                    //clear queued flag...
+                    relevantItem.Progress = 100;
+                    StateChangedAtIndex?.Invoke(null, indexOfItem);
+                }
+            }
+            else
+            {
+                StateChangedAtIndex?.Invoke(null, indexOfItem);
+            }
+        }
+
+        private void SoulseekClient_TransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
+        {
+            //Its possible to get a nullref here IF the system orientation changes..
+            //throttle this maybe...
+
+            //MainActivity.LogDebug("TRANSFER PROGRESS UPDATED"); //this typically happens once every 10 ms or even less and thats in debug mode.  in fact sometimes it happens 4 times in 1 ms.
+            try
+            {
+                MainActivity.KeepAliveInactivityKillTimer.Stop(); //lot of nullref here...
+                MainActivity.KeepAliveInactivityKillTimer.Start();
+            }
+            catch (System.Exception err)
+            {
+                MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
+            }
+            TransferItem relevantItem = null;
+            if (TransfersFragment.transferItems == null)
+            {
+                MainActivity.LogDebug("transferItems Null " + e.Transfer.Filename);
+                return;
+            }
+            lock (TransfersFragment.transferItems)
+            {
+                foreach (TransferItem item in TransfersFragment.transferItems) //THIS is where those enumeration exceptions are all coming from...
+                {
+                    if (item.FullFilename.Equals(e.Transfer.Filename))
+                    {
+                        relevantItem = item;
+                        break;
+                    }
+                }
+            }
+
+
+            if (relevantItem == null)
+            {
+                //this happens on Clear and Cancel All.
+                MainActivity.LogDebug("Relevant Item Null " + e.Transfer.Filename);
+                MainActivity.LogDebug("transferItems.Count " + TransfersFragment.transferItems.Count);
+                return;
+            }
+            else
+            {
+                bool fullRefresh = false;
+                double percentComplete = e.Transfer.PercentComplete;
+                relevantItem.Progress = (int)percentComplete;
+                relevantItem.RemainingTime = e.Transfer.RemainingTime;
+
+
+
+
+                // int indexRemoved = -1;
+                if (SoulSeekState.AutoClearComplete && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear
+                {
+
+                    Action action = new Action(() => {
+                        int before = TransfersFragment.transferItems.Count;
+                        lock (TransfersFragment.transferItems)
+                        {
+                            //used to occur on nonUI thread.  Im pretty sure this causes the recyclerview inconsistency crash..
+                            //indexRemoved = transferItems.IndexOf(relevantItem);
+                            TransfersFragment.transferItems.Remove(relevantItem); //TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt
+                        }
+                        int after = TransfersFragment.transferItems.Count;
+                        MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
+                    });
+                    if (SoulSeekState.ActiveActivityRef != null)
+                    {
+                        SoulSeekState.ActiveActivityRef?.RunOnUiThread(action);
+                    }
+
+                    fullRefresh = true;
+                }
+                else if (System.Math.Abs(percentComplete - 100) < .001)
+                {
+                    fullRefresh = true;
+                }
+
+                bool wasFailed = false;
+                if (percentComplete != 0)
+                {
+                    wasFailed = false;
+                    if (relevantItem.Failed)
+                    {
+                        wasFailed = true;
+                        relevantItem.Failed = false;
+                    }
+
+                }
+
+                ProgressUpdated?.Invoke(null,new ProgressUpdatedUI(relevantItem,wasFailed,fullRefresh, percentComplete));
+
+            }
         }
 
         public static string GetVersionString()
