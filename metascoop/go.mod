@@ -15,6 +15,8 @@ require (
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/r3labs/diff/v2 v2.14.0 // indirect
+	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	golang.org/x/net v0.0.0-20211008194852-3b03d305991f // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

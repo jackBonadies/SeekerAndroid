@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"metascoop/apps"
+	"metascoop/git"
 	"net/http"
 	"os"
 	"os/exec"
@@ -25,6 +26,8 @@ func main() {
 		appsFilePath = flag.String("ap", "apps.yaml", "Path to apps.yaml file")
 		repoDir      = flag.String("rd", "fdroid/repo", "Path to fdroid \"repo\" directory")
 		accessToken  = flag.String("pat", "", "GitHub personal access token")
+
+		debugMode = flag.Bool("debug", false, "Debug mode won't run the fdroid command")
 	)
 	flag.Parse()
 
@@ -44,6 +47,13 @@ func main() {
 	githubClient := github.NewClient(authenticatedClient)
 
 	var haveError bool
+
+	fdroidIndexFilePath := filepath.Join(*repoDir, "index-v1.json")
+
+	initialFdroidIndex, err := apps.ReadIndex(fdroidIndexFilePath)
+	if err != nil {
+		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
+	}
 
 	err = os.MkdirAll(*repoDir, 0o644)
 	if err != nil {
@@ -128,22 +138,21 @@ func main() {
 	}
 	log.SetPrefix("")
 
-	// Now, we run the fdroid update command
-	cmd := exec.Command("fdroid", "update", "-c")
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Dir = filepath.Dir(*repoDir)
-
-	err = cmd.Run()
-	if err != nil {
-		log.Println("Error while running \"fdroid update -c\":", err.Error())
-		os.Exit(1)
+	if !*debugMode {
+		// Now, we run the fdroid update command
+		cmd := exec.Command("fdroid", "update", "-c")
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Dir = filepath.Dir(*repoDir)
+		err = cmd.Run()
+		if err != nil {
+			log.Println("Error while running \"fdroid update -c\":", err.Error())
+			os.Exit(1)
+		}
 	}
 
-	indexFilePath := filepath.Join(*repoDir, "index-v1.json")
-
-	fdroidIndex, err := apps.ReadIndex(indexFilePath)
+	fdroidIndex, err := apps.ReadIndex(fdroidIndexFilePath)
 	if err != nil {
 		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
 	}
@@ -205,17 +214,45 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Now, we run the fdroid update command again to regenerate the index with our new metadata
-	cmd = exec.Command("fdroid", "update")
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	cmd.Dir = filepath.Dir(*repoDir)
+	if !*debugMode {
+		// Now, we run the fdroid update command again to regenerate the index with our new metadata
+		cmd := exec.Command("fdroid", "update")
+		cmd.Stderr = os.Stderr
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Dir = filepath.Dir(*repoDir)
 
-	err = cmd.Run()
+		err = cmd.Run()
+		if err != nil {
+			log.Println("Error while running \"fdroid update -c\":", err.Error())
+			os.Exit(1)
+		}
+	}
+
+	// Now at the end, we read the index again
+	fdroidIndex, err = apps.ReadIndex(fdroidIndexFilePath)
 	if err != nil {
-		log.Println("Error while running \"fdroid update -c\":", err.Error())
-		os.Exit(1)
+		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
+	}
+
+	if !apps.HasSignificandChanges(initialFdroidIndex, fdroidIndex) {
+		changedFiles, err := git.GetChangedFileNames(*repoDir)
+		if err != nil {
+			log.Fatalf("getting changed files: %s\n", err.Error())
+		}
+
+		// If only the index files changed, we ignore the commit
+		var insignificant = true
+		for _, fname := range changedFiles {
+			if !strings.Contains(fname, "index") {
+				insignificant = false
+				break
+			}
+		}
+
+		if insignificant {
+			os.Exit(2)
+		}
 	}
 
 	if haveError {

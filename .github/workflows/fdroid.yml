@@ -33,16 +33,8 @@ jobs:
         name: Set up Go
         with:
           go-version: '^1.17.0' 
-
-      - name: Download new apps & update existing ones
-        run: go run main.go -ap=../apps.yaml -rd=../fdroid/repo -pat="${{ secrets.GH_ACCESS_TOKEN }}"
-        working-directory: metascoop
-
-      - name: Commit all changes
-        run: | 
-          git config --global user.name 'github-actions'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          git add fdroid
-          git commit -m"Automated update" || true
-          git push
+        
+      - name: Run update script
+        run: bash update.sh
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}

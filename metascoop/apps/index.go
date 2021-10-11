@@ -3,9 +3,12 @@ package apps
 import (
 	"encoding/json"
 	"os"
+	"reflect"
 	"sort"
+	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/r3labs/diff/v2"
 )
 
 type RepoIndex struct {
@@ -70,4 +73,35 @@ func ReadIndex(path string) (index *RepoIndex, err error) {
 	err = json.NewDecoder(f).Decode(&index)
 
 	return
+}
+
+func HasSignificandChanges(old, new *RepoIndex) bool {
+	changelog, err := diff.Diff(old, new)
+	if err != nil {
+		panic("diffing fdroid index structs: " + err.Error())
+	}
+
+	for _, change := range changelog {
+		if change.Type != diff.UPDATE {
+			return true
+		}
+
+		var isIgnoredChange = false
+
+		// Fdroid seems to update the "added" timestamp of apps every time we run the command
+		if len(change.Path) > 0 && (strings.EqualFold(change.Path[len(change.Path)-1], "added") || strings.EqualFold(change.Path[len(change.Path)-1], "lastUpdated")) {
+			isIgnoredChange = true
+		}
+
+		// Also it updates the repo timestamp
+		if reflect.DeepEqual(change.Path, []string{"Repo", "timestamp"}) {
+			isIgnoredChange = true
+		}
+
+		if !isIgnoredChange {
+			return true
+		}
+	}
+
+	return false
 }
