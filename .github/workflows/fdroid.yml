@@ -40,6 +40,6 @@ jobs:
           go-version: '^1.17.0' 
         
       - name: Run update script
-        run: bash update.sh
+        run: bash update.sh 2>&1
         env:
           GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
