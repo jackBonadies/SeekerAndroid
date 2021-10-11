@@ -177,6 +177,9 @@ func main() {
 		log.Fatalf("reading f-droid repo index: %s\n::endgroup::\n", err.Error())
 	}
 
+	// directory paths that should be removed after updating metadata
+	var toRemovePaths []string
+
 	walkPath := filepath.Join(filepath.Dir(*repoDir), "metadata")
 	err = filepath.WalkDir(walkPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".yml") {
@@ -283,6 +286,8 @@ func main() {
 			sccounter++
 		}
 
+		toRemovePaths = append(toRemovePaths, screenshotsPath)
+
 		log.Printf("Updated metadata file %q", path)
 
 		return nil
@@ -322,6 +327,15 @@ func main() {
 	fdroidIndex, err = apps.ReadIndex(fdroidIndexFilePath)
 	if err != nil {
 		log.Fatalf("reading f-droid repo index: %s\n::endgroup::\n", err.Error())
+	}
+
+	// Now we can remove all paths that were marked for doing so
+
+	for _, rmpath := range toRemovePaths {
+		err = os.RemoveAll(rmpath)
+		if err != nil {
+			log.Fatalf("removing path %q: %s\n", rmpath, err.Error())
+		}
 	}
 
 	if !apps.HasSignificantChanges(initialFdroidIndex, fdroidIndex) {
