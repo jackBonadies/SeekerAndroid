@@ -5152,6 +5152,7 @@ namespace AndriodApp1
                 try
                 {
                     Android.Net.Uri incompleteUri = null;
+                    SetupCancellationToken(item,cancellationTokenSource);
                     Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.Size, cancellationTokenSource);
                     task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource,item.QueueLength,0))));
                 }
@@ -5234,7 +5235,14 @@ namespace AndriodApp1
                 MainActivity.LogDebug("transfer is in Downloads !!! " + item1.FullFilename);
                 item1.CancelAndRetryFlag = true;
                 ClearTransferForRetry(item1, position);
-                item1.CancellationTokenSource.Cancel();
+                if(item1.CancellationTokenSource!=null)
+                {
+                    item1.CancellationTokenSource.Cancel();
+                }
+                else
+                {
+                    MainActivity.LogFirebase("CTS is null. this should not happen. we should always set it before downloading.");
+                }
                 return; //the dl continuation method will take care of it....
             }
 
@@ -5244,6 +5252,7 @@ namespace AndriodApp1
             {
 
                 Android.Net.Uri incompleteUri = null;
+                SetupCancellationToken(item1, cancellationTokenSource);
                 Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
                     //SoulSeekState.SoulseekClient.DownloadAsync(
                     //username: item1.Username,
@@ -6183,17 +6192,27 @@ namespace AndriodApp1
             transferItem.Username = e.dlInfo.username;
             transferItem.FullFilename = e.dlInfo.fullFilename;
             transferItem.Size = e.dlInfo.Size;
-            transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
             transferItem.QueueLength = e.dlInfo.QueueLength;
-
             e.dlInfo.TransferItemReference = transferItem;
 
-            if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
+            SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource);
+            //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
+            //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
+            //{
+            //    //likely old already exists so just replace the old one
+            //    CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
+            //}
+            addTransferItemToListView(transferItem); //this is where the enumeration collection modified was thrown.  probably bc UI was also modifying collection.
+        }
+
+        private void SetupCancellationToken(TransferItem transferItem, CancellationTokenSource cts)
+        {
+            transferItem.CancellationTokenSource = cts;
+            if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), cts))
             {
                 //likely old already exists so just replace the old one
-                CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
+                CancellationTokens[ProduceCancellationTokenKey(transferItem)] = cts;
             }
-            addTransferItemToListView(transferItem); //this is where the enumeration collection modified was thrown.  probably bc UI was also modifying collection.
         }
 
         private void addTransferItemToListView(TransferItem ti)

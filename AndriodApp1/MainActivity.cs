@@ -3488,7 +3488,14 @@ namespace AndriodApp1
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     var origString = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body), SeekerApplication.GetVersionString()); //this is a literal CDATA string.
-                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString,Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
+                    if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
+                    {
+                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
+                    }
+                    else
+                    {
+                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString); //this can be slow so do NOT do it in loops...
+                    }
                     ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = (Android.Text.Method.LinkMovementMethod.Instance);
                     return true;
             }
