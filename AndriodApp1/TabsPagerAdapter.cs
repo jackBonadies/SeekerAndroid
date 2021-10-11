@@ -5529,270 +5529,85 @@ namespace AndriodApp1
             return null;
         }
 
-        private void SoulseekClient_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
-        {
-            try
-            {
-                MainActivity.KeepAliveInactivityKillTimer.Stop();
-                MainActivity.KeepAliveInactivityKillTimer.Start();
-            }
-            catch (System.Exception err)
-            {
-                MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
-            }
-            int indexOfItem = -1;
-            TransferItem relevantItem = GetTransferItemByFileName(e.Transfer?.Filename, out indexOfItem);
-            if (relevantItem != null)
-            {
-                relevantItem.State = e.Transfer.State;
-            }
-            if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut))
-            {
+        //private void SoulseekClient_UI_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
+        //{
 
-                //this gets called regardless of UI lifecycle, so I am guessing that this.transferItems is null....
-                //maybe better to make static and independent... bc you should still be able to update an item as failed even if UI is disposed
-                //if(transferItems==null)
-                //{
-                //    MainActivity.LogFirebase(("transferItems is null" + " SoulseekClient_TransferStateChanged"));
-                //    return;
-                //} 
-                if (relevantItem == null)
-                {
-                    return;
-                }
-                else
-                {
-                    relevantItem.Failed = true;
-                    Action action = new Action(()=>{refreshListViewSpecificItem(indexOfItem); });
-                    SoulSeekState.MainActivityRef.RunOnUiThread(action);
-                    //Activity.RunOnUiThread(action); //this is probably the cause of the nullref.  since Activity is null whenever Context is null i.e. onDeattach or not yet attached..
-                }
-            }
-            else if(e.Transfer.State.HasFlag(TransferStates.Queued))
-            {
-                if (relevantItem == null)
-                {
-                    return;
-                }
-                relevantItem.Queued = true;
-                if(relevantItem.QueueLength!=0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
-                {
-                    //nothing to do, bc its already set..
-                    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
-                }
-                else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
-                {
-                    //GET QUEUE LENGTH AND UPDATE...
-                    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename,null);
-                }
-                Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-                SoulSeekState.MainActivityRef.RunOnUiThread(action);
-            }
-            else if(e.Transfer.State.HasFlag(TransferStates.Initializing))
-            {
-                if (relevantItem == null)
-                {
-                    return;
-                }
-                //clear queued flag...
-                relevantItem.Queued = false;
-                relevantItem.QueueLength = 0;
-                Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-                SoulSeekState.MainActivityRef.RunOnUiThread(action);
-            }
-            else if(e.Transfer.State.HasFlag(TransferStates.Completed))
-            {
-                if (relevantItem == null)
-                {
-                    return;
-                }
-                if(!e.Transfer.State.HasFlag(TransferStates.Cancelled))
-                {
-                    //clear queued flag...
-                    relevantItem.Progress = 100;
-                    Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-                    SoulSeekState.MainActivityRef.RunOnUiThread(action);
-                }
-            }
-            else
-            {
-                Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-                SoulSeekState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
+        //    if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut))
+        //    {
 
-        private void SoulseekClient_TransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
-        {
-            //Its possible to get a nullref here IF the system orientation changes..
-            //throttle this maybe...
-
-            //MainActivity.LogDebug("TRANSFER PROGRESS UPDATED"); //this typically happens once every 10 ms or even less and thats in debug mode.  in fact sometimes it happens 4 times in 1 ms.
-            try
-            {
-                MainActivity.KeepAliveInactivityKillTimer.Stop(); //lot of nullref here...
-                MainActivity.KeepAliveInactivityKillTimer.Start();
-            }
-            catch (System.Exception err)
-            {
-                MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
-            }
-            TransferItem relevantItem = null;
-            if (transferItems == null)
-            {
-                MainActivity.LogDebug("transferItems Null " + e.Transfer.Filename);
-                return;
-            }
-            lock (transferItems)
-            {
-                foreach (TransferItem item in transferItems) //THIS is where those enumeration exceptions are all coming from...
-                {
-                    if (item.FullFilename.Equals(e.Transfer.Filename))
-                    {
-                        relevantItem = item;
-                        break;
-                    }
-                }
-            }
-            if (relevantItem == null)
-            {
-                //this happens on Clear and Cancel All.
-                MainActivity.LogDebug("Relevant Item Null " + e.Transfer.Filename);
-                MainActivity.LogDebug("transferItems.Count " + transferItems.Count);
-                return;
-            }
-            else
-            {
-                bool fullRefresh = false;
-                double percentComplete = e.Transfer.PercentComplete;
-                relevantItem.Progress = (int)percentComplete;
-                relevantItem.RemainingTime = e.Transfer.RemainingTime;
-               // int indexRemoved = -1;
-                if (SoulSeekState.AutoClearComplete && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear
-                {
-                    fullRefresh = true;
-                    Action action = new Action(() => {
-                        int before = transferItems.Count;
-                        lock (transferItems)
-                        {
-                            //used to occur on nonUI thread.  Im pretty sure this causes the recyclerview inconsistency crash..
-                            //indexRemoved = transferItems.IndexOf(relevantItem);
-                            transferItems.Remove(relevantItem);
-                        }
-                        int after = transferItems.Count;
-                        MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
-                    });
-                    if(Activity!=null)
-                    {
-                        Activity?.RunOnUiThread(action);
-                    }
-                    else
-                    {
-                        SoulSeekState.MainActivityRef?.RunOnUiThread(action);
-                    }
-                }
-                else if (System.Math.Abs(percentComplete - 100) < .001)
-                {
-                    fullRefresh = true;
-                }
-                if (percentComplete != 0)
-                {
-                    bool wasFailed = false;
-                    if (relevantItem.Failed)
-                    {
-                        wasFailed = true;
-                        relevantItem.Failed = false;
-                    }
-                    if (fullRefresh)
-                    {
-                        Action action = refreshListViewSafe;
-                        //if (indexRemoved!=-1)
-                        //{
-
-                        //    var refreshOnlySelected = new Action(() => {
-
-                        //        MainActivity.LogDebug("notifyItemRemoved " + indexRemoved + "count: " + recyclerTransferAdapter.ItemCount);
-                        //        if(indexRemoved == recyclerTransferAdapter.ItemCount)
-                        //        {
-
-                        //        }
-                        //        recyclerTransferAdapter?.NotifyItemRemoved(indexRemoved);
+        //        //this gets called regardless of UI lifecycle, so I am guessing that this.transferItems is null....
+        //        //maybe better to make static and independent... bc you should still be able to update an item as failed even if UI is disposed
+        //        //if(transferItems==null)
+        //        //{
+        //        //    MainActivity.LogFirebase(("transferItems is null" + " SoulseekClient_TransferStateChanged"));
+        //        //    return;
+        //        //} 
+        //        if (relevantItem == null)
+        //        {
+        //            return;
+        //        }
+        //        else
+        //        {
+        //            relevantItem.Failed = true;
+        //            Action action = new Action(()=>{refreshListViewSpecificItem(indexOfItem); });
+        //            SoulSeekState.MainActivityRef.RunOnUiThread(action);
+        //            //Activity.RunOnUiThread(action); //this is probably the cause of the nullref.  since Activity is null whenever Context is null i.e. onDeattach or not yet attached..
+        //        }
+        //    }
+        //    else if(e.Transfer.State.HasFlag(TransferStates.Queued))
+        //    {
+        //        //if (relevantItem == null)
+        //        //{
+        //        //    return;
+        //        //}
+        //        //relevantItem.Queued = true;
+        //        //if(relevantItem.QueueLength!=0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
+        //        //{
+        //        //    //nothing to do, bc its already set..
+        //        //    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+        //        //}
+        //        //else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
+        //        //{
+        //        //    //GET QUEUE LENGTH AND UPDATE...
+        //        //    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename,null);
+        //        //}
+        //        Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
+        //        SoulSeekState.MainActivityRef.RunOnUiThread(action);
+        //    }
+        //    else if(e.Transfer.State.HasFlag(TransferStates.Initializing))
+        //    {
+        //        if (relevantItem == null)
+        //        {
+        //            return;
+        //        }
+        //        //clear queued flag...
+        //        relevantItem.Queued = false;
+        //        relevantItem.QueueLength = 0;
+        //        Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
+        //        SoulSeekState.MainActivityRef.RunOnUiThread(action);
+        //    }
+        //    else if(e.Transfer.State.HasFlag(TransferStates.Completed))
+        //    {
+        //        if (relevantItem == null)
+        //        {
+        //            return;
+        //        }
+        //        if(!e.Transfer.State.HasFlag(TransferStates.Cancelled))
+        //        {
+        //            //clear queued flag...
+        //            relevantItem.Progress = 100;
+        //            Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
+        //            SoulSeekState.MainActivityRef.RunOnUiThread(action);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
+        //        SoulSeekState.MainActivityRef.RunOnUiThread(action);
+        //    }
+        //}
 
 
-                        //    });
-
-                        //    var refresh1 = new Action(()  => refreshListView(refreshOnlySelected) );
-
-                        //    action = refreshOnlySelected;
-                        //}
-                        //else
-                        //{
-                        //    action = refreshListViewSafe;
-                        //}
-                        Activity?.RunOnUiThread(action); //in case of rotation it is the ACTIVITY which will be null!!!!
-                    }
-                    else
-                    {
-                        try
-                        {
-                            bool isNew = !ProgressUpdatedThrottler.ContainsKey(relevantItem.FullFilename);
-
-                            DateTime now = DateTime.UtcNow;
-                            DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(relevantItem.FullFilename, now); //this returns now if the key is not in the dictionary!
-                            if(now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
-                            {
-                                ProgressUpdatedThrottler[relevantItem.FullFilename] = now;
-                            }
-                            else if(wasFailed)
-                            {
-                                //still update..
-                            }
-                            else
-                            {
-                                //there was a bug where there were multiple instances of tabspageradapter and one would always get their event handler before the other
-                                //basically updating a recyclerview that wasnt even visible, while the other was never getting to update due to the throttler.
-                                //this is fixed by attaching and dettaching the event handlers on start / stop.
-                                return;
-                            }
-
-                            int index = -1;
-                            //partial refresh just update progress..
-                            lock (transferItems)
-                            {
-                                for(int i=0;i<transferItems.Count;i++)
-                                {
-                                    if (transferItems[i].FullFilename == relevantItem.FullFilename)
-                                    {
-                                        index = i;
-                                    }
-                                }
-                            }
-                            //MainActivity.LogDebug("Index is "+index+" TransferProgressUpdated"); //tested!
-                            if (index==-1)
-                            {
-                                MainActivity.LogDebug("Index is -1 TransferProgressUpdated");
-                                return;
-                            }
-                            //int indexToUpdate = transferItems.IndexOf(relevantItem);
-
-                            Activity?.RunOnUiThread(() => {
-
-                                MainActivity.LogDebug("UI THREAD TRANSFER PROGRESS UPDATED"); //this happens every 20ms.  so less often then tranfer progress updated.  usually 6 of those can happen before 2 of these.
-                                refreshItemProgress(index, relevantItem.Progress, relevantItem, wasFailed); 
-                                
-                                });
-
-
-
-                        }
-                        catch (System.Exception error)
-                        {
-                            MainActivity.LogFirebase(error.Message + " partial update");
-                        }
-                    }
-                }
-            }
-
-        }
 
         private void refreshListViewSafe()
         {
@@ -6154,18 +5969,127 @@ namespace AndriodApp1
 
         }
 
+        private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUI e)
+        {
+            if (e.percentComplete != 0)
+            {
+                if (e.fullRefresh)
+                {
+                    Action action = refreshListViewSafe; //notify data set changed...
+                                                         //if (indexRemoved!=-1)
+                                                         //{
+
+                    //    var refreshOnlySelected = new Action(() => {
+
+                    //        MainActivity.LogDebug("notifyItemRemoved " + indexRemoved + "count: " + recyclerTransferAdapter.ItemCount);
+                    //        if(indexRemoved == recyclerTransferAdapter.ItemCount)
+                    //        {
+
+                    //        }
+                    //        recyclerTransferAdapter?.NotifyItemRemoved(indexRemoved);
+
+
+                    //    });
+
+                    //    var refresh1 = new Action(()  => refreshListView(refreshOnlySelected) );
+
+                    //    action = refreshOnlySelected;
+                    //}
+                    //else
+                    //{
+                    //    action = refreshListViewSafe;
+                    //}
+                    Activity?.RunOnUiThread(action); //in case of rotation it is the ACTIVITY which will be null!!!!
+                }
+                else
+                {
+                    try
+                    {
+                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename);
+
+                        DateTime now = DateTime.UtcNow;
+                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.ti.FullFilename, now); //this returns now if the key is not in the dictionary!
+                        if (now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
+                        {
+                            ProgressUpdatedThrottler[e.ti.FullFilename] = now;
+                        }
+                        else if (e.wasFailed)
+                        {
+                            //still update..
+                        }
+                        else
+                        {
+                            //there was a bug where there were multiple instances of tabspageradapter and one would always get their event handler before the other
+                            //basically updating a recyclerview that wasnt even visible, while the other was never getting to update due to the throttler.
+                            //this is fixed by attaching and dettaching the event handlers on start / stop.
+                            return;
+                        }
+
+                        int index = -1;
+                        //partial refresh just update progress..
+                        lock (transferItems)
+                        {
+                            for (int i = 0; i < transferItems.Count; i++)
+                            {
+                                if (transferItems[i].FullFilename == e.ti.FullFilename)
+                                {
+                                    index = i;
+                                }
+                            }
+                        }
+                        //MainActivity.LogDebug("Index is "+index+" TransferProgressUpdated"); //tested!
+                        if (index == -1)
+                        {
+                            MainActivity.LogDebug("Index is -1 TransferProgressUpdated");
+                            return;
+                        }
+                        //int indexToUpdate = transferItems.IndexOf(relevantItem);
+
+                        Activity?.RunOnUiThread(() => {
+
+                            MainActivity.LogDebug("UI THREAD TRANSFER PROGRESS UPDATED"); //this happens every 20ms.  so less often then tranfer progress updated.  usually 6 of those can happen before 2 of these.
+                            refreshItemProgress(index, e.ti.Progress, e.ti, e.wasFailed);
+
+                        });
+
+
+
+                    }
+                    catch (System.Exception error)
+                    {
+                        MainActivity.LogFirebase(error.Message + " partial update");
+                    }
+                }
+            }
+        }
+
+        private void TransferStateChanged(object sender, int index)
+        {
+            Action action = new Action(() => { refreshListViewSpecificItem(index); });
+            SoulSeekState.MainActivityRef.RunOnUiThread(action);
+        }
+
+
         public override void OnStart()
         {
-            SoulSeekState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
-            SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
+            SeekerApplication.StateChangedAtIndex += TransferStateChanged;
+            SeekerApplication.ProgressUpdated += TransferProgressUpdated;
+            
             MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
+
+            if(recyclerTransferAdapter!=null)
+            {
+                recyclerTransferAdapter.NotifyDataSetChanged();
+            }
+
             base.OnStart();
         }
 
         public override void OnStop()
         {
-            SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-            SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
+            SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
+            SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
+
             MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
             base.OnStop();
         }
