@@ -31,6 +31,8 @@ func main() {
 	)
 	flag.Parse()
 
+	fmt.Println("::group::Initializing")
+
 	appsList, err := apps.ParseAppFile(*appsFilePath)
 	if err != nil {
 		log.Fatalf("parsing given app file: %s\n", err.Error())
@@ -59,6 +61,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("creating repo directory: %s\n", err.Error())
 	}
+
+	fmt.Println("::endgroup::")
 
 	// map[apkName]info
 	var apkInfoMap = make(map[string]apps.AppInfo)
@@ -142,6 +146,7 @@ func main() {
 	}
 
 	if !*debugMode {
+		fmt.Println("::group::F-Droid: Creating metadata stubs")
 		// Now, we run the fdroid update command
 		cmd := exec.Command("fdroid", "update", "-c")
 		cmd.Stderr = os.Stderr
@@ -149,15 +154,21 @@ func main() {
 		cmd.Stdin = os.Stdin
 		cmd.Dir = filepath.Dir(*repoDir)
 		err = cmd.Run()
+
 		if err != nil {
 			log.Println("Error while running \"fdroid update -c\":", err.Error())
+
+			fmt.Println("::endgroup::")
 			os.Exit(1)
 		}
+		fmt.Println("::endgroup::")
 	}
+
+	fmt.Println("::group::Filling in metadata")
 
 	fdroidIndex, err := apps.ReadIndex(fdroidIndexFilePath)
 	if err != nil {
-		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
+		log.Fatalf("reading f-droid repo index: %s\n::endgroup::\n", err.Error())
 	}
 
 	walkPath := filepath.Join(filepath.Dir(*repoDir), "metadata")
@@ -210,14 +221,22 @@ func main() {
 			return nil
 		}
 
+		log.Printf("Updated metadata file %q", path)
+
 		return nil
 	})
 	if err != nil {
 		log.Printf("Error while walking metadata: %s", err.Error())
+
+		fmt.Println("::endgroup::")
 		os.Exit(1)
 	}
 
+	fmt.Println("::endgroup::")
+
 	if !*debugMode {
+		fmt.Println("::group::F-Droid: Reading updated metadata")
+
 		// Now, we run the fdroid update command again to regenerate the index with our new metadata
 		cmd := exec.Command("fdroid", "update")
 		cmd.Stderr = os.Stderr
@@ -228,20 +247,25 @@ func main() {
 		err = cmd.Run()
 		if err != nil {
 			log.Println("Error while running \"fdroid update -c\":", err.Error())
+
+			fmt.Println("::endgroup::")
 			os.Exit(1)
 		}
+		fmt.Println("::endgroup::")
 	}
+
+	fmt.Println("::group::Assessing changes")
 
 	// Now at the end, we read the index again
 	fdroidIndex, err = apps.ReadIndex(fdroidIndexFilePath)
 	if err != nil {
-		log.Fatalf("reading f-droid repo index: %s\n", err.Error())
+		log.Fatalf("reading f-droid repo index: %s\n::endgroup::\n", err.Error())
 	}
 
 	if !apps.HasSignificantChanges(initialFdroidIndex, fdroidIndex) {
 		changedFiles, err := git.GetChangedFileNames(*repoDir)
 		if err != nil {
-			log.Fatalf("getting changed files: %s\n", err.Error())
+			log.Fatalf("getting changed files: %s\n::endgroup::\n", err.Error())
 		}
 
 		// If only the index files changed, we ignore the commit
@@ -255,9 +279,12 @@ func main() {
 
 		if insignificant {
 			log.Println("There were no significant changes, exiting")
+			fmt.Println("::endgroup::")
 			os.Exit(2)
 		}
 	}
+
+	fmt.Println("::endgroup::")
 
 	if haveError {
 		os.Exit(1)
