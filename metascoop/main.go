@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"metascoop/apps"
+	"metascoop/file"
 	"metascoop/git"
 	"net/http"
 	"os"
@@ -232,14 +233,51 @@ func main() {
 			err = os.MkdirAll(filepath.Dir(destFilePath), os.ModePerm)
 			if err != nil {
 				log.Printf("Creating directory for changelog file %q: %s", destFilePath, err.Error())
-				return err
+				return nil
 			}
 
 			err = os.WriteFile(destFilePath, []byte(apkInfo.ReleaseDescription), os.ModePerm)
 			if err != nil {
 				log.Printf("Writing changelog file %q: %s", destFilePath, err.Error())
-				return err
+				return nil
 			}
+		}
+
+		gitRepoPath, err := git.CloneRepo(apkInfo.GitURL)
+		if err != nil {
+			log.Printf("Cloning git repo from %q: %s", apkInfo.GitURL, err.Error())
+			return nil
+		}
+
+		metadata, err := apps.FindMetadata(gitRepoPath)
+		if err != nil {
+			log.Printf("finding metadata in git repo %q: %s", gitRepoPath, err.Error())
+			return nil
+		}
+
+		var sccounter int = 1
+		for _, sc := range metadata.Screenshots {
+			var ext = filepath.Ext(sc)
+			if ext == "" {
+				continue
+			}
+
+			var newFilePath = filepath.Join(walkPath, latestPackage.PackageName,
+				"en-US", "images", fmt.Sprintf("%d%s", sccounter, ext))
+
+			err = os.MkdirAll(filepath.Dir(newFilePath), os.ModePerm)
+			if err != nil {
+				log.Printf("Creating directory for screenshot file %q: %s", newFilePath, err.Error())
+				return nil
+			}
+
+			err = file.Move(sc, newFilePath)
+			if err != nil {
+				log.Printf("Moving screenshot file %q to %q: %s", sc, newFilePath, err.Error())
+				return nil
+			}
+
+			sccounter++
 		}
 
 		log.Printf("Updated metadata file %q", path)
