@@ -14,6 +14,7 @@ func CloneRepo(gitUrl string) (dirPath string, err error) {
 	cloneCmd := exec.Command("git", "clone", gitUrl, dirPath)
 	err = cloneCmd.Run()
 	if err != nil {
+		_ = os.RemoveAll(dirPath)
 		return
 	}
 

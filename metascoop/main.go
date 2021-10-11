@@ -251,6 +251,7 @@ func main() {
 			log.Printf("Cloning git repo from %q: %s", apkInfo.GitURL, err.Error())
 			return nil
 		}
+		defer os.RemoveAll(gitRepoPath)
 
 		metadata, err := apps.FindMetadata(gitRepoPath)
 		if err != nil {
