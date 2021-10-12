@@ -105,69 +105,73 @@ func main() {
 			log.Printf("Received %d releases", len(releases))
 
 			for _, release := range releases {
+				fmt.Printf("::group::Release %s\n", release.GetTagName())
+				func() {
+					defer fmt.Println("::endgroup::")
 
-				if release.GetPrerelease() {
-					log.Printf("Skipping prerelease %q", release.GetTagName())
-					continue
-				}
-				if release.GetDraft() {
-					log.Printf("Skipping draft %q", release.GetTagName())
-					continue
-				}
-				if release.GetTagName() == "" {
-					log.Printf("Skipping release with empty tag name")
-					continue
-				}
+					if release.GetPrerelease() {
+						log.Printf("Skipping prerelease %q", release.GetTagName())
+						return
+					}
+					if release.GetDraft() {
+						log.Printf("Skipping draft %q", release.GetTagName())
+						return
+					}
+					if release.GetTagName() == "" {
+						log.Printf("Skipping release with empty tag name")
+						return
+					}
 
-				log.Printf("Working on release with tag name %q", release.GetTagName())
+					log.Printf("Working on release with tag name %q", release.GetTagName())
 
-				apk := apps.FindAPKRelease(release)
-				if apk == nil {
-					log.Printf("Couldn't find a release asset with extension \".apk\"")
-					continue
-				}
+					apk := apps.FindAPKRelease(release)
+					if apk == nil {
+						log.Printf("Couldn't find a release asset with extension \".apk\"")
+						return
+					}
 
-				appName := apps.GenerateReleaseFilename(app.Name(), release.GetTagName())
+					appName := apps.GenerateReleaseFilename(app.Name(), release.GetTagName())
 
-				log.Printf("Target APK name: %s", appName)
+					log.Printf("Target APK name: %s", appName)
 
-				appClone := app
+					appClone := app
 
-				appClone.ReleaseDescription = release.GetBody()
-				if appClone.ReleaseDescription != "" {
-					log.Printf("Release notes: %s", appClone.ReleaseDescription)
-				}
+					appClone.ReleaseDescription = release.GetBody()
+					if appClone.ReleaseDescription != "" {
+						log.Printf("Release notes: %s", appClone.ReleaseDescription)
+					}
 
-				apkInfoMap[appName] = appClone
+					apkInfoMap[appName] = appClone
 
-				appTargetPath := filepath.Join(*repoDir, appName)
+					appTargetPath := filepath.Join(*repoDir, appName)
 
-				// If the app file already exists for this version, we continue
-				if _, err := os.Stat(appTargetPath); !errors.Is(err, os.ErrNotExist) {
-					log.Printf("Already have APK for version %q at %q", release.GetTagName(), appTargetPath)
-					continue
-				}
+					// If the app file already exists for this version, we continue
+					if _, err := os.Stat(appTargetPath); !errors.Is(err, os.ErrNotExist) {
+						log.Printf("Already have APK for version %q at %q", release.GetTagName(), appTargetPath)
+						return
+					}
 
-				log.Printf("Downloading APK %q from release %q to %q", apk.GetName(), release.GetTagName(), appTargetPath)
+					log.Printf("Downloading APK %q from release %q to %q", apk.GetName(), release.GetTagName(), appTargetPath)
 
-				dlCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-				defer cancel()
+					dlCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+					defer cancel()
 
-				appStream, _, err := githubClient.Repositories.DownloadReleaseAsset(dlCtx, repo.Author, repo.Name, apk.GetID(), http.DefaultClient)
-				if err != nil {
-					log.Printf("Error while downloading app %q (artifact id %d) from from release %q: %s", app.GitURL, apk.GetID(), release.GetTagName(), err.Error())
-					haveError = true
-					continue
-				}
+					appStream, _, err := githubClient.Repositories.DownloadReleaseAsset(dlCtx, repo.Author, repo.Name, apk.GetID(), http.DefaultClient)
+					if err != nil {
+						log.Printf("Error while downloading app %q (artifact id %d) from from release %q: %s", app.GitURL, apk.GetID(), release.GetTagName(), err.Error())
+						haveError = true
+						return
+					}
 
-				err = downloadStream(appTargetPath, appStream)
-				if err != nil {
-					log.Printf("Error while downloading app %q (artifact id %d) from from release %q to %q: %s", app.GitURL, *apk.ID, *release.TagName, appTargetPath, err.Error())
-					haveError = true
-					continue
-				}
+					err = downloadStream(appTargetPath, appStream)
+					if err != nil {
+						log.Printf("Error while downloading app %q (artifact id %d) from from release %q to %q: %s", app.GitURL, *apk.ID, *release.TagName, appTargetPath, err.Error())
+						haveError = true
+						return
+					}
 
-				log.Printf("Successfully downloaded app for version %q", release.GetTagName())
+					log.Printf("Successfully downloaded app for version %q", release.GetTagName())
+				}()
 			}
 		}()
 	}
@@ -212,128 +216,133 @@ func main() {
 
 		pkgname := strings.TrimSuffix(filepath.Base(path), ".yml")
 
-		log.Printf("Working on %q", pkgname)
+		fmt.Printf("::group::%s\n", pkgname)
 
-		meta, err := apps.ReadMetaFile(path)
-		if err != nil {
-			log.Printf("Reading meta file %q: %s", path, err.Error())
-			return nil
-		}
+		return func() error {
+			defer fmt.Println("::endgroup::")
+			log.Printf("Working on %q", pkgname)
 
-		latestPackage, ok := fdroidIndex.FindLatestPackage(pkgname)
-		if !ok {
-			return nil
-		}
-
-		log.Printf("The latest version is %q with versionCode %d", latestPackage.VersionName, latestPackage.VersionCode)
-
-		apkInfo, ok := apkInfoMap[latestPackage.ApkName]
-		if !ok {
-			log.Printf("Cannot find apk info for %q", latestPackage.ApkName)
-			return nil
-		}
-
-		// Now update with some info
-
-		setIfEmpty(meta, "AuthorName", apkInfo.Author())
-		setIfEmpty(meta, "Name", apkInfo.Name())
-		setIfEmpty(meta, "SourceCode", apkInfo.GitURL)
-		setIfEmpty(meta, "License", apkInfo.License)
-		setIfEmpty(meta, "Description", apkInfo.Description)
-
-		var summary = apkInfo.Summary
-		// See https://f-droid.org/en/docs/Build_Metadata_Reference/#Summary for max length
-		const maxSummaryLength = 80
-		if len(summary) > maxSummaryLength {
-			summary = summary[:maxSummaryLength-3] + "..."
-
-			log.Printf("Truncated summary to length of %d (max length)", len(summary))
-		}
-
-		setIfEmpty(meta, "Summary", summary)
-
-		meta["CurrentVersion"] = latestPackage.VersionName
-		meta["CurrentVersionCode"] = latestPackage.VersionCode
-
-		log.Printf("Set current version info to versionName=%q, versionCode=%d", latestPackage.VersionName, latestPackage.VersionCode)
-
-		err = apps.WriteMetaFile(path, meta)
-		if err != nil {
-			log.Printf("Writing meta file %q: %s", path, err.Error())
-			return nil
-		}
-
-		log.Printf("Updated metadata file %q", path)
-
-		if apkInfo.ReleaseDescription != "" {
-			destFilePath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "changelogs", fmt.Sprintf("%d.txt", latestPackage.VersionCode))
-
-			err = os.MkdirAll(filepath.Dir(destFilePath), os.ModePerm)
+			meta, err := apps.ReadMetaFile(path)
 			if err != nil {
-				log.Printf("Creating directory for changelog file %q: %s", destFilePath, err.Error())
+				log.Printf("Reading meta file %q: %s", path, err.Error())
 				return nil
 			}
 
-			err = os.WriteFile(destFilePath, []byte(apkInfo.ReleaseDescription), os.ModePerm)
-			if err != nil {
-				log.Printf("Writing changelog file %q: %s", destFilePath, err.Error())
+			latestPackage, ok := fdroidIndex.FindLatestPackage(pkgname)
+			if !ok {
 				return nil
 			}
 
-			log.Printf("Wrote release notes to %q", destFilePath)
-		}
+			log.Printf("The latest version is %q with versionCode %d", latestPackage.VersionName, latestPackage.VersionCode)
 
-		log.Printf("Cloning git repository to search for screenshots")
+			apkInfo, ok := apkInfoMap[latestPackage.ApkName]
+			if !ok {
+				log.Printf("Cannot find apk info for %q", latestPackage.ApkName)
+				return nil
+			}
 
-		gitRepoPath, err := git.CloneRepo(apkInfo.GitURL)
-		if err != nil {
-			log.Printf("Cloning git repo from %q: %s", apkInfo.GitURL, err.Error())
+			// Now update with some info
+
+			setIfEmpty(meta, "AuthorName", apkInfo.Author())
+			setIfEmpty(meta, "Name", apkInfo.Name())
+			setIfEmpty(meta, "SourceCode", apkInfo.GitURL)
+			setIfEmpty(meta, "License", apkInfo.License)
+			setIfEmpty(meta, "Description", apkInfo.Description)
+
+			var summary = apkInfo.Summary
+			// See https://f-droid.org/en/docs/Build_Metadata_Reference/#Summary for max length
+			const maxSummaryLength = 80
+			if len(summary) > maxSummaryLength {
+				summary = summary[:maxSummaryLength-3] + "..."
+
+				log.Printf("Truncated summary to length of %d (max length)", len(summary))
+			}
+
+			setIfEmpty(meta, "Summary", summary)
+
+			meta["CurrentVersion"] = latestPackage.VersionName
+			meta["CurrentVersionCode"] = latestPackage.VersionCode
+
+			log.Printf("Set current version info to versionName=%q, versionCode=%d", latestPackage.VersionName, latestPackage.VersionCode)
+
+			err = apps.WriteMetaFile(path, meta)
+			if err != nil {
+				log.Printf("Writing meta file %q: %s", path, err.Error())
+				return nil
+			}
+
+			log.Printf("Updated metadata file %q", path)
+
+			if apkInfo.ReleaseDescription != "" {
+				destFilePath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "changelogs", fmt.Sprintf("%d.txt", latestPackage.VersionCode))
+
+				err = os.MkdirAll(filepath.Dir(destFilePath), os.ModePerm)
+				if err != nil {
+					log.Printf("Creating directory for changelog file %q: %s", destFilePath, err.Error())
+					return nil
+				}
+
+				err = os.WriteFile(destFilePath, []byte(apkInfo.ReleaseDescription), os.ModePerm)
+				if err != nil {
+					log.Printf("Writing changelog file %q: %s", destFilePath, err.Error())
+					return nil
+				}
+
+				log.Printf("Wrote release notes to %q", destFilePath)
+			}
+
+			log.Printf("Cloning git repository to search for screenshots")
+
+			gitRepoPath, err := git.CloneRepo(apkInfo.GitURL)
+			if err != nil {
+				log.Printf("Cloning git repo from %q: %s", apkInfo.GitURL, err.Error())
+				return nil
+			}
+			defer os.RemoveAll(gitRepoPath)
+
+			metadata, err := apps.FindMetadata(gitRepoPath)
+			if err != nil {
+				log.Printf("finding metadata in git repo %q: %s", gitRepoPath, err.Error())
+				return nil
+			}
+
+			log.Printf("Found %d screenshots", len(metadata.Screenshots))
+
+			screenshotsPath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "phoneScreenshots")
+
+			_ = os.RemoveAll(screenshotsPath)
+
+			var sccounter int = 1
+			for _, sc := range metadata.Screenshots {
+				var ext = filepath.Ext(sc)
+				if ext == "" {
+					log.Printf("Invalid: screenshot file extension is empty for %q", sc)
+					continue
+				}
+
+				var newFilePath = filepath.Join(screenshotsPath, fmt.Sprintf("%d%s", sccounter, ext))
+
+				err = os.MkdirAll(filepath.Dir(newFilePath), os.ModePerm)
+				if err != nil {
+					log.Printf("Creating directory for screenshot file %q: %s", newFilePath, err.Error())
+					return nil
+				}
+
+				err = file.Move(sc, newFilePath)
+				if err != nil {
+					log.Printf("Moving screenshot file %q to %q: %s", sc, newFilePath, err.Error())
+					return nil
+				}
+
+				log.Printf("Wrote screenshot to %s", newFilePath)
+
+				sccounter++
+			}
+
+			toRemovePaths = append(toRemovePaths, screenshotsPath)
+
 			return nil
-		}
-		defer os.RemoveAll(gitRepoPath)
-
-		metadata, err := apps.FindMetadata(gitRepoPath)
-		if err != nil {
-			log.Printf("finding metadata in git repo %q: %s", gitRepoPath, err.Error())
-			return nil
-		}
-
-		log.Printf("Found %d screenshots", len(metadata.Screenshots))
-
-		screenshotsPath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "phoneScreenshots")
-
-		_ = os.RemoveAll(screenshotsPath)
-
-		var sccounter int = 1
-		for _, sc := range metadata.Screenshots {
-			var ext = filepath.Ext(sc)
-			if ext == "" {
-				log.Printf("Invalid: screenshot file extension is empty for %q", sc)
-				continue
-			}
-
-			var newFilePath = filepath.Join(screenshotsPath, fmt.Sprintf("%d%s", sccounter, ext))
-
-			err = os.MkdirAll(filepath.Dir(newFilePath), os.ModePerm)
-			if err != nil {
-				log.Printf("Creating directory for screenshot file %q: %s", newFilePath, err.Error())
-				return nil
-			}
-
-			err = file.Move(sc, newFilePath)
-			if err != nil {
-				log.Printf("Moving screenshot file %q to %q: %s", sc, newFilePath, err.Error())
-				return nil
-			}
-
-			log.Printf("Wrote screenshot to %s", newFilePath)
-
-			sccounter++
-		}
-
-		toRemovePaths = append(toRemovePaths, screenshotsPath)
-
-		return nil
+		}()
 	})
 	if err != nil {
 		log.Printf("Error while walking metadata: %s", err.Error())
