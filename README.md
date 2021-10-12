@@ -18,6 +18,11 @@ This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This 
 3. Open the link in F-Droid. It will ask you to add the repository. Everything should already be filled in correctly, so just press "OK".
 4. You can now install my apps, e.g. start by searching for "Notality" in the F-Droid client.
 
+### Apps
+
+<!-- This table is auto-generated. Do not edit -->
+<!-- end apps table -->
+
 ### For developers
 If you are a developer and want to publish your own apps right from GitHub Actions as an F-Droid repo, you can fork/copy this repo and see  [the documentation](setup.md) for more information on how to set it up.
 

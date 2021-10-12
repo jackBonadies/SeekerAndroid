@@ -11,6 +11,7 @@ import (
 	"metascoop/apps"
 	"metascoop/file"
 	"metascoop/git"
+	"metascoop/md"
 	"net/http"
 	"os"
 	"os/exec"
@@ -383,6 +384,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("removing path %q: %s\n", rmpath, err.Error())
 		}
+	}
+
+	// We can now generate the README file
+	readmePath := filepath.Join(filepath.Dir(filepath.Dir(*repoDir)), "README.md")
+	err = md.RegenerateReadme(readmePath, fdroidIndex)
+	if err != nil {
+		log.Fatalf("error generating %q: %s\n", readmePath, err.Error())
 	}
 
 	cpath, haveSignificantChanges := apps.HasSignificantChanges(initialFdroidIndex, fdroidIndex)
