@@ -69,111 +69,107 @@ func main() {
 	var apkInfoMap = make(map[string]apps.AppInfo)
 
 	for _, app := range appsList {
-		fmt.Printf("::group::App: %s/%s\n", app.Author(), app.Name())
+		fmt.Printf("App: %s/%s\n", app.Author(), app.Name())
 
-		func() {
-			defer fmt.Println("::endgroup::")
+		repo, err := apps.RepoInfo(app.GitURL)
+		if err != nil {
+			log.Printf("Error while getting repo info from URL %q: %s", app.GitURL, err.Error())
+			haveError = true
+			return
+		}
 
-			repo, err := apps.RepoInfo(app.GitURL)
-			if err != nil {
-				log.Printf("Error while getting repo info from URL %q: %s", app.GitURL, err.Error())
-				haveError = true
-				return
+		log.Printf("Looking up %s/%s on GitHub", repo.Author, repo.Name)
+		gitHubRepo, _, err := githubClient.Repositories.Get(context.Background(), repo.Author, repo.Name)
+		if err != nil {
+			log.Printf("Error while looking up repo: %s", err.Error())
+		} else {
+			app.Summary = gitHubRepo.GetDescription()
+
+			if gitHubRepo.License != nil && gitHubRepo.License.SPDXID != nil {
+				app.License = *gitHubRepo.License.SPDXID
 			}
 
-			log.Printf("Looking up %s/%s on GitHub", repo.Author, repo.Name)
-			gitHubRepo, _, err := githubClient.Repositories.Get(context.Background(), repo.Author, repo.Name)
-			if err != nil {
-				log.Printf("Error while looking up repo: %s", err.Error())
-			} else {
-				app.Summary = gitHubRepo.GetDescription()
+			log.Printf("Data from GitHub: summary=%q, license=%q", app.Summary, app.License)
+		}
 
-				if gitHubRepo.License != nil && gitHubRepo.License.SPDXID != nil {
-					app.License = *gitHubRepo.License.SPDXID
+		releases, err := apps.ListAllReleases(githubClient, repo.Author, repo.Name)
+		if err != nil {
+			log.Printf("Error while listing repo releases for %q: %s\n", app.GitURL, err.Error())
+			haveError = true
+			return
+		}
+
+		log.Printf("Received %d releases", len(releases))
+
+		for _, release := range releases {
+			fmt.Printf("::group::Release %s\n", release.GetTagName())
+			func() {
+				defer fmt.Println("::endgroup::")
+
+				if release.GetPrerelease() {
+					log.Printf("Skipping prerelease %q", release.GetTagName())
+					return
+				}
+				if release.GetDraft() {
+					log.Printf("Skipping draft %q", release.GetTagName())
+					return
+				}
+				if release.GetTagName() == "" {
+					log.Printf("Skipping release with empty tag name")
+					return
 				}
 
-				log.Printf("Data from GitHub: summary=%q, license=%q", app.Summary, app.License)
-			}
+				log.Printf("Working on release with tag name %q", release.GetTagName())
 
-			releases, err := apps.ListAllReleases(githubClient, repo.Author, repo.Name)
-			if err != nil {
-				log.Printf("Error while listing repo releases for %q: %s\n", app.GitURL, err.Error())
-				haveError = true
-				return
-			}
+				apk := apps.FindAPKRelease(release)
+				if apk == nil {
+					log.Printf("Couldn't find a release asset with extension \".apk\"")
+					return
+				}
 
-			log.Printf("Received %d releases", len(releases))
+				appName := apps.GenerateReleaseFilename(app.Name(), release.GetTagName())
 
-			for _, release := range releases {
-				fmt.Printf("::group::Release %s\n", release.GetTagName())
-				func() {
-					defer fmt.Println("::endgroup::")
+				log.Printf("Target APK name: %s", appName)
 
-					if release.GetPrerelease() {
-						log.Printf("Skipping prerelease %q", release.GetTagName())
-						return
-					}
-					if release.GetDraft() {
-						log.Printf("Skipping draft %q", release.GetTagName())
-						return
-					}
-					if release.GetTagName() == "" {
-						log.Printf("Skipping release with empty tag name")
-						return
-					}
+				appClone := app
 
-					log.Printf("Working on release with tag name %q", release.GetTagName())
+				appClone.ReleaseDescription = release.GetBody()
+				if appClone.ReleaseDescription != "" {
+					log.Printf("Release notes: %s", appClone.ReleaseDescription)
+				}
 
-					apk := apps.FindAPKRelease(release)
-					if apk == nil {
-						log.Printf("Couldn't find a release asset with extension \".apk\"")
-						return
-					}
+				apkInfoMap[appName] = appClone
 
-					appName := apps.GenerateReleaseFilename(app.Name(), release.GetTagName())
+				appTargetPath := filepath.Join(*repoDir, appName)
 
-					log.Printf("Target APK name: %s", appName)
+				// If the app file already exists for this version, we continue
+				if _, err := os.Stat(appTargetPath); !errors.Is(err, os.ErrNotExist) {
+					log.Printf("Already have APK for version %q at %q", release.GetTagName(), appTargetPath)
+					return
+				}
 
-					appClone := app
+				log.Printf("Downloading APK %q from release %q to %q", apk.GetName(), release.GetTagName(), appTargetPath)
 
-					appClone.ReleaseDescription = release.GetBody()
-					if appClone.ReleaseDescription != "" {
-						log.Printf("Release notes: %s", appClone.ReleaseDescription)
-					}
+				dlCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+				defer cancel()
 
-					apkInfoMap[appName] = appClone
+				appStream, _, err := githubClient.Repositories.DownloadReleaseAsset(dlCtx, repo.Author, repo.Name, apk.GetID(), http.DefaultClient)
+				if err != nil {
+					log.Printf("Error while downloading app %q (artifact id %d) from from release %q: %s", app.GitURL, apk.GetID(), release.GetTagName(), err.Error())
+					haveError = true
+					return
+				}
 
-					appTargetPath := filepath.Join(*repoDir, appName)
+				err = downloadStream(appTargetPath, appStream)
+				if err != nil {
+					log.Printf("Error while downloading app %q (artifact id %d) from from release %q to %q: %s", app.GitURL, *apk.ID, *release.TagName, appTargetPath, err.Error())
+					haveError = true
+					return
+				}
 
-					// If the app file already exists for this version, we continue
-					if _, err := os.Stat(appTargetPath); !errors.Is(err, os.ErrNotExist) {
-						log.Printf("Already have APK for version %q at %q", release.GetTagName(), appTargetPath)
-						return
-					}
-
-					log.Printf("Downloading APK %q from release %q to %q", apk.GetName(), release.GetTagName(), appTargetPath)
-
-					dlCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-					defer cancel()
-
-					appStream, _, err := githubClient.Repositories.DownloadReleaseAsset(dlCtx, repo.Author, repo.Name, apk.GetID(), http.DefaultClient)
-					if err != nil {
-						log.Printf("Error while downloading app %q (artifact id %d) from from release %q: %s", app.GitURL, apk.GetID(), release.GetTagName(), err.Error())
-						haveError = true
-						return
-					}
-
-					err = downloadStream(appTargetPath, appStream)
-					if err != nil {
-						log.Printf("Error while downloading app %q (artifact id %d) from from release %q to %q: %s", app.GitURL, *apk.ID, *release.TagName, appTargetPath, err.Error())
-						haveError = true
-						return
-					}
-
-					log.Printf("Successfully downloaded app for version %q", release.GetTagName())
-				}()
-			}
-		}()
+				log.Printf("Successfully downloaded app for version %q", release.GetTagName())
+			}()
+		}
 	}
 
 	if !*debugMode {
@@ -198,7 +194,7 @@ func main() {
 		fmt.Println("::endgroup::")
 	}
 
-	fmt.Println("::group::Filling in metadata")
+	fmt.Println("Filling in metadata")
 
 	fdroidIndex, err := apps.ReadIndex(fdroidIndexFilePath)
 	if err != nil {
@@ -347,11 +343,8 @@ func main() {
 	if err != nil {
 		log.Printf("Error while walking metadata: %s", err.Error())
 
-		fmt.Println("::endgroup::")
 		os.Exit(1)
 	}
-
-	fmt.Println("::endgroup::")
 
 	if !*debugMode {
 		fmt.Println("::group::F-Droid: Reading updated metadata")
