@@ -81,13 +81,18 @@ func main() {
 				return
 			}
 
+			log.Printf("Looking up %s/%s on GitHub", repo.Author, repo.Name)
 			gitHubRepo, _, err := githubClient.Repositories.Get(context.Background(), repo.Author, repo.Name)
-			if err == nil {
+			if err != nil {
+				log.Printf("Error while looking up repo: %s", err.Error())
+			} else {
 				app.Summary = gitHubRepo.GetDescription()
 
 				if gitHubRepo.License != nil && gitHubRepo.License.SPDXID != nil {
 					app.License = *gitHubRepo.License.SPDXID
 				}
+
+				log.Printf("Data from GitHub: summary=%q, license=%q", app.Summary, app.License)
 			}
 
 			releases, err := apps.ListAllReleases(githubClient, repo.Author, repo.Name)
@@ -97,26 +102,41 @@ func main() {
 				return
 			}
 
+			log.Printf("Received %d releases", len(releases))
+
 			for _, release := range releases {
-				if release.Prerelease != nil && *release.Prerelease {
-					if release.TagName == nil {
-						nt := "nil-tagname"
-						release.TagName = &nt
-					}
-					log.Printf("Skipping prerelease %q", *release.TagName)
+
+				if release.GetPrerelease() {
+					log.Printf("Skipping prerelease %q", release.GetTagName())
 					continue
 				}
+				if release.GetDraft() {
+					log.Printf("Skipping draft %q", release.GetTagName())
+					continue
+				}
+				if release.GetTagName() == "" {
+					log.Printf("Skipping release with empty tag name")
+					continue
+				}
+
+				log.Printf("Working on release with tag name %q", release.GetTagName())
 
 				apk := apps.FindAPKRelease(release)
 				if apk == nil {
+					log.Printf("Couldn't find a release asset with extension \".apk\"")
 					continue
 				}
 
-				appName := apps.GenerateReleaseFilename(app.Name(), *release.TagName)
+				appName := apps.GenerateReleaseFilename(app.Name(), release.GetTagName())
+
+				log.Printf("Target APK name: %s", appName)
 
 				appClone := app
 
 				appClone.ReleaseDescription = release.GetBody()
+				if appClone.ReleaseDescription != "" {
+					log.Printf("Release notes: %s", appClone.ReleaseDescription)
+				}
 
 				apkInfoMap[appName] = appClone
 
@@ -124,16 +144,18 @@ func main() {
 
 				// If the app file already exists for this version, we continue
 				if _, err := os.Stat(appTargetPath); !errors.Is(err, os.ErrNotExist) {
-					log.Printf("Already have version %q at %q", *release.TagName, appTargetPath)
+					log.Printf("Already have APK for version %q at %q", release.GetTagName(), appTargetPath)
 					continue
 				}
+
+				log.Printf("Downloading APK %q from release %q to %q", apk.GetName(), release.GetTagName(), appTargetPath)
 
 				dlCtx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 				defer cancel()
 
-				appStream, _, err := githubClient.Repositories.DownloadReleaseAsset(dlCtx, repo.Author, repo.Name, *apk.ID, http.DefaultClient)
+				appStream, _, err := githubClient.Repositories.DownloadReleaseAsset(dlCtx, repo.Author, repo.Name, apk.GetID(), http.DefaultClient)
 				if err != nil {
-					log.Printf("Error while downloading app %q (artifact id %d) from from release %q: %s", app.GitURL, *apk.ID, *release.TagName, err.Error())
+					log.Printf("Error while downloading app %q (artifact id %d) from from release %q: %s", app.GitURL, apk.GetID(), release.GetTagName(), err.Error())
 					haveError = true
 					continue
 				}
@@ -145,8 +167,7 @@ func main() {
 					continue
 				}
 
-				log.Printf("Successfully downloaded %q", appTargetPath)
-
+				log.Printf("Successfully downloaded app for version %q", release.GetTagName())
 			}
 		}()
 	}
@@ -159,6 +180,9 @@ func main() {
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Dir = filepath.Dir(*repoDir)
+
+		log.Printf("Running %q in %s", cmd.String(), cmd.Dir)
+
 		err = cmd.Run()
 
 		if err != nil {
@@ -188,6 +212,8 @@ func main() {
 
 		pkgname := strings.TrimSuffix(filepath.Base(path), ".yml")
 
+		log.Printf("Working on %q", pkgname)
+
 		meta, err := apps.ReadMetaFile(path)
 		if err != nil {
 			log.Printf("Reading meta file %q: %s", path, err.Error())
@@ -199,8 +225,11 @@ func main() {
 			return nil
 		}
 
+		log.Printf("The latest version is %q with versionCode %d", latestPackage.VersionName, latestPackage.VersionCode)
+
 		apkInfo, ok := apkInfoMap[latestPackage.ApkName]
 		if !ok {
+			log.Printf("Cannot find apk info for %q", latestPackage.ApkName)
 			return nil
 		}
 
@@ -217,6 +246,8 @@ func main() {
 		const maxSummaryLength = 80
 		if len(summary) > maxSummaryLength {
 			summary = summary[:maxSummaryLength-3] + "..."
+
+			log.Printf("Truncated summary to length of %d (max length)", len(summary))
 		}
 
 		setIfEmpty(meta, "Summary", summary)
@@ -224,11 +255,15 @@ func main() {
 		meta["CurrentVersion"] = latestPackage.VersionName
 		meta["CurrentVersionCode"] = latestPackage.VersionCode
 
+		log.Printf("Set current version info to versionName=%q, versionCode=%d", latestPackage.VersionName, latestPackage.VersionCode)
+
 		err = apps.WriteMetaFile(path, meta)
 		if err != nil {
 			log.Printf("Writing meta file %q: %s", path, err.Error())
 			return nil
 		}
+
+		log.Printf("Updated metadata file %q", path)
 
 		if apkInfo.ReleaseDescription != "" {
 			destFilePath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "changelogs", fmt.Sprintf("%d.txt", latestPackage.VersionCode))
@@ -244,7 +279,11 @@ func main() {
 				log.Printf("Writing changelog file %q: %s", destFilePath, err.Error())
 				return nil
 			}
+
+			log.Printf("Wrote release notes to %q", destFilePath)
 		}
+
+		log.Printf("Cloning git repository to search for screenshots")
 
 		gitRepoPath, err := git.CloneRepo(apkInfo.GitURL)
 		if err != nil {
@@ -259,6 +298,8 @@ func main() {
 			return nil
 		}
 
+		log.Printf("Found %d screenshots", len(metadata.Screenshots))
+
 		screenshotsPath := filepath.Join(walkPath, latestPackage.PackageName, "en-US", "phoneScreenshots")
 
 		_ = os.RemoveAll(screenshotsPath)
@@ -267,6 +308,7 @@ func main() {
 		for _, sc := range metadata.Screenshots {
 			var ext = filepath.Ext(sc)
 			if ext == "" {
+				log.Printf("Invalid: screenshot file extension is empty for %q", sc)
 				continue
 			}
 
@@ -284,12 +326,12 @@ func main() {
 				return nil
 			}
 
+			log.Printf("Wrote screenshot to %s", newFilePath)
+
 			sccounter++
 		}
 
 		toRemovePaths = append(toRemovePaths, screenshotsPath)
-
-		log.Printf("Updated metadata file %q", path)
 
 		return nil
 	})
@@ -311,6 +353,8 @@ func main() {
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Dir = filepath.Dir(*repoDir)
+
+		log.Printf("Running %q in %s", cmd.String(), cmd.Dir)
 
 		err = cmd.Run()
 		if err != nil {
@@ -343,24 +387,25 @@ func main() {
 	if haveSignificantChanges {
 		log.Printf("The index %q had a significant change at JSON path %q", fdroidIndexFilePath, cpath)
 	} else {
+		log.Printf("The index files didn't change significantly")
+
 		changedFiles, err := git.GetChangedFileNames(*repoDir)
 		if err != nil {
 			log.Fatalf("getting changed files: %s\n::endgroup::\n", err.Error())
 		}
 
 		// If only the index files changed, we ignore the commit
-		var insignificant = true
 		for _, fname := range changedFiles {
 			if !strings.Contains(fname, "index") {
-				insignificant = false
+				haveSignificantChanges = true
 
 				log.Printf("File %q is a significant change", fname)
-
-				break
 			}
 		}
 
-		haveSignificantChanges = !insignificant
+		if !haveSignificantChanges {
+			log.Printf("It doesn't look like there were any relevant changes, neither to the index file nor any file indexed by git.")
+		}
 	}
 
 	fmt.Println("::endgroup::")
@@ -381,6 +426,8 @@ func main() {
 func setIfEmpty(m map[string]interface{}, key string, value string) {
 	if value != "" && m[key] == nil || m[key] == "" || m[key] == "Unknown" {
 		m[key] = value
+
+		log.Printf("Set %s to %q", key, value)
 	}
 }
 
