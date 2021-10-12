@@ -8,3 +8,5 @@ config.yml
 fdroid/tmp
 fdroid/repo/status
 fdroid/metadata/**/phoneScreenshots
+
+metascoop/metascoop
