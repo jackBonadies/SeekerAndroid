@@ -75,7 +75,7 @@ func ReadIndex(path string) (index *RepoIndex, err error) {
 	return
 }
 
-func HasSignificantChanges(old, new *RepoIndex) bool {
+func HasSignificantChanges(old, new *RepoIndex) (changedPath string, changed bool) {
 	changelog, err := diff.Diff(old, new)
 	if err != nil {
 		panic("diffing fdroid index structs: " + err.Error())
@@ -83,7 +83,7 @@ func HasSignificantChanges(old, new *RepoIndex) bool {
 
 	for _, change := range changelog {
 		if change.Type != diff.UPDATE {
-			return true
+			return strings.Join(change.Path, "."), true
 		}
 
 		var isIgnoredChange = false
@@ -99,9 +99,9 @@ func HasSignificantChanges(old, new *RepoIndex) bool {
 		}
 
 		if !isIgnoredChange {
-			return true
+			return strings.Join(change.Path, "."), true
 		}
 	}
 
-	return false
+	return "", false
 }

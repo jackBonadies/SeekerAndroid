@@ -339,7 +339,10 @@ func main() {
 		}
 	}
 
-	if !apps.HasSignificantChanges(initialFdroidIndex, fdroidIndex) {
+	cpath, haveSignificantChanges := apps.HasSignificantChanges(initialFdroidIndex, fdroidIndex)
+	if haveSignificantChanges {
+		log.Printf("The index %q had a significant change at JSON path %q", fdroidIndexFilePath, cpath)
+	} else {
 		changedFiles, err := git.GetChangedFileNames(*repoDir)
 		if err != nil {
 			log.Fatalf("getting changed files: %s\n::endgroup::\n", err.Error())
@@ -350,22 +353,29 @@ func main() {
 		for _, fname := range changedFiles {
 			if !strings.Contains(fname, "index") {
 				insignificant = false
+
+				log.Printf("File %q is a significant change", fname)
+
 				break
 			}
 		}
 
-		if insignificant {
-			log.Println("There were no significant changes, exiting")
-			fmt.Println("::endgroup::")
-			os.Exit(2)
-		}
+		haveSignificantChanges = !insignificant
 	}
 
 	fmt.Println("::endgroup::")
 
+	// If we have an error, we report it as such
 	if haveError {
 		os.Exit(1)
 	}
+
+	// If we don't have any good changes, we report it with exit code 2
+	if !haveSignificantChanges {
+		os.Exit(2)
+	}
+
+	// If we have relevant changes, we exit with code 0
 }
 
 func setIfEmpty(m map[string]interface{}, key string, value string) {
