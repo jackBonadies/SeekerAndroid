@@ -3400,44 +3400,54 @@ namespace AndriodApp1
                     SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
                 }
 
+                bool manualSet = false;
                 //for incomplete case
                 Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
                 if (SoulSeekState.ManualIncompleteDataDirectoryUri != null && SoulSeekState.ManualIncompleteDataDirectoryUri.ToString() != "")
                 {
+                    manualSet = true;
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     incompleteRes = Android.Net.Uri.Parse(SoulSeekState.ManualIncompleteDataDirectoryUri);
                 }
-                bool canWriteIncomplete = false;
-                try
+                else
                 {
-                    //a phone failed 4 times with //POCO X3 Pro
-                    //Android 11(SDK 30)
-                    //Caused by: java.lang.IllegalArgumentException: 
-                    //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                    //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                    if (SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
-                    {
-                        canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
-                    }
-                    else
-                    {
-                        canWriteIncomplete = DocumentFile.FromTreeUri(this, incompleteRes).CanWrite();
-                    }
+                    manualSet = false;
                 }
-                catch (Exception e)
+
+                if(manualSet)
                 {
-                    if (incompleteRes != null)
+                    bool canWriteIncomplete = false;
+                    try
                     {
-                        LogFirebase("DocumentFile.FromTreeUri failed with incomplete URI: " + incompleteRes.ToString() + " " + e.Message);
+                        //a phone failed 4 times with //POCO X3 Pro
+                        //Android 11(SDK 30)
+                        //Caused by: java.lang.IllegalArgumentException: 
+                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
+                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
+                        if (SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
+                        {
+                            canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
+                        }
+                        else
+                        {
+                            canWriteIncomplete = DocumentFile.FromTreeUri(this, incompleteRes).CanWrite();
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        LogFirebase("DocumentFile.FromTreeUri failed with incomplete null URI");
+                        if (incompleteRes != null)
+                        {
+                            LogFirebase("DocumentFile.FromTreeUri failed with incomplete URI: " + incompleteRes.ToString() + " " + e.Message);
+                        }
+                        else
+                        {
+                            LogFirebase("DocumentFile.FromTreeUri failed with incomplete null URI");
+                        }
                     }
-                }
-                if(canWriteIncomplete)
-                {
-                    SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                    if(canWriteIncomplete)
+                    {
+                        SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                    }
                 }
 
 
@@ -5878,11 +5888,20 @@ namespace AndriodApp1
                         (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
                         ) 
                     {
-                        DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
-                        uri = mFile.Uri;
-                        finalUri = mFile.Uri.ToString();
-                        System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                        MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete),stream,uriOfIncomplete, parentUriOfIncomplete);
+                        try
+                        {
+                            DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
+                            uri = mFile.Uri;
+                            finalUri = mFile.Uri.ToString();
+                            System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                            MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete),stream,uriOfIncomplete, parentUriOfIncomplete);
+                        }
+                        catch(Exception e)
+                        {
+                            MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR pre" + e.Message);
+                            SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                            MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); 
+                        }
                     }
                     else
                     {
@@ -5905,9 +5924,29 @@ namespace AndriodApp1
                         }
                         catch (Exception e)
                         {
-                            MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message);
-                            SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                            MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                            if(e.Message.ToLower().Contains("already exists"))
+                            {
+                                try
+                                {
+                                    //set the uri to the existing file...
+                                    var df = DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, uriOfIncomplete);
+                                    string realName = df.Name;
+                                    uri = folderDir1.FindFile(realName).Uri;
+
+                                    SeekerApplication.ShowToast(string.Format("File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.", realName, uri.LastPathSegment.ToString()), ToastLength.Long);
+                                }
+                                catch(Exception e2)
+                                {
+                                    MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR errorhandling " + e2.Message);
+                                }
+
+                            }
+                            else
+                            {
+                                MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message);
+                                SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                            }
                         }
                         //throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
                     }
