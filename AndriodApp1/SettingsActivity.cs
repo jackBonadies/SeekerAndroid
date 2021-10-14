@@ -40,8 +40,13 @@ namespace AndriodApp1
     {
         private int CHANGE_WRITE_EXTERNAL = 0x909;
         private int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
+        
         private int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL = 0x911;
         private int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY = 0x912;
+
+        private int CHANGE_INCOMPLETE_EXTERNAL = 0x913;
+        private int CHANGE_INCOMPLETE_EXTERNAL_LEGACY = 0x914;
+
         private List<Tuple<int,int>> positionNumberPairs = new List<Tuple<int, int>>();
         private CheckBox allowPrivateRoomInvitations;
 
@@ -66,10 +71,17 @@ namespace AndriodApp1
         protected override void OnResume()
         {
             base.OnResume();
+
             UPnpManager.Instance.SearchFinished += UpnpSearchFinished;
             UPnpManager.Instance.SearchStarted += UpnpSearchStarted;
             UPnpManager.Instance.DeviceSuccessfullyMapped += UpnpDeviceMapped;
             PrivilegesManager.Instance.PrivilegesChecked += PrivilegesChecked;
+
+            //when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
+            this.UpdateDirectoryViews();
+
+            //however with the api<21 it is not paused and so an event is needed.
+            SoulSeekState.DirectoryUpdatedEvent += DirectoryUpdated;
 
         }
 
@@ -99,6 +111,18 @@ namespace AndriodApp1
             });
         }
 
+        private void DirectoryUpdated(object sender, EventArgs e)
+        {
+            UpdateDirectoryViews();
+        }
+
+        private void UpdateDirectoryViews()
+        {
+            this.SetIncompleteFolderView();
+            this.SetCompleteFolderView();
+            //TODO set shared view
+        }
+
         private void UpnpSearchStarted(object sender, EventArgs e)
         {
             SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
@@ -108,14 +132,32 @@ namespace AndriodApp1
 
         protected override void OnPause()
         {
+
             UPnpManager.Instance.SearchFinished -= UpnpSearchFinished;
             UPnpManager.Instance.SearchStarted -= UpnpSearchStarted;
             UPnpManager.Instance.DeviceSuccessfullyMapped -= UpnpDeviceMapped;
             PrivilegesManager.Instance.PrivilegesChecked -= PrivilegesChecked;
+            SoulSeekState.DirectoryUpdatedEvent -= DirectoryUpdated;
+            SettingsActivity.SaveAdditionalDirectorySettingsToSharedPreferences();
             base.OnPause();
         }
 
         //private string SaveDataDirectoryUri = string.Empty;
+
+        private CheckBox createUsernameSubfoldersView;
+        private CheckBox createCompleteAndIncompleteFoldersView;
+        private CheckBox manuallyChooseIncompleteFolderView;
+        private TextView currentCompleteFolderView;
+        private TextView currentIncompleteFolderView;
+
+        private ViewGroup incompleteFolderViewLayout;
+        private Button changeIncompleteDirectory;
+
+        private ViewGroup sharingSubLayout;
+
+        private ViewGroup listeningSubLayout2;
+        private ViewGroup listeningSubLayout3;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             MainActivity.LogDebug("Settings Created");
@@ -272,7 +314,189 @@ namespace AndriodApp1
             ImageView UpnpStatusView = FindViewById<ImageView>(Resource.Id.UPnPStatus);
             SetUpnpStatusView(UpnpStatusView);
             UpnpStatusView.Click += ImageView_Click;
-            // Create your application here
+
+            sharingSubLayout = FindViewById<ViewGroup>(Resource.Id.sharingSubLayout);
+            UpdateSharingViewState();
+
+            listeningSubLayout2 = FindViewById<ViewGroup>(Resource.Id.listeningRow2);
+            listeningSubLayout3 = FindViewById<ViewGroup>(Resource.Id.listeningRow3);
+            UpdateListeningViewState();
+
+            /*
+            **NOTE**
+            * 
+            * Regarding Directory Options (Incomplete Folder Options, Complete Folder Options):
+            * Incomplete Folder internal structure is always the same (folder is username concat file foldername),
+            *   it is just the placement of it that differs
+            * The automatic placement is "Soulseek Incomplete" in the same directory chosen for downloads (if "Create Folders for Downloads and Incomplete" is on.
+            * Otherwise the placement is in AppData Local - what Android calls "Internal Storage"
+            * 
+            * The incomplete folder choices are used when the stream is created and saved in IncompleteUri.  Therefore, changing this on the fly is okay, it just wont 
+            *   take effect until one starts a new download.
+            * The complete folder choices are used when the file is actually saved / moved.  So changing this on the fly is okay, the transfer, once finished, will just go into its new place.
+            * 
+            * When one turns "Manual Selection for Incomplete" off, it reverts back to Automatic.  The user will have to reselect their folder if they choose to turn it back on.
+            * 
+            * To clear Incomplete, there cannot be any pending transfers.  Paused transfers are okay, they will just start from the top...
+            * 
+            * If "Use Manual Incomplete Folder" is checked, but no Manual Incomplete Folder is chosen, then it is as if it is not checked.
+            * Also its fine if its null, or no longer writable, etc.  It will just get set back to default.  User will have to re-set it on their own.
+            * 
+            **NOTE**
+            */
+
+            createUsernameSubfoldersView = this.FindViewById<CheckBox>(Resource.Id.createUsernameSubfolders);
+            createUsernameSubfoldersView.Checked = SoulSeekState.CreateUsernameSubfolders;
+            createUsernameSubfoldersView.CheckedChange += CreateUsernameSubfoldersView_CheckedChange;
+            createCompleteAndIncompleteFoldersView = this.FindViewById<CheckBox>(Resource.Id.createCompleteAndIncompleteDirectories);
+            createCompleteAndIncompleteFoldersView.Checked = SoulSeekState.CreateCompleteAndIncompleteFolders;
+            createCompleteAndIncompleteFoldersView.CheckedChange += CreateCompleteAndIncompleteFoldersView_CheckedChange;
+            manuallyChooseIncompleteFolderView = this.FindViewById<CheckBox>(Resource.Id.manuallySetIncomplete);
+            manuallyChooseIncompleteFolderView.Checked = SoulSeekState.OverrideDefaultIncompleteLocations;
+            manuallyChooseIncompleteFolderView.CheckedChange += ManuallyChooseIncompleteFolderView_CheckedChange;
+            currentCompleteFolderView = this.FindViewById<TextView>(Resource.Id.completeFolderPath);
+            currentIncompleteFolderView = this.FindViewById<TextView>(Resource.Id.incompleteFolderPath);
+
+            changeIncompleteDirectory = this.FindViewById<Button>(Resource.Id.changeIncompleteDirSettings);
+            changeIncompleteDirectory.Click += ChangeIncompleteDirectory;
+            incompleteFolderViewLayout = this.FindViewById<ViewGroup>(Resource.Id.incompleteDirectoryLayout);
+
+
+            SetIncompleteDirectoryState();
+            SetCompleteFolderView();
+            SetIncompleteFolderView();
+        }
+
+        private static string GetFriendlyDownloadDirectoryName()
+        {
+            if(SoulSeekState.RootDocumentFile==null) //even in API<21 we do set this RootDocumentFile
+            {
+                if(SoulSeekState.UseLegacyStorage())
+                {
+                    //if not set and legacy storage, then the directory is simple the default music
+                    string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                    return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment;
+                }
+                else
+                {
+                    //if not set and not legacy storage, then that is bad.  user must set it.
+                    return "Not Set";
+                }
+            }
+            else
+            {
+                return SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
+            }
+        }
+
+        public static bool UseIncompleteManualFolder()
+        {
+            return (SoulSeekState.OverrideDefaultIncompleteLocations && SoulSeekState.RootIncompleteDocumentFile != null);
+        }
+
+        private static string GetFriendlyIncompleteDirectoryName()
+        {
+            if(SoulSeekState.MemoryBackedDownload)
+            {
+                return "Not in Use";
+            }
+            if(SoulSeekState.OverrideDefaultIncompleteLocations && SoulSeekState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
+            {
+                return SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
+            }
+            else
+            {
+                if(!SoulSeekState.CreateCompleteAndIncompleteFolders)
+                {
+                    return "App Local Storage";
+                }
+                //if not override then its whatever the download directory is...
+                if (SoulSeekState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
+                {
+                    if (SoulSeekState.UseLegacyStorage())
+                    {
+                        //if not set and legacy storage, then the directory is simple the default music
+                        string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                        return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment;
+                    }
+                    else
+                    {
+                        //if not set and not legacy storage, then that is bad.  user must set it.
+                        return "Not Set";
+                    }
+                }
+                else
+                {
+                    return SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
+                }
+            }
+        }
+
+        private void SetIncompleteDirectoryState()
+        {
+            if (SoulSeekState.OverrideDefaultIncompleteLocations)
+            {
+                incompleteFolderViewLayout.Enabled = true;
+                changeIncompleteDirectory.Enabled = true;
+                incompleteFolderViewLayout.Alpha = 1.0f;
+                changeIncompleteDirectory.Alpha = 1.0f;
+            }
+            else
+            {
+                incompleteFolderViewLayout.Enabled = false;
+                changeIncompleteDirectory.Enabled = false; //this make it not clickable
+                incompleteFolderViewLayout.Alpha = .5f;
+                changeIncompleteDirectory.Alpha = .5f;
+            }
+        }
+
+        private void SetCompleteFolderView()
+        {
+            currentCompleteFolderView.Text = GetFriendlyDownloadDirectoryName();
+        }
+
+        private void SetIncompleteFolderView()
+        {
+            currentIncompleteFolderView.Text = GetFriendlyIncompleteDirectoryName();
+        }
+
+
+
+        //private static string GetIncompleteFolderLocation()
+        //{
+        //    if (SoulSeekState.OverrideDefaultIncompleteLocations)
+        //    {
+
+        //    }
+        //    else
+        //    {
+        //        if (SoulSeekState.CreateCompleteAndIncompleteFolders)
+        //        {
+
+        //        }
+        //        else
+        //        {
+
+        //        }
+        //    }
+        //}
+
+        private void ManuallyChooseIncompleteFolderView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.OverrideDefaultIncompleteLocations = e.IsChecked;
+            SetIncompleteDirectoryState();
+            SetIncompleteFolderView();
+        }
+
+        private void CreateCompleteAndIncompleteFoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.CreateCompleteAndIncompleteFolders = e.IsChecked;
+            SetIncompleteFolderView();
+        }
+
+        private void CreateUsernameSubfoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.CreateUsernameSubfolders = e.IsChecked;
         }
 
         private void PrivHelp_Click(object sender, EventArgs e)
@@ -343,6 +567,7 @@ namespace AndriodApp1
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.disabling_listener, ToastLength.Short).Show();
             }
             SoulSeekState.ListenerEnabled = e.IsChecked;
+            UpdateListeningViewState();
             SeekerApplication.SaveListeningState();
             ReconfigureOptionsAPI(null, e.IsChecked, null);
             if(e.IsChecked)
@@ -734,6 +959,7 @@ namespace AndriodApp1
         private void MemoryFileDownloadSwitchCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             SoulSeekState.MemoryBackedDownload = !e.IsChecked;
+            SetIncompleteFolderView();
         }
 
         private void DisableDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -796,6 +1022,39 @@ namespace AndriodApp1
             SoulSeekState.SharingOn = e.IsChecked;
             /*SoulSeekState.MainActivityRef.*/MainActivity.SetUnsetSharingBasedOnConditions(true);
             UpdateShareImageView();
+            UpdateSharingViewState();
+        }
+
+        private void UpdateSharingViewState()
+        {
+            if(SoulSeekState.SharingOn)
+            {
+                sharingSubLayout.Enabled = true;
+                sharingSubLayout.Alpha = 1.0f;
+            }
+            else
+            {
+                sharingSubLayout.Enabled = false;
+                sharingSubLayout.Alpha = 0.5f;
+            }
+        }
+
+        private void UpdateListeningViewState()
+        {
+            if(SoulSeekState.ListenerEnabled)
+            {
+                listeningSubLayout2.Enabled = true;
+                listeningSubLayout3.Enabled = true;
+                listeningSubLayout2.Alpha = 1.0f;
+                listeningSubLayout3.Alpha = 1.0f;
+            }
+            else
+            {
+                listeningSubLayout2.Enabled = false;
+                listeningSubLayout3.Enabled = false;
+                listeningSubLayout2.Alpha = 0.5f;
+                listeningSubLayout3.Alpha = 0.5f;
+            }
         }
 
         private void ImageView_Click(object sender, EventArgs e)
@@ -933,12 +1192,17 @@ namespace AndriodApp1
 
         private void ChangeDownloadDirectory(object sender, EventArgs e)
         {
-            ShowDirSettings(SoulSeekState.SaveDataDirectoryUri,true);
+            ShowDirSettings(SoulSeekState.SaveDataDirectoryUri,DirectoryType.Download);
         }
 
         private void ChangeUploadDirectory(object sender, EventArgs e)
         {
-            ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, false);
+            ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+        }
+
+        private void ChangeIncompleteDirectory(object sender, EventArgs e)
+        {
+            ShowDirSettings(SoulSeekState.ManualIncompleteDataDirectoryUri, DirectoryType.Incomplete);
         }
 
         private void UseApiBelow21Method(int requestCode)
@@ -978,9 +1242,13 @@ namespace AndriodApp1
                         {
                             this.SuccessfulWriteExternalLegacyCallback(uri, true);
                         }
-                        else
+                        else if(requestCode == UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY)
                         {
-                            this.SuccessfulUploadExternalLegacyCallback(uri,requestCode, true);
+                            this.SuccessfulUploadExternalLegacyCallback(uri, requestCode, true);
+                        }
+                        else if(requestCode == CHANGE_INCOMPLETE_EXTERNAL_LEGACY)
+                        {
+                            this.SuccessfulIncompleteExternalLegacyCallback(uri, true);
                         }
                     }
 
@@ -988,25 +1256,31 @@ namespace AndriodApp1
                 });
         }
 
-        private void ShowDirSettings(string dirUri, bool isForDownloadDir)
+
+
+        private void ShowDirSettings(string startingDirectory, DirectoryType directoryType)
         {
             int requestCode = -1;
             if (SoulSeekState.UseLegacyStorage())
             {
                 var legacyIntent = new Intent(Intent.ActionOpenDocumentTree);
-                if (dirUri != null && dirUri != string.Empty)
+                if (startingDirectory != null && startingDirectory != string.Empty)
                 {
-                    Android.Net.Uri res = Android.Net.Uri.Parse(dirUri);
+                    Android.Net.Uri res = Android.Net.Uri.Parse(startingDirectory);
                     legacyIntent.PutExtra(DocumentsContract.ExtraInitialUri, res);
                 }
                 legacyIntent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
-                if (isForDownloadDir)
+                if (directoryType == DirectoryType.Download)
                 {
                     requestCode = CHANGE_WRITE_EXTERNAL_LEGACY;
                 }
-                else
+                else if (directoryType == DirectoryType.Upload)
                 {
                     requestCode = UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY;
+                }
+                else if (directoryType == DirectoryType.Incomplete)
+                {
+                    requestCode = CHANGE_INCOMPLETE_EXTERNAL_LEGACY;
                 }
                 try
                 {
@@ -1018,7 +1292,7 @@ namespace AndriodApp1
                     {
                         if(Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
                         {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.error_no_file_manager, ToastLength.Long).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.error_no_file_manager, ToastLength.Long).Show();
                         }
                         else //API 19 and 20 will always fail with that error message... therefore use our internal method...
                         {
@@ -1037,18 +1311,22 @@ namespace AndriodApp1
                 var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
                 var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
                 intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
-                if (dirUri != null && dirUri != string.Empty)
+                if (startingDirectory != null && startingDirectory != string.Empty)
                 {
-                    Android.Net.Uri res = Android.Net.Uri.Parse(dirUri);
+                    Android.Net.Uri res = Android.Net.Uri.Parse(startingDirectory);
                     intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
                 }
-                if (isForDownloadDir)
+                if (directoryType == DirectoryType.Download)
                 {
                     requestCode = CHANGE_WRITE_EXTERNAL;
                 }
-                else
+                else if(directoryType == DirectoryType.Upload)
                 {
                     requestCode = UPLOAD_DIR_CHANGE_WRITE_EXTERNAL;
+                }
+                else if(directoryType == DirectoryType.Incomplete)
+                {
+                    requestCode = CHANGE_INCOMPLETE_EXTERNAL;
                 }
                 try
                 {
@@ -1058,7 +1336,7 @@ namespace AndriodApp1
                 {
                     if(e.Message.ToLower().Contains("no activity found to handle"))
                     {
-                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.error_no_file_manager, ToastLength.Long).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.error_no_file_manager, ToastLength.Long).Show();
                     }
                     else
                     {
@@ -1086,9 +1364,39 @@ namespace AndriodApp1
             SoulSeekState.RootDocumentFile = docFile; 
             this.RunOnUiThread(new Action(() =>
             {
+                SoulSeekState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
                 Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long).Show();
             }));
         }
+
+        public static bool UseTempDirectory()
+        {
+            return !UseIncompleteManualFolder() && !SoulSeekState.CreateCompleteAndIncompleteFolders;
+        }
+
+        private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromSubApi21 = false)
+        {
+            var x = uri;
+            //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+            SoulSeekState.ManualIncompleteDataDirectoryUri = uri.ToString();
+            //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
+            DocumentFile docFile = null;
+            if (fromSubApi21)
+            {
+                docFile = DocumentFile.FromFile(new Java.IO.File(uri.Path));
+            }
+            else
+            {
+                docFile = DocumentFile.FromTreeUri(this, uri);
+            }
+            SoulSeekState.RootIncompleteDocumentFile = docFile;
+            this.RunOnUiThread(new Action(() =>
+            {
+                SoulSeekState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long).Show();
+            }));
+        }
+
 
         private void SuccessfulUploadExternalLegacyCallback(Android.Net.Uri uri, int requestCode, bool fromSubApi21 = false)
         {
@@ -1156,6 +1464,7 @@ namespace AndriodApp1
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission| ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action( ()=>
                     {
+                        SoulSeekState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
                         Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir),data.Data), ToastLength.Long).Show();
                     }));
                 }
@@ -1168,35 +1477,34 @@ namespace AndriodApp1
                     SuccessfulWriteExternalLegacyCallback(data.Data);
                 }
             }
-            //if(UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode)
-            //{
-            //    if (resultCode == Result.Ok)
-            //    {
-            //        var x = data.Data;
-            //        //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-            //        SoulSeekState.UploadDataDirectoryUri = data.Data.ToString();
-            //        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantReadUriPermission);
-            //        this.RunOnUiThread(new Action(() =>
-            //        {
-            //            Toast.MakeText(this, "Successfully set Shared Directory", ToastLength.Long).Show();
-            //        }));
-            //    }
-            //}
-            //if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY == requestCode)
-            //{
-            //    if (resultCode == Result.Ok)
-            //    {
-            //        var x = data.Data;
-            //        //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-            //        SoulSeekState.UploadDataDirectoryUri = data.Data.ToString();
-            //        //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
-            //        this.RunOnUiThread(new Action(() =>
-            //        {
-            //            Toast.MakeText(this, "Successfully set Shared Directory", ToastLength.Long).Show();
-            //        }));
-            //    }
-            //}
-            if(UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY==requestCode)
+
+
+            if (CHANGE_INCOMPLETE_EXTERNAL == requestCode)
+            {
+                if (resultCode == Result.Ok)
+                {
+                    var x = data.Data;
+                    SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                    SoulSeekState.ManualIncompleteDataDirectoryUri = data.Data.ToString();
+                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    this.RunOnUiThread(new Action(() =>
+                    {
+                        SoulSeekState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long).Show();
+                    }));
+                }
+            }
+            if (CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode)
+            {
+                if (resultCode == Result.Ok)
+                {
+                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    SuccessfulIncompleteExternalLegacyCallback(data.Data);
+                }
+            }
+
+
+            if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY==requestCode)
             {
                 if(resultCode != Result.Ok)
                 {
@@ -1212,5 +1520,48 @@ namespace AndriodApp1
 
             }
         }
+
+        public static void RestoreAdditionalDirectorySettingsFromSharedPreferences()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                SoulSeekState.CreateCompleteAndIncompleteFolders = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_CreateCompleteAndIncompleteFolders, true);
+                SoulSeekState.OverrideDefaultIncompleteLocations = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_UseManualIncompleteDirectoryUri, false);
+                SoulSeekState.CreateUsernameSubfolders = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_AdditionalUsernameSubdirectories, false);
+                SoulSeekState.ManualIncompleteDataDirectoryUri = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_ManualIncompleteDirectoryUri, string.Empty);
+            }
+        }
+
+        public static void SaveAdditionalDirectorySettingsToSharedPreferences()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutBoolean(SoulSeekState.M_CreateCompleteAndIncompleteFolders, SoulSeekState.CreateCompleteAndIncompleteFolders);
+                editor.PutBoolean(SoulSeekState.M_UseManualIncompleteDirectoryUri, SoulSeekState.OverrideDefaultIncompleteLocations);
+                editor.PutBoolean(SoulSeekState.M_AdditionalUsernameSubdirectories, SoulSeekState.CreateUsernameSubfolders);
+                editor.PutString(SoulSeekState.M_ManualIncompleteDirectoryUri, SoulSeekState.ManualIncompleteDataDirectoryUri);
+                bool success = editor.Commit();
+            }
+        }
+
+        public static void SaveManualIncompleteDirToSharedPreferences()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutString(SoulSeekState.M_ManualIncompleteDirectoryUri, SoulSeekState.ManualIncompleteDataDirectoryUri);
+                bool success = editor.Commit();
+            }
+        }
+
+    }
+
+    enum DirectoryType : ushort
+    {
+        Download = 0,
+        Upload = 1,
+        Incomplete = 2
     }
 }
+

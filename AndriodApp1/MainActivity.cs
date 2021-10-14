@@ -1405,6 +1405,14 @@ namespace AndriodApp1
         /// <returns></returns>
         public static bool AddToIgnoreList(string username)
         {
+            //typically its tough to add a user to ignore list from the UI if they are in the User List.
+            //but for example if you ignore a user based on their message.
+            //User List and Ignore List and mutually exclusive so if you ignore someone, they will be removed from user list.
+            if(MainActivity.UserListContainsUser(username))
+            {
+                MainActivity.UserListRemoveUser(username);
+            }
+
             lock (SoulSeekState.IgnoreUserList)
             {
                 if (SoulSeekState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
@@ -1619,6 +1627,7 @@ namespace AndriodApp1
                 SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
 
                 SearchTabHelper.RestoreStateFromSharedPreferences();
+                SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
             }
         }
 
@@ -3221,6 +3230,72 @@ namespace AndriodApp1
                         MainActivity.LogFirebase("cannot write" + chosenUri?.ToString()??"null");
                     }
                 }
+
+                //now for incomplete
+                if (SoulSeekState.ManualIncompleteDataDirectoryUri != null && SoulSeekState.ManualIncompleteDataDirectoryUri.ToString() != "")
+                {
+                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+                    Android.Net.Uri chosenIncompleteUri = Android.Net.Uri.Parse(SoulSeekState.ManualIncompleteDataDirectoryUri);
+                    bool canWrite = false;
+                    try
+                    {
+                        //a phone failed 4 times with //POCO X3 Pro
+                        //Android 11(SDK 30)
+                        //Caused by: java.lang.IllegalArgumentException: 
+                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
+                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
+                        if (SoulSeekState.PreOpenDocumentTree())
+                        {
+                            canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path)).CanWrite();
+                        }
+                        else
+                        {
+                            //on changing the code and restarting for api 22 
+                            //persistenduripermissions is empty
+                            //and exists is false, cannot list files
+
+                            //var list1 = this.ContentResolver.PersistedUriPermissions;
+                            //foreach(var item1 in list1)
+                            //{
+                            //    string content1 = item1.Uri.Path;
+                            //}
+
+                            //DocumentFile diagF = DocumentFile.FromTreeUri(this, chosenUri);
+                            //var files = diagF.ListFiles();
+                            //int cnt = files.Count();
+                            //bool exists = DocumentFile.FromTreeUri(this, chosenUri).Exists();  
+                            canWrite = DocumentFile.FromTreeUri(this, chosenIncompleteUri).CanWrite();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (chosenIncompleteUri != null)
+                        {
+                            LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with URI: " + chosenIncompleteUri.ToString() + " " + e.Message);
+                        }
+                        else
+                        {
+                            LogFirebase("legacy Incomplete DocumentFile.FromTreeUri failed with null URI");
+                        }
+                    }
+                    if (canWrite)
+                    {
+                        if (SoulSeekState.PreOpenDocumentTree())
+                        {
+                            SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path));
+                        }
+                        else
+                        {
+                            SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, chosenIncompleteUri);
+                        }
+                    }
+                    else
+                    {
+                        MainActivity.LogFirebase("cannot write incomplete" + chosenIncompleteUri?.ToString() ?? "null");
+                    }
+                }
+
+
             }
             else
             {
@@ -3246,6 +3321,15 @@ namespace AndriodApp1
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     res = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri);
                 }
+
+                //string path  = res.Path; 
+                //string lastPath = res.LastPathSegment;
+                //var segs = res.PathSegments;
+                //DocumentFile f = DocumentFile.FromTreeUri(this, res);
+                //string name = f.Name;
+                //bool isEmulated = Android.OS.Environment.IsExternalStorageEmulated;
+                //bool isRemovable = Android.OS.Environment.IsExternalStorageRemovable;
+
                 bool canWrite = false;
                 try
                 {
@@ -3315,6 +3399,50 @@ namespace AndriodApp1
                 {
                     SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
                 }
+
+                //for incomplete case
+                Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
+                if (SoulSeekState.ManualIncompleteDataDirectoryUri != null && SoulSeekState.ManualIncompleteDataDirectoryUri.ToString() != "")
+                {
+                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
+                    incompleteRes = Android.Net.Uri.Parse(SoulSeekState.ManualIncompleteDataDirectoryUri);
+                }
+                bool canWriteIncomplete = false;
+                try
+                {
+                    //a phone failed 4 times with //POCO X3 Pro
+                    //Android 11(SDK 30)
+                    //Caused by: java.lang.IllegalArgumentException: 
+                    //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
+                    //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
+                    if (SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
+                    {
+                        canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
+                    }
+                    else
+                    {
+                        canWriteIncomplete = DocumentFile.FromTreeUri(this, incompleteRes).CanWrite();
+                    }
+                }
+                catch (Exception e)
+                {
+                    if (incompleteRes != null)
+                    {
+                        LogFirebase("DocumentFile.FromTreeUri failed with incomplete URI: " + incompleteRes.ToString() + " " + e.Message);
+                    }
+                    else
+                    {
+                        LogFirebase("DocumentFile.FromTreeUri failed with incomplete null URI");
+                    }
+                }
+                if(canWriteIncomplete)
+                {
+                    SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                }
+
+
+
+
             }
 
 
@@ -4782,13 +4910,13 @@ namespace AndriodApp1
                 string finalUri = string.Empty;
                 if(task is Task<byte[]> tbyte)
                 {
-                    string path = SaveToFile(e.dlInfo.fullFilename, tbyte.Result, null, null, true, out finalUri);
+                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, out finalUri);
                     SaveFileToMediaStore(path);
                 }
                 else if(task is Task<Tuple<string, string>> tString)
                 {
                     //move file...
-                    string path = SaveToFile(e.dlInfo.fullFilename, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, out finalUri);
+                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, out finalUri);
                     SaveFileToMediaStore(path);
                 }
                 else
@@ -5196,12 +5324,24 @@ namespace AndriodApp1
             string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
-            //if (bytes.Length == 0)
-            //{
-            //    LogFirebase("EMPTY BYTE ARRAY");
-            //}
+            bool useDownloadDir = false;
+            if (SoulSeekState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+            {
+                useDownloadDir = true;
+            }
+            bool useTempDir = false;
+            if (SettingsActivity.UseTempDirectory())
+            {
+                useTempDir = true;
+            }
+            bool useCustomDir = false;
+            if (SettingsActivity.UseIncompleteManualFolder())
+            {
+                useCustomDir = true;
+            }
+
             bool fileExists = false;
-            if (SoulSeekState.UseLegacyStorage() && SoulSeekState.RootDocumentFile == null)
+            if (SoulSeekState.UseLegacyStorage() && (SoulSeekState.RootDocumentFile == null && useDownloadDir))
             {
                 System.IO.FileStream fs = null;
                 Java.IO.File incompleteDir = null;
@@ -5282,7 +5422,27 @@ namespace AndriodApp1
                 //MainActivity.LogDebug("rootDocumentFileIsNull: " + rootDocumentFileIsNull);
                 try
                 {
-                    rootdir = SoulSeekState.RootDocumentFile;
+                    if(useDownloadDir)
+                    { 
+                        rootdir = SoulSeekState.RootDocumentFile;
+                        MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
+                    }
+                    else if (useTempDir)
+                    {
+                        Java.IO.File appPrivateExternal = SoulSeekState.ActiveActivityRef.GetExternalFilesDir(null);
+                        rootdir = DocumentFile.FromFile(appPrivateExternal);
+                        MainActivity.LogDebug("using temp incomplete dir");
+                    }
+                    else if(useCustomDir)
+                    {
+                        rootdir = SoulSeekState.RootIncompleteDocumentFile;
+                        MainActivity.LogDebug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                    }
+                    else
+                    {
+                        MainActivity.LogFirebase("!! should not get here, no dirs");
+                    }
+
                     if (!rootdir.Exists())
                     {
                         LogFirebase("rootdir (nonnull) does not exist: " + rootdir.Uri);
@@ -5418,7 +5578,7 @@ namespace AndriodApp1
                 else
                 {
                     partialLength = 0;
-                    DocumentFile mFile = folderDir1.CreateFile(Helpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name)); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
+                    DocumentFile mFile = Helpers.CreateMediaFile(folderDir1,name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri;
                     stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
@@ -5480,7 +5640,7 @@ namespace AndriodApp1
 
 
 
-        private static string SaveToFile(string fullfilename, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, out string finalUri)
+        private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, out string finalUri)
         {
             string name = Helpers.GetFileNameFromFile(fullfilename);
             string dir  = Helpers.GetFolderNameFromFile(fullfilename);
@@ -5496,8 +5656,12 @@ namespace AndriodApp1
                 LogFirebase("no URI in file mode");
             }
             finalUri = string.Empty;
-            if(SoulSeekState.UseLegacyStorage() && SoulSeekState.RootDocumentFile == null)
+            if(SoulSeekState.UseLegacyStorage() && 
+                (SoulSeekState.RootDocumentFile == null && !SettingsActivity.UseIncompleteManualFolder())) //if the user didnt select a complete OR incomplete directory. i.e. pure java files.  
             {
+
+                //this method works just fine if coming from a temp dir.  just not a open doc tree dir.
+
                 string rootdir=string.Empty;
                 //if (SoulSeekState.SaveDataDirectoryUri ==null || SoulSeekState.SaveDataDirectoryUri == string.Empty)
                 //{
@@ -5512,7 +5676,16 @@ namespace AndriodApp1
                     (new Java.IO.File(rootdir)).Mkdirs();
                 }
                 //string rootdir = GetExternalFilesDir(Android.OS.Environment.DirectoryMusic)
-                string fullDir = rootdir + @"/Soulseek Complete/" + dir; //+ @"/" + name;
+                string intermediateFolder = @"/";
+                if (SoulSeekState.CreateCompleteAndIncompleteFolders)
+                {
+                    intermediateFolder = @"/Soulseek Complete/";
+                }
+                if(SoulSeekState.CreateUsernameSubfolders)
+                {
+                    intermediateFolder = intermediateFolder + username + @"/"; //TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
+                }
+                string fullDir = rootdir + intermediateFolder + dir; //+ @"/" + name;
                 Java.IO.File musicDir = new Java.IO.File(fullDir);
                 musicDir.Mkdirs();
                 filePath = fullDir + @"/" + name;
@@ -5533,6 +5706,45 @@ namespace AndriodApp1
             }
             else
             {
+                bool useLegacyDocFileToJavaFileOverride = false;
+                DocumentFile legacyRootDir = null;
+                if(SoulSeekState.UseLegacyStorage() && SoulSeekState.RootDocumentFile == null && SettingsActivity.UseIncompleteManualFolder())
+                {
+                    //this means that even though rootfile is null, manual folder is set and is a docfile.
+                    //so we must wrap the default root doc file.
+                    string legacyRootdir = string.Empty;
+                    //if (SoulSeekState.SaveDataDirectoryUri ==null || SoulSeekState.SaveDataDirectoryUri == string.Empty)
+                    //{
+                    legacyRootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                    //}
+                    //else
+                    //{
+                    //    rootdir = SoulSeekState.SaveDataDirectoryUri;
+                    //}
+                    Java.IO.File legacyRoot = (new Java.IO.File(legacyRootdir));
+                    if (!legacyRoot.Exists())
+                    {
+                        legacyRoot.Mkdirs();
+                    }
+
+                    legacyRootDir = DocumentFile.FromFile(legacyRoot);
+
+                    useLegacyDocFileToJavaFileOverride = true;
+
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
                 DocumentFile folderDir1 = null; //this is the desired location.
                 DocumentFile rootdir = null;
 
@@ -5546,7 +5758,14 @@ namespace AndriodApp1
 
 
 
+
                     rootdir = SoulSeekState.RootDocumentFile;
+
+                    if (useLegacyDocFileToJavaFileOverride)
+                    {
+                        rootdir = legacyRootDir;
+                    }
+
                     if (!rootdir.Exists())
                     {
                         diagRootDirExists = false;
@@ -5555,22 +5774,59 @@ namespace AndriodApp1
                     }
                     //var slskCompleteUri = rootdir.Uri + @"/Soulseek Complete/";
 
-                    DocumentFile slskDir1 = rootdir.FindFile("Soulseek Complete"); //does Soulseek Complete folder exist
-                    if(slskDir1 == null || !slskDir1.Exists())
+                    DocumentFile slskDir1 = null;
+                    if (SoulSeekState.CreateCompleteAndIncompleteFolders)
                     {
-                        slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
-                        LogDebug("Creating Soulseek Complete");
-                        diagDidWeCreateSoulSeekDir = true;
+                        slskDir1 = rootdir.FindFile("Soulseek Complete"); //does Soulseek Complete folder exist
+                        if(slskDir1 == null || !slskDir1.Exists())
+                        {
+                            slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
+                            LogDebug("Creating Soulseek Complete");
+                            diagDidWeCreateSoulSeekDir = true;
+                        }
+
+                        if(slskDir1 == null)
+                        {
+                            diagSlskDirExistsAfterCreation = false;
+                        }
+                        else if(!slskDir1.Exists())
+                        {
+                            diagSlskDirExistsAfterCreation = false;
+                        }
+                    }
+                    else
+                    {
+                        slskDir1 = rootdir;
                     }
 
-                    if(slskDir1 == null)
+                    bool diagUsernameDirExistsAfterCreation = false;
+                    bool diagDidWeCreateUsernameDir = false;
+                    if (SoulSeekState.CreateUsernameSubfolders)
                     {
-                        diagSlskDirExistsAfterCreation = false;
+                        DocumentFile tempUsernameDir1 = null;
+                        tempUsernameDir1 = slskDir1.FindFile(username); //does username folder exist
+                        if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
+                        {
+                            tempUsernameDir1 = slskDir1.CreateDirectory(username);
+                            LogDebug(string.Format("Creating {0} dir",username));
+                            diagDidWeCreateUsernameDir = true;
+                        }
+
+                        if (tempUsernameDir1 == null)
+                        {
+                            diagUsernameDirExistsAfterCreation = false;
+                        }
+                        else if (!slskDir1.Exists())
+                        {
+                            diagUsernameDirExistsAfterCreation = false;
+                        }
+                        else
+                        {
+                            diagUsernameDirExistsAfterCreation = true;
+                        }
+                        slskDir1 = tempUsernameDir1;
                     }
-                    else if(!slskDir1.Exists())
-                    {
-                        diagSlskDirExistsAfterCreation = false;
-                    }
+
 
                     folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
                     if(folderDir1 == null || !folderDir1.Exists())
@@ -5586,7 +5842,7 @@ namespace AndriodApp1
                 }
                 catch(Exception e)
                 {
-                    MainActivity.LogFirebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull);
+                    MainActivity.LogFirebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + SoulSeekState.CreateUsernameSubfolders);
                 }
 
                 if(rootdir == null && !SoulSeekState.UseLegacyStorage())
@@ -5606,7 +5862,7 @@ namespace AndriodApp1
                 //FileOutputStream stream = new FileOutputStream(mFile);
                 if(memoryMode)
                 {
-                    DocumentFile mFile = folderDir1.CreateFile(Helpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
+                    DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
                     System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                     stream.Write(bytes);
@@ -5617,9 +5873,12 @@ namespace AndriodApp1
 
                     //106ms for 32mb
                     Android.Net.Uri uri = null;
-                    if(SoulSeekState.PreMoveDocument())
+                    if(SoulSeekState.PreMoveDocument() ||
+                        SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
+                        (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
+                        ) 
                     {
-                        DocumentFile mFile = folderDir1.CreateFile(Helpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
+                        DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
                         uri = mFile.Uri;
                         finalUri = mFile.Uri.ToString();
                         System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
@@ -5627,7 +5886,29 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        uri = DocumentsContract.MoveDocument(SoulSeekState.ActiveActivityRef.ContentResolver, uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); //ADDED IN API 24!!
+                        try
+                        {
+                            string realName = string.Empty;
+                            if (SettingsActivity.UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
+                            {
+                                var df = DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, uriOfIncomplete); //dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                                realName = df.Name;
+                            }
+
+                            uri = DocumentsContract.MoveDocument(SoulSeekState.ActiveActivityRef.ContentResolver, uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); //ADDED IN API 24!!
+                            //"/tree/primary:musictemp/document/primary:music2/J when two different uri trees the uri returned from move document is a mismash of the two... even tho it actually moves it correctly.
+                            //folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
+                            if(SettingsActivity.UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
+                            {
+                                uri = folderDir1.FindFile(realName).Uri; //dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message);
+                            SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                            MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                        }
                         //throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
                     }
                     finalUri = uri.ToString();
@@ -5639,7 +5920,7 @@ namespace AndriodApp1
 
                     if (uri == null)
                     {
-                        LogFirebase("DocumentsContract MoveDocument FAILED");
+                        LogFirebase("DocumentsContract MoveDocument FAILED, override incomplete: " + SoulSeekState.OverrideDefaultIncompleteLocations);
                     }
                     //stopwatch.Stop();
                     //LogDebug("DocumentsContract.MoveDocument took: " + stopwatch.ElapsedMilliseconds);
@@ -5662,7 +5943,7 @@ namespace AndriodApp1
             to.Flush();
             to.Close();
 
-            if(SoulSeekState.PreOpenDocumentTree())
+            if(SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory())
             {
                 try
                 {
@@ -5678,7 +5959,7 @@ namespace AndriodApp1
             }
             else
             {
-                DocumentFile df = DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, toDelete);
+                DocumentFile df = DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, toDelete); //this returns a file that doesnt exist with file ://
 
                 if (!df.Delete()) //on API 19 this seems to always fail..
                 {
@@ -5687,13 +5968,13 @@ namespace AndriodApp1
             }
 
             DocumentFile parent = null;
-            if (SoulSeekState.PreOpenDocumentTree())
+            if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory())
             {
                 parent = DocumentFile.FromFile(new Java.IO.File(parentToDelete.Path));
             }
             else
             {
-                parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentToDelete); //if from single uri then listing files will give unsupported operation exception...
+                parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentToDelete); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
             }
             LogDebug(parent.Name + "p name");
             LogDebug(parent.ListFiles().ToString());
@@ -5819,8 +6100,10 @@ namespace AndriodApp1
                 editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
             }
 
+               
+
             //editor.Apply();
-            editor.Commit();
+                editor.Commit();
             }
         }
 
@@ -5849,6 +6132,7 @@ namespace AndriodApp1
             {
                 outState.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
             }
+            
         }
 
         private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs e)
@@ -6341,6 +6625,7 @@ namespace AndriodApp1
         public static bool IsStartUpServiceCurrentlyRunning = false;
         public static String SaveDataDirectoryUri = null;
         public static String UploadDataDirectoryUri = null;
+        public static String ManualIncompleteDataDirectoryUri = null;
         public static bool DownloadKeepAliveServiceRunning = false;
         public static SlskHelp.SharedFileCache SharedFileCache = null;
         public static int UploadSpeed = -1; //bytes
@@ -6356,6 +6641,12 @@ namespace AndriodApp1
         public static bool ListenerEnabled = true;
         public static volatile int ListenerPort = 33939;
         public static bool ListenerUPnpEnabled = true;
+
+        public static bool CreateCompleteAndIncompleteFolders = true;
+        public static bool CreateUsernameSubfolders = false;
+        public static bool OverrideDefaultIncompleteLocations = false;
+
+        public static EventHandler<EventArgs> DirectoryUpdatedEvent;
 
         /// <summary>
         /// This is only for showing toasts.  The logic is as follows.  If we showed a cancelled toast 
@@ -6503,9 +6794,14 @@ namespace AndriodApp1
         public const string M_UserInfoPicture = "Momento_UserInfoPicture";
         public const string M_UserNotes = "Momento_UserNotes";
 
+        public const string M_ManualIncompleteDirectoryUri = "Momento_ManualIncompleteDirectoryUri";
+        public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
+        public const string M_CreateCompleteAndIncompleteFolders= "Momento_CreateCompleteIncomplete";
+        public const string M_AdditionalUsernameSubdirectories = "Momento_M_AdditionalUsernameSubdirectories";
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
         public static Android.Support.V4.Provider.DocumentFile RootDocumentFile = null;
+        public static Android.Support.V4.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
         public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
         {
             BrowseResponseReceived(null,new BrowseResponseEvent(origBR,rootTree, fromUsername, startingLocation));
@@ -6622,6 +6918,21 @@ namespace AndriodApp1
             return incompleteFolderName;
         }
 
+        public static bool IsFileUri(string uriString)
+        {
+            if(uriString.StartsWith("file:"))
+            {
+                return true;
+            }
+            else if(uriString.StartsWith("content:"))
+            {
+                return false;
+            }
+            else
+            {
+                throw new Exception("IsFileUri failed: " + uriString);
+            }
+        }
 
         static Helpers()
         {
@@ -6955,19 +7266,78 @@ namespace AndriodApp1
             return clipped;
         }
 
+
+        //this is a helper for this issue:
+        //var name1 = df.CreateFile("audio/m4a", "name1").Name;
+        //var name2 = df.CreateFile("audio/x-m4a", "name2").Name;
+        //  are both extensionless....
+        public static DocumentFile CreateMediaFile(DocumentFile parent, string name)
+        {
+            if(Helpers.GetMimeTypeFromFilename(name) == M4A_MIME)
+            {
+                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .m4a extension for us..
+            }
+            else if(Helpers.GetMimeTypeFromFilename(name) == APE_MIME)
+            {
+                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .ape extension for us..
+            }
+            else if(Helpers.GetMimeTypeFromFilename(name)==null)
+            {
+                //a null mimetype is fine, it just defaults to application/octet-stream
+                return parent.CreateFile(null, name); //we use just name since it will not add the extension for us..
+            }
+            else
+            {
+                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
+            }
+        }
+
+
+
         //examples..
         //Helpers.GetMimeTypeFromFilename("x.flac");//"audio/flac"
         //Helpers.GetMimeTypeFromFilename("x.mp3"); //"audio/mpeg"
         //Helpers.GetMimeTypeFromFilename("x.wmv"); //"video/x-ms-wmv"
+        //Helpers.GetMimeTypeFromFilename("x.wma"); // good
         //Helpers.GetMimeTypeFromFilename("x.png"); //"image/png"
+        //THIS FAILS MISERABLY FOR M4A FILES. it regards them as mp3, causing both android and windows foobar to deem them corrupted and refuse to play them!
+        //[seeker] .wma === audio/x-ms-wma
+        //[seeker] .flac === audio/flac
+        //[seeker] .aac === audio/aac
+        //[seeker] .m4a === audio/mpeg  --- miserable failure should be audio/m4a or audio/x-m4a
+        //[seeker] .mp3 === audio/mpeg
+        //[seeker] .oga === audio/ogg
+        //[seeker] .ogg === audio/ogg
+        //[seeker] .opus === audio/ogg
+        //[seeker] .wav === audio/x-wav
+        //[seeker] .mp4 === video/mp4
+
+        //other problematic - 
+        //        ".alac", -> null
+        //        ".ape",  -> null  // audio/x-ape
+        //        ".m4p" //aac with apple drm. similar to the drm free m4a. audio/m4p not mp4 which is reported. I am not sure...
+        public const string M4A_MIME = "audio/m4a";
+        public const string APE_MIME = "audio/x-ape";
         public static string GetMimeTypeFromFilename(string filename)
         {
             string ext = System.IO.Path.GetExtension(filename).ToLower();
             string mimeType = @"audio/mpeg"; //default
             if (ext != null && ext != string.Empty)
             {
-                ext = ext.TrimStart('.');
-                mimeType = Android.Webkit.MimeTypeMap.Singleton.GetMimeTypeFromExtension(ext);
+                switch(ext)
+                {
+                    case ".ape":
+                        mimeType = APE_MIME;
+                        break;
+                    case ".m4a":
+                        mimeType = M4A_MIME;
+                        break;
+                    default:
+                        ext = ext.TrimStart('.');
+                        mimeType = Android.Webkit.MimeTypeMap.Singleton.GetMimeTypeFromExtension(ext);
+                        break;
+                }
+
             }
             return mimeType;
         }

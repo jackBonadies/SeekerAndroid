@@ -38,23 +38,241 @@
             android:padding="4dip"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+
+                        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "10dp"
+                android:gravity="center_horizontal"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/directoryLayout"
+                android:orientation="vertical">
+
+                        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "10dp"
+                    android:gravity="center_horizontal"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/dlChangeDirectoryLayout"
+                android:orientation="horizontal">
+
+                                            <LinearLayout
+                android:layout_width="wrap_content"
+                        android:layout_marginRight="10dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "10dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/directoryLayout"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp"
+                            android:layout_gravity="center_horizontal"
+                    android:text="Current Download Folder: "
+                            android:textColor="@color/normalTextColor"
+                    android:textSize="12dp"
+                    />
+
+                               <TextView
+                            android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="folderPathDummy"
+                            
+                     android:id="@+id/completeFolderPath"
+
+                            android:padding="2dp"
+                            android:background="@drawable/rounded_corner_background"
+                            android:textColor="@color/normalTextColor"
+                    
+                    />
+
+                     </LinearLayout>
+
             <Button
                 android:layout_centerHorizontal="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/change_download_folder"
+                android:text="Change"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop = "40dp"
-                android:layout_marginBottom = "50dp"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
                 style="@style/SeekerButtonStyle"
                 android:foreground="@drawable/button"
                 android:id="@+id/changeDirSettings"
        />
+
+                </LinearLayout>
+
+
+                            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="Create Soulseek Complete and Soulseek Incomplete Directories"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/createCompleteAndIncompleteDirectories"
+                android:layout_marginBottom = "10dp"/>
+
+                                            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="Create Username Subfolders"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="10dp"
+                android:layout_gravity="center"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/createUsernameSubfolders"
+                android:layout_marginBottom = "10dp"/>
+
+
+
+
+                           <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
+                    
+                    android:layout_marginRight="10dp"
+                android:id="@+id/incompleteFolderLayout"
+                android:background="@drawable/border_group_box"
+                android:orientation="vertical"
+                >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "2dp"
+                        
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/incompleteFolderSubLayout"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal|fill_horizontal|center">
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Manually Set Incomplete Folder"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "4dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/manuallySetIncomplete"
+       />
+
+
+<!--                                        <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/moreInfoButton"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="@color/mainTextColor"
+            />-->
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_marginLeft = "32dp"
+                        android:gravity="center_horizontal"
+                        android:layout_centerHorizontal="true"
+                    android:id="@+id/incompleteSublayout2"
+                    android:orientation="horizontal">
+
+                        
+                                            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "10dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/incompleteDirectoryLayout"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                    android:text="Current Incomplete Folder:"
+                            android:textColor="@color/normalTextColor"
+                    android:textSize="12dp"
+                                android:layout_marginBottom="4dp"
+                    />
+
+                               <TextView
+                            android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="incompleteFolderPathDummy"
+                                android:id="@+id/incompleteFolderPath"
+                            android:padding="2dp"
+                            android:background="@drawable/rounded_corner_background"
+                            android:textColor="@color/normalTextColor"
+                    
+                    />
+
+                     </LinearLayout>
+
+            <Button
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Change"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
+                style="@style/SeekerButtonStyle"
+                android:foreground="@drawable/button"
+                android:id="@+id/changeIncompleteDirSettings"
+       />
+
+                </LinearLayout> <!--Incomplete Sublayout 2-->
+
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+
+
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/changeDirSettings"
+                android:layout_below="@id/directoryLayout"
                 android:layout_marginTop = "10dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/searchResLayout"
@@ -382,7 +600,7 @@
                     android:layout_marginBottom = "10dp"
                     android:layout_marginLeft = "32dp"
 
-                    android:id="@+id/moreInfoLayout"
+                    android:id="@+id/sharingSubLayout"
                     android:orientation="horizontal">
 
 

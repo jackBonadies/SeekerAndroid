@@ -598,5 +598,6 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
     <string name="note">Note</string>
       <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
 
+  <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
 
 </resources>

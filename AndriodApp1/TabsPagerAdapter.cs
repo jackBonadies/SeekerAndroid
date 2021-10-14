@@ -5461,7 +5461,7 @@ namespace AndriodApp1
                         //tested on API25 and API30
                         //AndroidX.Core.Content.FileProvider
                         Android.Net.Uri uriToUse = null;
-                        if(SoulSeekState.UseLegacyStorage())
+                        if(SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri(tItem.FinalUri)) //i.e. if it is a FILE URI.
                         {
                             uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse(tItem.FinalUri).Path));
                         }
