@@ -295,6 +295,8 @@ namespace AndriodApp1
                 {
                     //shouldnt get here
                 }
+                //TODO there is a case due to like button mashing or if you keep requesting idk. but its a SoulseekClient InnerException and it says peer disconnected unexpectedly and timeout.
+
                 //List<string> terms = new List<string>();
                 //terms.Add("Collective");
                 string errorString = string.Empty;
@@ -1016,7 +1018,7 @@ namespace AndriodApp1
             return task;
         }
 
-        public static Android.Net.Uri GetIncompleteUri(string username, string fullfilename)
+        public static Android.Net.Uri GetIncompleteUri(string username, string fullfilename) //TODO remove unused method
         {
             string name = Helpers.GetFileNameFromFile(fullfilename);
             string dir = Helpers.GetFolderNameFromFile(fullfilename);
@@ -1027,7 +1029,24 @@ namespace AndriodApp1
             //    LogFirebase("EMPTY BYTE ARRAY");
             //}
 
-            if (SoulSeekState.UseLegacyStorage() && SoulSeekState.RootDocumentFile == null)
+            //i.e. just use the Download Folder
+            bool useDownloadDir = false;
+            if(SoulSeekState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+            {
+                useDownloadDir = true;
+            }
+            bool useTempDir = false;
+            if (SettingsActivity.UseTempDirectory())
+            {
+                useTempDir = true;
+            }
+            bool useCustomDir = false;
+            if (SettingsActivity.UseIncompleteManualFolder())
+            {
+                useCustomDir = true;
+            }
+
+            if (SoulSeekState.UseLegacyStorage() && (SoulSeekState.RootDocumentFile == null && useDownloadDir))
             {
                 string rootdir = string.Empty;
                 rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
@@ -1038,9 +1057,31 @@ namespace AndriodApp1
             else
             {
                 DocumentFile rootdir = null;
+                
                 try
                 {
-                    rootdir = SoulSeekState.RootDocumentFile;
+                    if(useCustomDir)
+                    {
+                        rootdir = SoulSeekState.RootIncompleteDocumentFile;
+                    }
+                    else if(useDownloadDir)
+                    {
+                        rootdir = SoulSeekState.RootDocumentFile;
+                    }
+                    else if(useTempDir)
+                    {
+                        //getExternalFilesDir() or getFilesDir()
+                        //no permissions needed for either of these
+                        //these will be removed on uninstall
+                        //internal storage tends to be more limited...
+                        //external storage is not always there like if user removed SD card.
+                        //on API29+ they are encrypted if internal which seems wasteful for our purposes...
+                        //Environment.getExternalStorageState() == media_mounted if available
+                        //On devices without removable external storage, use the following command to enable a virtual volume for testing your external storage availability logic:
+                        //  adb shell sm set-virtual-disk true
+                        //If a shared storage device is emulated(as determined by Environment#isExternalStorageEmulated(File)), it's contents are backed by a private user data partition, which means there is little benefit to storing data here instead of the private directories returned by getFilesDir(), etc. 
+
+                    }
                     string fullPath = rootdir.Uri.Path + @"/Soulseek Incomplete/" + username + "_" + dir + @"/" + name;
                     return Android.Net.Uri.Parse(new Java.IO.File(fullPath).ToURI().ToString());
                 }
@@ -1050,6 +1091,7 @@ namespace AndriodApp1
                     return null;
                 }
             }
+
         }
 
 
