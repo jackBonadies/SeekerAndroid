@@ -257,6 +257,10 @@ func main() {
 
 			setIfEmpty(meta, "Summary", summary)
 
+			if len(apkInfo.Categories) != 0 {
+				meta["Categories"] = apkInfo.Categories
+			}
+
 			meta["CurrentVersion"] = latestPackage.VersionName
 			meta["CurrentVersionCode"] = latestPackage.VersionCode
 

@@ -74,6 +74,11 @@ notality:
     - Automatic dark/light mode depending on the system-wide setting
     - Localization for English and German
 
+  # As described on https://f-droid.org/en/docs/Build_Metadata_Reference/#Categories,
+  # you can use any name here, but you should look at the existing categories first
+  categories: 
+    - Writing
+
 another_app:
   git: https://github.com/xarantolus/myotherapp
 ```
@@ -86,6 +91,8 @@ Metadata can be added in two places: the `apps.yaml` file and the app repositori
 #### Metadata file
 **Description**: As described in [Add a new app](#add-a-new-app), you can set a git URL and a description in the `apps.yaml` file
 
+**Categories**: A list of categories, preferably one of the [categories already listed in the official repo](https://f-droid.org/en/docs/Build_Metadata_Reference/#Categories)
+
 #### Metadata from the repository
 **Screenshots**: This tool will make any file from the git repository for which the path contains `screenshot` available as screenshot. Basically, if you run `find .  -type f | grep -i screenshot` in your app repo you should find all files that will be used.
 
@@ -94,6 +101,7 @@ Metadata can be added in two places: the `apps.yaml` file and the app repositori
 **License**: The License `spdx_id` given by GitHub. Make sure GitHub recognizes the license type of your app. 
 
 **Tag line**: The tag line of the app shown in F-Droid is the same text as the repository description on GitHub.
+
 
 ### Repository URL
 When you link to your repository, you can also add the fingerprint to the URL.
