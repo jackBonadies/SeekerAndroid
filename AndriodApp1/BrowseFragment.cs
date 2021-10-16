@@ -146,7 +146,7 @@ namespace AndriodApp1
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            if(HasResults())
+            if(IsResponseLoaded())
             {
                 inflater.Inflate(Resource.Menu.browse_menu_full, menu);
             }
@@ -225,9 +225,14 @@ namespace AndriodApp1
         //    base.OnDestroy();
         //}
 
-        public bool HasResults()
+        /// <summary>
+        /// This is used to determine whether we should show the "No browse, to get started" message and whether we should use the browse full or empty.  
+        /// I changed it from dataItems!=0 because its too confusing if you browse someone who is sharing an empty directory.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsResponseLoaded()
         {
-            return (dataItemsForListView.Count != 0);
+            return !string.IsNullOrEmpty(username); //(dataItemsForListView.Count != 0);
         }
         public static BrowseFragment Instance = null;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -268,7 +273,7 @@ namespace AndriodApp1
             }
             //}
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
-            if (FilteredResults || HasResults()) // if we are filtering then we already know how it works..
+            if (FilteredResults || IsResponseLoaded()) // if we are filtering then we already know how it works..
             {
                 noBrowseView.Visibility = ViewStates.Gone;
             }

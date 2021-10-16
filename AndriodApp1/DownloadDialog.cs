@@ -533,10 +533,52 @@ namespace AndriodApp1
                 TreeNode<Directory> curNode = null;
 
                 TreeNode<Directory> prevNodeDebug = null;
-
+                
                 var dirArray = b.Directories.ToArray();
-                Array.Sort(dirArray,(x,y) => (String.Compare(x.Name,y.Name))); //sometimes i dont quite think they are sorted.
+                //TODO I think moving this out of a lambda would make it faster, but need to do unit tests first!
+                //StringComparer alphabetComparer = StringComparer.Create(new System.Globalization.CultureInfo("en-US"), true); //else 'a' is 26 behind 'A'
+                Array.Sort(dirArray,(x,y) =>
+                {
+                    int len1 = x.Name.Count();
+                    int len2 = y.Name.Count();
+                    int len = Math.Min(len1, len2);
+                    for(int i=0;i<len;i++)
+                    {
+                        char cx = x.Name[i];
+                        char cy = y.Name[i];
+                        if(cx=='\\'||cy=='\\')
+                        {
+                            if(cx == '\\' && cy != '\\')
+                            {
+                                return -1;
+                            }
+                            if(cx != '\\' && cy == '\\')
+                            {
+                                return 1;
+                            }
+                        }
+                        else
+                        {
+                            //int comp = System.String.Compare(x.Name, i, y.Name, i , 1);
+                            int comp = char.ToLowerInvariant(cx).CompareTo(char.ToLowerInvariant(cy));
+                            if(comp!=0)
+                            {
+                                return comp;
+                            }
+                        }
+                    }
+                    return len1 - len2;
+                }
+                ); //sometimes i dont quite think they are sorted.
                 //sorting alphabetically seems weird, but since it puts shorter strings in front of longer ones, it does actually sort the highest parent 1st, etc.
+
+                //sorting fails as it does not consider \\ higher than other chars, etc.
+                //Music
+                //music 3
+                //Music\test
+                //fixed with custom comparer
+
+
 
                 //normally peoples files look like 
                 //@@datd\complete
@@ -546,7 +588,7 @@ namespace AndriodApp1
                 //in that case we need to make a common root, as the directory everyone has (even if its the fake "@@adfadf" directory NOT TRUE)
                 //I think a quick hack would be.. is the first directory name contained in the last directory name
 
-                //mzawk case
+                //mzawk case (This is SoulseekQT Im guessing)
                 //@@bvenl\0
                 //@@bvenl\1
                 //@@bvenl\2
@@ -554,7 +596,7 @@ namespace AndriodApp1
                 //@@bvenl\2\complete\1990
                 //@@bvenl\2\complete\1990\test
 
-                //BeerNecessities
+                //BeerNecessities (This is Nicotine multi-root Im guessing)
                 //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\Billy Idol [video collection]"
                 //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\Nina Hagen - Video Collection"
                 //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\The Beatles - 1+ (all 27 tracks with 5.1 surround audio)"
@@ -565,7 +607,8 @@ namespace AndriodApp1
                 //sometimes the root is the empty string
                 //
                 bool emptyRoot = false;
-                if(dirArray[dirArray.Length-1].Name.Contains(dirArray[0].Name))
+                //if(dirArray[dirArray.Length-1].Name.Contains(dirArray[0].Name))
+                if(Helpers.IsChildDirString(dirArray[dirArray.Length-1].Name,dirArray[0].Name, true) || dirArray[dirArray.Length - 1].Name.Equals(dirArray[0].Name))
                 {
                     //normal single tree case..
                 }
@@ -597,7 +640,7 @@ namespace AndriodApp1
                         curNode = rootNode;
                         prevDirName = d.Name;
                     }
-                    else if(d.Name.Contains(prevDirName)) //if the next directory contains the previous in its path then it is a CHILD
+                    else if(Helpers.IsChildDirString(d.Name,prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
                     {
                         if(!filter)
                         {
@@ -614,7 +657,7 @@ namespace AndriodApp1
                     { //go up one OR more than one
                         prevNodeDebug = new TreeNode<Directory>(curNode.Data);
                         curNode = curNode.Parent; //This is not good if the first node is not the root...
-                        while(!d.Name.Contains(curNode.Data.Name))
+                        while(!Helpers.IsChildDirString(d.Name, curNode.Data.Name, curNode?.Parent == null))
                         {
                             if(curNode.Parent==null)
                             {
@@ -958,6 +1001,7 @@ namespace AndriodApp1
         /// <returns></returns>
         public static Task DownloadFileAsync(string username, string fullfilename, long size, CancellationTokenSource cts)
         {
+            MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
             Task dlTask = null;
             if (SoulSeekState.MemoryBackedDownload)
             {

@@ -29,6 +29,7 @@ namespace Soulseek
         private readonly int progressUpdateLimit = 1000;
         private readonly double speedAlpha = 2f / 10;
         private double lastProgressBytes = 0;
+        private long startOffset = 0;
         private DateTime? lastProgressTime = null;
         private bool speedInitialized = false;
         private TransferStates state = TransferStates.None;
@@ -125,7 +126,18 @@ namespace Soulseek
         /// <summary>
         ///     Gets or sets the start offset of the transfer, in bytes.
         /// </summary>
-        public long StartOffset { get; set; }
+        public long StartOffset 
+        { 
+            get
+            {
+                return startOffset;
+            }
+            set
+            {
+                lastProgressBytes = value;
+                startOffset = value;
+            }
+        }
 
         /// <summary>
         ///     Gets the UTC time at which the transfer transitioned into the <see cref="TransferStates.InProgress"/> state.

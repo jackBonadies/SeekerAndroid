@@ -120,7 +120,7 @@ namespace AndriodApp1
         {
             this.SetIncompleteFolderView();
             this.SetCompleteFolderView();
-            //TODO set shared view
+            this.SetSharedFolderView();
         }
 
         private void UpnpSearchStarted(object sender, EventArgs e)
@@ -149,11 +149,13 @@ namespace AndriodApp1
         private CheckBox manuallyChooseIncompleteFolderView;
         private TextView currentCompleteFolderView;
         private TextView currentIncompleteFolderView;
+        private TextView currentSharedFolderView;
 
         private ViewGroup incompleteFolderViewLayout;
         private Button changeIncompleteDirectory;
 
-        private ViewGroup sharingSubLayout;
+        private ViewGroup sharingSubLayout1;
+        private ViewGroup sharingSubLayout2;
 
         private ViewGroup listeningSubLayout2;
         private ViewGroup listeningSubLayout3;
@@ -254,6 +256,7 @@ namespace AndriodApp1
 
             Button sharedFolderButton = FindViewById<Button>(Resource.Id.setSharedFolder);
             sharedFolderButton.Click += ChangeUploadDirectory;
+            currentSharedFolderView = FindViewById<TextView>(Resource.Id.sharedFolderPath);
 
             CheckBox shareCheckBox = FindViewById<CheckBox>(Resource.Id.enableSharing);
             shareCheckBox.Checked = SoulSeekState.SharingOn;
@@ -315,7 +318,8 @@ namespace AndriodApp1
             SetUpnpStatusView(UpnpStatusView);
             UpnpStatusView.Click += ImageView_Click;
 
-            sharingSubLayout = FindViewById<ViewGroup>(Resource.Id.sharingSubLayout);
+            sharingSubLayout1 = FindViewById<ViewGroup>(Resource.Id.dlChangeSharedDirectoryLayout);
+            sharingSubLayout2 = FindViewById<ViewGroup>(Resource.Id.sharingSubLayout2);
             UpdateSharingViewState();
 
             listeningSubLayout2 = FindViewById<ViewGroup>(Resource.Id.listeningRow2);
@@ -365,6 +369,7 @@ namespace AndriodApp1
             SetIncompleteDirectoryState();
             SetCompleteFolderView();
             SetIncompleteFolderView();
+            SetSharedFolderView();
         }
 
         private static string GetFriendlyDownloadDirectoryName()
@@ -417,7 +422,7 @@ namespace AndriodApp1
                     {
                         //if not set and legacy storage, then the directory is simple the default music
                         string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                        return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment;
+                        return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment; //this is to prevent line breaks.
                     }
                     else
                     {
@@ -431,6 +436,28 @@ namespace AndriodApp1
                 }
             }
         }
+
+        private static string GetFriendlySharedDirectoryName()
+        {
+            if (!SoulSeekState.SharingOn)
+            {
+                return "Not Sharing";
+            }
+            else if (SoulSeekState.IsParsing)
+            {
+                return "Parsing...";
+            }
+            else if(SoulSeekState.UploadDataDirectoryUri == null || SoulSeekState.UploadDataDirectoryUri == string.Empty)
+            {
+                return "Not Set";
+            }
+            else
+            {
+                return Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).LastPathSegment;
+            }
+        }
+
+
 
         private void SetIncompleteDirectoryState()
         {
@@ -452,12 +479,23 @@ namespace AndriodApp1
 
         private void SetCompleteFolderView()
         {
-            currentCompleteFolderView.Text = GetFriendlyDownloadDirectoryName();
+            string friendlyName = Helpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
+            currentCompleteFolderView.Text = friendlyName;
+            Helpers.SetToolTipText(currentCompleteFolderView, friendlyName);
         }
 
         private void SetIncompleteFolderView()
         {
-            currentIncompleteFolderView.Text = GetFriendlyIncompleteDirectoryName();
+            string friendlyName = Helpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
+            currentIncompleteFolderView.Text = friendlyName;
+            Helpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
+        }
+
+        private void SetSharedFolderView()
+        {
+            string friendlyName = Helpers.AvoidLineBreaks(GetFriendlySharedDirectoryName());
+            currentSharedFolderView.Text = friendlyName;
+            Helpers.SetToolTipText(currentSharedFolderView, friendlyName);
         }
 
 
@@ -1023,19 +1061,24 @@ namespace AndriodApp1
             /*SoulSeekState.MainActivityRef.*/MainActivity.SetUnsetSharingBasedOnConditions(true);
             UpdateShareImageView();
             UpdateSharingViewState();
+            SetSharedFolderView();
         }
 
         private void UpdateSharingViewState()
         {
             if(SoulSeekState.SharingOn)
             {
-                sharingSubLayout.Enabled = true;
-                sharingSubLayout.Alpha = 1.0f;
+                sharingSubLayout1.Enabled = true;
+                sharingSubLayout1.Alpha = 1.0f;
+                sharingSubLayout2.Enabled = true;
+                sharingSubLayout2.Alpha = 1.0f;
             }
             else
             {
-                sharingSubLayout.Enabled = false;
-                sharingSubLayout.Alpha = 0.5f;
+                sharingSubLayout1.Enabled = false;
+                sharingSubLayout1.Alpha = 0.5f;
+                sharingSubLayout2.Enabled = false;
+                sharingSubLayout2.Alpha = 0.5f;
             }
         }
 
@@ -1407,6 +1450,7 @@ namespace AndriodApp1
                     this.RunOnUiThread(new Action(() =>
                     {
                         UpdateShareImageView(); //for is parsing..
+                        SetSharedFolderView();
                     }));
                     try
                     {
@@ -1424,6 +1468,7 @@ namespace AndriodApp1
                         this.RunOnUiThread(new Action(() =>
                         {
                             UpdateShareImageView();
+                            SetSharedFolderView();
                             Toast.MakeText(this, Resource.String.error_parsing_files_shared_dir, ToastLength.Long).Show();
                         }));
                         return;
@@ -1438,6 +1483,7 @@ namespace AndriodApp1
                     this.RunOnUiThread(new Action(() =>
                     {
                         UpdateShareImageView();
+                        SetSharedFolderView();
                         int dirs = SoulSeekState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
                         int files = SoulSeekState.SharedFileCache.FileCount;
                         Toast.MakeText(this, string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum),dirs,files), ToastLength.Long).Show();

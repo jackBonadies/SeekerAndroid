@@ -2792,18 +2792,25 @@ namespace Soulseek
 
         private async Task<Tuple<string, string>> DownloadToStreamAsync(string username, string filename, Stream outputStream, long? size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken, Task<Tuple<System.IO.Stream,long, string, string>> streamTask=null)
         {
-            string incompleteUriString = null;
-            string incompleteUriParentString = null;
-            if(outputStream==null)
-            {
-                streamTask.Start();
-                var t = await streamTask.ConfigureAwait(false); //obv this can throw
-                outputStream = t.Item1;
-                startOffset = t.Item2;
-                incompleteUriString = t.Item3;
-                incompleteUriParentString = t.Item4;
-            }
+            //Diagnostic.Info($"!!! - Started Opening Incomplete Stream {Path.GetFileName(filename)}");
+            //InvokeDebugLogHandler($"!!! - Started Opening Incomplete Stream  {Path.GetFileName(filename)}");
 
+            //files would come into this method in the correct order...
+            //string incompleteUriString = null;
+            //string incompleteUriParentString = null;
+            //if(outputStream==null)
+            //{
+            //    streamTask.Start();
+            //    var t = await streamTask.ConfigureAwait(false); //obv this can throw
+            //    outputStream = t.Item1;
+            //    startOffset = t.Item2;
+            //    incompleteUriString = t.Item3;
+            //    incompleteUriParentString = t.Item4;
+            //}
+            //...but opening the incomplete stream would mess up the order
+
+            //Diagnostic.Info($"!!! - Finished Opening Incomplete Stream {Path.GetFileName(filename)}");
+            //InvokeDebugLogHandler($"!!! - Finished Opening Incomplete Stream  {Path.GetFileName(filename)}");
 
             var download = new TransferInternal(TransferDirection.Download, username, filename, token, options)
             {
@@ -2848,6 +2855,9 @@ namespace Soulseek
 
                 Task downloadCompleted;
 
+                //Diagnostic.Info($"!!! - Requesting User Endpoint {Path.GetFileName(filename)}");
+                //InvokeDebugLogHandler($"!!! - Requesting User Endpoint  {Path.GetFileName(filename)}");
+
                 var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
                 var peerConnection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
 
@@ -2859,10 +2869,27 @@ namespace Soulseek
                 var transferStartRequested = Waiter.WaitIndefinitely<TransferRequest>(transferStartRequestedWaitKey, cancellationToken);
 
                 // request the file
+                //Diagnostic.Info($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
+                //InvokeDebugLogHandler($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
                 await peerConnection.WriteAsync(new TransferRequest(TransferDirection.Download, token, filename), cancellationToken).ConfigureAwait(false);
                 UpdateState(TransferStates.Requested);
 
                 var transferRequestAcknowledgement = await transferRequestAcknowledged.ConfigureAwait(false);
+
+
+                string incompleteUriString = null;
+                string incompleteUriParentString = null;
+                if(outputStream==null)
+                {
+                    streamTask.Start();
+                    var t = await streamTask.ConfigureAwait(false); //obv this can throw
+                    outputStream = t.Item1;
+                    startOffset = t.Item2;
+                    incompleteUriString = t.Item3;
+                    incompleteUriParentString = t.Item4;
+                }
+                download.StartOffset = startOffset;//its okay to update start offset here. its before any writes.
+
 
                 if (transferRequestAcknowledgement.IsAllowed)
                 {
