@@ -101,7 +101,7 @@
       android:id = "@+id/noBrowseView"
         android:textAlignment="center"
       android:layout_centerHorizontal = "true"
-        android:paddingBottom="150dp"
+        android:paddingBottom="110dp"
       android:layout_centerVertical="true"
       android:textColor = "@color/mainTextColorHinted"
       android:textSize = "20dp" />

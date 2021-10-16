@@ -5154,7 +5154,7 @@ namespace AndriodApp1
                     Android.Net.Uri incompleteUri = null;
                     SetupCancellationToken(item,cancellationTokenSource);
                     Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.Size, cancellationTokenSource);
-                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource,item.QueueLength,0))));
+                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource,item.QueueLength,0) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -5237,7 +5237,10 @@ namespace AndriodApp1
                 ClearTransferForRetry(item1, position);
                 if(item1.CancellationTokenSource!=null)
                 {
-                    item1.CancellationTokenSource.Cancel();
+                    if(!item1.CancellationTokenSource.IsCancellationRequested)
+                    {
+                        item1.CancellationTokenSource.Cancel();
+                    }
                 }
                 else
                 {
@@ -5259,7 +5262,7 @@ namespace AndriodApp1
                     //filename: item1.FullFilename,
                     //size: item1.Size,
                     //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource,item1.QueueLength, 1)))); //maybe do 1 here since we are already retrying it manually
+                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource,item1.QueueLength, 1) { TransferItemReference = item1 }))); //maybe do 1 here since we are already retrying it manually
             }
             catch (DuplicateTransferException)
             {
@@ -5325,7 +5328,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case 0:
-                    //retry download
+                    //retry download (resume download)
 
                     if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                     {

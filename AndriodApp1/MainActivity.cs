@@ -2469,7 +2469,7 @@ namespace AndriodApp1
         {
             if(dir.IsDirectory)
             {
-                DocumentFile[] files = dir.ListFiles();
+                DocumentFile[] files = dir.ListFiles(); //doesnt need to be sorted
                 for (int i = 0; i < files.Length; ++i)
                 {
                     DocumentFile file = files[i];
@@ -2484,21 +2484,21 @@ namespace AndriodApp1
 
         private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, string dirToStrip, bool diagFromDirectoryResolver)
         {
-            string directoryPath = dirFile.Uri.Path; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
+            string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
             directoryPath = directoryPath.Replace("/", @"\");
-            try
-            {
-                directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
-                directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
-            }
-            catch(Exception e)
-            {
-                //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
-                //its possible for dirToStrip to be null
-                //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
-                //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
-                LogFirebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
-            }
+            //try
+            //{
+            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
+            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
+            //}
+            //catch(Exception e)
+            //{
+            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
+            //    //its possible for dirToStrip to be null
+            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
+            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
+            //    LogFirebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
+            //}
             //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
             //strip out the shared root dir
             //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
@@ -2534,6 +2534,7 @@ namespace AndriodApp1
                 }
 
             }
+            Helpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
             var slskDir = new Soulseek.Directory(directoryPath, files);
             return slskDir;
         }
@@ -2820,7 +2821,7 @@ namespace AndriodApp1
         {
             if (dir.Exists())
             {
-                DocumentFile[] files = dir.ListFiles();
+                DocumentFile[] files = dir.ListFiles(); 
                 for (int i = 0; i < files.Length; ++i)
                 {
                     DocumentFile file = files[i];
@@ -3733,7 +3734,7 @@ namespace AndriodApp1
                     item1.QueueLength = 0;
                     Android.Net.Uri incompleteUri = null;
                     Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
-                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0))));
+                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0) { TransferItemReference = item1 })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -4080,7 +4081,7 @@ namespace AndriodApp1
 
         public static bool MeetsSharingConditions()
         {
-            return (SoulSeekState.SharingOn && SoulSeekState.UploadDataDirectoryUri != null && SoulSeekState.UploadDataDirectoryUri != string.Empty);
+            return (SoulSeekState.SharingOn && SoulSeekState.UploadDataDirectoryUri != null && SoulSeekState.UploadDataDirectoryUri != string.Empty) && !SoulSeekState.IsParsing;
         }
 
         public static Tuple<SharingIcons, string> GetSharingMessageAndIcon()
@@ -6946,6 +6947,19 @@ namespace AndriodApp1
 
     public static class Helpers
     {
+        public static string AvoidLineBreaks(string orig)
+        {
+            return orig.Replace(' ', '\u00A0').Replace("\\", "\\\u2060");
+        }
+        /// <summary>
+        /// This is necessary since DocumentFile.ListFiles() returns files in an incomprehensible order (not by name, size, modified, inode, etc.)
+        /// </summary>
+        /// <param name="files"></param>
+        public static void SortSlskDirFiles(List<Soulseek.File> files)
+        {
+            files.Sort((x,y)=>x.Filename.CompareTo(y.Filename));
+        }
+
         public static string GenerateIncompleteFolderName(string username, string albumFolderName)
         {
             string incompleteFolderName = username + "_" + albumFolderName;
@@ -7413,6 +7427,51 @@ namespace AndriodApp1
             }
         }
 
+        /// <summary>
+        /// Replaces d.Name.Contains(prevDirName) which fails for Mu, Music
+        /// </summary>
+        /// <param name="possibleChild"></param>
+        /// <param name="possibleParent"></param>
+        /// <returns></returns>
+        public static bool IsChildDirString(string possibleChild, string possibleParent, bool rootCase)
+        {
+            if(rootCase)
+            {
+                if(possibleChild.LastIndexOf("\\")==-1 && possibleParent.LastIndexOf("\\") == -1)
+                {
+                    if(possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
+                    {
+                        return possibleChild.Contains(possibleParent);
+                    }
+                    else if(possibleChild.Equals(possibleParent))
+                    {
+                        return true; //else the primary:music case fails.
+                    }
+                }
+            }
+            int pathSep = possibleChild.LastIndexOf("\\");
+            if(pathSep==-1)
+            {
+                return false;
+            }
+            else
+            {
+                return possibleChild.Substring(0, pathSep).Contains(possibleParent);
+                //{
+                //    return true;
+                //}
+                //else
+                //{
+                //    //special case. since primary: is a parent of primary:Music
+                //    if(possibleParent.LastIndexOf("\\")==-1 && possibleParent.IndexOf(':')==(possibleParent.Length-1))
+                //    {
+                //        return true;
+                //    }
+                //    return false;
+                //}
+            }
+        }
+
         public static string GetDominantFileType(SearchResponse resp)
         {
             //basically this works in two ways.  if the first file has a type of .mp3, .flac, .wav, .aiff, .wma, .aac then thats likely the type.
@@ -7571,6 +7630,18 @@ namespace AndriodApp1
                 );
                 NotificationManager manager = c.GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.CreateNotificationChannel(serviceChannel);
+            }
+        }
+
+        public static void SetToolTipText(View v, string tip)
+        {
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            {
+                v.TooltipText = tip; //api26+ otherwise crash...
+            }
+            else
+            {
+                AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(v, tip);
             }
         }
 
