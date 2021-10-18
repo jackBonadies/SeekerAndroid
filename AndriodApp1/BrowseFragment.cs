@@ -1201,13 +1201,11 @@ namespace AndriodApp1
                         }
                         continue; // do not add to the task list.
                     }
-                    //by default doing Task.Start() will run it on a threadpoolthread
-                    System.Action action = new System.Action(() => {
+
                         DownloadInfo downloadInfo = new DownloadInfo(username, file.FullFileName, file.Size, dlTask, cancellationTokenSource, 0, 0);
                         SoulSeekState.downloadInfoList.Add(downloadInfo); //for future ref if need be
-                        SoulSeekState.OnDownloadAdded(downloadInfo);
-                    }); //causes main activity to start downloading it
-                    SoulSeekState.MainActivityRef.RunOnUiThread(action);
+                        SoulSeekState.OnDownloadAdded(downloadInfo); //TODO THERE IS A RACE CONDITION WHERE UPDATESTATE gets called before the transfer is added and it looks for the transfer to update it and the transfer is null...
+
                 }
                 Action toast1 = new Action(() => {
                     Toast.MakeText(Context, this.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show(); });
