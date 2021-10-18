@@ -2,6 +2,15 @@
 
 xmlns:app="http://schemas.android.com/apk/res-auto">
 
+  <item android:id="@+id/action_toggle_group_by"
+android:title="Toggle Group By"
+app:showAsAction="always"
+android:iconifiedByDefault="true"
+android:icon="@drawable/folder_swap_outline"
+
+ />
+
+
   <item android:id="@+id/action_clear_all_complete"
 android:title="@string/clear_all_complete"
 app:showAsAction="never"

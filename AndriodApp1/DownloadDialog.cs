@@ -934,14 +934,9 @@ namespace AndriodApp1
         {
             //TODO TODO downloadInfoList is stale..... not what you want to use....
             //TransfersFragment frag = (StaticHacks.TransfersFrag as TransfersFragment);
-            if(TransfersFragment.transferItems != null)
+            if(TransfersFragment.TransferItemManagerDL != null)
             {
-            bool dup = TransfersFragment.transferItems.Exists((TransferItem di) => 
-                {return (di.FullFilename == file.Filename &&
-                        di.Size == file.Size &&
-                        di.Username == searchResponse.Username
-                    );
-                 });
+                bool dup = TransfersFragment.TransferItemManagerDL.Exists(file.Filename, searchResponse.Username, file.Size);
                 if(dup)
                 {
                     string msg = "Duplicate Detected: user:" + searchResponse.Username + "filename: " + file.Filename;

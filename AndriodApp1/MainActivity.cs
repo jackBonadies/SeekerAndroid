@@ -868,6 +868,747 @@ namespace AndriodApp1
             //nothing to do here...
         }
     }
+    public interface ITransferItem
+    {
+        public string GetDisplayName();
+        public string GetFolderName();
+        public string GetUsername();
+        public TimeSpan? GetRemainingTime();
+        public int GetQueueLength();
+    }
+
+    [Serializable]
+    public class FolderItem : ITransferItem
+    {
+        public TimeSpan? RemainingFolderTime;
+
+        public TimeSpan? GetRemainingTime()
+        {
+            return RemainingFolderTime;
+        }
+
+        public string GetDisplayName()
+        {
+            return FolderName;
+        }
+
+        public string GetFolderName()
+        {
+            return FolderName;
+        }
+
+        public string GetUsername()
+        {
+            return Username;
+        }
+
+        /// <summary>
+        /// int - percent.
+        /// </summary>
+        /// <returns></returns>
+        public int GetFolderProgress(out long totalBytes, out long bytesCompleted)
+        {
+            lock (TransferItems)
+            {
+                long folderBytesComplete = 0;
+                long totalFolderBytes = 0;
+                foreach (TransferItem ti in TransferItems)
+                {
+                    folderBytesComplete += (long)((ti.Progress / 100.0) * ti.Size);
+                    totalFolderBytes += ti.Size;
+                }
+                totalBytes = totalFolderBytes;
+                bytesCompleted = folderBytesComplete;
+                return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
+            }
+        }
+
+        /// <summary>
+        /// Get the overall queue of the folder (the lowest queued track)
+        /// </summary>
+        /// <returns></returns>
+        public int GetQueueLength()
+        {
+            lock (TransferItems)
+            {
+                int queueLen = int.MaxValue;
+                foreach (TransferItem ti in TransferItems)
+                {
+                    if (ti.State == TransferStates.Queued)
+                    {
+                        queueLen = Math.Min(ti.QueueLength,queueLen);
+                    }
+                }
+                if(queueLen==int.MaxValue)
+                {
+                    return 0;
+                }
+                return queueLen;
+            }
+        }
+
+
+
+
+        /// <summary>
+        /// Get the overall state of the folder.
+        /// </summary>
+        /// <returns></returns>
+        public TransferStates GetState()
+        {
+            //top priority - In Progress
+            //if ANY are InProgress then this is considered in progress
+            //if not then if ANY initialized.
+            //if not then if ANY queued its considered queued.  And the queue number is that of the lowest transfer.
+            //if not then if ANY failed its considered failed
+            //if not then its cancelled (i.e. paused)
+            //if not then its Succeeded.
+
+
+            //if not then none...
+            lock (TransferItems)
+            {
+                TransferStates folderState = TransferStates.None;
+                foreach (TransferItem ti in TransferItems)
+                {
+                    TransferStates state = ti.State;
+                    if(state==TransferStates.InProgress)
+                    {
+                        return TransferStates.InProgress;
+                    }
+                    else
+                    {
+                        //do priority
+                        if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
+                        {
+                            folderState = state;
+                        }
+                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        {
+                            folderState = state;
+                        }
+                        else if((   state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut)   ) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        {
+                            folderState = state;
+                        }
+                        else if(state.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        {
+                            folderState = state;
+                        }
+                        else if(state.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        {
+                            folderState = state;
+                        }
+                    }
+                }
+                return folderState;
+            }
+        }
+
+        public string FolderName;
+        public string Username;
+        public List<TransferItem> TransferItems;
+
+        public FolderItem(string folderName, string username, TransferItem initialTransferItem)
+        {
+            TransferItems = new List<TransferItem>();
+            Add(initialTransferItem);
+            if(folderName == null)
+            {
+                folderName = Helpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
+            }
+            FolderName = folderName;
+            Username = username;
+        }
+
+        /// <summary>
+        /// default public constructor for serialization.
+        /// </summary>
+        public FolderItem()
+        {
+            TransferItems = new List<TransferItem>();
+        }
+
+        public void ClearAllComplete()
+        {
+            lock (TransferItems)
+            {
+                TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99;});
+            }
+        }
+
+        public bool HasTransferItem(TransferItem ti)
+        {
+            lock (TransferItems)
+            {
+                return TransferItems.Contains(ti);
+            }
+        }
+
+        public bool IsEmpty()
+        {
+            return TransferItems.Count == 0;
+        }
+
+        public void Remove(TransferItem ti)
+        {
+            lock (TransferItems)
+            {
+                TransferItems.Remove(ti);
+            }
+        }
+
+
+        public void Add(TransferItem ti)
+        {
+            lock(TransferItems)
+            {
+                TransferItems.Add(ti);
+            }
+        }
+    }
+
+
+
+    [Serializable]
+    public class TransferItemManager
+    {
+        /// <summary>
+        /// Do not use directly.  This is public only for default serialization.
+        /// </summary>
+        public List<TransferItem> AllTransferItems;
+
+        /// <summary>
+        /// Do not use directly.  This is public only for default serialization.
+        /// </summary>
+        public List<FolderItem> AllFolderItems;
+
+        public TransferItemManager()
+        {
+            AllTransferItems = new List<TransferItem>();
+            AllFolderItems = new List<FolderItem>();
+        }
+
+        /// <summary>
+        /// transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
+        /// </summary>
+        public void OnRelaunch()
+        {
+            lock(AllTransferItems)
+            {
+                foreach (var ti in AllTransferItems)
+                {
+                    if (ti.State.HasFlag(TransferStates.InProgress))
+                    {
+                        ti.State = TransferStates.Cancelled;
+                        ti.RemainingTime = null;
+                    }
+                }
+            }
+        }
+
+        public List<Tuple<TransferItem, int>> GetListOfPausedFromFolder(FolderItem fi)
+        {
+            List<Tuple<TransferItem, int>> transferItemConditionList = new List<Tuple<TransferItem, int>>();
+            lock (fi.TransferItems)
+            {
+                for (int i = 0; i < fi.TransferItems.Count; i++)
+                {
+                    var item = fi.TransferItems[i];
+
+                    if (item.State.HasFlag(TransferStates.Cancelled) || item.State.HasFlag(TransferStates.Queued))
+                    {
+                        transferItemConditionList.Add(new Tuple<TransferItem, int>(item, i));
+                    }
+
+                }
+            }
+            return transferItemConditionList;
+        }
+
+        public List<Tuple<TransferItem, int, int>> GetListOfPaused()
+        {
+            List<Tuple<TransferItem, int, int>> transferItemConditionList = new List<Tuple<TransferItem, int, int>>();
+            lock (AllTransferItems)
+            {
+                lock (AllFolderItems)
+                {
+                    for (int i = 0; i < AllTransferItems.Count; i++)
+                    {
+                        var item = AllTransferItems[i];
+
+                        if (item.State.HasFlag(TransferStates.Cancelled) || item.State.HasFlag(TransferStates.Queued))
+                        {
+                            int folderIndex = -1;
+                            for (int fi = 0; fi < AllFolderItems.Count; fi++)
+                            {
+                                if (AllFolderItems[fi].HasTransferItem(item))
+                                {
+                                    folderIndex = fi;
+                                    break;
+                                }
+
+                            }
+                            transferItemConditionList.Add(new Tuple<TransferItem, int, int>(AllTransferItems[i], i, folderIndex));
+                        }
+
+                    }
+                }
+            }
+            return transferItemConditionList;
+        }
+
+        public List<Tuple<TransferItem, int>> GetListOfFailedFromFolder(FolderItem fi)
+        {
+            List<Tuple<TransferItem, int>> transferItemConditionList = new List<Tuple<TransferItem, int>>();
+            lock(fi.TransferItems)
+            {
+                for (int i = 0; i < fi.TransferItems.Count; i++)
+                {
+                    var item = fi.TransferItems[i];
+
+                    if (item.Failed)
+                    {
+                        transferItemConditionList.Add(new Tuple<TransferItem, int>(item, i));
+                    }
+
+                }
+            }
+            return transferItemConditionList;
+        }
+
+        public List<Tuple<TransferItem, int, int> > GetListOfFailed()
+        {
+            List<Tuple<TransferItem, int, int>> transferItemConditionList = new List<Tuple<TransferItem, int, int>>();
+            lock (AllTransferItems)
+            {
+                lock (AllFolderItems)
+                {
+                    for (int i = 0; i < AllTransferItems.Count; i++)
+                    {
+                        var item = AllTransferItems[i];
+
+                        if (item.Failed)
+                        {
+                            int folderIndex = -1;
+                            for (int fi = 0; fi < AllFolderItems.Count; fi++)
+                            {
+                                if (AllFolderItems[fi].HasTransferItem(item))
+                                {
+                                    folderIndex = fi;
+                                    break;
+                                }
+
+                            }
+                            transferItemConditionList.Add(new Tuple<TransferItem, int, int>(AllTransferItems[i], i, folderIndex));
+                        }
+
+                    }
+                }
+            }
+            return transferItemConditionList;
+        }
+
+        public object GetUICurrentList()
+        {
+            if (TransfersFragment.GroupByFolder)
+            {
+                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                {
+                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems;
+                }
+                else
+                {
+                    return AllFolderItems;
+                }
+            }
+            else
+            {
+                return AllTransferItems;
+            }
+        }
+
+        public void RemoveAtUserIndex(int indexOfItem)
+        {
+            if (TransfersFragment.GroupByFolder)
+            {
+                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                {
+                    Remove(TransfersFragment.CurrentlySelectedDLFolder.TransferItems[indexOfItem]);
+                }
+                else
+                {
+                    List <TransferItem> transferItemsToRemove = new List<TransferItem>();
+                    lock(AllFolderItems[indexOfItem].TransferItems)
+                    {
+                        foreach(var ti in AllFolderItems[indexOfItem].TransferItems)
+                        {
+                            transferItemsToRemove.Add(ti);
+                        }
+                    }
+                    foreach(var ti in transferItemsToRemove)
+                    {
+                        Remove(ti);
+                    }
+                }
+            }
+            else
+            {
+                Remove(AllTransferItems[indexOfItem]);
+            }
+        }
+
+        public ITransferItem GetItemAtUserIndex(int indexOfItem)
+        {
+            if(TransfersFragment.GroupByFolder)
+            {
+                if(TransfersFragment.CurrentlySelectedDLFolder!=null)
+                {
+                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems[indexOfItem];
+                }
+                else
+                {
+                    return AllFolderItems[indexOfItem];
+                }
+            }
+            else
+            {
+                return AllTransferItems[indexOfItem];
+            }
+        }
+
+        /// <summary>
+        /// The index in the folder, the folder, or the overall index
+        /// </summary>
+        /// <param name="indexOfItem"></param>
+        /// <returns></returns>
+        public int GetUserIndexForTransferItem(TransferItem ti)
+        {
+            if (TransfersFragment.GroupByFolder)
+            {
+                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                {
+                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems.IndexOf(ti);
+                }
+                else
+                {
+                    string foldername = ti.FolderName;
+                    if (foldername == null)
+                    {
+                        foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
+                    }
+                    return AllFolderItems.FindIndex((FolderItem fi) => {return fi.FolderName == foldername && fi.Username == ti.Username; });
+                }
+            }
+            else
+            {
+                return AllTransferItems.IndexOf(ti);
+            }
+        }
+
+        public int GetIndexForFolderItem(FolderItem ti)
+        {
+            lock(AllFolderItems)
+            {
+                return AllFolderItems.IndexOf(ti);
+            }
+        }
+
+        /// <summary>
+        /// The index in the folder, the folder, or the overall index
+        /// </summary>
+        /// <param name="indexOfItem"></param>
+        /// <returns></returns>
+        public int GetUserIndexForTransferItem(string fullfilename)
+        {
+            if (TransfersFragment.GroupByFolder)
+            {
+                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                {
+                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems.FindIndex((ti)=>ti.FullFilename==fullfilename);
+                }
+                else
+                {
+                    TransferItem ti;
+                    lock(AllTransferItems)
+                    {
+                        ti = AllTransferItems.Find((ti) => ti.FullFilename == fullfilename);
+                    }
+                    string foldername = ti.FolderName;
+                    if (foldername == null)
+                    {
+                        foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
+                    }
+                    return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
+                }
+            }
+            else
+            {
+                return AllTransferItems.FindIndex((ti) => ti.FullFilename == fullfilename);
+            }
+        }
+
+
+        //public TransferItem GetTransferItemWithUserIndex(string fullFileName, out int indexOfItem)
+        //{
+        //    if (fullFileName == null)
+        //    {
+        //        indexOfItem = -1;
+        //        return null;
+        //    }
+        //    lock (AllTransferItems)
+        //    {
+        //        foreach (TransferItem item in AllTransferItems)
+        //        {
+        //            if (item.FullFilename.Equals(fullFileName)) //fullfilename includes dir so that takes care of any ambiguity...
+        //            {
+        //                indexOfItem = AllTransferItems.IndexOf(item);
+        //                return item;
+        //            }
+        //        }
+        //    }
+        //    indexOfItem = -1;
+        //    return null;
+        //}
+
+
+        public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, out int indexOfItem)
+        {
+            if (fullFileName == null)
+            {
+                indexOfItem = -1;
+                return null;
+            }
+            lock (AllTransferItems)
+            {
+                foreach (TransferItem item in AllTransferItems)
+                {
+                    if (item.FullFilename.Equals(fullFileName)) //fullfilename includes dir so that takes care of any ambiguity...
+                    {
+                        indexOfItem = AllTransferItems.IndexOf(item);
+                        return item;
+                    }
+                }
+            }
+            indexOfItem = -1;
+            return null;
+        }
+
+        public bool Exists(string fullFilename, string username, long size)
+        {
+            lock(AllTransferItems)
+            {
+                return AllTransferItems.Exists((TransferItem ti) =>
+                {
+                    return (ti.FullFilename == fullFilename &&
+                           ti.Size == size &&
+                           ti.Username == username
+                       );
+                });
+            }
+        }
+
+        public bool IsEmpty()
+        {
+            return AllTransferItems.Count == 0;
+        }
+
+        public TransferItem GetTransferItem(string fullfilename)
+        {
+            lock (AllTransferItems)
+            {
+                foreach (TransferItem item in AllTransferItems) //THIS is where those enumeration exceptions are all coming from...
+                {
+                    if (item.FullFilename.Equals(fullfilename))
+                    {
+                        return item;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private IEnumerable<FolderItem> GetMatchingFolder(TransferItem ti)
+        {
+            lock (AllFolderItems)
+            {
+                string foldername = string.Empty;
+                if(string.IsNullOrEmpty(ti.FolderName))
+                {
+                    foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
+                }
+                else
+                {
+                    foldername = ti.FolderName;
+                }
+                return AllFolderItems.Where((folder) => folder.FolderName == foldername && folder.Username == ti.Username);
+            }
+        }
+
+        private int GetMatchingFolderIndex(TransferItem ti)
+        {
+            lock(AllFolderItems)
+            {
+                for(int i=0;i<AllFolderItems.Count; i++)
+                {
+                    if(AllFolderItems[i].HasTransferItem(ti))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        public void Add(TransferItem ti)
+        {
+            lock(AllTransferItems)
+            {
+                AllTransferItems.Add(ti);
+            }
+            lock(AllFolderItems)
+            {
+                var matchingFolder = GetMatchingFolder(ti);
+                if(matchingFolder.Count()==0)
+                {
+                    AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
+                }
+                else
+                {
+                    var folderItem = matchingFolder.First();
+                    folderItem.Add(ti);
+                }
+            }
+        }
+
+        public void ClearAllComplete()
+        {
+            lock (AllTransferItems)
+            {
+                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
+            }
+            lock (AllFolderItems)
+            {
+                foreach(FolderItem f in AllFolderItems)
+                {
+                    f.ClearAllComplete();
+                }
+                AllFolderItems.RemoveAll((FolderItem f) => { return f.IsEmpty(); });
+            }
+        }
+
+        public void ClearAllCompleteFromFolder(FolderItem fi)
+        {
+            lock (AllTransferItems)
+            {
+                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99 && fi.Username == i.Username && GetFolderNameFromTransferItem(i)==fi.FolderName; });
+            }
+            fi.ClearAllComplete();
+            if(fi.IsEmpty())
+            {
+                AllFolderItems.Remove(fi);
+            }
+        }
+
+        private static string GetFolderNameFromTransferItem(TransferItem ti)
+        {
+            if(string.IsNullOrEmpty(ti.FolderName))
+            {
+                return Helpers.GetFolderNameFromFile(ti.FullFilename);
+            }
+            else
+            {
+                return ti.FolderName;
+            }
+        }
+
+        public void ClearAll()
+        {
+            lock (AllTransferItems)
+            {
+                AllTransferItems.Clear();
+            }
+            lock (AllFolderItems)
+            {
+                AllFolderItems.Clear();
+            }
+        }
+
+        public void ClearAllFromFolder(FolderItem fi)
+        {
+            foreach(TransferItem ti in fi.TransferItems)
+            {
+                AllTransferItems.Remove(ti);
+            }
+            fi.TransferItems.Clear();
+            AllFolderItems.Remove(fi);
+        }
+
+        public void CancelAll()
+        {
+            lock (AllTransferItems)
+            {
+                for (int i = 0; i < AllTransferItems.Count; i++)
+                {
+                    //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
+                    TransfersFragment.CancellationTokens.TryGetValue(TransfersFragment.ProduceCancellationTokenKey(AllTransferItems[i]), out CancellationTokenSource token);
+                    token?.Cancel();
+                    //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
+                }
+                TransfersFragment.CancellationTokens.Clear();
+            }
+        }
+
+        public void CancelFolder(FolderItem fi)
+        {
+            lock (fi.TransferItems)
+            {
+                for (int i = 0; i < fi.TransferItems.Count; i++)
+                {
+                    //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
+                    var key = TransfersFragment.ProduceCancellationTokenKey(fi.TransferItems[i]);
+                    TransfersFragment.CancellationTokens.TryGetValue(key, out CancellationTokenSource token);
+                    if(token!=null)
+                    {
+                        token.Cancel();
+                        TransfersFragment.CancellationTokens.Remove(key);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// If its the folders last transfer then we remove the folder
+        /// </summary>
+        /// <param name="ti"></param>
+        public void Remove(TransferItem ti)
+        {
+            lock (AllTransferItems)
+            {
+                AllTransferItems.Remove(ti);
+            }
+            lock (AllFolderItems)
+            {
+                var matchingFolder = GetMatchingFolder(ti);
+                if (matchingFolder.Count() == 0)
+                {
+                    //error folder not found...
+                }
+                else
+                {
+                    var folderItem = matchingFolder.First();
+                    folderItem.Remove(ti);
+                    if(folderItem.IsEmpty())
+                    {
+                        AllFolderItems.Remove(folderItem);
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
 
     [Application]
@@ -934,12 +1675,12 @@ namespace AndriodApp1
 
                 MessageController.Initialize();
                 ChatroomController.Initialize();
-                SoulSeekState.DownloadAdded -= MainActivity.SoulSeekState_DownloadAdded;
+
                 SoulSeekState.DownloadAdded += MainActivity.SoulSeekState_DownloadAdded;
 
-                SoulseekClient.ErrorLogHandler -= MainActivity.SoulseekClient_ErrorLogHandler;
+
                 SoulseekClient.ErrorLogHandler += MainActivity.SoulseekClient_ErrorLogHandler;
-                SoulseekClient.DebugLogHandler -= MainActivity.DebugLogHandler;
+
                 SoulseekClient.DebugLogHandler += MainActivity.DebugLogHandler;
             }
 
@@ -954,19 +1695,22 @@ namespace AndriodApp1
 
         public class ProgressUpdatedUI : EventArgs
         {
-            public ProgressUpdatedUI(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete)
+            public ProgressUpdatedUI(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete, double _avgspeedBytes)
             {
                 ti=_ti;
                 wasFailed=_wasFailed;
                 fullRefresh=_fullRefresh;
                 percentComplete = _percentComplete;
+                avgspeedBytes = _avgspeedBytes;
             }
             public TransferItem ti;
             public bool wasFailed;
             public bool fullRefresh;
             public double percentComplete;
+            public double avgspeedBytes;
         }
 
+        public static EventHandler<TransferItem> StateChangedForItem;
         public static EventHandler<int> StateChangedAtIndex;
         public static EventHandler<ProgressUpdatedUI> ProgressUpdated;
 
@@ -981,8 +1725,8 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
-            int indexOfItem = -1;
-            TransferItem relevantItem = TransfersFragment.GetTransferItemByFileName(e.Transfer?.Filename, out indexOfItem);
+
+            TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, out _);
             if (relevantItem != null)
             {
                 relevantItem.State = e.Transfer.State;
@@ -994,7 +1738,7 @@ namespace AndriodApp1
                     return;
                 }
                 relevantItem.Failed = true;
-                StateChangedAtIndex?.Invoke(null, indexOfItem);
+                StateChangedForItem?.Invoke(null, relevantItem);
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Queued))
             {
@@ -1013,7 +1757,7 @@ namespace AndriodApp1
                     //GET QUEUE LENGTH AND UPDATE...
                     MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
                 }
-                StateChangedAtIndex?.Invoke(null, indexOfItem);
+                StateChangedForItem?.Invoke(null, relevantItem);
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Initializing))
             {
@@ -1024,7 +1768,7 @@ namespace AndriodApp1
                 //clear queued flag...
                 relevantItem.Queued = false;
                 relevantItem.QueueLength = 0;
-                StateChangedAtIndex?.Invoke(null, indexOfItem);
+                StateChangedForItem?.Invoke(null, relevantItem);
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed))
             {
@@ -1036,12 +1780,16 @@ namespace AndriodApp1
                 {
                     //clear queued flag...
                     relevantItem.Progress = 100;
-                    StateChangedAtIndex?.Invoke(null, indexOfItem);
+                    StateChangedForItem?.Invoke(null, relevantItem);
                 }
             }
             else
             {
-                StateChangedAtIndex?.Invoke(null, indexOfItem);
+                if(relevantItem == null && e.Transfer.State == TransferStates.Requested)
+                {
+                    return; //TODO sometimes this can happen to fast.  this is okay thouugh bc it will soon go to another state.
+                }
+                StateChangedForItem?.Invoke(null, relevantItem);
             }
         }
 
@@ -1061,29 +1809,19 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
             TransferItem relevantItem = null;
-            if (TransfersFragment.transferItems == null)
+            if (TransfersFragment.TransferItemManagerDL == null)
             {
                 MainActivity.LogDebug("transferItems Null " + e.Transfer.Filename);
                 return;
             }
-            lock (TransfersFragment.transferItems)
-            {
-                foreach (TransferItem item in TransfersFragment.transferItems) //THIS is where those enumeration exceptions are all coming from...
-                {
-                    if (item.FullFilename.Equals(e.Transfer.Filename))
-                    {
-                        relevantItem = item;
-                        break;
-                    }
-                }
-            }
-
+            
+            relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
 
             if (relevantItem == null)
             {
                 //this happens on Clear and Cancel All.
                 MainActivity.LogDebug("Relevant Item Null " + e.Transfer.Filename);
-                MainActivity.LogDebug("transferItems.Count " + TransfersFragment.transferItems.Count);
+                MainActivity.LogDebug("transferItems.IsEmpty " + TransfersFragment.TransferItemManagerDL.IsEmpty());
                 return;
             }
             else
@@ -1093,23 +1831,16 @@ namespace AndriodApp1
                 relevantItem.Progress = (int)percentComplete;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
 
-
-
-
                 // int indexRemoved = -1;
                 if (SoulSeekState.AutoClearComplete && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear
                 {
 
                     Action action = new Action(() => {
-                        int before = TransfersFragment.transferItems.Count;
-                        lock (TransfersFragment.transferItems)
-                        {
-                            //used to occur on nonUI thread.  Im pretty sure this causes the recyclerview inconsistency crash..
-                            //indexRemoved = transferItems.IndexOf(relevantItem);
-                            TransfersFragment.transferItems.Remove(relevantItem); //TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt
-                        }
-                        int after = TransfersFragment.transferItems.Count;
-                        MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
+                        //int before = TransfersFragment.transferItems.Count;
+
+                        TransfersFragment.TransferItemManagerDL.Remove(relevantItem); //TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt
+                        //int after = TransfersFragment.transferItems.Count;
+                        //MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
                     if (SoulSeekState.ActiveActivityRef != null)
                     {
@@ -1135,7 +1866,7 @@ namespace AndriodApp1
 
                 }
 
-                ProgressUpdated?.Invoke(null,new ProgressUpdatedUI(relevantItem,wasFailed,fullRefresh, percentComplete));
+                ProgressUpdated?.Invoke(null,new ProgressUpdatedUI(relevantItem,wasFailed,fullRefresh, percentComplete, e.Transfer.AverageSpeed));
 
             }
         }
@@ -2337,6 +3068,30 @@ namespace AndriodApp1
             }
         }
 
+        public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
+
+        public static void ClearDownloadAddedEventsFromTarget(object target)
+        {
+            if (DownloadAddedUINotify == null)
+            {
+                return;
+            }
+            else
+            {
+                foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
+                {
+                    if (d.Target == null) //i.e. static
+                    {
+                        continue;
+                    }
+                    if (d.Target.GetType() == target.GetType())
+                    {
+                        DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
+                    }
+                }
+            }
+        }
+
         private void setKeyboardVisibilityListener()
         {
             //this creates problems.  we dont really need this anymore with the new "adjust nothing if edittext is at top" fix.
@@ -2985,7 +3740,7 @@ namespace AndriodApp1
 
             sharedPreferences = this.GetSharedPreferences("SoulSeekPrefs",0);
 
-            if (TransfersFragment.transferItems == null)//bc our sharedPref string can be older than the transferItems
+            if (TransfersFragment.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             {
                 TransfersFragment.RestoreTransferItems(sharedPreferences);
             }
@@ -3686,7 +4441,7 @@ namespace AndriodApp1
                     else
                     {
                         //update the transferItem array
-                        TransferItem relevantItem = TransfersFragment.GetTransferItemByFileName(fullFileName, out int _);
+                        TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, out int _);
                         if (relevantItem == null)
                         {
                             return;
@@ -3726,7 +4481,7 @@ namespace AndriodApp1
             catch(TransferNotFoundException)
             {
                 //it is not downloading... therefore retry the download...
-                TransferItem item1 = TransfersFragment.GetTransferItemByFileName(fullFileName, out int _);
+                TransferItem item1 = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, out int _);
                 //TransferItem item1 = transferItems[info.Position];  
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 try
@@ -4246,6 +5001,18 @@ namespace AndriodApp1
                 {
                     relevant = ((pager.Adapter as TabsPagerAdapter).GetItem(3) as BrowseFragment).BackButton();
                 }
+                else if(pager.CurrentItem == 2) //transfer tab
+                {
+                    if(TransfersFragment.CurrentlySelectedDLFolder!=null)
+                    {
+                        TransfersFragment.CurrentlySelectedDLFolder = null;
+                        SetTransferSupportActionBarState();
+                        this.InvalidateOptionsMenu();
+                        ((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).SetRecyclerAdapter();
+                        ((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).RestoreScrollPosition(); 
+                        relevant = true;
+                    }
+                }
             }
             catch(Exception e)
             {
@@ -4733,11 +5500,30 @@ namespace AndriodApp1
 
         public static void SoulSeekState_DownloadAdded(object sender, DownloadAddedEventArgs e)
         {
+            MainActivity.LogDebug("SoulSeekState_DownloadAdded");
+            TransferItem transferItem = new TransferItem();
+            transferItem.Filename = Helpers.GetFileNameFromFile(e.dlInfo.fullFilename);
+            transferItem.FolderName = Helpers.GetFolderNameFromFile(e.dlInfo.fullFilename);
+            transferItem.Username = e.dlInfo.username;
+            transferItem.FullFilename = e.dlInfo.fullFilename;
+            transferItem.Size = e.dlInfo.Size;
+            transferItem.QueueLength = e.dlInfo.QueueLength;
+            e.dlInfo.TransferItemReference = transferItem;
+
+            TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource);
+            //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
+            //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
+            //{
+            //    //likely old already exists so just replace the old one
+            //    CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
+            //}
+
             //once task completes, write to disk
             Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
             e.dlInfo.downloadTask.ContinueWith(continuationActionSaveFile);
 
-
+            TransfersFragment.TransferItemManagerDL.Add(transferItem);
+            MainActivity.DownloadAddedUINotify?.Invoke(null, e);
         }
 
         /// <summary>
@@ -6197,6 +6983,9 @@ namespace AndriodApp1
             //in addition each fragment is responsible for expanding their menu...
             if(e.Position==0)
             {
+                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                this.SupportActionBar.SetHomeButtonEnabled(false);
+
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                 this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
@@ -6204,6 +6993,9 @@ namespace AndriodApp1
             }
             if(e.Position==1) //search
             {
+                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                this.SupportActionBar.SetHomeButtonEnabled(false);
+
                 //string initText = string.Empty;
                 //if (this.SupportActionBar?.CustomView != null) //it is null on device rotation...
                 //{
@@ -6239,17 +7031,41 @@ namespace AndriodApp1
             }
             else if(e.Position==2)
             {
+
+
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                this.SupportActionBar.Title = this.GetString(Resource.String.transfer_tab);
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);
+
+
+                SetTransferSupportActionBarState();
+
+                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
             }
             else if(e.Position==3)
             {
+                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                this.SupportActionBar.SetHomeButtonEnabled(false);
+
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                 this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
                 this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
+            }
+        }
+
+        public void SetTransferSupportActionBarState()
+        {
+            if (TransfersFragment.CurrentlySelectedDLFolder == null)
+            {
+                this.SupportActionBar.Title = this.GetString(Resource.String.transfer_tab);
+                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                this.SupportActionBar.SetHomeButtonEnabled(false);
+            }
+            else
+            {
+                this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedDLFolder.FolderName;
+                this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+                this.SupportActionBar.SetHomeButtonEnabled(true);
             }
         }
 
@@ -6701,27 +7517,7 @@ namespace AndriodApp1
         /// </summary>
         public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
-        public static void ClearDownloadAddedEventsFromTarget(object target)
-        {
-            if(DownloadAdded == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in DownloadAdded.GetInvocationList())
-                {
-                    if(d.Target==null) //i.e. static
-                    {
-                        continue;
-                    }
-                    if(d.Target.GetType() == target.GetType())
-                    {
-                        DownloadAdded -= (EventHandler<DownloadAddedEventArgs>)d;
-                    }
-                }
-            }
-        }
+
         public static void ClearSearchHistoryEventsFromTarget(object target)
         {
             if (ClearSearchHistory == null)
@@ -6748,6 +7544,10 @@ namespace AndriodApp1
 
 
         public static event EventHandler<DownloadAddedEventArgs> DownloadAdded;
+        /// <summary>
+        /// Occurs after we set up the DownloadAdded transfer item.
+        /// </summary>
+        
         public static event EventHandler<EventArgs> ClearSearchHistory;
         public static List<DownloadInfo> downloadInfoList;
         /// <summary>
@@ -6791,6 +7591,7 @@ namespace AndriodApp1
         public const string M_Username = "Momento_Username";
         public const string M_Password = "Momento_Password";
         public const string M_TransferList = "Momento_List";
+        public const string M_TransferList_v2 = "Momento_UpdatedTransferListWithFolders";
         public const string M_Messages = "Momento_Messages";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
