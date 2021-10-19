@@ -3808,6 +3808,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             base.OnResume();
+            
             MainActivity.LogDebug("OnResume ran");
 
             Window window = Dialog.Window;//  getDialog().getWindow();
@@ -4421,14 +4422,14 @@ namespace AndriodApp1
             InnerTransferItem = item;
             FolderItem folderItem = item as FolderItem;
             viewFoldername.Text = folderItem.FolderName;
-            var state = folderItem.GetState();
+            var state = folderItem.GetState(out bool isFailed);
 
             TransferViewHelper.SetViewStatusText(viewStatus, state);
             TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, item, state);
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
             progressBar.Progress = folderItem.GetFolderProgress(out _, out _);
             viewUsername.Text = folderItem.Username;
-            if (state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut))
+            if (isFailed)//state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut))
             {
                 progressBar.Progress = 100;
 #pragma warning disable 0618
@@ -4968,7 +4969,7 @@ namespace AndriodApp1
             }
             else
             {
-                var state = CurrentlySelectedDLFolder.GetState();
+                var state = CurrentlySelectedDLFolder.GetState(out bool isFailed);
 
                 if (state.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
                 {
@@ -4997,7 +4998,7 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
                 }
 
-                if(state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored))
+                if(state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored) || isFailed) //i.e. if the overall state is failed OR if it contains any failed
                 {
                     menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
                 }
@@ -5504,6 +5505,12 @@ namespace AndriodApp1
         //    base.OnDestroy();
         //}
 
+        public override void OnResume()
+        {
+            StaticHacks.TransfersFrag = this;
+            base.OnResume();
+        }
+
         public override void OnPause()
         {
             base.OnPause();
@@ -5834,11 +5841,11 @@ namespace AndriodApp1
                     break;
                 case 2:
                     //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
-                    TransferItem tItem = null;
+                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed"); 
+                    ITransferItem tItem = null;
                     try
                     {
-                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position) as TransferItem;
+                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position);
                     }
                     catch (ArgumentOutOfRangeException)
                     {
@@ -5846,23 +5853,41 @@ namespace AndriodApp1
                         Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                         return base.OnContextItemSelected(item);
                     }
-                    CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tItem), out CancellationTokenSource token);
-                    token?.Cancel();
-                    //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                    CancellationTokens.Remove(ProduceCancellationTokenKey(tItem));
+                    if(tItem is TransferItem tti)
+                    {
+                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource token);
+                        token?.Cancel();
+                        //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
+                        CancellationTokens.Remove(ProduceCancellationTokenKey(tti));
+                        lock (TransferItemManagerDL.GetUICurrentList())
+                        {
+                            TransferItemManagerDL.RemoveAtUserIndex(position);
+                            recyclerTransferAdapter.NotifyItemRemoved(position);
+                        }
+                    }
+                    else if(tItem is FolderItem fi)
+                    {
+                        TransferItemManagerDL.CancelFolder(fi);
+                        TransferItemManagerDL.ClearAllFromFolder(fi);
+                        lock (TransferItemManagerDL.GetUICurrentList())
+                        {
+                            //TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
+                            recyclerTransferAdapter.NotifyItemRemoved(position);
+                        }
+                    }
+                    else
+                    {
+                        MainActivity.LogInfoFirebase("Cancel and Clear item pressed - bad item");
+                    }
                     MainActivity.LogDebug("Cancellation Token does not exist");
                     //tItem.CancellationTokenSource.Cancel();
-                    lock (TransferItemManagerDL.GetUICurrentList())
-                    {
-                        TransferItemManagerDL.RemoveAtUserIndex(position);
-                        recyclerTransferAdapter.NotifyItemRemoved(position);
-                    }
+
                     break;
-                case 3:
+                case 3:  
                     tItem = null;
                     try
                     {
-                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position) as TransferItem;
+                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position);
                     }
                     catch (ArgumentOutOfRangeException)
                     {
@@ -5870,31 +5895,25 @@ namespace AndriodApp1
                         Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                         return base.OnContextItemSelected(item);
                     }
-                    int queueLenOld = tItem.QueueLength;
 
-                    Func<TransferItem, object> actionOnComplete = new Func<TransferItem, object>((TransferItem t) =>
+                    //the folder implementation will re-request all queued files
+                    //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
+
+
+                    if(tItem is TransferItem)
+                    {
+                        GetQueuePosition(tItem as TransferItem);
+                    }
+                    else if(tItem is FolderItem folderItem)
+                    {
+                        lock(folderItem.TransferItems)
                         {
-                            try
+                            foreach(TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State == TransferStates.Queued))
                             {
-                            if(queueLenOld == t.QueueLength) //always true bc its a reference...
-                            {
-                                Toast.MakeText(SoulSeekState.MainActivityRef, string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength),ToastLength.Short).Show();
+                                GetQueuePosition(transferItem);
                             }
-                            else
-                            {
-                                    int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t);
-                                    recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
-                            }
-                            }
-                            catch(System.Exception e)
-                            {
-                                MainActivity.LogFirebase("actionOnComplete" + e.Message + e.StackTrace);
-                            }
-
-                            return null;
-                        });
-
-                    MainActivity.GetDownloadPlaceInQueue(tItem.Username, tItem.FullFilename, actionOnComplete);
+                        }
+                    }
                     break;
                 case 4:
                     tItem = null;
@@ -5913,17 +5932,17 @@ namespace AndriodApp1
                         //tested on API25 and API30
                         //AndroidX.Core.Content.FileProvider
                         Android.Net.Uri uriToUse = null;
-                        if(SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri(tItem.FinalUri)) //i.e. if it is a FILE URI.
+                        if(SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
                         {
-                            uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse(tItem.FinalUri).Path));
+                            uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
                         }
                         else
                         {
-                            uriToUse = Android.Net.Uri.Parse(tItem.FinalUri);
+                            uriToUse = Android.Net.Uri.Parse((tItem as TransferItem).FinalUri);
                         }
                         Intent playFileIntent = new Intent(Intent.ActionView);
                         //playFileIntent.SetDataAndType(uriToUse,"audio/*");  
-                        playFileIntent.SetDataAndType(uriToUse, Helpers.GetMimeTypeFromFilename(tItem.FullFilename));   //works
+                        playFileIntent.SetDataAndType(uriToUse, Helpers.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
                         playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
                         //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
                         this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
@@ -6009,6 +6028,35 @@ namespace AndriodApp1
                     break;
             }
             return base.OnContextItemSelected(item);
+        }
+
+        public void GetQueuePosition(TransferItem ttItem)
+        {
+            int queueLenOld = ttItem.QueueLength;
+
+            Func<TransferItem, object> actionOnComplete = new Func<TransferItem, object>((TransferItem t) =>
+            {
+                try
+                {
+                    if (queueLenOld == t.QueueLength) //always true bc its a reference...
+                    {
+                        Toast.MakeText(SoulSeekState.MainActivityRef, string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
+                    }
+                    else
+                    {
+                        int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t);
+                        recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    MainActivity.LogFirebase("actionOnComplete" + e.Message + e.StackTrace);
+                }
+
+                return null;
+            });
+
+            MainActivity.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, actionOnComplete);
         }
 
         public void UpdateQueueState(string fullFilename) //Add this to the event handlers so that when downloads are added they have their queue position.
@@ -6486,6 +6534,7 @@ namespace AndriodApp1
                 FolderItem fi = null;
                 TransferStates folderItemState = TransferStates.None;
                 bool isTransferItem = false;
+                bool anyFailed = false;
                 if(tvh?.InnerTransferItem is TransferItem tvhi)
                 {
                     isTransferItem = true;
@@ -6494,7 +6543,7 @@ namespace AndriodApp1
                 else if(tvh?.InnerTransferItem is FolderItem tvhf)
                 {
                     fi = tvhf;
-                    folderItemState = fi.GetState();
+                    folderItemState = fi.GetState(out anyFailed);
                 }
                 
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
@@ -6596,7 +6645,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored))
+                    if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
                     {
                         //no op
                         menu.Add(4, 102, 4, "Retry Failed Files");

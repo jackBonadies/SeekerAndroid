@@ -458,6 +458,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             base.OnResume();
+            Instance = this;
             if (listViewDirectories != null && ScrollPositionRestoreRotate != null)
             {
                 //restore scroll
