@@ -947,14 +947,33 @@ namespace AndriodApp1
             }
         }
 
-
+        public TransferItem GetLowestQueuedTransferItem()
+        {
+            lock (TransferItems)
+            {
+                int queueLen = int.MaxValue;
+                TransferItem curLowest = null;
+                foreach (TransferItem ti in TransferItems)
+                {
+                    if (ti.State == TransferStates.Queued)
+                    {
+                        queueLen = Math.Min(ti.QueueLength, queueLen);
+                        if(queueLen == ti.QueueLength)
+                        {
+                            curLowest = ti;
+                        }
+                    }
+                }
+                return curLowest;
+            }
+        }
 
 
         /// <summary>
         /// Get the overall state of the folder.
         /// </summary>
         /// <returns></returns>
-        public TransferStates GetState()
+        public TransferStates GetState(out bool isFailed)
         {
             //top priority - In Progress
             //if ANY are InProgress then this is considered in progress
@@ -964,7 +983,7 @@ namespace AndriodApp1
             //if not then its cancelled (i.e. paused)
             //if not then its Succeeded.
 
-
+            isFailed = false;
             //if not then none...
             lock (TransferItems)
             {
@@ -974,10 +993,15 @@ namespace AndriodApp1
                     TransferStates state = ti.State;
                     if(state==TransferStates.InProgress)
                     {
+                        isFailed = false;
                         return TransferStates.InProgress;
                     }
                     else
                     {
+                        if(ti.Failed)
+                        {
+                            isFailed = true;
+                        }
                         //do priority
                         if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
                         {
@@ -1731,7 +1755,7 @@ namespace AndriodApp1
             {
                 relevantItem.State = e.Transfer.State;
             }
-            if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut))
+            if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
                 if(relevantItem == null)
                 {
@@ -4999,7 +5023,7 @@ namespace AndriodApp1
                 var pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
-                    relevant = ((pager.Adapter as TabsPagerAdapter).GetItem(3) as BrowseFragment).BackButton();
+                    relevant = BrowseFragment.Instance.BackButton();
                 }
                 else if(pager.CurrentItem == 2) //transfer tab
                 {
@@ -5008,8 +5032,10 @@ namespace AndriodApp1
                         TransfersFragment.CurrentlySelectedDLFolder = null;
                         SetTransferSupportActionBarState();
                         this.InvalidateOptionsMenu();
-                        ((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).SetRecyclerAdapter();
-                        ((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).RestoreScrollPosition(); 
+                        //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).SetRecyclerAdapter();  //if you go to transfers rotate phone and then OnBackPressed gets hit,. the fragment that getitem returns will be very old.
+                        //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).RestoreScrollPosition();
+                        StaticHacks.TransfersFrag.SetRecyclerAdapter();
+                        StaticHacks.TransfersFrag.RestoreScrollPosition();
                         relevant = true;
                     }
                 }
@@ -7743,7 +7769,7 @@ namespace AndriodApp1
         public static bool UpdateUI = false;
         public static View RootView = null;
         public static Android.Support.V4.App.Fragment LoginFragment = null;
-        public static Android.Support.V4.App.Fragment TransfersFrag = null;
+        public static TransfersFragment TransfersFrag = null;
     }
 
     public static class Helpers

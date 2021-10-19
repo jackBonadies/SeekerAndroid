@@ -3062,7 +3062,7 @@ namespace Soulseek
                 // change state so we can fire the progress update a final time with the updated state. little bit of a hack to
                 // avoid cloning the download
                 download.State = TransferStates.Completed | download.State;
-                if(outputStream.CanSeek)
+                if(outputStream?.CanSeek ?? false)
                 {
                     UpdateProgress(download.StartOffset + outputStream.Position);
                 }
@@ -3099,7 +3099,7 @@ namespace Soulseek
                     InvokeDownloadAddedRemovedInternalHandler(Downloads.Count);
                 }
                 InvokeDebugLogHandler("New count is: " + Downloads.Count); //the bad case says that there is still one thing left.. even though downloads.count is 0....
-                if (options.DisposeOutputStreamOnCompletion)
+                if (options.DisposeOutputStreamOnCompletion && outputStream!=null)
                 {
                     try
                     {
