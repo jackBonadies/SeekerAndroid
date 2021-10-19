@@ -23,6 +23,8 @@ type AppInfo struct {
 
 	Categories []string `yaml:"categories"`
 
+	AntiFeatures []string `yaml:"anti_features"`
+
 	ReleaseDescription string
 
 	License string

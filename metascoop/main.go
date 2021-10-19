@@ -261,6 +261,10 @@ func main() {
 				meta["Categories"] = apkInfo.Categories
 			}
 
+			if len(apkInfo.AntiFeatures) != 0 {
+				meta["AntiFeatures"] = strings.Join(apkInfo.AntiFeatures, ",")
+			}
+
 			meta["CurrentVersion"] = latestPackage.VersionName
 			meta["CurrentVersionCode"] = latestPackage.VersionCode
 
