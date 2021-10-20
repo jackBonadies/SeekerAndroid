@@ -1687,7 +1687,7 @@ namespace AndriodApp1
                 SoulSeekState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
                 SoulSeekState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
-                SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged; ;
+                SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
 
                 SoulSeekState.SoulseekClient.Connected += SoulseekClient_Connected;
                 SoulSeekState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
@@ -1750,7 +1750,7 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
 
-            TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, out _);
+            TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, out _);  //upload / download branch here
             if (relevantItem != null)
             {
                 relevantItem.State = e.Transfer.State;
@@ -3813,6 +3813,9 @@ namespace AndriodApp1
                 }
                 else if(Intent.GetIntExtra(WishlistController.FromWishlistString,-1)==1)
                 {
+                    SoulSeekState.MainActivityRef = this; //set these early. they are needed
+                    SoulSeekState.ActiveActivityRef = this; 
+
                     MainActivity.LogInfoFirebase("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false).ToString());
                     MainActivity.LogInfoFirebase("from wishlist clicked");
                     int currentPage = pager.CurrentItem;
@@ -7036,7 +7039,7 @@ namespace AndriodApp1
                 this.SupportActionBar.SetDisplayShowCustomEnabled(true);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(false);
                 this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
-                SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, initText*/);
+                SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
                 //this.SupportActionBar.CustomView.FindViewById<View>(Resource.Id.searchHere).FocusChange += MainActivity_FocusChange;
                 this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                 if(goToSearchTab != int.MaxValue)
