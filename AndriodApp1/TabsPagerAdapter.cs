@@ -1503,7 +1503,10 @@ namespace AndriodApp1
                     }
                     this.Activity.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
                 });
-
+                if(SoulSeekState.MainActivityRef==null)
+                {
+                    MainActivity.LogFirebase("mainActivityRef is null GoToTab");
+                }
                 SoulSeekState.MainActivityRef?.RunOnUiThread(a);
             }
         }
@@ -1652,7 +1655,7 @@ namespace AndriodApp1
         }
         
 
-        public static void ConfigureSupportCustomView(View customView/*, string initSearchText*/)
+        public static void ConfigureSupportCustomView(View customView/*, Context contextJustInCase*/) //todo: seems to be an error. which seems entirely possible. where ActiveActivityRef does not get set yet.
         {
             MainActivity.LogDebug("ConfigureSupportCustomView");
             AutoCompleteTextView actv = customView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
@@ -1700,13 +1703,24 @@ namespace AndriodApp1
 
             SetSearchHintTarget(SearchTabHelper.SearchTarget, actv);
 
-            actv.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, searchHistory);
+            Context contextToUse = SoulSeekState.ActiveActivityRef;
+            //if (SoulSeekState.ActiveActivityRef==null)
+            //{
+            //    MainActivity.LogFirebase("Active ActivityRef is null!!!");
+            //    //contextToUse = contextJustInCase;
+            //}
+            //else
+            //{
+            //    contextToUse = SoulSeekState.ActiveActivityRef;
+            //}
+
+            actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.autoSuggestionRow, searchHistory);
             actv.KeyPress -= Actv_KeyPressHELPER;
             actv.KeyPress += Actv_KeyPressHELPER;
             actv.FocusChange += MainActivity_FocusChange;
             actv.TextChanged += Actv_TextChanged;
 
-            SetCustomViewTabNumberInner(iv, SoulSeekState.ActiveActivityRef);
+            SetCustomViewTabNumberInner(iv, contextToUse);
         }
 
         private static void Actv_Touch(object sender, View.TouchEventArgs e)
@@ -2218,19 +2232,19 @@ namespace AndriodApp1
                 switch(target)
                 {
                     case SearchTarget.AllUsers:
-                        actv.Hint = SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_here);
+                        actv.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.search_here);
                         break;
                     case SearchTarget.UserList:
-                        actv.Hint = SoulSeekState.ActiveActivityRef.GetString(Resource.String.saerch_user_list);
+                        actv.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.saerch_user_list);
                         break;
                     case SearchTarget.Room:
-                        actv.Hint = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_room_),SearchTabHelper.SearchTargetChosenRoom);
+                        actv.Hint = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.search_room_),SearchTabHelper.SearchTargetChosenRoom);
                         break;
                     case SearchTarget.ChosenUser:
-                        actv.Hint = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_user_),SearchTabHelper.SearchTargetChosenUser); 
+                        actv.Hint = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.search_user_),SearchTabHelper.SearchTargetChosenUser); 
                         break;
                     case SearchTarget.Wishlist:
-                        actv.Hint = SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist_search);
+                        actv.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.wishlist_search);
                         break;
                 }
             }
