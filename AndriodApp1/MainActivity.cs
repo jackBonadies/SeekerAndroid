@@ -875,11 +875,17 @@ namespace AndriodApp1
         public string GetUsername();
         public TimeSpan? GetRemainingTime();
         public int GetQueueLength();
+        public bool IsUpload();
     }
 
     [Serializable]
     public class FolderItem : ITransferItem
     {
+        public bool IsUpload()
+        {
+            return TransferItems[0].IsUpload();
+        }
+
         public TimeSpan? RemainingFolderTime;
 
         public TimeSpan? GetRemainingTime()
@@ -919,7 +925,16 @@ namespace AndriodApp1
                 }
                 totalBytes = totalFolderBytes;
                 bytesCompleted = folderBytesComplete;
-                return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
+                //error "System.OverflowException: Value was either too large or too small for an Int32." can occur for example when totalFolderBytes is 0
+                if(totalFolderBytes==0)
+                {
+                    MainActivity.LogInfoFirebase("total folder bytes == 0");
+                    return 100;
+                }
+                else
+                {
+                    return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
+                }
             }
         }
 
@@ -1058,6 +1073,10 @@ namespace AndriodApp1
             lock (TransferItems)
             {
                 TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99;});
+                if (IsUpload())
+                {
+                    TransferItems.RemoveAll((TransferItem i) => { return Helpers.IsUploadCompleteOrAborted(i.State); });
+                }
             }
         }
 
@@ -1092,11 +1111,76 @@ namespace AndriodApp1
         }
     }
 
+    /// <summary>
+    /// for both uploads and downloads
+    /// </summary>
+    public class TransferItemManagerWrapper
+    {
+        private TransferItemManager Uploads;
+        private TransferItemManager Downloads;
+        public TransferItemManagerWrapper(TransferItemManager up, TransferItemManager down)
+        {
+            Uploads = up;
+            Downloads = down;
+        }
 
+        public void Remove(TransferItem ti)
+        {
+            if(ti.IsUpload())
+            {
+                Uploads.Remove(ti);
+            }
+            else
+            {
+                Downloads.Remove(ti);
+            }
+        }
+
+        public object GetUICurrentList()
+        {
+            if(TransfersFragment.InUploadsMode)
+            {
+                return Uploads.GetUICurrentList();
+            }
+            else
+            {
+                return Downloads.GetUICurrentList();
+            }
+        }
+
+        public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, bool isUpload, out int indexOfItem)
+        {
+            if (isUpload)
+            {
+                return Uploads.GetTransferItemWithIndexFromAll(fullFileName, username, out indexOfItem);
+            }
+            else
+            {
+                return Downloads.GetTransferItemWithIndexFromAll(fullFileName, username, out indexOfItem);
+            }
+        }
+
+        public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
+        {
+            if(TransfersFragment.InUploadsMode && ti.IsUpload())
+            {
+                return Uploads.GetUserIndexForTransferItem(ti);
+            }
+            else if(!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
+            {
+                return Downloads.GetUserIndexForTransferItem(ti);
+            }
+            else
+            {
+                return -1; //this is okay. we arent on that page so ui events are irrelevant
+            }
+        }
+    }
 
     [Serializable]
     public class TransferItemManager
     {
+        private bool isUploads;
         /// <summary>
         /// Do not use directly.  This is public only for default serialization.
         /// </summary>
@@ -1113,22 +1197,32 @@ namespace AndriodApp1
             AllFolderItems = new List<FolderItem>();
         }
 
+        public TransferItemManager(bool _isUploads)
+        {
+            isUploads = _isUploads;
+            AllTransferItems = new List<TransferItem>();
+            AllFolderItems = new List<FolderItem>();
+        }
+
         /// <summary>
         /// transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
         /// </summary>
         public void OnRelaunch()
         {
-            lock(AllTransferItems)
-            {
-                foreach (var ti in AllTransferItems)
+            //if(forDownload)
+            //{
+                lock(AllTransferItems)
                 {
-                    if (ti.State.HasFlag(TransferStates.InProgress))
+                    foreach (var ti in AllTransferItems)
                     {
-                        ti.State = TransferStates.Cancelled;
-                        ti.RemainingTime = null;
+                        if (ti.State.HasFlag(TransferStates.InProgress))
+                        {
+                            ti.State = TransferStates.Cancelled;
+                            ti.RemainingTime = null;
+                        }
                     }
                 }
-            }
+            //}
         }
 
         public List<Tuple<TransferItem, int>> GetListOfPausedFromFolder(FolderItem fi)
@@ -1396,9 +1490,9 @@ namespace AndriodApp1
         //}
 
 
-        public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, out int indexOfItem)
+        public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, out int indexOfItem)
         {
-            if (fullFileName == null)
+            if (fullFileName == null || username==null)
             {
                 indexOfItem = -1;
                 return null;
@@ -1407,7 +1501,7 @@ namespace AndriodApp1
             {
                 foreach (TransferItem item in AllTransferItems)
                 {
-                    if (item.FullFilename.Equals(fullFileName)) //fullfilename includes dir so that takes care of any ambiguity...
+                    if (item.FullFilename.Equals(fullFileName) && item.Username.Equals(username)) //fullfilename includes dir so that takes care of any ambiguity...
                     {
                         indexOfItem = AllTransferItems.IndexOf(item);
                         return item;
@@ -1484,6 +1578,30 @@ namespace AndriodApp1
             return -1;
         }
 
+        /// <summary>
+        /// This way we will have the right reference
+        /// </summary>
+        /// <param name="ti"></param>
+        /// <returns></returns>
+        public TransferItem AddIfNotExistAndReturnTransfer(TransferItem ti, out bool exists)
+        {
+            lock(AllTransferItems)
+            {
+                var linq = AllTransferItems.Where((existingTi) => { return existingTi.Username == ti.Username && existingTi.FullFilename == ti.FullFilename; });
+                if (linq.Count()>0)
+                {
+                    exists = true;
+                    return linq.First();
+                }
+                else
+                {
+                    Add(ti);
+                    exists = false;
+                    return ti;
+                }
+            }
+        }
+
         public void Add(TransferItem ti)
         {
             lock(AllTransferItems)
@@ -1510,6 +1628,10 @@ namespace AndriodApp1
             lock (AllTransferItems)
             {
                 AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
+                if(isUploads)
+                {
+                    AllTransferItems.RemoveAll((TransferItem i) => { return Helpers.IsUploadCompleteOrAborted(i.State); });
+                }
             }
             lock (AllFolderItems)
             {
@@ -1750,7 +1872,13 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
 
-            TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, out _);  //upload / download branch here
+            bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
+            TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
+            if(relevantItem==null)
+            {
+                MainActivity.LogInfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
+            }
+            //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
             if (relevantItem != null)
             {
                 relevantItem.State = e.Transfer.State;
@@ -1771,15 +1899,18 @@ namespace AndriodApp1
                     return;
                 }
                 relevantItem.Queued = true;
-                if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
+                if(!relevantItem.IsUpload())
                 {
-                    //nothing to do, bc its already set..
-                    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
-                }
-                else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
-                {
-                    //GET QUEUE LENGTH AND UPDATE...
-                    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                    if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
+                    {
+                        //nothing to do, bc its already set..
+                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                    }
+                    else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
+                    {
+                        //GET QUEUE LENGTH AND UPDATE...
+                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                    }
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
@@ -1838,8 +1969,10 @@ namespace AndriodApp1
                 MainActivity.LogDebug("transferItems Null " + e.Transfer.Filename);
                 return;
             }
-            
-            relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
+
+            bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
+            relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename,e.Transfer.Username, e.Transfer.Direction==TransferDirection.Upload, out _);
+            //relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
 
             if (relevantItem == null)
             {
@@ -1856,13 +1989,12 @@ namespace AndriodApp1
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
 
                 // int indexRemoved = -1;
-                if (SoulSeekState.AutoClearComplete && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear
+                if ( ((SoulSeekState.AutoClearCompleteDownloads && !isUpload)||SoulSeekState.AutoClearCompleteUploads && isUpload) && System.Math.Abs(percentComplete - 100) < .001 ) //if 100% complete and autoclear //todo: autoclear on upload
                 {
 
                     Action action = new Action(() => {
                         //int before = TransfersFragment.transferItems.Count;
-
-                        TransfersFragment.TransferItemManagerDL.Remove(relevantItem); //TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt
+                        TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt
                         //int after = TransfersFragment.transferItems.Count;
                         //MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
@@ -2360,7 +2492,8 @@ namespace AndriodApp1
                 SoulSeekState.SaveDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_SaveDataDirectoryUri, "");
                 SoulSeekState.NumberSearchResults = sharedPreferences.GetInt(SoulSeekState.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
                 SoulSeekState.DayNightMode = sharedPreferences.GetInt(SoulSeekState.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
-                SoulSeekState.AutoClearComplete = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
+                SoulSeekState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
+                SoulSeekState.AutoClearCompleteUploads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearCompleteUploads, false);
                 SoulSeekState.RememberSearchHistory = sharedPreferences.GetBoolean(SoulSeekState.M_RememberSearchHistory, true);
                 SoulSeekState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(SoulSeekState.M_OnlyFreeUploadSlots, true);
                 SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, false);
@@ -3092,6 +3225,8 @@ namespace AndriodApp1
             }
         }
 
+        public static event EventHandler<TransferItem> TransferAddedUINotify;
+
         public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
 
         public static void ClearDownloadAddedEventsFromTarget(object target)
@@ -3502,6 +3637,9 @@ namespace AndriodApp1
                         editor.PutString(SoulSeekState.M_CACHE_browseResponse, bResponse);
                         editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, bfriendlyDirName);
                         editor.PutString(SoulSeekState.M_CACHE_auxDupList, bAuxDupListStreamName);
+                        editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri); 
+                            //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
+                            //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
                         editor.Commit();
                         }
                     }
@@ -3766,7 +3904,9 @@ namespace AndriodApp1
 
             if (TransfersFragment.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             {
-                TransfersFragment.RestoreTransferItems(sharedPreferences);
+                TransfersFragment.RestoreDownloadTransferItems(sharedPreferences);
+                TransfersFragment.RestoreUploadTransferItems(sharedPreferences);
+                TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
             }
 
             //restoreSoulSeekState(savedInstanceState);
@@ -4468,7 +4608,7 @@ namespace AndriodApp1
                     else
                     {
                         //update the transferItem array
-                        TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, out int _);
+                        TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                         if (relevantItem == null)
                         {
                             return;
@@ -4508,7 +4648,7 @@ namespace AndriodApp1
             catch(TransferNotFoundException)
             {
                 //it is not downloading... therefore retry the download...
-                TransferItem item1 = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, out int _);
+                TransferItem item1 = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                 //TransferItem item1 = transferItems[info.Position];  
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 try
@@ -5287,14 +5427,48 @@ namespace AndriodApp1
             var cts = new CancellationTokenSource();
             //var topts = new TransferOptions(stateChanged: (e) => tracker.AddOrUpdate(e, cts), progressUpdated: (e) => tracker.AddOrUpdate(e, cts), governor: (t, c) => Task.Delay(1, c));
 
-            // accept all download requests, and begin the upload immediately.
-            // normally there would be an internal queue, and uploads would be handled separately.
+            TransferItem transferItem = new TransferItem();
+            transferItem.Username = username;
+            transferItem.FullFilename = filename;
+            transferItem.Filename = Helpers.GetFileNameFromFile(filename);
+            transferItem.FolderName = Helpers.GetFolderNameFromFile(filename);
+            transferItem.CancellationTokenSource = cts;
+            transferItem.Size = ourFile.Length();
+            transferItem.isUpload = true;
+            transferItem = TransfersFragment.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
+            
+            if (!exists) //else the state will simply be updated a bit later. 
+            {
+                TransferAddedUINotify?.Invoke(null, transferItem);
+            }
+                // accept all download requests, and begin the upload immediately.
+                // normally there would be an internal queue, and uploads would be handled separately.
             Task.Run(async () =>
             {
-                using var stream = SoulSeekState.MainActivityRef.ContentResolver.OpenInputStream(ourFile.Uri); //outputstream.CanRead is false...
-                //using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-                await SoulSeekState.SoulseekClient.UploadAsync(username, filename, ourFile.Length(), stream, options: null, cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
-                //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
+                try
+                {
+                    using var stream = SoulSeekState.MainActivityRef.ContentResolver.OpenInputStream(ourFile.Uri); //outputstream.CanRead is false...
+                    //using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+                    await SoulSeekState.SoulseekClient.UploadAsync(username, filename, transferItem.Size, stream, options: null, cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
+                                                                                                                                                                //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
+                    TransfersFragment.SetupCancellationToken(transferItem, cts); //I put this here because if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one.
+                }
+                catch (DuplicateTransferException dup)
+                {
+                    LogDebug("UPLOAD DUPL - " + dup.Message);
+                }
+                catch(DuplicateTokenException dup)
+                {
+                    LogDebug("UPLOAD DUPL - " + dup.Message);
+                }
+                catch(Exception e)
+                {
+                    LogDebug("UPLOAD FAILED - " + e.Message);
+                    transferItem.Failed = true;
+                    transferItem.State = TransferStates.Errored;
+                    //update the UI if we get here.
+                    SeekerApplication.StateChangedForItem?.Invoke(null, transferItem);
+                }
             }).ContinueWith(t =>
             {
                 //Console.WriteLine($"[UPLOAD FAILED] {t.Exception}");
@@ -5320,7 +5494,7 @@ namespace AndriodApp1
                 {
                     Action showDirectoryButton = new Action(() => {
                         ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
-                        AddLoggedInLayout(StaticHacks.LoginFragment.View);
+                        AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
                         if(!SoulSeekState.currentlyLoggedIn)
                         {
                             MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
@@ -5622,25 +5796,25 @@ namespace AndriodApp1
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                     {
-                        MainActivity.LogFirebase("read error: remote connection closed");
+                        //MainActivity.LogFirebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
                     {
-                        MainActivity.LogFirebase("Network Subsystem is Down");
+                        //MainActivity.LogFirebase("Network Subsystem is Down");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_down)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
                     {
-                        MainActivity.LogFirebase("Reported as failed by uploader");
+                        //MainActivity.LogFirebase("Reported as failed by uploader");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect message connection"))
                     {
-                        MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
+                        //MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
                     }
@@ -6937,7 +7111,8 @@ namespace AndriodApp1
             editor.PutString(SoulSeekState.M_SaveDataDirectoryUri,SoulSeekState.SaveDataDirectoryUri);
             editor.PutInt(SoulSeekState.M_NumberSearchResults,SoulSeekState.NumberSearchResults);
             editor.PutInt(SoulSeekState.M_DayNightMode,SoulSeekState.DayNightMode);
-            editor.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearComplete);
+            editor.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
+            editor.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
             editor.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
             editor.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
             editor.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
@@ -6971,7 +7146,8 @@ namespace AndriodApp1
             outState.PutString(SoulSeekState.M_SaveDataDirectoryUri, SoulSeekState.SaveDataDirectoryUri);
             outState.PutInt(SoulSeekState.M_NumberSearchResults, SoulSeekState.NumberSearchResults);
             outState.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
-            outState.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearComplete);
+            outState.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
+            outState.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
             outState.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
             outState.PutBoolean(SoulSeekState.M_MemoryBackedDownload, SoulSeekState.MemoryBackedDownload);
             outState.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
@@ -7084,17 +7260,35 @@ namespace AndriodApp1
 
         public void SetTransferSupportActionBarState()
         {
-            if (TransfersFragment.CurrentlySelectedDLFolder == null)
+            if(TransfersFragment.InUploadsMode)
             {
-                this.SupportActionBar.Title = this.GetString(Resource.String.transfer_tab);
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
+                if (TransfersFragment.CurrentlySelectedUploadFolder == null)
+                {
+                    this.SupportActionBar.Title = "Uploads";
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                }
+                else
+                {
+                    this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedUploadFolder.FolderName;
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+                    this.SupportActionBar.SetHomeButtonEnabled(true);
+                }
             }
             else
             {
-                this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedDLFolder.FolderName;
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-                this.SupportActionBar.SetHomeButtonEnabled(true);
+                if (TransfersFragment.CurrentlySelectedDLFolder == null)
+                {
+                    this.SupportActionBar.Title = "Downloads";
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                }
+                else
+                {
+                    this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedDLFolder.FolderName;
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+                    this.SupportActionBar.SetHomeButtonEnabled(true);
+                }
             }
         }
 
@@ -7491,7 +7685,8 @@ namespace AndriodApp1
 
         public static bool InDarkModeCache = false;
         public static bool currentlyLoggedIn = false;
-        public static bool AutoClearComplete = false;
+        public static bool AutoClearCompleteDownloads = false;
+        public static bool AutoClearCompleteUploads = false;
         public static bool FreeUploadSlotsOnly = true;
         public static bool DisableDownloadToastNotification = false;
         public static bool AutoRetryDownload = true;
@@ -7621,12 +7816,15 @@ namespace AndriodApp1
         public const string M_Password = "Momento_Password";
         public const string M_TransferList = "Momento_List";
         public const string M_TransferList_v2 = "Momento_UpdatedTransferListWithFolders";
+        public const string M_TransferListUpload = "Momento_Upload_List";
+        public const string M_TransferListUpload_v2 = "Momento_Upload_UpdatedTransferListWithFolders";
         public const string M_Messages = "Momento_Messages";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";
+        public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
         public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";
         public const string M_OnlyFreeUploadSlots = "Momento_FreeUploadSlots";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
@@ -8240,6 +8438,11 @@ namespace AndriodApp1
                     SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()),ToastLength.Long);
                 }
             }
+        }
+
+        public static bool IsUploadCompleteOrAborted(TransferStates state)
+        {
+            return (state.HasFlag(TransferStates.Succeeded) || state.HasFlag(TransferStates.Cancelled) || state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Completed) || state.HasFlag(TransferStates.Rejected));
         }
 
         public static string GetFolderNameFromFile(string filename)

@@ -186,8 +186,12 @@ namespace AndriodApp1
             changeDirSettings.Click += ChangeDownloadDirectory;
 
             CheckBox autoClearComplete = FindViewById<CheckBox>(Resource.Id.autoClearComplete);
-            autoClearComplete.Checked = SoulSeekState.AutoClearComplete;
+            autoClearComplete.Checked = SoulSeekState.AutoClearCompleteDownloads;
             autoClearComplete.CheckedChange += AutoClearComplete_CheckedChange;
+
+            CheckBox autoClearCompleteUploads = FindViewById<CheckBox>(Resource.Id.autoClearCompleteAndAbortedUploads);
+            autoClearCompleteUploads.Checked = SoulSeekState.AutoClearCompleteUploads;
+            autoClearCompleteUploads.CheckedChange += AutoClearCompleteUploads_CheckedChange;
 
             CheckBox freeUploadSlotsOnly = FindViewById<CheckBox>(Resource.Id.freeUploadSlots);
             freeUploadSlotsOnly.Checked = SoulSeekState.FreeUploadSlotsOnly;
@@ -1178,9 +1182,14 @@ namespace AndriodApp1
             SoulSeekState.ClearSearchHistoryInvoke();
         }
 
+        private void AutoClearCompleteUploads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.AutoClearCompleteUploads = e.IsChecked;
+        }
+
         private void AutoClearComplete_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SoulSeekState.AutoClearComplete = e.IsChecked;
+            SoulSeekState.AutoClearCompleteDownloads = e.IsChecked;
         }
 
         private void SetSpinnerPosition(Spinner s)
@@ -1209,14 +1218,16 @@ namespace AndriodApp1
         private void RestoreDefaults_Click(object sender, EventArgs e)
         {
             SoulSeekState.NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
-            SoulSeekState.AutoClearComplete = false;
+            SoulSeekState.AutoClearCompleteDownloads = false;
+            SoulSeekState.AutoClearCompleteUploads = false;
             SoulSeekState.RememberSearchHistory = true;
             SoulSeekState.SharingOn = false;
             SoulSeekState.FreeUploadSlotsOnly = true;
             SoulSeekState.DisableDownloadToastNotification = false;
             SoulSeekState.MemoryBackedDownload = false;
             SoulSeekState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
-            (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SoulSeekState.AutoClearComplete;
+            (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SoulSeekState.AutoClearCompleteDownloads;
+            (FindViewById<CheckBox>(Resource.Id.autoClearCompleteAndAbortedUploads) as CheckBox).Checked = SoulSeekState.AutoClearCompleteUploads;
             (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SoulSeekState.RememberSearchHistory;
             (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SoulSeekState.SharingOn;
             (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SoulSeekState.FreeUploadSlotsOnly;

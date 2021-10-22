@@ -4325,6 +4325,11 @@ namespace AndriodApp1
             return queuelength;
         }
 
+        public bool IsUpload()
+        {
+            return isUpload;
+        }
+
 
         public string Filename;
         public string Username;
@@ -4335,6 +4340,7 @@ namespace AndriodApp1
         public bool Failed;
         public TransferStates State;
         public long Size;
+        public bool isUpload;
         public bool Queued = false;
         private int queuelength = 0;
         public bool CancelAndRetryFlag = false;
@@ -4438,7 +4444,7 @@ namespace AndriodApp1
             viewFoldername.Text = folderItem.FolderName;
             var state = folderItem.GetState(out bool isFailed);
 
-            TransferViewHelper.SetViewStatusText(viewStatus, state);
+            TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload());
             TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, item, state);
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
             progressBar.Progress = folderItem.GetFolderProgress(out _, out _);
@@ -4582,21 +4588,23 @@ namespace AndriodApp1
                     //error
                 }
 
+                string cancelledString = fi.IsUpload() ? "aborted" : "paused";
+
                 if (numSucceeded == 0 && numFailed == 0)
                 {
-                    filesLongStatus.Text = string.Format("All {0} paused", numPaused);
+                    filesLongStatus.Text = string.Format("All {0} {1}", numPaused, cancelledString);
                 }
                 else if (numSucceeded == 0)
                 {
-                    filesLongStatus.Text = string.Format("{0} paused, {1} failed", numPaused, numFailed);
+                    filesLongStatus.Text = string.Format("{0} {1}, {2} failed", numPaused, cancelledString, numFailed);
                 }
                 else if (numFailed == 0)
                 {
-                    filesLongStatus.Text = string.Format("{0} paused, {1} succeeded", numPaused, numSucceeded);
+                    filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded", numPaused, cancelledString, numSucceeded);
                 }
                 else
                 {
-                    filesLongStatus.Text = string.Format("{0} paused, {1} succeeded, {2} failed", numPaused, numSucceeded, numFailed);
+                    filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded, {3} failed", numPaused, cancelledString, numSucceeded, numFailed);
                 }
                 currentFile.Visibility = ViewStates.Gone;
                 //set views + visi
@@ -4609,7 +4617,7 @@ namespace AndriodApp1
         }
 
 
-        public static void SetViewStatusText(TextView viewStatus, TransferStates state)
+        public static void SetViewStatusText(TextView viewStatus, TransferStates state, bool isUpload)
         {
             if (state.HasFlag(TransferStates.Queued))
             {
@@ -4617,7 +4625,14 @@ namespace AndriodApp1
             }
             else if (state.HasFlag(TransferStates.Cancelled))
             {
-                viewStatus.SetText(Resource.String.paused);
+                if(isUpload)
+                {
+                    viewStatus.Text = "Aborted";
+                }
+                else
+                {
+                    viewStatus.SetText(Resource.String.paused);
+                }
             }
             else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
             {
@@ -4693,7 +4708,7 @@ namespace AndriodApp1
             {
                 viewStatusAdditionalInfo.Text = GetTimeRemainingString(item.GetRemainingTime());
             }
-            else if (state.HasFlag(TransferStates.Queued))
+            else if (state.HasFlag(TransferStates.Queued) && !(item.IsUpload()))
             {
                 viewStatusAdditionalInfo.Text = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_), item.GetQueueLength().ToString());
             }
@@ -4760,7 +4775,7 @@ namespace AndriodApp1
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.Progress;
-            TransferViewHelper.SetViewStatusText(viewStatus, ti.State);
+            TransferViewHelper.SetViewStatusText(viewStatus, ti.State, ti.IsUpload());
             TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, ti, ti.State);
             viewUsername.Text = ti.Username;
             if (ti.Failed)
@@ -4930,17 +4945,32 @@ namespace AndriodApp1
 
     }
 
+
+
+
     public class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
     {
         private View rootView = null;
 
         public static TransferItemManager TransferItemManagerDL; //for downloads
+        public static TransferItemManager TransferItemManagerUploads; //for uploads
+        public static TransferItemManagerWrapper TransferItemManagerWrapped;
 
         public static bool GroupByFolder = false;
 
         public static int ScrollPositionBeforeMovingIntoFolder = int.MinValue;
         public static int ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
         public static FolderItem CurrentlySelectedDLFolder = null;
+        public static FolderItem CurrentlySelectedUploadFolder = null;
+        public static bool CurrentlyInFolder()
+        {
+            if(CurrentlySelectedDLFolder == null && CurrentlySelectedUploadFolder ==null)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static volatile bool InUploadsMode = false;
 
         //private ListView primaryListView = null;
         private TextView noTransfers = null;
@@ -4972,56 +5002,96 @@ namespace AndriodApp1
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            if(CurrentlySelectedDLFolder==null)
+            if(InUploadsMode)
             {
-                menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
-                menu.FindItem(Resource.Id.action_resume_all).SetVisible(true);
-                menu.FindItem(Resource.Id.action_pause_all).SetVisible(true);
-                menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(true);
-                menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
-                menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
+                menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(true);
+                if (CurrentlySelectedUploadFolder == null)
+                {
+                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
+                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
+
+                    //todo: menu options.  clear all completed and aborted
+                    //todo: menu options.  abort all - are you sure? dialog
+
+                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
+
+                }
+                else
+                {
+
+
+                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(false);
+
+
+                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
+                }
             }
             else
             {
-                var state = CurrentlySelectedDLFolder.GetState(out bool isFailed);
-
-                if (state.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
+                menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(false);
+                if (CurrentlySelectedDLFolder==null)
                 {
-                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
+                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
+
                     menu.FindItem(Resource.Id.action_resume_all).SetVisible(true);
-                }
-                else if ((!state.HasFlag(TransferStates.Completed) && !state.HasFlag(TransferStates.Succeeded) && !state.HasFlag(TransferStates.Errored) && !state.HasFlag(TransferStates.TimedOut) && !state.HasFlag(TransferStates.Rejected)))
-                {
                     menu.FindItem(Resource.Id.action_pause_all).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
-                }
-
-                if ((state.HasFlag(TransferStates.Succeeded)))
-                {
                     menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
                     menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
-                }
-
-                if(state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored) || isFailed) //i.e. if the overall state is failed OR if it contains any failed
-                {
                     menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
                 }
                 else
                 {
-                    menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
-                }
+                    var state = CurrentlySelectedDLFolder.GetState(out bool isFailed);
 
-                menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
+                    if (state.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
+                    {
+                        menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
+                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(true);
+                    }
+                    else if ((!state.HasFlag(TransferStates.Completed) && !state.HasFlag(TransferStates.Succeeded) && !state.HasFlag(TransferStates.Errored) && !state.HasFlag(TransferStates.TimedOut) && !state.HasFlag(TransferStates.Rejected)))
+                    {
+                        menu.FindItem(Resource.Id.action_pause_all).SetVisible(true);
+                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
+                    }
+                    else
+                    {
+                        menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
+                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
+                    }
+
+                    if ((state.HasFlag(TransferStates.Succeeded)))
+                    {
+                        menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(true);
+                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
+                    }
+                    else
+                    {
+                        menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
+                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
+                    }
+
+                    if(state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored) || isFailed) //i.e. if the overall state is failed OR if it contains any failed
+                    {
+                        menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
+                    }
+                    else
+                    {
+                        menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
+                    }
+
+                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(false);
+                }
             }
             base.OnPrepareOptionsMenu(menu);
         }
@@ -5048,6 +5118,24 @@ namespace AndriodApp1
                 case Resource.Id.action_toggle_group_by: //toggle group by. group / ungroup by folder.
                     GroupByFolder = !GroupByFolder;
                     SetRecyclerAdapter();
+                    return true;
+                case Resource.Id.action_clear_all_complete_and_aborted:
+                    MainActivity.LogInfoFirebase("Clear All Complete Pressed");
+                    if (CurrentlySelectedUploadFolder == null)
+                    {
+                        TransferItemManagerUploads.ClearAllComplete();
+                    }
+                    else
+                    {
+                        TransferItemManagerUploads.ClearAllCompleteFromFolder(CurrentlySelectedUploadFolder);
+                    }
+                    refreshListView();
+                    return true;
+                case Resource.Id.action_toggle_download_upload:
+                    InUploadsMode = !InUploadsMode;
+                    SetRecyclerAdapter();
+                    SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
+                    SetNoTransfersMessage();
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     MainActivity.LogInfoFirebase("action_cancel_and_clear_all Pressed");
@@ -5195,12 +5283,63 @@ namespace AndriodApp1
             base.OnDestroy();
         }
 
-        public static void RestoreTransferItems(ISharedPreferences sharedPreferences)
+        public static void RestoreUploadTransferItems(ISharedPreferences sharedPreferences)
+        {
+            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_Upload_TransferList_v2, string.Empty); //TODO !!! replace
+            if (transferListv2 == string.Empty)
+            {
+                RestoreUploadTransferItemsLegacy(sharedPreferences);
+            }
+            else
+            {
+                //restore the simple way via deserializing...
+                TransferItemManagerUploads = new TransferItemManager(true);
+                using (var stream = new System.IO.StringReader(transferListv2))
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerUploads.GetType());
+                    TransferItemManagerUploads = serializer.Deserialize(stream) as TransferItemManager;
+                    //BackwardsCompatFunction(transferItemsLegacy);
+                    TransferItemManagerUploads.OnRelaunch();
+                }
+            }
+        }
+
+        public static void RestoreUploadTransferItemsLegacy(ISharedPreferences sharedPreferences)
+        {
+            string transferList = sharedPreferences.GetString(SoulSeekState.M_TransferListUpload, string.Empty);
+            if (transferList == string.Empty)
+            {
+                TransferItemManagerUploads = new TransferItemManager(true);
+            }
+            else
+            {
+                var transferItemsLegacy = new List<TransferItem>();
+                using (var stream = new System.IO.StringReader(transferList))
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(transferItemsLegacy.GetType());
+                    transferItemsLegacy = serializer.Deserialize(stream) as List<TransferItem>;
+                    //BackwardsCompatFunction(transferItemsLegacy);
+                    OnRelaunch(transferItemsLegacy);
+                }
+
+                TransferItemManagerUploads = new TransferItemManager(true);
+                //populate the new data structure.
+                foreach (var ti in transferItemsLegacy)
+                {
+                    TransferItemManagerUploads.Add(ti);
+                }
+
+            }
+        }
+
+
+
+        public static void RestoreDownloadTransferItems(ISharedPreferences sharedPreferences)
         {
             string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_TransferList_v2, string.Empty); //TODO !!! replace
             if(transferListv2 == string.Empty)
             {
-                RestoreTransferItemsLegacy(sharedPreferences);
+                RestoreDownloadTransferItemsLegacy(sharedPreferences);
             }
             else
             {
@@ -5218,7 +5357,7 @@ namespace AndriodApp1
 
         }
 
-        public static void RestoreTransferItemsLegacy(ISharedPreferences sharedPreferences)
+        public static void RestoreDownloadTransferItemsLegacy(ISharedPreferences sharedPreferences)
         {
             string transferList = sharedPreferences.GetString(SoulSeekState.M_TransferList, string.Empty);
             if (transferList == string.Empty)
@@ -5247,7 +5386,7 @@ namespace AndriodApp1
         }
 
         public static void OnRelaunch(List<TransferItem> transfers)
-        {   //transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
+        {   //transfers that were previously InProgress before we shut down should now be considered paused (cancelled). or aborted (cancelled upload)
             foreach (var ti in transfers)
             {
                 if (ti.State.HasFlag(TransferStates.InProgress))
@@ -5277,6 +5416,41 @@ namespace AndriodApp1
             }
         }
 
+        private void SetNoTransfersMessage()
+        {
+            if(TransfersFragment.InUploadsMode)
+            {
+                if (!(TransferItemManagerUploads.IsEmpty()))
+                {
+                    noTransfers.Visibility = ViewStates.Gone;
+                }
+                else
+                {
+                    noTransfers.Visibility = ViewStates.Visible;
+                    if(MainActivity.MeetsSharingConditions())
+                    {
+                        noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
+                    }
+                    else
+                    {
+                        noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_not_sharing);
+                    }
+                }
+            }
+            else
+            {
+                if (!(TransferItemManagerDL.IsEmpty()))
+                {
+                    noTransfers.Visibility = ViewStates.Gone;
+                }
+                else
+                {
+                    noTransfers.Visibility = ViewStates.Visible;
+                    noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_transfers_yet);
+                }
+            }
+        }
+
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -5302,12 +5476,13 @@ namespace AndriodApp1
             sharedPreferences = SoulSeekState.SharedPreferences;
             if(TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             {
-                RestoreTransferItems(sharedPreferences);
+                RestoreDownloadTransferItems(sharedPreferences);
+                RestoreUploadTransferItems(sharedPreferences);
+                TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
             }
-            if (!(TransferItemManagerDL.IsEmpty()))
-            {
-                noTransfers.Visibility = ViewStates.Gone;
-            }
+
+            SetNoTransfersMessage();
+
 
             //TransferAdapter customAdapter = new TransferAdapter(Context, transferItems);
             //primaryListView.Adapter = (customAdapter);
@@ -5340,7 +5515,7 @@ namespace AndriodApp1
 
 
 
-            MainActivity.LogInfoFirebase("AutoClear: " + SoulSeekState.AutoClearComplete);
+            MainActivity.LogInfoFirebase("AutoClear: " + SoulSeekState.AutoClearCompleteDownloads);
             MainActivity.LogInfoFirebase("AutoRetry: " + SoulSeekState.AutoRetryDownload);
 
             return rootView;
@@ -5367,15 +5542,15 @@ namespace AndriodApp1
 
         public void SetRecyclerAdapter()
         {
-            lock(TransferItemManagerDL.GetUICurrentList())
+            lock(TransferItemManagerWrapped.GetUICurrentList())
             {
-                if(GroupByFolder && CurrentlySelectedDLFolder==null)
+                if(GroupByFolder && !CurrentlyInFolder())
                 {
-                    recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItemManagerDL.GetUICurrentList() as List<FolderItem>);
+                    recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItemManagerWrapped.GetUICurrentList() as List<FolderItem>);
                 }
                 else
                 {
-                    recyclerTransferAdapter = new TransferAdapterRecyclerIndividualItem(TransferItemManagerDL.GetUICurrentList() as List<TransferItem>);
+                    recyclerTransferAdapter = new TransferAdapterRecyclerIndividualItem(TransferItemManagerWrapped.GetUICurrentList() as List<TransferItem>);
                 }
                 recyclerTransferAdapter.TransfersFragment = this;
                 recyclerViewTransferItems.SetAdapter(recyclerTransferAdapter);
@@ -5656,6 +5831,10 @@ namespace AndriodApp1
                 var refreshOnlySelected = new Action(() => { 
                     
                     int index = TransferItemManagerDL.GetUserIndexForTransferItem(item);
+                    if(index==-1&&InUploadsMode)
+                    {
+                        return;
+                    }
                     recyclerTransferAdapter?.NotifyItemChanged(index);  //TODO: I dont like that we do the index later. things could have changed.
                     
                     
@@ -5690,8 +5869,9 @@ namespace AndriodApp1
                 return;
             }
             string chosenFname = (targetView.InnerTransferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
+            string chosenUname = (targetView.InnerTransferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             MainActivity.LogDebug("chosenFname? " + chosenFname);
-            item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, out int _);
+            item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
             MainActivity.LogDebug("item1 is null?" + (item1==null).ToString());//tested
             if (item1==null)
             {
@@ -6059,6 +6239,10 @@ namespace AndriodApp1
                     else
                     {
                         int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t);
+                        if(indexOfItem==-1&&InUploadsMode)
+                        {
+                            return null;
+                        }
                         recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
                     }
                 }
@@ -6233,7 +6417,7 @@ namespace AndriodApp1
                     {
                         v.GetAdditionalStatusInfoView().Text = TransferViewHelper.GetTimeRemainingString(timeRemaining);
                     }
-                    else if (relevantItem.State.HasFlag(TransferStates.Queued))
+                    else if (relevantItem.State.HasFlag(TransferStates.Queued) && !(relevantItem.IsUpload()))
                     {
                         v.GetAdditionalStatusInfoView().Text = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_), v.InnerTransferItem.GetQueueLength().ToString());
                     }
@@ -6283,14 +6467,7 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
                 return;
             }
-            if (!(TransferItemManagerDL.IsEmpty()))
-            {
-                noTransfers.Visibility = ViewStates.Gone;
-            }
-            else
-            {
-                noTransfers.Visibility = ViewStates.Visible;
-            }
+            SetNoTransfersMessage();
             MainActivity.LogDebug("NotifyItemChanged" + indexOfItem);
             MainActivity.LogDebug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: ");
             MainActivity.LogDebug("UI thread: " + Looper.MainLooper.IsCurrentThread);
@@ -6325,15 +6502,8 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
                 return;
             }
-            if (!TransferItemManagerDL.IsEmpty())
-            {
-                noTransfers.Visibility = ViewStates.Gone;
-            }
-            else
-            {
-                noTransfers.Visibility = ViewStates.Visible;
-            }
-            if(specificRefreshAction==null)
+            SetNoTransfersMessage();
+            if (specificRefreshAction==null)
             {
             //primaryListView.Adapter = (customAdapter); try with just notifyDataSetChanged...
 
@@ -6426,7 +6596,16 @@ namespace AndriodApp1
             private void TransferAdapterRecyclerFolderItem_Click(object sender, EventArgs e)
             {
                 setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
-                CurrentlySelectedDLFolder = localDataSet[position] as FolderItem;
+                FolderItem f = localDataSet[position] as FolderItem;
+                if(InUploadsMode)
+                {
+                    CurrentlySelectedUploadFolder = f;
+                }
+                else
+                {
+                    CurrentlySelectedDLFolder = f;
+                }
+                
                 TransfersFragment.SaveScrollPositionOnMovingIntoFolder();
                 TransfersFragment.SetRecyclerAdapter();
                 SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
@@ -6549,120 +6728,161 @@ namespace AndriodApp1
                 TransferStates folderItemState = TransferStates.None;
                 bool isTransferItem = false;
                 bool anyFailed = false;
+                bool isUpload = false;
                 if(tvh?.InnerTransferItem is TransferItem tvhi)
                 {
                     isTransferItem = true;
                     ti = tvhi;
+                    isUpload = ti.IsUpload();
                 }
                 else if(tvh?.InnerTransferItem is FolderItem tvhf)
                 {
                     fi = tvhf;
                     folderItemState = fi.GetState(out anyFailed);
+                    isUpload = fi.IsUpload();
                 }
                 
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-                if(isTransferItem)
+                if(!isUpload)
                 {
-                    if(tvh != null && ti != null&& ti.State.HasFlag(TransferStates.Cancelled) && ti.Progress>0)
+                    if(isTransferItem)
                     {
-                        menu.Add(0, 0, 0, Resource.String.resume_dl);
-                    }
-                    else
-                    {
-                        menu.Add(0, 0, 0, Resource.String.retry_dl);
-                    }
-                }
-                else
-                {
-                    if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
-                    {
-                        menu.Add(0, 100, 0, "Resume Folder");
-                    }
-                    else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed)&& !folderItemState.HasFlag(TransferStates.Succeeded)&& !folderItemState.HasFlag(TransferStates.Errored)&& !folderItemState.HasFlag(TransferStates.TimedOut)&& !folderItemState.HasFlag(TransferStates.Rejected)))
-                    {
-                        menu.Add(0, 101, 0, "Pause Folder");
-                    }
-                }
-
-                if (isTransferItem)
-                {
-                    if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
-                    {
-                        menu.Add(1, 1, 1, Resource.String.clear_from_list);
-                        //if completed then we dont need to show the cancel option...
-                    }
-                    else
-                    {
-                        menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
-                    }
-                }
-                else
-                {
-                    if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
-                    {
-                        menu.Add(1, 1, 1, Resource.String.clear_from_list);
-                    }
-                    else
-                    {
-                        menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
-                    }
-                }
-
-                if (isTransferItem)
-                {
-
-                    if (tvh!=null&& ti != null)
-                    {
-                        if(ti.QueueLength>0) 
+                        if(tvh != null && ti != null&& ti.State.HasFlag(TransferStates.Cancelled) && ti.Progress>0)
                         {
-                            //the queue length of a succeeded download can be 183......
-                            //bc queue length AND free upload slots!!
-                            if(ti.State.HasFlag(TransferStates.Succeeded) ||
-                                ti.State.HasFlag(TransferStates.Completed))
-                            {
-                                //no op
-                            }
-                            else
-                            {
-                                menu.Add(3,3,3, Resource.String.refresh_queue_pos);
-                            }
+                            menu.Add(0, 0, 0, Resource.String.resume_dl);
+                        }
+                        else
+                        {
+                            menu.Add(0, 0, 0, Resource.String.retry_dl);
+                        }
+                    }
+                    else
+                    {
+                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
+                        {
+                            menu.Add(0, 100, 0, "Resume Folder");
+                        }
+                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed)&& !folderItemState.HasFlag(TransferStates.Succeeded)&& !folderItemState.HasFlag(TransferStates.Errored)&& !folderItemState.HasFlag(TransferStates.TimedOut)&& !folderItemState.HasFlag(TransferStates.Rejected)))
+                        {
+                            menu.Add(0, 101, 0, "Pause Folder");
+                        }
+                    }
+                }
+
+                if(!isUpload)
+                {
+                    if (isTransferItem)
+                    {
+                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
+                        {
+                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                            //if completed then we dont need to show the cancel option...
+                        }
+                        else
+                        {
+                            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
+                        }
+                    }
+                    else
+                    {
+                        if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
+                        {
+                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                        }
+                        else
+                        {
+                            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
                         }
                     }
                 }
                 else
                 {
-                    if (tvh != null && fi != null)
+                    if (isTransferItem)
                     {
-                        if (fi.GetQueueLength() > 0)
+                        if (tvh != null && ti != null && (Helpers.IsUploadCompleteOrAborted(ti.State)))
                         {
-                            //the queue length of a succeeded download can be 183......
-                            //bc queue length AND free upload slots!!
-                            if (folderItemState.HasFlag(TransferStates.Succeeded) ||
-                                folderItemState.HasFlag(TransferStates.Completed))
+                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                            //if completed then we dont need to show the cancel option...
+                        }
+                        //else
+                        //{
+                        //    menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
+                        //}
+                    }
+                    else
+                    {
+                        if (tvh != null && fi != null && (Helpers.IsUploadCompleteOrAborted(folderItemState)))
+                        {
+                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                        }
+                        //else //todo maybe an option to abort.
+                        //{
+                        //    menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
+                        //}
+                    }
+                }
+
+                if(!isUpload)
+                {
+                    if (isTransferItem)
+                    {
+
+                        if (tvh!=null&& ti != null)
+                        {
+                            if(ti.QueueLength>0) 
                             {
-                                //no op
+                                //the queue length of a succeeded download can be 183......
+                                //bc queue length AND free upload slots!!
+                                if(ti.State.HasFlag(TransferStates.Succeeded) ||
+                                    ti.State.HasFlag(TransferStates.Completed))
+                                {
+                                    //no op
+                                }
+                                else
+                                {
+                                    menu.Add(3,3,3, Resource.String.refresh_queue_pos);
+                                }
                             }
-                            else
+                        }
+                    }
+                    else
+                    {
+                        if (tvh != null && fi != null)
+                        {
+                            if (fi.GetQueueLength() > 0)
                             {
-                                menu.Add(3, 3, 3, Resource.String.refresh_queue_pos);
+                                //the queue length of a succeeded download can be 183......
+                                //bc queue length AND free upload slots!!
+                                if (folderItemState.HasFlag(TransferStates.Succeeded) ||
+                                    folderItemState.HasFlag(TransferStates.Completed))
+                                {
+                                    //no op
+                                }
+                                else
+                                {
+                                    menu.Add(3, 3, 3, Resource.String.refresh_queue_pos);
+                                }
                             }
                         }
                     }
                 }
 
-                if (isTransferItem)
+                if (!isUpload)
                 {
-                    if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri!=string.Empty)
+                    if (isTransferItem)
                     {
-                        menu.Add(4,4,4, Resource.String.play_file);
+                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri!=string.Empty)
+                        {
+                            menu.Add(4,4,4, Resource.String.play_file);
+                        }
                     }
-                }
-                else
-                {
-                    if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
+                    else
                     {
-                        //no op
-                        menu.Add(4, 102, 4, "Retry Failed Files");
+                        if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
+                        {
+                            //no op
+                            menu.Add(4, 102, 4, "Retry Failed Files");
+                        }
                     }
                 }
                 var subMenu = menu.AddSubMenu(5,5,5,"User Options");
@@ -6680,10 +6900,16 @@ namespace AndriodApp1
 
         private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUI e)
         {
+            bool needsRefresh = (e.ti.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.ti.IsUpload()) && !(TransfersFragment.InUploadsMode));
+            if(!needsRefresh)
+            {
+                return;
+            }
             if (e.percentComplete != 0)
             {
                 if (e.fullRefresh)
                 {
+                    
                     Action action = refreshListViewSafe; //notify data set changed...
                                                          //if (indexRemoved!=-1)
                                                          //{
@@ -6714,13 +6940,13 @@ namespace AndriodApp1
                 {
                     try
                     {
-                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename);
+                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename+e.ti.Username);
 
                         DateTime now = DateTime.UtcNow;
-                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.ti.FullFilename, now); //this returns now if the key is not in the dictionary!
+                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.ti.FullFilename + e.ti.Username, now); //this returns now if the key is not in the dictionary!
                         if (now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
                         {
-                            ProgressUpdatedThrottler[e.ti.FullFilename] = now;
+                            ProgressUpdatedThrottler[e.ti.FullFilename + e.ti.Username] = now;
                         }
                         else if (e.wasFailed)
                         {
@@ -6744,7 +6970,7 @@ namespace AndriodApp1
 
                         Activity?.RunOnUiThread(() => {
                             int index = -1;
-                            index = TransferItemManagerDL.GetUserIndexForTransferItem(e.ti);
+                            index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
                             if (index == -1)
                             {
                                 MainActivity.LogDebug("Index is -1 TransferProgressUpdated");
@@ -6770,7 +6996,11 @@ namespace AndriodApp1
         {
             Action action = new Action(() => {
 
-                int index = TransferItemManagerDL.GetUserIndexForTransferItem(ti);
+                int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti); //todo null ti
+                if(index==-1)
+                {
+                    return; //this is likely an upload when we are on downloads page or vice versa.
+                }
                 refreshListViewSpecificItem(index);
 
             });
@@ -6793,7 +7023,7 @@ namespace AndriodApp1
             SeekerApplication.StateChangedAtIndex += TransferStateChanged;
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
-            
+            MainActivity.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
             MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if(recyclerTransferAdapter!=null)
@@ -6804,12 +7034,44 @@ namespace AndriodApp1
             base.OnStart();
         }
 
+        private void MainActivity_TransferAddedUINotify(object sender, TransferItem e)
+        {
+            if(MainActivity.OnUIthread())
+            {
+                if(e.IsUpload() && InUploadsMode)
+                {
+                    lock (TransferItemManagerWrapped.GetUICurrentList())
+                    { //todo can update this to do a partial refresh... just the index..
+                        if(GroupByFolder && !CurrentlyInFolder())
+                        {
+                            //folderview - so we may insert or update
+                            //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
+                            refreshListView(); //just to be safe...
+                        
+                        }
+                        else
+                        {
+                            //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
+                            //refreshListView(()=>{recyclerTransferAdapter.NotifyItemInserted(index); });
+                            refreshListView(); //just to be safe...
+                        }
+
+                    }
+                }
+            }
+            else
+            {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { MainActivity_TransferAddedUINotify(null, e); });
+            }
+        }
+
         public override void OnStop()
         {
             SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
             MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+            MainActivity.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
 
@@ -6820,7 +7082,11 @@ namespace AndriodApp1
         {
 
             MainActivity.ClearDownloadAddedEventsFromTarget(this);
-            MainActivity.DownloadAddedUINotify += SoulSeekState_DownloadAddedUINotify;
+            MainActivity.DownloadAddedUINotify += SoulSeekState_DownloadAddedUINotify; 
+            //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
+            //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
+            //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
+            
 
             base.OnCreate(savedInstanceState);
         }
@@ -6832,7 +7098,7 @@ namespace AndriodApp1
             //occurs on nonUI thread...
             //if there is any deadlock due to this, then do Thread.Start().
                 lock (TransferItemManagerDL.GetUICurrentList())
-                { //also can update this to do a partial refresh...
+                { //todo can update this to do a partial refresh... just the index..
                     refreshListView();
                 }
             });

@@ -1022,6 +1022,9 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\folder_swap_outline.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\swap_vertical.xml" />
+  </ItemGroup>
   <Import Project="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
     Other similar extension points exist, see Microsoft.Common.targets.

@@ -1203,7 +1203,7 @@ namespace AndriodApp1
                         continue; // do not add to the task list.
                     }
 
-                        DownloadInfo downloadInfo = new DownloadInfo(username, file.FullFileName, file.Size, dlTask, cancellationTokenSource, 0, 0);
+                        DownloadInfo downloadInfo = new DownloadInfo(username, file.FullFileName, file.Size, dlTask, cancellationTokenSource, 0, 0);  //todo cant we move all this stuff above and then on our downloadinfo ref set the dlTask (even in like a finally or something...)
                         SoulSeekState.downloadInfoList.Add(downloadInfo); //for future ref if need be
                         SoulSeekState.OnDownloadAdded(downloadInfo); //TODO THERE IS A RACE CONDITION WHERE UPDATESTATE gets called before the transfer is added and it looks for the transfer to update it and the transfer is null...
 
