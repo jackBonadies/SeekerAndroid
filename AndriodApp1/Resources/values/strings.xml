@@ -178,7 +178,7 @@ Directory Count: {5}"</string>
   <string name="only_show_free_slots">Only Show Results of Users with Free Slots</string>
   <string name="start_service_on_startup">Start Service on Startup</string>
   <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
-  <string name="auto_clear_complete">Auto Clear Complete Transfers</string>
+
   <string name="disable_bottom_notifs_complete">Disable Bottom Notifications on Download Completed</string>
   <string name="remember_search_history">Remember Search History</string>
   <string name="clear_search_history">Clear Search History</string>
@@ -195,7 +195,8 @@ Directory Count: {5}"</string>
   <string name="edit_your_user_info">Edit User Info</string>
   <string name="restore_default_settings">Restore Defaults</string>
 
-  <string name="no_transfers_yet">No transfers currently, as you download content it will appear here</string>
+  <string name="no_transfers_yet">No downloads currently, as you download content it will appear here</string>
+
 
   <string name="user_has_no_bio">User has no bio.</string>
   <string name="user_has_no_pic">User has no picture.</string>
@@ -599,5 +600,9 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
       <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
 
   <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
+  <string name="no_uploads_yet">No uploads currently, as you upload files they will appear here</string>
+  <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
 
+  <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
+  <string name="auto_clear_complete_uploads">Auto Clear Complete (and Aborted) Uploads</string>
 </resources>

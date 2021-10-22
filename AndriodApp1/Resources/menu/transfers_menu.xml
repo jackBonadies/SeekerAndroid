@@ -2,6 +2,15 @@
 
 xmlns:app="http://schemas.android.com/apk/res-auto">
 
+  <item android:id="@+id/action_toggle_download_upload"
+android:title="Toggle Download Upload"
+app:showAsAction="always"
+android:iconifiedByDefault="true"
+android:icon="@drawable/swap_vertical"
+
+ />
+
+
   <item android:id="@+id/action_toggle_group_by"
 android:title="Toggle Group By"
 app:showAsAction="always"
@@ -10,6 +19,11 @@ android:icon="@drawable/folder_swap_outline"
 
  />
 
+  <item android:id="@+id/action_clear_all_complete_and_aborted"
+android:title="Clear all Complete and Aborted"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
 
   <item android:id="@+id/action_clear_all_complete"
 android:title="@string/clear_all_complete"

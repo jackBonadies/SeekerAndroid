@@ -272,7 +272,7 @@ namespace Soulseek.Network.Tcp
             {
                 Disconnect($"Connection Error: {ex.Message}", ex);
                 //Do event so that firebase can log...
-                SoulseekClient.InvokeErrorLogHandler(ex.Message + ex.StackTrace + IPEndPoint.AddressFamily);
+                //SoulseekClient.InvokeErrorLogHandler(ex.Message + ex.StackTrace + IPEndPoint.AddressFamily); can be operation cancelled, no route to host, connection timed out, network is unreachable, network subsystem is down, too many open files
                 if (ex is TimeoutException || ex is OperationCanceledException)
                 {
                     throw;

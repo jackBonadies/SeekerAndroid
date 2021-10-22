@@ -491,9 +491,10 @@ namespace AndriodApp1
 
         public static TreeNode<Directory> CreateTree(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, out string errorMsgToToast)
         {
-            //logging code for unit tests / diagnostic..
+            //logging code for unit tests / diagnostic.. //TODO comment out always
             //var root = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef , Android.Net.Uri.Parse( SoulSeekState.SaveDataDirectoryUri) );
             //DocumentFile exists = root.FindFile(username + "_dir_response");
+            //save:
             //if(exists==null || !exists.Exists())
             //{
             //    DocumentFile f = root.CreateFile(@"custom\binary",username + "_dir_response");
@@ -512,9 +513,20 @@ namespace AndriodApp1
             //        stream.Close();
             //    }
             //}
+            //load
+            //string username_to_load = "Cyborg_Master";
+            //exists = root.FindFile(username_to_load + "_dir_response");
+            //var str = SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(exists.Uri);
+
+            //System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+            //b = formatter.Deserialize(str) as BrowseResponse;
+
+            ////write to binary..
+
+            //str.Close();
             //end logging code
 
-            if(b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
+            if (b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
             {
                 errorMsgToToast = SoulSeekState.MainActivityRef.GetString(Resource.String.browse_onlylocked);
                 return null;
@@ -596,6 +608,11 @@ namespace AndriodApp1
                 //@@bvenl\2\complete\1990
                 //@@bvenl\2\complete\1990\test
 
+
+                //meee
+                //@@pulvh\FLAC Library
+                //@@pulvh\Old School
+
                 //BeerNecessities (This is Nicotine multi-root Im guessing)
                 //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\Billy Idol [video collection]"
                 //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\Nina Hagen - Video Collection"
@@ -621,6 +638,11 @@ namespace AndriodApp1
                         //MainActivity.LogFirebase("Root is the empty string: " + username); //this is fine
                         newRootDirName = "";
                         emptyRoot = true;
+                    }
+                    if(newRootDirName.EndsWith("\\"))
+                    {
+                        newRootDirName = newRootDirName.Substring(0, newRootDirName.Length-1);
+                        //else our new folder root will be "@@sdfklj\\" rather than "@@sdfklj" causing problems..
                     }
                     Directory rootDirectory = new Directory(newRootDirName);
 
