@@ -55,7 +55,7 @@
         /// 
         /// </param>
         /// <returns></returns>
-        public Tuple<string, string, long> GetFullInfoFromSearchableName(string keyFilename, string fullPath, out string errorMessage)
+        public Tuple<string, string, long> GetFullInfoFromSearchableName(string keyFilename, string fullPath, bool toStripVolumeName, string volumeName, Func<string,string> GetLastEncoded, out string errorMessage)
         {
             //Tuple<string, string, long> ourFileInfo = FullInfo.Where((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault();
             Tuple<string, string, long> ourFileInfo = FullInfo.FirstOrDefault((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; });
@@ -69,7 +69,7 @@
                 //look through the aux structure
                 foreach(var tup in AuxilaryDuplicates[ourFileInfo.Item1])
                 {
-                    if(tup.Item2 == fullPath)
+                    if(ConvertUriToBrowseResponsePath(tup.Item2, toStripVolumeName, volumeName, GetLastEncoded).EndsWith(fullPath))
                     {
                         errorMessage = string.Empty;
                         return tup;
@@ -84,6 +84,19 @@
                 errorMessage = string.Empty;
                 return ourFileInfo;
             }
+        }
+
+        public static string ConvertUriToBrowseResponsePath(string uri, bool toStripVolume, string volumeName, Func<string, string> GetLastEncoded)
+        {
+            string lastEncoded = GetLastEncoded(uri);
+            if(toStripVolume && volumeName!=null)
+            {
+                if(lastEncoded.StartsWith(volumeName))
+                {
+                    return lastEncoded.Substring(volumeName.Length).Replace('/', '\\');
+                }
+            }
+            return lastEncoded.Replace('/', '\\');
         }
 
         public List<Soulseek.File> GetSlskFilesFromFilenames(IEnumerable<string> results)
@@ -249,7 +262,7 @@
                 var results = Keys.Where( //keys is a list.. so it can contain duplicates just fine..
                     (string fileKey) =>
                     {
-                        if(fileKey.Contains(text))
+                        if(fileKey.ToLower().Contains(text.ToLower()))
                         {
                             return true;
                         }
