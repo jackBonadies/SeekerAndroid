@@ -3724,12 +3724,13 @@ namespace AndriodApp1
         {
             List<Tuple<string, string, long>> pairs = new List<Tuple<string, string, long>>();
             auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
-            traverseDocumentFile(dir,pairs, auxilaryDuplicatesList, true, GetVolumeName(dir.Uri.LastPathSegment), ref directoryCount);
+            traverseDocumentFile(dir,pairs, auxilaryDuplicatesList, true, GetVolumeName(dir.Uri.LastPathSegment, out _), ref directoryCount);
             return pairs;
         }
 
-        public static string GetVolumeName(string lastPathSegment)
+        public static string GetVolumeName(string lastPathSegment, out bool entireString)
         {
+            entireString = false;
             //if the first part of the path has a colon in it, then strip it.
             int endOfFirstPart = lastPathSegment.IndexOf('\\');
             if(endOfFirstPart==-1)
@@ -3743,7 +3744,16 @@ namespace AndriodApp1
             }
             else
             {
-                return lastPathSegment.Substring(0,volumeIndex+1);
+                string volumeName = lastPathSegment.Substring(0, volumeIndex + 1);
+                if(volumeName.Length == lastPathSegment.Length)
+                {   //special case where root is primary:.  in this case we return null which gets treated as "dont strip out anything"
+                    entireString = true;
+                    return null;
+                }
+                else
+                {
+                    return volumeName;
+                }
             }
         }
 
@@ -3838,7 +3848,10 @@ namespace AndriodApp1
             {
                 if (directoryPath.Substring(0, volumePath.Length).ToLower() == volumePath)
                 {
-                    directoryPath = directoryPath.Substring(volumePath.Length);
+                    if(directoryPath.Length != volumePath.Length)
+                    {
+                        directoryPath = directoryPath.Substring(volumePath.Length);
+                    }
                 }
             }
 
@@ -3858,7 +3871,7 @@ namespace AndriodApp1
             traverseToGetDirectories(dir, dirUris);
             var rootDirUris = GetRootDirs(dir);
             rootDirUris.Add(dir.Uri.ToString());
-            string volname = GetVolumeName(dir.Uri.LastPathSegment);
+            string volname = GetVolumeName(dir.Uri.LastPathSegment, out _);
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             foreach(Android.Net.Uri dirUri in dirUris)
             {
@@ -4155,11 +4168,14 @@ namespace AndriodApp1
                         string fullPath = file.Uri.Path.ToString().Replace('/','\\');
 
                         string searchableName = Helpers.GetFolderNameFromFile(fullPath) + @"\" + Helpers.GetFileNameFromFile(fullPath);
-                        if(isRootCase)
+                        if(isRootCase && (volName!=null))
                         {
                             if(searchableName.Substring(0, volName.Length).ToLower() == volName)
                             {
-                                searchableName = searchableName.Substring(volName.Length);
+                                if(searchableName.Length != volName.Length) //i.e. if its just "primary:"
+                                {
+                                    searchableName = searchableName.Substring(volName.Length);
+                                }
                             }
                         }
                         if(pairs.Exists((Tuple<string, string, long> tuple)=>{return tuple.Item1==searchableName; }))
@@ -5358,7 +5374,7 @@ namespace AndriodApp1
                 fullDir = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef, Android.Net.Uri.Parse(fullDirUri.Item2));
             }
             //Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path
-            var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true, GetVolumeName(fullDir.Uri.LastPathSegment));
+            var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true, GetVolumeName(fullDir.Uri.LastPathSegment, out _));
             slskDir = new Directory(directory,slskDir.Files);
             return Task.FromResult(slskDir);
         }
@@ -5679,7 +5695,10 @@ namespace AndriodApp1
         }
 
 
-
+        public static string GetLastPathSegment(string uri)
+        {
+            return Android.Net.Uri.Parse(uri).LastPathSegment;
+        }
 
 
         /// <summary>
@@ -5704,6 +5723,15 @@ namespace AndriodApp1
             //so check if it contains the uploadDataDirectoryUri
             string keyFilename = filename;
             string uploadDirfolderName = Helpers.GetFileNameFromFile(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path.Replace(@"/",@"\")); //this will actaully get the last folder name..
+            string volname = GetVolumeName(uploadDirfolderName, out bool entireString);
+            if(volname != null && uploadDirfolderName.IndexOf(volname)==0)
+            {
+                uploadDirfolderName = uploadDirfolderName.Substring(volname.Length);
+            }
+            else if(entireString)
+            {
+                uploadDirfolderName = string.Empty;
+            }
             if(filename.Contains(uploadDirfolderName))
             {
                 string newFolderName = Helpers.GetFolderNameFromFile(filename);
@@ -5714,7 +5742,7 @@ namespace AndriodApp1
             //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<string, string, long> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path.Replace(@"/", @"\"), out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
+            Tuple<string, string, long> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
             if (ourFileInfo==null)
             {
                 LogFirebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
