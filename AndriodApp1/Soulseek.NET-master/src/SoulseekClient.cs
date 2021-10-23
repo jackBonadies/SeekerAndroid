@@ -404,10 +404,10 @@ namespace Soulseek
             }
         }
 
-        public class DownloadAddedRemovedInternalEventArgs : EventArgs
+        public class TransferAddedRemovedInternalEventArgs : EventArgs
         {
             public int Count;
-            public DownloadAddedRemovedInternalEventArgs(int count)
+            public TransferAddedRemovedInternalEventArgs(int count)
             {
                 Count = count;
             }
@@ -415,28 +415,34 @@ namespace Soulseek
 
         public static void InvokeDownloadAddedRemovedInternalHandler(int count)
         {
-            DownloadAddedRemovedInternal?.Invoke(null, new DownloadAddedRemovedInternalEventArgs(count));
+            DownloadAddedRemovedInternal?.Invoke(null, new TransferAddedRemovedInternalEventArgs(count));
         }
 
-        public static event EventHandler<DownloadAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
-
-        public static void ClearDownloadAddedInternalHandler(object target)
+        public static void InvokeUploadAddedRemovedInternalHandler(int count)
         {
-            if (DownloadAddedRemovedInternal == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in DownloadAddedRemovedInternal.GetInvocationList())
-                {
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        DownloadAddedRemovedInternal -= (EventHandler<DownloadAddedRemovedInternalEventArgs>)d;
-                    }
-                }
-            }
+            UploadAddedRemovedInternal?.Invoke(null, new TransferAddedRemovedInternalEventArgs(count));
         }
+
+        public static event EventHandler<TransferAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
+        public static event EventHandler<TransferAddedRemovedInternalEventArgs> UploadAddedRemovedInternal;
+
+        //public static void ClearDownloadAddedInternalHandler(object target)
+        //{
+        //    if (DownloadAddedRemovedInternal == null)
+        //    {
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        foreach (Delegate d in DownloadAddedRemovedInternal.GetInvocationList())
+        //        {
+        //            if (d.Target.GetType() == target.GetType())
+        //            {
+        //                DownloadAddedRemovedInternal -= (EventHandler<DownloadAddedRemovedInternalEventArgs>)d;
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// a
@@ -3684,6 +3690,14 @@ namespace Soulseek
             };
 
             Uploads.TryAdd(upload.Token, upload);
+            try
+            {
+                InvokeUploadAddedRemovedInternalHandler(Uploads.Count);
+            }
+            catch (Exception error)
+            {
+                ErrorLogHandler?.Invoke(null, new ErrorLogEventArgs(error.Message + "InvokeUploadAddedRemovedInternalHandler"));
+            }
 
             var lastState = TransferStates.None;
 
@@ -3905,16 +3919,34 @@ namespace Soulseek
                 UpdateProgress(inputStream.Position);
                 UpdateState(upload.State);
 
-                if (!upload.State.HasFlag(TransferStates.Succeeded) && endpoint != default)
+                if (!upload.State.HasFlag(TransferStates.Succeeded))
                 {
                     try
                     {
-                        // if the upload failed, send a message to the user informing them.
-                        var messageConnection = await PeerConnectionManager
-                            .GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken)
-                            .ConfigureAwait(false);
+                        if(upload.State.HasFlag(TransferStates.Cancelled))
+                        {
+                            //if we cancelled the upload, send an upload denied message.  otherwise the client will immediately send another queue download message.
+                            if (endpoint==default) //the endpoint will be null if we were only queued (i.e. stuck at semaphore)
+                            {
+                                //get the endpoint in the cancelled case.  we need to tell user the upload was cancelled.  else it will be automatically retried.
+                                endpoint = await GetUserEndPointAsync(username, CancellationToken.None).ConfigureAwait(false);
+                            }
+                            
+                            var messageConnection = await PeerConnectionManager
+                                .GetOrAddMessageConnectionAsync(username, endpoint, CancellationToken.None)
+                                .ConfigureAwait(false);
+                            //though the class is called QueueFailedResponse it works both sending and receiving
+                            await messageConnection.WriteAsync(new QueueFailedResponse(filename, "Cancelled")).ConfigureAwait(false);
+                        }
+                        else if(endpoint != default)
+                        {
+                            // if the upload failed, send a message to the user informing them.
+                            var messageConnection = await PeerConnectionManager
+                                .GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken)
+                                .ConfigureAwait(false);
 
-                        await messageConnection.WriteAsync(new UploadFailed(filename)).ConfigureAwait(false);
+                            await messageConnection.WriteAsync(new UploadFailed(filename)).ConfigureAwait(false);
+                        }
                     }
                     catch
                     {
@@ -3922,7 +3954,33 @@ namespace Soulseek
                     }
                 }
 
+                bool allCancelled = false;
+                try
+                {
+                    //if you canclled one of them, then test, did you cancel all?
+                    if (upload.State.HasFlag(TransferStates.Cancelled))
+                    {
+                        allCancelled = Uploads.Values.All((TransferInternal ti) => { return ti.State.HasFlag(TransferStates.Cancelled); });
+                    }
+                    if (allCancelled)
+                    {
+                        InvokeDebugLogHandler("All cancelled worked with: " + Uploads.Values.Count);
+                    }
+                }
+                catch (Exception e)
+                {
+                    InvokeErrorLogHandler("The cancelled checking failed: " + e.Message);
+                }
                 Uploads.TryRemove(upload.Token, out _);
+                if (allCancelled)
+                {
+                    InvokeDebugLogHandler("They are all cancelled");
+                    InvokeUploadAddedRemovedInternalHandler(0);
+                }
+                else
+                {
+                    InvokeUploadAddedRemovedInternalHandler(Uploads.Count);
+                }
 
                 if (options.DisposeInputStreamOnCompletion)
                 {

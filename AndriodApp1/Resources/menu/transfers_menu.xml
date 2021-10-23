@@ -25,6 +25,12 @@ app:showAsAction="never"
 android:iconifiedByDefault="false"
  />
 
+  <item android:id="@+id/action_abort_all"
+android:title="Abort All"
+app:showAsAction="never"
+android:iconifiedByDefault="false"
+ />
+
   <item android:id="@+id/action_clear_all_complete"
 android:title="@string/clear_all_complete"
 app:showAsAction="never"
