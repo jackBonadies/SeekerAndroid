@@ -4449,6 +4449,10 @@ namespace AndriodApp1
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
             progressBar.Progress = folderItem.GetFolderProgress(out _, out _);
             viewUsername.Text = folderItem.Username;
+            if(item.IsUpload() && state.HasFlag(TransferStates.Cancelled))
+            {
+                isFailed = true;
+            }
             if (isFailed)//state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut))
             {
                 progressBar.Progress = 100;
@@ -4778,7 +4782,12 @@ namespace AndriodApp1
             TransferViewHelper.SetViewStatusText(viewStatus, ti.State, ti.IsUpload());
             TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, ti, ti.State);
             viewUsername.Text = ti.Username;
-            if (ti.Failed)
+            bool isFailedOrAborted = ti.Failed;
+            if (item.IsUpload() && ti.State.HasFlag(TransferStates.Cancelled))
+            {
+                isFailedOrAborted = true;
+            }
+            if (isFailedOrAborted)
             {
                 progressBar.Progress = 100;
 #pragma warning disable 0618
@@ -4970,6 +4979,17 @@ namespace AndriodApp1
             }
             return true;
         }
+        public static FolderItem GetCurrentlySelectedFolder()
+        {
+            if (InUploadsMode)
+            {
+                return CurrentlySelectedUploadFolder;
+            }
+            else
+            {
+                return CurrentlySelectedDLFolder;
+            }
+        }
         public static volatile bool InUploadsMode = false;
 
         //private ListView primaryListView = null;
@@ -5005,10 +5025,12 @@ namespace AndriodApp1
             if(InUploadsMode)
             {
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(true);
+                menu.FindItem(Resource.Id.action_abort_all).SetVisible(true);
                 if (CurrentlySelectedUploadFolder == null)
                 {
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
+                    
 
                     //todo: menu options.  clear all completed and aborted
                     //todo: menu options.  abort all - are you sure? dialog
@@ -5027,7 +5049,6 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(false);
 
-
                     menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
                     menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
                     menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
@@ -5037,6 +5058,7 @@ namespace AndriodApp1
             }
             else
             {
+                menu.FindItem(Resource.Id.action_abort_all).SetVisible(false);
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(false);
                 if (CurrentlySelectedDLFolder==null)
                 {
@@ -5149,6 +5171,19 @@ namespace AndriodApp1
                     {
                         TransferItemManagerDL.CancelFolder(CurrentlySelectedDLFolder);
                         TransferItemManagerDL.ClearAllFromFolder(CurrentlySelectedDLFolder);
+                    }
+                    refreshListView();
+                    return true;
+                case Resource.Id.action_abort_all: //abort all
+                    MainActivity.LogInfoFirebase("action_abort_all_pressed");
+                    SoulSeekState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    if (CurrentlySelectedUploadFolder == null)
+                    {
+                        TransferItemManagerUploads.CancelAll();
+                    }
+                    else
+                    {
+                        TransferItemManagerUploads.CancelFolder(CurrentlySelectedUploadFolder);
                     }
                     refreshListView();
                     return true;
@@ -5716,20 +5751,28 @@ namespace AndriodApp1
             {
                 return;
             }
-            string listOfTransferItems = string.Empty;
+            string listOfDownloadItems = string.Empty;
+            string listOfUploadItems = string.Empty;
             using (var writer = new System.IO.StringWriter())
             {
                 var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerDL.AllTransferItems.GetType());
                 serializer.Serialize(writer, TransferItemManagerDL.AllTransferItems);
-                listOfTransferItems = writer.ToString();
+                listOfDownloadItems = writer.ToString();
+            }
+            using (var writer = new System.IO.StringWriter())
+            {
+                var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerUploads.AllTransferItems.GetType());
+                serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
+                listOfUploadItems = writer.ToString();
             }
             lock (MainActivity.SHARED_PREF_LOCK)
-                lock (TransferStateSaveLock)
-                {
-                    var editor = sharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_TransferList, listOfTransferItems);
-                    editor.Commit();
-                }
+            lock (TransferStateSaveLock)
+            {
+                var editor = sharedPreferences.Edit();
+                editor.PutString(SoulSeekState.M_TransferList, listOfDownloadItems);
+                editor.PutString(SoulSeekState.M_TransferListUpload, listOfUploadItems);
+                editor.Commit();
+            }
 
 
 
@@ -5797,7 +5840,7 @@ namespace AndriodApp1
                 try
                 {
                     Android.Net.Uri incompleteUri = null;
-                    SetupCancellationToken(item,cancellationTokenSource);
+                    SetupCancellationToken(item,cancellationTokenSource, out _);
                     Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.Size, cancellationTokenSource);
                     task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource,item.QueueLength,0) { TransferItemReference = item })));
                 }
@@ -5905,7 +5948,7 @@ namespace AndriodApp1
             {
 
                 Android.Net.Uri incompleteUri = null;
-                SetupCancellationToken(item1, cancellationTokenSource);
+                SetupCancellationToken(item1, cancellationTokenSource, out _);
                 Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
                     //SoulSeekState.SoulseekClient.DownloadAsync(
                     //username: item1.Username,
@@ -5961,7 +6004,7 @@ namespace AndriodApp1
             ITransferItem ti = null;
             try
             {
-                ti = TransferItemManagerDL.GetItemAtUserIndex(position); //UI
+                ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -6017,11 +6060,11 @@ namespace AndriodApp1
                     //clear complete?
                     //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                     MainActivity.LogInfoFirebase("Clear Complete item pressed");
-                    lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
+                    lock (TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
                     {
                         try
                         {
-                            TransferItemManagerDL.RemoveAtUserIndex(position); //UI
+                            TransferItemManagerWrapped.RemoveAtUserIndex(position); //UI
                         }
                         catch(ArgumentOutOfRangeException)
                         {
@@ -6033,13 +6076,13 @@ namespace AndriodApp1
                         //refreshListView();
                     }
                     break;
-                case 2:
+                case 2: //cancel and clear (downloads) OR abort and clear (uploads)
                     //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                     MainActivity.LogInfoFirebase("Cancel and Clear item pressed"); 
                     ITransferItem tItem = null;
                     try
                     {
-                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position);
+                        tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
                     }
                     catch (ArgumentOutOfRangeException)
                     {
@@ -6049,21 +6092,21 @@ namespace AndriodApp1
                     }
                     if(tItem is TransferItem tti)
                     {
-                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource token);
-                        token?.Cancel();
+                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
+                        uptoken?.Cancel();
                         //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
                         CancellationTokens.Remove(ProduceCancellationTokenKey(tti));
-                        lock (TransferItemManagerDL.GetUICurrentList())
+                        lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
-                            TransferItemManagerDL.RemoveAtUserIndex(position);
+                            TransferItemManagerWrapped.RemoveAtUserIndex(position);
                             recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
                     }
                     else if(tItem is FolderItem fi)
                     {
-                        TransferItemManagerDL.CancelFolder(fi);
-                        TransferItemManagerDL.ClearAllFromFolder(fi);
-                        lock (TransferItemManagerDL.GetUICurrentList())
+                        TransferItemManagerWrapped.CancelFolder(fi);
+                        TransferItemManagerWrapped.ClearAllFromFolder(fi);
+                        lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
                             //TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
                             recyclerTransferAdapter.NotifyItemRemoved(position);
@@ -6073,9 +6116,6 @@ namespace AndriodApp1
                     {
                         MainActivity.LogInfoFirebase("Cancel and Clear item pressed - bad item");
                     }
-                    MainActivity.LogDebug("Cancellation Token does not exist");
-                    //tItem.CancellationTokenSource.Cancel();
-
                     break;
                 case 3:  
                     tItem = null;
@@ -6181,9 +6221,9 @@ namespace AndriodApp1
                         DownloadRetryAllConditionLogic(false, false, ti as FolderItem);
                     }
                     break;
-                case 101: //pause folder
-                    TransferItemManagerDL.CancelFolder(ti as FolderItem);
-                    int index = TransferItemManagerDL.GetIndexForFolderItem(ti as FolderItem);
+                case 101: //pause folder or abort uploads (uploads)
+                    TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
+                    int index = TransferItemManagerWrapped.GetIndexForFolderItem(ti as FolderItem);
                     recyclerTransferAdapter.NotifyItemChanged(index);
                     break;
                 case 102: //retry failed downloads from folder
@@ -6218,6 +6258,30 @@ namespace AndriodApp1
                     else
                     {
                         DownloadRetryAllConditionLogic(true, false, ti as FolderItem);
+                    }
+                    break;
+                case 103: //abort upload
+                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
+                    tItem = null;
+                    try
+                    {
+                        tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                        Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                        return base.OnContextItemSelected(item);
+                    }
+                    TransferItem uploadToCancel = tItem as TransferItem;
+                    
+                    CancellationTokens.TryGetValue(ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
+                    token?.Cancel();
+                    //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
+                    CancellationTokens.Remove(ProduceCancellationTokenKey(uploadToCancel));
+                    lock (TransferItemManagerWrapped.GetUICurrentList())
+                    {
+                        recyclerTransferAdapter.NotifyItemChanged(position);
                     }
                     break;
             }
@@ -6768,7 +6832,23 @@ namespace AndriodApp1
                         }
                     }
                 }
-
+                else
+                {
+                    if (isTransferItem)
+                    {
+                        if (tvh != null && ti != null && !(Helpers.IsUploadCompleteOrAborted(ti.State)))
+                        {
+                            menu.Add(0, 103, 0, "Abort Upload");
+                        }
+                    }
+                    else
+                    {
+                        if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState)));
+                        {
+                            menu.Add(0, 101, 0, "Abort Uploads");
+                        }
+                    }
+                }
                 if(!isUpload)
                 {
                     if (isTransferItem)
@@ -6804,10 +6884,10 @@ namespace AndriodApp1
                             menu.Add(1, 1, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
                         }
-                        //else
-                        //{
-                        //    menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
-                        //}
+                        else
+                        {
+                            menu.Add(2, 2, 2, "Abort and Clear Upload");
+                        }
                     }
                     else
                     {
@@ -6815,10 +6895,10 @@ namespace AndriodApp1
                         {
                             menu.Add(1, 1, 1, Resource.String.clear_from_list);
                         }
-                        //else //todo maybe an option to abort.
-                        //{
-                        //    menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
-                        //}
+                        else
+                        {
+                            menu.Add(2, 2, 2, "Abort and Clear Uploads");
+                        }
                     }
                 }
 
@@ -7104,14 +7184,16 @@ namespace AndriodApp1
             });
         }
 
-        public static void SetupCancellationToken(TransferItem transferItem, CancellationTokenSource cts)
+        public static void SetupCancellationToken(TransferItem transferItem, CancellationTokenSource cts, out CancellationTokenSource oldToken)
         {
             transferItem.CancellationTokenSource = cts;
             if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), cts))
             {
                 //likely old already exists so just replace the old one
+                oldToken = CancellationTokens[ProduceCancellationTokenKey(transferItem)];
                 CancellationTokens[ProduceCancellationTokenKey(transferItem)] = cts;
             }
+            oldToken = null;
         }
 
         public static string ProduceCancellationTokenKey(TransferItem i)

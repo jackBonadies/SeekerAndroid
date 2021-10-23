@@ -189,7 +189,7 @@ namespace AndriodApp1
             autoClearComplete.Checked = SoulSeekState.AutoClearCompleteDownloads;
             autoClearComplete.CheckedChange += AutoClearComplete_CheckedChange;
 
-            CheckBox autoClearCompleteUploads = FindViewById<CheckBox>(Resource.Id.autoClearCompleteAndAbortedUploads);
+            CheckBox autoClearCompleteUploads = FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads);
             autoClearCompleteUploads.Checked = SoulSeekState.AutoClearCompleteUploads;
             autoClearCompleteUploads.CheckedChange += AutoClearCompleteUploads_CheckedChange;
 
@@ -1227,7 +1227,7 @@ namespace AndriodApp1
             SoulSeekState.MemoryBackedDownload = false;
             SoulSeekState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
             (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SoulSeekState.AutoClearCompleteDownloads;
-            (FindViewById<CheckBox>(Resource.Id.autoClearCompleteAndAbortedUploads) as CheckBox).Checked = SoulSeekState.AutoClearCompleteUploads;
+            (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SoulSeekState.AutoClearCompleteUploads;
             (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SoulSeekState.RememberSearchHistory;
             (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SoulSeekState.SharingOn;
             (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SoulSeekState.FreeUploadSlotsOnly;

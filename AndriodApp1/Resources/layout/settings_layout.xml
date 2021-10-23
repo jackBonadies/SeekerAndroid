@@ -450,14 +450,14 @@
                 android:paddingRight="10dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop = "10dp"
-                android:id="@+id/autoClearCompleteAndAbortedUploads"
+                android:id="@+id/autoClearCompleteUploads"
                 android:layout_marginBottom = "10dp"/>
 
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@+id/autoClearCompleteAndAbortedUploads"
+                android:layout_below="@+id/autoClearCompleteUploads"
                 android:text="@string/disable_bottom_notifs_complete"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"

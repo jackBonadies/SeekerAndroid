@@ -470,8 +470,7 @@ Directory Count: {5}"</string>
   <string name="copy_image">Copy Image</string>
   <string name="save_image">Save Image</string>
 
-  <string name="transfer_remaining">{0} transfer remaining</string>
-  <string name="transfers_remaining">{0} transfers remaining</string>
+
 
   <string name="success_save">User picture successfully saved.</string>
 
@@ -604,5 +603,12 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
   <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
 
   <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
-  <string name="auto_clear_complete_uploads">Auto Clear Complete (and Aborted) Uploads</string>
+  <string name="auto_clear_complete_uploads">Auto Clear Complete Uploads</string>
+
+  <string name="download_remaining">{0} download remaining</string>
+  <string name="downloads_remaining">{0} downloads remaining</string>
+
+  <string name="upload_remaining">{0} upload remaining</string>
+  <string name="uploads_remaining">{0} uploads remaining</string>
+  <string name="uploads_in_progress">Uploads in Progress</string>
 </resources>

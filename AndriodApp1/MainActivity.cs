@@ -154,7 +154,11 @@ namespace AndriodApp1
 
         void Application.IActivityLifecycleCallbacks.OnActivityStarted(Activity activity)
         {
-            SoulSeekState.ActiveActivityRef = activity;
+            SoulSeekState.ActiveActivityRef = activity as FragmentActivity;
+            if(SoulSeekState.ActiveActivityRef==null)
+            {
+                MainActivity.LogFirebase("OnActivityStarted activity is null!");
+            }
             DiagLastStarted = activity.GetType().Name.ToString();
             MainActivity.LogDebug("OnActivityStarted " + DiagLastStarted);
         }
@@ -883,6 +887,10 @@ namespace AndriodApp1
     {
         public bool IsUpload()
         {
+            if(TransferItems.Count==0)
+            {
+                return false; //usually this is if we are in the process of clearing the folder....
+            }
             return TransferItems[0].IsUpload();
         }
 
@@ -1175,6 +1183,66 @@ namespace AndriodApp1
                 return -1; //this is okay. we arent on that page so ui events are irrelevant
             }
         }
+
+        public ITransferItem GetItemAtUserIndex(int position)
+        {
+            if(TransfersFragment.InUploadsMode)
+            {
+                return Uploads.GetItemAtUserIndex(position);
+            }
+            else
+            {
+                return Downloads.GetItemAtUserIndex(position);
+            }
+        }
+
+        public void RemoveAtUserIndex(int position)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.RemoveAtUserIndex(position);
+            }
+            else
+            {
+                Downloads.RemoveAtUserIndex(position);
+            }
+        }
+
+        public void CancelFolder(FolderItem fi)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.CancelFolder(fi);
+            }
+            else
+            {
+                Downloads.CancelFolder(fi);
+            }
+        }
+
+        public void ClearAllFromFolder(FolderItem fi)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.ClearAllFromFolder(fi);
+            }
+            else
+            {
+                Downloads.ClearAllFromFolder(fi);
+            }
+        }
+
+        public int GetIndexForFolderItem(FolderItem folderItem)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                return Uploads.GetIndexForFolderItem(folderItem);
+            }
+            else
+            {
+                return Downloads.GetIndexForFolderItem(folderItem);
+            }
+        }
     }
 
     [Serializable]
@@ -1331,9 +1399,9 @@ namespace AndriodApp1
         {
             if (TransfersFragment.GroupByFolder)
             {
-                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems;
+                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems;
                 }
                 else
                 {
@@ -1350,9 +1418,9 @@ namespace AndriodApp1
         {
             if (TransfersFragment.GroupByFolder)
             {
-                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    Remove(TransfersFragment.CurrentlySelectedDLFolder.TransferItems[indexOfItem]);
+                    Remove(TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem]);
                 }
                 else
                 {
@@ -1380,9 +1448,9 @@ namespace AndriodApp1
         {
             if(TransfersFragment.GroupByFolder)
             {
-                if(TransfersFragment.CurrentlySelectedDLFolder!=null)
+                if(TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems[indexOfItem];
+                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem];
                 }
                 else
                 {
@@ -1404,9 +1472,9 @@ namespace AndriodApp1
         {
             if (TransfersFragment.GroupByFolder)
             {
-                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems.IndexOf(ti);
+                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems.IndexOf(ti);
                 }
                 else
                 {
@@ -1441,9 +1509,9 @@ namespace AndriodApp1
         {
             if (TransfersFragment.GroupByFolder)
             {
-                if (TransfersFragment.CurrentlySelectedDLFolder != null)
+                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    return TransfersFragment.CurrentlySelectedDLFolder.TransferItems.FindIndex((ti)=>ti.FullFilename==fullfilename);
+                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems.FindIndex((ti)=>ti.FullFilename==fullfilename);
                 }
                 else
                 {
@@ -1788,14 +1856,14 @@ namespace AndriodApp1
             UPnpManager.RestoreUpnpState();
             //SoulSeekState.SharedPreferences = sharedPrefs;
 
-            if (SeekerKeepAliveService.CpuKeepAlive == null)
+            if (SeekerKeepAliveService.CpuKeepAlive_FullService == null)
             {
-                SeekerKeepAliveService.CpuKeepAlive = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial,"Seeker Keep Alive Service Cpu");
+                SeekerKeepAliveService.CpuKeepAlive_FullService = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial,"Seeker Keep Alive Service Cpu");
             }
 
-            if (SeekerKeepAliveService.WifiKeepAlive == null)
+            if (SeekerKeepAliveService.WifiKeepAlive_FullService == null)
             {
-                SeekerKeepAliveService.WifiKeepAlive = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
+                SeekerKeepAliveService.WifiKeepAlive_FullService = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
             }
 
             if (SoulSeekState.SoulseekClient == null)
@@ -1828,6 +1896,9 @@ namespace AndriodApp1
                 SoulseekClient.ErrorLogHandler += MainActivity.SoulseekClient_ErrorLogHandler;
 
                 SoulseekClient.DebugLogHandler += MainActivity.DebugLogHandler;
+
+                SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
+                SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
             }
 
             UPnpManager.Context = this;
@@ -1838,6 +1909,212 @@ namespace AndriodApp1
 
 
         }
+
+
+
+        public static void AcquireTransferLocksAndResetTimer()
+        {
+            if (MainActivity.CpuKeepAlive_Transfer != null && !MainActivity.CpuKeepAlive_Transfer.IsHeld)
+            {
+                MainActivity.CpuKeepAlive_Transfer.Acquire();
+            }
+            if (MainActivity.WifiKeepAlive_Transfer != null && !MainActivity.WifiKeepAlive_Transfer.IsHeld)
+            {
+                MainActivity.WifiKeepAlive_Transfer.Acquire();
+            }
+
+            if (MainActivity.KeepAliveInactivityKillTimer != null)
+            {
+                MainActivity.KeepAliveInactivityKillTimer.Stop(); //can be null
+                MainActivity.KeepAliveInactivityKillTimer.Start(); //reset the timer..
+            }
+            else
+            {
+                MainActivity.KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
+                                                                                                     //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
+                MainActivity.KeepAliveInactivityKillTimer.Elapsed += MainActivity.KeepAliveInactivityKillTimerEllapsed;
+                MainActivity.KeepAliveInactivityKillTimer.AutoReset = false;
+            }
+        }
+
+        public static void ReleaseTransferLocksIfServicesComplete()
+        {
+            //if all transfers are done..
+            if(!SoulSeekState.UploadKeepAliveServiceRunning && !SoulSeekState.DownloadKeepAliveServiceRunning)
+            {
+                if (MainActivity.CpuKeepAlive_Transfer != null)
+                {
+                    MainActivity.CpuKeepAlive_Transfer.Release();
+                }
+                if (MainActivity.WifiKeepAlive_Transfer != null)
+                {
+                    MainActivity.WifiKeepAlive_Transfer.Release();
+                }
+                if (MainActivity.KeepAliveInactivityKillTimer != null)
+                {
+                    MainActivity.KeepAliveInactivityKillTimer.Stop();
+                }
+            }
+        }
+
+
+        
+
+        public static volatile int UPLOAD_COUNT = -1; // a hack see below
+
+        private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+        {
+            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.AbortAllWasPressedDebouncer) < 750; 
+            if (e.Count == 0 || abortAll)
+            {
+                UPLOAD_COUNT = -1;
+                Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
+                MainActivity.LogDebug("Stop Service");
+                this.StopService(uploadServiceIntent);
+                SoulSeekState.UploadKeepAliveServiceRunning = false;
+            }
+            else if (!SoulSeekState.UploadKeepAliveServiceRunning)
+            {
+                UPLOAD_COUNT = e.Count;
+                Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
+                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                {
+                    bool isForeground = false;
+                    try
+                    {
+                        if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
+                        {
+                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                        }
+                    }
+                    catch
+                    {
+                        MainActivity.LogFirebase("Exception thrown while checking lifecycle");
+                    }
+
+                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
+                    if (isForeground)
+                    {
+                        this.StartService(uploadServiceIntent); //this will throw if the app is in background.
+                    }
+                    else
+                    {
+                        //only do this if we absolutely must
+                        this.StartForegroundService(uploadServiceIntent);//added in 26
+                    }
+                }
+                else
+                {
+                    this.StartService(uploadServiceIntent); //this will throw if the app is in background.
+                }
+                SoulSeekState.UploadKeepAliveServiceRunning = true;
+            }
+            else if (SoulSeekState.UploadKeepAliveServiceRunning && e.Count != 0)
+            {
+                UPLOAD_COUNT = e.Count;
+                //for two downloads, this notification will go up before the service is started...
+
+                //requires run on ui thread? NOPE
+                string msg = string.Empty;
+                if (e.Count == 1)
+                {
+                    msg = string.Format(UploadForegroundService.SingularUploadRemaining, e.Count);
+                }
+                else
+                {
+                    msg = string.Format(UploadForegroundService.PluralUploadsRemaining, e.Count);
+                }
+                var notif = UploadForegroundService.CreateNotification(this, msg);
+                NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
+                manager.Notify(UploadForegroundService.NOTIF_ID, notif);
+            }
+            //});
+
+
+        }
+
+
+        public static volatile int DL_COUNT = -1; // a hack see below
+
+        //it works in the case of successfully finished, cancellation token used, etc.
+        private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+        {
+            //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
+            //SoulSeekState.MainActivityRef.RunOnUiThread(()=>
+            //{
+            MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
+            MainActivity.LogDebug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+
+            bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.CancelAndClearAllWasPressedDebouncer) < 750;
+            MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
+            if (e.Count == 0 || cancelAndClear)
+            {
+                DL_COUNT = -1;
+                Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
+                MainActivity.LogDebug("Stop Service");
+                this.StopService(downloadServiceIntent);
+                SoulSeekState.DownloadKeepAliveServiceRunning = false;
+            }
+            else if (!SoulSeekState.DownloadKeepAliveServiceRunning)
+            {
+                DL_COUNT = e.Count;
+                Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
+                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                {
+                    bool isForeground = false;
+                    try
+                    {
+                        if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
+                        {
+                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                        }
+                    }
+                    catch
+                    {
+                        MainActivity.LogFirebase("Exception thrown while checking lifecycle");
+                    }
+
+                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
+                    if (isForeground)
+                    {
+                        this.StartService(downloadServiceIntent); //this will throw if the app is in background.
+                    }
+                    else
+                    {
+                        //only do this if we absolutely must
+                        this.StartForegroundService(downloadServiceIntent);//added in 26
+                    }
+                }
+                else
+                {
+                    this.StartService(downloadServiceIntent); //this will throw if the app is in background.
+                }
+                SoulSeekState.DownloadKeepAliveServiceRunning = true;
+            }
+            else if (SoulSeekState.DownloadKeepAliveServiceRunning && e.Count != 0)
+            {
+                DL_COUNT = e.Count;
+                //for two downloads, this notification will go up before the service is started...
+
+                //requires run on ui thread? NOPE
+                string msg = string.Empty;
+                if (e.Count == 1)
+                {
+                    msg = string.Format(DownloadForegroundService.SingularDownloadRemaining, e.Count);
+                }
+                else
+                {
+                    msg = string.Format(DownloadForegroundService.PluralDownloadsRemaining, e.Count);
+                }
+                var notif = DownloadForegroundService.CreateNotification(this, msg);
+                NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
+                manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
+            }
+            //});
+        }
+
+
+
 
         public class ProgressUpdatedUI : EventArgs
         {
@@ -2400,7 +2677,7 @@ namespace AndriodApp1
                 //uploading file to user...
             }
             //if(e.Transfer.State == TransferStates.Completed) //this condition will NEVER be hit.  it is always completed | succeeded
-            if (e.Transfer.State.HasFlag(TransferStates.Succeeded))
+            if (e.Transfer.State.HasFlag(TransferStates.Succeeded)) //todo rethink upload notifications....
             {
                 MainActivity.LogDebug("transfer state changed to completed" + e.Transfer.Filename);
                 //send notif successfully uploading file to user..
@@ -2840,19 +3117,19 @@ namespace AndriodApp1
         }
 
 
-        public static string PluralTransfersRemaining
+        public static string PluralDownloadsRemaining
         {
             get
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfers_remaining);
+                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.downloads_remaining);
             }
         }
 
-        public static string SingularTransfersRemaining
+        public static string SingularDownloadRemaining
         {
             get
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_remaining);
+                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.download_remaining);
             }
         }
 
@@ -2864,7 +3141,7 @@ namespace AndriodApp1
 
             Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
-            int cnt = MainActivity.DL_COUNT;
+            int cnt = SeekerApplication.DL_COUNT;
             if (cnt == -1)
             {
                 notification = CreateNotification(this, this.GetString(Resource.String.transfers_in_progress));
@@ -2873,37 +3150,17 @@ namespace AndriodApp1
             {
                 if(cnt == 1)
                 {
-                    notification = CreateNotification(this, string.Format(SingularTransfersRemaining, 1));
+                    notification = CreateNotification(this, string.Format(SingularDownloadRemaining, 1));
                 }
                 else
                 {
-                    notification = CreateNotification(this, string.Format(PluralTransfersRemaining, cnt));
+                    notification = CreateNotification(this, string.Format(PluralDownloadsRemaining, cnt));
                 }
             }
 
             try
             {
-            if(MainActivity.CpuKeepAlive!=null&&!MainActivity.CpuKeepAlive.IsHeld)
-            {
-                MainActivity.CpuKeepAlive.Acquire();
-            }
-            if (MainActivity.WifiKeepAlive != null && !MainActivity.WifiKeepAlive.IsHeld)
-            {
-                MainActivity.WifiKeepAlive.Acquire();
-            }
-
-            if(MainActivity.KeepAliveInactivityKillTimer != null)
-            {
-                MainActivity.KeepAliveInactivityKillTimer.Stop(); //can be null
-                MainActivity.KeepAliveInactivityKillTimer.Start(); //reset the timer..
-            }
-            else
-            {
-                MainActivity.KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
-                                                                                                     //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
-                MainActivity.KeepAliveInactivityKillTimer.Elapsed += MainActivity.KeepAliveInactivityKillTimerEllapsed;
-                MainActivity.KeepAliveInactivityKillTimer.AutoReset = false;
-            }
+                SeekerApplication.AcquireTransferLocksAndResetTimer();
             }
             catch(System.Exception e)
             {
@@ -2924,18 +3181,111 @@ namespace AndriodApp1
         public override void OnDestroy()
         {
             SoulSeekState.DownloadKeepAliveServiceRunning = false;
-            if (MainActivity.CpuKeepAlive != null)
+            SeekerApplication.ReleaseTransferLocksIfServicesComplete();
+
+            base.OnDestroy();
+        }
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+        }
+    }
+
+
+    //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
+    [Service(Name = "com.companyname.andriodapp1.UploadService")]
+    public class UploadForegroundService : Service
+    {
+        public const int NOTIF_ID = 1112;
+        public const string CHANNEL_ID = "my channel id - upload";
+        public const string CHANNEL_NAME = "Foreground Upload Service";
+        public const string FromTransferString = "FromTransfer"; //todo update for onclick...
+        public override IBinder OnBind(Intent intent)
+        {
+            return null; //does not allow binding. 
+        }
+
+
+
+        public static Notification CreateNotification(Context context, String contentText)
+        {
+            Intent notifIntent = new Intent(context, typeof(MainActivity));
+            notifIntent.PutExtra(FromTransferString, 2);
+            PendingIntent pendingIntent =
+                PendingIntent.GetActivity(context, 0, notifIntent, 0);
+            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
+            //a "channel" is a category in the UI to the end user.
+            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText);
+        }
+
+
+        public static string PluralUploadsRemaining
+        {
+            get
             {
-                MainActivity.CpuKeepAlive.Release();
+                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.uploads_remaining);
             }
-            if (MainActivity.WifiKeepAlive != null)
+        }
+
+        public static string SingularUploadRemaining
+        {
+            get
             {
-                MainActivity.WifiKeepAlive.Release();
+                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.upload_remaining);
             }
-            if(MainActivity.KeepAliveInactivityKillTimer != null)
+        }
+
+
+        [return: GeneratedEnum]
+        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
+        {
+            SoulSeekState.UploadKeepAliveServiceRunning = true;
+
+            Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            Notification notification = null;
+            int cnt = SeekerApplication.UPLOAD_COUNT;
+            if (cnt == -1)
             {
-                MainActivity.KeepAliveInactivityKillTimer.Stop();
+                notification = CreateNotification(this, this.GetString(Resource.String.transfers_in_progress));
             }
+            else
+            {
+                if (cnt == 1)
+                {
+                    notification = CreateNotification(this, string.Format(SingularUploadRemaining, 1));
+                }
+                else
+                {
+                    notification = CreateNotification(this, string.Format(PluralUploadsRemaining, cnt));
+                }
+            }
+
+            try
+            {
+                SeekerApplication.AcquireTransferLocksAndResetTimer();
+            }
+            catch (System.Exception e)
+            {
+                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
+            }
+            //.setContentTitle(getText(R.string.notification_title))
+            //.setContentText(getText(R.string.notification_message))
+            //.setSmallIcon(R.drawable.icon)
+            //.setContentIntent(pendingIntent)
+            //.setTicker(getText(R.string.ticker_text))
+            //.build();
+            StartForeground(NOTIF_ID, notification);
+            //runs indefinitely until stop.
+
+            return StartCommandResult.Sticky;
+        }
+
+        public override void OnDestroy()
+        {
+            SoulSeekState.UploadKeepAliveServiceRunning = false;
+            SeekerApplication.ReleaseTransferLocksIfServicesComplete();
+
             base.OnDestroy();
         }
 
@@ -2959,8 +3309,8 @@ namespace AndriodApp1
         public const string CHANNEL_ID = "seeker keep alive id";
         public const string CHANNEL_NAME = "Seeker Keep Alive Service";
 
-        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive = null;
-        public static PowerManager.WakeLock CpuKeepAlive = null;
+        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_FullService = null;
+        public static PowerManager.WakeLock CpuKeepAlive_FullService = null;
 
 
         public override IBinder OnBind(Intent intent)
@@ -2993,14 +3343,14 @@ namespace AndriodApp1
 
             try
             {
-                if (CpuKeepAlive != null && !CpuKeepAlive.IsHeld)
+                if (CpuKeepAlive_FullService != null && !CpuKeepAlive_FullService.IsHeld)
                 {
-                    CpuKeepAlive.Acquire();
+                    CpuKeepAlive_FullService.Acquire();
                     MainActivity.LogInfoFirebase("CpuKeepAlive acquire");
                 }
-                if (WifiKeepAlive != null && !WifiKeepAlive.IsHeld)
+                if (WifiKeepAlive_FullService != null && !WifiKeepAlive_FullService.IsHeld)
                 {
-                    WifiKeepAlive.Acquire();
+                    WifiKeepAlive_FullService.Acquire();
                     MainActivity.LogInfoFirebase("WifiKeepAlive acquire");
                 }
             }
@@ -3024,29 +3374,29 @@ namespace AndriodApp1
         public override void OnDestroy()
         {
             SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
-            if (CpuKeepAlive != null && CpuKeepAlive.IsHeld)
+            if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
             {
-                CpuKeepAlive.Release();
+                CpuKeepAlive_FullService.Release();
                 MainActivity.LogInfoFirebase("CpuKeepAlive release");
             }
-            else if(CpuKeepAlive==null)
+            else if(CpuKeepAlive_FullService==null)
             {
                 MainActivity.LogFirebase("CpuKeepAlive is null");
             }
-            else if (!CpuKeepAlive.IsHeld)
+            else if (!CpuKeepAlive_FullService.IsHeld)
             {
                 MainActivity.LogFirebase("CpuKeepAlive not held");
             }
-            if (WifiKeepAlive != null && WifiKeepAlive.IsHeld)
+            if (WifiKeepAlive_FullService != null && WifiKeepAlive_FullService.IsHeld)
             {
-                WifiKeepAlive.Release();
+                WifiKeepAlive_FullService.Release();
                 MainActivity.LogInfoFirebase("WifiKeepAlive release");
             }
-            else if(WifiKeepAlive == null)
+            else if(WifiKeepAlive_FullService == null)
             {
                 MainActivity.LogFirebase("WifiKeepAlive is null");
             }
-            else if(!WifiKeepAlive.IsHeld)
+            else if(!WifiKeepAlive_FullService.IsHeld)
             {
                 MainActivity.LogFirebase("WifiKeepAlive not held");
             }
@@ -3374,8 +3724,27 @@ namespace AndriodApp1
         {
             List<Tuple<string, string, long>> pairs = new List<Tuple<string, string, long>>();
             auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
-            traverseDocumentFile(dir,pairs, auxilaryDuplicatesList, ref directoryCount);
+            traverseDocumentFile(dir,pairs, auxilaryDuplicatesList, true, GetVolumeName(dir.Uri.LastPathSegment), ref directoryCount);
             return pairs;
+        }
+
+        public static string GetVolumeName(string lastPathSegment)
+        {
+            //if the first part of the path has a colon in it, then strip it.
+            int endOfFirstPart = lastPathSegment.IndexOf('\\');
+            if(endOfFirstPart==-1)
+            {
+                endOfFirstPart = lastPathSegment.Length;
+            }
+            int volumeIndex = lastPathSegment.Substring(0,endOfFirstPart).IndexOf(':');
+            if(volumeIndex==-1)
+            {
+                return null;
+            }
+            else
+            {
+                return lastPathSegment.Substring(0,volumeIndex+1);
+            }
         }
 
 
@@ -3396,7 +3765,22 @@ namespace AndriodApp1
             }
         }
 
-        private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, string dirToStrip, bool diagFromDirectoryResolver)
+        private List<string> GetRootDirs(DocumentFile dir)
+        {
+            List<string> dirUris = new List<string>();
+            DocumentFile[] files = dir.ListFiles(); //doesnt need to be sorted
+            for (int i = 0; i < files.Length; ++i)
+            {
+                DocumentFile file = files[i];
+                if (file.IsDirectory)
+                {
+                    dirUris.Add(file.Uri.ToString());
+                }
+            }
+            return dirUris;
+        }
+
+        private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, string dirToStrip, bool diagFromDirectoryResolver, string volumePath)
         {
             string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
             directoryPath = directoryPath.Replace("/", @"\");
@@ -3449,6 +3833,15 @@ namespace AndriodApp1
 
             }
             Helpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+
+            if(volumePath!=null)
+            {
+                if (directoryPath.Substring(0, volumePath.Length).ToLower() == volumePath)
+                {
+                    directoryPath = directoryPath.Substring(volumePath.Length);
+                }
+            }
+
             var slskDir = new Soulseek.Directory(directoryPath, files);
             return slskDir;
         }
@@ -3463,6 +3856,9 @@ namespace AndriodApp1
             List<Android.Net.Uri> dirUris = new List<Android.Net.Uri>();
             dirUris.Add(dir.Uri);
             traverseToGetDirectories(dir, dirUris);
+            var rootDirUris = GetRootDirs(dir);
+            rootDirUris.Add(dir.Uri.ToString());
+            string volname = GetVolumeName(dir.Uri.LastPathSegment);
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             foreach(Android.Net.Uri dirUri in dirUris)
             {
@@ -3479,7 +3875,7 @@ namespace AndriodApp1
                 {
                     MainActivity.LogInfoFirebase("dirname is null " + dir.Uri?.ToString() ?? "dirUriIsNull");
                 }
-                var slskDir = SlskDirFromDocumentFile(dirFile, dir.Name, false);
+                var slskDir = SlskDirFromDocumentFile(dirFile, dir.Name, false, volname);
                 friendlyDirNameToUriMapping.Add(new Tuple<string, string>(slskDir.Name, dirFile.Uri.ToString()));
                 allDirs.Add(slskDir);
             }
@@ -3734,7 +4130,7 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string,long>> pairs, Dictionary<string,List<Tuple<string, string, long>>> auxilaryDuplicatesList, ref int directoryCount)
+        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string,long>> pairs, Dictionary<string,List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
         {
             if (dir.Exists())
             {
@@ -3745,7 +4141,7 @@ namespace AndriodApp1
                     if (file.IsDirectory)
                     {
                         directoryCount++;
-                        traverseDocumentFile(file, pairs, auxilaryDuplicatesList, ref directoryCount);
+                        traverseDocumentFile(file, pairs, auxilaryDuplicatesList, false, volName, ref directoryCount);
                     }
                     else
                     {
@@ -3759,9 +4155,12 @@ namespace AndriodApp1
                         string fullPath = file.Uri.Path.ToString().Replace('/','\\');
 
                         string searchableName = Helpers.GetFolderNameFromFile(fullPath) + @"\" + Helpers.GetFileNameFromFile(fullPath);
-                        if(searchableName.Substring(0,8).ToLower()=="primary:")
+                        if(isRootCase)
                         {
-                            searchableName = searchableName.Substring(8);
+                            if(searchableName.Substring(0, volName.Length).ToLower() == volName)
+                            {
+                                searchableName = searchableName.Substring(volName.Length);
+                            }
                         }
                         if(pairs.Exists((Tuple<string, string, long> tuple)=>{return tuple.Item1==searchableName; }))
                         {
@@ -3822,19 +4221,19 @@ namespace AndriodApp1
         private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
         private Android.Support.V4.View.ViewPager pager = null;
 
-        public static PowerManager.WakeLock CpuKeepAlive = null;
-        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive = null;
+        public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
+        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_Transfer = null;
         public static System.Timers.Timer KeepAliveInactivityKillTimer = null;
 
         public static void KeepAliveInactivityKillTimerEllapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if (CpuKeepAlive != null)
+            if (CpuKeepAlive_Transfer != null)
             {
-                CpuKeepAlive.Release();
+                CpuKeepAlive_Transfer.Release();
             }
-            if(WifiKeepAlive != null)
+            if(WifiKeepAlive_Transfer != null)
             {
-                WifiKeepAlive.Release();
+                WifiKeepAlive_Transfer.Release();
             }
             KeepAliveInactivityKillTimer.Stop();
         }
@@ -3850,15 +4249,15 @@ namespace AndriodApp1
 
             try
             {
-                if(CpuKeepAlive==null)
+                if(CpuKeepAlive_Transfer==null)
                 {
-                    CpuKeepAlive = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
-                    CpuKeepAlive.SetReferenceCounted(false);
+                    CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
+                    CpuKeepAlive_Transfer.SetReferenceCounted(false);
                 }
-                if(WifiKeepAlive==null)
+                if(WifiKeepAlive_Transfer==null)
                 {
-                    WifiKeepAlive = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
-                    WifiKeepAlive.SetReferenceCounted(false);
+                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
+                    WifiKeepAlive_Transfer.SetReferenceCounted(false);
                 }
             }
             catch(Exception e)
@@ -4071,8 +4470,7 @@ namespace AndriodApp1
             //Android.Net.Wifi.WifiManager wm = this.GetSystemService(WifiService);
             //wm.
             //Mono.Nat.NatUtility.UnknownDeviceFound += NatUtility_DeviceFound;
-            SoulseekClient.ClearDownloadAddedInternalHandler(this);
-            SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
+            
 
 
             SoulSeekState.SharedPreferences = sharedPreferences;
@@ -4960,7 +5358,7 @@ namespace AndriodApp1
                 fullDir = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef, Android.Net.Uri.Parse(fullDirUri.Item2));
             }
             //Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path
-            var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true);
+            var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true, GetVolumeName(fullDir.Uri.LastPathSegment));
             slskDir = new Directory(directory,slskDir.Files);
             return Task.FromResult(slskDir);
         }
@@ -5075,85 +5473,6 @@ namespace AndriodApp1
             }
         }
 
-
-        public static int DL_COUNT = -1; // a hack see below
-
-        //it works in the case of successfully finished, cancellation token used, etc.
-        private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.DownloadAddedRemovedInternalEventArgs e)
-        {
-            //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
-            //SoulSeekState.MainActivityRef.RunOnUiThread(()=>
-            //{
-            MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
-            MainActivity.LogDebug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
-            bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.CancelAndClearAllWasPressedDebouncer)<750;
-            MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
-            if (e.Count == 0|| cancelAndClear)
-            {
-                DL_COUNT = -1;
-                Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                MainActivity.LogDebug("Stop Service");
-                this.StopService(downloadServiceIntent);
-                SoulSeekState.DownloadKeepAliveServiceRunning = false;
-            }
-            else if(!SoulSeekState.DownloadKeepAliveServiceRunning)
-            {
-                Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-                {
-                    bool isForeground = false;
-                    try
-                    {
-                        if (this.Lifecycle?.CurrentState !=null)
-                        {
-                            isForeground = this.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
-                        }
-                    }
-                    catch
-                    {
-                        LogFirebase("Exception thrown while checking lifecycle");
-                    }
-
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
-                    if (isForeground)
-                    {
-                        this.StartService(downloadServiceIntent); //this will throw if the app is in background.
-                    }
-                    else
-                    {
-                        //only do this if we absolutely must
-                        this.StartForegroundService(downloadServiceIntent);//added in 26
-                    }
-                }
-                else
-                {
-                    this.StartService(downloadServiceIntent); //this will throw if the app is in background.
-                }
-                SoulSeekState.DownloadKeepAliveServiceRunning = true;
-            }
-            else if(SoulSeekState.DownloadKeepAliveServiceRunning && e.Count !=0)
-            {
-                DL_COUNT = e.Count;
-                //for two downloads, this notification will go up before the service is started...
-
-                //requires run on ui thread? NOPE
-                string msg = string.Empty;
-                if(e.Count==1)
-                {
-                    msg = string.Format(DownloadForegroundService.SingularTransfersRemaining,e.Count);
-                }
-                else
-                {
-                    msg = string.Format(DownloadForegroundService.PluralTransfersRemaining, e.Count);
-                }
-                var notif = DownloadForegroundService.CreateNotification(this, msg);
-                NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
-                manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
-            }
-            //});
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -5170,9 +5489,16 @@ namespace AndriodApp1
                 }
                 else if(pager.CurrentItem == 2) //transfer tab
                 {
-                    if(TransfersFragment.CurrentlySelectedDLFolder!=null)
+                    if(TransfersFragment.GetCurrentlySelectedFolder()!=null) 
                     {
-                        TransfersFragment.CurrentlySelectedDLFolder = null;
+                        if(TransfersFragment.InUploadsMode)
+                        {
+                            TransfersFragment.CurrentlySelectedUploadFolder = null;
+                        }
+                        else
+                        {
+                            TransfersFragment.CurrentlySelectedDLFolder = null;
+                        }
                         SetTransferSupportActionBarState();
                         this.InvalidateOptionsMenu();
                         //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).SetRecyclerAdapter();  //if you go to transfers rotate phone and then OnBackPressed gets hit,. the fragment that getitem returns will be very old.
@@ -5445,29 +5771,27 @@ namespace AndriodApp1
                 // normally there would be an internal queue, and uploads would be handled separately.
             Task.Run(async () =>
             {
+                CancellationTokenSource oldCts = null;
                 try
                 {
                     using var stream = SoulSeekState.MainActivityRef.ContentResolver.OpenInputStream(ourFile.Uri); //outputstream.CanRead is false...
                     //using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
+
+                    TransfersFragment.SetupCancellationToken(transferItem, cts, out oldCts);
+
                     await SoulSeekState.SoulseekClient.UploadAsync(username, filename, transferItem.Size, stream, options: null, cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
                                                                                                                                                                 //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
-                    TransfersFragment.SetupCancellationToken(transferItem, cts); //I put this here because if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one.
+                    
                 }
-                catch (DuplicateTransferException dup)
+                catch (DuplicateTransferException dup) //not tested
                 {
-                    LogDebug("UPLOAD DUPL - " + dup.Message);
+                    LogDebug("UPLOAD DUPL - " + dup.Message); 
+                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
                 }
                 catch(DuplicateTokenException dup)
                 {
                     LogDebug("UPLOAD DUPL - " + dup.Message);
-                }
-                catch(Exception e)
-                {
-                    LogDebug("UPLOAD FAILED - " + e.Message);
-                    transferItem.Failed = true;
-                    transferItem.State = TransferStates.Errored;
-                    //update the UI if we get here.
-                    SeekerApplication.StateChangedForItem?.Invoke(null, transferItem);
+                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
                 }
             }).ContinueWith(t =>
             {
@@ -5713,7 +6037,7 @@ namespace AndriodApp1
             transferItem.QueueLength = e.dlInfo.QueueLength;
             e.dlInfo.TransferItemReference = transferItem;
 
-            TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource);
+            TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource, out _);
             //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
             //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
             //{
@@ -7706,7 +8030,11 @@ namespace AndriodApp1
         public static String SaveDataDirectoryUri = null;
         public static String UploadDataDirectoryUri = null;
         public static String ManualIncompleteDataDirectoryUri = null;
-        public static bool DownloadKeepAliveServiceRunning = false;
+
+        public static volatile bool DownloadKeepAliveServiceRunning = false;
+        public static volatile bool UploadKeepAliveServiceRunning = false;
+
+
         public static SlskHelp.SharedFileCache SharedFileCache = null;
         public static int UploadSpeed = -1; //bytes
         public static bool FailedShareParse = false;
@@ -7740,6 +8068,7 @@ namespace AndriodApp1
         /// events all occuring on different threads that all go to affect the service.
         /// </summary>
         public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
+        public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
 
         public static void ClearSearchHistoryEventsFromTarget(object target)
@@ -7777,7 +8106,7 @@ namespace AndriodApp1
         /// <summary>
         /// Context of last created activity
         /// </summary>
-        public static volatile Activity ActiveActivityRef = null;
+        public static volatile FragmentActivity ActiveActivityRef = null;
         public static ISharedPreferences SharedPreferences;
         public static volatile MainActivity MainActivityRef;
 
