@@ -33,4 +33,7 @@
   
   <color name="subTextColor">#ff757575</color>
   
+  
+  <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
+  <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 </resources>
