@@ -494,7 +494,7 @@ namespace AndriodApp1
             //logging code for unit tests / diagnostic.. //TODO comment out always
             //var root = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef , Android.Net.Uri.Parse( SoulSeekState.SaveDataDirectoryUri) );
             //DocumentFile exists = root.FindFile(username + "_dir_response");
-            //save:
+            ////save:
             //if(exists==null || !exists.Exists())
             //{
             //    DocumentFile f = root.CreateFile(@"custom\binary",username + "_dir_response");
@@ -632,6 +632,7 @@ namespace AndriodApp1
                 else
                 {
                     //we need to set the first root..
+
                     string newRootDirName = GetLongestBeginningSubstring(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
                     if(newRootDirName==string.Empty)
                     {
@@ -639,9 +640,15 @@ namespace AndriodApp1
                         newRootDirName = "";
                         emptyRoot = true;
                     }
-                    if(newRootDirName.EndsWith("\\"))
+                    //if(newRootDirName.EndsWith("\\"))
+                    //{
+                    //    newRootDirName = newRootDirName.Substring(0, newRootDirName.Length-1);
+                    //    //else our new folder root will be "@@sdfklj\\" rather than "@@sdfklj" causing problems..
+                    //}
+                    //the rootname can be "@@sdfklj\\! " if the directories are "@@sdfklj\\! mp3", "@@sdfklj\\! flac"
+                    if(newRootDirName.LastIndexOf("\\")!=-1)
                     {
-                        newRootDirName = newRootDirName.Substring(0, newRootDirName.Length-1);
+                        newRootDirName = newRootDirName.Substring(0, newRootDirName.LastIndexOf("\\"));
                         //else our new folder root will be "@@sdfklj\\" rather than "@@sdfklj" causing problems..
                     }
                     Directory rootDirectory = new Directory(newRootDirName);
