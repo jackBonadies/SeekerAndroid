@@ -6183,7 +6183,14 @@ namespace AndriodApp1
                             if(task.Exception.InnerException.InnerException != null)
                             {
                                 //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                if(task.Exception.InnerException.InnerException.Message.Contains("Failed to establish a direct or indirect transfer connection"))
+                                {
+                                    //skip this case
+                                }
+                                else
+                                {
+                                    MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                }
 
                                 if(task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)"))
                                 {
@@ -7605,7 +7612,14 @@ namespace AndriodApp1
 
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
+                if(string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
+                {
+                    this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
+                }
+                else
+                {
+                    this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                }
                 this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
             }
         }
@@ -8697,7 +8711,7 @@ namespace AndriodApp1
             clipboardManager.PrimaryClip = clip;
         }
 
-        public static string GetFileNameFromFile(string filename)
+        public static string GetFileNameFromFile(string filename) //is also used to get the last folder
         {
             int begin = filename.LastIndexOf("\\");
             string clipped = filename.Substring(begin + 1);

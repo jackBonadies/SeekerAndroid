@@ -4723,6 +4723,7 @@ namespace AndriodApp1
         }
     }
 
+
     public class TransferItemViewDetails : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }

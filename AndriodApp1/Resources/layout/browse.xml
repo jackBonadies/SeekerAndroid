@@ -34,58 +34,24 @@
         android:layout_alignRight="@id/dlFiles"
         style="@style/SeekerButtonStyle"
         />-->
-    <LinearLayout
-        android:layout_marginTop="0dp"
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:background="@color/mainPurple"
+        android:minWidth="25px"
+        android:minHeight="0px"
+            android:elevation="4dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/button2"
-        android:background="@color/slskAccent"
-        android:id="@+id/header1">
-        <TextView
-            android:layout_width = "0dp"
-            android:layout_height = "wrap_content"
-            android:layout_weight = "1.5"
-            android:gravity = "center"
-            android:padding = "5dp"
-            android:text = "Files"
-            android:textSize="12sp"
-            android:textColor = "#ffffff" />
-
-<!--        <TextView
-            android:layout_width = "0dp"
-            android:layout_height = "wrap_content"
-            android:layout_weight = "3"
-            android:gravity = "center"
-            android:textSize="10dp"
-            android:padding = "5dp"
-            android:text = "Folder"
-            android:textColor = "#ffffff"/>
-
-        <TextView
-            android:layout_width = "0dp"
-            android:layout_height = "wrap_content"
-            android:layout_weight = ".5"
-            android:gravity = "center"
-            android:padding = "2dp"
-            android:text = "Kb/s"
-            android:id="@+id/browseKbs"
-            android:textSize="10dp"
-            android:textColor = "#ffffff" />
-
-        <TextView
-            android:layout_width = "0dp"
-            android:layout_height = "wrap_content"
-            android:layout_weight = ".5"
-            android:gravity = "center"
-            android:padding = "2dp"
-            android:text = "Queue"
-            android:id="@+id/browseQueue"
-            android:textSize="10dp"
-            android:textColor = "#ffffff" />-->
-    </LinearLayout>
+        android:id="@+id/recyclerViewHorizontalPath" />
+        <View
+            android:layout_below = "@id/recyclerViewHorizontalPath"
+            android:background="#ffd4d4d4"
+            android:id="@+id/recyclerViewHorizontalPathSep"
+            android:layout_width="match_parent"
+            android:elevation="4dp"
+            android:layout_height="1dp"/>
     <ListView
-        android:layout_below = "@id/header1"
+        android:layout_below = "@id/recyclerViewHorizontalPathSep"
         android:minWidth="25px"
         android:minHeight="25px"
         
