@@ -1004,11 +1004,11 @@ namespace AndriodApp1
                     //}
 
                     //by default doing Task.Start() will run it on a threadpoolthread
-                    Action action = new Action(() => {
+
                         DownloadInfo downloadInfo = new DownloadInfo(searchResponse.Username, file.Filename, file.Size, dlTask, cancellationTokenSource, GetQueueLength(searchResponse),0);
                         //SoulSeekState.downloadInfoList.Add(downloadInfo); //for future ref if need be
-                        SoulSeekState.OnDownloadAdded(downloadInfo); }); //causes main activity to start downloading it
-                    this.activity.RunOnUiThread(action);
+                        SoulSeekState.OnDownloadAdded(downloadInfo); //causes main activity to start downloading it
+
             });
             return task;
         }
@@ -1181,13 +1181,10 @@ namespace AndriodApp1
                         continue; // do not add to the task list.
                     }
                     //by default doing Task.Start() will run it on a threadpoolthread
-                    Action action = new Action(() => {
 
                         DownloadInfo downloadInfo = new DownloadInfo(searchResponse.Username, file.Filename, file.Size, dlTask, cancellationTokenSource, GetQueueLength(searchResponse), 0);
-                        SoulSeekState.downloadInfoList.Add(downloadInfo); //for future ref if need be
                         SoulSeekState.OnDownloadAdded(downloadInfo);
-                    }); //causes main activity to start downloading it
-                    this.activity.RunOnUiThread(action);
+
                 }
             });
             return task;

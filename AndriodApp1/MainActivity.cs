@@ -7234,8 +7234,8 @@ namespace AndriodApp1
                     Android.Net.Uri uri = null;
                     if(SoulSeekState.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
-                        (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                        ) 
+                        (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
+                        Helpers.CompleteIncompleteDifferentVolume()) 
                     {
                         try
                         {
@@ -7273,7 +7273,11 @@ namespace AndriodApp1
                         }
                         catch (Exception e)
                         {
-                            if(e.Message.ToLower().Contains("already exists"))
+                            //move document fails if two different volumes:
+                            //"Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
+                            //{content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
+                            //content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
+                            if (e.Message.ToLower().Contains("already exists"))
                             {
                                 try
                                 {
@@ -7292,7 +7296,7 @@ namespace AndriodApp1
                             }
                             else
                             {
-                                MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message);
+                                MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message + " path child: " + uriOfIncomplete?.Path + " path parent: " + parentUriOfIncomplete?.Path + " path dest: " + folderDir1?.Uri);
                                 SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
                                 MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
                             }
@@ -8357,6 +8361,54 @@ namespace AndriodApp1
         public static void SortSlskDirFiles(List<Soulseek.File> files)
         {
             files.Sort((x,y)=>x.Filename.CompareTo(y.Filename));
+        }
+
+        public static bool CompleteIncompleteDifferentVolume()
+        {
+            if(SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootIncompleteDocumentFile != null && SoulSeekState.RootDocumentFile != null)
+            {
+                //if(!SoulSeekState.UseLegacyStorage())
+                //{
+                //    //this method is only for API29+
+                //    //var sm = (SoulSeekState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);
+                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(SoulSeekState.RootDocumentFile.Uri); //fails if not media store uri
+                //    //string uuid1 = sv1.Uuid;
+                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(SoulSeekState.RootIncompleteDocumentFile.Uri);
+                //    //string uuid2 = sv2.Uuid;
+
+
+                //    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
+                    
+                //    return uuid1 != uuid2;
+                //}
+                //else
+                //{
+                try
+                {
+                    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, out bool everything);
+                    if(everything)
+                    {
+                        volume1 = SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
+                    }
+                    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, out everything);
+                    if(everything)
+                    {
+                        volume2 = SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
+                    }
+                    return volume1 != volume2;
+                }
+                catch(Exception e)
+                {
+                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SoulSeekState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " +  SoulSeekState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
+                    return false;
+                }
+                //}
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public static string GenerateIncompleteFolderName(string username, string albumFolderName)
