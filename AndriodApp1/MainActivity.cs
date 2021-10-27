@@ -1785,7 +1785,7 @@ namespace AndriodApp1
                     if(token!=null)
                     {
                         token.Cancel();
-                        TransfersFragment.CancellationTokens.Remove(key);
+                        TransfersFragment.CancellationTokens.Remove(key, out _);
                     }
                 }
             }
@@ -2220,6 +2220,12 @@ namespace AndriodApp1
                 if(relevantItem == null && e.Transfer.State == TransferStates.Requested)
                 {
                     return; //TODO sometimes this can happen to fast.  this is okay thouugh bc it will soon go to another state.
+                }
+                if(relevantItem == null && e.Transfer.State == TransferStates.InProgress)
+                {
+                    //THIS SHOULD NOT HAPPEN now that the race condition is resolved....
+                    MainActivity.LogFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
+                    return;
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
@@ -3578,6 +3584,11 @@ namespace AndriodApp1
         public static event EventHandler<TransferItem> TransferAddedUINotify;
 
         public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
+
+        public static void InvokeDownloadAddedUINotify(DownloadAddedEventArgs e)
+        {
+            DownloadAddedUINotify?.Invoke(null, e);
+        }
 
         public static void ClearDownloadAddedEventsFromTarget(object target)
         {
@@ -5489,6 +5500,20 @@ namespace AndriodApp1
             }
         }
 
+        public bool OnBrowseTab()
+        {
+            try
+            {
+                var pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+                return pager.CurrentItem == 3;
+            }
+            catch
+            {
+                MainActivity.LogFirebase("OnBrowseTab failed");
+            }
+            return false;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -7296,7 +7321,7 @@ namespace AndriodApp1
                             }
                             else
                             {
-                                MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message + " path child: " + uriOfIncomplete?.Path + " path parent: " + parentUriOfIncomplete?.Path + " path dest: " + folderDir1?.Uri);
+                                MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message + " path child: " + Android.Net.Uri.Decode(uriOfIncomplete.ToString()) + " path parent: " + Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) + " path dest: " + Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
                                 SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
                                 MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
                             }
@@ -8181,10 +8206,10 @@ namespace AndriodApp1
         public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); //previously this was on the loginfragment but
                    //it would get recreated every time so there were lost instances with threads waiting forever....
 
-        public static void OnDownloadAdded(DownloadInfo dlInfo)
-        {
-            DownloadAdded(null,new DownloadAddedEventArgs(dlInfo));
-        }
+        //public static void OnDownloadAdded(DownloadInfo dlInfo)
+        //{
+        //    DownloadAdded(null,new DownloadAddedEventArgs(dlInfo));
+        //}
 
         public const string M_CurrentlyLoggedIn = "Momento_LoggedIn";
         public const string M_Username = "Momento_Username";
