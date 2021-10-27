@@ -622,7 +622,20 @@ namespace AndriodApp1
                 //FLAC\\++Various Artists++\\VA - Winters Of Discontent - The Peel Sessions 77-83 (1991)"
                 //NOTE THERE IS NO FAKE @@lskjdf
                 //sometimes the root is the empty string
-                //
+
+                //doggoli - the first is literally just '\\' not an actual directory name... (old PowerPC Mac version??)
+                //\\
+                //\\Volumes
+                //...
+                //"\\Volumes\\Music\\**Artist**"
+                //I think this would be a special case where we simply remove the first dir.
+                if(dirArray[0].Name=="\\")
+                {
+                    dirArray = dirArray.Skip(1).ToArray();
+                }
+
+
+
                 bool emptyRoot = false;
                 //if(dirArray[dirArray.Length-1].Name.Contains(dirArray[0].Name))
                 if(Helpers.IsChildDirString(dirArray[dirArray.Length-1].Name,dirArray[0].Name, true) || dirArray[dirArray.Length - 1].Name.Equals(dirArray[0].Name))
@@ -980,37 +993,78 @@ namespace AndriodApp1
             MainActivity.LogDebug("CreateDownloadTask");
             Task task = new Task(()=>
             {
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                Android.Net.Uri incompleteUri = null;
-                Task dlTask = DownloadFileAsync(searchResponse.Username, file.Filename, file.Size, cancellationTokenSource);
-                    //if(SoulSeekState.MemoryBackedDownload)
-                    //{
-                    //    dlTask =
-                    //        SoulSeekState.SoulseekClient.DownloadAsync(
-                    //            username: searchResponse.Username,
-                    //            filename: file.Filename,
-                    //            size: file.Size,
-                    //            cancellationToken: cancellationTokenSource.Token);
-                    //}
-                    //else
-                    //{
-                    //    dlTask = SoulSeekState.SoulseekClient.DownloadAsync(
-                    //            username: searchResponse.Username,
-                    //            filename: file.Filename,
-                    //            MainActivity.GetIncompleteStream(searchResponse.Username, file.Filename, out incompleteUri),
-                    //            size: file.Size,
-                    //            options: new TransferOptions(disposeOutputStreamOnCompletion:true),
-                    //            cancellationToken: cancellationTokenSource.Token);
-                    //}
-
-                    //by default doing Task.Start() will run it on a threadpoolthread
-
-                        DownloadInfo downloadInfo = new DownloadInfo(searchResponse.Username, file.Filename, file.Size, dlTask, cancellationTokenSource, GetQueueLength(searchResponse),0);
-                        //SoulSeekState.downloadInfoList.Add(downloadInfo); //for future ref if need be
-                        SoulSeekState.OnDownloadAdded(downloadInfo); //causes main activity to start downloading it
+                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), out _);
 
             });
             return task;
+        }
+
+
+        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, out bool errorExists)
+        {
+            errorExists = false;
+            Task dlTask = null;
+            Android.Net.Uri incompleteUri = null;
+            System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
+            bool exists = false;
+            TransferItem originalTransferItem;
+            TransferItem transferItem = null;
+            DownloadInfo downloadInfo = null;
+            System.Threading.CancellationTokenSource oldCts = null;
+            try
+            {
+
+                downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0);
+
+                transferItem = new TransferItem();
+                transferItem.Filename = Helpers.GetFileNameFromFile(downloadInfo.fullFilename);
+                transferItem.FolderName = Helpers.GetFolderNameFromFile(downloadInfo.fullFilename);
+                transferItem.Username = downloadInfo.username;
+                transferItem.FullFilename = downloadInfo.fullFilename;
+                transferItem.Size = downloadInfo.Size;
+                transferItem.QueueLength = downloadInfo.QueueLength;
+
+                try
+                {
+                    TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
+                }
+                catch (Exception errr)
+                {
+                    MainActivity.LogFirebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                }
+                transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
+                downloadInfo.TransferItemReference = transferItem;
+
+
+
+
+                dlTask = DownloadFileAsync(username, fname, size, cancellationTokenSource);
+
+                var e = new DownloadAddedEventArgs(downloadInfo);
+                downloadInfo.downloadTask = dlTask;
+                Action<Task> continuationActionSaveFile = MainActivity.DownloadContinuationActionUI(e);
+                dlTask.ContinueWith(continuationActionSaveFile);
+                MainActivity.InvokeDownloadAddedUINotify(e);
+
+
+
+
+            }
+            catch (Exception e)
+            {
+                if (!exists)
+                {
+                    TransfersFragment.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
+                }
+                else
+                {
+                    errorExists = exists;
+                }
+                if (oldCts != null)
+                {
+                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
+                }
+            }
         }
 
         /// <summary>
@@ -1144,47 +1198,9 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("CreateDownloadAllTask");
             Task task = new Task(() => { 
-                bool exceptionShown = false;
                 foreach(Soulseek.File file in searchResponse.Files)
                 {
-
-                    Task dlTask = null;
-                    Android.Net.Uri incompleteUri = null;
-                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                    try
-                    {
-
-                        dlTask = DownloadFileAsync(searchResponse.Username, file.Filename, file.Size, cancellationTokenSource);
-                        //SoulSeekState.SoulseekClient.DownloadAsync(
-                        //    username: searchResponse.Username,
-                        //    filename: file.Filename,
-                        //    size: file.Size,
-                        //    cancellationToken: cancellationTokenSource.Token);
-                    }
-                    catch (Exception error)
-                    {
-                        Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
-
-                        if (error.Message != null && error.Message.Contains("already in progress"))
-                        {
-                            MainActivity.LogFirebase("already in progress - CreateDownloadAllTask");
-                        }
-                        else
-                        {
-                            MainActivity.LogFirebase(error.Message + " CreateDownloadAllTask");
-                        }
-                        if (!exceptionShown)
-                        {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(a);
-                            exceptionShown = true; //it would be annoying to show this once for every download
-                        }
-                        continue; // do not add to the task list.
-                    }
-                    //by default doing Task.Start() will run it on a threadpoolthread
-
-                        DownloadInfo downloadInfo = new DownloadInfo(searchResponse.Username, file.Filename, file.Size, dlTask, cancellationTokenSource, GetQueueLength(searchResponse), 0);
-                        SoulSeekState.OnDownloadAdded(downloadInfo);
-
+                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), out _);
                 }
             });
             return task;

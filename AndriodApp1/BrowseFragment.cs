@@ -514,7 +514,8 @@ namespace AndriodApp1
         {
             base.OnResume();
             if(SoulSeekState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
-                && !SoulSeekState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername))
+                && !SoulSeekState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername)
+                && SoulSeekState.MainActivityRef.OnBrowseTab())
             {
                 SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
             }
@@ -1235,49 +1236,35 @@ namespace AndriodApp1
                 return new Task(()=>{ }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
             }
             MainActivity.LogDebug("CreateDownloadAllTask");
-            bool exceptionShown = false;
+            bool allExist = true; //only show the transfer exists if all transfers in question do already exist
             Task task = new Task(() => {
                 foreach (FullFileInfo file in files)
                 {
-                    Task dlTask = null;
-                    Android.Net.Uri incompleteUri = null;
-                    System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
-                    try
-                    {
-                        dlTask = DownloadDialog.DownloadFileAsync(username, file.FullFileName, file.Size, cancellationTokenSource);
 
-                    }
-                    catch (Exception error)
+                    DownloadDialog.SetupAndDownloadFile(username, file.FullFileName, file.Size, 0, out bool transferExists);
+                    if(!transferExists)
                     {
-                        Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
-                        if(error.Message != null && error.Message.Contains("already in progress"))
-                        {
-                            MainActivity.LogFirebase("already in progress - CreateDownloadAllTask");
-                        }
-                        else if(error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
-                        {
-
-                        }
-                        else
-                        {
-                            MainActivity.LogFirebase(error.Message + " CreateDownloadAllTask");
-                        }
-                        if(!exceptionShown)
-                        {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(a);
-                            exceptionShown=true; //it would be annoying to show this once for every download
-                        }
-                        continue; // do not add to the task list.
+                        allExist = false;
                     }
 
-                        DownloadInfo downloadInfo = new DownloadInfo(username, file.FullFileName, file.Size, dlTask, cancellationTokenSource, 0, 0);  //todo cant we move all this stuff above and then on our downloadinfo ref set the dlTask (even in like a finally or something...)
-                        //SoulSeekState.downloadInfoList.Add(downloadInfo); //for future ref if need be
-                        SoulSeekState.OnDownloadAdded(downloadInfo); //TODO THERE IS A RACE CONDITION WHERE UPDATESTATE gets called before the transfer is added and it looks for the transfer to update it and the transfer is null...
+
 
                 }
-                Action toast1 = new Action(() => {
-                    Toast.MakeText(Context, this.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show(); });
-                SoulSeekState.MainActivityRef.RunOnUiThread(toast1);
+                Action toast1 = null;
+                if (allExist)
+                {
+                    toast1 = new Action(() => {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show(); });
+                
+                }
+                else
+                {
+                    toast1 = new Action(() => {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                    });
+                }
+
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(toast1);
             });
             return task;
         }

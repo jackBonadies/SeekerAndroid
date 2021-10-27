@@ -6096,7 +6096,7 @@ namespace AndriodApp1
                         CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
                         uptoken?.Cancel();
                         //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                        CancellationTokens.Remove(ProduceCancellationTokenKey(tti));
+                        CancellationTokens.Remove(ProduceCancellationTokenKey(tti), out _);
                         lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
                             TransferItemManagerWrapped.RemoveAtUserIndex(position);
@@ -6279,7 +6279,7 @@ namespace AndriodApp1
                     CancellationTokens.TryGetValue(ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
                     token?.Cancel();
                     //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                    CancellationTokens.Remove(ProduceCancellationTokenKey(uploadToCancel));
+                    CancellationTokens.Remove(ProduceCancellationTokenKey(uploadToCancel), out _);
                     lock (TransferItemManagerWrapped.GetUICurrentList())
                     {
                         recyclerTransferAdapter.NotifyItemChanged(position);
@@ -7188,13 +7188,16 @@ namespace AndriodApp1
         public static void SetupCancellationToken(TransferItem transferItem, CancellationTokenSource cts, out CancellationTokenSource oldToken)
         {
             transferItem.CancellationTokenSource = cts;
-            if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), cts))
+            if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), cts)) //returns false if it already exists in dict
             {
                 //likely old already exists so just replace the old one
                 oldToken = CancellationTokens[ProduceCancellationTokenKey(transferItem)];
                 CancellationTokens[ProduceCancellationTokenKey(transferItem)] = cts;
             }
-            oldToken = null;
+            else
+            {
+                oldToken = null;
+            }
         }
 
         public static string ProduceCancellationTokenKey(TransferItem i)
@@ -7208,7 +7211,7 @@ namespace AndriodApp1
         }
 
 
-        public static Dictionary<string, CancellationTokenSource> CancellationTokens = new Dictionary<string, CancellationTokenSource>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource> CancellationTokens = new System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource>();
 
 
 
