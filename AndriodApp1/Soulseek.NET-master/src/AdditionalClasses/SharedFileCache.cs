@@ -26,22 +26,15 @@
             TTL = ttl;
         }
 
-        public SharedFileCache(List<Tuple<string,string,long>> keys, Dictionary<string, List<Tuple<string, string, long>>> auxilaryDuplicates, int direcotryCount, BrowseResponse browseResponse, List<Tuple<string,string>> friendlyDirNameToUriMapping)
+        public SharedFileCache(List<Tuple<string,string,long, string>> keys, int direcotryCount, BrowseResponse browseResponse, List<Tuple<string, string>> friendlyDirNameToUriMapping)
         {
             Keys=keys.Select(_=>_.Item1).ToList(); //if its here then we have it.
             FullInfo = keys; //this is the full info, i.e. keys and and their corresponding URI and length
-            if(auxilaryDuplicates!=null)
-            {
-                AuxilaryDuplicates = auxilaryDuplicates; //this is a helper to FullInfo.  on cases where the URI is "" and length is -1 then its found here.  Why? bc otherwise duplicate keys and cant make a dictionary..
-            }
-            else
-            {
-                AuxilaryDuplicates = new Dictionary<string, List<Tuple<string, string, long>>>();
-            }
             DirectoryCount = direcotryCount;
             TTL = 1000*3600*24; //1day in ms
             BrowseResponse = browseResponse;
             FriendlyDirNameToUriMapping = friendlyDirNameToUriMapping;
+
             SuccessfullyInitialized = false;
         }
 
@@ -55,10 +48,10 @@
         /// 
         /// </param>
         /// <returns></returns>
-        public Tuple<string, string, long> GetFullInfoFromSearchableName(string keyFilename, string fullPath, bool toStripVolumeName, string volumeName, Func<string,string> GetLastEncoded, out string errorMessage)
+        public Tuple<string, string, long, string> GetFullInfoFromSearchableName(string keyFilename, string fullPath, bool toStripVolumeName, string volumeName, Func<string,string> GetLastEncoded, out string errorMessage)
         {
             //Tuple<string, string, long> ourFileInfo = FullInfo.Where((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault();
-            Tuple<string, string, long> ourFileInfo = FullInfo.FirstOrDefault((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; });
+            Tuple<string, string, long, string> ourFileInfo = FullInfo.FirstOrDefault((Tuple<string, string, long, string> fullInfoTuple) => { return fullInfoTuple.Item4 == keyFilename; });
             if(ourFileInfo==null)
             {
                 errorMessage = "ourFileInfo 1 is null keyFilename is: " + keyFilename + "FullInfo.Count" + FullInfo.Count;
@@ -66,17 +59,17 @@
             }
             if(ourFileInfo.Item3==-1)
             {
-                //look through the aux structure
-                foreach(var tup in AuxilaryDuplicates[ourFileInfo.Item1])
-                {
-                    if(ConvertUriToBrowseResponsePath(tup.Item2, toStripVolumeName, volumeName, GetLastEncoded).EndsWith(fullPath))
-                    {
-                        errorMessage = string.Empty;
-                        return tup;
-                    }
-                }
+                ////look through the aux structure
+                //foreach(var tup in AuxilaryDuplicates[ourFileInfo.Item1])
+                //{
+                //    if(ConvertUriToBrowseResponsePath(tup.Item2, toStripVolumeName, volumeName, GetLastEncoded).EndsWith(fullPath))
+                //    {
+                //        errorMessage = string.Empty;
+                //        return tup;
+                //    }
+                //}
                 //THIS SHOULD NEVER HAPPEN!!!!! we do log this is parent method
-                errorMessage = "our Auxilary lookup failed: fullpath: " + fullPath + "duplicates Count is: " + AuxilaryDuplicates[ourFileInfo.Item1].Count;
+                errorMessage = "our Auxilary lookup failed: fullpath: " + fullPath + "duplicates Count is: ";
                 return null;
             }
             else
@@ -99,10 +92,10 @@
             return lastEncoded.Replace('/', '\\');
         }
 
-        public List<Soulseek.File> GetSlskFilesFromFilenames(IEnumerable<string> results)
+        public List<Soulseek.File> GetSlskFilesFromFilenames(IEnumerable<Tuple<string,string,long,string>> results)
         {
 
-            IEnumerable<string> fileNames = results.Distinct();//.Select(r => Files[r.Replace("''", "'")]);
+            IEnumerable<string> fileNames = results.Select(_=>_.Item4).Distinct();//.Select(r => Files[r.Replace("''", "'")]);
             List<Soulseek.File> response = new List<Soulseek.File>();
             foreach (var fName in fileNames)
             {
@@ -122,9 +115,8 @@
         public event EventHandler<(int Directories, int Files)> Refreshed;
         public bool SuccessfullyInitialized { get;set;}
         public BrowseResponse BrowseResponse { get;}
-        public Dictionary<string, List<Tuple<string, string, long>>> AuxilaryDuplicates { get;set;}
         public List<string> Keys { get; }
-        public List<Tuple<string, string, long>> FullInfo {get; }
+        public List<Tuple<string, string, long, string>> FullInfo {get; }
         public int DirectoryCount = -1;
         public int FileCount
         {
@@ -170,29 +162,11 @@
 
                 //FullInfo is a list.. we want to transform it into a dictionary. but only 1 problem, that is duplicate keys.
                 Files = FullInfo
-                    .Select(f => new Soulseek.File(1, f.Item1.Replace("/", @"\"), f.Item3, Path.GetExtension(f.Item1)))
+                    .Select(f => new Soulseek.File(1, f.Item4.Replace("/", @"\"), f.Item3, Path.GetExtension(f.Item1)))
                     .ToDictionary(f => f.Filename, f => f);
                 DuplicateFiles = new Dictionary<string, List<Soulseek.File>>();
-                foreach (var pair in AuxilaryDuplicates)
-                {
-                    foreach(var tup in pair.Value)
-                    {
-                        if(DuplicateFiles.ContainsKey(pair.Key))
-                        {
-                            DuplicateFiles[pair.Key].Add(new Soulseek.File(1, tup.Item1.Replace("/", @"\"), tup.Item3, Path.GetExtension(tup.Item1)));
-                        }
-                        else
-                        {
-                            DuplicateFiles[pair.Key] = new List<Soulseek.File>();
-                            DuplicateFiles[pair.Key].Add(new Soulseek.File(1, tup.Item1.Replace("/", @"\"), tup.Item3, Path.GetExtension(tup.Item1)));
-                        }
-                    }
-                }
+
                 // potentially optimize with multi-valued insert https://stackoverflow.com/questions/16055566/insert-multiple-rows-in-sqlite
-                foreach (string file in Keys)
-                {
-                    //InsertFilename(file); //this is how we determine matches
-                }
                 //TODO DIRECTORY COUNT
                 int directoryCount  = 2;
                 Refreshed?.Invoke(this, (directoryCount, Files.Count));
@@ -259,10 +233,10 @@
             try
             {
                 //using var cmd = new SqliteCommand(query, SQLite);
-                var results = Keys.Where( //keys is a list.. so it can contain duplicates just fine..
-                    (string fileKey) =>
+                var results = FullInfo.Where( //keys is a list.. so it can contain duplicates just fine..
+                    (Tuple<string,string,long,string> fileKey) =>
                     {
-                        if(fileKey.ToLower().Contains(text.ToLower()))
+                        if(fileKey.Item1.ToLower().Contains(text.ToLower()))
                         {
                             return true;
                         }

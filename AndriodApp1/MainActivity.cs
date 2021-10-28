@@ -51,6 +51,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Android.Animation;
 using System.Collections.ObjectModel;
 using Android.Net.Wifi;
+using static Android.Provider.DocumentsContract;
 //using System.IO;
 //readme:
 //dotnet add package Soulseek --version 1.0.0-rc3.1
@@ -3731,15 +3732,72 @@ namespace AndriodApp1
         /// <param name="dir"></param>
         /// <param name="directoryCount"></param>
         /// <returns></returns>
-        public List<Tuple<string, string, long>> ParseSharedDirectory(DocumentFile dir, ref int directoryCount, out Dictionary<string,List<Tuple<string,string,long>>> auxilaryDuplicatesList)
+        public List<Tuple<string, string, long, string>> ParseSharedDirectoryFastDocContract(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri)
         {
-            List<Tuple<string, string, long>> pairs = new List<Tuple<string, string, long>>();
-            auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
-            traverseDocumentFile(dir,pairs, auxilaryDuplicatesList, true, GetVolumeName(dir.Uri.LastPathSegment, out _), ref directoryCount);
+            //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
+            //so the presentablename should be FolderSelected/path to rest
+            //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
+            //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
+            List<Tuple<string, string, long, string>> pairs = new List<Tuple<string, string, long, string>>();
+            List<Android.Net.Uri> listOfDirectoryUris = new List<Android.Net.Uri>();
+            //auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
+            listOfDirectoryUris.Add(dir.Uri);
+            List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
+            dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
+            string lastPathSegment = dir.Uri.LastPathSegment.Replace('/', '\\');
+            string toStrip = string.Empty;
+            string volName = GetVolumeName(dir.Uri.LastPathSegment, true, out _);
+            if (lastPathSegment.Contains('\\'))
+            {
+                int stripIndex = lastPathSegment.LastIndexOf('\\');
+                toStrip = lastPathSegment.Substring(0,stripIndex + 1);
+            }
+            else if(lastPathSegment.Contains(volName))
+            {
+                if(lastPathSegment==volName)
+                {
+                    toStrip = null;
+                }
+                else
+                {
+                    toStrip = volName;
+                }
+            }
+            else
+            {
+                MainActivity.LogFirebase("contains neither: " + lastPathSegment);
+            }
+            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, ref directoryCount);
+            br = new BrowseResponse(allDirs);
             return pairs;
         }
 
-        public static string GetVolumeName(string lastPathSegment, out bool entireString)
+        public List<Tuple<string, string, long, string>> ParseSharedDirectoryLegacy(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri)
+        {
+            //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
+            //so the presentablename should be FolderSelected/path to rest
+            //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
+            //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
+            List<Tuple<string, string, long, string>> pairs = new List<Tuple<string, string, long, string>>();
+            List<Android.Net.Uri> listOfDirectoryUris = new List<Android.Net.Uri>();
+            //auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
+            listOfDirectoryUris.Add(dir.Uri);
+            List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
+            dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
+            string lastPathSegment = dir.Uri.Path.Replace('/', '\\');
+            string toStrip = string.Empty;
+            if (lastPathSegment.Contains('\\'))
+            {
+                int stripIndex = lastPathSegment.LastIndexOf('\\');
+                toStrip = lastPathSegment.Substring(0, stripIndex + 1);
+            }
+            traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, dirMappingFriendlyNameToUri, toStrip, ref directoryCount);
+            br = new BrowseResponse(allDirs);
+            return pairs;
+        }
+
+
+        public static string GetVolumeName(string lastPathSegment, bool alwaysReturn, out bool entireString)
         {
             entireString = false;
             //if the first part of the path has a colon in it, then strip it.
@@ -3759,6 +3817,10 @@ namespace AndriodApp1
                 if(volumeName.Length == lastPathSegment.Length)
                 {   //special case where root is primary:.  in this case we return null which gets treated as "dont strip out anything"
                     entireString = true;
+                    if (alwaysReturn)
+                    {
+                        return volumeName;
+                    }
                     return null;
                 }
                 else
@@ -3801,6 +3863,94 @@ namespace AndriodApp1
             return dirUris;
         }
 
+        private static Soulseek.Directory SlskDirFromUri(ContentResolver contentResolver, Android.Net.Uri rootUri, Android.Net.Uri dirUri, string dirToStrip, bool diagFromDirectoryResolver, string volumePath)
+        {
+
+
+            string directoryPath = dirUri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
+            directoryPath = directoryPath.Replace("/", @"\");
+            //try
+            //{
+            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
+            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
+            //}
+            //catch(Exception e)
+            //{
+            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
+            //    //its possible for dirToStrip to be null
+            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
+            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
+            //    LogFirebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
+            //}
+            //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
+            //strip out the shared root dir
+            //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
+            Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, DocumentsContract.GetDocumentId(dirUri));
+            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
+            List<Soulseek.File> files = new List<Soulseek.File>();
+            try
+            {
+                while (c.MoveToNext())
+                {
+                    string docId = c.GetString(0);
+                    string name = c.GetString(1);
+                    string mime = c.GetString(2);
+                    long size = c.GetLong(3);
+                    var childUri = DocumentsContract.BuildDocumentUri(rootUri.Authority, docId);
+                    //MainActivity.LogDebug("docId: " + docId + ", name: " + name + ", mime: " + mime);
+                    if (isDirectory(mime))
+                    {
+                    }
+                    else
+                    {
+
+                        string fname = Helpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string folderName = Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
+                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                               //bc we get a path that is:
+                                                                               //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                                                                               //not quite a full URI but it does add quite a bit..
+
+                        //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
+                        //{
+                        //    searchableName = searchableName.Substring(8);
+                        //}
+                        var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), size, System.IO.Path.GetExtension(childUri.Path));
+                        files.Add(slskFile);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                LogDebug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
+                LogFirebase("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
+            }
+            finally
+            {
+                closeQuietly(c);
+            }
+            Helpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+
+            if (volumePath != null)
+            {
+                if (directoryPath.Substring(0, volumePath.Length) == volumePath)
+                {
+                    //if (directoryPath.Length != volumePath.Length)
+                    //{
+                        directoryPath = directoryPath.Substring(volumePath.Length);
+                    //}
+                }
+            }
+
+            var slskDir = new Soulseek.Directory(directoryPath, files);
+            return slskDir;
+        }
+
+
+
+
+
         private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, string dirToStrip, bool diagFromDirectoryResolver, string volumePath)
         {
             string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
@@ -3839,7 +3989,6 @@ namespace AndriodApp1
                     //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
                     //not quite a full URI but it does add quite a bit..
 
-                    //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
                     //{
                     //    searchableName = searchableName.Substring(8);
                     //}
@@ -3857,12 +4006,12 @@ namespace AndriodApp1
 
             if(volumePath!=null)
             {
-                if (directoryPath.Substring(0, volumePath.Length).ToLower() == volumePath)
+                if (directoryPath.Substring(0, volumePath.Length) == volumePath)
                 {
-                    if(directoryPath.Length != volumePath.Length)
-                    {
+                    //if(directoryPath.Length != volumePath.Length)
+                    //{
                         directoryPath = directoryPath.Substring(volumePath.Length);
-                    }
+                    //}
                 }
             }
 
@@ -3882,7 +4031,7 @@ namespace AndriodApp1
             traverseToGetDirectories(dir, dirUris);
             var rootDirUris = GetRootDirs(dir);
             rootDirUris.Add(dir.Uri.ToString());
-            string volname = GetVolumeName(dir.Uri.LastPathSegment, out _);
+            string volname = GetVolumeName(dir.Uri.LastPathSegment, true, out _); //?>?>?>
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             foreach(Android.Net.Uri dirUri in dirUris)
             {
@@ -3908,7 +4057,7 @@ namespace AndriodApp1
 
         public class CachedParseResults
         {
-            public List<Tuple<string, string, long>> keys = null;
+            public List<Tuple<string, string, long, string>> keys = null;
             public int direcotryCount = -1;
             public BrowseResponse browseResponse = null;
             public List<Tuple<string, string>> friendlyDirNameToUriMapping = null;
@@ -3926,7 +4075,10 @@ namespace AndriodApp1
                 editor.PutString(SoulSeekState.M_CACHE_browseResponse, string.Empty);
                 editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, string.Empty);
                 editor.PutString(SoulSeekState.M_CACHE_auxDupList, string.Empty);
-                editor.Commit();
+                    editor.PutString(SoulSeekState.M_CACHE_stringUriPairs_v2, string.Empty);
+                    editor.PutString(SoulSeekState.M_CACHE_browseResponse_v2, string.Empty);
+                    editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
+                    editor.Commit();
                 }
             }
             catch(Exception e)
@@ -3938,10 +4090,9 @@ namespace AndriodApp1
 
         public CachedParseResults GetCachedParseResults()
         {
-            string s_stringUriPairs = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_stringUriPairs, string.Empty);
-            string s_BrowseResponse = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_browseResponse, string.Empty);
-            string s_FriendlyDirNameMapping = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, string.Empty);       
-            string s_AuxDupList = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_auxDupList, string.Empty); //this one is optional!!
+            string s_stringUriPairs = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_stringUriPairs_v2, string.Empty);
+            string s_BrowseResponse = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_browseResponse_v2, string.Empty);
+            string s_FriendlyDirNameMapping = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);       
             if(s_stringUriPairs==string.Empty|| s_BrowseResponse==string.Empty|| s_FriendlyDirNameMapping==string.Empty)
             {
                 return null;
@@ -3960,19 +4111,11 @@ namespace AndriodApp1
                     {
                         BinaryFormatter binaryFormatter = new BinaryFormatter();
                         CachedParseResults cachedParseResults = new CachedParseResults();
-                        cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as List<Tuple<string, string, long>>;
+
+                        cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as List<Tuple<string, string, long, string>>;
                         cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
                         cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
                         cachedParseResults.direcotryCount = cachedParseResults.browseResponse.DirectoryCount;
-
-                        if (s_AuxDupList != string.Empty)
-                        {
-                            byte[] b_AuxDupList = Convert.FromBase64String(s_AuxDupList);
-                            using (System.IO.MemoryStream m_AuxDupList = new System.IO.MemoryStream(b_AuxDupList))
-                            {
-                                cachedParseResults.dupAux = binaryFormatter.Deserialize(m_AuxDupList) as Dictionary<string, List<Tuple<string, string, long>>>;
-                            }
-                        }
 
                         return cachedParseResults;
                     }
@@ -3987,13 +4130,191 @@ namespace AndriodApp1
             }
         }
 
+
+        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, List<Tuple<string, string, long, string>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, ref int directoryCount)
+        {
+            //this should be the folder before the selected to strip away..
+
+
+
+            Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
+            //Log.d(TAG, "node uri: ", childrenUri);
+            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
+            List<Soulseek.File> files = new List<Soulseek.File>();
+            try
+            {
+                while (c.MoveToNext())
+                {
+                    string docId = c.GetString(0);
+                    string name = c.GetString(1);
+                    string mime = c.GetString(2);
+                    long size = c.GetLong(3);
+                    var childUri = DocumentsContract.BuildDocumentUriUsingTree(rootUri, docId);
+                    MainActivity.LogDebug("docId: " + docId + ", name: " + name + ", mime: " + mime);
+                    if (isDirectory(mime))
+                    {
+                        directoryCount++;
+                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, ref directoryCount);
+                    }
+                    else
+                    {
+                        
+                        string presentableName = childUri.LastPathSegment.Replace('/', '\\');
+
+
+
+                        if(folderToStripForPresentableNames==null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                        {
+                            if (volName.Length != presentableName.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                            {
+                                presentableName = presentableName.Substring(0,volName.Length) + '\\' + presentableName.Substring(volName.Length);
+                            }
+                        }
+                        else
+                        {
+                            presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
+                        }
+
+
+                        string searchableName = Helpers.GetFolderNameFromFile(presentableName) + @"\" + Helpers.GetFileNameFromFile(presentableName);
+
+                        //if(volName != null)
+                        //{
+                        //    if (presentableName.Substring(0, volName.Length) == volName)
+                        //    {
+                        //        if (presentableName.Length != volName.Length) //i.e. if its just "primary:"
+                        //        {
+                        //            presentableName = presentableName.Substring(volName.Length);
+                        //        }
+                        //    }
+                        //}
+                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
+
+                        string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                                                                               //for the brose response should only be the filename!!! 
+                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                               //bc we get a path that is:
+                                                                               //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                                                                               //not quite a full URI but it does add quite a bit..
+
+                        //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
+                        //{
+                        //    searchableName = searchableName.Substring(8);
+                        //}
+                        var slskFile = new Soulseek.File(1, fname, size, System.IO.Path.GetExtension(childUri.Path));
+                        files.Add(slskFile);
+                    }
+                }
+                Helpers.SortSlskDirFiles(files);
+                string directoryPath = parentUri.LastPathSegment.Replace("/", @"\");
+
+                if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                {
+                    if(volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                    {
+                        directoryPath = directoryPath.Substring(0, volName.Length) + '\\' + directoryPath.Substring(volName.Length);
+                    }
+                }
+                else
+                {
+                    directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
+                }
+
+                var slskDir = new Soulseek.Directory(directoryPath, files);
+                listOfDirs.Add(slskDir);
+                dirMappingFriendlyNameToUri.Add(new Tuple<string, string>(directoryPath, parentUri.ToString()));
+            }
+            finally
+            {
+                closeQuietly(c);
+            }
+        }
+
+
+        public void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, List<Tuple<string, string, long, string>> pairs, bool isRootCase, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, ref int directoryCount)
+        {
+            //this should be the folder before the selected to strip away..
+            List<Soulseek.File> files = new List<Soulseek.File>();
+            foreach (var childDocFile in parentDocFile.ListFiles())
+            {
+                if(childDocFile.IsDirectory)
+                {
+                    directoryCount++;
+                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, ref directoryCount);
+                }
+                else
+                {
+                    //for subAPI21 last path segment is:
+                    //".android_secure" so just the filename whereas Path is more similar to last part segment:
+                    //"/storage/sdcard/.android_secure"
+                    string presentableName = childDocFile.Uri.Path.Replace('/', '\\');
+                    if (folderToStripForPresentableNames != null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                    {
+                        presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
+                    }
+                    string searchableName = Helpers.GetFolderNameFromFile(presentableName) + @"\" + Helpers.GetFileNameFromFile(presentableName);
+                    pairs.Add(new Tuple<string, string, long, string>(searchableName, childDocFile.Uri.ToString(), childDocFile.Length(), presentableName));
+                    string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                                                                                                    //for the brose response should only be the filename!!! 
+                                                                                                    //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                                                    //bc we get a path that is:
+                                                                                                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                                                                                                    //not quite a full URI but it does add quite a bit..
+
+                    //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
+                    //{
+                    //    searchableName = searchableName.Substring(8);
+                    //}
+                    var slskFile = new Soulseek.File(1, fname, childDocFile.Length(), System.IO.Path.GetExtension(childDocFile.Uri.Path));
+                    files.Add(slskFile);
+                }
+            }
+
+            Helpers.SortSlskDirFiles(files);
+            string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
+
+            if (folderToStripForPresentableNames != null) 
+            {
+                directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
+            }
+
+            var slskDir = new Soulseek.Directory(directoryPath, files);
+            listOfDirs.Add(slskDir);
+            dirMappingFriendlyNameToUri.Add(new Tuple<string, string>(directoryPath, parentDocFile.Uri.ToString()));
+        }
+
+
+
+        // Util method to check if the mime type is a directory
+        private static bool isDirectory(String mimeType)
+        {
+            return DocumentsContract.Document.MimeTypeDir.Equals(mimeType);
+        }
+
+        // Util method to close a closeable
+        private static void closeQuietly(Android.Database.ICursor closeable)
+        {
+            if (closeable != null)
+            {
+                try
+                {
+                    closeable.Close();
+                }
+                catch
+                {
+                    // ignore exception
+                }
+            }
+        }
+
         /// <summary>
         /// Check Cache should be false if setting a new dir.. true if on startup.
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public void InitializeDatabase(DocumentFile dir,bool checkCache)
+        public bool InitializeDatabase(DocumentFile dir,bool checkCache, out string errorMsg)
         {
+            errorMsg = string.Empty;
             bool success = false;
             try
             {
@@ -4005,38 +4326,27 @@ namespace AndriodApp1
 
                 if(cachedParseResults==null)
                 {
-                    LogDebug("No cached results");
                     int directoryCount = 0;
-                    System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
-                    s.Start();
-                    Dictionary<string, List<Tuple<string, string, long>>> auxilaryDuplicatesList = null;
-                    var stringUriPairs = ParseSharedDirectory(dir,ref directoryCount, out auxilaryDuplicatesList); //for 550 files takes 15 seconds (debug mode)
-                    s.Stop();
-                    LogDebug("ParseSharedDirectory: " + s.ElapsedMilliseconds);
-                    s.Reset();
-                    s.Start();
-                    List<Tuple<string, string>> friendlyDirNameToUriMapping = new List<Tuple<string, string>>();
-                    var browseResponse = ParseSharedDirectoryForBrowseResponse(dir, ref friendlyDirNameToUriMapping); //for 550 files takes 30 seconds (debug mode). serialized is 95kB.
-
-
-                    //using (var writer = new System.IO.StringWriter())
-                    //{
-                    //    var serializer = new System.Xml.(browseResponse.GetType());
-                    //    serializer.Serialize(writer, browseResponse);
-                    //    string serializedString = writer.ToString();
-                    //    LogDebug(serializedString.Length.ToString());
-                    //}
-
-
-                    s.Stop();
-                    LogDebug("ParseSharedDirectoryForBrowseResponse: " + s.ElapsedMilliseconds);
-                    s.Reset();
+                    //System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
+                    //s.Start();
+                    List<Tuple<string,string,long,string>> stringUriPairs = null;
+                    BrowseResponse browseResponse = null;
+                    List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
+                    if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
+                    {
+                        stringUriPairs = ParseSharedDirectoryFastDocContract(dir,ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri);
+                    }
+                    else
+                    {
+                        stringUriPairs = ParseSharedDirectoryLegacy(dir, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri);
+                    }
+                    //s.Stop();
+                    //LogDebug("ParseSharedDirectory: " + s.ElapsedMilliseconds);
 
                     //put into cache.
                     using(System.IO.MemoryStream bResponsememoryStream = new System.IO.MemoryStream())
                     using(System.IO.MemoryStream stringUrimemoryStream = new System.IO.MemoryStream())
                     using(System.IO.MemoryStream friendlyDirNamememoryStream = new System.IO.MemoryStream())
-                    using(System.IO.MemoryStream auxDupListStream = new System.IO.MemoryStream())
                     {
                         BinaryFormatter formatter = new BinaryFormatter();
                         formatter.Serialize(bResponsememoryStream, browseResponse);
@@ -4045,26 +4355,23 @@ namespace AndriodApp1
                         formatter.Serialize(stringUrimemoryStream,stringUriPairs);
                         string bstringUriPairs = Convert.ToBase64String(stringUrimemoryStream.ToArray());
 
-                        formatter.Serialize(friendlyDirNamememoryStream, friendlyDirNameToUriMapping);
+                        formatter.Serialize(friendlyDirNamememoryStream, dirMappingFriendlyNameToUri);
                         string bfriendlyDirName = Convert.ToBase64String(friendlyDirNamememoryStream.ToArray());
 
-                        formatter.Serialize(auxDupListStream, auxilaryDuplicatesList);
-                        string bAuxDupListStreamName = Convert.ToBase64String(auxDupListStream.ToArray());
                         lock (SHARED_PREF_LOCK)
                         {
                             var editor = SoulSeekState.SharedPreferences.Edit();
-                        editor.PutString(SoulSeekState.M_CACHE_stringUriPairs, bstringUriPairs);
-                        editor.PutString(SoulSeekState.M_CACHE_browseResponse, bResponse);
-                        editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, bfriendlyDirName);
-                        editor.PutString(SoulSeekState.M_CACHE_auxDupList, bAuxDupListStreamName);
-                        editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri); 
+                            editor.PutString(SoulSeekState.M_CACHE_stringUriPairs_v2, bstringUriPairs);
+                            editor.PutString(SoulSeekState.M_CACHE_browseResponse_v2, bResponse);
+                            editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, bfriendlyDirName);
+                            editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri); 
                             //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
                             //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
-                        editor.Commit();
+                            editor.Commit();
                         }
                     }
 
-                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(stringUriPairs, auxilaryDuplicatesList, directoryCount, browseResponse, friendlyDirNameToUriMapping);//.Select(_=>_.Item1).ToList());
+                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(stringUriPairs, directoryCount, browseResponse, dirMappingFriendlyNameToUri);//.Select(_=>_.Item1).ToList());
                     sharedFileCache.Refreshed += SharedFileCache_Refreshed;
                     sharedFileCache.Fill();
                     SoulSeekState.SharedFileCache = sharedFileCache;
@@ -4072,7 +4379,7 @@ namespace AndriodApp1
                 else
                 {
                     LogDebug("Using cached results");
-                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys, cachedParseResults.dupAux, cachedParseResults.direcotryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping);//.Select(_=>_.Item1).ToList());
+                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys, cachedParseResults.direcotryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping);//.Select(_=>_.Item1).ToList());
                     sharedFileCache.Refreshed += SharedFileCache_Refreshed;
                     sharedFileCache.Fill();
                     SoulSeekState.SharedFileCache = sharedFileCache;
@@ -4083,6 +4390,11 @@ namespace AndriodApp1
             }
             catch(Exception e)
             {
+                if(e.GetType().FullName == "Java.Lang.SecurityException")
+                {
+                    errorMsg = "Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.";
+                }
+                success=false;
                 LogDebug("Error parsing files: " + e.Message + e.StackTrace);
                 LogFirebase("Error parsing files: " + e.Message + e.StackTrace);
             }
@@ -4099,6 +4411,7 @@ namespace AndriodApp1
                     }
                 }
             }
+            return success;
             //SoulSeekState.SoulseekClient.SearchResponseDelivered += SoulseekClient_SearchResponseDelivered;
             //SoulSeekState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
         }
@@ -4154,7 +4467,7 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string,long>> pairs, Dictionary<string,List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
+        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string,long, string>> pairs, Dictionary<string,List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
         {
             if (dir.Exists())
             {
@@ -4177,11 +4490,12 @@ namespace AndriodApp1
                         //LogDebug(file.Uri.LastPathSegment); // primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
 
                         string fullPath = file.Uri.Path.ToString().Replace('/','\\');
+                        string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
                         string searchableName = Helpers.GetFolderNameFromFile(fullPath) + @"\" + Helpers.GetFileNameFromFile(fullPath);
                         if(isRootCase && (volName!=null))
                         {
-                            if(searchableName.Substring(0, volName.Length).ToLower() == volName)
+                            if(searchableName.Substring(0, volName.Length) == volName)
                             {
                                 if(searchableName.Length != volName.Length) //i.e. if its just "primary:"
                                 {
@@ -4189,28 +4503,7 @@ namespace AndriodApp1
                                 }
                             }
                         }
-                        if(pairs.Exists((Tuple<string, string, long> tuple)=>{return tuple.Item1==searchableName; }))
-                        {
-                            //if there already exists a tuple with the same searchable name, put it into an auxilary list..
-                            Tuple<string,string,long> matching = pairs.Find((Tuple<string, string, long> tuple) => { return tuple.Item1 == searchableName; });
-                            pairs.Remove(matching);
-                            pairs.Add(new Tuple<string,string,long>(matching.Item1,string.Empty,-1)); // this is how we know that we should look elsewhere for it...
-                            if(auxilaryDuplicatesList.ContainsKey(searchableName))
-                            {
-                                auxilaryDuplicatesList[searchableName].Add(new Tuple<string,string,long>(searchableName, file.Uri.ToString(), file.Length()));
-                            }
-                            else
-                            {
-                                List<Tuple<string,string,long>> listOfDuplicates = new List<Tuple<string, string, long>>();
-                                listOfDuplicates.Add(matching);
-                                listOfDuplicates.Add(new Tuple<string, string, long>(searchableName, file.Uri.ToString(), file.Length()));
-                                auxilaryDuplicatesList[searchableName] = listOfDuplicates;
-                            }
-                        }
-                        else
-                        {
-                            pairs.Add(new Tuple<string,string,long>(searchableName, file.Uri.ToString(), file.Length()));
-                        }
+                        pairs.Add(new Tuple<string,string,long, string>(searchableName, file.Uri.ToString(), file.Length(), presentableName));
                     }
                 }
             }
@@ -4434,6 +4727,8 @@ namespace AndriodApp1
             if (MeetsSharingConditions() && !SoulSeekState.IsParsing && (SoulSeekState.SharedFileCache == null || !SoulSeekState.SharedFileCache.SuccessfullyInitialized))
             {
                 Action setUpSharedFileCache = new Action(() => {
+                    string errorMessage = string.Empty;
+                    bool success = false;
                     LogDebug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
                     try
                     {
@@ -4446,7 +4741,7 @@ namespace AndriodApp1
                         {
                             docFile = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri));
                         }
-                        SoulSeekState.MainActivityRef.InitializeDatabase(docFile, true);
+                        success = SoulSeekState.MainActivityRef.InitializeDatabase(docFile, true, out errorMessage);
                     }
                     catch (Exception e)
                     {   
@@ -4459,7 +4754,8 @@ namespace AndriodApp1
                             Toast.MakeText(this, this.GetString(Resource.String.error_sharing), ToastLength.Long).Show();
                         }));
                     }
-                    if(SoulSeekState.SharedFileCache.SuccessfullyInitialized)
+                    
+                    if(success && SoulSeekState.SharedFileCache != null && SoulSeekState.SharedFileCache.SuccessfullyInitialized)
                     {
                         LogDebug("database full initialized.");
                         this.RunOnUiThread(new Action(() =>
@@ -4475,6 +4771,20 @@ namespace AndriodApp1
                         {
                             MainActivity.LogFirebase("MainActivity error setting handlers: " + e.Message + "  " + e.StackTrace);
                         }
+                    }
+                    else if(!success)
+                    {
+                        this.RunOnUiThread(new Action(() =>
+                        {
+                            if(string.IsNullOrEmpty(errorMessage))
+                            {
+                                Toast.MakeText(this, this.GetString(Resource.String.error_sharing), ToastLength.Short).Show();
+                            }
+                            else
+                            {
+                                Toast.MakeText(this, errorMessage, ToastLength.Short).Show();
+                            }
+                        }));
                     }
                 });
                 System.Threading.ThreadPool.QueueUserWorkItem((object o) => {setUpSharedFileCache(); });
@@ -5385,7 +5695,7 @@ namespace AndriodApp1
                 fullDir = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef, Android.Net.Uri.Parse(fullDirUri.Item2));
             }
             //Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path
-            var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true, GetVolumeName(fullDir.Uri.LastPathSegment, out _));
+            var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true, GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
             slskDir = new Directory(directory,slskDir.Files);
             return Task.FromResult(slskDir);
         }
@@ -5748,7 +6058,7 @@ namespace AndriodApp1
             //so check if it contains the uploadDataDirectoryUri
             string keyFilename = filename;
             string uploadDirfolderName = Helpers.GetFileNameFromFile(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path.Replace(@"/",@"\")); //this will actaully get the last folder name..
-            string volname = GetVolumeName(uploadDirfolderName, out bool entireString);
+            string volname = GetVolumeName(uploadDirfolderName, false, out bool entireString);
             if(volname != null && uploadDirfolderName.IndexOf(volname)==0)
             {
                 uploadDirfolderName = uploadDirfolderName.Substring(volname.Length);
@@ -5757,17 +6067,17 @@ namespace AndriodApp1
             {
                 uploadDirfolderName = string.Empty;
             }
-            if(filename.Contains(uploadDirfolderName))
-            {
-                string newFolderName = Helpers.GetFolderNameFromFile(filename);
-                string newFileName = Helpers.GetFileNameFromFile(filename);
-                keyFilename = newFolderName + @"\" + newFileName;
-            }
+            //if(filename.Contains(uploadDirfolderName))
+            //{
+            //    string newFolderName = Helpers.GetFolderNameFromFile(filename);
+            //    string newFileName = Helpers.GetFileNameFromFile(filename);
+            //    keyFilename = newFolderName + @"\" + newFileName;
+            //}
 
             //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<string, string, long> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
+            Tuple<string, string, long, string> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
             if (ourFileInfo==null)
             {
                 LogFirebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
@@ -7509,7 +7819,7 @@ namespace AndriodApp1
             editor.PutInt(SoulSeekState.M_SearchResultStyle,(int)(SearchFragment.SearchResultStyle));
             editor.PutBoolean(SoulSeekState.M_DisableToastNotifications, SoulSeekState.DisableDownloadToastNotification);
             editor.PutInt(SoulSeekState.M_UploadSpeed, SoulSeekState.UploadSpeed);
-            editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
+            //editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
             editor.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
             editor.PutBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, SoulSeekState.AllowPrivateRoomInvitations);
 
@@ -7544,7 +7854,7 @@ namespace AndriodApp1
             outState.PutInt(SoulSeekState.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
             outState.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
             outState.PutInt(SoulSeekState.M_UploadSpeed, SoulSeekState.UploadSpeed);
-            outState.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
+            //outState.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
             outState.PutBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, SoulSeekState.AllowPrivateRoomInvitations);
             outState.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
             if(SoulSeekState.UserList != null)
@@ -8254,6 +8564,13 @@ namespace AndriodApp1
         public const string M_CACHE_friendlyDirNameToUriMapping = "Cache_friendlyDirNameToUriMapping";
         public const string M_CACHE_auxDupList = "Cache_auxDupList";
 
+
+        public const string M_CACHE_stringUriPairs_v2 = "Cache_stringUriPairs_v2";
+        public const string M_CACHE_browseResponse_v2 = "Cache_browseResponse_v2";
+        public const string M_CACHE_friendlyDirNameToUriMapping_v2 = "Cache_friendlyDirNameToUriMapping_v2";
+
+
+
         public const string M_ListenerEnabled = "Momento_ListenerEnabled";
         public const string M_ListenerPort = "Momento_ListenerPort";
         public const string M_ListenerUPnpEnabled = "Momento_ListenerUPnpEnabled";
@@ -8411,12 +8728,12 @@ namespace AndriodApp1
                 //{
                 try
                 {
-                    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, out bool everything);
+                    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
                     if(everything)
                     {
                         volume1 = SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
                     }
-                    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, out everything);
+                    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
                     if(everything)
                     {
                         volume2 = SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
