@@ -1466,7 +1466,7 @@ namespace AndriodApp1
                     try
                     {
 
-                        SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false);
+                        SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, out _);
                         SoulSeekState.IsParsing = false;
                     }
                     catch (Exception e)

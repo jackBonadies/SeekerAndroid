@@ -27,5 +27,5 @@
             android:padding="0dp"
             android:visibility="visible"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/chevron_right"/>
+            app:srcCompat="@drawable/chevron_right"/>
 </LinearLayout>

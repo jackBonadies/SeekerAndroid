@@ -1562,7 +1562,16 @@ namespace AndriodApp1
                 GetPathItemsInternal(pathItemsList, nonFilteredDataItemsForListView[0].Node, true);
             }
             pathItemsList.Reverse();
+            FixNullRootDisplayName(pathItemsList);
             return pathItemsList;
+        }
+
+        private static void FixNullRootDisplayName(List<PathItem> pathItemsList)
+        {
+            if(pathItemsList.Count>0 && pathItemsList[0].DisplayName == string.Empty)
+            {
+                pathItemsList[0].DisplayName = "root";
+            }
         }
 
         private static void GetPathItemsInternal(List<PathItem> pathItems, TreeNode<Directory> treeNode, bool lastChild)
