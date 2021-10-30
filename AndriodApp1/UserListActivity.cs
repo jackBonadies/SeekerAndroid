@@ -204,9 +204,28 @@ namespace AndriodApp1
             }
         }
 
+        private void OnUserStatusChanged(object sender, string username)
+        {
+            if(MainActivity.OnUIthread())
+            {
+                recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+            }
+            else
+            {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{ OnUserStatusChanged(null, username); });
+            }
+        }
+
+        protected override void OnPause()
+        {
+            SeekerApplication.UserStatusChangedUIEvent -= OnUserStatusChanged;
+            base.OnPause();
+        }
+
         protected override void OnResume()
         {
             RefreshUserList();
+            SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
             base.OnResume();
         }
 
@@ -431,6 +450,7 @@ namespace AndriodApp1
         public Soulseek.UserStatus UserStatus; //add user updates this..
         public Soulseek.UserData UserData; //add user updates this as well...
         public Soulseek.UserInfo UserInfo; //this is the "picture and everything" one that we have to explicitly request from the peer (not server)...
+        public bool DoesNotExist; //we dont allow someone to add a user that does not exist, BUT if they add someone and their username expires or such, then this will happen...
         public UserListItem(string username, UserRole role)
         {
             Role = role;
@@ -526,10 +546,11 @@ namespace AndriodApp1
                 view.setupChildren();
                 //view.viewMoreOptions.Click += this.UserListActivity.UserListItemMoreOptionsClick;
                 view.viewUserStatus.Click += view.ViewUserStatus_Click; 
+                view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick; 
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
-                (view as View).LongClick += UserRowView_LongClick;
+                (view as View).LongClick += view.UserRowView_LongClick;
                 return new UserRowViewHolder(view as View);
             }
             else if (viewType == (int)UserRole.Ignored)
@@ -538,10 +559,11 @@ namespace AndriodApp1
                 view.setupChildren();
                 //view.viewMoreOptions.Click += this.UserListActivity.IgnoredUserListItemMoreOptionsClick;
                 view.viewUserStatus.Click += view.ViewUserStatus_Click;
+                view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick;
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).LongClick += ChatroomReceivedAdapter_LongClick;
-                (view as View).LongClick += UserRowView_LongClick;
+                (view as View).LongClick += view.UserRowView_LongClick;
                 return new UserRowViewHolder(view as View);
             }
             else// if(viewType == CATEGORY)
@@ -555,17 +577,14 @@ namespace AndriodApp1
 
         }
 
-        private void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
-        {
-            setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
-            (sender as View).ShowContextMenu();
-        }
+
     }
 
 
     public class UserRowViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
     {
         public UserRowView userRowView;
+
 
 
         public UserRowViewHolder(View view) : base(view)
@@ -637,6 +656,12 @@ namespace AndriodApp1
             setupChildren();
         }
 
+        public void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
+        {
+            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (sender as View).ShowContextMenu();
+        }
+
         public static UserRowView inflate(ViewGroup parent)
         {
             UserRowView itemView = (UserRowView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.user_row_dummy, parent, false);
@@ -656,9 +681,16 @@ namespace AndriodApp1
             //viewMoreOptions = FindViewById<ImageView>(Resource.Id.options);
         }
 
+
         public void ViewUserStatus_Click(object sender, EventArgs e)
         {
             (sender as ImageView).PerformLongClick();
+            
+        }
+
+        public void ViewUserStatus_LongClick(object sender, View.LongClickEventArgs e)
+        {
+            Toast.MakeText(SoulSeekState.ActiveActivityRef, (sender as ImageView).TooltipText, ToastLength.Short).Show();
         }
 
         public void setItem(UserListItem item)
@@ -715,7 +747,7 @@ namespace AndriodApp1
                         AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(viewUserStatus, ignoredString);
                     }
                 }
-                else if (statusExists)
+                else if (statusExists && !item.DoesNotExist)
                 {
                     var drawable = DrawableCompat.Wrap(viewUserStatus.Drawable);
                     var mutableDrawable = drawable.Mutate();
@@ -757,6 +789,19 @@ namespace AndriodApp1
                                 AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(viewUserStatus, offlineString);
                             }
                             break;
+                    }
+                }
+                else if(item.DoesNotExist)
+                {
+                    viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
+                    string doesNotExistString = "Does not Exist";
+                    if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                    {
+                        viewUserStatus.TooltipText = doesNotExistString; //api26+ otherwise crash...
+                    }
+                    else
+                    {
+                        AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(viewUserStatus, doesNotExistString);
                     }
                 }
 

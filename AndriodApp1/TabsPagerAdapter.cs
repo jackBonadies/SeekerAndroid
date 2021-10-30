@@ -204,7 +204,7 @@ namespace AndriodApp1
                     try
                     {
                         //there is a bug where we reach here with an empty Username and Password...
-                        login = SoulSeekState.SoulseekClient.ConnectAsync(SoulSeekState.Username, SoulSeekState.Password);
+                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
                     }
                     catch (InvalidOperationException)
                     {
@@ -521,7 +521,7 @@ namespace AndriodApp1
                     Toast.MakeText(this.Activity, Resource.String.no_empty_user_pass, ToastLength.Long).Show();
                     return;
                 }
-                login = SoulSeekState.SoulseekClient.ConnectAsync(user.Text, pass.Text);
+                login = SeekerApplication.ConnectAndPerformPostConnectTasks(user.Text, pass.Text);
                 //}
                 //catch(AddressException)
                 //{

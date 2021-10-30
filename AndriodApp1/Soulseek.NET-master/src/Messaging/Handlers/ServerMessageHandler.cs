@@ -236,7 +236,6 @@ namespace Soulseek.Messaging.Handlers
 
                     case MessageCode.Server.GetUserStats:
                         UserData userData = GetUserStatsCommand.FromByteArray(message);
-                        //SoulseekClient.Waiter.Complete(new WaitKey(code), confirmedPassword);
                         UserDataReceived?.Invoke(this,userData);
                         break;
 

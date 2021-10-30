@@ -1465,7 +1465,7 @@ namespace AndriodApp1
                     }));
                     try
                     {
-
+                        SoulSeekState.UploadDataDirectoryUri = uri.ToString();
                         SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, out _);
                         SoulSeekState.IsParsing = false;
                     }
