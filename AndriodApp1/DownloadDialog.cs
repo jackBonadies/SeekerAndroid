@@ -489,6 +489,39 @@ namespace AndriodApp1
             return a.Substring(0,maxIndexInCommon);//this can be empty..
         }
 
+        public static string GetLongestCommonParent(string a, string b)
+        {
+            if (!a.Contains('\\') || !b.Contains('\\'))
+            {
+                return string.Empty;
+            }
+            string allOtherThanCurrentDirA = a.Substring(0, a.LastIndexOf('\\') + 1);
+            string allOtherThanCurrentDirB = b.Substring(0, b.LastIndexOf('\\') + 1);
+            int maxLen = Math.Min(allOtherThanCurrentDirA.Length, allOtherThanCurrentDirB.Length);
+            int maxIndexInCommon = 0;
+            for (int i = 0; i < maxLen; i++)
+            {
+                if (a[i] == b[i])
+                {
+                    maxIndexInCommon++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            string potential = a.Substring(0, maxIndexInCommon);
+            int lastIndex = potential.LastIndexOf('\\');
+            if (lastIndex == -1)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return potential.Substring(0, lastIndex);
+            }
+        }
+
         public static TreeNode<Directory> CreateTree(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, out string errorMsgToToast)
         {
             //logging code for unit tests / diagnostic.. //TODO comment out always
@@ -498,7 +531,7 @@ namespace AndriodApp1
             //if(exists==null || !exists.Exists())
             //{
             //    DocumentFile f = root.CreateFile(@"custom\binary",username + "_dir_response");
-
+            //
             //    System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
             //    //Java.IO.File musicFile = new Java.IO.File(filePath);
             //    //FileOutputStream stream = new FileOutputStream(mFile);
@@ -506,9 +539,9 @@ namespace AndriodApp1
             //    {
             //        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
             //        formatter.Serialize(userListStream, b);
-
+            //
             //    //write to binary..
-
+            //
             //        stream.Write(userListStream.ToArray());
             //        stream.Close();
             //    }
@@ -628,10 +661,17 @@ namespace AndriodApp1
                 //\\Volumes
                 //...
                 //"\\Volumes\\Music\\**Artist**"
+                //or 
+                //adfzdg\\  (Note this should be adfzdg)...
+                //adfzdg\\Music
                 //I think this would be a special case where we simply remove the first dir.
                 if(dirArray[0].Name=="\\")
                 {
                     dirArray = dirArray.Skip(1).ToArray();
+                }
+                else if(dirArray[0].Name.EndsWith("\\"))
+                {
+                    dirArray[0] = new Directory(dirArray[0].Name.Substring(0, dirArray[0].Name.Length-1),dirArray[0].Files);
                 }
 
 
@@ -645,9 +685,9 @@ namespace AndriodApp1
                 else
                 {
                     //we need to set the first root..
-
-                    string newRootDirName = GetLongestBeginningSubstring(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
-                    if(newRootDirName==string.Empty)
+                    //GetLongestCommonParent(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
+                    string newRootDirName = GetLongestCommonParent(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
+                    if (newRootDirName==string.Empty)
                     {
                         //MainActivity.LogFirebase("Root is the empty string: " + username); //this is fine
                         newRootDirName = "";

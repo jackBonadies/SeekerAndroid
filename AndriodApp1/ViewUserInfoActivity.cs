@@ -129,7 +129,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("UserToView==null");
             }
-            myToolbar.Title = this.GetString(Resource.String.user_) + UserToView;
+            myToolbar.Title = this.GetString(Resource.String.user_) + " " + UserToView;
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
@@ -156,18 +156,43 @@ namespace AndriodApp1
             this.RegisterForContextMenu(picture);
             picture.LongClick += Picture_LongClick;
 
-            SetPictureStatus();
-            SetBioStatus();
-            SetUserStatsStatus();
+
 
             base.OnCreate(savedInstanceState);
         }
 
+        protected override void OnResume()
+        {
+            RequestedUserInfoHelper.UserDataReceivedUI += UserDataReceivedUIHandler;
+            SetPictureStatus();
+            SetBioStatus();
+            SetUserStatsStatus();
+            base.OnResume();
+        }
+
+        private void UserDataReceivedUIHandler(object sender, Soulseek.UserData _userData)
+        {
+            userData = _userData;
+            SetUserStatsStatus();
+        }
+
+        protected override void OnPause()
+        {
+            RequestedUserInfoHelper.UserDataReceivedUI -= UserDataReceivedUIHandler;
+            base.OnPause();
+        }
+
         private void SetUserStatsStatus()
         {
-            int speedKbs = userData.AverageSpeed / 1000;
-            string speedString = speedKbs.ToString("N0") + " kbs";
-            userStats.Text = string.Format(Resources.GetString(Resource.String.user_status_string),userInfo.UploadSlots, userInfo.HasFreeUploadSlot, userInfo.QueueLength, speedString, userData.FileCount.ToString("N0"), userData.DirectoryCount.ToString("N0"));
+            bool userInfoNull = userInfo == null;
+            bool userDataNull = userData == null;
+            string speedString = "...";
+            if (!userDataNull)
+            {
+                int speedKbs = userData.AverageSpeed / 1000; //someone got a nullref here.... this can happen if the server is slower to respond than the user...
+                speedString = speedKbs.ToString("N0") + " kbs";
+            }
+            userStats.Text = string.Format(Resources.GetString(Resource.String.user_status_string),userInfo.UploadSlots, userInfo.HasFreeUploadSlot, userInfo.QueueLength, speedString, userDataNull ? "..." : userData.FileCount.ToString("N0"), userDataNull ? "..." : userData.DirectoryCount.ToString("N0"));
         }
 
         private void SetBioStatus()

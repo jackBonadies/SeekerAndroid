@@ -9,8 +9,8 @@
         event EventHandler<(int Directories, int Files)> Refreshed;
 
         //string Directory { get; }
-        DateTime? LastFill { get; }
-        long TTL { get; }
+        //DateTime? LastFill { get; }
+        //long TTL { get; }
 
         void Fill();
 
