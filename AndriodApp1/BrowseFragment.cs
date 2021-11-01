@@ -504,8 +504,12 @@ namespace AndriodApp1
                         BrowseFragment.Instance.RefreshOnRecieved();
                     }
                 }
-                SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
-                SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
+                var pager = (Android.Support.V4.View.ViewPager)SoulSeekState.MainActivityRef?.FindViewById(Resource.Id.pager);
+                if (pager!=null && pager.CurrentItem == 3)
+                {
+                    SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                    SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
+                }
 
             });
         }

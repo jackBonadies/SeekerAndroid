@@ -1133,6 +1133,130 @@ namespace AndriodApp1
             Downloads = down;
         }
 
+        public static void CleanupEntry(IEnumerable<TransferItem> tis)
+        {
+            MainActivity.LogDebug("launching cleanup entry");
+            System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, tis);
+        }
+
+        public static void CleanupEntry(TransferItem ti)
+        {
+            MainActivity.LogDebug("launching cleanup entry");
+            System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, ti);
+        }
+
+        static void PeformCleanup(object state)
+        {
+            try
+            {
+                MainActivity.LogDebug("in cleanup entry");
+                if (state is IEnumerable<TransferItem> tis)
+                {
+                    PerfomCleanupItems(tis);
+                }
+                else
+                {
+                    PerformCleanupItem(state as TransferItem);
+                }
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("PeformCleanup: " + e.Message);
+            }
+        }
+
+        public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                return Uploads.GetTransferItemsForUser(username);
+            }
+            else
+            {
+                return Downloads.GetTransferItemsForUser(username);
+            }
+        }
+
+        public static void PerfomCleanupItems(IEnumerable<TransferItem> tis)
+        {
+            foreach(TransferItem ti in tis)
+            {
+                PerformCleanupItem(ti);
+            }
+        }
+
+        public static void PerformCleanupItem(TransferItem ti)
+        {
+            MainActivity.LogDebug("cleaning up: " + ti.Filename);
+            //if (TransfersFragment.TransferItemManagerDL.ExistsAndInProcessing(ti.FullFilename, ti.Username, ti.Size))
+            //{
+            //    //this should rarely happen. its a race condition if someone clears a download and then goes back to the person they downloaded from to re-download.
+            //    return;
+            //}
+            //api 21+
+            if((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            {
+                DocumentFile parent = null;
+                if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory())
+                {
+                    parent = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(ti.IncompleteParentUri).Path));
+                }
+                else
+                {
+                    parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, Android.Net.Uri.Parse(ti.IncompleteParentUri)); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
+                }
+
+                DocumentFile df = parent.FindFile(ti.Filename);
+                if(df==null || !df.Exists())
+                {
+                    MainActivity.LogDebug("delete failed - null or not exist");
+                }
+                if(!df.Delete())
+                {
+                    MainActivity.LogDebug("delete failed");
+                }
+                MainActivity.DeleteParentIfEmpty(parent);
+            }
+            else
+            {
+                Java.IO.File parent = new Java.IO.File(Android.Net.Uri.Parse(ti.IncompleteParentUri).Path);
+                Java.IO.File f = parent.ListFiles().First((file)=>file.Name == ti.Filename);
+                if (f == null || !f.Exists())
+                {
+                    MainActivity.LogDebug("delete failed LEGACY - null or not exist");
+                }
+                if (!f.Delete())
+                {
+                    MainActivity.LogDebug("delete failed LEGACY");
+                }
+                MainActivity.DeleteParentIfEmpty(parent);
+            }
+        }
+
+
+        /// <summary>
+        /// remove and spawn cleanup task if applicable
+        /// </summary>
+        /// <param name="ti"></param>
+        public void RemoveAndCleanUp(TransferItem ti)
+        {
+            Remove(ti);
+            if(NeedsCleanUp(ti))
+            {
+                CleanupEntry(ti);
+            }
+        }
+
+        public static bool NeedsCleanUp(TransferItem ti)
+        {
+            if (ti != null && ti.IncompleteParentUri != null && !ti.CancelAndClearFlag) //if cancel and clear flag is set then it will be cleaned up on continuation. that way we are sure the stream is closed.
+            {
+                return true;
+            }
+            return false;
+        }
+
+
         public void Remove(TransferItem ti)
         {
             if(ti.IsUpload())
@@ -1197,15 +1321,53 @@ namespace AndriodApp1
             }
         }
 
-        public void RemoveAtUserIndex(int position)
+        public object RemoveAtUserIndex(int position)
         {
             if (TransfersFragment.InUploadsMode)
             {
-                Uploads.RemoveAtUserIndex(position);
+                return Uploads.RemoveAtUserIndex(position);
             }
             else
             {
-                Downloads.RemoveAtUserIndex(position);
+                return Downloads.RemoveAtUserIndex(position);
+            }
+        }
+
+        /// <summary>
+        /// remove and spawn cleanup task if applicable
+        /// </summary>
+        /// <param name="position"></param>
+        public void RemoveAndCleanUpAtUserIndex(int position)
+        {
+            object objectRemoved = RemoveAtUserIndex(position);
+            if(objectRemoved is TransferItem ti)
+            {
+                if(ti.InProcessing)
+                {
+                    ti.CancelAndClearFlag = true;
+                }
+                else
+                {
+                    if (NeedsCleanUp(ti))
+                    {
+                        CleanupEntry(ti);
+                    }
+                }
+            }
+            else
+            {
+                List<TransferItem> tis = objectRemoved as List<TransferItem>;
+                IEnumerable<TransferItem> tisCleanUpOnComplete = tis.Where((item) => { return item.InProcessing; });
+                foreach(var item in tisCleanUpOnComplete)
+                {
+                    item.CancelAndClearFlag = true;
+                }
+                IEnumerable<TransferItem> tisNeedingCleanup = tis.Where((item) => { return NeedsCleanUp(item); });
+                if (tisNeedingCleanup.Any())
+                {
+                    CleanupEntry(tisNeedingCleanup);
+                }
+
             }
         }
 
@@ -1221,6 +1383,23 @@ namespace AndriodApp1
             }
         }
 
+        /// <summary>
+        /// prepare for clear basically says, these guys are going to be cleared, so if they are currently being processed and they get in the download continuation action, clear their incomplete files...
+        /// </summary>
+        /// <param name="fi"></param>
+        /// <param name="prepareForClear"></param>
+        public void CancelFolder(FolderItem fi, bool prepareForClear = false)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.CancelFolder(fi);
+            }
+            else
+            {
+                Downloads.CancelFolder(fi, prepareForClear);
+            }
+        }
+
         public void ClearAllFromFolder(FolderItem fi)
         {
             if (TransfersFragment.InUploadsMode)
@@ -1230,6 +1409,18 @@ namespace AndriodApp1
             else
             {
                 Downloads.ClearAllFromFolder(fi);
+            }
+        }
+
+        public void ClearAllFromFolderAndClean(FolderItem fi)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.ClearAllFromFolder(fi);
+            }
+            else
+            {
+                Downloads.ClearAllFromFolderAndClean(fi);
             }
         }
 
@@ -1271,6 +1462,14 @@ namespace AndriodApp1
             isUploads = _isUploads;
             AllTransferItems = new List<TransferItem>();
             AllFolderItems = new List<FolderItem>();
+        }
+
+        public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
+        {
+            lock(AllTransferItems)
+            {
+                return AllTransferItems.Where((item)=>item.Username==username).ToList();
+            }
         }
 
         /// <summary>
@@ -1415,13 +1614,20 @@ namespace AndriodApp1
             }
         }
 
-        public void RemoveAtUserIndex(int indexOfItem)
+        /// <summary>
+        /// Returns the removed object (either TransferItem or List of TransferItem)
+        /// </summary>
+        /// <param name="indexOfItem"></param>
+        /// <returns></returns>
+        public object RemoveAtUserIndex(int indexOfItem)
         {
             if (TransfersFragment.GroupByFolder)
             {
                 if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    Remove(TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem]);
+                    var ti = TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem];
+                    Remove(ti);
+                    return ti;
                 }
                 else
                 {
@@ -1437,11 +1643,14 @@ namespace AndriodApp1
                     {
                         Remove(ti);
                     }
+                    return transferItemsToRemove;
                 }
             }
             else
             {
-                Remove(AllTransferItems[indexOfItem]);
+                var ti = AllTransferItems[indexOfItem];
+                Remove(ti);
+                return ti;
             }
         }
 
@@ -1595,6 +1804,20 @@ namespace AndriodApp1
             }
         }
 
+        public bool ExistsAndInProcessing(string fullFilename, string username, long size)
+        {
+            lock (AllTransferItems)
+            {
+                return AllTransferItems.Where((TransferItem ti) =>
+                {
+                    return (ti.FullFilename == fullFilename &&
+                           ti.Size == size &&
+                           ti.Username == username
+                       );
+                }).Any((item)=>item.InProcessing);
+            }
+        }
+
         public bool IsEmpty()
         {
             return AllTransferItems.Count == 0;
@@ -1737,6 +1960,23 @@ namespace AndriodApp1
             }
         }
 
+        public void ClearAllAndClean()
+        {
+            lock (AllTransferItems)
+            {
+                List<TransferItem> tisNeedingCleanup = AllTransferItems.Where((item) => { return TransferItemManagerWrapper.NeedsCleanUp(item); }).ToList();
+                if (tisNeedingCleanup.Any())
+                {
+                    TransferItemManagerWrapper.CleanupEntry(tisNeedingCleanup);
+                }
+                AllTransferItems.Clear();
+            }
+            lock (AllFolderItems)
+            {
+                AllFolderItems.Clear();
+            }
+        }
+
         public void ClearAll()
         {
             lock (AllTransferItems)
@@ -1759,14 +1999,37 @@ namespace AndriodApp1
             AllFolderItems.Remove(fi);
         }
 
-        public void CancelAll()
+        public void ClearAllFromFolderAndClean(FolderItem fi)
+        {
+            IEnumerable<TransferItem> tisNeedingCleanup = fi.TransferItems.Where((item) => { return TransferItemManagerWrapper.NeedsCleanUp(item); });
+            if (tisNeedingCleanup.Any())
+            {
+                TransferItemManagerWrapper.CleanupEntry(tisNeedingCleanup);
+            }
+            foreach (TransferItem ti in fi.TransferItems)
+            {
+                AllTransferItems.Remove(ti);
+            }
+            fi.TransferItems.Clear();
+            AllFolderItems.Remove(fi);
+        }
+
+        public void CancelAll(bool prepareForClear = false)
         {
             lock (AllTransferItems)
             {
                 for (int i = 0; i < AllTransferItems.Count; i++)
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-                    TransfersFragment.CancellationTokens.TryGetValue(TransfersFragment.ProduceCancellationTokenKey(AllTransferItems[i]), out CancellationTokenSource token);
+                    TransferItem ti = AllTransferItems[i];
+                    if(prepareForClear)
+                    {
+                        if(ti.InProcessing) //let continuation action clear this guy
+                        {
+                            ti.CancelAndClearFlag = true;
+                        }
+                    }
+                    TransfersFragment.CancellationTokens.TryGetValue(TransfersFragment.ProduceCancellationTokenKey(ti), out CancellationTokenSource token);
                     token?.Cancel();
                     //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
                 }
@@ -1774,14 +2037,19 @@ namespace AndriodApp1
             }
         }
 
-        public void CancelFolder(FolderItem fi)
+        public void CancelFolder(FolderItem fi, bool prepareForClear = false)
         {
             lock (fi.TransferItems)
             {
                 for (int i = 0; i < fi.TransferItems.Count; i++)
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-                    var key = TransfersFragment.ProduceCancellationTokenKey(fi.TransferItems[i]);
+                    var ti = fi.TransferItems[i];
+                    if(prepareForClear && ti.InProcessing)
+                    {
+                        ti.CancelAndClearFlag = true;
+                    }
+                    var key = TransfersFragment.ProduceCancellationTokenKey(ti);
                     TransfersFragment.CancellationTokens.TryGetValue(key, out CancellationTokenSource token);
                     if(token!=null)
                     {
@@ -2160,6 +2428,15 @@ namespace AndriodApp1
             if (relevantItem != null)
             {
                 relevantItem.State = e.Transfer.State;
+                relevantItem.IncompleteParentUri = e.IncompleteParentUri;
+                if(!relevantItem.State.HasFlag(TransferStates.Requested))
+                {
+                    relevantItem.InProcessing = true;
+                }
+                if(relevantItem.State.HasFlag(TransferStates.Succeeded))
+                {
+                    relevantItem.IncompleteParentUri = null; //not needed anymore.
+                }
             }
             if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
@@ -2214,6 +2491,13 @@ namespace AndriodApp1
                     //clear queued flag...
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
+                }
+                else //if it does have state cancelled we still want to update UI! (assuming we arent also clearing it)
+                {
+                    if(!relevantItem.CancelAndClearFlag)
+                    {
+                        StateChangedForItem?.Invoke(null, relevantItem);
+                    }
                 }
             }
             else
@@ -2278,7 +2562,7 @@ namespace AndriodApp1
 
                     Action action = new Action(() => {
                         //int before = TransfersFragment.transferItems.Count;
-                        TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt
+                        TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
                         //int after = TransfersFragment.transferItems.Count;
                         //MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
@@ -6683,6 +6967,8 @@ namespace AndriodApp1
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
+                try
+                {
                 Action action = null;
                 if (task.IsCanceled)
                 {
@@ -6709,6 +6995,14 @@ namespace AndriodApp1
                         {
                             MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
                         }
+                    }
+
+                    if(e.dlInfo.TransferItemReference.CancelAndClearFlag)
+                    {
+                        MainActivity.LogDebug("continue with cleanup activity: " + e.dlInfo.fullFilename);
+                        e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
+                        e.dlInfo.TransferItemReference.InProcessing = false;
+                        TransferItemManagerWrapper.PerformCleanupItem(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
                     }
 
                     return;
@@ -6875,6 +7169,11 @@ namespace AndriodApp1
                     LogFirebase("Very bad. Task is not the right type.....");
                 }
                 e.dlInfo.TransferItemReference.FinalUri = finalUri;
+                }
+                finally
+                {
+                    e.dlInfo.TransferItemReference.InProcessing = false;
+                }
             });
             return continuationActionSaveFile;
         }
@@ -7856,6 +8155,7 @@ namespace AndriodApp1
                             }
 
                             uri = DocumentsContract.MoveDocument(SoulSeekState.ActiveActivityRef.ContentResolver, uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); //ADDED IN API 24!!
+                            DeleteParentIfEmpty(DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentUriOfIncomplete));
                             //"/tree/primary:musictemp/document/primary:music2/J when two different uri trees the uri returned from move document is a mismash of the two... even tho it actually moves it correctly.
                             //folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
                             if(SettingsActivity.UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
@@ -7888,9 +8188,36 @@ namespace AndriodApp1
                             }
                             else
                             {
-                                MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message + " path child: " + Android.Net.Uri.Decode(uriOfIncomplete.ToString()) + " path parent: " + Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) + " path dest: " + Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
-                                SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                                MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                                if(uri==null) //this means doc file failed (else it would be after)
+                                {
+                                    MainActivity.LogInfoFirebase("uri==null");
+                                    //lets try with the non MoveDocument way.
+                                    //this case can happen (for a legitimate reason) if:
+                                    //  the user is on api <29.  they start downloading an album.  then while its downloading they set the download directory.  the manual one will be file:\\ but the end location will be content:\\
+                                    try
+                                    {
+                                        
+                                        DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
+                                        uri = mFile.Uri;
+                                        finalUri = mFile.Uri.ToString();
+                                        MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri);
+                                        System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                                        MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
+                                    }
+                                    catch (Exception secondTryErr)
+                                    {
+                                        MainActivity.LogFirebase("Legacy backup failed - CRITICAL FILESYSTEM ERROR pre" + secondTryErr.Message);
+                                        SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                        MainActivity.LogDebug(secondTryErr.Message + " " + uriOfIncomplete.Path);
+                                    }
+                                }
+                                else
+                                {
+                                    MainActivity.LogInfoFirebase("uri!=null");
+                                    MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR " + e.Message + " path child: " + Android.Net.Uri.Decode(uriOfIncomplete.ToString()) + " path parent: " + Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) + " path dest: " + Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
+                                    SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                    MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
+                                }
                             }
                         }
                         //throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
@@ -7927,7 +8254,7 @@ namespace AndriodApp1
             to.Flush();
             to.Close();
 
-            if(SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory())
+            if(SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
             {
                 try
                 {
@@ -7944,7 +8271,7 @@ namespace AndriodApp1
             else
             {
                 DocumentFile df = DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, toDelete); //this returns a file that doesnt exist with file ://
-
+                
                 if (!df.Delete()) //on API 19 this seems to always fail..
                 {
                     LogFirebase("df.Delete() failed to delete");
@@ -7952,7 +8279,7 @@ namespace AndriodApp1
             }
 
             DocumentFile parent = null;
-            if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory())
+            if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentToDelete.Scheme == "file")
             {
                 parent = DocumentFile.FromFile(new Java.IO.File(parentToDelete.Path));
             }
@@ -7960,15 +8287,25 @@ namespace AndriodApp1
             {
                 parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentToDelete); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
             }
-            LogDebug(parent.Name + "p name");
-            LogDebug(parent.ListFiles().ToString());
-            LogDebug(parent.ListFiles().Length.ToString());
-            foreach(var f in parent.ListFiles())
-            {
-                LogDebug("child: " + f.Name);
-            }
+            DeleteParentIfEmpty(parent);
+        }
 
-            if(parent.ListFiles().Length==1 && parent.ListFiles()[0].Name==".nomedia")
+        public static void DeleteParentIfEmpty(DocumentFile parent)
+        {
+            if(parent==null)
+            {
+                MainActivity.LogFirebase("null parent");
+                return;
+            }
+            //LogDebug(parent.Name + "p name");
+            //LogDebug(parent.ListFiles().ToString());
+            //LogDebug(parent.ListFiles().Length.ToString());
+            //foreach (var f in parent.ListFiles())
+            //{
+            //    LogDebug("child: " + f.Name);
+            //}
+
+            if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
             {
                 if (!parent.Delete())
                 {
@@ -7976,7 +8313,22 @@ namespace AndriodApp1
                 }
             }
         }
+        
 
+        public static void DeleteParentIfEmpty(Java.IO.File parent)
+        {
+            if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
+            {
+                if (!parent.ListFiles()[0].Delete())
+                {
+                    LogFirebase("LEGACY parent.Delete() failed to delete .nomedia child...");
+                }
+                if (!parent.Delete()) //this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
+                {
+                    LogFirebase("LEGACY parent.Delete() failed to delete parent");
+                }
+            }
+        }
 
 
         private static void MoveFile(Java.IO.FileInputStream from, Java.IO.FileOutputStream to, Java.IO.File toDelete, Java.IO.File parent)
@@ -7994,17 +8346,7 @@ namespace AndriodApp1
             {
                 LogFirebase("LEGACY df.Delete() failed to delete ()");
             }
-            if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
-            {
-                if(!parent.ListFiles()[0].Delete())
-                {
-                    LogFirebase("LEGACY parent.Delete() failed to delete .nomedia child...");
-                }
-                if (!parent.Delete()) //this returns false... maybe delete .nomedia child??? YUP.  cannot delete non empty dir...
-                {
-                    LogFirebase("LEGACY parent.Delete() failed to delete parent");
-                }
-            }
+            DeleteParentIfEmpty(parent);
             //LogDebug(toDelete.ParentFile.Name + ":" + toDelete.ParentFile.ListFiles().Length.ToString());
         }
 

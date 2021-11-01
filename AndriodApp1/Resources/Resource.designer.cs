@@ -8330,9 +8330,6 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0E0187
 			public const int save_image = 2131624327;
 			
-			// aapt resource value: 0x7F0E0197
-			public const int searches_bold = 2131624343;
-			
 			// aapt resource value: 0x7F0E0198
 			public const int searches_tab = 2131624344;
 			
@@ -8369,17 +8366,20 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0E0192
 			public const int search_room_ = 2131624338;
 			
+			// aapt resource value: 0x7F0E0194
+			public const int search_tabs_bold = 2131624340;
+			
 			// aapt resource value: 0x7F0E0193
 			public const int search_tab_error = 2131624339;
 			
-			// aapt resource value: 0x7F0E0194
-			public const int search_target_ = 2131624340;
-			
 			// aapt resource value: 0x7F0E0195
-			public const int search_user_ = 2131624341;
+			public const int search_target_ = 2131624341;
 			
 			// aapt resource value: 0x7F0E0196
-			public const int search_user_files = 2131624342;
+			public const int search_user_ = 2131624342;
+			
+			// aapt resource value: 0x7F0E0197
+			public const int search_user_files = 2131624343;
 			
 			// aapt resource value: 0x7F0E019B
 			public const int seconds_left = 2131624347;

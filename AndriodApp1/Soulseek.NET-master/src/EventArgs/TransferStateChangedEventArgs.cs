@@ -37,5 +37,10 @@ namespace Soulseek
         ///     Gets the previous state of the transfer.
         /// </summary>
         public TransferStates PreviousState { get; }
+
+        /// <summary>
+        ///     Location of the incomplete stream.
+        /// </summary>
+        public string IncompleteParentUri { get; set; }
     }
 }

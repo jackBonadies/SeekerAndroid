@@ -2836,10 +2836,11 @@ namespace Soulseek
 
             var lastState = TransferStates.None;
 
-            void UpdateState(TransferStates state)
+            void UpdateState(TransferStates state, string incompleteParentUri)
             {
                 download.State = state;
                 var args = new TransferStateChangedEventArgs(previousState: lastState, transfer: new Transfer(download));
+                args.IncompleteParentUri = incompleteParentUri;
                 lastState = state;
                 options.StateChanged?.Invoke(args);
                 TransferStateChanged?.Invoke(this, args);
@@ -2855,7 +2856,8 @@ namespace Soulseek
             }
 
             var transferStartRequestedWaitKey = new WaitKey(MessageCode.Peer.TransferRequest, download.Username, download.Filename);
-
+            string incompleteUriString = null;
+            string incompleteUriParentString = null;
             try
             {
 
@@ -2878,13 +2880,10 @@ namespace Soulseek
                 //Diagnostic.Info($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
                 //InvokeDebugLogHandler($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
                 await peerConnection.WriteAsync(new TransferRequest(TransferDirection.Download, token, filename), cancellationToken).ConfigureAwait(false);
-                UpdateState(TransferStates.Requested);
+                UpdateState(TransferStates.Requested, null);
 
                 var transferRequestAcknowledgement = await transferRequestAcknowledged.ConfigureAwait(false);
 
-
-                string incompleteUriString = null;
-                string incompleteUriParentString = null;
                 if(outputStream==null)
                 {
                     streamTask.Start();
@@ -2900,7 +2899,7 @@ namespace Soulseek
                 if (transferRequestAcknowledgement.IsAllowed)
                 {
                     // the peer is ready to initiate the transfer immediately; we are bypassing their queue.
-                    UpdateState(TransferStates.Initializing);
+                    UpdateState(TransferStates.Initializing, incompleteUriParentString);
 
                     // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
                     // by the remote client will erroneously be reported as zero and the transfer will fail.
@@ -2925,7 +2924,7 @@ namespace Soulseek
                 else
                 {
                     // the download is remotely queued, so put it in the local queue.
-                    UpdateState(TransferStates.Queued);
+                    UpdateState(TransferStates.Queued, incompleteUriParentString);
 
                     // wait for the peer to respond that they are ready to start the transfer
                     var transferStartRequest = await transferStartRequested.ConfigureAwait(false);
@@ -2935,7 +2934,7 @@ namespace Soulseek
                     download.Size ??= transferStartRequest.FileSize;
                     download.RemoteToken = transferStartRequest.Token;
 
-                    UpdateState(TransferStates.Initializing);
+                    UpdateState(TransferStates.Initializing, incompleteUriParentString);
 
                     // also prepare a wait for the overall completion of the download
                     downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);
@@ -2998,7 +2997,7 @@ namespace Soulseek
                     var startOffsetBytes = BitConverter.GetBytes(startOffset);
                     await download.Connection.WriteAsync(startOffsetBytes, cancellationToken).ConfigureAwait(false);
 
-                    UpdateState(TransferStates.InProgress);
+                    UpdateState(TransferStates.InProgress, incompleteUriParentString);
                     UpdateProgress(startOffset); //this is good.
 
                     await download.Connection.ReadAsync(download.Size.Value - startOffset, outputStream, (cancelToken) => options.Governor(new Transfer(download), cancelToken), cancellationToken).ConfigureAwait(false);
@@ -3072,7 +3071,7 @@ namespace Soulseek
                 {
                     UpdateProgress(download.StartOffset + outputStream.Position);
                 }
-                UpdateState(download.State);
+                UpdateState(download.State, incompleteUriParentString);
 
                 InvokeDebugLogHandler("Try remove " + download.Token + " - "  + download.Filename);
                 bool allCancelled = false;

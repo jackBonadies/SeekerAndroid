@@ -114,6 +114,88 @@ namespace AndriodApp1
         private ImageView picture = null;
         private TextView userBio = null;
 
+        protected override void OnSaveInstanceState(Bundle outState)
+        {
+            outState.PutString("UserToView", UserToView);
+            if(userInfo!=null)
+            {
+                outState.PutBoolean("UserInfo.HasPicture", userInfo.HasPicture);
+                if(userInfo.HasPicture)
+                {
+                    outState.PutByteArray("UserInfo.Picture",userInfo.Picture);
+                }
+                outState.PutString("UserInfo.Description", userInfo.Description);
+                outState.PutInt("UserInfo.QueueLength", userInfo.QueueLength);
+                outState.PutInt("UserInfo.UploadSlots", userInfo.UploadSlots);
+                outState.PutBoolean("UserInfo.HasFreeUploadSlot", userInfo.HasFreeUploadSlot);
+            }
+            if(userData!=null)
+            {
+                outState.PutInt("userData.AverageSpeed",userData.AverageSpeed);
+                outState.PutString("userData.CountryCode", userData.CountryCode);
+                outState.PutInt("userData.DirectoryCount", userData.DirectoryCount);
+                outState.PutLong("userData.DownloadCount", userData.DownloadCount);
+                outState.PutInt("userData.FileCount", userData.FileCount);
+                if(userData.SlotsFree.HasValue)
+                {
+                    outState.PutInt("userData.SlotsFree", userData.SlotsFree.Value);
+                }
+                outState.PutInt("userData.Status", (int)(userData.Status));
+                outState.PutString("userData.Username", userData.Username);
+            }
+            base.OnSaveInstanceState(outState);
+        }
+
+        protected override void OnRestoreInstanceState(Bundle savedInstanceState)
+        {
+            RestoreStateFromBundleIfNecessary(savedInstanceState);
+            base.OnRestoreInstanceState(savedInstanceState);
+        }
+
+        private void RestoreStateFromBundleIfNecessary(Bundle savedInstanceState)
+        {
+            if (string.IsNullOrEmpty(UserToView) || RequestedUserInfoHelper.GetInfoForUser(UserToView) == null)
+            {
+                UserToView = savedInstanceState.GetString("UserToView", string.Empty);
+                if (RequestedUserInfoHelper.GetInfoForUser(UserToView) == null)
+                {
+
+                    if (savedInstanceState.ContainsKey("UserInfo.HasPicture"))
+                    {
+                        bool hasPic = savedInstanceState.GetBoolean("UserInfo.HasPicture", false);
+                        byte[] pic = null;
+                        if (hasPic)
+                        {
+                            pic = savedInstanceState.GetByteArray("UserInfo.Picture");
+                        }
+                        string desc = savedInstanceState.GetString("UserInfo.Description", string.Empty);
+                        int ql = savedInstanceState.GetInt("UserInfo.QueueLength");
+                        int uploadSlots = savedInstanceState.GetInt("UserInfo.UploadSlots");
+                        bool freeSlot = savedInstanceState.GetBoolean("UserInfo.HasFreeUploadSlot");
+                        userInfo = new Soulseek.UserInfo(desc, pic, uploadSlots, ql, freeSlot);
+                    }
+
+                    if (savedInstanceState.ContainsKey("userData.AverageSpeed"))
+                    {
+                        int aspeed = savedInstanceState.GetInt("userData.AverageSpeed");
+                        string cc = savedInstanceState.GetString("userData.CountryCode");
+                        int dc = savedInstanceState.GetInt("userData.DirectoryCount");
+                        long downloadCount = savedInstanceState.GetLong("userData.DownloadCount");
+                        int fcount = savedInstanceState.GetInt("userData.FileCount");
+                        int? slotsFree = null;
+                        if (savedInstanceState.ContainsKey("userData.SlotsFree"))
+                        {
+                            slotsFree = savedInstanceState.GetInt("userData.SlotsFree", userData.SlotsFree.Value);
+                        }
+                        Soulseek.UserPresence pres = (Soulseek.UserPresence)(savedInstanceState.GetInt("userData.Status"));
+                        string user = savedInstanceState.GetString("userData.Username");
+                        userData = new Soulseek.UserData(user, pres, aspeed, downloadCount, fcount, dc, cc, slotsFree);
+                    }
+
+                }
+            }
+        }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             SoulSeekState.ActiveActivityRef = this;
@@ -140,11 +222,15 @@ namespace AndriodApp1
                 userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, SoulSeekState.UploadSpeed, 0, SoulSeekState.SharedFileCache?.FileCount ?? 0, SoulSeekState.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = SeekerApplication.UserInfoResponseHandler(UserToView, null).Result; //the task is already completed.  (task.fromresult).
             }
-            else
+            else if(UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
             {
                 UserListItem uli = RequestedUserInfoHelper.GetInfoForUser(UserToView);
-                userInfo = uli.UserInfo;
+                userInfo = uli.UserInfo; //null ref on uli.
                 userData = uli.UserData;
+            }
+            else
+            {
+                RestoreStateFromBundleIfNecessary(savedInstanceState);
             }
 
 
