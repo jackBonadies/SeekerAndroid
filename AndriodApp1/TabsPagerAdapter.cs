@@ -4330,7 +4330,6 @@ namespace AndriodApp1
             return isUpload;
         }
 
-
         public string Filename;
         public string Username;
         public string FolderName;
@@ -4344,6 +4343,10 @@ namespace AndriodApp1
         public bool Queued = false;
         private int queuelength = 0;
         public bool CancelAndRetryFlag = false;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool CancelAndClearFlag = false;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool InProcessing = false; //whether its currently a task in Soulseek.Net.  so from Intialized / Queued to the end of the main download continuation task...
         public int QueueLength
         {
             get
@@ -4364,6 +4367,7 @@ namespace AndriodApp1
             }
         }
         public string FinalUri = string.Empty; //final uri of downloaded item
+        public string IncompleteParentUri = null; //incomplete uri of item.  will be null if successfully downloaded or not yet created.
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public CancellationTokenSource CancellationTokenSource = null;
     }
@@ -5165,13 +5169,13 @@ namespace AndriodApp1
                     SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedDLFolder == null)
                     {
-                        TransferItemManagerDL.CancelAll();
-                        TransferItemManagerDL.ClearAll();
+                        TransferItemManagerDL.CancelAll(true);
+                        TransferItemManagerDL.ClearAllAndClean();
                     }
                     else
                     {
-                        TransferItemManagerDL.CancelFolder(CurrentlySelectedDLFolder);
-                        TransferItemManagerDL.ClearAllFromFolder(CurrentlySelectedDLFolder);
+                        TransferItemManagerDL.CancelFolder(CurrentlySelectedDLFolder, true);
+                        TransferItemManagerDL.ClearAllFromFolderAndClean(CurrentlySelectedDLFolder);
                     }
                     refreshListView();
                     return true;
@@ -6065,7 +6069,14 @@ namespace AndriodApp1
                     {
                         try
                         {
-                            TransferItemManagerWrapped.RemoveAtUserIndex(position); //UI
+                            if(InUploadsMode)
+                            {
+                                TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                            }
+                            else
+                            {
+                                TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
+                            }
                         }
                         catch(ArgumentOutOfRangeException)
                         {
@@ -6093,20 +6104,28 @@ namespace AndriodApp1
                     }
                     if(tItem is TransferItem tti)
                     {
+                        bool wasInProgress = tti.State.HasFlag(TransferStates.InProgress);
                         CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
                         uptoken?.Cancel();
                         //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
                         CancellationTokens.Remove(ProduceCancellationTokenKey(tti), out _);
                         lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
-                            TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                            if (InUploadsMode)
+                            {
+                                TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                            }
+                            else
+                            {
+                                TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
+                            }
                             recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
                     }
                     else if(tItem is FolderItem fi)
                     {
-                        TransferItemManagerWrapped.CancelFolder(fi);
-                        TransferItemManagerWrapped.ClearAllFromFolder(fi);
+                        TransferItemManagerWrapped.CancelFolder(fi, true);
+                        TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
                         lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
                             //TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
@@ -6262,7 +6281,7 @@ namespace AndriodApp1
                     }
                     break;
                 case 103: //abort upload
-                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
+                    MainActivity.LogInfoFirebase("Abort Upload item pressed");
                     tItem = null;
                     try
                     {
@@ -6284,6 +6303,25 @@ namespace AndriodApp1
                     {
                         recyclerTransferAdapter.NotifyItemChanged(position);
                     }
+                    break;
+                case 104: //ignore (unshare) user
+                    MainActivity.LogInfoFirebase("Unshare User item pressed");
+                    IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
+                    foreach(var tiToCancel in tItems)
+                    {
+                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
+                        token1?.Cancel();
+                        CancellationTokens.Remove(ProduceCancellationTokenKey(tiToCancel), out _);
+                        lock (TransferItemManagerWrapped.GetUICurrentList())
+                        {
+                            int posOfCancelled = TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
+                            if(posOfCancelled!=-1)
+                            {
+                                recyclerTransferAdapter.NotifyItemChanged(posOfCancelled);
+                            }
+                        }
+                    }
+                    SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, ti.GetUsername());
                     break;
             }
             return base.OnContextItemSelected(item);
@@ -6974,6 +7012,11 @@ namespace AndriodApp1
                 subMenu.Add(10,10,10, Resource.String.get_user_info);
                 Helpers.AddUserNoteMenuItem(subMenu, 11, 11, 11, tvh.InnerTransferItem.GetUsername());
                 Helpers.AddGivePrivilegesIfApplicable(subMenu, 12);
+
+                if(isUpload)
+                {
+                    menu.Add(6, 104, 6, "Ignore (Unshare) User");
+                }
 
             }
 

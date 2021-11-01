@@ -57,7 +57,7 @@ Privileges allow one to support the Soulseek creator (Nir) and the central serve
   <string name="requesting_room_list">Requesting Room List</string>
   <string name="requesting_user_info">Requesting User\'s Info</string>
   <string name="room_list_received">Room List Received</string>
-  <string name="searches_bold"><b>Searches</b></string>
+
   <string name="kilobytes_per_second">kbs</string>
   <string name="kilohertz">kHz</string>
   <string name="wishlist">Wishlist</string>
@@ -611,4 +611,7 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
   <string name="upload_remaining">{0} upload remaining</string>
   <string name="uploads_remaining">{0} uploads remaining</string>
   <string name="uploads_in_progress">Uploads in Progress</string>
+  <string name="search_tabs_bold">
+    <b>Search Tabs</b>
+  </string>
 </resources>
