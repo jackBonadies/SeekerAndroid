@@ -4093,13 +4093,13 @@ namespace AndriodApp1
         /// <param name="dir"></param>
         /// <param name="directoryCount"></param>
         /// <returns></returns>
-        public Dictionary<string, Tuple<long, string>> ParseSharedDirectoryFastDocContract(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
+        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> ParseSharedDirectoryFastDocContract(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
             //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
             //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
-            Dictionary<string,Tuple<long,string>> pairs = new Dictionary<string, Tuple<long, string>>();
+            Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int,int,int,int>>>();
             List<Android.Net.Uri> listOfDirectoryUris = new List<Android.Net.Uri>();
             //auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
             listOfDirectoryUris.Add(dir.Uri);
@@ -4109,7 +4109,7 @@ namespace AndriodApp1
             string lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(dir);
             string toStrip = string.Empty;
             //can be reproduced with pixel emulator API 28 (android 9). the last path segment for the downloads dir is "downloads" but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete" (note it is still a content scheme, raw: is the volume)
-            
+
             string volName = GetVolumeName(lastPathSegment, true, out _);
             //if(volName==null)
             //{
@@ -4142,13 +4142,13 @@ namespace AndriodApp1
             return pairs;
         }
 
-        public Dictionary<string, Tuple<long, string>> ParseSharedDirectoryLegacy(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
+        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> ParseSharedDirectoryLegacy(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
             //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
             //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
-            Dictionary<string, Tuple<long, string>> pairs = new Dictionary<string, Tuple<long, string>>();
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>();
             List<Android.Net.Uri> listOfDirectoryUris = new List<Android.Net.Uri>();
             //auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
             listOfDirectoryUris.Add(dir.Uri);
@@ -4429,7 +4429,7 @@ namespace AndriodApp1
 
         public class CachedParseResults
         {
-            public Dictionary<string, Tuple<long, string>> keys = null;
+            public Dictionary<string, Tuple<long, string, Tuple<int,int,int,int>>> keys = null;
             public int direcotryCount = -1;
             public BrowseResponse browseResponse = null;
             public List<Tuple<string, string>> friendlyDirNameToUriMapping = null;
@@ -4495,12 +4495,17 @@ namespace AndriodApp1
                         BinaryFormatter binaryFormatter = new BinaryFormatter();
                         CachedParseResults cachedParseResults = new CachedParseResults();
 
-                        cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string>>;
+                        cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>;
                         cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
                         cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
                         cachedParseResults.direcotryCount = cachedParseResults.browseResponse.DirectoryCount;
                         cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
                         cachedParseResults.tokenIndex = binaryFormatter.Deserialize(m_tokenIndex) as Dictionary<string, List<int>>;
+
+                        if(cachedParseResults.keys==null || cachedParseResults.browseResponse == null || cachedParseResults.friendlyDirNameToUriMapping == null || cachedParseResults.helperIndex == null || cachedParseResults.tokenIndex==null)
+                        {
+                            return null;
+                        }
 
                         sw.Stop();
                         MainActivity.LogDebug("time to deserialize all sharing helpers: " + sw.ElapsedMilliseconds);
@@ -4518,8 +4523,319 @@ namespace AndriodApp1
             }
         }
 
+        //Pretty much all clients send "attributes" or limited metadata.
+        // if lossless - they send duration, bit rate, bit depth, and sample rate
+        // if lossy - they send duration and bit rate.
 
-        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, ref int directoryCount, ref int indexNum)
+        //notes:
+        // for lossless - bit rate = sample rate * bit depth * num channels
+        //                1411.2 kpbs = 44.1kHz * 16 * 2
+        //  --if the formula is required note that typically sample rate is in (44.1, 48, 88.2, 96) with the last too being very rare (never seen it).
+        //      and bit depth in (16, 24, 32) with 16 most common, sometimes 24, never seen 32.  
+        // for both lossy and lossless - determining bit rate from file size and duration is a bit too imprecise.  
+        //      for mp3 320kps cbr one will get 320.3, 314, 315, etc.
+
+        //for the pre-indexed media store (note: its possible for one to revoke the photos&media permission and for seeker to work right in all places by querying mediastore)
+        //  api 29+ we have duration
+        //  api 30+ we have bit rate
+        //  api 31+ (Android 12) we have sample rate and bit depth
+
+        //for the built in media retreiver (which requires actually reading the file) we have duration, bit rate, with sample rate and bit depth for api31+
+
+        //the library tag lib sharp can get us everything, tho it is 1 MB extra.
+
+
+        private bool HasMediaStoreDurationColumn()
+        {
+            return (int)Android.OS.Build.VERSION.SdkInt >= 29;
+        }
+
+        private bool HasMediaStoreBitRateColumn()
+        {
+            return (int)Android.OS.Build.VERSION.SdkInt >= 30;
+        }
+
+        private bool HasMediaStoreSampleRateBitDepthColumn()
+        {
+            return (int)Android.OS.Build.VERSION.SdkInt >= 31;
+        }
+
+        private bool HasMediaRetreiverSampleRateBitDepth()
+        {
+            return (int)Android.OS.Build.VERSION.SdkInt >= 31;
+        }
+
+        private bool IsUncompressed(string name)
+        {
+            string ext = System.IO.Path.GetExtension(name);
+            switch (ext)
+            {
+                case ".wav":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool IsLossless(string name)
+        {
+            string ext = System.IO.Path.GetExtension(name);
+            switch(ext)
+            {
+                case ".ape":
+                case ".flac":
+                case ".wav":
+                case ".alac":
+                case ".aiff":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool IsSupportedAudio(string name)
+        {
+            string ext = System.IO.Path.GetExtension(name);
+            switch (ext)
+            {
+                case ".ape":
+                case ".flac":
+                case ".wav":
+                case ".alac":
+                case ".aiff":
+                case ".mp3":
+                case ".m4a":
+                case ".wma":
+                case ".aac":
+                case ".opus":
+                case ".ogg":
+                case ".oga":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private void GetFlacMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth)
+        {
+            sampleRate = -1;
+            bitDepth = -1;
+            System.IO.Stream fileStream = null;
+            try
+            {
+                fileStream = contentResolver.OpenInputStream(uri);
+                byte[] header = new byte[4];
+                fileStream.Read(header, 0, 4);
+                if (header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3")))
+                {
+                    //its technically incorrect, but flac files can have ID3 tags.
+                    //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
+                    //just skip over this
+                    byte[] id3Header = new byte[10];
+                    if ((fileStream.Read(id3Header, 0, 10) == 10))
+                    {
+                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
+                        fileStream.Seek(size - 4, System.IO.SeekOrigin.Current);
+                        fileStream.Read(header, 0, 4);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                if (!(header.SequenceEqual(System.Text.Encoding.ASCII.GetBytes("fLaC"))))
+                {
+                    throw new Exception("bad format");
+                }
+                //position is now after the fLaC
+
+                while (fileStream.Read(header, 0, 4) == 4)
+                {
+                    int blockType = header[0] & (byte)(0x7f);
+                    int isLastBlock = header[0] & (byte)(0x80);
+                    int size = header[1] * 256 * 256 + header[2] * 256 + header[3];
+                    if (blockType == 0)
+                    {
+                        byte[] stream_info_header = new byte[size];
+                        if (fileStream.Read(stream_info_header, 0, size) != size)
+                        {
+                            return;
+                        }
+                        int offset_to_sample_rate = 10;
+                        sampleRate = (stream_info_header[offset_to_sample_rate] * 256 * 256 + stream_info_header[offset_to_sample_rate + 1] * 256 + stream_info_header[offset_to_sample_rate + 2]) / 16;
+
+                        bitDepth = ((stream_info_header[offset_to_sample_rate + 2] & (byte)(0x1)) * 16 + (stream_info_header[offset_to_sample_rate + 3] & (byte)(0xf0)) / 16) + 1;
+                        return;
+                    }
+                    else if(isLastBlock!=0) //it will be 128
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        //go to next block
+                        fileStream.Seek(size, System.IO.SeekOrigin.Current);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("getFlacMetadata: "+ e.Message + e.StackTrace);
+            }
+            finally
+            {
+                if(fileStream!=null)
+                {
+                    fileStream.Close();
+                }
+            }
+        }
+
+
+        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri)
+        {
+            try
+            { 
+                //get media attributes...
+                bool supported = IsSupportedAudio(presentableName);
+                if(!supported)
+                {
+                    return null;
+                }
+                bool lossless = IsLossless(presentableName);
+                bool uncompressed = IsUncompressed(presentableName);
+                int duration = -1;
+                int bitrate = -1;
+                int sampleRate = -1;
+                int bitDepth = -1;
+                bool useContentResolverQuery = HasMediaStoreDurationColumn();//else it has no more additional data for us..
+                if (useContentResolverQuery)
+                {
+                    //quick info 
+
+                    string[] selectionColumns = null;
+                    bool hasBitRate = HasMediaStoreBitRateColumn();
+                    if (hasBitRate)
+                    {
+                        selectionColumns = new string[] {Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
+                                        Android.Provider.MediaStore.IMediaColumns.Duration,
+                                        Android.Provider.MediaStore.IMediaColumns.Bitrate };
+                    }
+                    else //only has duration
+                    {
+                        selectionColumns = new string[] {Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
+                                        Android.Provider.MediaStore.IMediaColumns.Duration };
+                    }
+                    Android.Database.ICursor mediaStoreInfo = contentResolver.Query(MediaStore.Audio.Media.ExternalContentUri, selectionColumns,
+                        Android.Provider.MediaStore.IMediaColumns.Size + " = '" + size + "' AND " + Android.Provider.MediaStore.IMediaColumns.DisplayName + " = '" + displayName.Replace("'","''") + "'", null, null);
+                    string nameToSearchFor = presentableName.Replace('\\','/');
+                    bool found = true;
+                    if (mediaStoreInfo.Count > 0)
+                    {
+                        if (mediaStoreInfo.Count > 1)
+                        {
+                            found = false;
+                            while (mediaStoreInfo.MoveToNext())
+                            {
+                                if (mediaStoreInfo.GetString(0).Contains(nameToSearchFor))
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            mediaStoreInfo.MoveToNext();
+                        }
+                        if(found)
+                        {
+                            duration = mediaStoreInfo.GetInt(1) / 1000; //in ms
+                            if (hasBitRate)
+                            {
+                                bitrate = mediaStoreInfo.GetInt(2);
+                            }
+                        }
+                    }
+                }
+
+                if((SoulSeekState.PerformDeepMetadataSearch && (bitrate==-1 || duration==-1) && size!=0 ))
+                {
+                    try
+                    {
+                        Android.Media.MediaMetadataRetriever mediaMetadataRetriever = new Android.Media.MediaMetadataRetriever();
+                        mediaMetadataRetriever.SetDataSource(SoulSeekState.ActiveActivityRef, childUri);
+                        string? bitRateStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Bitrate);
+                        string? durationStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
+                        mediaMetadataRetriever.Close();
+                        if (bitRateStr != null)
+                        {
+                            bitrate = int.Parse(bitRateStr);
+                        }
+                        if (durationStr != null)
+                        {
+                            duration = int.Parse(durationStr) / 1000;
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace);
+                    }
+
+
+                }
+
+                if (SoulSeekState.PerformDeepMetadataSearch && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
+                {
+                    GetFlacMetadata(contentResolver, childUri, out sampleRate, out bitDepth);
+                }
+
+                //if uncompressed we can use this simple formula
+                if (uncompressed)
+                {
+                    if(bitrate!=-1)
+                    {
+                        //bitrate = 2 * sampleRate * depth
+                        //so test pairs in order of precedence..
+                        if((bitrate) / (2 * 44100) == 16)
+                        {
+                            sampleRate = 44100;
+                            bitDepth = 16;
+                        }
+                        else if ((bitrate) / (2 * 44100) == 24)
+                        {
+                            sampleRate = 44100;
+                            bitDepth = 24;
+                        }
+                        else if ((bitrate) / (2 * 48000) == 16)
+                        {
+                            sampleRate = 48000;
+                            bitDepth = 16;
+                        }
+                        else if ((bitrate) / (2 * 48000) == 24)
+                        {
+                            sampleRate = 48000;
+                            bitDepth = 24;
+                        }
+                    }
+                }
+                if(duration==-1 && bitrate==-1 && bitDepth == -1 && sampleRate == -1)
+                {
+                    return null;
+                }
+                return new Tuple<int, int, int, int>(duration, lossless ? -1 : (bitrate / 1000), bitDepth, sampleRate); //for lossless do not send bitrate!! no other client does that!!
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("get audio attr failed: " + e.Message + e.StackTrace);
+                return null;
+            }
+        }
+
+
+
+
+        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
 
@@ -4527,7 +4843,7 @@ namespace AndriodApp1
 
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
             //Log.d(TAG, "node uri: ", childrenUri);
-            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
+            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize}, null, null, null);
             List<Soulseek.File> files = new List<Soulseek.File>();
             try
             {
@@ -4546,12 +4862,10 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        
+
                         string presentableName = childUri.LastPathSegment.Replace('/', '\\');
 
-
-
-                        if(folderToStripForPresentableNames==null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                        if (folderToStripForPresentableNames==null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
                         {
                             if (volName != null && volName.Length != presentableName.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
                             {
@@ -4566,17 +4880,13 @@ namespace AndriodApp1
 
                         string searchableName = Helpers.GetFolderNameFromFile(presentableName) + @"\" + Helpers.GetFileNameFromFile(presentableName);
 
-                        //if(volName != null)
-                        //{
-                        //    if (presentableName.Substring(0, volName.Length) == volName)
-                        //    {
-                        //        if (presentableName.Length != volName.Length) //i.e. if its just "primary:"
-                        //        {
-                        //            presentableName = presentableName.Substring(volName.Length);
-                        //        }
-                        //    }
-                        //}
-                        pairs.Add(presentableName,new Tuple<long, string>(size, childUri.ToString()));
+                        Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri);
+                        if (attributes != null)
+                        {
+                            MainActivity.LogDebug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
+                        }
+
+                        pairs.Add(presentableName,new Tuple<long, string, Tuple<int, int, int, int>>(size, childUri.ToString(),attributes)); //NEED TO STORE THEM HERE...
                         index.Add(indexNum,presentableName); //throws on same key
                         indexNum++;
 //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
@@ -4592,7 +4902,8 @@ namespace AndriodApp1
                         //{
                         //    searchableName = searchableName.Substring(8);
                         //}
-                        var slskFile = new Soulseek.File(1, fname, size, System.IO.Path.GetExtension(childUri.Path));
+
+                        var slskFile = new Soulseek.File(1, fname, size, System.IO.Path.GetExtension(childUri.Path), SharedFileCache.GetFileAttributesFromTuple(attributes)); //soulseekQT does not show attributes in browse tab, but nicotine does.
                         files.Add(slskFile);
                     }
                 }
@@ -4631,7 +4942,7 @@ namespace AndriodApp1
         }
 
 
-        public void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string>> pairs, bool isRootCase, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, ref int directoryCount, ref int indexNum)
+        public void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -4652,7 +4963,7 @@ namespace AndriodApp1
                     {
                         presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
                     }
-                    pairs.Add(presentableName,new Tuple<long,string>(childDocFile.Length(), childDocFile.Uri.ToString()));
+                    pairs.Add(presentableName,new Tuple<long,string, Tuple<int, int, int, int>>(childDocFile.Length(), childDocFile.Uri.ToString(),null));
                     index.Add(indexNum, presentableName);
                     indexNum++;
                     string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
@@ -4730,7 +5041,7 @@ namespace AndriodApp1
                     int directoryCount = 0;
                     System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                     s.Start();
-                    Dictionary<string, Tuple<long, string>> stringUriPairs = null;
+                    Dictionary<string, Tuple<long, string, Tuple< int,int,int,int>>> stringUriPairs = null;
                     BrowseResponse browseResponse = null;
                     List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
                     Dictionary<int, string> index = null;
@@ -4905,6 +5216,10 @@ namespace AndriodApp1
                     //linear - 6,570 ms
                     //dictionary based - 22ms
 
+                    //*********Profiling********* for 807 files -- deep metadata retreival off. (i.e. only whats indexed in MediaStore) - 
+                    //*********Profiling********* for 807 files -- metadata for flac and those not in MediaStore - 12,234
+                    //*********Profiling********* for 807 files -- mediaretreiver for everything.  metadata for flac and those not in MediaStore - 38,063
+
 
 
                 }
@@ -4921,6 +5236,7 @@ namespace AndriodApp1
             }
             catch(Exception e)
             {
+                errorMsg = "Unspecified Error";
                 if(e.GetType().FullName == "Java.Lang.SecurityException")
                 {
                     errorMsg = "Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.";
@@ -4928,6 +5244,18 @@ namespace AndriodApp1
                 success=false;
                 LogDebug("Error parsing files: " + e.Message + e.StackTrace);
                 LogFirebase("Error parsing files: " + e.Message + e.StackTrace);
+                if(e.Message.Contains("An item with the same key"))
+                {
+                    try
+                    {
+                        LogFirebase("Possible encoding issue: " + ShowCodePoints(e.Message.Substring(e.Message.Length-7)));
+                        errorMsg = "Possible Encoding Issue: " + e.Message + ". Please contact the developer";
+                    }
+                    catch
+                    {
+                        //just in case
+                    }
+                }
             }
             finally
             {
@@ -4945,6 +5273,16 @@ namespace AndriodApp1
             return success;
             //SoulSeekState.SoulseekClient.SearchResponseDelivered += SoulseekClient_SearchResponseDelivered;
             //SoulSeekState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
+        }
+
+        private static string ShowCodePoints(string str)
+        {
+            string codePointString = string.Empty;
+            foreach(char c in str)
+            {
+                codePointString = codePointString + ($"_{ (int)c:x4}");
+            }
+            return codePointString;
         }
 
         private void SoulseekClient_SearchResponseDeliveryFailed(object sender, SearchRequestResponseEventArgs e)
@@ -6636,7 +6974,7 @@ namespace AndriodApp1
             //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<long, string> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
+            Tuple<long, string, Tuple< int,int,int,int>> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
             if (ourFileInfo==null)
             {
                 LogFirebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
@@ -9062,6 +9400,8 @@ namespace AndriodApp1
         public static bool CreateUsernameSubfolders = false;
         public static bool OverrideDefaultIncompleteLocations = false;
 
+        public static bool PerformDeepMetadataSearch = false;
+
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
 
         /// <summary>
@@ -9321,6 +9661,8 @@ namespace AndriodApp1
 
     public static class Helpers
     {
+
+
         public static string AvoidLineBreaks(string orig)
         {
             return orig.Replace(' ', '\u00A0').Replace("\\", "\\\u2060");

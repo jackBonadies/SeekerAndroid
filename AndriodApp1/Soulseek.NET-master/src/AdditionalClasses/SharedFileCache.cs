@@ -26,7 +26,7 @@
             //TTL = ttl;
         }
 
-        public SharedFileCache(Dictionary<string,Tuple<long,string>> fullInfo, int direcotryCount, BrowseResponse browseResponse, List<Tuple<string, string>> friendlyDirNameToUriMapping, Dictionary<string,List<int>> tokenIndex, Dictionary<int,string> helperIndex)
+        public SharedFileCache(Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>>> fullInfo, int direcotryCount, BrowseResponse browseResponse, List<Tuple<string, string>> friendlyDirNameToUriMapping, Dictionary<string,List<int>> tokenIndex, Dictionary<int,string> helperIndex)
         {
             FullInfo = fullInfo; //this is the full info, i.e. keys and and their corresponding URI and length
             DirectoryCount = direcotryCount;
@@ -48,10 +48,10 @@
         /// 
         /// </param>
         /// <returns></returns>
-        public Tuple<long, string> GetFullInfoFromSearchableName(string keyFilename, string fullPath, bool toStripVolumeName, string volumeName, Func<string,string> GetLastEncoded, out string errorMessage)
+        public Tuple<long, string, Tuple<int, int, int, int>> GetFullInfoFromSearchableName(string keyFilename, string fullPath, bool toStripVolumeName, string volumeName, Func<string,string> GetLastEncoded, out string errorMessage)
         {
             //Tuple<string, string, long> ourFileInfo = FullInfo.Where((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault();
-            Tuple<long, string> ourFileInfo = FullInfo[keyFilename];
+            Tuple<long, string, Tuple<int, int, int, int>> ourFileInfo = FullInfo[keyFilename];
             if(ourFileInfo==null)
             {
                 errorMessage = "ourFileInfo 1 is null keyFilename is: " + keyFilename + "FullInfo.Count" + FullInfo.Count;
@@ -78,6 +78,33 @@
                 return ourFileInfo;
             //}
         }
+
+        public static IEnumerable<FileAttribute> GetFileAttributesFromTuple(Tuple<int, int, int, int> attributeTuple)
+        {
+            if (attributeTuple == null)
+            {
+                return null;
+            }
+            List<FileAttribute> fileAttributes = new List<FileAttribute>();
+            if (attributeTuple.Item1 >= 0)
+            {
+                fileAttributes.Add(new FileAttribute(FileAttributeType.Length, attributeTuple.Item1)); //in seconds
+            }
+            if (attributeTuple.Item2 >= 0)
+            {
+                fileAttributes.Add(new FileAttribute(FileAttributeType.BitRate, attributeTuple.Item2)); //in bits
+            }
+            if (attributeTuple.Item3 >= 0)
+            {
+                fileAttributes.Add(new FileAttribute(FileAttributeType.BitDepth, attributeTuple.Item3)); //in bits
+            }
+            if (attributeTuple.Item4 >= 0)
+            {
+                fileAttributes.Add(new FileAttribute(FileAttributeType.SampleRate, attributeTuple.Item4)); //in Hz
+            }
+            return fileAttributes.Count > 0 ? fileAttributes : null;
+        }
+
 
         public static string ConvertUriToBrowseResponsePath(string uri, bool toStripVolume, string volumeName, Func<string, string> GetLastEncoded)
         {
@@ -106,7 +133,7 @@
             foreach (var fName in presentableNames)
             {
                 var fullInfoFile = FullInfo[fName];
-                Soulseek.File f = new Soulseek.File(1, fName, fullInfoFile.Item1, System.IO.Path.GetExtension(fName));
+                Soulseek.File f = new Soulseek.File(1, fName, fullInfoFile.Item1, System.IO.Path.GetExtension(fName), GetFileAttributesFromTuple(fullInfoFile.Item3));
                 response.Add(f);
             }
             return response;
@@ -117,7 +144,7 @@
         public event EventHandler<(int Directories, int Files)> Refreshed;
         public bool SuccessfullyInitialized { get;set;}
         public BrowseResponse BrowseResponse { get;}
-        public Dictionary<string,Tuple<long,string>> FullInfo {get; }
+        public Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>>> FullInfo {get; }
         public int DirectoryCount = -1;
         public int FileCount
         {
