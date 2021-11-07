@@ -281,7 +281,7 @@ namespace AndriodApp1
                 var action = new Action(() =>
                 {
                     Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
-                    MainActivity.LogFirebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
+                    //MainActivity.LogFirebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
                 SoulSeekState.MainActivityRef.RunOnUiThread(action);
                 SoulseekClient.DNS_LOOKUP_FAILED = false; // dont have to keep showing this... wait for next failure for it to be set...
@@ -3064,24 +3064,6 @@ namespace AndriodApp1
                 SearchTabHelper.SearchTabCollection[fromTab].SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Keys.ToList();
                 SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
             }
-            //}
-            //else //as an optimization, we do not need to sort, we will sort everything when we go back to the tab.
-            //{
-            //    Tuple<bool, List<SearchResponse>> splitResponses = SplitMultiDirResponse(resp);
-            //    if (splitResponses.Item1)
-            //    { //we have multiple to add
-            //        foreach (SearchResponse splitResponse in splitResponses.Item2)
-            //        {
-            //            SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Add(splitResponse);
-            //        }
-            //    }
-            //    else
-            //    {
-            //        SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Add(resp);
-            //    }
-            //}
-
-
             //only do fromWishlist if SearchFragment.Instance is not null...
 
             if ((!fromWishlist || SearchFragment.Instance != null) && fromTab==SearchTabHelper.CurrentTab)
@@ -3093,9 +3075,11 @@ namespace AndriodApp1
                     {
                         return;
                     }
-                    if(SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount == SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
+                    int total = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
+                    MainActivity.LogDebug("ui thread response received - search collection: " + total);
+                    if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount == total)
                     {
-                        MainActivity.LogDebug("already did it..");
+                        MainActivity.LogDebug("already did it..: " + total);
                         //we already updated for this one.
                         //the UI marshelled calls are delayed.  as a result there will be many all coming in with the final search response count of say 751.  
                         return;
@@ -3116,7 +3100,7 @@ namespace AndriodApp1
                         ListView lv = SearchFragment.Instance.rootView.FindViewById<ListView>(Resource.Id.listView1);
                         lv.Adapter = (customAdapter);
                     }
-                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
+                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = total;
                 });
                 SoulSeekState.MainActivityRef?.RunOnUiThread(a);
             }

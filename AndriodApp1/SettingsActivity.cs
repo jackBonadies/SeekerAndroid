@@ -1457,6 +1457,7 @@ namespace AndriodApp1
             Action parseDatabaseAndUpdateUI = new Action(() => {
                 try
                 {
+                    bool success = false;
                     SoulSeekState.IsParsing = true;
                     this.RunOnUiThread(new Action(() =>
                     {
@@ -1466,7 +1467,11 @@ namespace AndriodApp1
                     try
                     {
                         SoulSeekState.UploadDataDirectoryUri = uri.ToString();
-                        SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, out _);
+                        success = SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, out string errorMessage);
+                        if(!success)
+                        {
+                            throw new Exception("Failed to parse shared files: " + errorMessage);
+                        }
                         SoulSeekState.IsParsing = false;
                     }
                     catch (Exception e)
@@ -1480,7 +1485,7 @@ namespace AndriodApp1
                         {
                             UpdateShareImageView();
                             SetSharedFolderView();
-                            Toast.MakeText(this, Resource.String.error_parsing_files_shared_dir, ToastLength.Long).Show();
+                            Toast.MakeText(this, e.Message, ToastLength.Long).Show();
                         }));
                         return;
                     }
