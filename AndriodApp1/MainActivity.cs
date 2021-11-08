@@ -4137,7 +4137,69 @@ namespace AndriodApp1
             }
             index = new Dictionary<int, string>();
             int indexNum = 0;
-            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, ref directoryCount, ref indexNum);
+
+            Dictionary<string, List<Tuple<string,int,int>>> allMediaStoreInfo = new Dictionary<string, List<Tuple<string, int, int>>>();
+
+            bool hasAnyInfo = HasMediaStoreDurationColumn();
+            if(hasAnyInfo)
+            {
+                bool hasBitRate = HasMediaStoreBitRateColumn();
+                string[] selectionColumns = null;
+                if (hasBitRate)
+                {
+                    selectionColumns = new string[] {
+                        Android.Provider.MediaStore.IMediaColumns.Size,
+                        Android.Provider.MediaStore.IMediaColumns.DisplayName,
+
+                        Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
+                                    Android.Provider.MediaStore.IMediaColumns.Duration,
+                                    Android.Provider.MediaStore.IMediaColumns.Bitrate };
+                }
+                else //only has duration
+                {
+                    selectionColumns = new string[] {
+                        Android.Provider.MediaStore.IMediaColumns.Size,
+                        Android.Provider.MediaStore.IMediaColumns.DisplayName,
+
+                        Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
+                                    Android.Provider.MediaStore.IMediaColumns.Duration };
+                }
+
+
+                //metadata content resolver info
+                Android.Database.ICursor mediaStoreInfo = null;
+                try
+                {
+                    mediaStoreInfo = SoulSeekState.ActiveActivityRef.ContentResolver.Query(MediaStore.Audio.Media.ExternalContentUri, selectionColumns,
+                        null, null, null);
+                    while(mediaStoreInfo.MoveToNext())
+                    {
+                        string key = mediaStoreInfo.GetInt(0) + mediaStoreInfo.GetString(1);
+                        if(!allMediaStoreInfo.ContainsKey(key))
+                        {
+                            var list = new List<Tuple<string, int, int>>();
+                            list.Add(new Tuple<string, int, int>(mediaStoreInfo.GetString(2), mediaStoreInfo.GetInt(3), hasBitRate ? mediaStoreInfo.GetInt(4) : -1));
+                            allMediaStoreInfo.Add(key, list);
+                        }
+                        else
+                        {
+                            allMediaStoreInfo[key].Add(new Tuple<string, int, int>(mediaStoreInfo.GetString(2), mediaStoreInfo.GetInt(3), hasBitRate ? mediaStoreInfo.GetInt(4) : -1));
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    MainActivity.LogFirebase("pre get all mediaStoreInfo: " + e.Message + e.StackTrace);
+                    if(mediaStoreInfo!=null)
+                    {
+                        mediaStoreInfo.Close();
+                    }
+                }
+
+            }
+
+
+            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, ref directoryCount, ref indexNum);
             br = new BrowseResponse(allDirs);
             return pairs;
         }
@@ -4616,83 +4678,11 @@ namespace AndriodApp1
             }
         }
 
-        private void GetFlacMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth)
-        {
-            sampleRate = -1;
-            bitDepth = -1;
-            System.IO.Stream fileStream = null;
-            try
-            {
-                fileStream = contentResolver.OpenInputStream(uri);
-                byte[] header = new byte[4];
-                fileStream.Read(header, 0, 4);
-                if (header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3")))
-                {
-                    //its technically incorrect, but flac files can have ID3 tags.
-                    //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
-                    //just skip over this
-                    byte[] id3Header = new byte[10];
-                    if ((fileStream.Read(id3Header, 0, 10) == 10))
-                    {
-                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
-                        fileStream.Seek(size - 4, System.IO.SeekOrigin.Current);
-                        fileStream.Read(header, 0, 4);
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-                if (!(header.SequenceEqual(System.Text.Encoding.ASCII.GetBytes("fLaC"))))
-                {
-                    throw new Exception("bad format");
-                }
-                //position is now after the fLaC
-
-                while (fileStream.Read(header, 0, 4) == 4)
-                {
-                    int blockType = header[0] & (byte)(0x7f);
-                    int isLastBlock = header[0] & (byte)(0x80);
-                    int size = header[1] * 256 * 256 + header[2] * 256 + header[3];
-                    if (blockType == 0)
-                    {
-                        byte[] stream_info_header = new byte[size];
-                        if (fileStream.Read(stream_info_header, 0, size) != size)
-                        {
-                            return;
-                        }
-                        int offset_to_sample_rate = 10;
-                        sampleRate = (stream_info_header[offset_to_sample_rate] * 256 * 256 + stream_info_header[offset_to_sample_rate + 1] * 256 + stream_info_header[offset_to_sample_rate + 2]) / 16;
-
-                        bitDepth = ((stream_info_header[offset_to_sample_rate + 2] & (byte)(0x1)) * 16 + (stream_info_header[offset_to_sample_rate + 3] & (byte)(0xf0)) / 16) + 1;
-                        return;
-                    }
-                    else if(isLastBlock!=0) //it will be 128
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        //go to next block
-                        fileStream.Seek(size, System.IO.SeekOrigin.Current);
-                    }
-                }
-            }
-            catch(Exception e)
-            {
-                MainActivity.LogFirebase("getFlacMetadata: "+ e.Message + e.StackTrace);
-            }
-            finally
-            {
-                if(fileStream!=null)
-                {
-                    fileStream.Close();
-                }
-            }
-        }
 
 
-        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri)
+
+
+        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string,List<Tuple<string, int, int>>> allMediaInfoDict)
         {
             try
             { 
@@ -4711,34 +4701,24 @@ namespace AndriodApp1
                 bool useContentResolverQuery = HasMediaStoreDurationColumn();//else it has no more additional data for us..
                 if (useContentResolverQuery)
                 {
-                    //quick info 
-
-                    string[] selectionColumns = null;
                     bool hasBitRate = HasMediaStoreBitRateColumn();
-                    if (hasBitRate)
+                    //querying it every time was slow...
+                    //so now we query it all ahead of time (with 1 query request) and put it in a dict.
+                    string key = size + displayName;
+                    if(allMediaInfoDict.ContainsKey(key))
                     {
-                        selectionColumns = new string[] {Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
-                                        Android.Provider.MediaStore.IMediaColumns.Duration,
-                                        Android.Provider.MediaStore.IMediaColumns.Bitrate };
-                    }
-                    else //only has duration
-                    {
-                        selectionColumns = new string[] {Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
-                                        Android.Provider.MediaStore.IMediaColumns.Duration };
-                    }
-                    Android.Database.ICursor mediaStoreInfo = contentResolver.Query(MediaStore.Audio.Media.ExternalContentUri, selectionColumns,
-                        Android.Provider.MediaStore.IMediaColumns.Size + " = '" + size + "' AND " + Android.Provider.MediaStore.IMediaColumns.DisplayName + " = '" + displayName.Replace("'","''") + "'", null, null);
-                    string nameToSearchFor = presentableName.Replace('\\','/');
-                    bool found = true;
-                    if (mediaStoreInfo.Count > 0)
-                    {
-                        if (mediaStoreInfo.Count > 1)
+                        string nameToSearchFor = presentableName.Replace('\\', '/');
+                        bool found = true;
+                        var listInfo = allMediaInfoDict[key];
+                        Tuple<string, int, int> infoItem = null;
+                        if(listInfo.Count>1)
                         {
                             found = false;
-                            while (mediaStoreInfo.MoveToNext())
+                            foreach(var item in listInfo)
                             {
-                                if (mediaStoreInfo.GetString(0).Contains(nameToSearchFor))
+                                if (item.Item1.Contains(nameToSearchFor))
                                 {
+                                    infoItem = item;
                                     found = true;
                                     break;
                                 }
@@ -4746,20 +4726,20 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            mediaStoreInfo.MoveToNext();
+                            infoItem = listInfo[0];
                         }
-                        if(found)
+                        if (found)
                         {
-                            duration = mediaStoreInfo.GetInt(1) / 1000; //in ms
+                            duration = infoItem.Item2 / 1000; //in ms
                             if (hasBitRate)
                             {
-                                bitrate = mediaStoreInfo.GetInt(2);
+                                bitrate = infoItem.Item3;
                             }
                         }
                     }
                 }
 
-                if((SoulSeekState.PerformDeepMetadataSearch && (bitrate==-1 || duration==-1) && size!=0 ))
+                if ((SoulSeekState.PerformDeepMetadataSearch && (bitrate==-1 || duration==-1) && size!=0 ))
                 {
                     try
                     {
@@ -4781,13 +4761,30 @@ namespace AndriodApp1
                     {
                         MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace);
                     }
-
-
                 }
+
+                //this is the mp3 vbr case, android meta data retriever and therefore also the mediastore cache fail
+                //quite badly in this case.  they often return the min vbr bitrate of 32000.
+                //if its under 128kbps then lets just double check it..
+                //I did test .m4a vbr.  android meta data retriever handled it quite well.
+                if(System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate>=0 && bitrate<128000) && size != 0)
+                {
+                    if(SoulSeekState.PerformDeepMetadataSearch)
+                    {
+                        MicroTagReader.GetMp3Metadata(contentResolver, childUri, duration, size, out bitrate);
+                    }
+                    else
+                    {
+                        bitrate = -1; //better to have nothing than for it to be so blatantly wrong..
+                    }
+                }
+
+
+
 
                 if (SoulSeekState.PerformDeepMetadataSearch && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
                 {
-                    GetFlacMetadata(contentResolver, childUri, out sampleRate, out bitDepth);
+                    MicroTagReader.GetFlacMetadata(contentResolver, childUri, out sampleRate, out bitDepth);
                 }
 
                 //if uncompressed we can use this simple formula
@@ -4823,7 +4820,7 @@ namespace AndriodApp1
                 {
                     return null;
                 }
-                return new Tuple<int, int, int, int>(duration, lossless ? -1 : (bitrate / 1000), bitDepth, sampleRate); //for lossless do not send bitrate!! no other client does that!!
+                return new Tuple<int, int, int, int>(duration, (lossless || bitrate==-1) ? -1 : (bitrate / 1000), bitDepth, sampleRate); //for lossless do not send bitrate!! no other client does that!!
             }
             catch(Exception e)
             {
@@ -4835,7 +4832,7 @@ namespace AndriodApp1
 
 
 
-        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, ref int directoryCount, ref int indexNum)
+        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
 
@@ -4858,7 +4855,7 @@ namespace AndriodApp1
                     if (isDirectory(mime))
                     {
                         directoryCount++;
-                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, ref directoryCount, ref indexNum);
+                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, ref directoryCount, ref indexNum);
                     }
                     else
                     {
@@ -4880,7 +4877,7 @@ namespace AndriodApp1
 
                         string searchableName = Helpers.GetFolderNameFromFile(presentableName) + @"\" + Helpers.GetFileNameFromFile(presentableName);
 
-                        Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri);
+                        Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict);
                         if (attributes != null)
                         {
                             MainActivity.LogDebug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
@@ -9400,7 +9397,7 @@ namespace AndriodApp1
         public static bool CreateUsernameSubfolders = false;
         public static bool OverrideDefaultIncompleteLocations = false;
 
-        public static bool PerformDeepMetadataSearch = false;
+        public static bool PerformDeepMetadataSearch = true;
 
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
 
@@ -10745,6 +10742,320 @@ namespace AndriodApp1
             builder.Show();
         }
     }
+
+    public static class MicroTagReader
+    {
+        static List<List<int>> samplerates;
+        static List<int> channels_per_mode;
+        static List<List<List<int>>> bitrate_by_version_by_layer;
+        static MicroTagReader()
+        {
+            samplerates = new List<List<int>>();
+            var level1 = new List<int>() { 11025, 12000, 8000 };
+            samplerates.Add(level1);
+            var level2 = new List<int>();
+            samplerates.Add(level2);
+            var level3 = new List<int>() { 22050, 24000, 16000 };
+            samplerates.Add(level3);
+            var level4 = new List<int>() { 44100, 48000, 32000 };
+            samplerates.Add(level4);
+
+            bitrate_by_version_by_layer = new List<List<List<int>>>();
+
+            List<int> v1l1 = new List<int>() { 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0 };
+            List<int> v1l2 = new List<int>() { 0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0 };
+            List<int> v1l3 = new List<int>() { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
+            List<int> v2l1 = new List<int>() { 0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, 0 };
+            List<int> v2l2 = new List<int>() { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
+            List<int> v2l3 = v2l2;
+
+            List<List<int>> v2_5 = new List<List<int>>() { null, v2l3, v2l2, v2l1 };
+            //List<List<int>> v2_5 = new List<List<int>>() { null, v2l3, v2l2, v2l1 }
+            List<List<int>> v2 = new List<List<int>>() { null, v2l3, v2l2, v2l1 };
+            List<List<int>> v1 = new List<List<int>>() { null, v1l3, v1l2, v1l1 };
+            bitrate_by_version_by_layer.Add(v2_5);
+            bitrate_by_version_by_layer.Add(null);
+            bitrate_by_version_by_layer.Add(v2);
+            bitrate_by_version_by_layer.Add(v1);
+            //samples_per_frame = 1152  # the default frame size for mp3
+
+            channels_per_mode = new List<int>() { 2, 2, 2, 1 };
+        }
+
+        /// <summary>
+        /// used since android messes up very badly when it comes to vbr mp3s
+        /// </summary>
+        /// <param name="contentResolver"></param>
+        /// <param name="uri"></param>
+        /// <param name="sampleRate"></param>
+        /// <param name="bitDepth"></param>
+        public static void GetMp3Metadata(ContentResolver contentResolver, Android.Net.Uri uri, int true_duration, long true_size, out int bitrate)
+        {
+            bitrate = -1;
+            System.IO.Stream fileStream = null;
+            try
+            {
+                //int max_estimation_frames = 30 * 44100 / 1152;
+
+                double bitrate_accumulator = 0;
+                int frame_size_accu = 0;
+                List<double> last_bitrates = new List<double>();
+                //int audio_offset = -1;
+                fileStream = contentResolver.OpenInputStream(uri);
+                byte[] header = new byte[4];
+                fileStream.Read(header, 0, 4);
+                bool startsWithID3 = header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3"));
+                //{
+                //its technically incorrect, but flac files can have ID3 tags.
+                //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
+                byte[] id3Header = new byte[10];
+                if ((fileStream.Read(id3Header, 0, 10) == 10))
+                {
+                    if (startsWithID3)
+                    {
+                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
+                        fileStream.Seek(size, System.IO.SeekOrigin.Begin);
+                    }
+                    else
+                    {
+                        fileStream.Seek(0, System.IO.SeekOrigin.Begin);
+                    }
+                }
+                int frames = 0;
+                while (true)
+                {
+                    byte[] nextFour = new byte[4];
+                    int read = fileStream.Read(nextFour, 0, 4);
+                    if (read < 4)
+                    {
+                        return;
+                    }
+                    int br_id = (byte)(((nextFour[2] >> 4))) & 0x0F;
+                    int sr_id = (byte)((nextFour[2] / 4)) & 0x03;
+                    int padding = (nextFour[2] & 0x02) > 0 ? 1 : 0;
+                    int mpeg_id = (byte)((nextFour[1] / 8)) & 0x03;
+                    int layer_id = (byte)((nextFour[1] / 2)) & 0x03;
+                    int channel_mode = (byte)((nextFour[3] / 64)) & 0x03;
+                    int val = nextFour[0] * 256 + nextFour[1];
+                    if (val <= (65504) || br_id > 14 || br_id == 0 || sr_id == 3 || layer_id == 0 || mpeg_id == 1)
+                    {
+                        int index = Array.IndexOf(nextFour, (byte)(0xFF));
+                        if (index == -1)
+                        {
+                            index = nextFour.Length;
+                        }
+                        if (index == 0)
+                        {
+                            index = 1;
+                        }
+                        int amountToMove = index - 4;
+                        fileStream.Seek(amountToMove, System.IO.SeekOrigin.Current); //we go backwards if need be.
+                        continue;
+                    }
+
+                    int frame_bitrate = bitrate_by_version_by_layer[mpeg_id][layer_id][br_id];
+                    int samplerate = samplerates[mpeg_id][sr_id];
+                    int channels = channels_per_mode[channel_mode];
+
+
+                    if (frames == 0)
+                    {
+                        byte[] lookForXing = new byte[1024];
+                        fileStream.Read(lookForXing, 0, 1024);
+                        fileStream.Seek(-1028, System.IO.SeekOrigin.Current);
+                        byte[] toLookForXing = nextFour.Concat(lookForXing).ToArray();
+                        int index = -1;
+                        for (int i = 0; i < toLookForXing.Length - 4; i++)
+                        {
+                            if (toLookForXing[i] == (byte)(88) &&
+                                toLookForXing[i + 1] == (byte)(105) &&
+                                toLookForXing[i + 2] == (byte)(110) &&
+                                toLookForXing[i + 3] == (byte)(103))
+                            {
+                                index = i;
+                                break;
+                            }
+                        }
+                        if (index != -1)
+                        {
+                            fileStream.Seek(index + 4, System.IO.SeekOrigin.Current);
+
+
+                            fileStream.Read(nextFour, 0, 4);
+                            var id3header = nextFour.ToArray();
+                            int id3frames = -1;
+                            int byte_count = -1;
+                            if ((id3header[3] & 0x01) != 0)
+                            {
+                                fileStream.Read(nextFour, 0, 4);
+                                id3frames = nextFour[0] * 256 * 256 * 256 + nextFour[1] * 256 * 256 + nextFour[2] * 256 + nextFour[3];
+                            }
+                            if ((id3header[3] & 0x02) != 0)
+                            {
+                                fileStream.Read(nextFour, 0, 4);
+                                byte_count = nextFour[0] * 256 * 256 * 256 + nextFour[1] * 256 * 256 + nextFour[2] * 256 + nextFour[3];
+                            }
+                            if ((id3header[3] & 0x04) != 0)
+                            {
+                                byte[] next400 = new byte[400];
+                                fileStream.Read(next400, 0, 400);
+                            }
+                            if ((id3header[3] & 0x08) != 0)
+                            {
+                                fileStream.Read(nextFour, 0, 4);
+                            }
+                            if (id3frames != -1 && byte_count != -1 && id3frames != 0)
+                            {
+                                double duration = id3frames * 1152 / (double)(samplerate);
+                                bitrate = (int)(byte_count * 8 / duration / 1000) * 1000;
+                            }
+                            return;
+                        }
+                        else
+                        {
+                            fileStream.Seek(4, System.IO.SeekOrigin.Current);
+                        }
+                    }
+
+
+
+
+                    frames += 1;
+                    bitrate_accumulator += frame_bitrate;
+                    if (frames <= 5)
+                    {
+                        last_bitrates.Add(frame_bitrate);
+                    }
+
+
+                    //if(frames==1)
+                    //{
+                    //    audio_offset = fileStream.Position;
+                    //}
+
+                    //fileStream.Seek(4, System.IO.SeekOrigin.Current) 
+
+                    int frame_length = (144000 * frame_bitrate) / samplerate + padding;
+                    frame_size_accu += frame_length;
+                    //if bitrate does not change over time its probably CBR
+                    bool is_cbr = (frames == 5 && last_bitrates.Distinct().Count() == 1);
+                    if (is_cbr)
+                    {
+                        //int audio_stream_size = fileStream.Position - audio_offset;
+                        //int est_frame_count = audio_stream_size / (frame_size_accu / float(frames))
+                        //int samples = est_frame_count * 1152;
+                        //double duration = samples / (double)(samplerate);
+                        bitrate = (int)(bitrate_accumulator / frames) * 1000; //works especially great for cbr
+                        return;
+                    }
+
+                    if (frames > 5)
+                    {
+                        //dont use this estimation method for vbr... its no more accurate than size / duration... and takes way longer.
+                        bitrate = (true_duration != -1) ? (int)((true_size * 8 * 1000.0 / 1024.0) / true_duration) : -1;//todo test
+                        return;
+                    }
+
+                    if (frame_length > 1)
+                    {
+                        fileStream.Seek(frame_length - header.Length, System.IO.SeekOrigin.Current);
+                    }
+                }
+                //}
+                //else
+                //{
+                //    return;
+                //}
+            }
+            catch (Exception e)
+            {
+                MainActivity.LogFirebase("getMp3Metadata: " + e.Message + e.StackTrace);
+            }
+            finally
+            {
+                if (fileStream != null)
+                {
+                    fileStream.Close();
+                }
+            }
+        }
+
+        public static void GetFlacMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth)
+        {
+            sampleRate = -1;
+            bitDepth = -1;
+            System.IO.Stream fileStream = null;
+            try
+            {
+                fileStream = contentResolver.OpenInputStream(uri);
+                byte[] header = new byte[4];
+                fileStream.Read(header, 0, 4);
+                if (header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3")))
+                {
+                    //its technically incorrect, but flac files can have ID3 tags.
+                    //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
+                    //just skip over this
+                    byte[] id3Header = new byte[10];
+                    if ((fileStream.Read(id3Header, 0, 10) == 10))
+                    {
+                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
+                        fileStream.Seek(size - 4, System.IO.SeekOrigin.Current);
+                        fileStream.Read(header, 0, 4);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                if (!(header.SequenceEqual(System.Text.Encoding.ASCII.GetBytes("fLaC"))))
+                {
+                    throw new Exception("bad format");
+                }
+                //position is now after the fLaC
+
+                while (fileStream.Read(header, 0, 4) == 4)
+                {
+                    int blockType = header[0] & (byte)(0x7f);
+                    int isLastBlock = header[0] & (byte)(0x80);
+                    int size = header[1] * 256 * 256 + header[2] * 256 + header[3];
+                    if (blockType == 0)
+                    {
+                        byte[] stream_info_header = new byte[size];
+                        if (fileStream.Read(stream_info_header, 0, size) != size)
+                        {
+                            return;
+                        }
+                        int offset_to_sample_rate = 10;
+                        sampleRate = (stream_info_header[offset_to_sample_rate] * 256 * 256 + stream_info_header[offset_to_sample_rate + 1] * 256 + stream_info_header[offset_to_sample_rate + 2]) / 16;
+
+                        bitDepth = ((stream_info_header[offset_to_sample_rate + 2] & (byte)(0x1)) * 16 + (stream_info_header[offset_to_sample_rate + 3] & (byte)(0xf0)) / 16) + 1;
+                        return;
+                    }
+                    else if (isLastBlock != 0) //it will be 128
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        //go to next block
+                        fileStream.Seek(size, System.IO.SeekOrigin.Current);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MainActivity.LogFirebase("getFlacMetadata: " + e.Message + e.StackTrace);
+            }
+            finally
+            {
+                if (fileStream != null)
+                {
+                    fileStream.Close();
+                }
+            }
+        }
+    }
+
 
     [Serializable]
     public class TreeNode<T> : IEnumerable<TreeNode<T>>
