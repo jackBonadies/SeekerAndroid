@@ -4165,12 +4165,36 @@ namespace AndriodApp1
                                     Android.Provider.MediaStore.IMediaColumns.Duration };
                 }
 
+                //this is for if the chosen volume is not primary external
+                var volumeNames = MediaStore.GetExternalVolumeNames(SoulSeekState.ActiveActivityRef);
+                string chosenVolume = null;
+                if(volName!=null)
+                {
+                    string volToCompare = volName.Replace(":","");
+                    foreach (string mediaStoreVolume in volumeNames)
+                    {
+                        if(mediaStoreVolume.ToLower() == volToCompare.ToLower())
+                        {
+                            chosenVolume = mediaStoreVolume;
+                        }
+                    }
+                }
+
+                Android.Net.Uri mediaStoreUri = null;
+                if(!string.IsNullOrEmpty(chosenVolume))
+                {
+                    mediaStoreUri = MediaStore.Audio.Media.GetContentUri(chosenVolume);
+                }
+                else
+                {
+                    mediaStoreUri = MediaStore.Audio.Media.ExternalContentUri;
+                }
 
                 //metadata content resolver info
                 Android.Database.ICursor mediaStoreInfo = null;
                 try
                 {
-                    mediaStoreInfo = SoulSeekState.ActiveActivityRef.ContentResolver.Query(MediaStore.Audio.Media.ExternalContentUri, selectionColumns,
+                    mediaStoreInfo = SoulSeekState.ActiveActivityRef.ContentResolver.Query(mediaStoreUri, selectionColumns,
                         null, null, null);
                     while(mediaStoreInfo.MoveToNext())
                     {
@@ -4747,7 +4771,15 @@ namespace AndriodApp1
                         mediaMetadataRetriever.SetDataSource(SoulSeekState.ActiveActivityRef, childUri);
                         string? bitRateStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Bitrate);
                         string? durationStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
-                        mediaMetadataRetriever.Close();
+                        if(HasMediaStoreDurationColumn())
+                        {
+                            mediaMetadataRetriever.Close(); //added in api 29
+                        }
+                        else
+                        {
+                            mediaMetadataRetriever.Release();
+                        }
+                        
                         if (bitRateStr != null)
                         {
                             bitrate = int.Parse(bitRateStr);
@@ -4767,7 +4799,8 @@ namespace AndriodApp1
                 //quite badly in this case.  they often return the min vbr bitrate of 32000.
                 //if its under 128kbps then lets just double check it..
                 //I did test .m4a vbr.  android meta data retriever handled it quite well.
-                if(System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate>=0 && bitrate<128000) && size != 0)
+                //on api 19 the vbr being reported at 32000 is reported as 128000.... both obviously quite incorrect...
+                if(System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate>=0 && bitrate<=128000) && size != 0)
                 {
                     if(SoulSeekState.PerformDeepMetadataSearch)
                     {
@@ -4960,6 +4993,13 @@ namespace AndriodApp1
                     {
                         presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
                     }
+
+                    Tuple<int, int, int, int> attributes = GetAudioAttributes(SoulSeekState.ActiveActivityRef.ContentResolver, childDocFile.Name, childDocFile.Length(), presentableName, childDocFile.Uri, null);
+                    if (attributes != null)
+                    {
+                        MainActivity.LogDebug("fname: " + childDocFile.Name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
+                    }
+
                     pairs.Add(presentableName,new Tuple<long,string, Tuple<int, int, int, int>>(childDocFile.Length(), childDocFile.Uri.ToString(),null));
                     index.Add(indexNum, presentableName);
                     indexNum++;
@@ -5682,7 +5722,7 @@ namespace AndriodApp1
 
             UpdateForScreenSize();
 
-
+            
 
 
             if (SoulSeekState.UseLegacyStorage())

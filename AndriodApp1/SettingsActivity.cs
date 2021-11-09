@@ -44,6 +44,8 @@ namespace AndriodApp1
         private int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL = 0x911;
         private int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY = 0x912;
 
+        private int READ_EXTERNAL_FOR_MEDIA_STORE = 1182021;
+
         private int CHANGE_INCOMPLETE_EXTERNAL = 0x913;
         private int CHANGE_INCOMPLETE_EXTERNAL_LEGACY = 0x914;
 
@@ -1251,7 +1253,14 @@ namespace AndriodApp1
 
         private void ChangeUploadDirectory(object sender, EventArgs e)
         {
-            ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+            if (this.CheckSelfPermission(Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied) //you dont have this on api >= 29 because you never requested it, but it is NECESSARY to read media store
+            {
+                this.RequestPermissions(new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
+            }
+            else
+            {
+                ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+            }
         }
 
         private void ChangeIncompleteDirectory(object sender, EventArgs e)
@@ -1580,6 +1589,14 @@ namespace AndriodApp1
 
                 SuccessfulUploadExternalLegacyCallback(data.Data, requestCode);
 
+            }
+
+            if(READ_EXTERNAL_FOR_MEDIA_STORE == requestCode)
+            {
+                if (resultCode == Result.Ok)
+                {
+                    ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+                }
             }
         }
 
