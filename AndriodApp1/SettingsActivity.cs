@@ -32,6 +32,7 @@ using System.Linq;
 using System.Text;
 using Google.Android.Material.Snackbar;
 using System.Threading.Tasks;
+using Android.Content.PM;
 
 namespace AndriodApp1
 {
@@ -1522,6 +1523,18 @@ namespace AndriodApp1
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { parseDatabaseAndUpdateUI(); });
         }
 
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            if (READ_EXTERNAL_FOR_MEDIA_STORE == requestCode)
+            {
+                if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                {
+                    ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+                }
+            }
+        }
+
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
@@ -1591,13 +1604,7 @@ namespace AndriodApp1
 
             }
 
-            if(READ_EXTERNAL_FOR_MEDIA_STORE == requestCode)
-            {
-                if (resultCode == Result.Ok)
-                {
-                    ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
-                }
-            }
+
         }
 
         public static void RestoreAdditionalDirectorySettingsFromSharedPreferences()
