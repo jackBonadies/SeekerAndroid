@@ -215,8 +215,8 @@ namespace AndriodApp1
             var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.message_chosen_user, rootView, false);
             // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosenUserEditText);
-
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<EditText>(Resource.Id.chosenUserEditText);
+            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
@@ -237,6 +237,8 @@ namespace AndriodApp1
                     }
                     return;
                 }
+
+                SoulSeekState.RecentUsersManager.AddUserToTop(userToMessage, true);
 
                 //Do Logic of going to Username View
                 this.ChangeToInnerFragment(userToMessage);
@@ -290,6 +292,34 @@ namespace AndriodApp1
                 }
             };
 
+
+            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
+            {
+                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+                {
+                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    }
+                    //Do the Browse Logic...
+                    eventHandler(sender, null);
+                }
+                else
+                {
+                    e.Handled = false;
+                }
+            };
+
+            input.KeyPress += keypressAction;
             input.EditorAction += editorAction;
             input.FocusChange += Input_FocusChange;
 

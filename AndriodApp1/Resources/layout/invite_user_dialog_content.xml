@@ -5,12 +5,13 @@
     android:padding="@dimen/abc_control_padding_material">
 
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/inviteUserTextEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-
+            android:popupBackground = "@color/cellback"
+            android:completionThreshold="0"
                 android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
             android:hint="@string/enter_user_to_invite_to_room"

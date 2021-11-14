@@ -3136,6 +3136,7 @@ namespace AndriodApp1
                 SoulSeekState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
                 SoulSeekState.AutoClearCompleteUploads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearCompleteUploads, false);
                 SoulSeekState.RememberSearchHistory = sharedPreferences.GetBoolean(SoulSeekState.M_RememberSearchHistory, true);
+                SoulSeekState.ShowRecentUsers = sharedPreferences.GetBoolean(SoulSeekState.M_RememberUserHistory, true);
                 SoulSeekState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(SoulSeekState.M_OnlyFreeUploadSlots, true);
                 SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, false);
                 SoulSeekState.MemoryBackedDownload = sharedPreferences.GetBoolean(SoulSeekState.M_MemoryBackedDownload, false);
@@ -3146,6 +3147,7 @@ namespace AndriodApp1
                 SoulSeekState.UploadDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_UploadDirectoryUri, "");
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
                 SoulSeekState.UserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
+                RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
                 SoulSeekState.IgnoreUserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
                 SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
                 SoulSeekState.StartServiceOnStartup = sharedPreferences.GetBoolean(SoulSeekState.M_ServiceOnStartup, true);
@@ -3222,6 +3224,75 @@ namespace AndriodApp1
             {
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
                 return binaryFormatter.Deserialize(mem) as List<UserListItem>;
+            }
+        }
+
+        public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser=false)
+        {
+            if(SoulSeekState.ShowRecentUsers)
+            {
+                if(forAddingUser)
+                {
+                    //dont show people that we have already added...
+                    var recents = SoulSeekState.RecentUsersManager.GetRecentUserList();
+                    lock (SoulSeekState.UserList)
+                    {
+                        foreach(var uli in SoulSeekState.UserList)
+                        {
+                            recents.Remove(uli.Username);
+                        }
+                    }
+                    actv.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, recents);
+                }
+                else
+                {
+                    actv.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, SoulSeekState.RecentUsersManager.GetRecentUserList());
+                }
+            }
+        }
+
+        public static void RestoreRecentUsersManagerFromString(string xmlRecentUsersList)
+        {
+            //if empty then this is the first time creating it.  initialize it with our list of added users.
+            SoulSeekState.RecentUsersManager = new RecentUserManager();
+            if (xmlRecentUsersList == string.Empty)
+            {
+                int count = SoulSeekState.UserList?.Count ?? 0;
+                if(count>0)
+                {
+                    SoulSeekState.RecentUsersManager.SetRecentUserList(SoulSeekState.UserList.Select(uli=>uli.Username).ToList());
+                }
+                else
+                {
+                    SoulSeekState.RecentUsersManager.SetRecentUserList(new List<string>());
+                }
+            }
+            else
+            {
+                List<string> recentUsers = new List<string>();
+                using (var stream = new System.IO.StringReader(xmlRecentUsersList))
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType()); //this happens too often not allowing new things to be properly stored..
+                    SoulSeekState.RecentUsersManager.SetRecentUserList(serializer.Deserialize(stream) as List<string>);
+                }
+            }
+        }
+
+        public static void SaveRecentUsers()
+        {
+            string recentUsersStr;
+            List<string> recentUsers = SoulSeekState.RecentUsersManager.GetRecentUserList();
+            using (var writer = new System.IO.StringWriter())
+            {
+                var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType());
+                serializer.Serialize(writer, recentUsers);
+                recentUsersStr = writer.ToString();
+            }
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutString(SoulSeekState.M_RecentUsersList, recentUsersStr);
+                editor.Commit();
             }
         }
 
@@ -4093,7 +4164,7 @@ namespace AndriodApp1
         /// <param name="dir"></param>
         /// <param name="directoryCount"></param>
         /// <returns></returns>
-        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> ParseSharedDirectoryFastDocContract(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
+        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> ParseSharedDirectoryFastDocContract(DocumentFile dir, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -4223,12 +4294,12 @@ namespace AndriodApp1
             }
 
 
-            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, ref directoryCount, ref indexNum);
+            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, ref directoryCount, ref indexNum);
             br = new BrowseResponse(allDirs);
             return pairs;
         }
 
-        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> ParseSharedDirectoryLegacy(DocumentFile dir, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
+        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> ParseSharedDirectoryLegacy(DocumentFile dir, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -4249,7 +4320,7 @@ namespace AndriodApp1
                 toStrip = lastPathSegment.Substring(0, stripIndex + 1);
             }
             int indexNum = 0;
-            traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, dirMappingFriendlyNameToUri, toStrip, index, ref directoryCount, ref indexNum);
+            traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, dirMappingFriendlyNameToUri, toStrip, index, previousFileInfoToUse, ref directoryCount, ref indexNum);
             br = new BrowseResponse(allDirs);
             return pairs;
         }
@@ -4706,10 +4777,21 @@ namespace AndriodApp1
 
 
 
-        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string,List<Tuple<string, int, int>>> allMediaInfoDict)
+        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string,List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> prevInfoToUse)
         {
             try
             { 
+                if(prevInfoToUse!=null)
+                {
+                    if(prevInfoToUse.ContainsKey(presentableName))
+                    {
+                        var tuple = prevInfoToUse[presentableName];
+                        if(tuple.Item1 == size) //this is the file...
+                        {
+                            return tuple.Item3;
+                        }
+                    }
+                }
                 //get media attributes...
                 bool supported = IsSupportedAudio(presentableName);
                 if(!supported)
@@ -4865,7 +4947,7 @@ namespace AndriodApp1
 
 
 
-        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, ref int directoryCount, ref int indexNum)
+        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string,Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
 
@@ -4888,7 +4970,7 @@ namespace AndriodApp1
                     if (isDirectory(mime))
                     {
                         directoryCount++;
-                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, ref directoryCount, ref indexNum);
+                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse, ref directoryCount, ref indexNum);
                     }
                     else
                     {
@@ -4910,7 +4992,7 @@ namespace AndriodApp1
 
                         string searchableName = Helpers.GetFolderNameFromFile(presentableName) + @"\" + Helpers.GetFileNameFromFile(presentableName);
 
-                        Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict);
+                        Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
                         if (attributes != null)
                         {
                             MainActivity.LogDebug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
@@ -4919,6 +5001,11 @@ namespace AndriodApp1
                         pairs.Add(presentableName,new Tuple<long, string, Tuple<int, int, int, int>>(size, childUri.ToString(),attributes)); //NEED TO STORE THEM HERE...
                         index.Add(indexNum,presentableName); //throws on same key
                         indexNum++;
+                        if(indexNum % 50 == 0)
+                        {
+                            //update public status variable every so often
+                            SoulSeekState.NumberParsed = indexNum;
+                        }
 //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
                         string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
@@ -4972,7 +5059,7 @@ namespace AndriodApp1
         }
 
 
-        public void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, ref int directoryCount, ref int indexNum)
+        public void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -4981,7 +5068,7 @@ namespace AndriodApp1
                 if(childDocFile.IsDirectory)
                 {
                     directoryCount++;
-                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, ref directoryCount, ref indexNum);
+                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, ref directoryCount, ref indexNum);
                 }
                 else
                 {
@@ -4994,7 +5081,7 @@ namespace AndriodApp1
                         presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
                     }
 
-                    Tuple<int, int, int, int> attributes = GetAudioAttributes(SoulSeekState.ActiveActivityRef.ContentResolver, childDocFile.Name, childDocFile.Length(), presentableName, childDocFile.Uri, null);
+                    Tuple<int, int, int, int> attributes = GetAudioAttributes(SoulSeekState.ActiveActivityRef.ContentResolver, childDocFile.Name, childDocFile.Length(), presentableName, childDocFile.Uri, null, previousFileInfoToUse);
                     if (attributes != null)
                     {
                         MainActivity.LogDebug("fname: " + childDocFile.Name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
@@ -5003,6 +5090,11 @@ namespace AndriodApp1
                     pairs.Add(presentableName,new Tuple<long,string, Tuple<int, int, int, int>>(childDocFile.Length(), childDocFile.Uri.ToString(),null));
                     index.Add(indexNum, presentableName);
                     indexNum++;
+                    if (indexNum % 50 == 0)
+                    {
+                        //update public status variable every so often
+                        SoulSeekState.NumberParsed = indexNum;
+                    }
                     string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                     //for the brose response should only be the filename!!! 
                                                                                                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
@@ -5061,7 +5153,7 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public bool InitializeDatabase(DocumentFile dir,bool checkCache, out string errorMsg)
+        public bool InitializeDatabase(DocumentFile dir,bool checkCache, bool rescan, out string errorMsg)
         {
             errorMsg = string.Empty;
             bool success = false;
@@ -5084,12 +5176,13 @@ namespace AndriodApp1
                     Dictionary<int, string> index = null;
                     if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
                     {
-                        stringUriPairs = ParseSharedDirectoryFastDocContract(dir,ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
+                        stringUriPairs = ParseSharedDirectoryFastDocContract(dir, rescan ? SoulSeekState.SharedFileCache.FullInfo : null, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
                     }
                     else
                     {
-                        stringUriPairs = ParseSharedDirectoryLegacy(dir, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
+                        stringUriPairs = ParseSharedDirectoryLegacy(dir, rescan ? SoulSeekState.SharedFileCache.FullInfo : null, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
                     }
+                    SoulSeekState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
                     s.Stop();
                     MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds", stringUriPairs.Keys.Count, s.ElapsedMilliseconds));
                     s.Reset();
@@ -5647,7 +5740,7 @@ namespace AndriodApp1
                         {
                             docFile = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri));
                         }
-                        success = SoulSeekState.MainActivityRef.InitializeDatabase(docFile, true, out errorMessage);
+                        success = SoulSeekState.MainActivityRef.InitializeDatabase(docFile, true, false, out errorMessage);
                     }
                     catch (Exception e)
                     {   
@@ -6614,7 +6707,15 @@ namespace AndriodApp1
         /// <returns>A Task resolving an instance of Soulseek.Directory containing the contents of the requested directory.</returns>
         private static Task<Soulseek.Directory> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
         {
-            Tuple<string, string> fullDirUri = SoulSeekState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string,string> t) => {return t.Item1.EndsWith(directory); }).FirstOrDefault();
+            //the directory is the presentable name.
+            //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
+            Tuple<string, string> fullDirUri = SoulSeekState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault();
+
+            if(fullDirUri == null)
+            {
+                //as fallback safety.  I dont think this will ever happen.....
+                fullDirUri = SoulSeekState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); }).FirstOrDefault();
+            }
             if(fullDirUri==null)
             {
                 //could not find...
@@ -6675,9 +6776,10 @@ namespace AndriodApp1
             return (SoulSeekState.SharingOn && SoulSeekState.UploadDataDirectoryUri != null && SoulSeekState.UploadDataDirectoryUri != string.Empty) && !SoulSeekState.IsParsing;
         }
 
-        public static Tuple<SharingIcons, string> GetSharingMessageAndIcon()
+        public static Tuple<SharingIcons, string> GetSharingMessageAndIcon(out bool isParsing)
         {
-            if(MeetsSharingConditions())
+            isParsing = false;
+            if (MeetsSharingConditions())
             {
                 //try to parse this into a path: SoulSeekState.ShareDataDirectoryUri
                 return new Tuple<SharingIcons,string>(SharingIcons.On,SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
@@ -6688,6 +6790,7 @@ namespace AndriodApp1
             }
             else if(SoulSeekState.IsParsing)
             {
+                isParsing = true;
                 return new Tuple<SharingIcons, string>(SharingIcons.Error, SoulSeekState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
             }
             else if (SoulSeekState.FailedShareParse)
@@ -8804,6 +8907,7 @@ namespace AndriodApp1
             editor.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
             editor.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
             editor.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
+            editor.PutBoolean(SoulSeekState.M_RememberUserHistory, SoulSeekState.ShowRecentUsers);
             editor.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
             editor.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
             editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
@@ -8839,6 +8943,7 @@ namespace AndriodApp1
             outState.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
             outState.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
             outState.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
+            outState.PutBoolean(SoulSeekState.M_RememberUserHistory, SoulSeekState.ShowRecentUsers);
             outState.PutBoolean(SoulSeekState.M_MemoryBackedDownload, SoulSeekState.MemoryBackedDownload);
             outState.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
             outState.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
@@ -9382,6 +9487,46 @@ namespace AndriodApp1
             return found;
         }
     }
+    /// <summary>
+    /// Manages recent users
+    /// </summary>
+    public class RecentUserManager
+    {
+        private object recentUserLock = new object();
+        private List<string> recentUsers;
+        /// <summary>
+        /// Called at startup
+        /// </summary>
+        /// <param name="_recentUsers"></param>
+        public void SetRecentUserList(List<string> _recentUsers)
+        {
+            recentUsers = _recentUsers;
+        }
+
+        public List<string> GetRecentUserList()
+        {
+            lock (recentUserLock)
+            {
+                return recentUsers.ToList(); //a copy to avoid threading issues.
+            }
+        }
+
+        public void AddUserToTop(string user, bool andSave)
+        {
+            lock(recentUserLock)
+            {
+                if(recentUsers.Contains(user))
+                {
+                    recentUsers.Remove(user);
+                }
+                recentUsers.Insert(0, user);
+            }
+            if (andSave)
+            {
+                SeekerApplication.SaveRecentUsers();
+            }
+        }
+    }
 
     public static class SoulSeekState
     {
@@ -9421,10 +9566,27 @@ namespace AndriodApp1
         public static SlskHelp.SharedFileCache SharedFileCache = null;
         public static int UploadSpeed = -1; //bytes
         public static bool FailedShareParse = false;
-        public static bool IsParsing = false;
+        private static bool isParsing = false;
+        public static bool IsParsing
+        {
+            get
+            {
+                return isParsing;
+            }
+            set
+            {
+                isParsing = value;
+                NumberParsed = 0; //reset
+            }
+        }
+
+        public static int NumberParsed = 0;
+
         public static List<UserListItem> IgnoreUserList = new List<UserListItem>();
         public static List<UserListItem> UserList = new List<UserListItem>();
+        public static RecentUserManager RecentUsersManager = null;
         public static System.Collections.Concurrent.ConcurrentDictionary<string,string> UserNotes = null;
+        public static bool ShowRecentUsers = true;
 
         public static string UserInfoBio = string.Empty;
         public static string UserInfoPictureName = string.Empty; //filename only. The picture will be in (internal storage) FilesDir/user_info_pic/filename.
@@ -9540,6 +9702,7 @@ namespace AndriodApp1
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";
         public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
         public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";
+        public const string M_RememberUserHistory = "Momento_RememberUserHistory";
         public const string M_OnlyFreeUploadSlots = "Momento_FreeUploadSlots";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
@@ -9547,6 +9710,7 @@ namespace AndriodApp1
         public const string M_FilterStickyString = "Momento_FilterStickyString";
         public const string M_SearchResultStyle = "Momento_SearchResStyle";
         public const string M_UserList = "Cache_UserList";
+        public const string M_RecentUsersList = "Momento_RecentUsersList";
         public const string M_IgnoreUserList = "Cache_IgnoreUserList";
         public const string M_JoinedRooms = "Cache_JoinedRooms";
         public const string M_AllowPrivateRooomInvitations = "Momento_AllowPrivateRoomInvitations";
