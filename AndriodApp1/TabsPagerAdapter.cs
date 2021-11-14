@@ -522,6 +522,15 @@ namespace AndriodApp1
                     return;
                 }
                 login = SeekerApplication.ConnectAndPerformPostConnectTasks(user.Text, pass.Text);
+                try
+                {
+                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
+                    imm.HideSoftInputFromWindow(user.WindowToken, 0);
+                }
+                catch(System.Exception)
+                {
+
+                }
                 //}
                 //catch(AddressException)
                 //{
@@ -2322,7 +2331,7 @@ namespace AndriodApp1
             }
         }
 
-        private EditText chooseUserInput = null;
+        private AutoCompleteTextView chooseUserInput = null;
         private EditText customRoomName = null;
         private Spinner roomListSpinner = null;
         private LinearLayout targetRoomLayout = null;
@@ -2332,7 +2341,8 @@ namespace AndriodApp1
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.search_target_);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
-            chooseUserInput = viewInflated.FindViewById<EditText>(Resource.Id.chosenUserInput);
+            chooseUserInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserInput);
+            SeekerApplication.SetupRecentUserAutoCompleteTextView(chooseUserInput);
             customRoomName = viewInflated.FindViewById<EditText>(Resource.Id.customRoomName);
             targetRoomLayout = viewInflated.FindViewById<LinearLayout>(Resource.Id.targetRoomLayout);
             roomListSpinner = viewInflated.FindViewById<Spinner>(Resource.Id.roomListSpinner);
@@ -2395,6 +2405,10 @@ namespace AndriodApp1
             EventHandler<DialogClickEventArgs> eventHandlerClose = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
             {
                 SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
+                if(SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
+                {
+                    SoulSeekState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
+                }
                 if(sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -2824,14 +2838,14 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-            editor.PutString(SoulSeekState.M_SearchHistory, listOfSearchItems);
-            if(FilterSticky)
-            {
-                editor.PutBoolean(SoulSeekState.M_FilterSticky, FilterSticky);
-                editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
-            }
-            editor.PutInt(SoulSeekState.M_SearchResultStyle,(int)SearchResultStyle);
-            editor.Commit();
+                editor.PutString(SoulSeekState.M_SearchHistory, listOfSearchItems);
+                if(FilterSticky)
+                {
+                    editor.PutBoolean(SoulSeekState.M_FilterSticky, FilterSticky);
+                    editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
+                }
+                editor.PutInt(SoulSeekState.M_SearchResultStyle,(int)SearchResultStyle);
+                editor.Commit();
             }
         }
 

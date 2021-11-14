@@ -421,8 +421,8 @@ namespace AndriodApp1
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.invite_user_dialog_content, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
             // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.inviteUserTextEdit);
-
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.inviteUserTextEdit);
+            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
@@ -436,6 +436,7 @@ namespace AndriodApp1
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
+                SoulSeekState.RecentUsersManager.AddUserToTop(userToAdd, true);
                 ChatroomController.AddRemoveUserToPrivateRoomAPI(roomToInvite, userToAdd, true, false);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -472,7 +473,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -484,6 +485,33 @@ namespace AndriodApp1
                 }
             };
 
+            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
+            {
+                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+                {
+                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    }
+                    //Do the Browse Logic...
+                    eventHandler(sender, null);
+                }
+                else
+                {
+                    e.Handled = false;
+                }
+            };
+
+            input.KeyPress += keypressAction;
             input.EditorAction += editorAction;
             input.FocusChange += Input_FocusChange;
 
@@ -525,6 +553,10 @@ namespace AndriodApp1
 
         }
 
+        private void Input_KeyPress(object sender, View.KeyEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
 
         public static System.String LocaleToEmoji(string locale)
         {

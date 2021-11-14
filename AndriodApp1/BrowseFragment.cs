@@ -1967,7 +1967,8 @@ namespace AndriodApp1
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
             View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.browse_chosen_user, (ViewGroup)this.View, false);
             // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosenUserEditText);
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
+            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
             
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
@@ -1982,9 +1983,17 @@ namespace AndriodApp1
                 if(usernameToBrowse==null|| usernameToBrowse==string.Empty)
                 {
                     Toast.MakeText(this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
-                    (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+                    if (sender is AndroidX.AppCompat.App.AlertDialog aDiag1) //actv
+                    {
+                        aDiag1.Dismiss();
+                    }
+                    else
+                    {
+                        BrowseFragment.browseUserDialog.Dismiss();
+                    }
                     return;
                 }
+                SoulSeekState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
                 DownloadDialog.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
                 if(sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -2032,6 +2041,33 @@ namespace AndriodApp1
                 }
             };
 
+            System.EventHandler < TextView.KeyEventArgs > keypressAction = (object sender, TextView.KeyEventArgs e) =>
+            {
+                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+                {
+                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    }
+                    //Do the Browse Logic...
+                    eventHandler(sender, null);
+                }
+                else
+                {
+                    e.Handled = false;
+                }
+            };
+
+            input.KeyPress += keypressAction;
             input.EditorAction += editorAction;
             input.FocusChange += Input_FocusChange;
 
@@ -2072,6 +2108,8 @@ namespace AndriodApp1
             }
             
         }
+
+
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
         {

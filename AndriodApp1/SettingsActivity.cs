@@ -163,6 +163,16 @@ namespace AndriodApp1
         private ViewGroup listeningSubLayout2;
         private ViewGroup listeningSubLayout3;
 
+        Button sharedFolderButton;
+        Button browseSelfButton;
+        Button rescanSharesButton;
+
+        Button checkStatus;
+        Button changePort;
+
+        CheckBox useUPnPCheckBox;
+
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             MainActivity.LogDebug("Settings Created");
@@ -228,6 +238,13 @@ namespace AndriodApp1
             rememberSearchHistory.Checked = SoulSeekState.RememberSearchHistory;
             rememberSearchHistory.CheckedChange += RememberSearchHistory_CheckedChange;
 
+            Button clearRecentUserHistory = FindViewById<Button>(Resource.Id.clearRecentUsers);
+            clearRecentUserHistory.Click += ClearRecentUserHistory_Click; ;
+
+            CheckBox rememberRecentUsers = FindViewById<CheckBox>(Resource.Id.rememberRecentUsers);
+            rememberRecentUsers.Checked = SoulSeekState.ShowRecentUsers;
+            rememberRecentUsers.CheckedChange += RememberRecentUsers_CheckedChange;
+
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
             positionNumberPairs.Add(new Tuple<int, int>(0,5));
             positionNumberPairs.Add(new Tuple<int, int>(1,10));
@@ -261,7 +278,7 @@ namespace AndriodApp1
             imageView.Click += ImageView_Click;
             UpdateShareImageView();
 
-            Button sharedFolderButton = FindViewById<Button>(Resource.Id.setSharedFolder);
+            sharedFolderButton = FindViewById<Button>(Resource.Id.setSharedFolder);
             sharedFolderButton.Click += ChangeUploadDirectory;
             currentSharedFolderView = FindViewById<TextView>(Resource.Id.sharedFolderPath);
 
@@ -272,8 +289,11 @@ namespace AndriodApp1
             ImageView moreInfoButton = FindViewById<ImageView>(Resource.Id.moreInfoButton);
             moreInfoButton.Click += MoreInfoButton_Click;
 
-            Button browseSelfButton = FindViewById<Button>(Resource.Id.browseSelfButton);
+            browseSelfButton = FindViewById<Button>(Resource.Id.browseSelfButton);
             browseSelfButton.Click += BrowseSelfButton_Click;
+
+            rescanSharesButton = FindViewById<Button>(Resource.Id.rescanShares);
+            rescanSharesButton.Click += RescanSharesButton_Click;
 
             ImageView startupServiceMoreInfo = FindViewById<ImageView>(Resource.Id.helpServiceOnStartup);
             startupServiceMoreInfo.Click += StartupServiceMoreInfo_Click;
@@ -296,10 +316,10 @@ namespace AndriodApp1
             TextView portView = FindViewById<TextView>(Resource.Id.portView);
             SetPortViewText(portView);
 
-            Button changePort = FindViewById<Button>(Resource.Id.changePort);
+            changePort = FindViewById<Button>(Resource.Id.changePort);
             changePort.Click += ChangePort_Click;
 
-            Button checkStatus = FindViewById<Button>(Resource.Id.checkStatus);
+            checkStatus = FindViewById<Button>(Resource.Id.checkStatus);
             checkStatus.Click += CheckStatus_Click;
 
             Button getPriv = FindViewById<Button>(Resource.Id.getPriv);
@@ -317,7 +337,7 @@ namespace AndriodApp1
             Button editUserInfo = FindViewById<Button>(Resource.Id.editUserInfoButton);
             editUserInfo.Click += EditUserInfo_Click;
 
-            CheckBox useUPnPCheckBox = FindViewById<CheckBox>(Resource.Id.useUPnPCheckBox);
+            useUPnPCheckBox = FindViewById<CheckBox>(Resource.Id.useUPnPCheckBox);
             useUPnPCheckBox.Checked = SoulSeekState.ListenerUPnpEnabled;
             useUPnPCheckBox.CheckedChange += UseUPnPCheckBox_CheckedChange;
 
@@ -377,6 +397,56 @@ namespace AndriodApp1
             SetCompleteFolderView();
             SetIncompleteFolderView();
             SetSharedFolderView();
+        }
+
+        private void ClearRecentUserHistory_Click(object sender, EventArgs e)
+        {
+            //set to just the added users....
+            int count = SoulSeekState.UserList?.Count ?? 0;
+            if (count > 0)
+            {
+                lock(SoulSeekState.UserList)
+                {
+                    SoulSeekState.RecentUsersManager.SetRecentUserList(SoulSeekState.UserList.Select(uli => uli.Username).ToList());
+                }
+            }
+            else
+            {
+                SoulSeekState.RecentUsersManager.SetRecentUserList(new List<string>());
+            }
+            SeekerApplication.SaveRecentUsers();
+        }
+
+        private void RememberRecentUsers_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.ShowRecentUsers = e.IsChecked;
+        }
+
+        private void RescanSharesButton_Click(object sender, EventArgs e)
+        {
+            if(SoulSeekState.IsParsing)
+            {
+                Toast.MakeText(this, "Already parsing", ToastLength.Long).Show();
+                return;
+            }
+            if(string.IsNullOrEmpty(SoulSeekState.UploadDataDirectoryUri))
+            {
+                Toast.MakeText(this, "Directory not set", ToastLength.Long).Show();
+                return;
+            }
+            Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
+
+            //for rescan=true, we use the previous parse to get metadata if there is a match...
+            //so that we do not have to read the file again to get things like bitrate, samples, etc.
+            //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
+            if(SoulSeekState.PreOpenDocumentTree())
+            {
+                SuccessfulUploadExternalCallback(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri), -1, true, true);
+            }
+            else
+            {
+                SuccessfulUploadExternalCallback(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri), -1, false, true);
+            }
         }
 
         private static string GetFriendlyDownloadDirectoryName()
@@ -474,13 +544,15 @@ namespace AndriodApp1
                 changeIncompleteDirectory.Enabled = true;
                 incompleteFolderViewLayout.Alpha = 1.0f;
                 changeIncompleteDirectory.Alpha = 1.0f;
+                changeIncompleteDirectory.Clickable = true;
             }
             else
             {
                 incompleteFolderViewLayout.Enabled = false;
                 changeIncompleteDirectory.Enabled = false; //this make it not clickable
-                incompleteFolderViewLayout.Alpha = .5f;
-                changeIncompleteDirectory.Alpha = .5f;
+                incompleteFolderViewLayout.Alpha = 0.5f;
+                changeIncompleteDirectory.Alpha = 0.5f;
+                changeIncompleteDirectory.Clickable = false;
             }
         }
 
@@ -1035,17 +1107,29 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("UpdateShareImageView MainActivityRef==null");//this caused a fatal crash.. back when GetSharingMessageAndIcon() was not static....
             }
-            Tuple<SharingIcons,string> info = MainActivity.GetSharingMessageAndIcon();
+            Tuple<SharingIcons,string> info = MainActivity.GetSharingMessageAndIcon(out bool isParsing);
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
             if(imageView==null) return;
-
+            string toolTip = info.Item2;
+            int numParsed = SoulSeekState.NumberParsed;
+            if (isParsing && numParsed != 0)
+            {
+                if(numParsed==int.MaxValue) //our signal we are finishing up (i.e. creating token index)
+                {
+                    toolTip = toolTip + " (finishing up)";
+                }
+                else
+                {
+                    toolTip = toolTip + String.Format(" ({0} files parsed)", numParsed);
+                }
+            }
             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
             {
-                imageView.TooltipText = info.Item2; //api26+ otherwise crash...
+                imageView.TooltipText = toolTip; //api26+ otherwise crash...
             }
             else
             {
-                AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(imageView,info.Item2);
+                AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(imageView, toolTip);
             }
             switch(info.Item1)
             {
@@ -1073,12 +1157,17 @@ namespace AndriodApp1
 
         private void UpdateSharingViewState()
         {
+            //this isnt winforms where disabling parent, disables all children..
+
             if(SoulSeekState.SharingOn)
             {
                 sharingSubLayout1.Enabled = true;
                 sharingSubLayout1.Alpha = 1.0f;
                 sharingSubLayout2.Enabled = true;
                 sharingSubLayout2.Alpha = 1.0f;
+                sharedFolderButton.Clickable = true;
+                browseSelfButton.Clickable = true;
+                rescanSharesButton.Clickable = true;
             }
             else
             {
@@ -1086,6 +1175,9 @@ namespace AndriodApp1
                 sharingSubLayout1.Alpha = 0.5f;
                 sharingSubLayout2.Enabled = false;
                 sharingSubLayout2.Alpha = 0.5f;
+                sharedFolderButton.Clickable = false;
+                browseSelfButton.Clickable = false;
+                rescanSharesButton.Clickable = false;
             }
         }
 
@@ -1097,6 +1189,9 @@ namespace AndriodApp1
                 listeningSubLayout3.Enabled = true;
                 listeningSubLayout2.Alpha = 1.0f;
                 listeningSubLayout3.Alpha = 1.0f;
+                useUPnPCheckBox.Clickable = true;
+                changePort.Clickable = true;
+                checkStatus.Clickable = true;
             }
             else
             {
@@ -1104,11 +1199,15 @@ namespace AndriodApp1
                 listeningSubLayout3.Enabled = false;
                 listeningSubLayout2.Alpha = 0.5f;
                 listeningSubLayout3.Alpha = 0.5f;
+                useUPnPCheckBox.Clickable = false;
+                changePort.Clickable = false;
+                checkStatus.Clickable = false;
             }
         }
 
         private void ImageView_Click(object sender, EventArgs e)
         {
+            UpdateShareImageView();
             (sender as ImageView).PerformLongClick();
         }
 
@@ -1224,6 +1323,7 @@ namespace AndriodApp1
             SoulSeekState.AutoClearCompleteDownloads = false;
             SoulSeekState.AutoClearCompleteUploads = false;
             SoulSeekState.RememberSearchHistory = true;
+            SoulSeekState.ShowRecentUsers = true;
             SoulSeekState.SharingOn = false;
             SoulSeekState.FreeUploadSlotsOnly = true;
             SoulSeekState.DisableDownloadToastNotification = false;
@@ -1232,6 +1332,7 @@ namespace AndriodApp1
             (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SoulSeekState.AutoClearCompleteDownloads;
             (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SoulSeekState.AutoClearCompleteUploads;
             (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SoulSeekState.RememberSearchHistory;
+            (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SoulSeekState.ShowRecentUsers;
             (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SoulSeekState.SharingOn;
             (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SoulSeekState.FreeUploadSlotsOnly;
             (FindViewById<CheckBox>(Resource.Id.disableToastNotificationOnDownload) as CheckBox).Checked = SoulSeekState.DisableDownloadToastNotification;
@@ -1254,9 +1355,9 @@ namespace AndriodApp1
 
         private void ChangeUploadDirectory(object sender, EventArgs e)
         {
-            if (this.CheckSelfPermission(Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied) //you dont have this on api >= 29 because you never requested it, but it is NECESSARY to read media store
+            if (Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied) //you dont have this on api >= 29 because you never requested it, but it is NECESSARY to read media store
             {
-                this.RequestPermissions(new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
+                Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
             }
             else
             {
@@ -1308,7 +1409,7 @@ namespace AndriodApp1
                         }
                         else if(requestCode == UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY)
                         {
-                            this.SuccessfulUploadExternalLegacyCallback(uri, requestCode, true);
+                            this.SuccessfulUploadExternalCallback(uri, requestCode, true);
                         }
                         else if(requestCode == CHANGE_INCOMPLETE_EXTERNAL_LEGACY)
                         {
@@ -1462,13 +1563,18 @@ namespace AndriodApp1
         }
 
 
-        private void SuccessfulUploadExternalLegacyCallback(Android.Net.Uri uri, int requestCode, bool fromSubApi21 = false)
+        private void SuccessfulUploadExternalCallback(Android.Net.Uri uri, int requestCode, bool fromSubApi21 = false, bool rescan = false)
         {
             Action parseDatabaseAndUpdateUI = new Action(() => {
                 try
                 {
+                    int prevFiles = -1;
                     bool success = false;
                     SoulSeekState.IsParsing = true;
+                    if(rescan && SoulSeekState.SharedFileCache != null)
+                    {
+                        prevFiles = SoulSeekState.SharedFileCache.FileCount;
+                    }
                     this.RunOnUiThread(new Action(() =>
                     {
                         UpdateShareImageView(); //for is parsing..
@@ -1477,7 +1583,7 @@ namespace AndriodApp1
                     try
                     {
                         SoulSeekState.UploadDataDirectoryUri = uri.ToString();
-                        success = SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, out string errorMessage);
+                        success = SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, rescan, out string errorMessage);
                         if(!success)
                         {
                             throw new Exception("Failed to parse shared files: " + errorMessage);
@@ -1500,7 +1606,7 @@ namespace AndriodApp1
                         return;
                     }
                     SoulSeekState.UploadDataDirectoryUri = uri.ToString();
-                    if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode)
+                    if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode && !rescan)
                     {
                         this.ContentResolver.TakePersistableUriPermission(uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     }
@@ -1512,7 +1618,23 @@ namespace AndriodApp1
                         SetSharedFolderView();
                         int dirs = SoulSeekState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
                         int files = SoulSeekState.SharedFileCache.FileCount;
-                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum),dirs,files), ToastLength.Long).Show();
+                        string msg = string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum), dirs, files);
+                        if(rescan) //tack on additional message if applicable..
+                        {
+                            int diff = files - prevFiles;
+                            if(diff > 0)
+                            {
+                                if(diff > 1)
+                                {
+                                    msg = msg + String.Format(" {0} additional files since last scan.",diff);
+                                }
+                                else
+                                {
+                                    msg = msg + " 1 additional file since last scan.";
+                                }
+                            }
+                        }
+                        Toast.MakeText(this, msg, ToastLength.Long).Show();
                     }));
                 }
                 finally
@@ -1600,7 +1722,7 @@ namespace AndriodApp1
                 //this takes 5+ seconds in Debug mode (with 20-30 albums) which means that this MUST be done on a separate thread..
                 Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
 
-                SuccessfulUploadExternalLegacyCallback(data.Data, requestCode);
+                SuccessfulUploadExternalCallback(data.Data, requestCode, false);
 
             }
 

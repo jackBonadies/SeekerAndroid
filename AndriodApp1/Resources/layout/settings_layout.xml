@@ -509,10 +509,53 @@
                     android:id="@+id/clearHistory"
         />
             </LinearLayout>
-            <LinearLayout
+
+                        <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/searchHistoryLayout"
+                android:layout_marginTop = "10dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/recentUserHistoryLayout"
+                android:orientation="horizontal">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remember Recent Users"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/rememberRecentUsers"
+       />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clear Recent Users"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:textAllCaps="false"
+                    android:minHeight="16dp"
+                    android:foreground="@drawable/button"
+                    style="@style/SeekerButtonStyle"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:id="@+id/clearRecentUsers"
+        />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/recentUserHistoryLayout"
                 android:layout_marginTop = "2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/memoryFileDownloadSwitch"
@@ -747,7 +790,27 @@
                         android:id="@+id/sharedStatus"
                         android:tint="@color/mainTextColor"
                 />
-
+                                        <Button
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rescan Shares"
+                        android:textSize="12dp"
+                        android:layout_marginLeft="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        android:minHeight="16dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginRight="6dp"
+                        android:layout_marginBottom = "10dp"
+                        android:id="@+id/rescanShares"
+        />
 
                     <Button
                         android:layout_centerHorizontal="true"
@@ -755,7 +818,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/browse_yourself"
                         android:textSize="12dp"
-                        android:layout_marginLeft="16dp"
+                        android:layout_marginLeft="6dp"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:textAllCaps="false"
