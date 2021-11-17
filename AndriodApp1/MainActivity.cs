@@ -1197,13 +1197,14 @@ namespace AndriodApp1
             if((int)Android.OS.Build.VERSION.SdkInt >= 21)
             {
                 DocumentFile parent = null;
-                if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory())
+                Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);
+                if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentIncompleteUri.Scheme == "file")
                 {
-                    parent = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(ti.IncompleteParentUri).Path));
+                    parent = DocumentFile.FromFile(new Java.IO.File(parentIncompleteUri.Path));
                 }
                 else
                 {
-                    parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, Android.Net.Uri.Parse(ti.IncompleteParentUri)); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
+                    parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentIncompleteUri); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
                 }
 
                 DocumentFile df = parent.FindFile(ti.Filename);
@@ -8803,6 +8804,10 @@ namespace AndriodApp1
 
             if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
             {
+                if (!parent.ListFiles()[0].Delete())
+                {
+                    LogFirebase("parent.Delete() failed to delete .nomedia child...");
+                }
                 if (!parent.Delete())
                 {
                     LogFirebase("parent.Delete() failed to delete parent");
