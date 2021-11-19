@@ -1161,7 +1161,7 @@ namespace AndriodApp1
             }
             catch(Exception e)
             {
-                MainActivity.LogFirebase("PeformCleanup: " + e.Message);
+                MainActivity.LogFirebase("PeformCleanup: " + e.Message + e.StackTrace);
             }
         }
 
@@ -2917,6 +2917,7 @@ namespace AndriodApp1
                 }
                 else
                 {
+                    //timeout
                     MainActivity.LogFirebase("UpdateUserInfo case 3 " + t.Exception.Message);
                 }
             }
@@ -4777,7 +4778,17 @@ namespace AndriodApp1
 
 
 
-
+        /// <summary>
+        /// Any exceptions here get caught.  worst case, you just get no metadata...
+        /// </summary>
+        /// <param name="contentResolver"></param>
+        /// <param name="displayName"></param>
+        /// <param name="size"></param>
+        /// <param name="presentableName"></param>
+        /// <param name="childUri"></param>
+        /// <param name="allMediaInfoDict"></param>
+        /// <param name="prevInfoToUse"></param>
+        /// <returns></returns>
         private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string,List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> prevInfoToUse)
         {
             try
@@ -4874,7 +4885,7 @@ namespace AndriodApp1
                     }
                     catch(Exception e)
                     {
-                        MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace);
+                        MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SoulSeekState.ActiveActivityRef==null) + childUri?.ToString());
                     }
                 }
 
@@ -4957,6 +4968,13 @@ namespace AndriodApp1
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
             //Log.d(TAG, "node uri: ", childrenUri);
             Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize}, null, null, null);
+            //c can be null...
+            if(c==null)
+            {
+                //TODO: if this is unavoidable then test with a work around... i.e. make it so that a random folder has this problem and make sure it works parsing everything but the random folder (recursive)...
+                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " + listChildrenUri?.ToString());
+            }
+
             List<Soulseek.File> files = new List<Soulseek.File>();
             try
             {
@@ -8697,7 +8715,8 @@ namespace AndriodApp1
                                         DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
                                         uri = mFile.Uri;
                                         finalUri = mFile.Uri.ToString();
-                                        MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri);
+                                        MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri + " parent: " + parentUriOfIncomplete);
+//                                        MainActivity.LogInfoFirebase("using temp: " + 
                                         System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                                         MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
                                     }
@@ -8719,6 +8738,12 @@ namespace AndriodApp1
                         }
                         //throws "no static method with name='moveDocument' signature='(Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/net/Uri;Landroid/net/Uri;)Landroid/net/Uri;' in class Landroid/provider/DocumentsContract;"
                     }
+
+                    if (uri == null)
+                    {
+                        LogFirebase("DocumentsContract MoveDocument FAILED, override incomplete: " + SoulSeekState.OverrideDefaultIncompleteLocations);
+                    }
+
                     finalUri = uri.ToString();
 
                     //1220ms for 35mb so 10x slower
@@ -8726,10 +8751,7 @@ namespace AndriodApp1
                     //System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                     //MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
 
-                    if (uri == null)
-                    {
-                        LogFirebase("DocumentsContract MoveDocument FAILED, override incomplete: " + SoulSeekState.OverrideDefaultIncompleteLocations);
-                    }
+
                     //stopwatch.Stop();
                     //LogDebug("DocumentsContract.MoveDocument took: " + stopwatch.ElapsedMilliseconds);
                     
@@ -8801,16 +8823,29 @@ namespace AndriodApp1
             //{
             //    LogDebug("child: " + f.Name);
             //}
-
-            if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
+            try
             {
-                if (!parent.ListFiles()[0].Delete())
+                if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
                 {
-                    LogFirebase("parent.Delete() failed to delete .nomedia child...");
+                    if (!parent.ListFiles()[0].Delete())
+                    {
+                        LogFirebase("parent.Delete() failed to delete .nomedia child...");
+                    }
+                    if (!parent.Delete())
+                    {
+                        LogFirebase("parent.Delete() failed to delete parent");
+                    }
                 }
-                if (!parent.Delete())
+            }
+            catch(Exception ex)
+            {
+                if(ex.Message.Contains("Index was outside"))
                 {
-                    LogFirebase("parent.Delete() failed to delete parent");
+                    //race condition between checking length of ListFiles() and indexing [0] (twice)
+                }
+                else
+                {
+                    throw ex; //this might be important..
                 }
             }
         }
