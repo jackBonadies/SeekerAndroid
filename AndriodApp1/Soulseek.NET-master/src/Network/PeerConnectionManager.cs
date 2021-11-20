@@ -131,6 +131,7 @@ namespace Soulseek.Network
 
                 connection.Type = ConnectionTypes.Inbound | ConnectionTypes.Direct;
                 connection.MessageRead += SoulseekClient.PeerMessageHandler.HandleMessageRead;
+                connection.MessageReceived += SoulseekClient.PeerMessageHandler.HandleMessageReceived;
                 connection.MessageWritten += SoulseekClient.PeerMessageHandler.HandleMessageWritten;
                 connection.Disconnected += MessageConnection_Disconnected;
 
