@@ -4179,34 +4179,41 @@ namespace AndriodApp1
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
             MainActivity.LogInfoFirebase("case " + dir.Uri.ToString() + " - - - - " + dir.Uri.LastPathSegment); 
-            string lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(dir);
+            string lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
             string toStrip = string.Empty;
             //can be reproduced with pixel emulator API 28 (android 9). the last path segment for the downloads dir is "downloads" but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete" (note it is still a content scheme, raw: is the volume)
-
-            string volName = GetVolumeName(lastPathSegment, true, out _);
-            //if(volName==null)
-            //{
-            //    MainActivity.LogFirebase("volName is null: " + dir.Uri.ToString());
-            //}
-            if (lastPathSegment.Contains('\\'))
+            string volName = null;
+            if (msdCase)
             {
-                int stripIndex = lastPathSegment.LastIndexOf('\\');
-                toStrip = lastPathSegment.Substring(0,stripIndex + 1);
-            }
-            else if(volName!=null && lastPathSegment.Contains(volName))
-            {
-                if(lastPathSegment==volName)
-                {
-                    toStrip = null;
-                }
-                else
-                {
-                    toStrip = volName;
-                }
+                //in this case we assume the volume is primary..
             }
             else
             {
-                MainActivity.LogFirebase("contains neither: " + lastPathSegment);
+                volName = GetVolumeName(lastPathSegment, true, out _);
+                //if(volName==null)
+                //{
+                //    MainActivity.LogFirebase("volName is null: " + dir.Uri.ToString());
+                //}
+                if (lastPathSegment.Contains('\\'))
+                {
+                    int stripIndex = lastPathSegment.LastIndexOf('\\');
+                    toStrip = lastPathSegment.Substring(0,stripIndex + 1);
+                }
+                else if(volName!=null && lastPathSegment.Contains(volName))
+                {
+                    if(lastPathSegment==volName)
+                    {
+                        toStrip = null;
+                    }
+                    else
+                    {
+                        toStrip = volName;
+                    }
+                }
+                else
+                {
+                    MainActivity.LogFirebase("contains neither: " + lastPathSegment);
+                }
             }
             index = new Dictionary<int, string>();
             int indexNum = 0;
@@ -4223,7 +4230,7 @@ namespace AndriodApp1
                     selectionColumns = new string[] {
                         Android.Provider.MediaStore.IMediaColumns.Size,
                         Android.Provider.MediaStore.IMediaColumns.DisplayName,
-
+                        
                         Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
                                     Android.Provider.MediaStore.IMediaColumns.Duration,
                                     Android.Provider.MediaStore.IMediaColumns.Bitrate };
@@ -4287,16 +4294,18 @@ namespace AndriodApp1
                 catch(Exception e)
                 {
                     MainActivity.LogFirebase("pre get all mediaStoreInfo: " + e.Message + e.StackTrace);
-                    if(mediaStoreInfo!=null)
+                }
+                finally
+                {
+                    if (mediaStoreInfo != null)
                     {
                         mediaStoreInfo.Close();
                     }
                 }
-
             }
 
 
-            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, ref directoryCount, ref indexNum);
+            traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, pairs, true, volName, allDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, msdCase, msdCase ? "downloads" : null, ref directoryCount, ref indexNum);
             br = new BrowseResponse(allDirs);
             return pairs;
         }
@@ -4481,7 +4490,14 @@ namespace AndriodApp1
 
 
 
-
+        /// <summary>
+        /// We only use this in Contents Response Resolver.
+        /// </summary>
+        /// <param name="dirFile"></param>
+        /// <param name="dirToStrip"></param>
+        /// <param name="diagFromDirectoryResolver"></param>
+        /// <param name="volumePath"></param>
+        /// <returns></returns>
         private static Soulseek.Directory SlskDirFromDocumentFile(DocumentFile dirFile, string dirToStrip, bool diagFromDirectoryResolver, string volumePath)
         {
             string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
@@ -4512,9 +4528,20 @@ namespace AndriodApp1
                 }
                 try
                 {
-                    string fname = Helpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
-                    string folderName = Helpers.GetFolderNameFromFile(f.Uri.Path.Replace("/", @"\"));
-                    string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
+                    string fname = null;
+                    string searchableName = null;
+
+                    if (dirFile.Uri.Authority== "com.android.providers.downloads.documents" && !f.Uri.Path.Contains(dirFile.Uri.Path))
+                    {
+                        //msd, msf case
+                        fname = f.Name;
+                        searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
+                    }
+                    else
+                    {
+                        fname = Helpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
+                        searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
+                    }
                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                     //bc we get a path that is:
                     //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
@@ -4550,41 +4577,41 @@ namespace AndriodApp1
             return slskDir;
         }
 
-        /// <summary>
-        /// Here you want a flattened list of directories.  Directories should have full paths.  Each dir has files only.
-        /// </summary>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        private BrowseResponse ParseSharedDirectoryForBrowseResponse(DocumentFile dir, ref List<Tuple<string,string>> friendlyDirNameToUriMapping)
-        {
-            List<Android.Net.Uri> dirUris = new List<Android.Net.Uri>();
-            dirUris.Add(dir.Uri);
-            traverseToGetDirectories(dir, dirUris);
-            var rootDirUris = GetRootDirs(dir);
-            rootDirUris.Add(dir.Uri.ToString());
-            string volname = GetVolumeName(dir.Uri.LastPathSegment, true, out _); //?>?>?>
-            List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
-            foreach(Android.Net.Uri dirUri in dirUris)
-            {
-                DocumentFile dirFile = null;
-                if(SoulSeekState.PreOpenDocumentTree())
-                {
-                    dirFile = DocumentFile.FromFile(new Java.IO.File(dirUri.Path));
-                }
-                else
-                {
-                    dirFile = DocumentFile.FromTreeUri(this,dirUri); //will return null or not exists for API below 21.
-                }
-                if(dir.Name==null)
-                {
-                    MainActivity.LogInfoFirebase("dirname is null " + dir.Uri?.ToString() ?? "dirUriIsNull");
-                }
-                var slskDir = SlskDirFromDocumentFile(dirFile, dir.Name, false, volname);
-                friendlyDirNameToUriMapping.Add(new Tuple<string, string>(slskDir.Name, dirFile.Uri.ToString()));
-                allDirs.Add(slskDir);
-            }
-            return new BrowseResponse(allDirs,null);
-        }
+        ///// <summary>
+        ///// Here you want a flattened list of directories.  Directories should have full paths.  Each dir has files only.
+        ///// </summary>
+        ///// <param name="dir"></param>
+        ///// <returns></returns>
+        //private BrowseResponse ParseSharedDirectoryForBrowseResponse(DocumentFile dir, ref List<Tuple<string,string>> friendlyDirNameToUriMapping)
+        //{
+        //    List<Android.Net.Uri> dirUris = new List<Android.Net.Uri>();
+        //    dirUris.Add(dir.Uri);
+        //    traverseToGetDirectories(dir, dirUris);
+        //    var rootDirUris = GetRootDirs(dir);
+        //    rootDirUris.Add(dir.Uri.ToString());
+        //    string volname = GetVolumeName(dir.Uri.LastPathSegment, true, out _); //?>?>?>
+        //    List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
+        //    foreach(Android.Net.Uri dirUri in dirUris)
+        //    {
+        //        DocumentFile dirFile = null;
+        //        if(SoulSeekState.PreOpenDocumentTree())
+        //        {
+        //            dirFile = DocumentFile.FromFile(new Java.IO.File(dirUri.Path));
+        //        }
+        //        else
+        //        {
+        //            dirFile = DocumentFile.FromTreeUri(this,dirUri); //will return null or not exists for API below 21.
+        //        }
+        //        if(dir.Name==null)
+        //        {
+        //            MainActivity.LogInfoFirebase("dirname is null " + dir.Uri?.ToString() ?? "dirUriIsNull");
+        //        }
+        //        var slskDir = SlskDirFromDocumentFile(dirFile, dir.Name, false, volname);
+        //        friendlyDirNameToUriMapping.Add(new Tuple<string, string>(slskDir.Name, dirFile.Uri.ToString()));
+        //        allDirs.Add(slskDir);
+        //    }
+        //    return new BrowseResponse(allDirs,null);
+        //}
 
         public class CachedParseResults
         {
@@ -4959,7 +4986,7 @@ namespace AndriodApp1
 
 
 
-        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string,Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, ref int directoryCount, ref int indexNum)
+        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string,Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, bool msdMsfCase, string msdMsfBuildParentName, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
 
@@ -4989,23 +5016,30 @@ namespace AndriodApp1
                     if (isDirectory(mime))
                     {
                         directoryCount++;
-                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse, ref directoryCount, ref indexNum);
+                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse, msdMsfCase, msdMsfCase ? msdMsfBuildParentName + '\\' + name : null, ref directoryCount, ref indexNum);
                     }
                     else
                     {
-
-                        string presentableName = childUri.LastPathSegment.Replace('/', '\\');
-
-                        if (folderToStripForPresentableNames==null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                        string presentableName = null;
+                        if(msdMsfCase)
                         {
-                            if (volName != null && volName.Length != presentableName.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
-                            {
-                                presentableName = presentableName.Substring(0,volName.Length) + '\\' + presentableName.Substring(volName.Length);
-                            }
+                            presentableName = msdMsfBuildParentName + '\\' + name;
                         }
                         else
                         {
-                            presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
+                            presentableName = childUri.LastPathSegment.Replace('/', '\\');
+
+                            if (folderToStripForPresentableNames==null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                            {
+                                if (volName != null && volName.Length != presentableName.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                                {
+                                    presentableName = presentableName.Substring(0,volName.Length) + '\\' + presentableName.Substring(volName.Length);
+                                }
+                            }
+                            else
+                            {
+                                presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
+                            }
                         }
 
 
@@ -5045,9 +5079,13 @@ namespace AndriodApp1
                 }
                 Helpers.SortSlskDirFiles(files);
                 string lastPathSegment = null;
-                if(isRootCase)
+                if(msdMsfCase)
                 {
-                    lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase);
+                    lastPathSegment = msdMsfBuildParentName;
+                }
+                else if(isRootCase)
+                {
+                    lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
                 }
                 else
                 {
@@ -10429,14 +10467,30 @@ namespace AndriodApp1
             return (state.HasFlag(TransferStates.Succeeded) || state.HasFlag(TransferStates.Cancelled) || state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Completed) || state.HasFlag(TransferStates.Rejected));
         }
 
-        public static string GetLastPathSegmentWithSpecialCaseProtection(DocumentFile dir)
+        public static string GetLastPathSegmentWithSpecialCaseProtection(DocumentFile dir, out bool msdCase)
         {
+            msdCase = false;
             if (dir.Uri.LastPathSegment == "downloads")
             {
                 var dfs = dir.ListFiles();
                 if (dfs.Length > 0)
                 {
-                    return Helpers.GetAllButLast(dfs[0].Uri.LastPathSegment.Replace('/', '\\'));
+                    //if last path segment is downloads then its likely that this is the "com.android.providers.downloads.documents" authority rather than the "com.android.externalstorage.documents" authority
+                    //on android 10 (reproducible on emulator), the providers.downloads.documents authority does not give any kind of paths.  The last encoded path will always be msd:uniquenumber and so is useless
+                    //as far as a presentable name is concerned.
+
+                    string lastPathSegmentChild = dfs[0].Uri.LastPathSegment.Replace('/', '\\');
+                    //last path segment child will be "raw:/storage/emulated/0/Download/Soulseek Incomplete" for the reasonable case and "msd:24" for the bad case
+                    if(lastPathSegmentChild.Contains("\\"))
+                    {
+                        return Helpers.GetAllButLast(lastPathSegmentChild);
+                    }
+                    else
+                    {
+                        MainActivity.LogInfoFirebase("msdcase: " + lastPathSegmentChild); //should be msd:int
+                        msdCase = true;
+                        return String.Empty;
+                    }
                 }
                 else
                 {
