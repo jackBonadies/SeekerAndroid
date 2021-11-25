@@ -150,6 +150,7 @@ namespace Soulseek
             StartingToken = startingToken;
 
             ServerConnectionOptions = (serverConnectionOptions ?? new ConnectionOptions()).WithoutInactivityTimeout();
+            ServerConnectionOptions.TcpKeepAlive = true; //always true for server
             PeerConnectionOptions = peerConnectionOptions ?? new ConnectionOptions();
             TransferConnectionOptions = (transferConnectionOptions ?? new ConnectionOptions()).WithoutInactivityTimeout();
             IncomingConnectionOptions = incomingConnectionOptions ?? new ConnectionOptions();

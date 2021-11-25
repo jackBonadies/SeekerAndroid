@@ -61,6 +61,75 @@ namespace Soulseek.Network.Tcp
                 };
             }
 
+            //this is for server connections only.
+            if(Options.TcpKeepAlive)
+            {
+                try
+                {
+
+
+                    //[DllImport("libc", SetLastError = true)]
+                    //public static extern unsafe int setsockopt(int socket, int opt1, int opt2, void* name, uint size);
+                    //[DllImport("libc", SetLastError = true)]
+                    //public static extern unsafe int getsockopt(int socket, int level, int optname, void* optval, uint* optlen);
+                    //int on = 1;
+                    //uint on3 = 4;
+                    //int za = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    //int x = setsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 1, 9, &on, sizeof(int));
+                    //za = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    //on = 3;
+                    //int y = setsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 5, &on, sizeof(int));
+                    //za = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    //int z = setsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 6, &on, sizeof(int));
+                    //za = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    //int q = setsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 4, &on, sizeof(int));
+                    //on = 20;
+                    //q = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 4, &on, &on3);
+
+                    //getsockopt returns values set by setsockopt which is good.
+                    //if the values are set by IOControl they are not returned which seems bad.
+                    //in both cases things seemed to work a lot better, but wireshark did not report keep alive packets.. :/
+                    //to test - 
+                    //turn off wifi
+                    //kill foreground service
+                    //adb shell dumpsys battery unplug
+                    //adb shell dumpsys deviceidle force-idle
+                    //try sending message to self, or check privileges etc.
+
+
+
+
+                    //its night and day with this code.  it really does seem to fix it.
+                    //with it you get a timeout around 10 seconds after doze mode.
+                    //another solution is to register the enter idle mode broadcast. can also check (SoulSeekState.ActiveActivityRef.GetSystemService(PowerService) as PowerManager).IsDeviceIdleMode
+                    int size = 4;
+                    byte[] keepAlive = new byte[size * 3];
+                    
+                    //// Turn keepalive on
+                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(1U), 0, keepAlive, 0, size);
+                    
+                    //// Amount of time without activity before sending a keepalive
+                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(30U), 0, keepAlive, size, size);
+                    //(TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.KeepAlive, 1);
+                        //// Keepalive interval to 5 seconds
+                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(10U), 0, keepAlive, size * 2, size);
+                    //(TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.SendTimeout = 1000;
+                    (TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.IOControl(System.Net.Sockets.IOControlCode.KeepAliveValues, keepAlive, null);
+
+
+
+
+
+                    //int qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 4, &on, &on3);
+                    //qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 5, &on, &on3);
+                    //qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 6, &on, &on3);
+                }
+                catch(Exception)
+                {
+                    //if we cant set the keep alive, just continue on.
+                }
+            }
+
             WatchdogTimer = new SystemTimer()
             {
                 Enabled = false,
@@ -449,6 +518,10 @@ namespace Soulseek.Network.Tcp
                 throw new InvalidOperationException("The underlying Tcp connection is closed");
             }
 
+            //bool selectRead = TcpClient.Client.Poll(1000000, SelectMode.SelectRead);
+            //bool selectWrite = TcpClient.Client.Poll(1000000, SelectMode.SelectWrite);
+            //bool selectError = TcpClient.Client.Poll(1000000, SelectMode.SelectError);
+
             if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException($"Invalid attempt to send to a disconnected or transitioning connection (current state: {State})");
@@ -591,11 +664,29 @@ namespace Soulseek.Network.Tcp
 
                     var bytesRemaining = length - totalBytesRead;
                     var bytesToRead = bytesRemaining >= buffer.Length ? buffer.Length : (int)bytesRemaining; // cast to int is safe because of the check against buffer length.
-
+#if DEBUG
+                    if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
+                    {
+                        Console.WriteLine("server pre read bytes low level: " + bytesToRead);
+                        Console.WriteLine(this.Id);
+                        Console.WriteLine(TcpClient.Client.RemoteEndPoint.ToString() + TcpClient.Client.LocalEndPoint.ToString());
+                    }
+#endif
                     var bytesRead = await Stream.ReadAsync(buffer, 0, bytesToRead, cancellationToken).ConfigureAwait(false);
-
+#if DEBUG
+                    if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
+                    {
+                        Console.WriteLine("server post read bytes low level");
+                    }
+#endif
                     if (bytesRead == 0)
                     {
+#if DEBUG
+                        if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
+                        {
+                            Console.WriteLine("server remote connection closed");
+                        }
+#endif
                         throw new ConnectionException("Remote connection closed");
                     }
 
@@ -617,6 +708,12 @@ namespace Soulseek.Network.Tcp
             }
             catch (Exception ex)
             {
+#if DEBUG
+                if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
+                {
+                    Console.WriteLine("server remote disconnect");
+                }
+#endif
                 Disconnect($"Read error: {ex.Message}", ex);
 
                 if (ex is TimeoutException || ex is OperationCanceledException)
@@ -670,6 +767,14 @@ namespace Soulseek.Network.Tcp
                     await Stream.WriteAsync(inputBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
 
                     totalBytesWritten += bytesRead;
+#if DEBUG
+                    if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
+                    {
+                        Console.WriteLine("server write bytes: ");
+                        Console.WriteLine(this.Id);
+                        Console.WriteLine(TcpClient.Client.RemoteEndPoint.ToString() + TcpClient.Client.LocalEndPoint.ToString());
+                    }
+#endif
 
                     Interlocked.CompareExchange(ref DataWritten, null, null)?
                         .Invoke(this, new ConnectionDataEventArgs(totalBytesWritten, length));

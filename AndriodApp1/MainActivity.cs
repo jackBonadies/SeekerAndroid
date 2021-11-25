@@ -1152,7 +1152,7 @@ namespace AndriodApp1
                 MainActivity.LogDebug("in cleanup entry");
                 if (state is IEnumerable<TransferItem> tis)
                 {
-                    PerfomCleanupItems(tis);
+                    PerfomCleanupItems(tis.ToList()); //added tolist() due to enumerable exception.
                 }
                 else
                 {
@@ -4889,7 +4889,7 @@ namespace AndriodApp1
                     try
                     {
                         Android.Media.MediaMetadataRetriever mediaMetadataRetriever = new Android.Media.MediaMetadataRetriever();
-                        mediaMetadataRetriever.SetDataSource(SoulSeekState.ActiveActivityRef, childUri);
+                        mediaMetadataRetriever.SetDataSource(SoulSeekState.ActiveActivityRef, childUri); //TODO: error file descriptor must not be null.
                         string? bitRateStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Bitrate);
                         string? durationStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
                         if(HasMediaStoreDurationColumn())
@@ -4995,11 +4995,21 @@ namespace AndriodApp1
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
             //Log.d(TAG, "node uri: ", childrenUri);
             Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize}, null, null, null);
-            //c can be null...
-            if(c==null)
+            //c can be null... reasons are fairly opaque - if remote exception return null. if underlying content provider is null.
+            if (c == null)
             {
-                //TODO: if this is unavoidable then test with a work around... i.e. make it so that a random folder has this problem and make sure it works parsing everything but the random folder (recursive)...
-                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " + listChildrenUri?.ToString());
+                //diagnostic code.
+                
+                //would a non /children uri work?
+                bool nonChildrenWorks = contentResolver.Query(rootUri, new string[] { Document.ColumnSize }, null, null, null) != null;
+
+                //would app context work?
+                bool wouldActiveWork = SoulSeekState.ActiveActivityRef.ApplicationContext.ContentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null) != null;
+
+                //would list files work?
+                bool docFileLegacyWork = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentUri).Exists();
+
+                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " + listChildrenUri?.ToString() + "nonchildren: " + nonChildrenWorks + " activeContext: "+ wouldActiveWork + " legacyWork: " + docFileLegacyWork);
             }
 
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -11342,7 +11352,7 @@ namespace AndriodApp1
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("getFlacMetadata: " + e.Message + e.StackTrace);
+                MainActivity.LogFirebase("getFlacMetadata: " + e.Message + e.StackTrace); //TODO: getFlacMetadata: FileDescriptor must not be null a
             }
             finally
             {
