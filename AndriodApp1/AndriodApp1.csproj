@@ -53,6 +53,7 @@
     <AndroidUseAapt2>true</AndroidUseAapt2>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>

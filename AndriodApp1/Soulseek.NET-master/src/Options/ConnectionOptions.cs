@@ -30,12 +30,14 @@ namespace Soulseek
         /// <param name="connectTimeout">The connection timeout, in milliseconds, for client and peer TCP connections.</param>
         /// <param name="inactivityTimeout">The inactivity timeout, in milliseconds, for peer TCP connections.</param>
         /// <param name="proxyOptions">Optional SOCKS 5 proxy configuration options.</param>
+        /// <param name="tcpKeepAlive">Tcp Keep Alive.</param>
         public ConnectionOptions(
             int readBufferSize = 16384,
             int writeBufferSize = 16384,
             int connectTimeout = 10000,
             int inactivityTimeout = 15000,
-            ProxyOptions proxyOptions = null)
+            ProxyOptions proxyOptions = null,
+            bool tcpKeepAlive = false)
         {
             ReadBufferSize = readBufferSize;
             WriteBufferSize = writeBufferSize;
@@ -43,7 +45,13 @@ namespace Soulseek
             InactivityTimeout = inactivityTimeout;
 
             ProxyOptions = proxyOptions;
+            TcpKeepAlive = tcpKeepAlive;
         }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether to use Tcp Keep Alive
+        /// </summary>
+        public bool TcpKeepAlive { get; set; }
 
         /// <summary>
         ///     Gets the connection timeout, in milliseconds, for client and peer TCP connections. (Default = 10000).
@@ -80,7 +88,7 @@ namespace Soulseek
         /// <returns>This instance with InactivityTimeout disabled.</returns>
         public ConnectionOptions WithoutInactivityTimeout()
         {
-            return new ConnectionOptions(ReadBufferSize, WriteBufferSize, ConnectTimeout, inactivityTimeout: -1, ProxyOptions);
+            return new ConnectionOptions(ReadBufferSize, WriteBufferSize, ConnectTimeout, inactivityTimeout: -1, ProxyOptions, TcpKeepAlive);
         }
     }
 }
