@@ -26,7 +26,13 @@ app:showAsAction="ifRoom"/>
         android:title="@string/settings"
         app:showAsAction="always"/>
 
-  <item android:id="@+id/about_action"
+	<item android:id="@+id/shutdown_action"
+android:icon="@drawable/baseline_settings_white_24"
+android:title="@string/shutdown"
+app:showAsAction="never"/>
+
+
+	<item android:id="@+id/about_action"
 android:icon="@drawable/baseline_settings_white_24"
 android:title="@string/about_title"
 app:showAsAction="never"/>
