@@ -3075,7 +3075,7 @@ namespace AndriodApp1
                 SoulSeekState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
                 try
                 {
-                    Helpers.CreateNotificationChannel(SoulSeekState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME);
+                    Helpers.CreateNotificationChannel(SoulSeekState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
                     NotifInfo notifInfo = null;
                     string directory = Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
@@ -3095,7 +3095,7 @@ namespace AndriodApp1
 
                     Notification n = MainActivity.CreateUploadNotification(SoulSeekState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
                     NotificationManagerCompat nmc = NotificationManagerCompat.From(SoulSeekState.MainActivityRef);
-                    nmc.Notify(notifInfo.NOTIF_ID_FOR_USER, n);
+                    nmc.Notify(e.Transfer.Username.GetHashCode(), n);
                 }
                 catch (Exception err)
                 {
@@ -5858,6 +5858,10 @@ namespace AndriodApp1
                         pager.SetCurrentItem(1, false);
                     }
                 }
+                else if (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)
+                {
+                    HandleFromNotificationUploadIntent();
+                }
                 else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
                 {
                     MainActivity.LogInfoFirebase("from browse self");
@@ -6350,7 +6354,7 @@ namespace AndriodApp1
             SoulSeekState.MainActivityRef = this;
             base.OnStart();
         }
-
+        public static bool fromNotificationMoveToUploads = false;
         protected override void OnNewIntent(Intent intent)
         {
             base.OnNewIntent(intent);
@@ -6361,15 +6365,15 @@ namespace AndriodApp1
                 MainActivity.LogInfoFirebase("from wishlist clicked");
                 int currentPage = pager.CurrentItem;
                 int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
-                if (currentPage==1)
+                if (currentPage == 1)
                 {
-                    if(tabID==int.MaxValue)
+                    if (tabID == int.MaxValue)
                     {
                         LogFirebase("tabID == int.MaxValue");
                     }
-                    else if(!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
+                    else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                     {
-                        Toast.MakeText(this,this.GetString(Resource.String.wishlist_tab_error),ToastLength.Long).Show();
+                        Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long).Show();
                     }
                     else
                     {
@@ -6391,7 +6395,11 @@ namespace AndriodApp1
                     pager.SetCurrentItem(1, false);
                 }
             }
-            else if(Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
+            else if (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)
+            {
+                HandleFromNotificationUploadIntent();
+            }
+            else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
             {
                 MainActivity.LogInfoFirebase("from browse self");
                 pager.SetCurrentItem(3, false);
@@ -6407,6 +6415,33 @@ namespace AndriodApp1
                 //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
                 //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
                 pager.SetCurrentItem(1, false);
+            }
+        }
+
+        private void HandleFromNotificationUploadIntent()
+        {
+            //either we change to uploads mode now (if resumed), or we wait for on resume to do it.
+
+            MainActivity.LogInfoFirebase("from uploads clicked");
+            int currentPage = pager.CurrentItem;
+            if (currentPage == 2)
+            {
+                if (StaticHacks.TransfersFrag?.Activity == null || (StaticHacks.TransfersFrag?.IsResumed ?? false))
+                {
+                    MainActivity.LogInfoFirebase("we need to wait for on resume");
+                    fromNotificationMoveToUploads = true; //we read this in onresume
+                }
+                else
+                {
+                    //we can change to uploads mode now
+                    MainActivity.LogDebug("go to upload now");
+                    StaticHacks.TransfersFrag.MoveToUploadForNotif();
+                }
+            }
+            else
+            {
+                fromNotificationMoveToUploads = true; //we read this in onresume
+                pager.SetCurrentItem(2, false);
             }
         }
 
@@ -6658,6 +6693,7 @@ namespace AndriodApp1
 
         public const string UPLOADS_CHANNEL_ID =  "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
+        public const string UPLOADS_NOTIF_EXTRA = "From Upload";
 
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
@@ -6682,9 +6718,10 @@ namespace AndriodApp1
             }
             string contextText = directoryString;
             Intent notifIntent = new Intent(context, typeof(MainActivity));
-            notifIntent.PutExtra("From Upload", 2);
+            notifIntent.AddFlags(ActivityFlags.SingleTop);
+            notifIntent.PutExtra(UPLOADS_NOTIF_EXTRA, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, 0);
+                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             Notification notification = null;
