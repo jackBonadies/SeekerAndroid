@@ -612,4 +612,5 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
   <string name="search_tabs_bold">
     <b>Search Tabs</b>
   </string>
+	<string name="shutdown">Shutdown</string>
 </resources>

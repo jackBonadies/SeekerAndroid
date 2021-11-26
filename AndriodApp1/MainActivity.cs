@@ -2227,8 +2227,22 @@ namespace AndriodApp1
             }
         }
 
+        public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
 
-        
+        public static bool IsShuttingDown(Intent intent)
+        {
+            if(intent?.Action == null)
+            {
+                return false;
+            }
+            if(intent.Action == ACTION_SHUTDOWN)
+            {
+                return true;
+            }
+            return false;
+        }
+
+
 
         public static volatile int UPLOAD_COUNT = -1; // a hack see below
 
@@ -2726,6 +2740,10 @@ namespace AndriodApp1
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show();});
                     }
                     return; //DO NOT RETRY!!! or will do an infinite loop!
+                }
+                if(e.Exception is System.ObjectDisposedException)
+                {
+                    return; //DO NOT RETRY!!! we are shutting down
                 }
 
 
@@ -3577,6 +3595,11 @@ namespace AndriodApp1
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
+            if (SeekerApplication.IsShuttingDown(intent))
+            {
+                this.StopSelf();
+                return StartCommandResult.NotSticky;
+            }
             SoulSeekState.DownloadKeepAliveServiceRunning = true;
 
             Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
@@ -3680,6 +3703,12 @@ namespace AndriodApp1
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
+            if(SeekerApplication.IsShuttingDown(intent))
+            {
+                this.StopSelf();
+                return StartCommandResult.NotSticky;
+            }
+
             SoulSeekState.UploadKeepAliveServiceRunning = true;
 
             Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
@@ -3775,6 +3804,11 @@ namespace AndriodApp1
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
+            if (SeekerApplication.IsShuttingDown(intent))
+            {
+                this.StopSelf();
+                return StartCommandResult.NotSticky;
+            }
             MainActivity.LogInfoFirebase("keep alive service started...");
             SoulSeekState.IsStartUpServiceCurrentlyRunning = true;
 
@@ -3853,6 +3887,55 @@ namespace AndriodApp1
 
 
 
+    [Activity(Label = "CloseActivity", Theme = "@style/AppTheme.NoActionBar")]
+    public class CloseActivity : AppCompatActivity
+    {
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            base.OnCreate(savedInstanceState);
+            MainActivity.LogInfoFirebase("shutting down");
+
+            //stop all soulseek connection.
+            if(SoulSeekState.SoulseekClient != null)
+            {
+                //closes server socket, distributed connections, and peer connections. cancels searches, stops listener.
+                //this shutdown cleanly closes tcp connections. 
+                // - ex. say you are downloading from QT, by closing the tcp stream, the person uploading to you will immediately 
+                //       know that you are no longer there and set the status to "Aborted".
+                //       compared to just killing service and "swiping up" which will uncleanly close the connection, QT will continue
+                //       writing bytes with no one receiving them for several seconds.
+                SoulSeekState.SoulseekClient.Dispose();
+                SoulSeekState.SoulseekClient = null;
+            }
+
+            //stop the 3 potential foreground services.
+            Intent intent = new Intent(this, typeof(UploadForegroundService));
+            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
+            StartService(intent);
+
+            intent = new Intent(this, typeof(DownloadForegroundService));
+            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
+            StartService(intent);
+
+            intent = new Intent(this, typeof(SeekerKeepAliveService));
+            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
+            StartService(intent);
+
+            //remove this final "closing" activity from task list.
+            if ((int)Android.OS.Build.VERSION.SdkInt < 21)
+            {
+                this.FinishAffinity();
+            }
+            else
+            {
+                this.FinishAndRemoveTask();
+            }
+
+            //actually unload all classes, statics, etc from JVM.
+            //the process will still be a "cached background process" that is fine.
+            Java.Lang.JavaSystem.Exit(0);
+        }
+    }
 
 
 
@@ -3860,11 +3943,8 @@ namespace AndriodApp1
 
 
 
-
-
-
-    //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+        //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
+        [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
     public class MainActivity : AppCompatActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         public static object SHARED_PREF_LOCK = new object();
@@ -6536,6 +6616,23 @@ namespace AndriodApp1
                     Intent intent2 = new Intent(SoulSeekState.MainActivityRef, typeof(SettingsActivity));
                     //intent.PutExtra("SaveDataDirectoryUri", SoulSeekState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
                     SoulSeekState.MainActivityRef.StartActivityForResult(intent2, 140);
+                    return true;
+                case Resource.Id.shutdown_action:
+                    Intent intent3 = new Intent(this, typeof(CloseActivity));
+                    //Clear all activities and start new task
+                    //ClearTask - causes any existing task that would be associated with the activity 
+                    // to be cleared before the activity is started. can only be used in conjunction with NewTask.
+                    // basically it clears all activities in the current task.
+                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask); 
+                    this.StartActivity(intent3);
+                    if((int)Android.OS.Build.VERSION.SdkInt < 21)
+                    {
+                        this.FinishAffinity();
+                    }
+                    else
+                    {
+                        this.FinishAndRemoveTask();
+                    }
                     return true;
                 case Resource.Id.about_action:
                     var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
