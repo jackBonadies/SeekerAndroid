@@ -5121,6 +5121,13 @@ namespace AndriodApp1
             base.OnPrepareOptionsMenu(menu);
         }
 
+        public void RefreshForModeSwitch()
+        {
+            SetRecyclerAdapter();
+            SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
+            SetNoTransfersMessage();
+        }
+
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
             switch (item.ItemId)
@@ -5158,9 +5165,7 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_toggle_download_upload:
                     InUploadsMode = !InUploadsMode;
-                    SetRecyclerAdapter();
-                    SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
-                    SetNoTransfersMessage();
+                    RefreshForModeSwitch();
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     MainActivity.LogInfoFirebase("action_cancel_and_clear_all Pressed");
@@ -5735,7 +5740,21 @@ namespace AndriodApp1
         public override void OnResume()
         {
             StaticHacks.TransfersFrag = this;
+            if(MainActivity.fromNotificationMoveToUploads)
+            {
+                MainActivity.fromNotificationMoveToUploads = false;
+                this.MoveToUploadForNotif();
+            }
             base.OnResume();
+        }
+
+        public void MoveToUploadForNotif()
+        {
+            InUploadsMode = true;
+            CurrentlySelectedDLFolder = null;
+            CurrentlySelectedUploadFolder = null;
+            this.RefreshForModeSwitch();
+            SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
         }
 
         public override void OnPause()
