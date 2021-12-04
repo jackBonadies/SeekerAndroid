@@ -236,9 +236,12 @@ namespace AndriodApp1
             //return base.OnNavigateUp();
         }
 
-        public static void AddUserLogic(Context c, string username, Action UIaction)
+        public static void AddUserLogic(Context c, string username, Action UIaction, bool massImportCase = false)
         {
-            Toast.MakeText(c, string.Format(c.GetString(Resource.String.adding_user_),username), ToastLength.Short).Show();
+            if(!massImportCase)
+            {
+                Toast.MakeText(c, string.Format(c.GetString(Resource.String.adding_user_),username), ToastLength.Short).Show();
+            }
 
             Action<Task<Soulseek.UserData>> continueWithAction = (Task<Soulseek.UserData> t) =>
             {
@@ -254,20 +257,30 @@ namespace AndriodApp1
                     else if (t.Exception != null && t.Exception != null && t.Exception.InnerException is Soulseek.UserNotFoundException)
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                            Toast.MakeText(c, Resource.String.error_adding_user_not_found, ToastLength.Short).Show();
+                            if(!massImportCase)
+                            {
+                                Toast.MakeText(c, Resource.String.error_adding_user_not_found, ToastLength.Short).Show();
+                            }
+                            else
+                            {
+                                Toast.MakeText(c, String.Format("Error adding {0}: user not found", username), ToastLength.Short).Show();
+                            }
                         });
                     }
                 }
                 else
                 {
                     MainActivity.UserListAddUser(t.Result);
-                    if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
+                    if(!massImportCase)
                     {
-                        lock (MainActivity.SHARED_PREF_LOCK)
+                        if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
                         {
-                         var editor = SoulSeekState.SharedPreferences.Edit();
-                        editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
-                        editor.Commit();
+                            lock (MainActivity.SHARED_PREF_LOCK)
+                            {
+                             var editor = SoulSeekState.SharedPreferences.Edit();
+                            editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
+                            editor.Commit();
+                            }
                         }
                     }
                     if (UIaction != null)
@@ -281,7 +294,7 @@ namespace AndriodApp1
             SoulSeekState.SoulseekClient.AddUserAsync(username).ContinueWith(continueWithAction);
         }
 
-        public static void AddUserAPI(Context c, string username, Action UIaction)
+        public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
         {
             
             if (username == string.Empty || username == null)
@@ -321,13 +334,13 @@ namespace AndriodApp1
                         });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(()=>{AddUserLogic(c,username,UIaction); });
+                    SoulSeekState.MainActivityRef.RunOnUiThread(()=>{AddUserLogic(c,username,UIaction, massImportCase); });
 
                 }));
             }
             else
             {
-                AddUserLogic(c, username, UIaction);
+                AddUserLogic(c, username, UIaction, massImportCase);
             }
         }
 
@@ -852,7 +865,7 @@ namespace AndriodApp1
                 if(userDataExists)
                 {
                     viewNumFiles.Text = item.UserData.FileCount.ToString("N0") + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.files);
-                    viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SeekerApplication.STRINGS_KBS;
+                    viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SlskHelp.CommonHelpers.STRINGS_KBS;
                 }
                 else
                 {

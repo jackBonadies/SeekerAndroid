@@ -353,6 +353,9 @@ namespace AndriodApp1
             listeningSubLayout3 = FindViewById<ViewGroup>(Resource.Id.listeningRow3);
             UpdateListeningViewState();
 
+            Button importData = this.FindViewById<Button>(Resource.Id.importDataButton);
+            importData.Click += ImportData_Click;
+
             /*
             **NOTE**
             * 
@@ -397,6 +400,17 @@ namespace AndriodApp1
             SetCompleteFolderView();
             SetIncompleteFolderView();
             SetSharedFolderView();
+        }
+
+        private void ImportData_Click(object sender, EventArgs e)
+        {
+            if(!SoulSeekState.currentlyLoggedIn || !SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
+            {
+                Toast.MakeText(this, "Must be logged in and connected to import data.", ToastLength.Long).Show();
+                return;
+            }
+            Intent intent = new Intent(this, typeof(ImportWizardActivity));
+            StartActivity(intent);
         }
 
         private void ClearRecentUserHistory_Click(object sender, EventArgs e)

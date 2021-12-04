@@ -29,11 +29,16 @@
   <color name="normalTextColor">#000000</color>
   <color name="slightContrastColor">#c7c7c7</color>
   <color name="slightestContrastColor">#e0e0e0</color>
-  
-  
-  <color name="subTextColor">#ff757575</color>
-  
-  
-  <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
+	
+	<color name="nextPage">#ff5A595B</color>
+	<color name="currentPage">#ff0C9DCE</color>
+	<color name="prevPage">#ffC1E1ED</color>
+	
+	<color name="subTextColor">#ff757575</color>
+	<color name="slightTint">#18000000</color>
+
+
+
+	<color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
   <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 </resources>

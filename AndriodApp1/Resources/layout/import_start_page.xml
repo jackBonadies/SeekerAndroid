@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16dp"
+        android:text="Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > 'Export Client Configuration Data', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap 'Import' to get started."
+        />
+       <Button
+        android:layout_gravity="center_horizontal"
+        android:text="Import"
+        android:foreground="@drawable/button"
+        android:id="@+id/importData"
+            android:layout_marginTop="20dp"
+
+        
+        style="@style/SeekerButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+      <androidx.core.widget.ContentLoadingProgressBar
+        android:layout_below="@id/recyclerViewChips"
+    android:layout_width="match_parent"
+        android:id="@+id/contentLoadingProgressBar1"
+        android:layout_marginTop="20dp"
+    android:layout_height="wrap_content"
+        style="@android:style/Widget.DeviceDefault.ProgressBar"
+    android:indeterminate="true" />
+
+</LinearLayout>

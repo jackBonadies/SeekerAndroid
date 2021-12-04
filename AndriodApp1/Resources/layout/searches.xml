@@ -100,8 +100,19 @@
                 android:textColor = "#ffffff" />
         </LinearLayout>
         THE HEADER-->
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_below = "@id/header1"
+        android:minWidth="25px"
+        android:minHeight="0px"
+        android:elevation="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="2dp"
+        android:paddingTop="2dp"
+        android:id="@+id/recyclerViewChips" />
+
+        <ListView
+            android:layout_below = "@id/recyclerViewChips"
             android:minWidth="25px"
                   android:paddingBottom="80dp"
             android:clipToPadding="false"
