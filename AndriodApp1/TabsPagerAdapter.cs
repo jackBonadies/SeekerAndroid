@@ -780,6 +780,8 @@ namespace AndriodApp1
         public string LastSearchTerm = string.Empty;
         public int LastSearchResultsCount = 0;
 
+        public List<ChipDataItem> ChipDataItems;
+
         public SearchTab Clone(bool forWishlist)
         {
             SearchTab clone = new SearchTab();
@@ -969,6 +971,23 @@ namespace AndriodApp1
 
             //*********************
             SearchTabHelper.SaveStateToSharedPreferences();
+        }
+
+        /// <summary>
+        /// This is done in the case of import
+        /// TODO: testing - this is the only way to create a wishlist tab without the main activity created so beware!! and test!!
+        ///    prove that this is always initialized (so we dont save and wipe away all previous wishes...)
+        /// </summary>
+        public static void AddWishlistSearchTabFromString(string wish)
+        {
+            lastWishlistID--;
+            SearchTabCollection[lastWishlistID] = new SearchTab();
+            SearchTabCollection[lastWishlistID].LastSearchTerm = wish;
+            SearchTabCollection[lastWishlistID].SearchTarget = SearchTarget.Wishlist;
+            SearchTabCollection[lastWishlistID].CurrentlySearching = false;
+
+            //*********************
+            
         }
 
         public static int LastSearchResultsCount
@@ -1921,7 +1940,8 @@ namespace AndriodApp1
         }
         
         public static volatile SearchFragment Instance = null;
-
+        public RecyclerView recyclerViewChips;
+        public ChipsItemRecyclerAdapter recyclerChipsAdapter;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Instance = this; 
@@ -1942,6 +1962,22 @@ namespace AndriodApp1
             //note: changing from AutoCompleteTextView to EditText fixes both the hardware keyboard issue, and the backspace issue.
 
             ListView lv = rootView.FindViewById<ListView>(Resource.Id.listView1);
+
+            bool showChips = false;
+            recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
+            if(showChips)
+            {
+                recyclerViewChips.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                recyclerViewChips.Visibility = ViewStates.Gone;
+            }
+
+            var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
+            recyclerViewChips.SetItemAnimator(null);
+            recyclerViewChips.SetLayoutManager(manager);
+
 
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
@@ -2009,6 +2045,15 @@ namespace AndriodApp1
                 SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.SearchResponses);
                 lv.Adapter = (customAdapter);
             }
+            showChips = false;
+            if (showChips)// && SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems != null)
+            {
+                var xx= new List<ChipDataItem>();
+                xx.Add(new ChipDataItem(ChipType.FileCount,true, "test"));
+                recyclerChipsAdapter = new ChipsItemRecyclerAdapter(xx);
+                recyclerViewChips.SetAdapter(recyclerChipsAdapter);
+            }
+
             lv.ItemClick -= Lv_ItemClick;
             lv.ItemClick += Lv_ItemClick;
             lv.Clickable = true;
@@ -3347,6 +3392,23 @@ namespace AndriodApp1
                     {
                         SearchTabHelper.SaveStateToSharedPreferences();
                     }
+
+                    if(fromTab== SearchTabHelper.CurrentTab)
+                    {
+                        //show the chips..
+                        bool showChips = false;
+                        if(showChips)
+                        {
+                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
+                            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
+                            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                                SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+                            }));
+                        }
+
+                    }
+
                 }));
 
 
@@ -4086,9 +4148,9 @@ namespace AndriodApp1
         public void setItem(SearchResponse item, bool noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SeekerApplication.STRINGS_KBS; //kbs
-            viewFileType.Text = Helpers.GetDominantFileType(item);
+            viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item)); //todo maybe also cache this...
+            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
+            viewFileType.Text = item.GetDominantFileType();
             if(item.FreeUploadSlots>0)
             {
                 viewQueue.Text = "";
@@ -4208,7 +4270,7 @@ namespace AndriodApp1
             {
                 viewQueue.Text = item.QueueLength.ToString();
             }
-            viewFileType.Text = Helpers.GetDominantFileType(item);
+            viewFileType.Text = item.GetDominantFileType();
 
             if(SearchFragment.SearchResultStyle==SearchResultStyleEnum.CollapsedAll && opposite ||
                 SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)

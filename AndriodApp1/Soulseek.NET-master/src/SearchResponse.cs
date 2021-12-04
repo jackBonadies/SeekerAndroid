@@ -80,6 +80,147 @@ namespace Soulseek
                 return true;
             }
         }
+        private string cachedDominantFileType = null;
+        //we used to do this in SetItem.  That might get called too many times.. so lets cache the result so that we only do it once.
+        //similar to before we only compute it when we actually need it (i.e. it scrolls into view).
+        public string GetDominantFileType()
+        {
+            if(!string.IsNullOrEmpty(cachedDominantFileType))
+            {
+                return cachedDominantFileType;
+            }
+            //basically this works in two ways.  if the first file has a type of .mp3, .flac, .wav, .aiff, .wma, .aac then thats likely the type.
+            //if not then we do a more expensive parsing, where we get the most common
+            string ext = System.IO.Path.GetExtension(this.Files.First().Filename);  //do not use Soulseek.File.Extension that will be "" most of the time...
+            string dominantTypeToReturn = "";
+            if (SlskHelp.CommonHelpers.KNOWN_TYPES.Contains(ext))
+            {
+                dominantTypeToReturn = ext;
+            }
+            else
+            {
+                Dictionary<string, int> countTypes = new Dictionary<string, int>();
+                ext = "";
+                foreach (Soulseek.File f in this.Files)
+                {
+                    ext = System.IO.Path.GetExtension(f.Filename);
+                    if (countTypes.ContainsKey(ext))
+                    {
+                        countTypes[ext] = countTypes[ext] + 1;
+                    }
+                    else
+                    {
+                        countTypes.Add(ext, 1);
+                    }
+                }
+                string dominantType = "";
+                int count = 0;
+                foreach (var pair in countTypes)
+                {
+                    if (pair.Value > count)
+                    {
+                        dominantType = pair.Key;
+                        count = pair.Value;
+                    }
+                }
+                dominantTypeToReturn = dominantType;
+            }
+            //now get a representative file and get some extra info (if any)
+            Soulseek.File representative = null;
+            Soulseek.File representative2 = null;
+            foreach (Soulseek.File f in this.Files)
+            {
+                if (representative == null && dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
+                {
+                    representative = f;
+                    continue;
+                }
+                if (dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
+                {
+                    representative2 = f;
+                    break;
+                }
+            }
+            if (representative == null)
+            {
+                //shouldnt happen
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
+                return cachedDominantFileType;
+            }
+
+
+
+            //vbr flags never work so just get two representative files and see if bitrate is same...
+
+
+            bool isVbr = (representative.IsVariableBitRate == null) ? false : representative.IsVariableBitRate.Value;
+
+            if (representative2 != null)
+            {
+                if (representative.BitRate != null && representative2.BitRate != null)
+                {
+                    if (representative.BitRate != representative2.BitRate)
+                    {
+                        isVbr = true;
+                    }
+                }
+            }
+
+            int bitRate = -1;
+            int bitDepth = -1;
+            double sampleRate = double.NaN;
+            foreach (var attr in representative.Attributes)
+            {
+                switch (attr.Type)
+                {
+                    case FileAttributeType.VariableBitRate:
+                        if (attr.Value == 1)
+                        {
+                            isVbr = true;
+                        }
+                        break;
+                    case FileAttributeType.BitRate:
+                        bitRate = attr.Value;
+                        break;
+                    case FileAttributeType.BitDepth:
+                        bitDepth = attr.Value;
+                        break;
+                    case FileAttributeType.SampleRate:
+                        sampleRate = attr.Value / 1000.0;
+                        break;
+                }
+            }
+            if (!isVbr && bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
+            {
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
+                return cachedDominantFileType; //nothing to add
+            }
+            else if (isVbr)
+            {
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (vbr)";
+                return cachedDominantFileType;
+            }
+            else if (bitDepth != -1 && !double.IsNaN(sampleRate))
+            {
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KBS + ")";
+                return cachedDominantFileType;
+            }
+            else if (!double.IsNaN(sampleRate))
+            {
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + sampleRate + SlskHelp.CommonHelpers.STRINGS_KBS + ")";
+                return cachedDominantFileType;
+            }
+            else if (bitRate != -1)
+            {
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + bitRate + SlskHelp.CommonHelpers.STRINGS_KBS + ")";
+                return cachedDominantFileType;
+            }
+            else
+            {
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
+                return cachedDominantFileType;
+            }
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SearchResponse"/> class.

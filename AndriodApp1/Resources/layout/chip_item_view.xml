@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+              android:id="@+id/chipLayout"
+android:paddingLeft="4dp"
+android:paddingRight="4dp"
+    android:orientation="horizontal">
+    <android.support.design.chip.Chip
+        android:text="mp3"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:id="@+id/chip1"
+        android:backgroundTint="@android:color/white"
+        style="@style/Widget.MaterialComponents.Chip.Filter"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chipSeparator"
+        android:paddingLeft="4dp"
+    android:textSize="20dp"
+    android:textColor="@android:color/black"
+        android:layout_margin="0dp"
+        android:visibility="visible"
+            android:text="•"
+android:textStyle="bold"
+        android:layout_gravity="center_vertical"
+        />
+</LinearLayout>

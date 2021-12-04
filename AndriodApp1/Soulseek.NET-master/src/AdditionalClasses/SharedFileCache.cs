@@ -5,10 +5,35 @@
     using Soulseek;
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Threading;
+
+
+    public static class CommonHelpers
+    {
+        //this is a cache for localized strings accessed in tight loops...
+        private static string strings_kbs;
+        public static string STRINGS_KBS
+        {
+            get
+            {
+                return strings_kbs;
+            }
+            set
+            {
+                strings_kbs = value;
+            }
+        }
+
+        static CommonHelpers()
+        {
+            KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();
+        }
+        public static ReadOnlyCollection<string> KNOWN_TYPES;
+    }
 
     /// <summary>
     ///     Caches shared files.

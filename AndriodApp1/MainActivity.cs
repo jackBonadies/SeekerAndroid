@@ -2173,7 +2173,7 @@ namespace AndriodApp1
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
-            strings_kbs = this.Resources.GetString(Resource.String.kilobytes_per_second);
+            CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
             strings_kHz = this.Resources.GetString(Resource.String.kilohertz);
             //shouldnt we also connect??? TODO TODO
 
@@ -2624,20 +2624,6 @@ namespace AndriodApp1
             }
         }
 
-
-        //this is a cache for localized strings accessed in tight loops...
-        private static string strings_kbs;
-        public static string STRINGS_KBS
-        {
-            get
-            {
-                return strings_kbs;
-            }
-            private set
-            {
-                strings_kbs = value;
-            }
-        }
 
         private static string strings_kHz;
         public static string STRINGS_KHZ
@@ -10174,12 +10160,6 @@ namespace AndriodApp1
             }
         }
 
-        static Helpers()
-        {
-            KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();
-        }
-        public static ReadOnlyCollection<string> KNOWN_TYPES;
-
 
         public static string GetNiceDateTime(DateTime dt)
         {
@@ -10708,134 +10688,6 @@ namespace AndriodApp1
             }
         }
 
-        public static string GetDominantFileType(SearchResponse resp)
-        {
-            //basically this works in two ways.  if the first file has a type of .mp3, .flac, .wav, .aiff, .wma, .aac then thats likely the type.
-            //if not then we do a more expensive parsing, where we get the most common
-            string ext = System.IO.Path.GetExtension(resp.Files.First().Filename);  //do not use Soulseek.File.Extension that will be "" most of the time...
-            string dominantTypeToReturn = "";
-            if (KNOWN_TYPES.Contains(ext))
-            {
-                dominantTypeToReturn = ext;
-            }
-            else
-            {
-                Dictionary<string,int> countTypes = new Dictionary<string, int>();
-                ext = "";
-                foreach(Soulseek.File f in resp.Files)
-                {
-                    ext = System.IO.Path.GetExtension(f.Filename);
-                    if (countTypes.ContainsKey(ext))
-                    {
-                        countTypes[ext] = countTypes[ext] +1;
-                    }
-                    else
-                    {
-                        countTypes.Add(ext, 1);
-                    }
-                }
-                string dominantType = "";
-                int count = 0;
-                foreach(var pair in countTypes)
-                {
-                    if(pair.Value>count)
-                    {
-                        dominantType = pair.Key;
-                        count = pair.Value;
-                    }
-                }
-                dominantTypeToReturn = dominantType;
-            }
-            //now get a representative file and get some extra info (if any)
-            Soulseek.File representative = null;
-            Soulseek.File representative2 = null;
-            foreach (Soulseek.File f in resp.Files)
-            {
-                if(representative==null && dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
-                {
-                    representative = f;
-                    continue;
-                }
-                if(dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
-                {
-                    representative2 = f;
-                    break;
-                }
-            }
-            if(representative==null)
-            {
-                //shouldnt happen
-                return dominantTypeToReturn.TrimStart('.');
-            }
-
-
-
-            //vbr flags never work so just get two representative files and see if bitrate is same...
-
-
-            bool isVbr = (representative.IsVariableBitRate == null) ? false : representative.IsVariableBitRate.Value;
-
-            if (representative2 != null)
-            {
-                if(representative.BitRate!=null && representative2.BitRate != null)
-                {
-                    if(representative.BitRate != representative2.BitRate)
-                    {
-                        isVbr = true;
-                    }
-                }
-            }
-
-            int bitRate = -1;
-            int bitDepth = -1;
-            double sampleRate = double.NaN;
-            foreach(var attr in representative.Attributes)
-            {
-                switch(attr.Type)
-                {
-                    case FileAttributeType.VariableBitRate:
-                        if(attr.Value==1)
-                        {
-                            isVbr = true;
-                        }
-                        break;
-                    case FileAttributeType.BitRate:
-                        bitRate = attr.Value;
-                        break;
-                    case FileAttributeType.BitDepth:
-                        bitDepth = attr.Value;
-                        break;
-                    case FileAttributeType.SampleRate:
-                        sampleRate = attr.Value / 1000.0;
-                        break;
-                }
-            }
-            if(!isVbr && bitRate==-1 && bitDepth == -1 && double.IsNaN(sampleRate))
-            {
-                return dominantTypeToReturn.TrimStart('.'); //nothing to add
-            }
-            else if(isVbr)
-            {
-                return dominantTypeToReturn.TrimStart('.') + " (vbr)";
-            }
-            else if(bitDepth!=-1 && !double.IsNaN(sampleRate))
-            {
-                return dominantTypeToReturn.TrimStart('.') + " (" + bitDepth + ", " + sampleRate + SeekerApplication.STRINGS_KBS + ")";
-            }
-            else if(!double.IsNaN(sampleRate))
-            {
-                return dominantTypeToReturn.TrimStart('.') + " (" + sampleRate + SeekerApplication.STRINGS_KBS + ")";
-            }
-            else if(bitRate!=-1)
-            {
-                return dominantTypeToReturn.TrimStart('.') + " (" + bitRate + SeekerApplication.STRINGS_KBS + ")";
-            }
-            else
-            {
-                return dominantTypeToReturn.TrimStart('.');
-            }
-        }
-
         /// <summary>
         /// Get all BUT the filename
         /// </summary>
@@ -11117,7 +10969,7 @@ namespace AndriodApp1
             builder.Show();
         }
 
-        private static void SaveUserNotes()
+        public static void SaveUserNotes()
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {

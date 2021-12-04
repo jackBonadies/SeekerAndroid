@@ -1087,10 +1087,26 @@
                 android:id="@+id/editUserInfoButton"
        />
 
+                        <Button
+                android:layout_below="@id/editUserInfoButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Import external client data"
+                android:layout_marginLeft="10dp"
+                android:foreground="@drawable/button"
+                style="@style/SeekerButtonStyle"
+                android:paddingLeft="7dp"
+                android:paddingRight="7dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
+                android:id="@+id/importDataButton"
+       />
+
 
 
             <Button
-                android:layout_below="@id/editUserInfoButton"
+                android:layout_below="@id/importDataButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/restore_default_settings"

@@ -107,9 +107,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BrowseFragment.cs" />
+    <Compile Include="bzip2\BZip2BitInputStream.cs" />
+    <Compile Include="bzip2\BZip2BlockDecompressor.cs" />
+    <Compile Include="bzip2\BZip2DivSufSort.cs" />
+    <Compile Include="bzip2\BZip2HuffmanStageDecoder.cs" />
+    <Compile Include="bzip2\BZip2InputStream.cs" />
+    <Compile Include="bzip2\Bzip2MTFAndRLE2StageEncoder.cs" />
+    <Compile Include="bzip2\CRC32.cs" />
+    <Compile Include="bzip2\HuffmanAllocator.cs" />
+    <Compile Include="bzip2\MoveToFront.cs" />
     <Compile Include="ChatroomActivity.cs" />
+    <Compile Include="ChipsAdapter.cs" />
     <Compile Include="DownloadDialog.cs" />
     <Compile Include="EditUserInfoActivity.cs" />
+    <Compile Include="ImportWizardActivity.cs" />
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="MessagesActivity.cs" />
@@ -1046,6 +1057,43 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\tree_path_item_view_dummy.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\chip_item_view.xml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\chip_item_view_dummy.xml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\wizard_activity_layout.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\import_start_page.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\import_list_layout.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\import_item_view.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\import_item_view_dummy.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

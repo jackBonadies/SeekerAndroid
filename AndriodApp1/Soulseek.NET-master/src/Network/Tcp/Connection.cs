@@ -109,22 +109,24 @@ namespace Soulseek.Network.Tcp
                     System.Buffer.BlockCopy(System.BitConverter.GetBytes(1U), 0, keepAlive, 0, size);
                     
                     //// Amount of time without activity before sending a keepalive
-                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(30U), 0, keepAlive, size, size);
+                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(3000U), 0, keepAlive, size, size);
                     //(TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.KeepAlive, 1);
                         //// Keepalive interval to 5 seconds
-                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(10U), 0, keepAlive, size * 2, size);
+                    System.Buffer.BlockCopy(System.BitConverter.GetBytes(2000U), 0, keepAlive, size * 2, size);
                     //(TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.SendTimeout = 1000;
                     (TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.IOControl(System.Net.Sockets.IOControlCode.KeepAliveValues, keepAlive, null);
 
 
-
-
+                    //on Redmi 3s - with values 1 (on), 30 (idle), and 10 (interval) it sends one after 1s inactivity, 1s interval.
+                    //rooted, tcpdump -i any 'tcp port 2271' -w test.pcap
+                    //on Redmi 3s - with values 1 (on), 5000 (idle), and 5000 (interval) it sends one after 5s inactivity, 5s interval.
+                    //so likely its in ms with the lower bound being 1s
 
                     //int qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 4, &on, &on3);
                     //qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 5, &on, &on3);
                     //qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 6, &on, &on3);
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     //if we cant set the keep alive, just continue on.
                 }
