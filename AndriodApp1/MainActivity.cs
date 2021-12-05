@@ -3100,6 +3100,7 @@ namespace AndriodApp1
         /// <param name="userStatus"></param>
         private static void UserListAddIfContainsUser(string username, UserData userData, UserStatus userStatus)
         {
+            UserPresence? prevStatus = UserPresence.Offline;
             lock (SoulSeekState.UserList)
             {
                 bool found = false;
@@ -3114,6 +3115,7 @@ namespace AndriodApp1
                         }
                         if (userStatus != null)
                         {
+                            prevStatus = item.UserStatus?.Presence ?? UserPresence.Offline;
                             item.UserStatus = userStatus;
                         }
                         break;
@@ -3125,6 +3127,47 @@ namespace AndriodApp1
                     //but also it could be users people added on a different client so maybe we want them???
                 }
             }
+            //if user was previously offline and now they are not offline, then do the notification.
+            //note - this method does not get called when first adding users. which I think is ideal for notifications.
+            if(!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && userStatus.Presence != UserPresence.Offline)
+            {
+                MainActivity.LogDebug("from offline to online " + username);
+                if(SoulSeekState.UserOnlineAlerts != null && SoulSeekState.UserOnlineAlerts.ContainsKey(username))
+                {
+                    //show notification.
+                    ShowNotificationForUserOnlineAlert(username);
+                }
+            }
+            else
+            {
+                MainActivity.LogDebug("NOT from offline to online " + username);
+            }
+        }
+
+        public const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
+        public const string CHANNEL_NAME_USER_ONLINE = "User Online Alerts";
+        public const string FromUserOnlineAlert = "FromUserOnlineAlert";
+        public static void ShowNotificationForUserOnlineAlert(string username)
+        {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                try
+                {
+                    Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
+                    Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(UserListActivity));
+                    notifIntent.AddFlags(ActivityFlags.SingleTop);
+                    notifIntent.PutExtra(FromUserOnlineAlert, true);
+                    PendingIntent pendingIntent =
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                    // notificationId is a unique int for each notification that you must define
+                    notificationManager.Notify(username.GetHashCode(), n);
+                }
+                catch (System.Exception e)
+                {
+                    MainActivity.LogFirebase("ShowNotificationForUserOnlineAlert failed: " + e.Message + e.StackTrace);
+                }
+            });
         }
 
 
@@ -3162,6 +3205,7 @@ namespace AndriodApp1
                 SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
 
                 SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
+                SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
                 SearchTabHelper.RestoreStateFromSharedPreferences();
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
@@ -3217,6 +3261,36 @@ namespace AndriodApp1
                     formatter.Serialize(userNotesStream, userNotes);
                     return Convert.ToBase64String(userNotesStream.ToArray());
                 }
+            }
+        }
+
+        public static string SaveUserOnlineAlertsFromString(System.Collections.Concurrent.ConcurrentDictionary<string, byte> onlineAlertsDict)
+        {
+            if (onlineAlertsDict == null || onlineAlertsDict.Keys.Count == 0)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                using (System.IO.MemoryStream onlineAlertsStream = new System.IO.MemoryStream())
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(onlineAlertsStream, onlineAlertsDict);
+                    return Convert.ToBase64String(onlineAlertsStream.ToArray());
+                }
+            }
+        }
+
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> RestoreUserOnlineAlertsFromString(string base64onlineAlerts)
+        {
+            if (base64onlineAlerts == string.Empty)
+            {
+                return new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
+            }
+            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64onlineAlerts)))
+            {
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, byte>;
             }
         }
 
@@ -3363,6 +3437,7 @@ namespace AndriodApp1
                 }
                 else
                 {
+                    MainActivity.LogDebug("user status changed " + e.Username);
                     UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
                     SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
                 }
@@ -9794,6 +9869,10 @@ namespace AndriodApp1
         public static List<UserListItem> UserList = new List<UserListItem>();
         public static RecentUserManager RecentUsersManager = null;
         public static System.Collections.Concurrent.ConcurrentDictionary<string,string> UserNotes = null;
+        /// <summary>
+        /// There is no concurrent hashset so concurrent dictionary is used. the value is pointless so its only 1 byte.
+        /// </summary>
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UserOnlineAlerts = null;
         public static bool ShowRecentUsers = true;
 
         public static string UserInfoBio = string.Empty;
@@ -9956,6 +10035,7 @@ namespace AndriodApp1
         public const string M_UserInfoBio = "Momento_UserInfoBio";
         public const string M_UserInfoPicture = "Momento_UserInfoPicture";
         public const string M_UserNotes = "Momento_UserNotes";
+        public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts";
 
         public const string M_ManualIncompleteDirectoryUri = "Momento_ManualIncompleteDirectoryUri";
         public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
@@ -10234,6 +10314,27 @@ namespace AndriodApp1
             }
         }
 
+        public static void AddUserOnlineAlertMenuItem(IMenu menu, int i, int j, int k, string username)
+        {
+            string title = null;
+            if (SoulSeekState.UserOnlineAlerts.ContainsKey(username))
+            {
+                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_online_alert);
+            }
+            else
+            {
+                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.set_online_alert);
+            }
+            if (i != -1)
+            {
+                menu.Add(i, j, k, title);
+            }
+            else
+            {
+                menu.Add(title);
+            }
+        }
+
         private static void SetAddRemoveTitle(IMenuItem menuItem, string username)
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
@@ -10354,7 +10455,7 @@ namespace AndriodApp1
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
         /// <returns></returns>
-        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote=null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored=null)
+        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote=null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored=null, Action uiUpdateSetResetOnlineAlert = null)
         {
             if(activity==null)
             {
@@ -10433,6 +10534,19 @@ namespace AndriodApp1
             {
                 ShowEditAddNoteDialog(usernameInQuestion, uiUpdateActionNote);
                 return true;
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
+            {
+                SoulSeekState.UserOnlineAlerts[usernameInQuestion] = 0;
+                Helpers.SaveOnlineAlerts();
+                uiUpdateSetResetOnlineAlert();
+            }
+            else if(contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
+            {
+                SoulSeekState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
+                Helpers.SaveOnlineAlerts();
+                uiUpdateSetResetOnlineAlert();
+                
             }
             return false;
         }
@@ -10975,6 +11089,17 @@ namespace AndriodApp1
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
                 editor.PutString(SoulSeekState.M_UserNotes, SeekerApplication.SaveUserNotesToString(SoulSeekState.UserNotes));
+                editor.Commit();
+            }
+        }
+
+
+        public static void SaveOnlineAlerts()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SeekerApplication.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
                 editor.Commit();
             }
         }

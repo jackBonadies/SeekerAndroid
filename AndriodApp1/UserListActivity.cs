@@ -81,7 +81,7 @@ namespace AndriodApp1
         {
             if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
             {
-                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null,null))
+                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null,null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
                     MainActivity.LogDebug("handled by commons");
                     return true;
@@ -667,6 +667,7 @@ namespace AndriodApp1
             {
                 SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
                 Helpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                Helpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
                 Helpers.AddGivePrivilegesIfApplicable(menu, -1);
             }
         }
@@ -682,6 +683,7 @@ namespace AndriodApp1
         public TextView viewUsername;
         public ImageView viewUserStatus;
         public ImageView viewMoreOptions;
+        public ImageView viewOnlineAlerts;
         public TextView viewNumFiles;
         public TextView viewSpeed;
         public TextView viewNote;
@@ -720,6 +722,7 @@ namespace AndriodApp1
             viewNumFiles = FindViewById<TextView>(Resource.Id.numFiles);
             viewSpeed = FindViewById<TextView>(Resource.Id.speed);
             viewNote = FindViewById<TextView>(Resource.Id.textViewNote);
+            viewOnlineAlerts = FindViewById<ImageView>(Resource.Id.online_alerts_image);
 
             viewNoteLayout = FindViewById<ViewGroup>(Resource.Id.noteLayout);
             viewStatsLayout = FindViewById<ViewGroup>(Resource.Id.statsLayout);
@@ -763,6 +766,15 @@ namespace AndriodApp1
                 else
                 {
                     viewNoteLayout.Visibility = ViewStates.Gone;
+                }
+
+                if(SoulSeekState.UserOnlineAlerts.ContainsKey(item.Username))
+                {
+                    viewOnlineAlerts.Visibility = ViewStates.Visible;
+                }
+                else
+                {
+                    viewOnlineAlerts.Visibility = ViewStates.Invisible;
                 }
 
                 //both item.UserStatus and item.UserData have status
