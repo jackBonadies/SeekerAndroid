@@ -2484,10 +2484,10 @@ namespace AndriodApp1
             AttemptedToJoinAutoJoins = true;
         }
 
-        public static string CHANNEL_ID = "Chatroom Messages ID";
-        public static string CHANNEL_NAME = "Chatroom Messages";
-        public static string FromRoomName = "FromThisRoom";
-        public static string ComingFromMessageTapped = "FromAMessage";
+        public const string CHANNEL_ID = "Chatroom Messages ID";
+        public const string CHANNEL_NAME = "Chatroom Messages";
+        public const string FromRoomName = "FromThisRoom";
+        public const string ComingFromMessageTapped = "FromAMessage";
         public static string currentlyInsideRoomName = string.Empty;
 
         public static void ShowNotification(Message msg, string roomName)

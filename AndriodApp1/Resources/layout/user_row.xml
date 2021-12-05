@@ -44,6 +44,20 @@
             android:textSize="22dp"
             android:singleLine = "true" />
 
+               <ImageView
+            android:id="@+id/online_alerts_image"
+            android:layout_width="wrap_content"
+            android:visibility="invisible"
+            app:srcCompat="@drawable/bell"
+            android:tint="@color/subTextColor"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="2dp"
+            
+            />
+
+
      <!--          <ImageView
             android:layout_marginTop = "4dp"
              android:layout_marginBottom = "4dp"

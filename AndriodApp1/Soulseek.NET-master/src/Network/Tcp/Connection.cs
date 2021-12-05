@@ -121,6 +121,7 @@ namespace Soulseek.Network.Tcp
                     //rooted, tcpdump -i any 'tcp port 2271' -w test.pcap
                     //on Redmi 3s - with values 1 (on), 5000 (idle), and 5000 (interval) it sends one after 5s inactivity, 5s interval.
                     //so likely its in ms with the lower bound being 1s
+                    //on rooted samsung galaxy tab 3, lineageOS, same thing :)
 
                     //int qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 4, &on, &on3);
                     //qt = getsockopt((int)((TcpClient as Soulseek.Network.Tcp.TcpClientAdapter).Client.Handle), 6, 5, &on, &on3);
