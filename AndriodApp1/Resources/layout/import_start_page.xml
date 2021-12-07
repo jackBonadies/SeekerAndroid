@@ -7,7 +7,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16dp"
-        android:text="Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > 'Export Client Configuration Data', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap 'Import' to get started."
+        android:text="Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > 'Export Client Configuration Data', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap 'Import' to get started."
         />
        <Button
         android:layout_gravity="center_horizontal"
