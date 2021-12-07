@@ -230,10 +230,17 @@ namespace AndriodApp1
                     selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, selectedImportedData.Value.IgnoredBanned, ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems(), selectedImportedData.Value.UserNotes);
                     ImportSelectedData(selectedImportedData.Value);
                     Toast.MakeText(this, "Successfully imported client data", ToastLength.Long).Show();
+                    MemoryCleanup();
                     this.Finish();
                     break;
             }
             //pager.SetCurrentItem(pager.CurrentItem + 1, true);
+        }
+
+        private void MemoryCleanup()
+        {
+            selectedImportedData = null;
+            fullImportedData = null;
         }
 
         private void ImportSelectedData(ImportedData selectedData)
@@ -1386,15 +1393,20 @@ namespace AndriodApp1
             bool diagContainsPaxHeader = false;
             if (Encoding.ASCII.GetString(paxHeader, 0, 14) == "././@PaxHeader")
             {
-                diagContainsPaxHeader = true;
+                //skip 1024 byte pax header that was present on both windows and linux. (python version 3.9 tarfile.DEFAULT_FORMAT==2==PAX)
+                stream.Seek(1024, SeekOrigin.Begin);
             }
-            stream.Seek(1024, SeekOrigin.Begin); //skip 1024 byte pax header that was present on both windows and linux.
+            else
+            {
+                //depending on python version there may not be a pax header... (version 2.7 to 3.7 tarfile.DEFAULT_FORMAT==1==gnu)
+                stream.Seek(0, SeekOrigin.Begin);
+            }
             var buffer = new byte[100];
             stream.Read(buffer, 0, 100);
             var name = Encoding.ASCII.GetString(buffer).Trim('\0');
             if (String.IsNullOrWhiteSpace(name))
             {
-                throw new Exception("");
+                throw new Exception("SkipTar - null or whitespace");
             }
             stream.Seek(24, SeekOrigin.Current);
             stream.Read(buffer, 0, 12);
@@ -1559,14 +1571,18 @@ namespace AndriodApp1
             }
             return listOfUsernames;
         }
-
+        /// <summary>
+        /// Note: there is an older config file version that has userlist in a section 
+        /// called columns that can mess things up if we dont consider the section...
+        /// </summary>
+        public const string sectionOfInterest = "[server]";
         public static ImportedData ParseNicotine(System.IO.Stream stream)
         {
             List<string> userList = new List<string>();
             List<string> bannedIgnoredList = new List<string>();
             List<string> wishlists = new List<string>();
             List<Tuple<string, string>> notes = new List<Tuple<string, string>>();
-
+            string currentSection = string.Empty;
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
                 string line;
@@ -1576,6 +1592,10 @@ namespace AndriodApp1
                     //possible key
                     if (line.Contains(" = "))
                     {
+                        if (currentSection != sectionOfInterest)
+                        {
+                            continue;
+                        }
                         int keySep = line.IndexOf(" = ");
                         string keyname = line.Substring(0, keySep);
                         switch (keyname)
@@ -1604,7 +1624,13 @@ namespace AndriodApp1
                                 continue;
                         }
                     }
-
+                    else
+                    {
+                        if (line.StartsWith("[") && line.EndsWith("]"))
+                        {
+                            currentSection = line;
+                        }
+                    }
 
 
                 }
