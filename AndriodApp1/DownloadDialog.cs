@@ -188,6 +188,11 @@ namespace AndriodApp1
             reqFiles.Click += ReqFiles_Click;
             //selectedPositions.Clear();
             TextView userHeader = view.FindViewById<TextView>(Resource.Id.userHeader);
+            TextView subHeader = view.FindViewById<TextView>(Resource.Id.userHeaderSub);
+
+
+
+            ViewGroup headerLayout = view.FindViewById<ViewGroup>(Resource.Id.header1);
             
             if(searchResponse == null)
             {
@@ -196,8 +201,9 @@ namespace AndriodApp1
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
             }
-            userHeader.Text = "     User: " + searchResponse.Username;
-            userHeader.Click += UserHeader_Click;
+            userHeader.Text = "User: " + searchResponse.Username;
+            subHeader.Text = "Total: " + Helpers.GetSubHeaderText(searchResponse);
+            headerLayout.Click += UserHeader_Click;
             log.Debug(MainActivity.logCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
             ListView listView = view.FindViewById<ListView>(Resource.Id.listView1);
@@ -212,6 +218,12 @@ namespace AndriodApp1
             this.customAdapter = new DownloadCustomAdapter(SoulSeekState.MainActivityRef, searchResponse.Files.ToList());
             this.customAdapter.Owner = this;
             listView.Adapter = (customAdapter);
+        }
+
+        private void UpdateSubHeader()
+        {
+            TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
+            subHeader.Text = "Total: " + Helpers.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -929,12 +941,12 @@ namespace AndriodApp1
                 if((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
                     e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                    e.View.FindViewById<TextView>(Resource.Id.textView1).Background = Resources.GetDrawable(Resource.Color.cellbackSelected,null);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected,null);
                 }
                 else
                 {
                     e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    e.View.FindViewById<TextView>(Resource.Id.textView1).Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
                 }
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Add(e.Position);
@@ -944,13 +956,13 @@ namespace AndriodApp1
 #pragma warning disable 0618
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                    e.View.FindViewById<TextView>(Resource.Id.textView1).Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                    e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
                 }
                 else
                 {
                     e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                    e.View.FindViewById<TextView>(Resource.Id.textView1).Background = Resources.GetDrawable(Resource.Color.cellback);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellback);
                 }
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Remove(e.Position);
@@ -1312,6 +1324,7 @@ namespace AndriodApp1
                     }
                     this.UpdateSearchResponseWithFullDirectory(dirTask.Result);
                     this.UpdateListView();
+                    this.UpdateSubHeader();
                     //this.customAdapter = new DownloadCustomAdapter(Context, dirTask.Result.Files.ToList());
                     //this.customAdapter.Owner = this;
                     //listView.Adapter = (customAdapter);
@@ -1443,13 +1456,13 @@ namespace AndriodApp1
 #pragma warning disable 0618
                  if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                  {
-                    itemView.Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                    itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                    itemView.Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
+                    //itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
                  }
                  else
                  {
                     itemView.Background = Owner.Resources.GetDrawable(Resource.Color.cellback);
-                    itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellback);
+                    //itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellback);
                  }
             }
 #pragma warning restore 0618
@@ -1461,7 +1474,7 @@ namespace AndriodApp1
     public class DownloadItemView : RelativeLayout
     {
         private TextView viewFilename;
-        private TextView viewSize;
+        //private TextView viewSize;
         private TextView viewAttributes;
         public DownloadItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -1483,15 +1496,15 @@ namespace AndriodApp1
         private void setupChildren()
         {
             viewFilename = FindViewById<TextView>(Resource.Id.textView1);
-            viewSize = FindViewById<TextView>(Resource.Id.textView2);
+            //viewSize = FindViewById<TextView>(Resource.Id.textView2);
             viewAttributes = FindViewById<TextView>(Resource.Id.textView3);
         }
 
         public void setItem(Soulseek.File item)
         {
             viewFilename.Text = Helpers.GetFileNameFromFile(item.Filename);
-            viewSize.Text = string.Format("{0:0.##} mb", item.Size / (1024.0 * 1024.0));
-            viewAttributes.Text = GetStringFromAttributes(item.Attributes);
+            //viewSize.Text = string.Format("{0:0.##} mb", item.Size / (1024.0 * 1024.0));
+            viewAttributes.Text = Helpers.GetSizeLengthAttrString(item);
         }
 
         /// <summary>
