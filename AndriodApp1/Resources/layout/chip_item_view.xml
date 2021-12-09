@@ -7,7 +7,7 @@
 android:paddingLeft="4dp"
 android:paddingRight="4dp"
     android:orientation="horizontal">
-    <android.support.design.chip.Chip
+<com.google.material.support.design.chip.Chip
         android:text="mp3"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@ android:paddingRight="4dp"
     android:textColor="@android:color/black"
         android:layout_margin="0dp"
         android:visibility="visible"
-            android:text="•"
+            android:text="x"
 android:textStyle="bold"
         android:layout_gravity="center_vertical"
         />

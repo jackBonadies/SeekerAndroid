@@ -202,12 +202,12 @@ namespace Soulseek
             }
             else if (bitDepth != -1 && !double.IsNaN(sampleRate))
             {
-                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KBS + ")";
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ + ")";
                 return cachedDominantFileType;
             }
             else if (!double.IsNaN(sampleRate))
             {
-                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + sampleRate + SlskHelp.CommonHelpers.STRINGS_KBS + ")";
+                cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ + ")";
                 return cachedDominantFileType;
             }
             else if (bitRate != -1)

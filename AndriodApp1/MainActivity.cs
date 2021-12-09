@@ -2174,7 +2174,7 @@ namespace AndriodApp1
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
             CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
-            strings_kHz = this.Resources.GetString(Resource.String.kilohertz);
+            CommonHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
             //shouldnt we also connect??? TODO TODO
 
 
@@ -2625,18 +2625,7 @@ namespace AndriodApp1
         }
 
 
-        private static string strings_kHz;
-        public static string STRINGS_KHZ
-        {
-            get
-            {
-                return strings_kHz;
-            }
-            private set
-            {
-                strings_kHz = value;
-            }
-        }
+
 
         public static Task<UserInfo> UserInfoResponseHandler(string uname, IPEndPoint ipEndPoint)
         {
@@ -10756,6 +10745,136 @@ namespace AndriodApp1
                 return "";
             }
         }
+
+
+        public static string GetSubHeaderText(SearchResponse searchResponse)
+        {
+            int numFiles = searchResponse.FileCount;
+            long totalBytes = searchResponse.Files.Sum(f=>f.Size);
+
+            //if total bytes greater than 1GB 
+            string sizeString = null;
+            if(totalBytes > 1024*1024*1024)
+            {
+                sizeString = string.Format("{0:0.##} gb", totalBytes / (1024.0 * 1024.0 * 1024.0));
+            }
+            else
+            {
+                sizeString = string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
+            }
+            
+            var filesWithLength = searchResponse.Files.Where(f=>f.Length.HasValue);
+            string timeString = null;
+            if (filesWithLength.Count() > 0)
+            {
+                //translate length into human readable
+                timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value));
+            }
+            if(timeString == null)
+            {
+                return string.Format("{0} files • {1}",numFiles, sizeString);
+            }
+            else
+            {
+                return string.Format("{0} files • {1} • {2}", numFiles, sizeString, timeString);
+            }
+
+
+        }
+
+        public static string GetSizeLengthAttrString(Soulseek.File f)
+        {
+            
+            string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
+            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : null;
+            string attrString = GetHumanReadableAttributesForSingleItem(f);
+            if(attrString == null && lengthString == null)
+            {
+                return sizeString;
+            }
+            else if(attrString == null)
+            {
+                return String.Format("{0} • {1}", sizeString, lengthString);
+            }
+            else if(lengthString == null)
+            {
+                return String.Format("{0} • {1}", sizeString, attrString);
+            }
+            else
+            {
+                return String.Format("{0} • {1} • {2}", sizeString, lengthString, attrString);
+            }
+        }
+
+
+        public static string GetHumanReadableAttributesForSingleItem(Soulseek.File f)
+        {
+
+            int bitRate = -1;
+            int bitDepth = -1;
+            double sampleRate = double.NaN;
+            foreach (var attr in f.Attributes)
+            {
+                switch (attr.Type)
+                {
+                    case FileAttributeType.BitRate:
+                        bitRate = attr.Value;
+                        break;
+                    case FileAttributeType.BitDepth:
+                        bitDepth = attr.Value;
+                        break;
+                    case FileAttributeType.SampleRate:
+                        sampleRate = attr.Value / 1000.0;
+                        break;
+                }
+            }
+            if (bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
+            {
+                return null; //nothing to add
+            }
+            else if (bitDepth != -1 && !double.IsNaN(sampleRate))
+            {
+                return bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
+            }
+            else if (!double.IsNaN(sampleRate))
+            {
+                return sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
+            }
+            else if (bitRate != -1)
+            {
+                return bitRate + SlskHelp.CommonHelpers.STRINGS_KBS;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
+
+        public static string GetHumanReadableTime(int totalSeconds)
+        {
+            int sec = totalSeconds % 60;
+            int minutes = (totalSeconds % 3600) / 60;
+            int hours = (totalSeconds / 3600);
+            if(minutes==0 && hours == 0 && sec == 0)
+            {
+                return null;
+            }
+            else if(minutes==0 && hours == 0)
+            {
+                return string.Format("{0}s",sec);
+            }
+            else if (hours == 0)
+            {
+                return string.Format("{0}m{1}s",minutes,sec);
+            }
+            else
+            {
+                return string.Format("{0}h{1}m{2}s", hours, minutes, sec);
+            }
+        }
+
 
         /// <summary>
         /// Replaces d.Name.Contains(prevDirName) which fails for Mu, Music

@@ -28,6 +28,19 @@
             }
         }
 
+        private static string strings_kHz;
+        public static string STRINGS_KHZ
+        {
+            get
+            {
+                return strings_kHz;
+            }
+            set
+            {
+                strings_kHz = value;
+            }
+        }
+
         static CommonHelpers()
         {
             KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();

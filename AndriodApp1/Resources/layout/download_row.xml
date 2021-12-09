@@ -1,49 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:id = "@+id/relativeLayout1"
+    android:orientation="vertical"
+    android:id = "@+id/mainDlLayout"
     android:layout_width = "fill_parent"
     android:layout_height = "wrap_content"
-    android:background="@color/cellback"
+    android:paddingBottom="4dp"
+    android:paddingTop="2dp"
+    android:background = "@drawable/cell_shape_end_dldiag"
     >
 
     <TextView
         android:id = "@+id/textView1"
-        android:layout_width = "0dp"
-        android:layout_height = "match_parent"
-        android:layout_weight = "5"
-        android:textSize="12sp"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:textSize="15sp"
         android:textColor="@color/cellTextColor"
-        android:background = "@drawable/cell_shape_dldiag"
-        android:padding = "5dp"
+        android:paddingLeft="5dp"
         android:ellipsize="end"
         android:text = "1.5"
         android:singleLine = "false" />
 
-    <TextView
-        android:id = "@+id/textView2"
-        android:layout_width = "0dp"
-        android:layout_height = "match_parent"
-        android:layout_weight = "2"
-        android:textSize="12sp"
-        android:textColor="@color/cellTextColor"
-        android:background = "@drawable/cell_shape_dldiag"
-        android:padding = "5dp"
-        android:text = "2"
-        android:ellipsize="end"
-        android:singleLine = "true" />
 
     <TextView
         android:id = "@+id/textView3"
-        android:layout_width = "0dp"
-        android:layout_height = "match_parent"
-        android:layout_weight = "2"
-        android:textSize="12sp"
-        android:textColor="@color/cellTextColor"
-        android:background = "@drawable/cell_shape_end_dldiag"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:textSize="10sp"
+        android:textColor="@color/cellTextColorSubdued"
+        
         android:ellipsize = "end"
-        android:padding = "5dp"
-        android:text = "3"
+        android:paddingLeft="5dp"
+        android:text = "15mb - 10:14 - 245kbps"
         android:singleLine = "true" />
 </LinearLayout>

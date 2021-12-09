@@ -5,24 +5,58 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     android:layout_gravity="center"
-    <TextView
-        android:layout_width = "match_parent"
-        android:layout_height = "wrap_content"
-        android:textSize="14dp"
-        android:gravity="center_vertical"
-        android:padding = "5dp"
-        android:text = "     User: dummy"
-        android:background="@color/mainPurple"
-        android:textColor="#ffffff"
-        app:drawableRightCompat="@drawable/ic_expand_more_black_32dp"
-        android:id="@+id/userHeader"
-        android:clickable="true"
-        />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:id="@+id/header1"
+        android:clickable="true"
+        android:background="@color/mainPurple"
+        android:orientation="horizontal">
+
+            <LinearLayout
+        android:layout_width="0dp"
+            android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    <TextView
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:textSize="19sp"
+        android:paddingLeft = "5dp"
+        android:text = "User: dummy"
+        android:background="@color/mainPurple"
+        android:textColor="#ffffff"
+        android:id="@+id/userHeader"
+        />
+            <TextView
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:textSize="12sp"
+        android:paddingLeft = "5dp"
+        android:paddingBottom = "2dp"
+        android:text = "Total: 12 files x 60 MB x 12m16s"
+        android:background="@color/mainPurple"
+        android:textColor="#ffffff"
+        android:id="@+id/userHeaderSub"
+        />
+  </LinearLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="6dp"
+            android:tint="#ffffff"
+            app:srcCompat="@drawable/dots_horizontal_circle_outline"
+            android:layout_gravity="center_vertical"
+            
+            />
+    </LinearLayout>
+<!--    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@+id/userHeader"
+        android:layout_below="@+id/userHeader2"
         android:background="@color/mainPurple"
         android:id="@+id/header1">
         <TextView
@@ -56,7 +90,7 @@
             android:text = "@string/attribute_column"
             android:textSize="12sp"
             android:textColor = "#ffffff" />
-    </LinearLayout>
+    </LinearLayout>-->
     <ListView
         android:layout_below = "@id/header1"
         android:minWidth="25px"
