@@ -1376,10 +1376,12 @@ namespace AndriodApp1
             }
             else
             {
+                AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
+                //the above is needed else it fails **Java.Lang.RuntimeException:** 'File res/drawable/numeric_1_box_multiple_outline.xml from drawable resource ID #0x7f0700d3'
                 drawable = c.Resources.GetDrawable(idOfDrawable);
             }
-
             imgView.SetImageDrawable(drawable);
+
         }
 
         public void SetCustomViewTabNumberImageViewState()

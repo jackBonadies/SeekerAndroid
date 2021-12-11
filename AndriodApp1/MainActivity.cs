@@ -5919,11 +5919,23 @@ namespace AndriodApp1
                 }
                 else if(SearchSendIntentHelper.IsFromActionSend(Intent))
                 {
+                    SoulSeekState.MainActivityRef = this;
+                    SoulSeekState.ActiveActivityRef = this;
+                    MainActivity.LogDebug("MainActivity action send intent");
                     //give us a new fresh tab if the current one has a search in it...
                     if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
                     {
                         MainActivity.LogDebug("lets go to a new fresh tab");
-                        SearchFragment.Instance.GoToTab(SearchTabHelper.AddSearchTab(), true, true);
+                        int newTabToGoTo = SearchTabHelper.AddSearchTab();
+                        if (SearchFragment.Instance?.IsResumed ?? false)
+                        {
+                            MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
+                            goToSearchTab = newTabToGoTo; //we read this we resume
+                        }
+                        else
+                        {
+                            SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
+                        }
                     }
 
                     //go to search tab

@@ -57,9 +57,9 @@ namespace AndriodApp1
                     string lyric = "/lyrics/";
                     if (mainText.Contains(lyric))
                     {
-                        string artistSongExtra = mainText.Substring(mainText.IndexOf(lyric + lyric.Length));
+                        string artistSongExtra = mainText.Substring(mainText.IndexOf(lyric) + lyric.Length);
                         string artist = artistSongExtra.Substring(0, artistSongExtra.IndexOf('/'));
-                        string song = artistSongExtra.Substring(artist.Length, artistSongExtra.IndexOf('?'));
+                        string song = artistSongExtra.Substring(artist.Length + 1, artistSongExtra.IndexOf('?') - (artist.Length + 1));
                         searchTerm = artist.Replace('-', ' ') + ' ' + song.Replace('-', ' ');
                         return true;
                     }
@@ -94,8 +94,9 @@ namespace AndriodApp1
                     if (mainText.Contains("with SoundHound and thought you'd enjoy it too"))
                     {
                         mainText = mainText.Replace("I found ", "");
-                        mainText = mainText.Replace(" with SoundHound and thought you'd enjoy it too", "");
-                        searchTerm = mainText.Replace(" by ", "");
+                        int ending = mainText.IndexOf(" with SoundHound and thought you'd enjoy it too!");
+                        mainText = mainText.Substring(0,ending); //Replace(" with SoundHound and thought you'd enjoy it too!", "");
+                        searchTerm = mainText.Replace(" by ", " ");
                         return true;
                     }
                     else
@@ -121,10 +122,15 @@ namespace AndriodApp1
                         return false;
                     }
                 }
+                else if (!string.IsNullOrEmpty(subject) && subject.EndsWith(" - SoundCloud"))
+                {
+                    searchTerm = subject.Replace(" - SoundCloud", "");
+                    return true;
+                }
             }
             catch(Exception ex)
             {
-                MainActivity.LogFirebase("tryparseintent step1: " ex.Message + " " + ex.StackTrace);
+                MainActivity.LogFirebase("tryparseintent step1: " + ex.Message + " " + ex.StackTrace);
                 searchTerm = null;
                 return false;
             }
@@ -189,10 +195,10 @@ namespace AndriodApp1
                             trackname = AndriodApp1.HTMLUtilities.unescapeHtml(trackname); //"Los Barrachos (I Don&#39;t Have Any Hope Left, But the Weather is Nice)"
                             artistname = AndriodApp1.HTMLUtilities.unescapeHtml(artistname);
                         }
-                        else if (urlstring.Contains("://soundcloud"))
-                        {
-                            //TODO
-                        }
+                        //else if (urlstring.Contains("://soundcloud"))
+                        //{
+                        //
+                        //}
                     }
                     catch (Exception ex)
                     {
@@ -237,7 +243,7 @@ namespace AndriodApp1
         /// <returns></returns>
         private static bool ToLookUp(string url)
         {
-            if (url.Contains("://soundcloud") || url.Contains("://open.spotify") || url.Contains("://www.soundhound.com") || url.Contains("://soundhound.com"))
+            if (url.Contains("://open.spotify") || url.Contains("://www.soundhound.com") || url.Contains("://soundhound.com"))
             {
                 return true;
             }
@@ -443,6 +449,7 @@ namespace AndriodApp1
                 {
                     intent.PutExtra(Intent.ExtraSubject, subject);
                 }
+                MainActivity.LogDebug("SearchDialogDummyActivity launch intent");
                 this.StartActivity(intent);
                 this.Finish();
             }
