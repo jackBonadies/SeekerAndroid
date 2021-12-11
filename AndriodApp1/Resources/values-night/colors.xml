@@ -36,6 +36,8 @@
   <color name="subTextColor">#ffC7C7C7</color>
 	<color name="slightTint">#18ffffff</color>
 
+	<color name="dialog_background">#ff424242</color>
+
   <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
   <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 </resources>
