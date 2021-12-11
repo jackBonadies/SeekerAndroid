@@ -3994,7 +3994,7 @@ namespace AndriodApp1
 
 
         //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
-        [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
     public class MainActivity : AppCompatActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         public static object SHARED_PREF_LOCK = new object();
@@ -5917,6 +5917,38 @@ namespace AndriodApp1
                     MainActivity.LogInfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
                 }
+                else if(SearchSendIntentHelper.IsFromActionSend(Intent))
+                {
+                    //give us a new fresh tab if the current one has a search in it...
+                    if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
+                    {
+                        MainActivity.LogDebug("lets go to a new fresh tab");
+                        SearchFragment.Instance.GoToTab(SearchTabHelper.AddSearchTab(), true, true);
+                    }
+
+                    //go to search tab
+                    MainActivity.LogDebug("prev search term: " + SearchDialog.SearchTerm);
+                    SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
+                    SearchDialog.IsFollowingLink = false;
+                    pager.SetCurrentItem(1, false);
+                    if(SearchSendIntentHelper.TryParseIntent(Intent, out string searchTermFound))
+                    {
+                        //we are done parsing the intent
+                        SearchDialog.SearchTerm = searchTermFound;
+                    }
+                    else if(SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
+                    {
+                        SearchDialog.IsFollowingLink = true;
+                    }
+                    //close previous instance
+                    if(SearchDialog.Instance!=null)
+                    {
+                        MainActivity.LogDebug("previous instance exists");
+                        //SearchDialog.Instance.Dismiss(); //throws exception, cannot perform this action after onSaveInstanceState
+                    }
+                    var searchDialog = new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink);
+                    searchDialog.Show(SupportFragmentManager, "Search Dialog");
+                }
             }
 
 
@@ -6407,6 +6439,7 @@ namespace AndriodApp1
         public static bool fromNotificationMoveToUploads = false;
         protected override void OnNewIntent(Intent intent)
         {
+            MainActivity.LogDebug("OnNewIntent");
             base.OnNewIntent(intent);
             this.Intent = intent;
             if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)

@@ -2899,31 +2899,46 @@ namespace AndriodApp1
             SearchFragment.Instance.Actv_KeyPress(sender, e);
         }
 
+        public static void PerformSearchLogicFromSearchDialog(string searchTerm)
+        {
+            EditText editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+            editTextSearch.Text = searchTerm;
+            SearchFragment.Instance.PeformSearchLogic(null);
+        }
+
+        private void PeformSearchLogic(object sender)
+        {
+            var transitionDrawable = GetTransitionDrawable();
+            if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
+            {
+                MainActivity.LogDebug("transitionDrawable: RESET transition");
+                transitionDrawable.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
+                SearchTabHelper.CancellationTokenSource.Cancel();
+                SearchTabHelper.CurrentlySearching = false;
+            }
+            else
+            {
+                transitionDrawable.StartTransition(SearchToCloseDuration);
+                PerformBackUpRefresh();
+                MainActivity.LogDebug("START TRANSITION");
+                SearchTabHelper.CurrentlySearching = true;
+            }
+            SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
+            EditText editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+            SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
+            if(sender != null)
+            {
+                (sender as AutoCompleteTextView).DismissDropDown();
+            }
+            MainActivity.LogDebug("Enter Pressed..");
+        }
+
         private void Actv_KeyPress(object sender, View.KeyEventArgs e)
         {
             if (e.KeyCode == Keycode.Enter && e.Event.Action == KeyEventActions.Down)
             {
                 MainActivity.LogDebug("ENTER PRESSED " + e.KeyCode.ToString());
-                var transitionDrawable = GetTransitionDrawable();
-                if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
-                {
-                    MainActivity.LogDebug("transitionDrawable: RESET transition");
-                    transitionDrawable.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
-                    SearchTabHelper.CancellationTokenSource.Cancel();
-                    SearchTabHelper.CurrentlySearching = false;
-                }
-                else
-                {
-                    transitionDrawable.StartTransition(SearchToCloseDuration);
-                    PerformBackUpRefresh();
-                    MainActivity.LogDebug("START TRANSITION");
-                    SearchTabHelper.CurrentlySearching = true;
-                }
-                SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
-                EditText editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
-                SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
-                (sender as AutoCompleteTextView).DismissDropDown();
-                MainActivity.LogDebug("Enter Pressed..");
+                PeformSearchLogic(sender);
             }
             else if(e.KeyCode == Keycode.Del && e.Event.Action == KeyEventActions.Down)
             {

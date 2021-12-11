@@ -126,9 +126,11 @@
     <Compile Include="MessagesActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchDialog.cs" />
     <Compile Include="SettingsActivity.cs" />
     <Compile Include="TabsPagerAdapter.cs" />
     <Compile Include="UserListActivity.cs" />
+    <Compile Include="Utils\HtmlEntityDecoder.cs" />
     <Compile Include="ViewUserInfoActivity.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -1102,6 +1104,11 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\dots_horizontal_circle_outline.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\search_intent_dialog.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
   </ItemGroup>
   <Import Project="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
