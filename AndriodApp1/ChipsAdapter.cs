@@ -82,7 +82,7 @@ namespace AndriodApp1
                 int groupSize = count / 4;
                 var sortedList = fileCountCounts.ToList();
                 //key is the folder count, value is the number of times that folder count appeared.
-                sortedList.Sort((x, y) => y.Key.CompareTo(x.Key));
+                sortedList.Sort((x, y) => x.Key.CompareTo(y.Key)); //low to high
                 int start = int.MinValue;
                 int partialTotal = 0;
                 int numGroups = 0;
@@ -103,7 +103,7 @@ namespace AndriodApp1
                         }
                         break;
                     }
-                    if ((sortedList[ii].Value + partialTotal) >= groupSize)
+                    if (((sortedList[ii].Value + partialTotal) >= groupSize) || (sortedList.Count - 1 == ii)) //or if its the last one..
                     {
                         //thats all for this group
                         if (start == int.MinValue)
@@ -207,10 +207,115 @@ namespace AndriodApp1
                 }
             }
 
-            var dataItems = chipDescriptions.Select(str=>new ChipDataItem(ChipType.FileCount,false, str));
-            dataItems.Last().LastInGroup = true;
+#if DEBUG
+            foreach (string ftype in sortedListPass1str)
+            {
+                MainActivity.LogDebug(ftype + " : " + fileTypeCounts[ftype]);
+            }
+#endif
+
+
+
+            var chipsListFileTypes = sortedListPass1str.Select(str => new ChipDataItem(ChipType.FileType, false, str)).ToList();
+
+
+            //further grouping of file types..
+            if (sortedListPass1str.Count > 14)
+            {
+                //a lot of times we have wayyy too many mp3 varients.
+                //if more than 5 varients or if 2+ varients are less than 7.5% then group them up.
+                List<Tuple<string, int, int>> varientsToGroupUp = new List<Tuple<string, int, int>>();
+                string currentBase = null;
+                int currentMax = -1;
+                int counter = 0;
+                bool cutoffConditionReached = false;
+                int varientsPastCutoff = 0;
+                foreach (string ftype in sortedListPass1str)
+                {
+
+                    if (currentBase != null && (ftype.Contains(currentBase + " ") || ftype == currentBase))
+                    {
+                        counter++;
+                        if (counter > 5 || (double)(fileTypeCounts[ftype]) / currentMax < .075)
+                        {
+                            varientsPastCutoff++;
+                        }
+                    }
+                    else
+                    {
+                        //we finished this grouping if applicable...
+                        if (currentBase != null && varientsPastCutoff >= 2)
+                        {
+                            varientsToGroupUp.Add(new Tuple<string, int, int>(currentBase, varientsPastCutoff, counter));
+                        }
+                        currentBase = null;
+                        varientsPastCutoff = 0;
+                        counter = 0;
+                    }
+
+                    if (ftype.Contains(" - all"))
+                    {
+                        currentBase = ftype.Replace(" - all", "");
+                        currentMax = fileTypeCounts[ftype];
+                        counter++;
+                    }
+                }
+
+                //get the chips here...
+                foreach (var tup in varientsToGroupUp)
+                {
+                    int start_all = sortedListPass1str.IndexOf(tup.Item1 + " - all");
+                    int start = start_all + tup.Item3 - tup.Item2;
+                    var rangeToCondense = sortedListPass1str.GetRange(start, tup.Item2);
+                    //put range to condense in the tag...
+                    sortedListPass1str.RemoveRange(start, tup.Item2);
+                    chipsListFileTypes.RemoveRange(start, tup.Item2);
+                    sortedListPass1str.Insert(start, tup.Item1 + " (other)");
+                    chipsListFileTypes.Insert(start, new ChipDataItem(ChipType.FileType, false, tup.Item1 + " (other)", rangeToCondense.ToList()));
+                }
+
+                //if still more then 14 chop off those at the end...
+                //just dont split a group i.e. -all (vbr) split after it.
+                int pointToSplit = 13;
+                if (sortedListPass1str.Count() > 15) //so 16 or more
+                {
+                    while (pointToSplit < sortedListPass1str.Count())
+                    {
+                        string fType = sortedListPass1str[pointToSplit];
+                        string ftypebase = fType;
+                        if (fType.Contains(" ("))
+                        {
+                            ftypebase = fType.Substring(0, fType.IndexOf(" ("));
+
+                        }
+                        if (!(sortedListPass1str[pointToSplit - 1].Contains(ftypebase)))
+                        {
+                            //then it is not part of a group, we are done and can split here...
+                            break;
+                        }
+                        else
+                        {
+                            pointToSplit++;
+                        }
+                    }
+                    if (sortedListPass1str.Count() - pointToSplit > 2) //i.e. if there is actually stuff to group up.
+                    {
+                        int cnt = sortedListPass1str.Count() - pointToSplit;
+                        var endToCondense = sortedListPass1str.GetRange(pointToSplit, sortedListPass1str.Count() - pointToSplit);
+                        //put range to condense in the tag...
+                        sortedListPass1str.RemoveRange(pointToSplit, cnt);
+                        chipsListFileTypes.RemoveRange(pointToSplit, cnt);
+                        sortedListPass1str.Insert(pointToSplit, "other");
+                        chipsListFileTypes.Insert(pointToSplit, new ChipDataItem(ChipType.FileType, false, "other", endToCondense.ToList()));
+                    }
+                }
+            }
+
+
+            var dataItems = chipDescriptions.Select(str => new ChipDataItem(ChipType.FileCount, false, str));
             var dataItemsList = dataItems.ToList();
-            dataItemsList.AddRange(sortedListPass1str.Select(str=>new ChipDataItem(ChipType.FileType,false,str)));
+            dataItemsList[dataItems.Count() - 1].LastInGroup = true;
+            dataItemsList.AddRange(chipsListFileTypes);
             return dataItemsList;
         }
     }
@@ -225,7 +330,7 @@ namespace AndriodApp1
 
             ChipItemView view = ChipItemView.inflate(parent);
             view.setupChildren();
-            //view.Chip.CheckedChange += Chip_CheckedChange;
+            view.Chip.CheckedChange += Chip_CheckedChange;
 
             return new ChipItemViewHolder(view as View);
 
@@ -274,6 +379,9 @@ namespace AndriodApp1
             //{
             //    CheckedItems.Remove(pos);
             //}
+            var searchTab = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab];
+            searchTab.ChipsFilter = SearchFragment.ParseChips(searchTab);
+            SearchFragment.Instance.RefreshOnChipChanged();
         }
 
 
@@ -325,7 +433,7 @@ namespace AndriodApp1
     public class ChipDataItem
     {
         public readonly string DisplayText;
-       // public readonly List<string> Children; //this is for Keyword.  In that case we can identify our children as those which contain us (minus parent prefix of '- all'). (i.e. "mp3 - all" (parent) children are mp3 (vbr), mp3 (320).
+        public readonly List<string> Children; //this is for "other". this is what the chip actually represents..
         public readonly ChipType ChipType;
         public bool LastInGroup; //last in group AND there is more after it
         public bool IsChecked = false;
@@ -335,14 +443,25 @@ namespace AndriodApp1
             this.ChipType = chipType;
             this.LastInGroup = lastInGroup;
             this.DisplayText = displayText;
-            //this.Children = children;
+            this.Children = null;
+        }
+        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, List<string> children)
+        {
+            this.ChipType = chipType;
+            this.LastInGroup = lastInGroup;
+            this.DisplayText = displayText;
+            this.Children = children;
+        }
+        public bool HasTag()
+        {
+            return this.Children != null;
         }
     }
 
 
     public class ChipItemView : LinearLayout
     {
-        //public Chip Chip;
+        public Chip Chip;
         public View ChipSeparator;
         public View ChipLayout;
         public ChipItemViewHolder ViewHolder;
@@ -360,24 +479,25 @@ namespace AndriodApp1
 
         public static ChipItemView inflate(ViewGroup parent)
         {
-            ChipItemView itemView = (ChipItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chip_item_view_dummy, parent, false);
+            var c = new ContextThemeWrapper(parent.Context, Resource.Style.MaterialThemeForChip);
+            ChipItemView itemView = (ChipItemView)LayoutInflater.From(c).Inflate(Resource.Layout.chip_item_view_dummy, parent, false);
             return itemView;
         }
 
         public void setupChildren()
         {
-            //Chip = FindViewById<Chip>(Resource.Id.chip1);
+            Chip = FindViewById<Chip>(Resource.Id.chip1);
             ChipSeparator = FindViewById<View>(Resource.Id.chipSeparator);
             ChipLayout = FindViewById<View>(Resource.Id.chipLayout);
         }
 
         public void setItem(ChipDataItem item)
         {
-            //Chip.Text = item.DisplayText;
-            //Chip.Checked = item.IsChecked;
+            Chip.Text = item.DisplayText;
+            Chip.Checked = item.IsChecked;
 
-            //Chip.Enabled = item.IsEnabled;
-            //Chip.Clickable = item.IsEnabled;
+            Chip.Enabled = item.IsEnabled;
+            Chip.Clickable = item.IsEnabled;
 
             if (item.LastInGroup)
             {
