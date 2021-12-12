@@ -781,6 +781,7 @@ namespace AndriodApp1
         public int LastSearchResultsCount = 0;
 
         public List<ChipDataItem> ChipDataItems;
+        public SearchFragment.ChipFilter ChipsFilter;
 
         public SearchTab Clone(bool forWishlist)
         {
@@ -1253,7 +1254,7 @@ namespace AndriodApp1
             if(!FilterSticky || force)
             {
                 SearchTabHelper.FilterString = string.Empty;
-                SearchTabHelper.FilteredResults = false;
+                SearchTabHelper.FilteredResults = this.AreChipsFiltering();
                 SearchTabHelper.WordsToAvoid.Clear();
                 SearchTabHelper.WordsToInclude.Clear();
                 SearchTabHelper.FilterSpecialFlags.Clear();
@@ -1965,9 +1966,8 @@ namespace AndriodApp1
 
             ListView lv = rootView.FindViewById<ListView>(Resource.Id.listView1);
 
-            bool showChips = false;
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
-            if(showChips)
+            if(SoulSeekState.ShowChips)
             {
                 recyclerViewChips.Visibility = ViewStates.Visible;
             }
@@ -2047,14 +2047,14 @@ namespace AndriodApp1
                 SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.SearchResponses);
                 lv.Adapter = (customAdapter);
             }
-            showChips = false;
-            if (showChips)// && SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems != null)
-            {
-                var xx= new List<ChipDataItem>();
-                xx.Add(new ChipDataItem(ChipType.FileCount,true, "test"));
-                recyclerChipsAdapter = new ChipsItemRecyclerAdapter(xx);
-                recyclerViewChips.SetAdapter(recyclerChipsAdapter);
-            }
+            //showChips = true;
+            //if (showChips)// && SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems != null)
+            //{
+            //    var xx= new List<ChipDataItem>();
+            //    xx.Add(new ChipDataItem(ChipType.FileCount,true, "test"));
+            //    recyclerChipsAdapter = new ChipsItemRecyclerAdapter(xx);
+            //    recyclerViewChips.SetAdapter(recyclerChipsAdapter);
+            //}
 
             lv.ItemClick -= Lv_ItemClick;
             lv.ItemClick += Lv_ItemClick;
@@ -2079,6 +2079,22 @@ namespace AndriodApp1
             }
 
             return rootView;
+        }
+
+        /// <summary>
+        /// Are chips filtering out results..
+        /// </summary>
+        /// <returns></returns>
+        private bool AreChipsFiltering()
+        {
+            if(!SoulSeekState.ShowChips || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems.Any(i=>i.IsChecked);
+            }
         }
 
         private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
@@ -2605,6 +2621,85 @@ namespace AndriodApp1
         //    }
         //}
 
+        public class ChipFilter
+        {
+            //this comes from "mp3 - all" and will match any (== "mp3") or (contains "mp3 ") results
+            //the items in these filters are always OR'd
+            public ChipFilter()
+            {
+                AllVarientsFileType = new List<string>();
+                SpecificFileType = new List<string>();
+                NumFiles = new List<int>();
+                FileRanges = new List<Tuple<int, int>>();
+
+            }
+            public List<string> AllVarientsFileType;
+            public List<string> SpecificFileType;
+            public List<int> NumFiles;
+            public List<Tuple<int,int>> FileRanges;
+
+            public bool IsEmpty()
+            {
+                return (AllVarientsFileType.Count == 0 && SpecificFileType.Count == 0 && NumFiles.Count == 0 && FileRanges.Count == 0);
+            }
+        }
+
+        public static ChipFilter ParseChips(SearchTab searchTab)
+        {
+            ChipFilter chipFilter = new ChipFilter();
+            var checkedChips = searchTab.ChipDataItems.Where(i=>i.IsChecked).ToList();
+            foreach(var chip in checkedChips)
+            {
+                if(chip.ChipType==ChipType.FileCount)
+                {
+                    if(chip.DisplayText.EndsWith(" file"))
+                    {
+                        chipFilter.NumFiles.Add(1);
+                    }
+                    else if(chip.DisplayText.Contains(" to "))
+                    {
+                        int endmin = chip.DisplayText.IndexOf(" to ");
+                        int min = int.Parse(chip.DisplayText.Substring(0, endmin));
+                        int max = int.Parse(chip.DisplayText.Substring(endmin + 4, chip.DisplayText.IndexOf(" files") - (endmin + 4)));
+                        chipFilter.FileRanges.Add(new Tuple<int, int>(min, max));
+                    }
+                    else if (chip.DisplayText.EndsWith(" files"))
+                    {
+                        chipFilter.NumFiles.Add(int.Parse(chip.DisplayText.Replace(" files","")));
+                    }
+                }
+                else if(chip.ChipType==ChipType.FileType)
+                {
+                    if(chip.HasTag())
+                    {
+                        foreach(var subChipString in chip.Children)
+                        {
+                            //its okay if this contains "mp3 (other)" say because if it does then by definition it will also contain
+                            //mp3 - all bc we dont split groups.
+                            if (subChipString.EndsWith(" - all"))
+                            {
+                                chipFilter.AllVarientsFileType.Add(subChipString.Replace(" - all", ""));
+                            }
+                            else
+                            {
+                                chipFilter.SpecificFileType.Add(subChipString);
+                            }
+                        }
+                    }
+                    else if (chip.DisplayText.EndsWith(" - all"))
+                    {
+                        chipFilter.AllVarientsFileType.Add(chip.DisplayText.Replace(" - all",""));
+                    }
+                    else
+                    {
+                        chipFilter.SpecificFileType.Add(chip.DisplayText);
+                    }
+                }
+            }
+            return chipFilter;
+        }
+
+
         public static void ParseFilterString(SearchTab searchTab)
         {
             List<string> filterStringSplit = searchTab.FilterString.Split(' ').ToList();
@@ -2670,6 +2765,59 @@ namespace AndriodApp1
             }
         }
 
+        private bool MatchesChipCriteria(SearchResponse s, ChipFilter chipFilter)
+        {
+            if(chipFilter == null || chipFilter.IsEmpty())
+            {
+                return true;
+            }
+            else
+            {
+                bool match = chipFilter.NumFiles.Count == 0 && chipFilter.FileRanges.Count == 0;
+                foreach(int num in chipFilter.NumFiles)
+                {
+                    if(s.FileCount == num)
+                    {
+                        match = true;
+                    }
+                }
+                foreach (Tuple<int,int> range in chipFilter.FileRanges)
+                {
+                    if (s.FileCount >= range.Item1 && s.FileCount <= range.Item2)
+                    {
+                        match = true;
+                    }
+                }
+                if (!match)
+                {
+                    return false;
+                }
+
+                match = chipFilter.AllVarientsFileType.Count == 0 && chipFilter.SpecificFileType.Count == 0;
+                foreach (string varient in chipFilter.AllVarientsFileType)
+                {
+                    if (s.GetDominantFileType() == varient || s.GetDominantFileType().Contains(varient + " "))
+                    {
+                        match = true;
+                    }
+                }
+                foreach (string specific in chipFilter.SpecificFileType)
+                {
+                    if (s.GetDominantFileType() == specific)
+                    {
+                        match = true;
+                    }
+                }
+                if(!match)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+
         private bool MatchesCriteria(SearchResponse s)
         {
             foreach (File f in s.Files)
@@ -2717,6 +2865,10 @@ namespace AndriodApp1
             (SearchResponse s) =>
             {
                 if(!MatchesCriteria(s))
+                {
+                    return false;
+                }
+                else if(!MatchesChipCriteria(s, searchTab.ChipsFilter))
                 {
                     return false;
                 }
@@ -2810,7 +2962,7 @@ namespace AndriodApp1
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             MainActivity.LogDebug("Text Changed: " + e.Text);
-            if (e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null)
+            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null)|| this.AreChipsFiltering())
             {
                 SearchTabHelper.FilteredResults = true;
                 SearchTabHelper.FilterString = e.Text.ToString();
@@ -2819,6 +2971,30 @@ namespace AndriodApp1
                     FilterStickyString = SearchTabHelper.FilterString;
                 }
                 ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
+                ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
+                lv.Adapter = (customAdapter);
+            }
+            else
+            {
+                SearchTabHelper.FilteredResults = false;
+                SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchResponses);
+                ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
+                lv.Adapter = (customAdapter);
+            }
+        }
+
+        /// <summary>
+        /// !!!!!!!!!!!!!!!!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void RefreshOnChipChanged()
+        {
+            if (this.AreChipsFiltering() || !string.IsNullOrEmpty(SearchTabHelper.FilterString))
+            {
+                SearchTabHelper.FilteredResults = true;
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                 SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
                 ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
@@ -2995,12 +3171,16 @@ namespace AndriodApp1
             SearchTabHelper.SearchResponses.Clear();
             SearchTabHelper.LastSearchResponseCount = -1;
             SearchTabHelper.FilteredResponses.Clear();
+            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = null;
+            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipsFilter = null;
             if (!fromWishlist)
             {
                 SearchFragment.Instance.ClearFilterStringAndCached();
                 SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchResponses);
                 ListView lv = SearchFragment.Instance.rootView.FindViewById<ListView>(Resource.Id.listView1);
                 lv.Adapter = (customAdapter);
+
+
             }
         }
 
@@ -3412,9 +3592,7 @@ namespace AndriodApp1
 
                     if(fromTab== SearchTabHelper.CurrentTab)
                     {
-                        //show the chips..
-                        bool showChips = false;
-                        if(showChips)
+                        if(SoulSeekState.ShowChips)
                         {
                             List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;

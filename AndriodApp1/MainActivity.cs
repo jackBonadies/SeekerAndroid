@@ -9876,6 +9876,8 @@ namespace AndriodApp1
         public static String UploadDataDirectoryUri = null;
         public static String ManualIncompleteDataDirectoryUri = null;
 
+        public static bool ShowChips = true;
+
         public static volatile bool DownloadKeepAliveServiceRunning = false;
         public static volatile bool UploadKeepAliveServiceRunning = false;
 
