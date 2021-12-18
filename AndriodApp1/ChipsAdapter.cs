@@ -22,7 +22,7 @@ namespace AndriodApp1
 
     public static class ChipsHelper
     {
-        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses)
+        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm)
         {
             Dictionary<string, int> fileTypeCounts = new Dictionary<string, int>();
             Dictionary<int, int> fileCountCounts = new Dictionary<int, int>();
@@ -138,6 +138,26 @@ namespace AndriodApp1
                     }
                 }
             }
+            else
+            {
+                //todo if only one group should we still do it?? maybe it is informative.. and might happen rather rarely..
+                //if you do make sure you test as count-1 is a thing below... to get the LastInGroup..
+                var sortedList = fileCountCounts.ToList();
+                //key is the folder count, value is the number of times that folder count appeared.
+                sortedList.Sort((x, y) => x.Key.CompareTo(y.Key));
+                foreach(var pair in sortedList)
+                {
+                    if (pair.Key == 1)
+                    {
+                        chipDescriptions.Add($"{pair.Key} file");
+                    }
+                    else
+                    {
+                        chipDescriptions.Add($"{pair.Key} files");
+                    }
+                }
+                   
+            }
 
 
             List<string> fileTypeBases = new List<string>();
@@ -164,7 +184,7 @@ namespace AndriodApp1
                 int results = 0;
                 foreach (var fileType in fileTypeCounts)
                 {
-                    if (fileType.Key.Contains(fileTypeBase))
+                    if (fileType.Key.Contains(fileTypeBase + " ")) //not just base, but base + " "
                     {
                         count1++;
                         results += fileType.Value;
@@ -311,13 +331,594 @@ namespace AndriodApp1
                 }
             }
 
+            //keywords
+            List<ChipDataItem> chipKeywords = new List<ChipDataItem>();
+            var keywords = GetKeywords(responses, searchTerm);
+            foreach(var keyword in keywords)
+            {
+                if(keyword.Item2!=null)
+                {
+                    chipKeywords.Add(new ChipDataItem(ChipType.Keyword, false, keyword.Item1,keyword.Item2.ToList()));
+                }
+                else
+                {
+                    chipKeywords.Add(new ChipDataItem(ChipType.Keyword, false, keyword.Item1));
+                }
+            }
+            //end keywords
 
             var dataItems = chipDescriptions.Select(str => new ChipDataItem(ChipType.FileCount, false, str));
             var dataItemsList = dataItems.ToList();
-            dataItemsList[dataItems.Count() - 1].LastInGroup = true;
+            if(dataItemsList.Count() > 0)
+            {
+                dataItemsList[dataItemsList.Count() - 1].LastInGroup = true;
+            }
             dataItemsList.AddRange(chipsListFileTypes);
+            if(chipKeywords.Count() > 0)
+            {
+                dataItemsList[dataItemsList.Count() - 1].LastInGroup = true;
+            }
+            dataItemsList.AddRange(chipKeywords);
             return dataItemsList;
         }
+
+
+        public static List<Tuple<string, HashSet<string>>> GetKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
+        {
+            try
+            {
+            //var sw = System.Diagnostics.Stopwatch.StartNew();
+            KeywordHelper keywordHelper = new KeywordHelper();
+            Dictionary<string, int> counts = new Dictionary<string, int>();
+            int totalCount = responses.Count();
+            for(int i=0; i < totalCount; i++)
+            {
+                //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
+                string fline = Helpers.GetFolderNameFromFile(responses[i].Files.First().Filename);
+
+                //fline = fline.Replace(" - ", " ");
+                //fline = fline.Replace(", ", " ");
+                //fline = fline.Replace("Weyes Blood", "");
+                if (fline.StartsWith(" - "))
+                {
+                    fline = fline.Substring(3);
+                }
+                fline = fline.Trim();
+
+                //fline = fline.ToLower(); //this should be moved so its only for the keys..
+
+                //test if something is in parenthesis and treat it specially bc its likely attributes???
+
+                foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    bool inParen = false;
+                    bool startsWithYear = false;
+                    int dateLen = 0;
+                    string trimmedTerm = term.Trim();
+                    //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                    if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
+                    {
+                        foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            keywordHelper.AddKey(t.Trim());
+                        }
+                        continue;
+                    }
+
+                    if (KeywordHelper.IsInParenthesis(trimmedTerm, fline))
+                    {
+                        //normally if in parenthesis those are attributes so split them by ','
+                        inParen = true;
+                    }
+                    if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
+                    {
+                        startsWithYear = true;
+                    }
+
+                    if (inParen || startsWithYear)
+                    {
+                        if (startsWithYear)
+                        {
+                            string year = trimmedTerm.Substring(0, dateLen);
+
+                            keywordHelper.AddKey(year);
+                        }
+                        string rest = trimmedTerm;//.Substring(5).Trim();
+                        if (startsWithYear)
+                        {
+                            rest = rest.Substring(dateLen).Trim();
+                            //if after stripping date it now starts with - 
+                            if (rest.StartsWith(", ") || rest.StartsWith(". "))
+                            {
+                                rest = rest.Substring(2);
+                            }
+                        }
+
+                        if (inParen)
+                        {
+                            foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                keywordHelper.AddKey(restTerm.Trim());
+                            }
+                        }
+                        else
+                        {
+                            keywordHelper.AddKey(rest);
+                        }
+                    }
+                    else
+                    {
+                        keywordHelper.AddKey(trimmedTerm);
+                    }
+                }
+                //generate all ngrams
+            }
+
+
+
+
+            //#if PARENT_VOTE
+
+            //var alllines = File.ReadLines(@"H:\Seeker_Testing\search_results\the_avalanches.txt");
+            //var sw = System.Diagnostics.Stopwatch.StartNew();
+            //KeywordHelper keywordHelper = new KeywordHelper();
+            //Dictionary<string, int> counts = new Dictionary<string, int>();
+            for (int i = 0; i < totalCount; i++)
+            {
+                //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
+                string fline = Helpers.GetParentFolderNameFromFile(responses[i].Files.First().Filename);
+
+                //fline = fline.Replace(" - ", " ");
+                //fline = fline.Replace(", ", " ");
+                //fline = fline.Replace("Weyes Blood", "");
+                if (fline.StartsWith(" - "))
+                {
+                    fline = fline.Substring(3);
+                }
+                fline = fline.Trim();
+
+                //fline = fline.ToLower(); //this should be moved so its only for the keys..
+
+                //test if something is in parenthesis and treat it specially bc its likely attributes???
+
+                foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string termTrimmed = term.Trim();
+                    bool inParen = false;
+                    bool startsWithYear = false;
+                    int dateLen = 0;
+
+                    if(KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(termTrimmed)))
+                    {
+                        continue;
+                    }
+
+                    //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                    if (KeywordHelper.IsNoSpacesFormat(termTrimmed))
+                    {
+                        foreach (string t in termTrimmed.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            keywordHelper.VoteIfExists(t.Trim());
+                        }
+                        continue;
+                    }
+
+                    if (KeywordHelper.IsInParenthesis(termTrimmed, fline))
+                    {
+                        //normally if in parenthesis those are attributes so split them by ','
+                        inParen = true;
+                    }
+                    if (KeywordHelper.StartsWithYearOrDate(termTrimmed, out dateLen))
+                    {
+                        startsWithYear = true;
+                    }
+
+                    if (inParen || startsWithYear)
+                    {
+                        if (startsWithYear)
+                        {
+                            string year = termTrimmed.Substring(0, dateLen);
+
+                            keywordHelper.VoteIfExists(year);
+                        }
+                        string rest = termTrimmed;//.Substring(5).Trim();
+                        if (startsWithYear)
+                        {
+                            rest = rest.Substring(dateLen).Trim();
+                        }
+
+                        if (inParen)
+                        {
+                            foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                keywordHelper.VoteIfExists(restTerm.Trim());
+                            }
+                        }
+                        else
+                        {
+                            keywordHelper.VoteIfExists(rest);
+                        }
+                    }
+                    else
+                    {
+                        keywordHelper.VoteIfExists(termTrimmed);
+                    }
+                }
+                //generate all ngrams
+            }
+
+//#endif
+            return keywordHelper.GetTopCandidates(searchTerm, 13);
+            }
+            catch(Exception ex)
+            {
+                MainActivity.LogFirebase("keywords failed " + ex.Message + ex.StackTrace);
+                return new List<Tuple<string, HashSet<string>>>();
+            }
+        }
+
+
+        public class KeywordHelper
+        {
+
+            public static string GetInvarientKey(string key)
+            {
+                string invarientKey = key.ToLower();
+                invarientKey = invarientKey.Replace("and", "&");
+                invarientKey = invarientKey.Replace(",", "");  //todo more efficient replace...
+                invarientKey = invarientKey.Replace("'", "");
+                invarientKey = invarientKey.Replace("-", "");
+                invarientKey = invarientKey.Replace("_", "");
+
+                //sufjan.stevens 
+
+                //group these chars
+                switch (invarientKey)
+                {
+                    case "cd1":
+                        return "disc 1";
+                    case "cd 1":
+                        return "disc 1";
+                    case "disc1":
+                        return "disc 1";
+                    case "cd2":
+                        return "disc 2";
+                    case "cd 2":
+                        return "disc 2";
+                    case "disc2":
+                        return "disc 2";
+                    case "va":
+                        return "V.A.";
+                    case "various artists":
+                        return "V.A.";
+                    case "v.a.":
+                        return "V.A.";
+                }
+                return invarientKey;
+            }
+
+            public static bool IsCommonAttribute(string key)
+            {
+
+                switch (key)
+                {
+                    case "disc 1":
+                    case "disc 2":
+                    case "2cd":
+                    case "cd":
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            public static bool IsYear(string potentialYear)
+            {
+                if (int.TryParse(potentialYear, out int potInt))
+                {
+                    if (potInt >= 1900 && potInt <= 2034)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+//            public static bool IsCommonParentFolder(string t)
+//            {
+//#if USE_PARENT
+//            switch (t)
+//            {
+//                case "music":
+//                case "complete":
+//                case "@flac":
+//                case "audio":
+//                case "mp#":
+//                case "m?sica":
+//                case "album":
+//                case "flac albums":
+//                case "albums":
+//                    return true;
+//                default:
+//                    return false;
+//            }
+//#else
+//                return false;
+//#endif
+
+//            }
+
+            public static bool IsCommonParentFolder2(string t)
+            {
+//#if PARENT_VOTE
+            if (t.Length == 1)
+            {
+                return true;
+            }
+
+            switch (t)
+            {
+                case "music":
+                case "complete":
+                case "@flac":
+                case "audio":
+                case "mp#":
+                case "m?sica":
+                case "album":
+                case "flac albums":
+                case "albums":
+                    return true;
+                default:
+                    return false;
+            }
+//#else
+//                return false;
+//#endif
+
+            }
+
+            public static bool IsSingleFileAttributeType(string t)
+            {
+                switch (t)
+                {
+                    case "mp3":
+                    case "flac":
+                    case "wav":
+                    case "wma":
+                    case "aac":
+                    case "mp4":
+                    case "aiff":
+                    case "ogg":
+                    case "opus":
+                    case "320":
+                    case "16-44.1":
+                    case "192k":
+                    case "mp3 320":
+                    case "mp3 192":
+                    case "mp3 v0":
+                    case "mp3 128":
+                    case "320 kbps":
+                    case "320kbps":
+                    case "m4a 128":
+                    case "v0":
+                    case "mp3 320kbps":
+                    case "!!!":
+                    case "-":
+                    case "@192":
+                    case "@320":
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            public static bool IsInParenthesis(string term, string line)
+            {
+                int i = line.IndexOf(term);
+                if (i > 1)
+                {
+                    int t = term.Length;
+                    if ((line[i - 1] == '(' || line[i - 1] == '{' || line[i - 1] == '[') &&
+                        (i + t < line.Length) && ((line[i + t] == ')' || line[i + t] == '}' || line[i + t] == ']')))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                return false;
+            }
+
+            public static bool IsNoSpacesFormat(string term)
+            {
+                if (!term.Contains(' ') && term.Contains('_') && term.Contains('-'))
+                {
+                    return true;
+                }
+                return false;
+            }
+
+            public static bool StartsWithYearOrDate(string line, out int dateLen)
+            {
+                dateLen = 0;
+                if (line.Length < 5)
+                {
+                    return false;
+                }
+                if (IsYear(line.Substring(0, 4)))
+                {
+                    if (IsSpecialChar(line[4]))
+                    {
+                        //can we also get month and day if available?
+                        if (line.Length >= 10)
+                        {
+                            if (IsSpecialChar(line[7]) && int.TryParse(line.Substring(5, 2), out _) && int.TryParse(line.Substring(8, 2), out _))
+                            {
+                                dateLen = 10;
+                                return true;
+                            }
+                        }
+                        dateLen = 4;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                return false;
+            }
+
+            public static bool IsSpecialChar(char c)
+            {
+                return c == ' ' || c == '-' || c == '.' || c == ',';
+            }
+
+
+            public Dictionary<string, int> invarientKeyCounts = new Dictionary<string, int>();
+            public Dictionary<string, int> realCounts = new Dictionary<string, int>();
+            public Dictionary<string, HashSet<string>> invarientToReal = new Dictionary<string, HashSet<string>>();
+
+            public void VoteIfExists(string term)
+            {
+                string invariantTerm = GetInvarientKey(term);
+                if (invarientKeyCounts.ContainsKey(invariantTerm))
+                {
+                    invarientKeyCounts[invariantTerm]++;
+                }
+                else
+                {
+                    return;
+                }
+
+                if (realCounts.ContainsKey(term))
+                {
+                    realCounts[term]++;
+                }
+                else
+                {
+                    realCounts[term] = 1;
+                }
+
+                if (invarientToReal.ContainsKey(invariantTerm))
+                {
+                    invarientToReal[invariantTerm].Add(term);
+                }
+                else
+                {
+                    invarientToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    invarientToReal[invariantTerm].Add(term);
+                }
+            }
+
+            public void AddKey(string term)
+            {
+                string invariantTerm = GetInvarientKey(term);
+                if (invarientKeyCounts.ContainsKey(invariantTerm))
+                {
+                    invarientKeyCounts[invariantTerm]++;
+                }
+                else
+                {
+                    invarientKeyCounts[invariantTerm] = 1;
+                }
+
+                if (realCounts.ContainsKey(term))
+                {
+                    realCounts[term]++;
+                }
+                else
+                {
+                    realCounts[term] = 1;
+                }
+
+                if (invarientToReal.ContainsKey(invariantTerm))
+                {
+                    invarientToReal[invariantTerm].Add(term);
+                }
+                else
+                {
+                    invarientToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    invarientToReal[invariantTerm].Add(term);
+                }
+            }
+
+            public List<Tuple<string, HashSet<string>>> GetTopCandidates(string searchTerm, int topN)
+            {
+                //weigh the years, and throw out the just file types.
+                string searchTermInvarient = GetInvarientKey(searchTerm);
+                foreach (string key in invarientKeyCounts.Keys.ToList())
+                {
+                    if (IsSingleFileAttributeType(key)) //todo use collection...
+                    {
+                        invarientKeyCounts.Remove(key);
+                    }
+                    else if (searchTermInvarient.Contains(key))
+                    {
+                        invarientKeyCounts.Remove(key);
+                    }
+                    else if (IsYear(key))
+                    {
+                        invarientKeyCounts[key] /= 4;
+                    }
+                    else if (IsCommonAttribute(key))
+                    {
+
+                        invarientKeyCounts[key] = (int)(invarientKeyCounts[key] * .6);
+                    }
+                    else
+                    {
+//#if USE_PARENT
+//                        if(IsCommonParentFolder(key))
+//                        {
+//                            invarientKeyCounts.Remove(key);
+//                        }
+//#endif
+                    }
+
+                }
+                //
+                //l.Sort((x, y) => y.Value.CompareTo(x.Value));
+
+
+                var l = invarientKeyCounts.ToList();
+                l.Sort((x, y) => y.Value.CompareTo(x.Value));
+                List<Tuple<string, HashSet<string>>> keyTerms = new List<Tuple<string, HashSet<string>>>();
+                if (topN > l.Count)
+                {
+                    topN = l.Count;
+                }
+                for (int i = 0; i < topN; i++)
+                {
+                    var hs = invarientToReal[l[i].Key];
+                    if (hs.Count > 1)
+                    {
+                        int max = -1;
+                        string displayName = string.Empty;
+                        for (int iiii = 0; iiii < hs.Count; iiii++)
+                        {
+                            string name = hs.ElementAt(iiii);
+                            if (realCounts[name] > max)
+                            {
+                                max = realCounts[name];
+                                displayName = name;
+                            }
+                        }
+                        keyTerms.Add(new Tuple<string, HashSet<string>>(displayName, hs));
+                    }
+                    else
+                    {
+                        keyTerms.Add(new Tuple<string, HashSet<string>>(hs.ElementAt(0), null));
+                    }
+
+                }
+                return keyTerms;
+            }
+
+        }
+
     }
 
     public class ChipsItemRecyclerAdapter : RecyclerView.Adapter

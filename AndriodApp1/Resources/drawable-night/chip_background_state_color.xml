@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:color="#ff545454" android:state_enabled="false" />
+	<!--<item android:color="#ff3E4699" android:state_checked="true" />-->
+	<!--<item android:color="#ff3134FF" android:state_checked="true" />-->
+	<item android:color="#ff385466" android:state_checked="true" />
+	<!--	<item android:color="#ff5E6088" android:state_checked="true" />-->
+	<!--<item android:color="#ff4F5891" android:state_checked="true" />-->
+	<item android:color="#ff505050" />
+</selector>
+
+
+<!--<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:color="#ff545454" android:state_enabled="false" />
+	<item android:color="#ff707070" android:state_checked="true" />
+	<item android:color="#ff505050" />
+</selector>-->
+

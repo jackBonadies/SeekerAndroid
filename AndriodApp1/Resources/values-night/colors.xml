@@ -40,4 +40,7 @@
 
   <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
   <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
+
+
+	<color name="chipSeparatorColor">#ffe0e0e0</color>
 </resources>
