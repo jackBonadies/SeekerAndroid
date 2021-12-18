@@ -2631,6 +2631,8 @@ namespace AndriodApp1
                 SpecificFileType = new List<string>();
                 NumFiles = new List<int>();
                 FileRanges = new List<Tuple<int, int>>();
+                Keywords = new List<string>();
+                KeywordInvarient = new List<List<string>>();
 
             }
             public List<string> AllVarientsFileType;
@@ -2638,9 +2640,13 @@ namespace AndriodApp1
             public List<int> NumFiles;
             public List<Tuple<int,int>> FileRanges;
 
+            //these are the keywords.  keywords invarient will contain say "Paul and Jake", "Paul & Jake". they are OR'd inner.  both collections outer are AND'd.
+            public List<string> Keywords;
+            public List<List<string>> KeywordInvarient;
+
             public bool IsEmpty()
             {
-                return (AllVarientsFileType.Count == 0 && SpecificFileType.Count == 0 && NumFiles.Count == 0 && FileRanges.Count == 0);
+                return (AllVarientsFileType.Count == 0 && SpecificFileType.Count == 0 && NumFiles.Count == 0 && FileRanges.Count == 0 && Keywords.Count == 0 && KeywordInvarient.Count == 0);
             }
         }
 
@@ -2693,6 +2699,17 @@ namespace AndriodApp1
                     else
                     {
                         chipFilter.SpecificFileType.Add(chip.DisplayText);
+                    }
+                }
+                else if(chip.ChipType==ChipType.Keyword)
+                {
+                    if(chip.Children==null)
+                    {
+                        chipFilter.Keywords.Add(chip.DisplayText);
+                    }
+                    else
+                    {
+                        chipFilter.KeywordInvarient.Add(chip.Children);
                     }
                 }
             }
@@ -2809,6 +2826,38 @@ namespace AndriodApp1
                     }
                 }
                 if(!match)
+                {
+                    return false;
+                }
+
+                string fullFname = s.Files.First().Filename;
+                foreach (string keyword in chipFilter.Keywords)
+                {
+                    if(!Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase)  &&
+                        !Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return false;
+                    }
+                }
+                foreach (List<string> keywordsInvar in chipFilter.KeywordInvarient)
+                {
+                    //do any match?
+                    bool anyMatch = false;
+                    foreach(string keyword in keywordsInvar)
+                    {
+                        if (Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
+                            Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            anyMatch = true;
+                            break;
+                        }
+                    }
+                    if(!anyMatch)
+                    {
+                        return false;
+                    }
+                }
+                if (!match)
                 {
                     return false;
                 }
@@ -3594,7 +3643,18 @@ namespace AndriodApp1
                     {
                         if(SoulSeekState.ShowChips)
                         {
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
+#if DEBUG
+                            var df = SoulSeekState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ','_'));
+                            var outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
+                            foreach (var sr in SearchTabHelper.SearchTabCollection[fromTab].SearchResponses)
+                            {
+                                byte[] bytesText = System.Text.Encoding.ASCII.GetBytes(sr.Files.First().Filename + System.Environment.NewLine);
+                                outputStream.Write(bytesText, 0, bytesText.Length);
+                            }
+                            outputStream.Close();
+
+#endif
+                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm);
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                             SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
                                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);

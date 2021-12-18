@@ -10793,6 +10793,20 @@ namespace AndriodApp1
             }
         }
 
+        public static string GetParentFolderNameFromFile(string filename)
+        {
+            try
+            {
+                string parent = filename.Substring(0, filename.LastIndexOf('\\'));
+                parent = parent.Substring(0, parent.LastIndexOf('\\'));
+                parent = parent.Substring(parent.LastIndexOf('\\') + 1);
+                return parent;
+            }
+            catch
+            {
+                return "";
+            }
+        }
 
         public static string GetSubHeaderText(SearchResponse searchResponse)
         {
