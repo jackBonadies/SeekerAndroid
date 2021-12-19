@@ -327,9 +327,8 @@ namespace AndriodApp1
             filterText.TextChanged += FilterText_TextChanged;
             filterText.FocusChange += FilterText_FocusChange;
             filterText.EditorAction += FilterText_EditorAction;
-
-            Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
-            clearFilter.Click += ClearFilter_Click;
+            filterText.Touch += FilterText_Touch;
+            SearchFragment.UpdateDrawableState(filterText, true);
 
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
@@ -342,6 +341,24 @@ namespace AndriodApp1
 
 
             return this.rootView;
+        }
+
+        private void FilterText_Touch(object sender, View.TouchEventArgs e)
+        {
+            EditText editText = sender as EditText;
+            e.Handled = false;
+            if (e.Event.GetX() >= (editText.Width - editText.TotalPaddingRight))
+            {
+                if (e.Event.Action == MotionEventActions.Up)
+                {
+                    //e.Handled = true;
+                    editText.Text = string.Empty;
+                    SearchFragment.UpdateDrawableState(editText, true);
+
+
+                    //editText.RequestFocus();
+                }
+            }
         }
 
         private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
@@ -615,6 +632,7 @@ namespace AndriodApp1
 
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
+            string oldFilterString = FilteredResults ? FilterString : string.Empty;
             MainActivity.LogDebug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
             if(e.Text!=null && e.Text.ToString()!=string.Empty && isPaused)
@@ -646,6 +664,15 @@ namespace AndriodApp1
                     ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
                     lv.Adapter = (customAdapter);
                 }
+            }
+
+            if (oldFilterString == string.Empty && e.Text.ToString() != string.Empty)
+            {
+                SearchFragment.UpdateDrawableState(sender as EditText, true);
+            }
+            else if (oldFilterString != string.Empty && e.Text.ToString() == string.Empty)
+            {
+                SearchFragment.UpdateDrawableState(sender as EditText, true);
             }
         }
 

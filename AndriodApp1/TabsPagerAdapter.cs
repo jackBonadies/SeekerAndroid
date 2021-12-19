@@ -1678,7 +1678,7 @@ namespace AndriodApp1
             searchTabDialog.Show(this.ChildFragmentManager, "search tab dialog");
         }
 
-        public static void UpdateDrawableState(EditText actv)
+        public static void UpdateDrawableState(EditText actv, bool purple = false)
         {
             if(actv.Text==string.Empty || actv.Text == null)
             {
@@ -1688,6 +1688,11 @@ namespace AndriodApp1
             {
                 var cancel = ContextCompat.GetDrawable(SoulSeekState.MainActivityRef,Resource.Drawable.ic_cancel_black_24dp);
                 cancel.SetBounds(0, 0, cancel.IntrinsicWidth, cancel.IntrinsicHeight);
+                if(purple)
+                {
+                    //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
+                    cancel.SetColorFilter(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.mainPurple), PorterDuff.Mode.SrcAtop);
+                }
                 actv.SetCompoundDrawables(null,null,cancel,null);
             }
         }
@@ -2018,8 +2023,8 @@ namespace AndriodApp1
             //b.FocusableInTouchMode = true;
             b.Click += B_Click;
 
-            Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
-            clearFilter.Click += ClearFilter_Click;
+            //Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
+            //clearFilter.Click += ClearFilter_Click;
 
             string searchHistoryXML = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchHistory, string.Empty);
             if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
@@ -2080,12 +2085,67 @@ namespace AndriodApp1
             filterText.TextChanged += FilterText_TextChanged;
             filterText.FocusChange += FilterText_FocusChange;
             filterText.EditorAction += FilterText_EditorAction;
-            if(FilterSticky)
+            filterText.Touch += FilterText_Touch;
+            UpdateDrawableState(filterText);
+            if (FilterSticky)
             {
                 filterText.Text = FilterStickyString;
             }
 
+            Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
+            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? "Hide Smart Filters" : "Show Smart Filters";
+            showHideSmartFilters.Click += ShowHideSmartFilters_Click;
+
             return rootView;
+        }
+
+        private void ShowHideSmartFilters_Click(object sender, EventArgs e)
+        {
+            SoulSeekState.ShowSmartFilters = !SoulSeekState.ShowSmartFilters;
+            Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
+            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? "Hide Smart Filters" : "Show Smart Filters";
+            if(SoulSeekState.ShowSmartFilters)
+            {
+                if(SearchTabHelper.CurrentlySearching)
+                {
+                    return; //it will update on complete search
+                }
+                if((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
+                {
+                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
+                    SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
+                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+                    }));
+                }
+            }
+            else
+            {
+                SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = null;
+                SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipsFilter = null; //in case there was previously a filter
+                SearchFragment.Instance.RefreshOnChipChanged();
+                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(null);
+                SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+            }
+        }
+
+        private void FilterText_Touch(object sender, View.TouchEventArgs e)
+        {
+            EditText editText = sender as EditText;
+            e.Handled = false;
+            if (e.Event.GetX() >= (editText.Width - editText.TotalPaddingRight))
+            {
+                if (e.Event.Action == MotionEventActions.Up)
+                {
+                    //e.Handled = true;
+                    editText.Text = string.Empty;
+                    UpdateDrawableState(editText, true);
+
+                    ClearFilterStringAndCached(true);
+                    //editText.RequestFocus();
+                }
+            }
         }
 
         /// <summary>
@@ -2116,12 +2176,12 @@ namespace AndriodApp1
             }
         }
 
-        private void ClearFilter_Click(object sender, EventArgs e)
-        {
-            CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
-            filterSticky.Checked = false;
-            ClearFilterStringAndCached(true);
-        }
+        //private void ClearFilter_Click(object sender, EventArgs e)
+        //{
+        //    CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
+        //    filterSticky.Checked = false;
+        //    ClearFilterStringAndCached(true);
+        //}
 
         private void B_Click(object sender, EventArgs e)
         {
@@ -3019,6 +3079,7 @@ namespace AndriodApp1
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             MainActivity.LogDebug("Text Changed: " + e.Text);
+            string oldFilterString = SearchTabHelper.FilterString;
             if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null)|| this.AreChipsFiltering())
             {
                 SearchTabHelper.FilteredResults = true;
@@ -3039,6 +3100,15 @@ namespace AndriodApp1
                 SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchResponses);
                 ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                 lv.Adapter = (customAdapter);
+            }
+
+            if (oldFilterString == string.Empty && e.Text.ToString() != string.Empty)
+            {
+                UpdateDrawableState(sender as EditText, true);
+            }
+            else if (oldFilterString != string.Empty && e.Text.ToString() == string.Empty)
+            {
+                UpdateDrawableState(sender as EditText, true);
             }
         }
 
@@ -3633,7 +3703,7 @@ namespace AndriodApp1
                         }));
                         
                     }
-                    if(t.Result.Count==0 && !fromWishlist)
+                    if((!t.IsCanceled) && t.Result.Count==0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
                         SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
                             Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();

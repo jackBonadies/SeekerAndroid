@@ -3328,11 +3328,11 @@ namespace AndriodApp1
         {
             SoulSeekState.SmartFilterOptions = new SoulSeekState.SmartFilterState();
             SoulSeekState.SmartFilterOptions.KeywordsEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_KeywordsEnabled, true);
-            SoulSeekState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_KeywordsOrder, 2);
+            SoulSeekState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_KeywordsOrder, 0);
             SoulSeekState.SmartFilterOptions.FileTypesEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_TypesEnabled, true);
             SoulSeekState.SmartFilterOptions.FileTypesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_TypesOrder, 1);
             SoulSeekState.SmartFilterOptions.NumFilesEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_CountsEnabled, true);
-            SoulSeekState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_CountsOrder, 0);
+            SoulSeekState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_CountsOrder, 2);
         }
 
         public static void SaveSmartFilterState()
@@ -11367,33 +11367,6 @@ namespace AndriodApp1
             {
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             });
-
-            //System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            //{
-            //    if (e.ActionId == Android.Views.InputMethods.ImeAction.Send || //in this case it is Send (blue checkmark)
-            //        e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-            //        e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-            //        e.ActionId == Android.Views.InputMethods.ImeAction.Search)
-            //    {
-            //        MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-            //        //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-            //        //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-            //        //overriding this, the keyboard fails to go down by default for some reason.....
-            //        try
-            //        {
-            //            Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
-            //            imm.HideSoftInputFromWindow(SoulSeekState.ActiveActivityRef.Window.DecorView.WindowToken, 0);
-            //        }
-            //        catch (System.Exception ex)
-            //        {
-            //            MainActivity.LogFirebase(ex.Message + " error closing keyboard");
-            //        }
-            //        //Do the Browse Logic...
-            //        eventHandler(sender, null);
-            //    }
-            //};
-
-            //input.EditorAction += editorAction;
 
             builder.SetPositiveButton(Resource.String.okay, eventHandler);
             builder.SetNegativeButton(Resource.String.close, eventHandlerCancel);

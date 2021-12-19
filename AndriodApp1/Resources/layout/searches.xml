@@ -20,86 +20,7 @@
         android:focusableInTouchMode="true"
         tools:context="android.PageFragment"
         android:id="@+id/relativeLayout1">
-<!--        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content"
-            android:id="@+id/searching">
-            <AutoCompleteTextView
-                android:layout_width = "wrap_content"
-                android:layout_height = "wrap_content"
-                android:layout_weight="10"
-                android:id = "@+id/searchHere"
-                android:hint = "Search Here"
-                android:completionThreshold="0"
-                android:singleLine="true"
-                android:focusable = "true"
-                android:imeOptions="actionDone"
-                android:textColorHighlight = "@color/mainTextColor"
-                android:textColorHint = "@color/mainTextColor"
-                android:layout_below = "@id/textView"
-                android:layout_alignParentLeft = "true"
-                android:layout_alignParentStart = "true"
-                android:layout_alignParentRight = "true"
-                android:layout_alignParentEnd = "true" />
-            <Button
-                android:layout_alignParentRight="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Submit"
-                android:clickable="true"
-                android:layout_weight="1"
-                android:layout_marginBottom="2dp"
-                android:focusable="true"
-                android:foreground="@drawable/button"
-                style="@style/SeekerButtonStyle"
-                android:id="@+id/button2"
-                android:layout_alignRight="@id/searchHere"
-        />
-        </LinearLayout>-->
-<!--        THE HEADER
-            <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
 
-            android:layout_below="@id/searching"
-            android:background="@color/slskAccent"
-            android:id="@+id/header1">
-            <TextView
-                android:layout_width = "0dp"
-                android:layout_height = "wrap_content"
-                android:layout_weight = "1.5"
-                android:background="@drawable/header_cell_shape"
-                android:gravity = "center"
-                android:padding = "5dp"
-                android:text = "Username"
-                android:textSize="12sp"
-                android:textColor = "#ffffff" />
-
-            <TextView
-                android:layout_width = "0dp"
-                android:layout_height = "wrap_content"
-                android:layout_weight = "3"
-                android:gravity = "center"
-                android:background="@drawable/header_cell_shape"
-                android:textSize="12sp"
-                android:padding = "5dp"
-                android:text = "Folder"
-                android:textColor = "#ffffff"/>
-
-            <TextView
-                android:layout_width = "0dp"
-                android:layout_height = "wrap_content"
-                android:layout_weight = ".65"
-                android:gravity = "center"
-                android:padding = "2dp"
-                android:text = "Kb/s"
-                android:id="@+id/searchesKbs"
-                android:textSize="12sp"
-                android:textColor = "#ffffff" />
-        </LinearLayout>
-        THE HEADER-->
         <androidx.recyclerview.widget.RecyclerView
             android:layout_below = "@id/header1"
         android:minWidth="25px"
@@ -151,18 +72,7 @@
                 android:layout_weight="2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-          <Button
-      android:layout_marginTop="0dp"
-                style="@style/SeekerButtonStyle"
-                android:layout_alignRight="@id/filterText"
-                android:text="@string/clear"
-        android:id="@+id/clearFilter"
-                android:layout_weight=".5"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:minWidth="0dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+
           <FrameLayout
       android:layout_marginTop="0dp"
                 android:layout_width="32dp"
@@ -177,6 +87,19 @@
             android:layout_marginBottom="12dp"
             android:layout_below="@id/filterLineOne"
             android:layout_height="wrap_content">
+
+                      <Button
+      android:layout_marginTop="0dp"
+                style="@style/SeekerButtonStyle"
+                android:foreground="@drawable/button"
+                android:text="Show Smart Filters"
+        android:id="@+id/toggleSmartFilters"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:minWidth="0dp"
+                android:textSize="12sp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
           <View
         android:layout_width="0dp"
         android:layout_height="0dp"
