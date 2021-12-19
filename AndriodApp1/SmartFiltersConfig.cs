@@ -138,16 +138,20 @@ namespace AndriodApp1
         , ItemTouchHelperAdapter
     {
         public ItemTouchHelper ItemTouchHelper;
-        private List<ConfigureChipItems> mItems = new List<ConfigureChipItems>();
+
+        public List<ConfigureChipItems> GetAdapterItems()
+        {
+            return mItems;
+        }
+
+        private List<ConfigureChipItems> mItems = null;
 
         private OnStartDragListener mDragStartListener;
 
-        public RecyclerListAdapter(Context context, OnStartDragListener dragStartListener)
+        public RecyclerListAdapter(Context context, OnStartDragListener dragStartListener, List<ConfigureChipItems> configureChipItems)
         {
             mDragStartListener = dragStartListener;
-            mItems.Add(new ConfigureChipItems() { Enabled = true, Name = "# Files" });
-            mItems.Add(new ConfigureChipItems() { Enabled = true, Name = "File Types" });
-            mItems.Add(new ConfigureChipItems() { Enabled = true, Name = "Keywords" });
+            mItems = configureChipItems;
             //mItems.addAll(Arrays.asList(context.getResources().getStringArray(R.array.dummy_items)));
         }
 

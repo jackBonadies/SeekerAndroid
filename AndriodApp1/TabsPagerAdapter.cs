@@ -1513,6 +1513,10 @@ namespace AndriodApp1
                         SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses); //this throws, its not ready..
                         ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                         lv.Adapter = (customAdapter);
+
+                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+
                     }
                     else
                     {
@@ -1520,6 +1524,9 @@ namespace AndriodApp1
                         MainActivity.LogDebug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
                         ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                         lv.Adapter = (customAdapter);
+
+                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
 
@@ -1967,14 +1974,14 @@ namespace AndriodApp1
             ListView lv = rootView.FindViewById<ListView>(Resource.Id.listView1);
 
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
-            if(SoulSeekState.ShowChips)
-            {
+            //if(SoulSeekState.ShowSmartFilters)
+            //{
                 recyclerViewChips.Visibility = ViewStates.Visible;
-            }
-            else
-            {
-                recyclerViewChips.Visibility = ViewStates.Gone;
-            }
+            //}
+            //else
+            //{
+            //    recyclerViewChips.Visibility = ViewStates.Gone;
+            //}
 
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
@@ -2087,7 +2094,7 @@ namespace AndriodApp1
         /// <returns></returns>
         private bool AreChipsFiltering()
         {
-            if(!SoulSeekState.ShowChips || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
+            if(!SoulSeekState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
                 return false;
             }
@@ -2898,6 +2905,7 @@ namespace AndriodApp1
         }
 
         //should be called whenever either the filter changes, new search results come in, the search gets cleared, etc.
+        //includes chips
         private void UpdateFilteredResponses(SearchTab searchTab)
         {
             //The Rules:
@@ -3228,6 +3236,9 @@ namespace AndriodApp1
                 SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchResponses);
                 ListView lv = SearchFragment.Instance.rootView.FindViewById<ListView>(Resource.Id.listView1);
                 lv.Adapter = (customAdapter);
+
+                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+                SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
 
             }
@@ -3641,7 +3652,7 @@ namespace AndriodApp1
 
                     if(fromTab== SearchTabHelper.CurrentTab)
                     {
-                        if(SoulSeekState.ShowChips)
+                        if(SoulSeekState.ShowSmartFilters)
                         {
 #if DEBUG
                             var df = SoulSeekState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ','_'));
@@ -3654,7 +3665,7 @@ namespace AndriodApp1
                             outputStream.Close();
 
 #endif
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm);
+                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                             SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
                                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
