@@ -737,6 +737,8 @@ namespace AndriodApp1
                     case "-":
                     case "@192":
                     case "@320":
+                    case "flac 24bit":
+                    case "mp3 320 44":
                         return true;
                     default:
                         return false;
