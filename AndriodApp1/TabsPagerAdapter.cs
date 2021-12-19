@@ -811,6 +811,8 @@ namespace AndriodApp1
             clone.LastSearchTerm = this.LastSearchTerm;
             clone.LastSearchResultsCount = this.LastSearchResultsCount;
             clone.LastRanTime = this.LastRanTime;
+            clone.ChipDataItems = this.ChipDataItems;
+            clone.ChipsFilter = this.ChipsFilter;
             return clone;
         }
     }
@@ -1691,7 +1693,7 @@ namespace AndriodApp1
                 if(purple)
                 {
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
-                    cancel.SetColorFilter(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.mainPurple), PorterDuff.Mode.SrcAtop);
+                    cancel.SetColorFilter(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
                 actv.SetCompoundDrawables(null,null,cancel,null);
             }
@@ -1991,7 +1993,8 @@ namespace AndriodApp1
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
             recyclerViewChips.SetLayoutManager(manager);
-
+            recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+            recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
@@ -3079,7 +3082,7 @@ namespace AndriodApp1
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             MainActivity.LogDebug("Text Changed: " + e.Text);
-            string oldFilterString = SearchTabHelper.FilterString;
+            string oldFilterString = SearchTabHelper.FilteredResults ? SearchTabHelper.FilterString : string.Empty;
             if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null)|| this.AreChipsFiltering())
             {
                 SearchTabHelper.FilteredResults = true;
