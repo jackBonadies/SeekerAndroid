@@ -33,6 +33,8 @@ using System.Text;
 using Google.Android.Material.Snackbar;
 using System.Threading.Tasks;
 using Android.Content.PM;
+using Android.Support.V7.Widget;
+using Android.Support.V7.Widget.Helper;
 
 namespace AndriodApp1
 {
@@ -171,6 +173,7 @@ namespace AndriodApp1
         Button changePort;
 
         CheckBox useUPnPCheckBox;
+        CheckBox showSmartFilters;
 
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -400,6 +403,96 @@ namespace AndriodApp1
             SetCompleteFolderView();
             SetIncompleteFolderView();
             SetSharedFolderView();
+
+
+            showSmartFilters = this.FindViewById<CheckBox>(Resource.Id.smartFilterEnable);
+            showSmartFilters.Checked = SoulSeekState.ShowSmartFilters;
+            showSmartFilters.CheckedChange += ShowSmartFilters_CheckedChange;
+
+            Button configSmartFilters = FindViewById<Button>(Resource.Id.configureSmartFilters);
+            configSmartFilters.Click += ConfigSmartFilters_Click;
+
+
+        }
+        //private static AndroidX.AppCompat.App.AlertDialog configSmartFilters = null;
+        private void ConfigSmartFilters_Click(object sender, EventArgs e)
+        {
+            MainActivity.LogInfoFirebase("ConfigSmartFilters_Click");
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this); //failed to bind....
+            builder.SetTitle("Configure Smart Filters");
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
+            // Set up the input
+            RecyclerView recyclerViewFiltersConfig = (RecyclerView)viewInflated.FindViewById<RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
+            builder.SetView(viewInflated);
+
+            
+
+            RecyclerListAdapter adapter = new RecyclerListAdapter(this, null, SoulSeekState.SmartFilterOptions.GetAdapterItems());
+
+            recyclerViewFiltersConfig.HasFixedSize = (true);
+            recyclerViewFiltersConfig.SetAdapter(adapter);
+            recyclerViewFiltersConfig.SetLayoutManager(new LinearLayoutManager(this));
+
+            ItemTouchHelper.Callback callback = new DragDropItemTouchHelper(adapter);
+            var mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.AttachToRecyclerView(recyclerViewFiltersConfig);
+            adapter.ItemTouchHelper = mItemTouchHelper;
+
+            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            {
+                SoulSeekState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
+                SeekerApplication.SaveSmartFilterState();
+
+                //int portNum = -1;
+                //if (!int.TryParse(input.Text, out portNum))
+                //{
+                //    Toast.MakeText(this, Resource.String.port_failed_parse, ToastLength.Long).Show();
+                //    return;
+                //}
+                //if (portNum < 1024 || portNum > 65535)
+                //{
+                //    Toast.MakeText(this, Resource.String.port_out_of_range, ToastLength.Long).Show();
+                //    return;
+                //}
+                //ReconfigureOptionsAPI(null, null, portNum);
+                //SoulSeekState.ListenerPort = portNum;
+                //UPnpManager.Instance.Feedback = true;
+                //UPnpManager.Instance.SearchAndSetMappingIfRequired();
+                //SeekerApplication.SaveListeningState();
+                //SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
+                //changePortDialog.Dismiss();
+            });
+
+            EventHandler<DialogClickEventArgs> cancelHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            {
+                //if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                //{
+                //    aDiag.Dismiss();
+                //}
+                //else
+                //{
+                //    changePortDialog.Dismiss();
+                //}
+
+            });
+
+            builder.SetPositiveButton(Resource.String.okay, eventHandler);
+            builder.SetNegativeButton(Resource.String.cancel, cancelHandler);
+
+            AndroidX.AppCompat.App.AlertDialog diag = builder.Create();
+            diag.Show();
+
+        }
+
+        private void ShowSmartFilters_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.ShowSmartFilters = e.IsChecked;
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                editor.PutBoolean(SoulSeekState.M_ShowSmartFilters, SoulSeekState.ShowSmartFilters);
+                bool success = editor.Commit();
+            }
         }
 
         private void ImportData_Click(object sender, EventArgs e)

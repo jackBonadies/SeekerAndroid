@@ -3185,10 +3185,14 @@ namespace AndriodApp1
                 SoulSeekState.UploadDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_UploadDirectoryUri, "");
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
                 SoulSeekState.UserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
+                
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
                 SoulSeekState.IgnoreUserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
                 SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
                 SoulSeekState.StartServiceOnStartup = sharedPreferences.GetBoolean(SoulSeekState.M_ServiceOnStartup, true);
+
+                SoulSeekState.ShowSmartFilters = sharedPreferences.GetBoolean(SoulSeekState.M_ShowSmartFilters, false);
+                RestoreSmartFilterState(sharedPreferences);
 
                 SoulSeekState.UserInfoBio = sharedPreferences.GetString(SoulSeekState.M_UserInfoBio, string.Empty);
                 SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
@@ -3317,6 +3321,32 @@ namespace AndriodApp1
                 {
                     actv.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, SoulSeekState.RecentUsersManager.GetRecentUserList());
                 }
+            }
+        }
+
+        public static void RestoreSmartFilterState(ISharedPreferences sharedPreferences)
+        {
+            SoulSeekState.SmartFilterOptions = new SoulSeekState.SmartFilterState();
+            SoulSeekState.SmartFilterOptions.KeywordsEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_KeywordsEnabled, true);
+            SoulSeekState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_KeywordsOrder, 2);
+            SoulSeekState.SmartFilterOptions.FileTypesEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_TypesEnabled, true);
+            SoulSeekState.SmartFilterOptions.FileTypesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_TypesOrder, 1);
+            SoulSeekState.SmartFilterOptions.NumFilesEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_CountsEnabled, true);
+            SoulSeekState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_CountsOrder, 0);
+        }
+
+        public static void SaveSmartFilterState()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutBoolean(SoulSeekState.M_SmartFilter_KeywordsEnabled, SoulSeekState.SmartFilterOptions.KeywordsEnabled);
+                editor.PutBoolean(SoulSeekState.M_SmartFilter_TypesEnabled, SoulSeekState.SmartFilterOptions.FileTypesEnabled);
+                editor.PutBoolean(SoulSeekState.M_SmartFilter_CountsEnabled, SoulSeekState.SmartFilterOptions.NumFilesEnabled);
+                editor.PutInt(SoulSeekState.M_SmartFilter_KeywordsOrder, SoulSeekState.SmartFilterOptions.KeywordsOrder);
+                editor.PutInt(SoulSeekState.M_SmartFilter_TypesOrder, SoulSeekState.SmartFilterOptions.FileTypesOrder);
+                editor.PutInt(SoulSeekState.M_SmartFilter_CountsOrder, SoulSeekState.SmartFilterOptions.NumFilesOrder);
+                editor.Commit();
             }
         }
 
@@ -9876,7 +9906,8 @@ namespace AndriodApp1
         public static String UploadDataDirectoryUri = null;
         public static String ManualIncompleteDataDirectoryUri = null;
 
-        public static bool ShowChips = true;
+        public static bool ShowSmartFilters = true;
+        public static SmartFilterState SmartFilterOptions;
 
         public static volatile bool DownloadKeepAliveServiceRunning = false;
         public static volatile bool UploadKeepAliveServiceRunning = false;
@@ -9939,6 +9970,104 @@ namespace AndriodApp1
         /// </summary>
         public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
         public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
+
+        public struct SmartFilterState
+        {
+            public bool KeywordsEnabled;
+            public int KeywordsOrder;
+            public bool NumFilesEnabled;
+            public int NumFilesOrder;
+            public bool FileTypesEnabled;
+            public int FileTypesOrder;
+            public List<ChipType> GetEnabledOrder()
+            {
+                List<Tuple<ChipType,int>> tuples = new List<Tuple<ChipType, int>>();
+                if(KeywordsEnabled)
+                {
+                    tuples.Add(new Tuple<ChipType, int>(ChipType.Keyword, KeywordsOrder));
+                }
+                if (NumFilesEnabled)
+                {
+                    tuples.Add(new Tuple<ChipType, int>(ChipType.FileCount, NumFilesOrder));
+                }
+                if (FileTypesEnabled)
+                {
+                    tuples.Add(new Tuple<ChipType, int>(ChipType.FileType, FileTypesOrder));
+                }
+                tuples.Sort((t1, t2)=>t1.Item2.CompareTo(t2.Item2));
+                return tuples.Select(t1=>t1.Item1).ToList();
+            }
+
+            public List<ConfigureChipItems> GetAdapterItems()
+            {
+                List<Tuple<string, int, bool>> tuples = new List<Tuple<string, int, bool>>();
+                tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.Keyword), KeywordsOrder, KeywordsEnabled));
+                tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.FileCount), NumFilesOrder, NumFilesEnabled));
+                tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.FileType), FileTypesOrder, FileTypesEnabled));
+                tuples.Sort((t1, t2) => t1.Item2.CompareTo(t2.Item2));
+                return tuples.Select(t1=>new ConfigureChipItems() {Name = t1.Item1, Enabled = t1.Item3 }).ToList();
+            }
+
+            public void FromAdapterItems(List<ConfigureChipItems> chipItems)
+            {
+                for(int i=0; i<chipItems.Count; i++)
+                {
+                    ChipType ct = GetEnumFromName(chipItems[i].Name);
+                    bool enabled = chipItems[i].Enabled;
+                    switch(ct)
+                    {
+                        case ChipType.Keyword:
+                            SoulSeekState.SmartFilterOptions.KeywordsEnabled = enabled;
+                            SoulSeekState.SmartFilterOptions.KeywordsOrder = i;
+                            break;
+                        case ChipType.FileType:
+                            SoulSeekState.SmartFilterOptions.FileTypesEnabled = enabled;
+                            SoulSeekState.SmartFilterOptions.FileTypesOrder = i;
+                            break;
+                        case ChipType.FileCount:
+                            SoulSeekState.SmartFilterOptions.NumFilesEnabled = enabled;
+                            SoulSeekState.SmartFilterOptions.NumFilesOrder = i;
+                            break;
+                        default:
+                            throw new Exception("unknown option");
+                    }
+                }
+            }
+
+            public const string DisplayNameKeyword = "Keywords";
+            public const string DisplayNameType = "File Types";
+            public const string DisplayNameCount = "# Files";
+
+            public string GetNameFromEnum(ChipType chipType)
+            {
+                switch (chipType)
+                {
+                    case ChipType.Keyword:
+                        return DisplayNameKeyword;
+                    case ChipType.FileType:
+                        return DisplayNameType;
+                    case ChipType.FileCount:
+                        return DisplayNameCount;
+                    default:
+                        throw new Exception("unknown enum");
+                }
+            }
+
+            public ChipType GetEnumFromName(string name)
+            {
+                switch (name)
+                {
+                    case DisplayNameKeyword:
+                        return ChipType.Keyword;
+                    case DisplayNameType:
+                        return ChipType.FileType;
+                    case DisplayNameCount:
+                        return ChipType.FileCount;
+                    default:
+                        throw new Exception("unknown enum");
+                }
+            }
+        }
 
 
         public static void ClearSearchHistoryEventsFromTarget(object target)
@@ -10038,6 +10167,7 @@ namespace AndriodApp1
         public const string M_JoinedRooms = "Cache_JoinedRooms";
         public const string M_AllowPrivateRooomInvitations = "Momento_AllowPrivateRoomInvitations";
         public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
+        public const string M_ShowSmartFilters = "Momento_ShowSmartFilters";
         public const string M_chatroomsToNotify = "Momento_chatroomsToNotify";
         public const string M_SearchTabsState = "Momento_SearchTabsState";
 
@@ -10077,6 +10207,15 @@ namespace AndriodApp1
         public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
         public const string M_CreateCompleteAndIncompleteFolders= "Momento_CreateCompleteIncomplete";
         public const string M_AdditionalUsernameSubdirectories = "Momento_M_AdditionalUsernameSubdirectories";
+
+
+        public const string M_SmartFilter_KeywordsEnabled = "Momento_SmartFilterKeywordsEnabled";
+        public const string M_SmartFilter_CountsEnabled = "Momento_SmartFilterCountsEnabled";
+        public const string M_SmartFilter_TypesEnabled = "Momento_SmartFilterTypesEnabled";
+        public const string M_SmartFilter_KeywordsOrder = "Momento_SmartFilterKeywordsOrder";
+        public const string M_SmartFilter_CountsOrder = "Momento_SmartFilterCountsOrder";
+        public const string M_SmartFilter_TypesOrder = "Momento_SmartFilterTypesOrder";
+
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
         public static Android.Support.V4.Provider.DocumentFile RootDocumentFile = null;
