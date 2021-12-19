@@ -3725,14 +3725,21 @@ namespace AndriodApp1
                         if(SoulSeekState.ShowSmartFilters)
                         {
 #if DEBUG
-                            var df = SoulSeekState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ','_'));
-                            var outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
-                            foreach (var sr in SearchTabHelper.SearchTabCollection[fromTab].SearchResponses)
+                            try
                             {
-                                byte[] bytesText = System.Text.Encoding.ASCII.GetBytes(sr.Files.First().Filename + System.Environment.NewLine);
-                                outputStream.Write(bytesText, 0, bytesText.Length);
+                                var df = SoulSeekState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ','_'));
+                                var outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
+                                foreach (var sr in SearchTabHelper.SearchTabCollection[fromTab].SearchResponses)
+                                {
+                                    byte[] bytesText = System.Text.Encoding.ASCII.GetBytes(sr.Files.First().Filename + System.Environment.NewLine);
+                                    outputStream.Write(bytesText, 0, bytesText.Length);
+                                }
+                                outputStream.Close();
                             }
-                            outputStream.Close();
+                            catch
+                            {
+
+                            }
 
 #endif
                             List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
