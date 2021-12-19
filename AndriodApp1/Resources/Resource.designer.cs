@@ -9243,1259 +9243,1280 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0F008A
 			public const int day_left = 2131689610;
 			
-			// aapt resource value: 0x7F0F008E
-			public const int deleted_all_messages = 2131689614;
+			// aapt resource value: 0x7F0F008C
+			public const int default_web_client_id = 2131689612;
 			
 			// aapt resource value: 0x7F0F008F
-			public const int deleted_all_no_messages = 2131689615;
+			public const int deleted_all_messages = 2131689615;
 			
 			// aapt resource value: 0x7F0F0090
-			public const int deleted_message_history_with = 2131689616;
-			
-			// aapt resource value: 0x7F0F008C
-			public const int delete_all_messages = 2131689612;
-			
-			// aapt resource value: 0x7F0F008D
-			public const int delete_messages = 2131689613;
+			public const int deleted_all_no_messages = 2131689616;
 			
 			// aapt resource value: 0x7F0F0091
-			public const int denied = 2131689617;
+			public const int deleted_message_history_with = 2131689617;
+			
+			// aapt resource value: 0x7F0F008D
+			public const int delete_all_messages = 2131689613;
+			
+			// aapt resource value: 0x7F0F008E
+			public const int delete_messages = 2131689614;
 			
 			// aapt resource value: 0x7F0F0092
-			public const int directory_is_empty = 2131689618;
+			public const int denied = 2131689618;
 			
 			// aapt resource value: 0x7F0F0093
-			public const int disable_bottom_notifs_complete = 2131689619;
+			public const int directory_is_empty = 2131689619;
 			
 			// aapt resource value: 0x7F0F0094
-			public const int disabling_listener = 2131689620;
+			public const int disable_bottom_notifs_complete = 2131689620;
 			
 			// aapt resource value: 0x7F0F0095
-			public const int dns_failed = 2131689621;
+			public const int disabling_listener = 2131689621;
 			
 			// aapt resource value: 0x7F0F0096
-			public const int dns_failed_2 = 2131689622;
-			
-			// aapt resource value: 0x7F0F009C
-			public const int downloads_remaining = 2131689628;
+			public const int dns_failed = 2131689622;
 			
 			// aapt resource value: 0x7F0F0097
-			public const int download_folder = 2131689623;
-			
-			// aapt resource value: 0x7F0F0098
-			public const int download_in_progress = 2131689624;
-			
-			// aapt resource value: 0x7F0F0099
-			public const int download_is_starting = 2131689625;
-			
-			// aapt resource value: 0x7F0F009A
-			public const int download_remaining = 2131689626;
-			
-			// aapt resource value: 0x7F0F009B
-			public const int download_selected = 2131689627;
+			public const int dns_failed_2 = 2131689623;
 			
 			// aapt resource value: 0x7F0F009D
-			public const int dropping_MEMBERSHIP_of_ROOMNAME = 2131689629;
+			public const int downloads_remaining = 2131689629;
+			
+			// aapt resource value: 0x7F0F0098
+			public const int download_folder = 2131689624;
+			
+			// aapt resource value: 0x7F0F0099
+			public const int download_in_progress = 2131689625;
+			
+			// aapt resource value: 0x7F0F009A
+			public const int download_is_starting = 2131689626;
+			
+			// aapt resource value: 0x7F0F009B
+			public const int download_remaining = 2131689627;
+			
+			// aapt resource value: 0x7F0F009C
+			public const int download_selected = 2131689628;
 			
 			// aapt resource value: 0x7F0F009E
-			public const int edit_info = 2131689630;
+			public const int dropping_MEMBERSHIP_of_ROOMNAME = 2131689630;
 			
 			// aapt resource value: 0x7F0F009F
-			public const int edit_note = 2131689631;
+			public const int edit_info = 2131689631;
 			
 			// aapt resource value: 0x7F0F00A0
-			public const int edit_your_user_info = 2131689632;
+			public const int edit_note = 2131689632;
 			
 			// aapt resource value: 0x7F0F00A1
-			public const int empty_browse_directory = 2131689633;
+			public const int edit_your_user_info = 2131689633;
 			
 			// aapt resource value: 0x7F0F00A2
-			public const int empty_message_error = 2131689634;
+			public const int empty_browse_directory = 2131689634;
 			
 			// aapt resource value: 0x7F0F00A3
-			public const int enable_listening = 2131689635;
+			public const int empty_message_error = 2131689635;
 			
 			// aapt resource value: 0x7F0F00A4
-			public const int enable_sharing = 2131689636;
+			public const int enable_listening = 2131689636;
 			
 			// aapt resource value: 0x7F0F00A5
-			public const int enabling_listener = 2131689637;
+			public const int enable_sharing = 2131689637;
 			
 			// aapt resource value: 0x7F0F00A6
-			public const int enter_listening_port = 2131689638;
+			public const int enabling_listener = 2131689638;
 			
 			// aapt resource value: 0x7F0F00A7
-			public const int enter_user_to_browse = 2131689639;
+			public const int enter_listening_port = 2131689639;
 			
 			// aapt resource value: 0x7F0F00A8
-			public const int enter_user_to_invite_to_room = 2131689640;
+			public const int enter_user_to_browse = 2131689640;
 			
 			// aapt resource value: 0x7F0F00A9
-			public const int enter_user_to_message = 2131689641;
+			public const int enter_user_to_invite_to_room = 2131689641;
 			
 			// aapt resource value: 0x7F0F00AA
-			public const int error = 2131689642;
+			public const int enter_user_to_message = 2131689642;
 			
 			// aapt resource value: 0x7F0F00AB
-			public const int error_ = 2131689643;
+			public const int error = 2131689643;
 			
 			// aapt resource value: 0x7F0F00AC
-			public const int error_adding_user_not_found = 2131689644;
+			public const int error_ = 2131689644;
 			
 			// aapt resource value: 0x7F0F00AD
-			public const int error_adding_user_timeout = 2131689645;
+			public const int error_adding_user_not_found = 2131689645;
 			
 			// aapt resource value: 0x7F0F00AE
-			public const int error_browse_at_location = 2131689646;
-			
-			// aapt resource value: 0x7F0F00B0
-			public const int error_days_entered_not_positive = 2131689648;
+			public const int error_adding_user_timeout = 2131689646;
 			
 			// aapt resource value: 0x7F0F00AF
-			public const int error_days_entered_no_parse = 2131689647;
+			public const int error_browse_at_location = 2131689647;
 			
 			// aapt resource value: 0x7F0F00B1
-			public const int error_duplicate = 2131689649;
+			public const int error_days_entered_not_positive = 2131689649;
+			
+			// aapt resource value: 0x7F0F00B0
+			public const int error_days_entered_no_parse = 2131689648;
 			
 			// aapt resource value: 0x7F0F00B2
-			public const int error_duplicates = 2131689650;
+			public const int error_duplicate = 2131689650;
 			
 			// aapt resource value: 0x7F0F00B3
-			public const int error_give_priv = 2131689651;
+			public const int error_duplicates = 2131689651;
 			
 			// aapt resource value: 0x7F0F00B4
-			public const int error_icon_content_description = 2131689652;
+			public const int error_give_priv = 2131689652;
 			
 			// aapt resource value: 0x7F0F00B5
-			public const int error_image_doesnt_exist = 2131689653;
+			public const int error_icon_content_description = 2131689653;
 			
 			// aapt resource value: 0x7F0F00B6
-			public const int error_image_too_large = 2131689654;
+			public const int error_image_doesnt_exist = 2131689654;
 			
 			// aapt resource value: 0x7F0F00B7
-			public const int error_insufficient_days = 2131689655;
-			
-			// aapt resource value: 0x7F0F00BB
-			public const int error_not_a_dir = 2131689659;
+			public const int error_image_too_large = 2131689655;
 			
 			// aapt resource value: 0x7F0F00B8
-			public const int error_no_file_manager = 2131689656;
-			
-			// aapt resource value: 0x7F0F00B9
-			public const int error_no_file_manager_dir = 2131689657;
-			
-			// aapt resource value: 0x7F0F00BA
-			public const int error_no_space = 2131689658;
+			public const int error_insufficient_days = 2131689656;
 			
 			// aapt resource value: 0x7F0F00BC
-			public const int error_parsing_files_shared_dir = 2131689660;
+			public const int error_not_a_dir = 2131689660;
+			
+			// aapt resource value: 0x7F0F00B9
+			public const int error_no_file_manager = 2131689657;
+			
+			// aapt resource value: 0x7F0F00BA
+			public const int error_no_file_manager_dir = 2131689658;
+			
+			// aapt resource value: 0x7F0F00BB
+			public const int error_no_space = 2131689659;
 			
 			// aapt resource value: 0x7F0F00BD
-			public const int error_reading_dir = 2131689661;
+			public const int error_parsing_files_shared_dir = 2131689661;
 			
 			// aapt resource value: 0x7F0F00BE
-			public const int error_sharing = 2131689662;
+			public const int error_reading_dir = 2131689662;
 			
 			// aapt resource value: 0x7F0F00BF
-			public const int error_unspecified = 2131689663;
+			public const int error_sharing = 2131689663;
 			
 			// aapt resource value: 0x7F0F00C0
-			public const int exposed_dropdown_menu_content_description = 2131689664;
+			public const int error_unspecified = 2131689664;
 			
 			// aapt resource value: 0x7F0F00C1
-			public const int fab_transformation_scrim_behavior = 2131689665;
+			public const int exposed_dropdown_menu_content_description = 2131689665;
 			
 			// aapt resource value: 0x7F0F00C2
-			public const int fab_transformation_sheet_behavior = 2131689666;
+			public const int fab_transformation_scrim_behavior = 2131689666;
 			
 			// aapt resource value: 0x7F0F00C3
-			public const int failed = 2131689667;
+			public const int fab_transformation_sheet_behavior = 2131689667;
 			
 			// aapt resource value: 0x7F0F00C4
-			public const int failed_added_mod = 2131689668;
+			public const int failed = 2131689668;
 			
 			// aapt resource value: 0x7F0F00C5
-			public const int failed_invite_user = 2131689669;
-			
-			// aapt resource value: 0x7F0F00C7
-			public const int failed_removed_user = 2131689671;
+			public const int failed_added_mod = 2131689669;
 			
 			// aapt resource value: 0x7F0F00C6
-			public const int failed_remove_mod = 2131689670;
+			public const int failed_invite_user = 2131689670;
 			
 			// aapt resource value: 0x7F0F00C8
-			public const int failed_setting_priv_invites = 2131689672;
+			public const int failed_removed_user = 2131689672;
+			
+			// aapt resource value: 0x7F0F00C7
+			public const int failed_remove_mod = 2131689671;
 			
 			// aapt resource value: 0x7F0F00C9
-			public const int failed_to_connect = 2131689673;
+			public const int failed_setting_priv_invites = 2131689673;
 			
 			// aapt resource value: 0x7F0F00CA
-			public const int failed_to_establish_connection_to_peer = 2131689674;
+			public const int failed_to_connect = 2131689674;
 			
 			// aapt resource value: 0x7F0F00CB
-			public const int failed_to_establish_direct_or_indirect = 2131689675;
+			public const int failed_to_establish_connection_to_peer = 2131689675;
 			
 			// aapt resource value: 0x7F0F00CC
-			public const int failed_to_parse_shares_post = 2131689676;
+			public const int failed_to_establish_direct_or_indirect = 2131689676;
 			
 			// aapt resource value: 0x7F0F00CD
-			public const int failed_to_play = 2131689677;
+			public const int failed_to_parse_shares_post = 2131689677;
 			
 			// aapt resource value: 0x7F0F00CE
-			public const int failed_to_remove = 2131689678;
+			public const int failed_to_play = 2131689678;
 			
 			// aapt resource value: 0x7F0F00CF
-			public const int failed_to_send_message = 2131689679;
+			public const int failed_to_remove = 2131689679;
 			
 			// aapt resource value: 0x7F0F00D0
-			public const int failed_to_set = 2131689680;
+			public const int failed_to_send_message = 2131689680;
 			
 			// aapt resource value: 0x7F0F00D1
-			public const int failed_to_set_ticker = 2131689681;
+			public const int failed_to_set = 2131689681;
 			
 			// aapt resource value: 0x7F0F00D2
-			public const int failed_to_undo = 2131689682;
+			public const int failed_to_set_ticker = 2131689682;
 			
 			// aapt resource value: 0x7F0F00D3
-			public const int file = 2131689683;
-			
-			// aapt resource value: 0x7F0F00D6
-			public const int filer_files = 2131689686;
-			
-			// aapt resource value: 0x7F0F00D7
-			public const int files = 2131689687;
+			public const int failed_to_undo = 2131689683;
 			
 			// aapt resource value: 0x7F0F00D4
-			public const int file_backed_downloads = 2131689684;
+			public const int file = 2131689684;
 			
-			// aapt resource value: 0x7F0F00D5
-			public const int file_column = 2131689685;
+			// aapt resource value: 0x7F0F00D7
+			public const int filer_files = 2131689687;
 			
 			// aapt resource value: 0x7F0F00D8
-			public const int filter_chatrooms_here = 2131689688;
+			public const int files = 2131689688;
+			
+			// aapt resource value: 0x7F0F00D5
+			public const int file_backed_downloads = 2131689685;
+			
+			// aapt resource value: 0x7F0F00D6
+			public const int file_column = 2131689686;
 			
 			// aapt resource value: 0x7F0F00D9
-			public const int filter_is_on = 2131689689;
+			public const int filter_chatrooms_here = 2131689689;
 			
 			// aapt resource value: 0x7F0F00DA
-			public const int filter_is_on_body = 2131689690;
+			public const int filter_is_on = 2131689690;
 			
 			// aapt resource value: 0x7F0F00DB
-			public const int filter_search_results_here = 2131689691;
+			public const int filter_is_on_body = 2131689691;
 			
 			// aapt resource value: 0x7F0F00DC
-			public const int folder_request_already_have = 2131689692;
+			public const int filter_search_results_here = 2131689692;
 			
 			// aapt resource value: 0x7F0F00DD
-			public const int folder_request_failed = 2131689693;
+			public const int folder_request_already_have = 2131689693;
 			
 			// aapt resource value: 0x7F0F00DE
-			public const int folder_request_timed_out = 2131689694;
+			public const int folder_request_failed = 2131689694;
 			
 			// aapt resource value: 0x7F0F00DF
-			public const int follow_system = 2131689695;
+			public const int folder_request_timed_out = 2131689695;
 			
 			// aapt resource value: 0x7F0F00E0
-			public const int friends = 2131689696;
+			public const int follow_system = 2131689696;
 			
 			// aapt resource value: 0x7F0F00E1
-			public const int from_directories = 2131689697;
+			public const int friends = 2131689697;
 			
 			// aapt resource value: 0x7F0F00E2
-			public const int from_directory = 2131689698;
+			public const int from_directories = 2131689698;
 			
 			// aapt resource value: 0x7F0F00E3
-			public const int get_folder = 2131689699;
+			public const int from_directory = 2131689699;
 			
 			// aapt resource value: 0x7F0F00E4
-			public const int get_user_info = 2131689700;
+			public const int gcm_defaultSenderId = 2131689700;
 			
 			// aapt resource value: 0x7F0F00E5
-			public const int give_hint = 2131689701;
-			
-			// aapt resource value: 0x7F0F00E7
-			public const int give_privileges = 2131689703;
+			public const int get_folder = 2131689701;
 			
 			// aapt resource value: 0x7F0F00E6
-			public const int give_priv_success = 2131689702;
+			public const int get_user_info = 2131689702;
 			
-			// aapt resource value: 0x7F0F00E8
-			public const int give_to_ = 2131689704;
+			// aapt resource value: 0x7F0F00E7
+			public const int give_hint = 2131689703;
 			
 			// aapt resource value: 0x7F0F00E9
-			public const int give_up_membership = 2131689705;
+			public const int give_privileges = 2131689705;
+			
+			// aapt resource value: 0x7F0F00E8
+			public const int give_priv_success = 2131689704;
 			
 			// aapt resource value: 0x7F0F00EA
-			public const int give_up_room = 2131689706;
+			public const int give_to_ = 2131689706;
 			
 			// aapt resource value: 0x7F0F00EB
-			public const int go = 2131689707;
+			public const int give_up_membership = 2131689707;
 			
 			// aapt resource value: 0x7F0F00EC
-			public const int hide_bottom_view_on_scroll_behavior = 2131689708;
+			public const int give_up_room = 2131689708;
 			
 			// aapt resource value: 0x7F0F00ED
-			public const int home_tab = 2131689709;
-			
-			// aapt resource value: 0x7F0F00EF
-			public const int hours_left = 2131689711;
+			public const int go = 2131689709;
 			
 			// aapt resource value: 0x7F0F00EE
-			public const int hour_left = 2131689710;
+			public const int google_api_key = 2131689710;
+			
+			// aapt resource value: 0x7F0F00EF
+			public const int google_app_id = 2131689711;
 			
 			// aapt resource value: 0x7F0F00F0
-			public const int icon_content_description = 2131689712;
-			
-			// aapt resource value: 0x7F0F00F2
-			public const int ignored = 2131689714;
+			public const int google_crash_reporting_api_key = 2131689712;
 			
 			// aapt resource value: 0x7F0F00F1
-			public const int ignore_user = 2131689713;
+			public const int google_storage_bucket = 2131689713;
 			
-			// aapt resource value: 0x7F0F00F5
-			public const int invite = 2131689717;
-			
-			// aapt resource value: 0x7F0F00F7
-			public const int inviteuser = 2131689719;
-			
-			// aapt resource value: 0x7F0F00F6
-			public const int invite_user = 2131689718;
-			
-			// aapt resource value: 0x7F0F00F8
-			public const int inviting_user_to = 2131689720;
+			// aapt resource value: 0x7F0F00F2
+			public const int hide_bottom_view_on_scroll_behavior = 2131689714;
 			
 			// aapt resource value: 0x7F0F00F3
-			public const int in_progress = 2131689715;
+			public const int home_tab = 2131689715;
+			
+			// aapt resource value: 0x7F0F00F5
+			public const int hours_left = 2131689717;
 			
 			// aapt resource value: 0x7F0F00F4
-			public const int in_queue = 2131689716;
+			public const int hour_left = 2131689716;
 			
-			// aapt resource value: 0x7F0F00F9
-			public const int item_total_plural = 2131689721;
+			// aapt resource value: 0x7F0F00F6
+			public const int icon_content_description = 2131689718;
 			
-			// aapt resource value: 0x7F0F00FA
-			public const int item_total_singular = 2131689722;
+			// aapt resource value: 0x7F0F00F8
+			public const int ignored = 2131689720;
+			
+			// aapt resource value: 0x7F0F00F7
+			public const int ignore_user = 2131689719;
 			
 			// aapt resource value: 0x7F0F00FB
-			public const int item_view_role_description = 2131689723;
-			
-			// aapt resource value: 0x7F0F00FC
-			public const int joined = 2131689724;
+			public const int invite = 2131689723;
 			
 			// aapt resource value: 0x7F0F00FD
-			public const int just_filtered = 2131689725;
+			public const int inviteuser = 2131689725;
+			
+			// aapt resource value: 0x7F0F00FC
+			public const int invite_user = 2131689724;
 			
 			// aapt resource value: 0x7F0F00FE
-			public const int keep_alive_service = 2131689726;
+			public const int inviting_user_to = 2131689726;
+			
+			// aapt resource value: 0x7F0F00F9
+			public const int in_progress = 2131689721;
+			
+			// aapt resource value: 0x7F0F00FA
+			public const int in_queue = 2131689722;
 			
 			// aapt resource value: 0x7F0F00FF
-			public const int kicked_due_to_other_client = 2131689727;
+			public const int item_total_plural = 2131689727;
 			
 			// aapt resource value: 0x7F0F0100
-			public const int kilobytes_per_second = 2131689728;
+			public const int item_total_singular = 2131689728;
 			
 			// aapt resource value: 0x7F0F0101
-			public const int kilohertz = 2131689729;
+			public const int item_view_role_description = 2131689729;
 			
 			// aapt resource value: 0x7F0F0102
-			public const int leaving_room = 2131689730;
+			public const int joined = 2131689730;
 			
 			// aapt resource value: 0x7F0F0103
-			public const int listener_off = 2131689731;
+			public const int just_filtered = 2131689731;
 			
 			// aapt resource value: 0x7F0F0104
-			public const int listening = 2131689732;
+			public const int keep_alive_service = 2131689732;
 			
 			// aapt resource value: 0x7F0F0105
-			public const int loading_current_ticker = 2131689733;
+			public const int kicked_due_to_other_client = 2131689733;
 			
 			// aapt resource value: 0x7F0F0106
-			public const int login = 2131689734;
+			public const int kilobytes_per_second = 2131689734;
 			
 			// aapt resource value: 0x7F0F0107
-			public const int logout = 2131689735;
+			public const int kilohertz = 2131689735;
 			
 			// aapt resource value: 0x7F0F0108
-			public const int material_slider_range_end = 2131689736;
+			public const int leaving_room = 2131689736;
 			
 			// aapt resource value: 0x7F0F0109
-			public const int material_slider_range_start = 2131689737;
+			public const int listener_off = 2131689737;
 			
 			// aapt resource value: 0x7F0F010A
-			public const int max_search_results = 2131689738;
+			public const int listening = 2131689738;
 			
 			// aapt resource value: 0x7F0F010B
-			public const int membership = 2131689739;
+			public const int loading_current_ticker = 2131689739;
 			
 			// aapt resource value: 0x7F0F010C
-			public const int memory_file_backed = 2131689740;
+			public const int login = 2131689740;
 			
 			// aapt resource value: 0x7F0F010D
-			public const int messages = 2131689741;
-			
-			// aapt resource value: 0x7F0F010F
-			public const int minutes_left = 2131689743;
+			public const int logout = 2131689741;
 			
 			// aapt resource value: 0x7F0F010E
-			public const int minute_left = 2131689742;
+			public const int material_slider_range_end = 2131689742;
+			
+			// aapt resource value: 0x7F0F010F
+			public const int material_slider_range_start = 2131689743;
 			
 			// aapt resource value: 0x7F0F0110
-			public const int mod = 2131689744;
+			public const int max_search_results = 2131689744;
 			
 			// aapt resource value: 0x7F0F0111
-			public const int more_options = 2131689745;
+			public const int membership = 2131689745;
 			
 			// aapt resource value: 0x7F0F0112
-			public const int msg_user = 2131689746;
+			public const int memory_file_backed = 2131689746;
 			
 			// aapt resource value: 0x7F0F0113
-			public const int mtrl_badge_numberless_content_description = 2131689747;
-			
-			// aapt resource value: 0x7F0F0114
-			public const int mtrl_chip_close_icon_content_description = 2131689748;
+			public const int messages = 2131689747;
 			
 			// aapt resource value: 0x7F0F0115
-			public const int mtrl_exceed_max_badge_number_content_description = 2131689749;
+			public const int minutes_left = 2131689749;
+			
+			// aapt resource value: 0x7F0F0114
+			public const int minute_left = 2131689748;
 			
 			// aapt resource value: 0x7F0F0116
-			public const int mtrl_exceed_max_badge_number_suffix = 2131689750;
+			public const int mod = 2131689750;
 			
 			// aapt resource value: 0x7F0F0117
-			public const int mtrl_picker_a11y_next_month = 2131689751;
+			public const int more_options = 2131689751;
 			
 			// aapt resource value: 0x7F0F0118
-			public const int mtrl_picker_a11y_prev_month = 2131689752;
+			public const int msg_user = 2131689752;
 			
 			// aapt resource value: 0x7F0F0119
-			public const int mtrl_picker_announce_current_selection = 2131689753;
+			public const int mtrl_badge_numberless_content_description = 2131689753;
 			
 			// aapt resource value: 0x7F0F011A
-			public const int mtrl_picker_cancel = 2131689754;
+			public const int mtrl_chip_close_icon_content_description = 2131689754;
 			
 			// aapt resource value: 0x7F0F011B
-			public const int mtrl_picker_confirm = 2131689755;
+			public const int mtrl_exceed_max_badge_number_content_description = 2131689755;
 			
 			// aapt resource value: 0x7F0F011C
-			public const int mtrl_picker_date_header_selected = 2131689756;
+			public const int mtrl_exceed_max_badge_number_suffix = 2131689756;
 			
 			// aapt resource value: 0x7F0F011D
-			public const int mtrl_picker_date_header_title = 2131689757;
+			public const int mtrl_picker_a11y_next_month = 2131689757;
 			
 			// aapt resource value: 0x7F0F011E
-			public const int mtrl_picker_date_header_unselected = 2131689758;
+			public const int mtrl_picker_a11y_prev_month = 2131689758;
 			
 			// aapt resource value: 0x7F0F011F
-			public const int mtrl_picker_day_of_week_column_header = 2131689759;
+			public const int mtrl_picker_announce_current_selection = 2131689759;
 			
 			// aapt resource value: 0x7F0F0120
-			public const int mtrl_picker_invalid_format = 2131689760;
+			public const int mtrl_picker_cancel = 2131689760;
 			
 			// aapt resource value: 0x7F0F0121
-			public const int mtrl_picker_invalid_format_example = 2131689761;
+			public const int mtrl_picker_confirm = 2131689761;
 			
 			// aapt resource value: 0x7F0F0122
-			public const int mtrl_picker_invalid_format_use = 2131689762;
+			public const int mtrl_picker_date_header_selected = 2131689762;
 			
 			// aapt resource value: 0x7F0F0123
-			public const int mtrl_picker_invalid_range = 2131689763;
+			public const int mtrl_picker_date_header_title = 2131689763;
 			
 			// aapt resource value: 0x7F0F0124
-			public const int mtrl_picker_navigate_to_year_description = 2131689764;
+			public const int mtrl_picker_date_header_unselected = 2131689764;
 			
 			// aapt resource value: 0x7F0F0125
-			public const int mtrl_picker_out_of_range = 2131689765;
+			public const int mtrl_picker_day_of_week_column_header = 2131689765;
 			
 			// aapt resource value: 0x7F0F0126
-			public const int mtrl_picker_range_header_only_end_selected = 2131689766;
+			public const int mtrl_picker_invalid_format = 2131689766;
 			
 			// aapt resource value: 0x7F0F0127
-			public const int mtrl_picker_range_header_only_start_selected = 2131689767;
+			public const int mtrl_picker_invalid_format_example = 2131689767;
 			
 			// aapt resource value: 0x7F0F0128
-			public const int mtrl_picker_range_header_selected = 2131689768;
+			public const int mtrl_picker_invalid_format_use = 2131689768;
 			
 			// aapt resource value: 0x7F0F0129
-			public const int mtrl_picker_range_header_title = 2131689769;
+			public const int mtrl_picker_invalid_range = 2131689769;
 			
 			// aapt resource value: 0x7F0F012A
-			public const int mtrl_picker_range_header_unselected = 2131689770;
+			public const int mtrl_picker_navigate_to_year_description = 2131689770;
 			
 			// aapt resource value: 0x7F0F012B
-			public const int mtrl_picker_save = 2131689771;
+			public const int mtrl_picker_out_of_range = 2131689771;
 			
 			// aapt resource value: 0x7F0F012C
-			public const int mtrl_picker_text_input_date_hint = 2131689772;
+			public const int mtrl_picker_range_header_only_end_selected = 2131689772;
 			
 			// aapt resource value: 0x7F0F012D
-			public const int mtrl_picker_text_input_date_range_end_hint = 2131689773;
+			public const int mtrl_picker_range_header_only_start_selected = 2131689773;
 			
 			// aapt resource value: 0x7F0F012E
-			public const int mtrl_picker_text_input_date_range_start_hint = 2131689774;
+			public const int mtrl_picker_range_header_selected = 2131689774;
 			
 			// aapt resource value: 0x7F0F012F
-			public const int mtrl_picker_text_input_day_abbr = 2131689775;
+			public const int mtrl_picker_range_header_title = 2131689775;
 			
 			// aapt resource value: 0x7F0F0130
-			public const int mtrl_picker_text_input_month_abbr = 2131689776;
+			public const int mtrl_picker_range_header_unselected = 2131689776;
 			
 			// aapt resource value: 0x7F0F0131
-			public const int mtrl_picker_text_input_year_abbr = 2131689777;
+			public const int mtrl_picker_save = 2131689777;
 			
 			// aapt resource value: 0x7F0F0132
-			public const int mtrl_picker_toggle_to_calendar_input_mode = 2131689778;
+			public const int mtrl_picker_text_input_date_hint = 2131689778;
 			
 			// aapt resource value: 0x7F0F0133
-			public const int mtrl_picker_toggle_to_day_selection = 2131689779;
+			public const int mtrl_picker_text_input_date_range_end_hint = 2131689779;
 			
 			// aapt resource value: 0x7F0F0134
-			public const int mtrl_picker_toggle_to_text_input_mode = 2131689780;
+			public const int mtrl_picker_text_input_date_range_start_hint = 2131689780;
 			
 			// aapt resource value: 0x7F0F0135
-			public const int mtrl_picker_toggle_to_year_selection = 2131689781;
+			public const int mtrl_picker_text_input_day_abbr = 2131689781;
 			
 			// aapt resource value: 0x7F0F0136
-			public const int must_be_logged_in_to_check_privileges = 2131689782;
+			public const int mtrl_picker_text_input_month_abbr = 2131689782;
 			
 			// aapt resource value: 0x7F0F0137
-			public const int must_be_logged_in_to_get_dir_contents = 2131689783;
+			public const int mtrl_picker_text_input_year_abbr = 2131689783;
 			
 			// aapt resource value: 0x7F0F0138
-			public const int must_be_logged_in_to_get_privileges = 2131689784;
+			public const int mtrl_picker_toggle_to_calendar_input_mode = 2131689784;
 			
 			// aapt resource value: 0x7F0F0139
-			public const int must_be_logged_in_to_give_privileges = 2131689785;
+			public const int mtrl_picker_toggle_to_day_selection = 2131689785;
 			
 			// aapt resource value: 0x7F0F013A
-			public const int must_be_logged_to_add_or_remove_user = 2131689786;
+			public const int mtrl_picker_toggle_to_text_input_mode = 2131689786;
 			
 			// aapt resource value: 0x7F0F013B
-			public const int must_be_logged_to_browse = 2131689787;
+			public const int mtrl_picker_toggle_to_year_selection = 2131689787;
 			
 			// aapt resource value: 0x7F0F013C
-			public const int must_be_logged_to_create_room = 2131689788;
+			public const int must_be_logged_in_to_check_privileges = 2131689788;
 			
 			// aapt resource value: 0x7F0F013D
-			public const int must_be_logged_to_drop_private = 2131689789;
+			public const int must_be_logged_in_to_get_dir_contents = 2131689789;
 			
 			// aapt resource value: 0x7F0F013E
-			public const int must_be_logged_to_get_room_list = 2131689790;
+			public const int must_be_logged_in_to_get_privileges = 2131689790;
 			
 			// aapt resource value: 0x7F0F013F
-			public const int must_be_logged_to_request_user_info = 2131689791;
+			public const int must_be_logged_in_to_give_privileges = 2131689791;
 			
 			// aapt resource value: 0x7F0F0140
-			public const int must_be_logged_to_search = 2131689792;
+			public const int must_be_logged_to_add_or_remove_user = 2131689792;
 			
 			// aapt resource value: 0x7F0F0141
-			public const int must_be_logged_to_send_message = 2131689793;
+			public const int must_be_logged_to_browse = 2131689793;
 			
 			// aapt resource value: 0x7F0F0142
-			public const int must_be_logged_to_set_ticker = 2131689794;
+			public const int must_be_logged_to_create_room = 2131689794;
 			
 			// aapt resource value: 0x7F0F0143
-			public const int must_be_logged_to_toggle_priv_invites = 2131689795;
+			public const int must_be_logged_to_drop_private = 2131689795;
 			
 			// aapt resource value: 0x7F0F0144
-			public const int must_type_a_username_to_add = 2131689796;
+			public const int must_be_logged_to_get_room_list = 2131689796;
 			
 			// aapt resource value: 0x7F0F0145
-			public const int must_type_a_username_to_browse = 2131689797;
+			public const int must_be_logged_to_request_user_info = 2131689797;
 			
 			// aapt resource value: 0x7F0F0146
-			public const int must_type_a_username_to_invite = 2131689798;
+			public const int must_be_logged_to_search = 2131689798;
 			
 			// aapt resource value: 0x7F0F0147
-			public const int must_type_a_username_to_message = 2131689799;
+			public const int must_be_logged_to_send_message = 2131689799;
 			
 			// aapt resource value: 0x7F0F0148
-			public const int must_type_chatroom_name = 2131689800;
+			public const int must_be_logged_to_set_ticker = 2131689800;
 			
 			// aapt resource value: 0x7F0F0149
-			public const int must_type_text_to_send = 2131689801;
+			public const int must_be_logged_to_toggle_priv_invites = 2131689801;
 			
 			// aapt resource value: 0x7F0F014A
-			public const int must_type_ticker_text = 2131689802;
+			public const int must_type_a_username_to_add = 2131689802;
 			
 			// aapt resource value: 0x7F0F014B
-			public const int network_down = 2131689803;
+			public const int must_type_a_username_to_browse = 2131689803;
 			
 			// aapt resource value: 0x7F0F014C
-			public const int network_error_setting_listener = 2131689804;
+			public const int must_type_a_username_to_invite = 2131689804;
 			
 			// aapt resource value: 0x7F0F014D
-			public const int network_error_setting_listener_port = 2131689805;
+			public const int must_type_a_username_to_message = 2131689805;
 			
 			// aapt resource value: 0x7F0F014E
-			public const int network_unreachable = 2131689806;
+			public const int must_type_chatroom_name = 2131689806;
 			
 			// aapt resource value: 0x7F0F014F
-			public const int new_result = 2131689807;
+			public const int must_type_text_to_send = 2131689807;
 			
 			// aapt resource value: 0x7F0F0150
-			public const int new_results = 2131689808;
+			public const int must_type_ticker_text = 2131689808;
 			
 			// aapt resource value: 0x7F0F0151
-			public const int new_room_message_received = 2131689809;
+			public const int network_down = 2131689809;
 			
 			// aapt resource value: 0x7F0F0152
-			public const int new_search_tab = 2131689810;
+			public const int network_error_setting_listener = 2131689810;
 			
 			// aapt resource value: 0x7F0F0153
-			public const int night_mode_options = 2131689811;
-			
-			// aapt resource value: 0x7F0F0167
-			public const int note = 2131689831;
-			
-			// aapt resource value: 0x7F0F0168
-			public const int note_title = 2131689832;
-			
-			// aapt resource value: 0x7F0F0169
-			public const int nothing_selected = 2131689833;
-			
-			// aapt resource value: 0x7F0F016A
-			public const int nothing_selected_extra = 2131689834;
-			
-			// aapt resource value: 0x7F0F016B
-			public const int nothing_to_download = 2131689835;
-			
-			// aapt resource value: 0x7F0F016E
-			public const int notification_off = 2131689838;
-			
-			// aapt resource value: 0x7F0F016F
-			public const int notification_on = 2131689839;
-			
-			// aapt resource value: 0x7F0F016C
-			public const int notif_room_off = 2131689836;
-			
-			// aapt resource value: 0x7F0F016D
-			public const int notif_room_on = 2131689837;
-			
-			// aapt resource value: 0x7F0F0164
-			public const int not_recursive_dirs_avaialbe_to_download = 2131689828;
-			
-			// aapt resource value: 0x7F0F0165
-			public const int not_sharing = 2131689829;
-			
-			// aapt resource value: 0x7F0F0166
-			public const int not_started = 2131689830;
+			public const int network_error_setting_listener_port = 2131689811;
 			
 			// aapt resource value: 0x7F0F0154
-			public const int no_account = 2131689812;
+			public const int network_unreachable = 2131689812;
 			
 			// aapt resource value: 0x7F0F0155
-			public const int no_changes_to_save = 2131689813;
+			public const int new_result = 2131689813;
 			
 			// aapt resource value: 0x7F0F0156
-			public const int no_empty_user_pass = 2131689814;
+			public const int new_results = 2131689814;
 			
 			// aapt resource value: 0x7F0F0157
-			public const int no_image_chosen = 2131689815;
+			public const int new_room_message_received = 2131689815;
 			
 			// aapt resource value: 0x7F0F0158
-			public const int no_messages = 2131689816;
+			public const int new_search_tab = 2131689816;
 			
 			// aapt resource value: 0x7F0F0159
-			public const int no_pic_set = 2131689817;
+			public const int night_mode_options = 2131689817;
 			
-			// aapt resource value: 0x7F0F015A
-			public const int no_room = 2131689818;
+			// aapt resource value: 0x7F0F016D
+			public const int note = 2131689837;
 			
-			// aapt resource value: 0x7F0F015B
-			public const int no_room_tickers = 2131689819;
+			// aapt resource value: 0x7F0F016E
+			public const int note_title = 2131689838;
 			
-			// aapt resource value: 0x7F0F015C
-			public const int no_search_results = 2131689820;
-			
-			// aapt resource value: 0x7F0F015D
-			public const int no_search_text = 2131689821;
-			
-			// aapt resource value: 0x7F0F015E
-			public const int no_transfers_yet = 2131689822;
-			
-			// aapt resource value: 0x7F0F015F
-			public const int no_uploads_yet = 2131689823;
-			
-			// aapt resource value: 0x7F0F0160
-			public const int no_uploads_yet_not_sharing = 2131689824;
-			
-			// aapt resource value: 0x7F0F0161
-			public const int no_upnp_devices_found = 2131689825;
-			
-			// aapt resource value: 0x7F0F0162
-			public const int no_user = 2131689826;
-			
-			// aapt resource value: 0x7F0F0163
-			public const int no_wish_text = 2131689827;
+			// aapt resource value: 0x7F0F016F
+			public const int nothing_selected = 2131689839;
 			
 			// aapt resource value: 0x7F0F0170
-			public const int offline = 2131689840;
+			public const int nothing_selected_extra = 2131689840;
 			
 			// aapt resource value: 0x7F0F0171
-			public const int okay = 2131689841;
-			
-			// aapt resource value: 0x7F0F0172
-			public const int online = 2131689842;
-			
-			// aapt resource value: 0x7F0F0173
-			public const int only_show_free_slots = 2131689843;
+			public const int nothing_to_download = 2131689841;
 			
 			// aapt resource value: 0x7F0F0174
-			public const int owned = 2131689844;
+			public const int notification_off = 2131689844;
 			
 			// aapt resource value: 0x7F0F0175
-			public const int owner = 2131689845;
+			public const int notification_on = 2131689845;
+			
+			// aapt resource value: 0x7F0F0172
+			public const int notif_room_off = 2131689842;
+			
+			// aapt resource value: 0x7F0F0173
+			public const int notif_room_on = 2131689843;
+			
+			// aapt resource value: 0x7F0F016A
+			public const int not_recursive_dirs_avaialbe_to_download = 2131689834;
+			
+			// aapt resource value: 0x7F0F016B
+			public const int not_sharing = 2131689835;
+			
+			// aapt resource value: 0x7F0F016C
+			public const int not_started = 2131689836;
+			
+			// aapt resource value: 0x7F0F015A
+			public const int no_account = 2131689818;
+			
+			// aapt resource value: 0x7F0F015B
+			public const int no_changes_to_save = 2131689819;
+			
+			// aapt resource value: 0x7F0F015C
+			public const int no_empty_user_pass = 2131689820;
+			
+			// aapt resource value: 0x7F0F015D
+			public const int no_image_chosen = 2131689821;
+			
+			// aapt resource value: 0x7F0F015E
+			public const int no_messages = 2131689822;
+			
+			// aapt resource value: 0x7F0F015F
+			public const int no_pic_set = 2131689823;
+			
+			// aapt resource value: 0x7F0F0160
+			public const int no_room = 2131689824;
+			
+			// aapt resource value: 0x7F0F0161
+			public const int no_room_tickers = 2131689825;
+			
+			// aapt resource value: 0x7F0F0162
+			public const int no_search_results = 2131689826;
+			
+			// aapt resource value: 0x7F0F0163
+			public const int no_search_text = 2131689827;
+			
+			// aapt resource value: 0x7F0F0164
+			public const int no_transfers_yet = 2131689828;
+			
+			// aapt resource value: 0x7F0F0165
+			public const int no_uploads_yet = 2131689829;
+			
+			// aapt resource value: 0x7F0F0166
+			public const int no_uploads_yet_not_sharing = 2131689830;
+			
+			// aapt resource value: 0x7F0F0167
+			public const int no_upnp_devices_found = 2131689831;
+			
+			// aapt resource value: 0x7F0F0168
+			public const int no_user = 2131689832;
+			
+			// aapt resource value: 0x7F0F0169
+			public const int no_wish_text = 2131689833;
 			
 			// aapt resource value: 0x7F0F0176
-			public const int ownership = 2131689846;
+			public const int offline = 2131689846;
 			
 			// aapt resource value: 0x7F0F0177
-			public const int parsing_files_wait = 2131689847;
+			public const int okay = 2131689847;
 			
 			// aapt resource value: 0x7F0F0178
-			public const int password = 2131689848;
+			public const int online = 2131689848;
 			
 			// aapt resource value: 0x7F0F0179
-			public const int password_toggle_content_description = 2131689849;
+			public const int only_show_free_slots = 2131689849;
 			
 			// aapt resource value: 0x7F0F017A
-			public const int path_password_eye = 2131689850;
+			public const int owned = 2131689850;
 			
 			// aapt resource value: 0x7F0F017B
-			public const int path_password_eye_mask_strike_through = 2131689851;
+			public const int owner = 2131689851;
 			
 			// aapt resource value: 0x7F0F017C
-			public const int path_password_eye_mask_visible = 2131689852;
+			public const int ownership = 2131689852;
 			
 			// aapt resource value: 0x7F0F017D
-			public const int path_password_strike_through = 2131689853;
-			
-			// aapt resource value: 0x7F0F017F
-			public const int paused = 2131689855;
+			public const int parsing_files_wait = 2131689853;
 			
 			// aapt resource value: 0x7F0F017E
-			public const int pause_all = 2131689854;
+			public const int password = 2131689854;
+			
+			// aapt resource value: 0x7F0F017F
+			public const int password_toggle_content_description = 2131689855;
 			
 			// aapt resource value: 0x7F0F0180
-			public const int pending_ = 2131689856;
+			public const int path_password_eye = 2131689856;
 			
 			// aapt resource value: 0x7F0F0181
-			public const int perform_search_first = 2131689857;
+			public const int path_password_eye_mask_strike_through = 2131689857;
 			
 			// aapt resource value: 0x7F0F0182
-			public const int persist_it = 2131689858;
+			public const int path_password_eye_mask_visible = 2131689858;
 			
 			// aapt resource value: 0x7F0F0183
-			public const int play_file = 2131689859;
-			
-			// aapt resource value: 0x7F0F0184
-			public const int port = 2131689860;
+			public const int path_password_strike_through = 2131689859;
 			
 			// aapt resource value: 0x7F0F0185
-			public const int port_already_in_use = 2131689861;
+			public const int paused = 2131689861;
+			
+			// aapt resource value: 0x7F0F0184
+			public const int pause_all = 2131689860;
 			
 			// aapt resource value: 0x7F0F0186
-			public const int port_failed_parse = 2131689862;
+			public const int pending_ = 2131689862;
 			
 			// aapt resource value: 0x7F0F0187
-			public const int port_out_of_range = 2131689863;
+			public const int perform_search_first = 2131689863;
 			
 			// aapt resource value: 0x7F0F0188
-			public const int position_ = 2131689864;
+			public const int persist_it = 2131689864;
 			
 			// aapt resource value: 0x7F0F0189
-			public const int position_is_still_ = 2131689865;
-			
-			// aapt resource value: 0x7F0F018C
-			public const int privateRoomCreation = 2131689868;
-			
-			// aapt resource value: 0x7F0F018D
-			public const int private_room = 2131689869;
-			
-			// aapt resource value: 0x7F0F018E
-			public const int privileges = 2131689870;
-			
-			// aapt resource value: 0x7F0F018F
-			public const int privileges_more_info = 2131689871;
+			public const int play_file = 2131689865;
 			
 			// aapt resource value: 0x7F0F018A
-			public const int priv_failed = 2131689866;
+			public const int port = 2131689866;
 			
 			// aapt resource value: 0x7F0F018B
-			public const int priv_success = 2131689867;
+			public const int port_already_in_use = 2131689867;
 			
-			// aapt resource value: 0x7F0F0190
-			public const int public_room = 2131689872;
+			// aapt resource value: 0x7F0F018C
+			public const int port_failed_parse = 2131689868;
 			
-			// aapt resource value: 0x7F0F0191
-			public const int queue_length_ = 2131689873;
+			// aapt resource value: 0x7F0F018D
+			public const int port_out_of_range = 2131689869;
+			
+			// aapt resource value: 0x7F0F018E
+			public const int position_ = 2131689870;
+			
+			// aapt resource value: 0x7F0F018F
+			public const int position_is_still_ = 2131689871;
 			
 			// aapt resource value: 0x7F0F0192
-			public const int quick_info = 2131689874;
+			public const int privateRoomCreation = 2131689874;
 			
 			// aapt resource value: 0x7F0F0193
-			public const int refresh_queue_pos = 2131689875;
+			public const int private_room = 2131689875;
 			
 			// aapt resource value: 0x7F0F0194
-			public const int refresh_room_list = 2131689876;
+			public const int privileges = 2131689876;
 			
 			// aapt resource value: 0x7F0F0195
-			public const int remember_search_history = 2131689877;
+			public const int privileges_more_info = 2131689877;
+			
+			// aapt resource value: 0x7F0F0190
+			public const int priv_failed = 2131689872;
+			
+			// aapt resource value: 0x7F0F0191
+			public const int priv_success = 2131689873;
 			
 			// aapt resource value: 0x7F0F0196
-			public const int remote_conn_closed = 2131689878;
-			
-			// aapt resource value: 0x7F0F019C
-			public const int removed_user_from_ignored_list = 2131689884;
+			public const int project_id = 2131689878;
 			
 			// aapt resource value: 0x7F0F0197
-			public const int remove_from_ignored = 2131689879;
+			public const int public_room = 2131689879;
 			
 			// aapt resource value: 0x7F0F0198
-			public const int remove_from_user_list = 2131689880;
+			public const int queue_length_ = 2131689880;
 			
 			// aapt resource value: 0x7F0F0199
-			public const int remove_mod_priv = 2131689881;
+			public const int quick_info = 2131689881;
 			
 			// aapt resource value: 0x7F0F019A
-			public const int remove_online_alert = 2131689882;
+			public const int refresh_queue_pos = 2131689882;
 			
 			// aapt resource value: 0x7F0F019B
-			public const int remove_user = 2131689883;
+			public const int refresh_room_list = 2131689883;
+			
+			// aapt resource value: 0x7F0F019C
+			public const int remember_search_history = 2131689884;
 			
 			// aapt resource value: 0x7F0F019D
-			public const int removing_mod = 2131689885;
-			
-			// aapt resource value: 0x7F0F019E
-			public const int removing_user_from = 2131689886;
-			
-			// aapt resource value: 0x7F0F019F
-			public const int reported_as_failed = 2131689887;
-			
-			// aapt resource value: 0x7F0F01A2
-			public const int requesting_room_list = 2131689890;
+			public const int remote_conn_closed = 2131689885;
 			
 			// aapt resource value: 0x7F0F01A3
-			public const int requesting_user_info = 2131689891;
+			public const int removed_user_from_ignored_list = 2131689891;
+			
+			// aapt resource value: 0x7F0F019E
+			public const int remove_from_ignored = 2131689886;
+			
+			// aapt resource value: 0x7F0F019F
+			public const int remove_from_user_list = 2131689887;
 			
 			// aapt resource value: 0x7F0F01A0
-			public const int request_directories = 2131689888;
+			public const int remove_mod_priv = 2131689888;
 			
 			// aapt resource value: 0x7F0F01A1
-			public const int request_user_error_empty = 2131689889;
+			public const int remove_online_alert = 2131689889;
+			
+			// aapt resource value: 0x7F0F01A2
+			public const int remove_user = 2131689890;
 			
 			// aapt resource value: 0x7F0F01A4
-			public const int restore_default_settings = 2131689892;
+			public const int removing_mod = 2131689892;
 			
 			// aapt resource value: 0x7F0F01A5
-			public const int resume_all = 2131689893;
+			public const int removing_user_from = 2131689893;
 			
 			// aapt resource value: 0x7F0F01A6
-			public const int resume_dl = 2131689894;
-			
-			// aapt resource value: 0x7F0F01A7
-			public const int retry_all_failed = 2131689895;
-			
-			// aapt resource value: 0x7F0F01A8
-			public const int retry_dl = 2131689896;
+			public const int reported_as_failed = 2131689894;
 			
 			// aapt resource value: 0x7F0F01A9
-			public const int room_data_still_loading = 2131689897;
+			public const int requesting_room_list = 2131689897;
 			
 			// aapt resource value: 0x7F0F01AA
-			public const int room_list_received = 2131689898;
+			public const int requesting_user_info = 2131689898;
+			
+			// aapt resource value: 0x7F0F01A7
+			public const int request_directories = 2131689895;
+			
+			// aapt resource value: 0x7F0F01A8
+			public const int request_user_error_empty = 2131689896;
 			
 			// aapt resource value: 0x7F0F01AB
-			public const int saerch_user_list = 2131689899;
-			
-			// aapt resource value: 0x7F0F01AD
-			public const int saved = 2131689901;
+			public const int restore_default_settings = 2131689899;
 			
 			// aapt resource value: 0x7F0F01AC
-			public const int save_image = 2131689900;
+			public const int resume_all = 2131689900;
 			
-			// aapt resource value: 0x7F0F01BD
-			public const int searches_tab = 2131689917;
-			
-			// aapt resource value: 0x7F0F01BE
-			public const int searches_tab2 = 2131689918;
+			// aapt resource value: 0x7F0F01AD
+			public const int resume_dl = 2131689901;
 			
 			// aapt resource value: 0x7F0F01AE
-			public const int search_error_unspecified = 2131689902;
+			public const int retry_all_failed = 2131689902;
 			
 			// aapt resource value: 0x7F0F01AF
-			public const int search_here = 2131689903;
+			public const int retry_dl = 2131689903;
 			
 			// aapt resource value: 0x7F0F01B0
-			public const int search_menu_title = 2131689904;
+			public const int room_data_still_loading = 2131689904;
 			
 			// aapt resource value: 0x7F0F01B1
-			public const int search_result_style = 2131689905;
+			public const int room_list_received = 2131689905;
 			
 			// aapt resource value: 0x7F0F01B2
-			public const int search_result_style_collapsed = 2131689906;
-			
-			// aapt resource value: 0x7F0F01B3
-			public const int search_result_style_expanded = 2131689907;
+			public const int saerch_user_list = 2131689906;
 			
 			// aapt resource value: 0x7F0F01B4
-			public const int search_result_style_medium = 2131689908;
+			public const int saved = 2131689908;
 			
-			// aapt resource value: 0x7F0F01B5
-			public const int search_result_style_minimal = 2131689909;
-			
-			// aapt resource value: 0x7F0F01B6
-			public const int search_room = 2131689910;
-			
-			// aapt resource value: 0x7F0F01B7
-			public const int search_room_ = 2131689911;
-			
-			// aapt resource value: 0x7F0F01B9
-			public const int search_tabs_bold = 2131689913;
-			
-			// aapt resource value: 0x7F0F01B8
-			public const int search_tab_error = 2131689912;
-			
-			// aapt resource value: 0x7F0F01BA
-			public const int search_target_ = 2131689914;
-			
-			// aapt resource value: 0x7F0F01BB
-			public const int search_user_ = 2131689915;
-			
-			// aapt resource value: 0x7F0F01BC
-			public const int search_user_files = 2131689916;
-			
-			// aapt resource value: 0x7F0F01C0
-			public const int seconds_left = 2131689920;
-			
-			// aapt resource value: 0x7F0F01BF
-			public const int second_left = 2131689919;
-			
-			// aapt resource value: 0x7F0F01C1
-			public const int seeker_cannot_access_files = 2131689921;
-			
-			// aapt resource value: 0x7F0F01C2
-			public const int seeker_needs_dl_dir = 2131689922;
-			
-			// aapt resource value: 0x7F0F01C3
-			public const int seeker_needs_dl_dir_choose_settings = 2131689923;
+			// aapt resource value: 0x7F0F01B3
+			public const int save_image = 2131689907;
 			
 			// aapt resource value: 0x7F0F01C4
-			public const int seeker_needs_dl_dir_content = 2131689924;
+			public const int searches_tab = 2131689924;
 			
 			// aapt resource value: 0x7F0F01C5
-			public const int seeker_needs_dl_dir_error = 2131689925;
+			public const int searches_tab2 = 2131689925;
 			
-			// aapt resource value: 0x7F0F01C6
-			public const int seeker_running = 2131689926;
+			// aapt resource value: 0x7F0F01B5
+			public const int search_error_unspecified = 2131689909;
+			
+			// aapt resource value: 0x7F0F01B6
+			public const int search_here = 2131689910;
+			
+			// aapt resource value: 0x7F0F01B7
+			public const int search_menu_title = 2131689911;
+			
+			// aapt resource value: 0x7F0F01B8
+			public const int search_result_style = 2131689912;
+			
+			// aapt resource value: 0x7F0F01B9
+			public const int search_result_style_collapsed = 2131689913;
+			
+			// aapt resource value: 0x7F0F01BA
+			public const int search_result_style_expanded = 2131689914;
+			
+			// aapt resource value: 0x7F0F01BB
+			public const int search_result_style_medium = 2131689915;
+			
+			// aapt resource value: 0x7F0F01BC
+			public const int search_result_style_minimal = 2131689916;
+			
+			// aapt resource value: 0x7F0F01BD
+			public const int search_room = 2131689917;
+			
+			// aapt resource value: 0x7F0F01BE
+			public const int search_room_ = 2131689918;
+			
+			// aapt resource value: 0x7F0F01C0
+			public const int search_tabs_bold = 2131689920;
+			
+			// aapt resource value: 0x7F0F01BF
+			public const int search_tab_error = 2131689919;
+			
+			// aapt resource value: 0x7F0F01C1
+			public const int search_target_ = 2131689921;
+			
+			// aapt resource value: 0x7F0F01C2
+			public const int search_user_ = 2131689922;
+			
+			// aapt resource value: 0x7F0F01C3
+			public const int search_user_files = 2131689923;
 			
 			// aapt resource value: 0x7F0F01C7
-			public const int seeker_running_content = 2131689927;
+			public const int seconds_left = 2131689927;
+			
+			// aapt resource value: 0x7F0F01C6
+			public const int second_left = 2131689926;
 			
 			// aapt resource value: 0x7F0F01C8
-			public const int select_folder = 2131689928;
+			public const int seeker_cannot_access_files = 2131689928;
 			
 			// aapt resource value: 0x7F0F01C9
-			public const int select_image = 2131689929;
+			public const int seeker_needs_dl_dir = 2131689929;
 			
 			// aapt resource value: 0x7F0F01CA
-			public const int select_pic = 2131689930;
+			public const int seeker_needs_dl_dir_choose_settings = 2131689930;
 			
 			// aapt resource value: 0x7F0F01CB
-			public const int send = 2131689931;
-			
-			// aapt resource value: 0x7F0F01CD
-			public const int sending__ = 2131689933;
+			public const int seeker_needs_dl_dir_content = 2131689931;
 			
 			// aapt resource value: 0x7F0F01CC
-			public const int send_message = 2131689932;
+			public const int seeker_needs_dl_dir_error = 2131689932;
 			
-			// aapt resource value: 0x7F0F01D1
-			public const int setticker = 2131689937;
-			
-			// aapt resource value: 0x7F0F01D4
-			public const int settings = 2131689940;
-			
-			// aapt resource value: 0x7F0F01D2
-			public const int setting_priv_invites = 2131689938;
-			
-			// aapt resource value: 0x7F0F01D3
-			public const int setting_ticker = 2131689939;
+			// aapt resource value: 0x7F0F01CD
+			public const int seeker_running = 2131689933;
 			
 			// aapt resource value: 0x7F0F01CE
-			public const int set_online_alert = 2131689934;
+			public const int seeker_running_content = 2131689934;
 			
 			// aapt resource value: 0x7F0F01CF
-			public const int set_shared_folder = 2131689935;
+			public const int select_folder = 2131689935;
 			
 			// aapt resource value: 0x7F0F01D0
-			public const int set_ticker = 2131689936;
+			public const int select_image = 2131689936;
 			
-			// aapt resource value: 0x7F0F01D5
-			public const int sharing_currently_parsing = 2131689941;
+			// aapt resource value: 0x7F0F01D1
+			public const int select_pic = 2131689937;
 			
-			// aapt resource value: 0x7F0F01D6
-			public const int sharing_dialog = 2131689942;
+			// aapt resource value: 0x7F0F01D2
+			public const int send = 2131689938;
 			
-			// aapt resource value: 0x7F0F01D7
-			public const int sharing_disabled_error = 2131689943;
+			// aapt resource value: 0x7F0F01D4
+			public const int sending__ = 2131689940;
+			
+			// aapt resource value: 0x7F0F01D3
+			public const int send_message = 2131689939;
 			
 			// aapt resource value: 0x7F0F01D8
-			public const int sharing_disabled_failure_parsing = 2131689944;
-			
-			// aapt resource value: 0x7F0F01D9
-			public const int sharing_disabled_share_not_set = 2131689945;
-			
-			// aapt resource value: 0x7F0F01DA
-			public const int sharing_off = 2131689946;
+			public const int setticker = 2131689944;
 			
 			// aapt resource value: 0x7F0F01DB
-			public const int shutdown = 2131689947;
+			public const int settings = 2131689947;
+			
+			// aapt resource value: 0x7F0F01D9
+			public const int setting_priv_invites = 2131689945;
+			
+			// aapt resource value: 0x7F0F01DA
+			public const int setting_ticker = 2131689946;
+			
+			// aapt resource value: 0x7F0F01D5
+			public const int set_online_alert = 2131689941;
+			
+			// aapt resource value: 0x7F0F01D6
+			public const int set_shared_folder = 2131689942;
+			
+			// aapt resource value: 0x7F0F01D7
+			public const int set_ticker = 2131689943;
 			
 			// aapt resource value: 0x7F0F01DC
-			public const int size_column = 2131689948;
+			public const int sharing_currently_parsing = 2131689948;
 			
 			// aapt resource value: 0x7F0F01DD
-			public const int start = 2131689949;
-			
-			// aapt resource value: 0x7F0F01DF
-			public const int startup_room_off = 2131689951;
-			
-			// aapt resource value: 0x7F0F01E0
-			public const int startup_room_on = 2131689952;
+			public const int sharing_dialog = 2131689949;
 			
 			// aapt resource value: 0x7F0F01DE
-			public const int start_service_on_startup = 2131689950;
+			public const int sharing_disabled_error = 2131689950;
+			
+			// aapt resource value: 0x7F0F01DF
+			public const int sharing_disabled_failure_parsing = 2131689951;
+			
+			// aapt resource value: 0x7F0F01E0
+			public const int sharing_disabled_share_not_set = 2131689952;
 			
 			// aapt resource value: 0x7F0F01E1
-			public const int status = 2131689953;
+			public const int sharing_off = 2131689953;
 			
 			// aapt resource value: 0x7F0F01E2
-			public const int status_bar_notification_info_overflow = 2131689954;
+			public const int shutdown = 2131689954;
 			
 			// aapt resource value: 0x7F0F01E3
-			public const int stop = 2131689955;
+			public const int size_column = 2131689955;
 			
 			// aapt resource value: 0x7F0F01E4
-			public const int subfolders_warning = 2131689956;
-			
-			// aapt resource value: 0x7F0F01E5
-			public const int submit = 2131689957;
-			
-			// aapt resource value: 0x7F0F01EF
-			public const int successfully_changed_dl_dir = 2131689967;
-			
-			// aapt resource value: 0x7F0F01F0
-			public const int successfully_changed_incomplete_dir = 2131689968;
-			
-			// aapt resource value: 0x7F0F01F1
-			public const int successfully_removed = 2131689969;
-			
-			// aapt resource value: 0x7F0F01F2
-			public const int successfully_set_ticker = 2131689970;
+			public const int start = 2131689956;
 			
 			// aapt resource value: 0x7F0F01E6
-			public const int success_added_mod = 2131689958;
+			public const int startup_room_off = 2131689958;
 			
 			// aapt resource value: 0x7F0F01E7
-			public const int success_added_user = 2131689959;
+			public const int startup_room_on = 2131689959;
+			
+			// aapt resource value: 0x7F0F01E5
+			public const int start_service_on_startup = 2131689957;
 			
 			// aapt resource value: 0x7F0F01E8
-			public const int success_invite_user = 2131689960;
-			
-			// aapt resource value: 0x7F0F01EA
-			public const int success_removed_user = 2131689962;
+			public const int status = 2131689960;
 			
 			// aapt resource value: 0x7F0F01E9
-			public const int success_remove_mod = 2131689961;
+			public const int status_bar_notification_info_overflow = 2131689961;
+			
+			// aapt resource value: 0x7F0F01EA
+			public const int stop = 2131689962;
 			
 			// aapt resource value: 0x7F0F01EB
-			public const int success_save = 2131689963;
-			
-			// aapt resource value: 0x7F0F01ED
-			public const int success_setting_shared_dir_fnum_dnum = 2131689965;
+			public const int subfolders_warning = 2131689963;
 			
 			// aapt resource value: 0x7F0F01EC
-			public const int success_set_pic = 2131689964;
-			
-			// aapt resource value: 0x7F0F01EE
-			public const int success_sharing = 2131689966;
-			
-			// aapt resource value: 0x7F0F01F3
-			public const int target_choose_user = 2131689971;
-			
-			// aapt resource value: 0x7F0F01F4
-			public const int target_room = 2131689972;
-			
-			// aapt resource value: 0x7F0F01F5
-			public const int target_room_joined = 2131689973;
+			public const int submit = 2131689964;
 			
 			// aapt resource value: 0x7F0F01F6
-			public const int target_room_name = 2131689974;
+			public const int successfully_changed_dl_dir = 2131689974;
 			
 			// aapt resource value: 0x7F0F01F7
-			public const int target_user_list = 2131689975;
+			public const int successfully_changed_incomplete_dir = 2131689975;
 			
 			// aapt resource value: 0x7F0F01F8
-			public const int temporary_disconnected = 2131689976;
+			public const int successfully_removed = 2131689976;
 			
 			// aapt resource value: 0x7F0F01F9
-			public const int timeout = 2131689977;
+			public const int successfully_set_ticker = 2131689977;
+			
+			// aapt resource value: 0x7F0F01ED
+			public const int success_added_mod = 2131689965;
+			
+			// aapt resource value: 0x7F0F01EE
+			public const int success_added_user = 2131689966;
+			
+			// aapt resource value: 0x7F0F01EF
+			public const int success_invite_user = 2131689967;
+			
+			// aapt resource value: 0x7F0F01F1
+			public const int success_removed_user = 2131689969;
+			
+			// aapt resource value: 0x7F0F01F0
+			public const int success_remove_mod = 2131689968;
+			
+			// aapt resource value: 0x7F0F01F2
+			public const int success_save = 2131689970;
+			
+			// aapt resource value: 0x7F0F01F4
+			public const int success_setting_shared_dir_fnum_dnum = 2131689972;
+			
+			// aapt resource value: 0x7F0F01F3
+			public const int success_set_pic = 2131689971;
+			
+			// aapt resource value: 0x7F0F01F5
+			public const int success_sharing = 2131689973;
 			
 			// aapt resource value: 0x7F0F01FA
-			public const int timeout_peer = 2131689978;
+			public const int target_choose_user = 2131689978;
 			
 			// aapt resource value: 0x7F0F01FB
-			public const int today = 2131689979;
-			
-			// aapt resource value: 0x7F0F01FE
-			public const int transfers_in_progress = 2131689982;
+			public const int target_room = 2131689979;
 			
 			// aapt resource value: 0x7F0F01FC
-			public const int transfer_rejected = 2131689980;
+			public const int target_room_joined = 2131689980;
 			
 			// aapt resource value: 0x7F0F01FD
-			public const int transfer_tab = 2131689981;
+			public const int target_room_name = 2131689981;
+			
+			// aapt resource value: 0x7F0F01FE
+			public const int target_user_list = 2131689982;
 			
 			// aapt resource value: 0x7F0F01FF
-			public const int type_chatroom_ticker_message = 2131689983;
+			public const int temporary_disconnected = 2131689983;
 			
 			// aapt resource value: 0x7F0F0200
-			public const int type_notes_here = 2131689984;
+			public const int timeout = 2131689984;
 			
 			// aapt resource value: 0x7F0F0201
-			public const int undo = 2131689985;
+			public const int timeout_peer = 2131689985;
 			
 			// aapt resource value: 0x7F0F0202
-			public const int unknown = 2131689986;
-			
-			// aapt resource value: 0x7F0F0203
-			public const int unsaved_changes_body = 2131689987;
-			
-			// aapt resource value: 0x7F0F0204
-			public const int unsaved_changes_title = 2131689988;
-			
-			// aapt resource value: 0x7F0F0208
-			public const int uploads_in_progress = 2131689992;
-			
-			// aapt resource value: 0x7F0F0209
-			public const int uploads_remaining = 2131689993;
+			public const int today = 2131689986;
 			
 			// aapt resource value: 0x7F0F0205
-			public const int upload_f_string = 2131689989;
+			public const int transfers_in_progress = 2131689989;
+			
+			// aapt resource value: 0x7F0F0203
+			public const int transfer_rejected = 2131689987;
+			
+			// aapt resource value: 0x7F0F0204
+			public const int transfer_tab = 2131689988;
 			
 			// aapt resource value: 0x7F0F0206
-			public const int upload_remaining = 2131689990;
+			public const int type_chatroom_ticker_message = 2131689990;
 			
 			// aapt resource value: 0x7F0F0207
-			public const int upload_slots_ = 2131689991;
+			public const int type_notes_here = 2131689991;
+			
+			// aapt resource value: 0x7F0F0208
+			public const int undo = 2131689992;
+			
+			// aapt resource value: 0x7F0F0209
+			public const int unknown = 2131689993;
 			
 			// aapt resource value: 0x7F0F020A
-			public const int upnp_currently_running = 2131689994;
+			public const int unsaved_changes_body = 2131689994;
 			
 			// aapt resource value: 0x7F0F020B
-			public const int upnp_last_success = 2131689995;
-			
-			// aapt resource value: 0x7F0F020D
-			public const int upnp_not_ran = 2131689997;
-			
-			// aapt resource value: 0x7F0F020C
-			public const int upnp_no_wifi_conn = 2131689996;
-			
-			// aapt resource value: 0x7F0F020E
-			public const int upnp_off = 2131689998;
+			public const int unsaved_changes_title = 2131689995;
 			
 			// aapt resource value: 0x7F0F020F
-			public const int upnp_search_finished = 2131689999;
+			public const int uploads_in_progress = 2131689999;
 			
 			// aapt resource value: 0x7F0F0210
-			public const int upnp_success = 2131690000;
+			public const int uploads_remaining = 2131690000;
+			
+			// aapt resource value: 0x7F0F020C
+			public const int upload_f_string = 2131689996;
+			
+			// aapt resource value: 0x7F0F020D
+			public const int upload_remaining = 2131689997;
+			
+			// aapt resource value: 0x7F0F020E
+			public const int upload_slots_ = 2131689998;
 			
 			// aapt resource value: 0x7F0F0211
-			public const int upnp_wifi_only = 2131690001;
-			
-			// aapt resource value: 0x7F0F0220
-			public const int username = 2131690016;
-			
-			// aapt resource value: 0x7F0F0213
-			public const int user_ = 2131690003;
-			
-			// aapt resource value: 0x7F0F0215
-			public const int user_has_no_bio = 2131690005;
-			
-			// aapt resource value: 0x7F0F0216
-			public const int user_has_no_pic = 2131690006;
-			
-			// aapt resource value: 0x7F0F0217
-			public const int user_info_bio = 2131690007;
-			
-			// aapt resource value: 0x7F0F0218
-			public const int user_info_failed_conn = 2131690008;
-			
-			// aapt resource value: 0x7F0F0219
-			public const int user_info_failed_offline = 2131690009;
-			
-			// aapt resource value: 0x7F0F021A
-			public const int user_info_failed_timeout = 2131690010;
-			
-			// aapt resource value: 0x7F0F021B
-			public const int user_info_picture = 2131690011;
-			
-			// aapt resource value: 0x7F0F021C
-			public const int user_info_received = 2131690012;
-			
-			// aapt resource value: 0x7F0F021D
-			public const int user_info_stats_header = 2131690013;
-			
-			// aapt resource value: 0x7F0F021E
-			public const int user_list_empty = 2131690014;
-			
-			// aapt resource value: 0x7F0F021F
-			public const int user_status_string = 2131690015;
-			
-			// aapt resource value: 0x7F0F0214
-			public const int user_X_is_now_online = 2131690004;
+			public const int upnp_currently_running = 2131690001;
 			
 			// aapt resource value: 0x7F0F0212
-			public const int use_pnp_for_port_forwarding = 2131690002;
+			public const int upnp_last_success = 2131690002;
 			
-			// aapt resource value: 0x7F0F0221
-			public const int view = 2131690017;
+			// aapt resource value: 0x7F0F0214
+			public const int upnp_not_ran = 2131690004;
 			
-			// aapt resource value: 0x7F0F0222
-			public const int view_all_tickers = 2131690018;
+			// aapt resource value: 0x7F0F0213
+			public const int upnp_no_wifi_conn = 2131690003;
 			
-			// aapt resource value: 0x7F0F0223
-			public const int view_self = 2131690019;
+			// aapt resource value: 0x7F0F0215
+			public const int upnp_off = 2131690005;
 			
-			// aapt resource value: 0x7F0F0224
-			public const int view_users = 2131690020;
+			// aapt resource value: 0x7F0F0216
+			public const int upnp_search_finished = 2131690006;
 			
-			// aapt resource value: 0x7F0F0226
-			public const int welcome = 2131690022;
+			// aapt resource value: 0x7F0F0217
+			public const int upnp_success = 2131690007;
 			
-			// aapt resource value: 0x7F0F0225
-			public const int we_are_already_logging_in = 2131690021;
+			// aapt resource value: 0x7F0F0218
+			public const int upnp_wifi_only = 2131690008;
 			
 			// aapt resource value: 0x7F0F0227
-			public const int wishlist = 2131690023;
+			public const int username = 2131690023;
+			
+			// aapt resource value: 0x7F0F021A
+			public const int user_ = 2131690010;
+			
+			// aapt resource value: 0x7F0F021C
+			public const int user_has_no_bio = 2131690012;
+			
+			// aapt resource value: 0x7F0F021D
+			public const int user_has_no_pic = 2131690013;
+			
+			// aapt resource value: 0x7F0F021E
+			public const int user_info_bio = 2131690014;
+			
+			// aapt resource value: 0x7F0F021F
+			public const int user_info_failed_conn = 2131690015;
+			
+			// aapt resource value: 0x7F0F0220
+			public const int user_info_failed_offline = 2131690016;
+			
+			// aapt resource value: 0x7F0F0221
+			public const int user_info_failed_timeout = 2131690017;
+			
+			// aapt resource value: 0x7F0F0222
+			public const int user_info_picture = 2131690018;
+			
+			// aapt resource value: 0x7F0F0223
+			public const int user_info_received = 2131690019;
+			
+			// aapt resource value: 0x7F0F0224
+			public const int user_info_stats_header = 2131690020;
+			
+			// aapt resource value: 0x7F0F0225
+			public const int user_list_empty = 2131690021;
+			
+			// aapt resource value: 0x7F0F0226
+			public const int user_status_string = 2131690022;
+			
+			// aapt resource value: 0x7F0F021B
+			public const int user_X_is_now_online = 2131690011;
+			
+			// aapt resource value: 0x7F0F0219
+			public const int use_pnp_for_port_forwarding = 2131690009;
 			
 			// aapt resource value: 0x7F0F0228
-			public const int wishlist_bold = 2131690024;
+			public const int view = 2131690024;
 			
 			// aapt resource value: 0x7F0F0229
-			public const int wishlist_empty_bold = 2131690025;
+			public const int view_all_tickers = 2131690025;
 			
 			// aapt resource value: 0x7F0F022A
-			public const int wishlist_search = 2131690026;
+			public const int view_self = 2131690026;
 			
 			// aapt resource value: 0x7F0F022B
-			public const int wishlist_tab_error = 2131690027;
-			
-			// aapt resource value: 0x7F0F022C
-			public const int wishlist_tab_target = 2131690028;
+			public const int view_users = 2131690027;
 			
 			// aapt resource value: 0x7F0F022D
-			public const int yes = 2131690029;
+			public const int welcome = 2131690029;
+			
+			// aapt resource value: 0x7F0F022C
+			public const int we_are_already_logging_in = 2131690028;
+			
+			// aapt resource value: 0x7F0F022E
+			public const int wishlist = 2131690030;
+			
+			// aapt resource value: 0x7F0F022F
+			public const int wishlist_bold = 2131690031;
+			
+			// aapt resource value: 0x7F0F0230
+			public const int wishlist_empty_bold = 2131690032;
+			
+			// aapt resource value: 0x7F0F0231
+			public const int wishlist_search = 2131690033;
+			
+			// aapt resource value: 0x7F0F0232
+			public const int wishlist_tab_error = 2131690034;
+			
+			// aapt resource value: 0x7F0F0233
+			public const int wishlist_tab_target = 2131690035;
+			
+			// aapt resource value: 0x7F0F0234
+			public const int yes = 2131690036;
 			
 			static String()
 			{
