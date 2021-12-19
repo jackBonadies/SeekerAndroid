@@ -579,7 +579,7 @@ namespace AndriodApp1
             }
 
 //#endif
-            return keywordHelper.GetTopCandidates(searchTerm, 13);
+            return keywordHelper.GetTopCandidates(searchTerm, 11);
             }
             catch(Exception ex)
             {

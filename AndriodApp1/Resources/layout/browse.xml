@@ -103,18 +103,7 @@
                 android:layout_weight="2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
-          <Button
-      android:layout_marginTop="0dp"
-                style="@style/SeekerButtonStyle"
-                android:layout_alignRight="@id/filterText"
-                android:text="@string/clear"
-        android:id="@+id/clearFilter"
-                android:layout_weight=".5"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:minWidth="0dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+
           <FrameLayout
       android:layout_marginTop="0dp"
                 android:layout_width="32dp"
