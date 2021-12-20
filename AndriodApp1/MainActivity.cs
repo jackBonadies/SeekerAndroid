@@ -2124,6 +2124,16 @@ namespace AndriodApp1
             RestoreSoulSeekState(sharedPrefs);
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
+
+
+            //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
+                                                                                   //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
+            //this does not restart Android.App.Application. so putting it here is a much better place... in MainActivity.OnCreate it would restart the activity every time.
+            if (AppCompatDelegate.DefaultNightMode != SoulSeekState.DayNightMode)
+            {
+                AppCompatDelegate.DefaultNightMode = SoulSeekState.DayNightMode;
+            }
+
             //SoulSeekState.SharedPreferences = sharedPrefs;
 
             if (SeekerKeepAliveService.CpuKeepAlive_FullService == null)
@@ -5855,13 +5865,6 @@ namespace AndriodApp1
             }
 
             //restoreSoulSeekState(savedInstanceState);
-
-            LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
-                                                                                   //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
-            if(AppCompatDelegate.DefaultNightMode != SoulSeekState.DayNightMode)
-            {
-                AppCompatDelegate.DefaultNightMode = SoulSeekState.DayNightMode;
-            }
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
             
