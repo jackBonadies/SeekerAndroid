@@ -18,15 +18,7 @@ android:paddingRight="4dp"
         android:id="@+id/checkBoxEnable"
         />
 
-<!--    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="0"
-        android:paddingLeft="4dp"
-        android:tint="#ff000000"
-        app:srcCompat="@drawable/eye_outline"
-        android:id="@+id/eye_visible"/>-->
+
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -35,11 +27,10 @@ android:paddingRight="4dp"
         android:paddingRight="4dp"
 
     android:textSize="20dp"
-    android:textColor="@android:color/black"
+    android:textColor="?attr/normalTextColorNonTinted"
         android:layout_margin="0dp"
         android:visibility="visible"
             android:text="Keywords"
-android:textStyle="bold"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         />
@@ -50,7 +41,7 @@ android:textStyle="bold"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="0"
-        android:tint="#ff000000"
+        android:tint="?attr/normalTextColorNonTinted"
         android:paddingRight="4dp"
         app:srcCompat="@drawable/drag_horizontal"/>
 </LinearLayout>

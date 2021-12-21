@@ -81,7 +81,7 @@
                             android:layout_marginBottom="4dp"
                             android:layout_gravity="center_horizontal"
                     android:text="Current Download Folder: "
-                            android:textColor="@color/normalTextColor"
+                            android:textColor="?attr/normalTextColor"
                     android:textSize="12dp"
                     />
 
@@ -99,8 +99,8 @@
                             android:paddingBottom="2dp"
                             android:paddingLeft="4dp"
                             android:paddingRight="4dp"
-                            android:background="@drawable/rounded_corner_background"
-                            android:textColor="@color/normalTextColor"
+                            android:background="?the_rounded_corner_background_drawable"
+                            android:textColor="?attr/normalTextColor"
                     
                     />
 
@@ -245,7 +245,7 @@
                     android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                     android:text="Current Incomplete Folder:"
-                            android:textColor="@color/normalTextColor"
+                            android:textColor="?attr/normalTextColor"
                     android:textSize="12dp"
                                 android:layout_marginBottom="4dp"
                     />
@@ -264,8 +264,8 @@
                             android:paddingBottom="2dp"
                             android:paddingLeft="4dp"
                             android:paddingRight="4dp"
-                            android:background="@drawable/rounded_corner_background"
-                            android:textColor="@color/normalTextColor"
+                            android:background="?the_rounded_corner_background_drawable"
+                            android:textColor="?attr/normalTextColor"
                     
                     />
 
@@ -321,7 +321,7 @@
                     android:layout_below="@id/changeDirSettings"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:textColor="@color/normalTextColor"
+                    android:textColor="?attr/normalTextColorNonTinted"
                     android:id="@+id/searchResults"
        />
                 <Spinner
@@ -655,7 +655,7 @@
                     android:layout_marginBottom = "10dp"
                     android:layout_gravity="center_vertical"
                     android:paddingLeft="10dp"
-                    android:textColor="@color/normalTextColor"
+                    android:textColor="?attr/normalTextColorNonTinted"
                     android:paddingRight="10dp"
                     android:id="@+id/nightModeText"
        />
@@ -765,7 +765,7 @@
                             android:layout_marginBottom="4dp"
                             android:layout_gravity="center_horizontal"
                     android:text="Current Shared Folder: "
-                            android:textColor="@color/normalTextColor"
+                            android:textColor="?attr/normalTextColor"
                     android:textSize="12dp"
                     />
 
@@ -783,8 +783,8 @@
                             android:paddingBottom="2dp"
                             android:paddingLeft="4dp"
                             android:paddingRight="4dp"
-                            android:background="@drawable/rounded_corner_background"
-                            android:textColor="@color/normalTextColor"
+                            android:background="?the_rounded_corner_background_drawable"
+                            android:textColor="?attr/normalTextColor"
                     
                     />
 
@@ -947,7 +947,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "10dp"
-                        android:textColor="@color/normalTextColor"
+                        android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingLeft="4dp"
                         android:paddingRight="10dp"
                         android:id="@+id/portView"
@@ -1054,7 +1054,7 @@
                         android:layout_marginRight="10dp"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "10dp"
-                        android:textColor="@color/normalTextColor"
+                        android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingLeft="4dp"
                         android:paddingRight="10dp"
                         android:id="@+id/privStatusView"

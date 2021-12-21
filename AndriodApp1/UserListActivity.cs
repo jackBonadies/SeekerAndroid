@@ -149,6 +149,7 @@ namespace AndriodApp1
         private RecyclerView recyclerViewUserList;
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             base.OnCreate(savedInstanceState);
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.user_list_activity_layout);
@@ -347,7 +348,7 @@ namespace AndriodApp1
 
         public void ShowEditTextDialogAddUserToList()
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(Resource.String.add_user_title);
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity

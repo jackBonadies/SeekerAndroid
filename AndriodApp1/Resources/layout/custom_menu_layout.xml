@@ -20,7 +20,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:id = "@+id/searchHere"
-        android:popupBackground = "@color/cellback"
+        android:popupBackground = "?attr/cellback"
         android:layout_weight="1" 
         android:hint = "@string/search_here"
         android:completionThreshold="0"

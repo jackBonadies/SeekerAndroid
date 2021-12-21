@@ -62,6 +62,7 @@ namespace AndriodApp1
         public static ImportedData? selectedImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             base.OnCreate(savedInstanceState);
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 
@@ -152,7 +153,14 @@ namespace AndriodApp1
                                     {
                                         StartPageFragment.Instance.PostImportLoad();
                                         SetButtonText(this.pager.CurrentItem);
-                                        Toast.MakeText(this, "Failed to Parse File. Please ensure file is valid. Contact developer for more help.", ToastLength.Long).Show();
+                                        if(t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
+                                        {
+                                            Toast.MakeText(this, String.Format("Failed to Parse File. {0}. Contact developer for more help.",npe.MessageToToast), ToastLength.Long).Show();
+                                        }
+                                        else
+                                        {
+                                            Toast.MakeText(this, "Failed to Parse File. Please ensure file is valid. Contact developer for more help.", ToastLength.Long).Show();
+                                        }
                                         MainActivity.LogFirebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
                                     }
                                     
@@ -1415,17 +1423,40 @@ namespace AndriodApp1
             stream.Seek(376L, SeekOrigin.Current);
         }
 
+        /// <summary>
+        /// This function is only used for nicotine parsing. not QT.
+        /// </summary>
+        /// <param name="currentLine"></param>
+        /// <param name="restOfLine"></param>
+        /// <param name="stringObtained"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static bool GetNextString(string currentLine, out string restOfLine, out string stringObtained)
         {
+            //nicotine uses the built in python str() ex. str(["x","y"]), which has some things to watch out for.
+            //normal strings -> 'xyz'
+            //string containing ' -> "xy'x"
+
+            //["xyz", r"xyz'x", r"xyz\"x", r"xyz'yf\"fds'xf\""]
+            //gets serialized to ['xyz', "xyz'x", 'xyz\\"x', 'xyz\'yf\\"fds\'xf\\"']
+            bool doubleQuotesUsedInsteadOfSingle = false;
             if (!currentLine.StartsWith('\''))
             {
-                throw new Exception();
+                if(!currentLine.StartsWith('"'))
+                {
+                    throw new Exception("doesnt start with \" or '");
+                }
+                else
+                {
+                    doubleQuotesUsedInsteadOfSingle = true;
+                }
             }
+            char termSeparator = doubleQuotesUsedInsteadOfSingle ? '"' : '\'';
             //get index of first non-escaped '
             int index = 0;
             while (true)
             {
-                if (!IsEscaped(currentLine, index) && currentLine[index + 1] == '\'')
+                if (!IsEscaped(currentLine, index) && currentLine[index + 1] == termSeparator)
                 {
                     break;
                 }
@@ -1571,6 +1602,18 @@ namespace AndriodApp1
             }
             return listOfUsernames;
         }
+
+        public class NicotineParsingException : System.Exception
+        {
+            public System.Exception InnerException;
+            public string MessageToToast;
+            public NicotineParsingException(System.Exception ex, string msgToToast)
+            {
+                InnerException = ex;
+                MessageToToast = msgToToast;
+            }
+        }
+
         /// <summary>
         /// Note: there is an older config file version that has userlist in a section 
         /// called columns that can mess things up if we dont consider the section...
@@ -1603,22 +1646,64 @@ namespace AndriodApp1
                             //all lists with = [] as default.
                             case "userlist":
                                 //this is also the only place where notes appear
-                                userList = ParseUserList(line, out notes);
+                                try
+                                {
+                                    userList = ParseUserList(line, out notes);
+                                }
+                                catch(Exception ex)
+                                {
+                                    throw new NicotineParsingException(ex, "Error reading UserList");
+                                }
                                 break;
                             case "banlist":
-                                bannedIgnoredList.AddRange(GetListOfString(line));
+                                try
+                                {
+                                    bannedIgnoredList.AddRange(GetListOfString(line));
+                                }
+                                catch(Exception ex)
+                                {
+                                    throw new NicotineParsingException(ex, "Error reading BanList");
+                                }
                                 break;
                             case "ignorelist":
-                                bannedIgnoredList.AddRange(GetListOfString(line));
+                                try
+                                {
+                                    bannedIgnoredList.AddRange(GetListOfString(line));
+                                }
+                                catch(Exception ex)
+                                {
+                                    throw new NicotineParsingException(ex, "Error reading IgnoreList");
+                                }
                                 break;
                             case "ipignorelist": //these are dicts and they are not redundant with the other above 2 lists.
-                                bannedIgnoredList.AddRange(GetListOfStringFromDictValues(line));
+                                try
+                                {
+                                    bannedIgnoredList.AddRange(GetListOfStringFromDictValues(line));
+                                }
+                                catch(Exception ex)
+                                {
+                                    throw new NicotineParsingException(ex, "Error reading IpIgnoreList");
+                                }
                                 break;
                             case "ipblocklist":  //ipblocklist = {'x.x.x.x': 'name', 'y.y.y.y': 'name'}
-                                bannedIgnoredList.AddRange(GetListOfStringFromDictValues(line));
+                                try
+                                {
+                                    bannedIgnoredList.AddRange(GetListOfStringFromDictValues(line));
+                                }
+                                catch (Exception ex)
+                                {
+                                    throw new NicotineParsingException(ex, "Error reading IpBlockList");
+                                }
                                 break;
                             case "autosearch":
-                                wishlists = GetListOfString(line);
+                                try
+                                {
+                                    wishlists = GetListOfString(line);
+                                }
+                                catch(Exception ex)
+                                {
+                                    throw new NicotineParsingException(ex, "Error reading Wishlist");
+                                }
                                 break;
                             default:
                                 continue;

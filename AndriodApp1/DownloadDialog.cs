@@ -162,6 +162,7 @@ namespace AndriodApp1
             return inflater.Inflate(Resource.Layout.downloaddialog,container); //container is parent
         }
 
+
         /// <summary>
         /// Called after on create view
         /// </summary>
@@ -174,8 +175,10 @@ namespace AndriodApp1
 
             log.Debug(MainActivity.logCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
             base.OnViewCreated(view, savedInstanceState);
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+
             //Dialog.SetTitle("File Info"); //is this needed in any way??
-            
+
             this.SetStyle((int)DialogFragmentStyle.NoTitle,0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
             log.Debug(MainActivity.logCatTag, "Is dl null: " + (dl == null).ToString());
@@ -961,8 +964,8 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellback);
+                    e.View.Background = Resources.GetDrawable(Resource.Attribute.cellback);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Attribute.cellback);
                 }
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Remove(e.Position);
@@ -1260,7 +1263,7 @@ namespace AndriodApp1
 
         public void OnCloseClick(object sender, DialogClickEventArgs d)
         {
-            (sender as AlertDialog).Dismiss();
+            (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
         }
 
         public static bool InNightMode(Context c)
@@ -1394,7 +1397,7 @@ namespace AndriodApp1
                 case Resource.Id.moreInfo:
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
                     //transferItems.CopyTo(tempArry);
-                    var builder = new AlertDialog.Builder(this.Context);
+                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) + searchResponse.QueueLength + System.Environment.NewLine + System.Environment.NewLine + this.Context.GetString(Resource.String.upload_slots_) + searchResponse.FreeUploadSlots).SetPositiveButton("Close", OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
@@ -1461,7 +1464,7 @@ namespace AndriodApp1
                  }
                  else
                  {
-                    itemView.Background = Owner.Resources.GetDrawable(Resource.Color.cellback);
+                    itemView.Background = Owner.Resources.GetDrawable(Resource.Attribute.cellback);
                     //itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellback);
                  }
             }

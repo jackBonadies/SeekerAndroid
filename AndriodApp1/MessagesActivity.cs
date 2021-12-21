@@ -208,7 +208,7 @@ namespace AndriodApp1
                 return;
             }
 
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(SoulSeekState.ActiveActivityRef.GetString(Resource.String.msg_user) + ":");
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
@@ -448,6 +448,7 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             base.OnCreate(savedInstanceState);
 
             MessagesActivityRef = this;

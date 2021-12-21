@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+	<attr name="mainTextColor" format="color" />
+	<attr name="mainTextColor2" format="color" />
+	<attr name="normalTextColor" format="color" />
+	<attr name="cellback" format="color" />
+	<attr name="cellbackColor" format="color" />
+	<attr name="cellbackColorDownloadDialog" format="color" />
+	<attr name="secondaryColor" format="color" />
+	<attr name="cellTextColor" format="color" />
+	<attr name="cellTextColorSubdued" format="color" />
+	<attr name="slightestContrastColor" format="color" />
+	<attr name="slightContrastColor" format="color" />
+	<attr name="dialog_background" format="color" />
+	<attr name="normalTextColorNonTinted" format="color" />
+
+	<attr name="the_rounded_corner_background_drawable" format="reference" />
+	<attr name="the_rounded_corner_dialog_background_drawable" format="reference" />
+
+</resources>

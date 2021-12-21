@@ -78,7 +78,7 @@
 
 
     <AutoCompleteTextView
-        android:popupBackground = "@color/cellback"
+        android:popupBackground = "?attr/cellback"
         android:completionThreshold="0"
         android:id="@+id/chosenUserInput"
         android:visibility="invisible"

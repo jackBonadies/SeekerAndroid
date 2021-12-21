@@ -49,7 +49,7 @@
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
         android:paddingTop="@dimen/abc_action_bar_content_inset_material"
-        android:background="@color/secondaryColor"
+        android:background="?attr/secondaryColor"
         >
         <LinearLayout
             android:layout_width="match_parent"

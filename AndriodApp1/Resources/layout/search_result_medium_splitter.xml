@@ -21,7 +21,7 @@
 
 
         android:paddingTop = "3dp"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:text = "1"
         android:textSize="14sp"
         android:singleLine = "true" />
@@ -44,7 +44,7 @@
         android:ellipsize = "end"
         android:paddingBottom = "5dp"
         android:paddingLeft = "5dp"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:text = "username  |  mp3(320kbs)  |  897kbsDummy"
         android:textSize="12sp"
         android:singleLine = "true" />

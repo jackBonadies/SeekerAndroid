@@ -198,6 +198,7 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.view_user_info_layout);
 
