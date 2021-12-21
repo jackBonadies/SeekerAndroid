@@ -20,7 +20,7 @@
 
 
         android:paddingTop = "3dp"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:text = "1"
         android:textSize="14sp"
         android:singleLine = "true" />
@@ -47,7 +47,7 @@
 
 
 
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:text = "1"
         android:textSize="12sp"
         android:singleLine = "true" />
@@ -58,7 +58,7 @@
         android:layout_height = "match_parent"
         android:layout_weight = "1"
         android:background = "@drawable/cell_shape_end"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:ellipsize = "end"
             android:textIsSelectable="false"
 
@@ -73,7 +73,7 @@
         android:id = "@+id/speedTextView"
         android:layout_width = "0dp"
         android:layout_height = "match_parent"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
 
 
         android:layout_weight = ".5"

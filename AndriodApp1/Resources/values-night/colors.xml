@@ -4,19 +4,17 @@
     <color name="colorPrimaryDark">#1B3147</color>
     <color name="colorAccent">#3498db</color>
     <color name="cellbackSelected">#3498db</color>
-    <color name="cellback">#ff303030</color>
+    
     <color name="mainPurple">#4f58c4</color>
     <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
     <color name="lightPurpleNotTransparent">#959BDC</color>
   <color name="whitePurple">#bcc1f7</color>
     <color name="mainTextColor">#bcc1f7</color>
   <color name="mainTextColorHinted">#bcc1f7</color> 
-  <color name="cellbackColor">#ff303030</color>
-  <color name="cellbackColorDownloadDialog">#ff424242</color>
-  <color name="secondaryColor">#ff424242</color>
+  
+  
   <color name="cellStroke">#959BDC</color>
-  <color name="cellTextColor">#ffffffff</color>
-  <color name="cellTextColorSubdued">#ccffffff</color>
+
   <color name="offline">#F7636A</color>
   <color name="away">#FFCD87</color>
   <color name="online">#89B38F</color>
@@ -28,15 +26,15 @@
   <color name="mainPurpleTurnedOff">#77437eab</color>
   <color name="chatBoxSplitterElevation">#6E6E6E</color>
   <color name="header_chatroom_list">#787878</color>
-  <color name="normalTextColor">#FFFFFF</color>
-  <color name="slightContrastColor">#6d6d6d</color>
-  <color name="slightestContrastColor">#4E4E4E</color>
+  
+  
+  
 
 
   <color name="subTextColor">#ffC7C7C7</color>
 	<color name="slightTint">#18ffffff</color>
 
-	<color name="dialog_background">#ff424242</color>
+	
 
   <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
   <color name="subTextColorAgainstPurple">#ffC7C7C7</color>

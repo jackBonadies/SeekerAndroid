@@ -52,6 +52,7 @@ using Android.Animation;
 using System.Collections.ObjectModel;
 using Android.Net.Wifi;
 using static Android.Provider.DocumentsContract;
+using Android.Util;
 //using System.IO;
 //readme:
 //dotnet add package Soulseek --version 1.0.0-rc3.1
@@ -2889,6 +2890,21 @@ namespace AndriodApp1
             }
         }
 
+        public static Android.Graphics.Drawables.Drawable? GetDrawableFromAttribute(Context c, int attr)
+        {
+            var typedValue = new TypedValue();
+            c.Theme.ResolveAttribute(attr, typedValue, true);
+            int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            {
+                return c.Resources.GetDrawable(drawableRes, null);
+            }
+            else
+            {
+                return c.Resources.GetDrawable(drawableRes);
+            }
+        }
+
         private static void UpdateUserInfo(Task<UserData> t)
         {
             try
@@ -2927,6 +2943,18 @@ namespace AndriodApp1
             catch (Exception e)
             {
                 MainActivity.LogFirebase("UpdateUserInfo" + e.Message + e.StackTrace);
+            }
+        }
+
+        public static void SetActivityTheme(Activity a)
+        {
+            if(a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+            {
+                a.SetTheme(Resource.Style.Amoled);
+            }
+            else
+            {
+                a.SetTheme(Resource.Style.DefaultLight);
             }
         }
 
@@ -5798,7 +5826,7 @@ namespace AndriodApp1
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         protected override void OnCreate(Bundle savedInstanceState)
         {
-
+            SeekerApplication.SetActivityTheme(this);
             LogDebug("Main Activity On Create");
             
 
@@ -6299,7 +6327,7 @@ namespace AndriodApp1
                 if(!canWrite)
                 {
 
-                    var b = new Android.App.AlertDialog.Builder(this);
+                    var b = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
                     b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
                     b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
                     ManualResetEvent mre = new ManualResetEvent(false);
@@ -6798,7 +6826,7 @@ namespace AndriodApp1
                     }
                     return true;
                 case Resource.Id.about_action:
-                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
                     //var diag = builder.SetMessage(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
@@ -11299,7 +11327,7 @@ namespace AndriodApp1
 
         public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction=null)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.note_title), username));
             View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.user_note_dialog, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
             // Set up the input
@@ -11402,7 +11430,7 @@ namespace AndriodApp1
 
         public static void ShowGivePrilegesDialog(string username)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_to_), username));
             View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.give_privileges_layout, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
             // Set up the input

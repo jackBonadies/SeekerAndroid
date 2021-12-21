@@ -38,7 +38,7 @@
             android:layout_weight = "16"
 
             android:gravity="center_vertical"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:ellipsize = "end"
             android:text = "2"
             android:textSize="22dp"

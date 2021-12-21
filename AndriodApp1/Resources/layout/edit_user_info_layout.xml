@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_bio"
         />
             <EditText
@@ -62,7 +62,7 @@
                 android:layout_weight="1"
                 android:id="@+id/editTextBio"
                 android:padding="6dp"
-                android:background="@drawable/rounded_corner_background"
+                android:background="?the_rounded_corner_background_drawable"
                 android:layout_marginBottom="12dp"
     />
 
@@ -71,7 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_picture"
                 
         />
@@ -86,8 +86,8 @@
                 android:text="@string/no_image_chosen"
                 android:id="@+id/user_info_picture_textview"
                 android:padding="6dp"
-                android:textColor="@color/normalTextColor"
-                android:background="@drawable/rounded_corner_background"
+                android:textColor="?attr/normalTextColor"
+                android:background="?the_rounded_corner_background_drawable"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="6dp"
         />

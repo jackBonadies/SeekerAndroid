@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
     <TextView
         android:id="@+id/textView1"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>

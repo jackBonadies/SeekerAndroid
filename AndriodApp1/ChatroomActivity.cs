@@ -46,6 +46,7 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             MainActivity.LogDebug("chatroom activity on create");
             base.OnCreate(savedInstanceState);
 
@@ -415,7 +416,7 @@ namespace AndriodApp1
         {
             MainActivity.LogInfoFirebase("ShowInviteUserDialog" + this.IsFinishing + this.IsDestroyed);
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.invite_user));
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
@@ -579,7 +580,7 @@ namespace AndriodApp1
         {
             MainActivity.LogInfoFirebase("ShowSetTickerDialog" + this.IsFinishing + this.IsDestroyed);
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.set_ticker));
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
@@ -709,7 +710,7 @@ namespace AndriodApp1
             MainActivity.LogInfoFirebase("ShowEditCreateChatroomDialog" + this.IsFinishing + this.IsDestroyed);
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             Context c = this;
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.create_chatroom_));
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
@@ -3592,6 +3593,8 @@ namespace AndriodApp1
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+
             //Dialog.SetTitle("File Info"); //is this needed in any way??
 
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);
@@ -4030,6 +4033,8 @@ namespace AndriodApp1
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+
             //Dialog.SetTitle("File Info"); //is this needed in any way??
 
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);

@@ -1662,7 +1662,7 @@ namespace AndriodApp1
             //bool isAdded = (((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as Android.Support.V4.View.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
             if (!this.IsAdded || this.Activity == null) //then child fragment manager will likely be null
             {
-                MainActivity.LogInfoFirebase("ShowSearchTabsDialog, fragment no longer attached..."); 
+                MainActivity.LogInfoFirebase("ShowSearchTabsDialog, fragment no longer attached...");
 
                 //foreach(Fragment frag in SoulSeekState.MainActivityRef.SupportFragmentManager.Fragments)
                 //{
@@ -2471,7 +2471,7 @@ namespace AndriodApp1
         public void ShowChangeTargetDialog()
         {
             Context toUse = this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef;
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse); //used to be our cached main activity ref...
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.search_target_);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
             chooseUserInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserInput);
@@ -3905,12 +3905,11 @@ namespace AndriodApp1
                     tst.Show();
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
                     transitionDrawable.ResetTransition();
+                    
                 }
-                else
-                {
-                    SearchTabHelper.CurrentlySearching = false;
-                    return;
-                }
+
+                SearchTabHelper.CurrentlySearching = false;
+                return;
             }
             else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
@@ -4169,7 +4168,7 @@ namespace AndriodApp1
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
             //Dialog.SetTitle("File Info"); //is this needed in any way??
-
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
             this.SetStyle((int)Android.App.DialogFragmentStyle.NoTitle, 0);
             //this.Dialog.SetTitle("Search Tab");
             recyclerViewSearches = view.FindViewById<RecyclerView>(Resource.Id.searchesRecyclerView);
@@ -4671,6 +4670,26 @@ namespace AndriodApp1
             viewToHideShow.Visibility = ViewStates.Gone;
         }
 
+        public static Color GetColorFromAttribute(Context c, int attr)
+        {
+            var typedValue = new TypedValue();
+            c.Theme.ResolveAttribute(attr, typedValue, true);
+            if(typedValue.ResourceId == 0)
+            {
+                return GetColorFromInteger(typedValue.Data);
+            }
+            else
+            {
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                {
+                    return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
+                }
+                else
+                {
+                    return c.Resources.GetColor(typedValue.ResourceId);
+                }
+            }
+        }
 
         public static Color GetColorFromInteger(int color)
         {
@@ -4679,14 +4698,7 @@ namespace AndriodApp1
 
         public static void SetTextColor(TextView tv, Context c)
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
-            {
-                tv.SetTextColor(GetColorFromInteger(ContextCompat.GetColor(c, Resource.Color.cellTextColor)));
-            }
-            else
-            {
-                tv.SetTextColor(c.Resources.GetColor(Resource.Color.cellTextColor));
-            }
+            tv.SetTextColor(GetColorFromAttribute(c, Resource.Attribute.cellTextColor));
         }
     }
 

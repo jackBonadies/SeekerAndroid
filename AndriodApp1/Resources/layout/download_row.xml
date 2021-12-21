@@ -15,7 +15,7 @@
         android:layout_width = "match_parent"
         android:layout_height = "wrap_content"
         android:textSize="15sp"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:paddingLeft="5dp"
         android:ellipsize="end"
         android:text = "1.5"
@@ -27,7 +27,7 @@
         android:layout_width = "match_parent"
         android:layout_height = "wrap_content"
         android:textSize="10sp"
-        android:textColor="@color/cellTextColorSubdued"
+        android:textColor="?attr/cellTextColorSubdued"
         
         android:ellipsize = "end"
         android:paddingLeft="5dp"

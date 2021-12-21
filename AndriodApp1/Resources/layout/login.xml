@@ -65,7 +65,7 @@
       android:text = "@string/no_account"
       android:id = "@+id/noAccount"
       android:layout_gravity="center_horizontal"
-      android:textColor = "@color/colorButtonText"
+      android:textColor = "?attr/cellbackColor"
       android:textSize = "14sp" />
 
 </RelativeLayout>

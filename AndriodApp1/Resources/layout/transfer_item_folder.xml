@@ -24,7 +24,7 @@
             android:paddingRight="3dp"
 
             android:text = "1.5"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:textSize="12sp"
             android:singleLine = "true" />
 
@@ -38,7 +38,7 @@
             android:paddingRight="2dp"
             android:text = "2"
             android:textSize="12sp"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:singleLine = "true" />
     </LinearLayout>
     <!--    <FrameLayout
@@ -82,7 +82,7 @@
             android:paddingLeft="3dp"
             android:paddingRight="3dp"
             android:text = "None"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:textSize="12sp"
             android:singleLine = "true" />
 
@@ -97,7 +97,7 @@
             android:paddingRight="5dp"
             android:text = "2"
             android:textSize="12sp"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:singleLine = "true" />
         <ProgressBar
             android:id="@+id/simpleProgressBar"
@@ -132,7 +132,7 @@
             android:paddingLeft="3dp"
             android:paddingRight="3dp"
             android:text = "3 files remaining"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:textSize="12sp"
             android:singleLine = "true" />
 
@@ -147,7 +147,7 @@
             android:paddingRight="5dp"
             android:text = "Current: filename..."
             android:textSize="12sp"
-            android:textColor="@color/cellTextColor"
+            android:textColor="?attr/cellTextColor"
             android:singleLine = "true" />
 
     </LinearLayout>

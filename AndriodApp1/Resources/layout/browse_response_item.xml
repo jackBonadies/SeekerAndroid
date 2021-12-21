@@ -12,7 +12,7 @@
         android:paddingTop="4sp"
         android:paddingBottom="4sp"
         android:textSize="14sp"
-        android:textColor="@color/normalTextColor"
+        android:textColor="?attr/normalTextColor"
         android:id="@+id/displayName"
         android:layout_gravity="center_vertical"
         android:text="test text item"/>

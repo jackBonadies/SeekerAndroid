@@ -178,6 +178,7 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             MainActivity.LogDebug("Settings Created");
 
 
@@ -418,7 +419,7 @@ namespace AndriodApp1
         private void ConfigSmartFilters_Click(object sender, EventArgs e)
         {
             MainActivity.LogInfoFirebase("ConfigSmartFilters_Click");
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle("Configure Smart Filters");
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
@@ -725,7 +726,7 @@ namespace AndriodApp1
 
         private void PrivHelp_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             var diag = builder.SetMessage(Resource.String.privileges_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -811,7 +812,7 @@ namespace AndriodApp1
         private void ChangePort_Click(object sender, EventArgs e)
         {
             MainActivity.LogInfoFirebase("ShowChangePortDialog");
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_port, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
@@ -945,7 +946,7 @@ namespace AndriodApp1
 
         private void ListeningMoreInfo_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             var diag = builder.SetMessage(Resource.String.listening).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -1023,7 +1024,7 @@ namespace AndriodApp1
 
         private void StartupServiceMoreInfo_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             var diag = builder.SetMessage(Resource.String.keep_alive_service).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -1175,7 +1176,7 @@ namespace AndriodApp1
 
         private void MemoryFileDownloadSwitchIcon_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             var diag = builder.SetMessage(Resource.String.memory_file_backed).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -1198,7 +1199,7 @@ namespace AndriodApp1
 
         private void MoreInfoButton_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             var diag = builder.SetMessage(Resource.String.sharing_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }

@@ -111,7 +111,7 @@ namespace AndriodApp1
             if (!force && PendingText != SoulSeekState.UserInfoBio)
             {
                 force = false;
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this);
+                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
                 var diag = builder.SetMessage(Resource.String.unsaved_changes_body).SetTitle(Resource.String.unsaved_changes_title).SetPositiveButton(Resource.String.okay, OnOkayClick).SetNegativeButton(Resource.String.cancel, OnCancelClick).Create();
                 diag.Show();
             }
@@ -124,6 +124,7 @@ namespace AndriodApp1
         private TextView pictureText = null;
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            SeekerApplication.SetActivityTheme(this);
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.edit_user_info_layout);
 

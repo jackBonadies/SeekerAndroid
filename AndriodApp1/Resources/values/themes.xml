@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+
+	<style name="DefaultLight" parent="AppTheme.NoActionBar">
+
+		<item name="normalTextColor">#000000</item>
+		<item name="normalTextColorNonTinted">#000000</item>
+
+		<!--<item name="dialogBackground">#52000000</item>-->
+		<item name="cellbackColor">#00000000</item>
+		<item name="cellback">#ffffff</item>
+		<item name="cellbackColorDownloadDialog">#00000000</item>
+
+
+		<item name="dialog_background">#ffffffff</item>
+
+		<item name="secondaryColor">#cccccc</item>
+		<item name="cellTextColor">#2c3e50</item>
+		<item name="cellTextColorSubdued">#cc2c3e50</item>
+		<item name="slightestContrastColor">#e0e0e0</item>
+		<item name="slightContrastColor">#c7c7c7</item>
+
+
+		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_light</item>
+		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_light</item>
+
+	</style>
+
+
+
+	<style name="DefaultDark" parent="AppTheme.NoActionBar">
+
+		<item name="normalTextColor">#FFFFFF</item>
+		<item name="normalTextColorNonTinted">#FFFFFF</item>
+
+		<!--<item name="dialogBackground">#52000000</item>-->
+		<item name="cellbackColor">#ff303030</item>
+		<item name="cellback">#ff303030</item>
+		<item name="cellbackColorDownloadDialog">#ff424242</item>
+
+
+		<item name="dialog_background">#ff424242</item>
+
+		<item name="secondaryColor">#ff424242</item>
+		<item name="cellTextColor">#ffffffff</item>
+		<item name="cellTextColorSubdued">#ccffffff</item>
+		<item name="slightestContrastColor">#4E4E4E</item>
+		<item name="slightContrastColor">#6d6d6d</item>
+
+		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark</item>
+		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark</item>
+
+	</style>
+
+
+
+	<style name="Amoled" parent="DefaultDark">
+		
+		<item name="normalTextColor">#bcc1f7</item>
+		<item name="normalTextColorNonTinted">#FFFFFF</item>
+
+		<!--Setting the window background color causes real bad UI issues on API19 emulator-->
+		<item name="android:windowBackground">#000000</item>
+
+
+		<item name="cellbackColor">#ff000000</item>
+		<item name="cellback">#ff000000</item>
+		<item name="cellbackColorDownloadDialog">#ff202020</item>
+
+		<item name="slightestContrastColor">#282828</item>
+		<item name="slightContrastColor">#4E4E4E</item>
+
+		<item name="dialog_background">#ff202020</item>
+		
+		<item name="secondaryColor">#ff202020</item>
+		<item name="cellTextColor">#ffE4E4E4</item>
+		<item name="cellTextColorSubdued">#ccE4E4E4</item>
+
+		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark_amoled</item>
+		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark_amoled</item>
+		<!--<item name="dialogBackground">#52000000</item>-->
+		
+		
+	</style>
+
+
+	<style name="MyAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+		
+		<item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
+		<item name="android:textColorSecondary">?attr/cellTextColor</item>
+		<item name="android:textColorPrimary">?attr/cellTextColor</item>
+		<item name="colorAccent">@color/colorAccent</item>
+		<item name="android:windowBackground">?the_rounded_corner_dialog_background_drawable</item>
+	</style>
+
+	<!--<style name="MyAlertDialogThemeNonCompat" parent="@android:style/Theme.Dialog">
+		<item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
+		<item name="android:textColorSecondary">?attr/cellTextColor</item>
+		<item name="colorAccent">@color/colorAccent</item>
+		<item name="android:windowBackground">?the_rounded_corner_dialog_background_drawable</item>
+	</style>-->
+
+
+</resources>

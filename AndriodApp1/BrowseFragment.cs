@@ -1087,7 +1087,7 @@ namespace AndriodApp1
             if (containsSubDirs)
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var builder = new Android.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
+                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
                 builder.SetTitle("This Folder contains Subfolders");
 
                 string topLevelStr = string.Empty;
@@ -1138,7 +1138,7 @@ namespace AndriodApp1
             if(FilteredResults && (dataItemsForListView.Count != filteredDataItemsForListView.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var b = new Android.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef);
+                var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
                 b.SetTitle(Resource.String.filter_is_on);
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -1988,7 +1988,7 @@ namespace AndriodApp1
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             FragmentActivity c = this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef;
             MainActivity.LogInfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(c.Resources.GetString(Resource.String.browse_user_files));
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity

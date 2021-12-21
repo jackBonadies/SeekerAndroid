@@ -38,7 +38,7 @@ namespace AndriodApp1
         private List<String> _mSubdirs = null;
         private ArrayAdapter<String> _mListAdapter = null;
         private bool _mGoToUpper = false;
-        private AlertDialog _dirsDialog;
+        private AndroidX.AppCompat.App.AlertDialog _dirsDialog;
 
         //////////////////////////////////////////////////////
         // Callback interface for selected directory
@@ -147,10 +147,10 @@ namespace AndriodApp1
             _mDir = dir;
             _mSubdirs = GetDirectories(dir);
 
-            AlertDialog.Builder dialogBuilder = CreateDirectoryChooserDialog(dir, _mSubdirs, (sender, args) =>
+            AndroidX.AppCompat.App.AlertDialog.Builder dialogBuilder = CreateDirectoryChooserDialog(dir, _mSubdirs, (sender, args) =>
             {
                 String mDirOld = _mDir;
-                String sel = "" + ((AlertDialog)sender).ListView.Adapter.GetItem(args.Which);
+                String sel = "" + ((AndroidX.AppCompat.App.AlertDialog)sender).ListView.Adapter.GetItem(args.Which);
                 if (sel[sel.Length - 1] == '/') sel = sel.Substring(0, sel.Length - 1);
 
                 // Navigate into the sub-directory
@@ -267,12 +267,38 @@ namespace AndriodApp1
             return dirs;
         }
 
+        public static Color GetColorFromAttribute(Context c, int attr)
+        {
+            var typedValue = new TypedValue();
+            c.Theme.ResolveAttribute(attr, typedValue, true);
+            if (typedValue.ResourceId == 0)
+            {
+                return GetColorFromInteger(typedValue.Data);
+            }
+            else
+            {
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                {
+                    return GetColorFromInteger(Android.Support.V4.Content.ContextCompat.GetColor(c, typedValue.ResourceId));
+                }
+                else
+                {
+                    return c.Resources.GetColor(typedValue.ResourceId);
+                }
+            }
+        }
+
+        public static Color GetColorFromInteger(int color)
+        {
+            return Color.Rgb(Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////                                   START DIALOG DEFINITION                                    //////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
-        private AlertDialog.Builder CreateDirectoryChooserDialog(String title, List<String> listItems, EventHandler<DialogClickEventArgs> onClickListener)
+        private AndroidX.AppCompat.App.AlertDialog.Builder CreateDirectoryChooserDialog(String title, List<String> listItems, EventHandler<DialogClickEventArgs> onClickListener)
         {
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(_mContext);
+            AndroidX.AppCompat.App.AlertDialog.Builder dialogBuilder = new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme);
             DisplayMetrics displayMetrics = new DisplayMetrics();
             _mContext.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
             float density = displayMetrics.Density; //I assume this is like 1 or 2
@@ -291,7 +317,7 @@ namespace AndriodApp1
             //need to make this a variable Save as, Open, Select Directory
             _mTitleView1.Gravity = GravityFlags.CenterVertical;
             //_mTitleView1.SetBackgroundColor(Color.DarkGray); // dark gray 	-12303292
-            _mTitleView1.SetTextColor(_mContext.Resources.GetColor(Resource.Color.normalTextColor));
+            _mTitleView1.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor));
             _mTitleView1.SetPadding((int)Math.Ceiling(10*density), (int)Math.Ceiling(10 * density), 0, (int)Math.Ceiling(15 * density));
             _mTitleView1.SetTextSize(ComplexUnitType.Dip, 18);
             _mTitleView1.SetTypeface(null, TypefaceStyle.Bold);
@@ -311,7 +337,7 @@ namespace AndriodApp1
                 newDirButton.Click += (sender, args) =>
                 {
                     EditText input = new EditText(_mContext);
-                    new AlertDialog.Builder(_mContext).SetTitle("New Folder Name").SetView(input).SetPositiveButton("OK", (o, eventArgs) =>
+                    new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme).SetTitle("New Folder Name").SetView(input).SetPositiveButton("OK", (o, eventArgs) =>
                     {
                         String newDirName = input.Text;
                         // Create new directory
@@ -339,7 +365,7 @@ namespace AndriodApp1
 
             var currentSelection = new TextView(_mContext);
             currentSelection.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
-            currentSelection.SetTextColor(_mContext.Resources.GetColor(Resource.Color.normalTextColor));
+            currentSelection.SetTextColor(_mContext.Resources.GetColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor)));
             currentSelection.Gravity = GravityFlags.CenterVertical;
             currentSelection.Text = _mContext.GetString(Resource.String.current_location_);
             currentSelection.SetPadding((int)Math.Ceiling(10 * density), (int)Math.Ceiling(5 * density), 0, (int)Math.Ceiling(3 * density));
@@ -350,7 +376,7 @@ namespace AndriodApp1
 
             _mTitleView = new TextView(_mContext);
             _mTitleView.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
-            _mTitleView.SetTextColor(_mContext.Resources.GetColor(Resource.Color.normalTextColor));
+            _mTitleView.SetTextColor(_mContext.Resources.GetColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor)));
             _mTitleView.Gravity = GravityFlags.CenterVertical;
             _mTitleView.Text = title;
             _mTitleView.SetPadding((int)Math.Ceiling(10 * density), 0, (int)Math.Ceiling(10 * density), (int)Math.Ceiling(5 * density));

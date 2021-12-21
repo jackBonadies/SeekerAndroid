@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_stats_header"
                 />
 
@@ -55,7 +55,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:id="@+id/user_info_stats"
                 />
 
@@ -67,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_bio"
                 />
             <TextView
@@ -78,12 +78,12 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/user_has_no_bio"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:gravity="top|start"
                 android:layout_weight="1"
                 android:id="@+id/textViewBio"
                 android:padding="6dp"
-                android:background="@drawable/rounded_corner_background"
+                android:background="?the_rounded_corner_background_drawable"
                 android:layout_marginBottom="12dp"
                 />
 
@@ -92,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
-                android:textColor="@color/normalTextColor"
+                android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_picture"
 
                 />
@@ -107,8 +107,8 @@
                 android:text="@string/user_has_no_pic"
                 android:id="@+id/user_info_no_picture"
                 android:padding="6dp"
-                android:textColor="@color/normalTextColor"
-                android:background="@drawable/rounded_corner_background"
+                android:textColor="?attr/normalTextColor"
+                android:background="?the_rounded_corner_background_drawable"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="6dp"
                 />

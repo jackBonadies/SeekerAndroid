@@ -16,7 +16,7 @@
         android:ellipsize = "end"
         android:padding = "5dp"
         android:text = "1.5"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:textSize="12sp"
         android:singleLine = "true" />
 
@@ -30,7 +30,7 @@
         android:padding = "5dp"
         android:text = "2"
         android:textSize="12sp"
-        android:textColor="@color/cellTextColor"
+        android:textColor="?attr/cellTextColor"
         android:singleLine = "true" />
     <FrameLayout
          android:layout_width="0dp"
