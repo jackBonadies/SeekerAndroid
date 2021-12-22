@@ -22,8 +22,8 @@
             android:focusable = "true"
             android:inputType="text"
             android:imeOptions="actionDone"
-            android:textColorHighlight = "@color/mainPurple"
-            android:textColorHint = "@color/mainPurple"
+            android:textColorHighlight = "?attr/mainPurple"
+            android:textColorHint = "?attr/mainPurple"
             android:layout_below = "@id/textView"
             android:layout_alignParentLeft = "true"
             android:layout_alignParentStart = "true"
@@ -41,7 +41,7 @@
             
         android:focusable="true"
         android:foreground="@drawable/button"
-        android:background="@color/mainPurple"
+        android:background="?attr/mainPurple"
         android:textColor="#ffffff"
         android:id="@+id/button2"
         android:layout_alignRight="@id/searchHere"
@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@id/searching"
-        android:background="@color/mainPurple"
+        android:background="?attr/mainPurple"
         android:id="@+id/header1">
         <TextView
             android:layout_width = "0dp"

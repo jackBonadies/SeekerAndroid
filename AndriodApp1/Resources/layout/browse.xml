@@ -36,7 +36,7 @@
         />-->
 
             <androidx.recyclerview.widget.RecyclerView
-                android:background="@color/mainPurple"
+                android:background="?attr/mainPurple"
         android:minWidth="25px"
         android:minHeight="0px"
             android:elevation="4dp"
@@ -69,7 +69,7 @@
       android:layout_centerHorizontal = "true"
         android:paddingBottom="110dp"
       android:layout_centerVertical="true"
-      android:textColor = "@color/mainTextColorHinted"
+      android:textColor = "?attr/mainTextColorHinted"
       android:textSize = "20dp" />
 
 </RelativeLayout>
@@ -97,8 +97,8 @@
                 android:singleLine="true"
                 android:focusable = "true"
                 android:imeOptions="actionDone"
-                android:textColorHighlight = "@color/mainTextColor"
-                android:textColorHint = "@color/mainTextColor"
+                android:textColorHighlight = "?attr/mainTextColor"
+                android:textColorHint = "?attr/mainTextColor"
                 android:hint="@string/filer_files"
                 android:layout_weight="2"
                 android:layout_width="wrap_content"
@@ -113,8 +113,8 @@
 <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/mainPurple"
-        android:background="@color/mainPurple"
+        android:backgroundTint="?attr/mainPurple"
+        android:background="?attr/mainPurple"
         app:layout_anchor="@id/bottomSheet"
         app:layout_dodgeInsetEdges="bottom"
         app:borderWidth="0dp"
@@ -127,8 +127,8 @@
    <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/mainPurple"
-        android:background="@color/mainPurple"
+        android:backgroundTint="?attr/mainPurple"
+        android:background="?attr/mainPurple"
         app:layout_anchor="@id/bottomSheet"
         app:borderWidth="0dp"
         app:fabSize="mini"

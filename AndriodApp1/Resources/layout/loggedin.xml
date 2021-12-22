@@ -13,7 +13,7 @@
       android:layout_marginTop = "25dp"
       android:id = "@+id/userNameView"
       android:layout_centerHorizontal = "true"
-      android:textColor = "@color/mainTextColor"
+      android:textColor = "?attr/mainTextColor"
       android:textSize = "35dp" />
        <Button
         android:foreground="@drawable/button"
@@ -32,7 +32,7 @@ style="@style/SeekerButtonStyle"
       android:layout_marginTop = "100dp"
       android:id = "@+id/loadingView"
       android:layout_centerHorizontal = "true"
-      android:textColor = "@color/mainTextColor"
+      android:textColor = "?attr/mainTextColor"
       android:textSize = "35dp" />
     />
       <Button

@@ -34,6 +34,6 @@
         android:clickable="true"
         app:srcCompat="@drawable/outline_cancel_white_24"
         android:id="@+id/leaveRoom"
-        android:tint="@color/mainTextColor"
+        android:tint="?attr/mainTextColor"
         />
 </LinearLayout>

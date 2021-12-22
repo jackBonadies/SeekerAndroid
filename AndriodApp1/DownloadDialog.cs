@@ -109,8 +109,9 @@ namespace AndriodApp1
             display.GetSize(size);
 
             int width = size.X;
+            int height = size.Y;
 
-            window.SetLayout((int)(width * 0.90), Android.Views.WindowManagerLayoutParams.WrapContent);//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
+            window.SetLayout((int)(width * 0.90), (int)(height * 0.90));//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
             window.SetGravity(GravityFlags.Center);
             MainActivity.LogDebug("OnResume End");
         }

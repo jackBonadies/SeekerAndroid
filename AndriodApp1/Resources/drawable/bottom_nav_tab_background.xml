@@ -4,7 +4,7 @@
       <item android:gravity="bottom">
         <shape android:shape="rectangle">
           <size android:height="4dp" />
-          <solid android:color="@color/whitePurple" />
+          <solid android:color="?attr/whitePurpleForNavBar" />
         </shape>
       </item>
     </layer-list>

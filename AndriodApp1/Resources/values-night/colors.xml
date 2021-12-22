@@ -5,12 +5,9 @@
     <color name="colorAccent">#3498db</color>
     <color name="cellbackSelected">#3498db</color>
     
-    <color name="mainPurple">#4f58c4</color>
     <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
     <color name="lightPurpleNotTransparent">#959BDC</color>
-  <color name="whitePurple">#bcc1f7</color>
-    <color name="mainTextColor">#bcc1f7</color>
-  <color name="mainTextColorHinted">#bcc1f7</color> 
+    
   
   
   <color name="cellStroke">#959BDC</color>
@@ -18,7 +15,7 @@
   <color name="offline">#F7636A</color>
   <color name="away">#FFCD87</color>
   <color name="online">#89B38F</color>
-  <color name="slskAccent">#437eab</color>
+
   <color name="expandIconColor">#ffffffff</color>
   <color name="queueColor">#F7636A</color>
   <color name="hardErrorRed">#cc0000</color>

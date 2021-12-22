@@ -11,8 +11,12 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-		
-    </style>
+		<item name="mainPurple">#4f58c4</item>
+        
+        <item name="whitePurpleForNavBar">#bcc1f7</item>
+        
+        <item name="slskAccent">#437eab</item>
+	</style>
 
 	<style name="MaterialThemeForChip" parent="Theme.MaterialComponents.Light.DarkActionBar">
 		<!-- Customize your theme here. -->
@@ -46,7 +50,7 @@
     <item name="android:textColor">#ffffff</item>
     <item name="android:paddingLeft">10dp</item>
     <item name="android:paddingRight">10dp</item>
-    <item name="android:background">@color/mainPurple</item>
+    <item name="android:background">?attr/mainPurple</item>
   </style>
 
   <style name="navTextInactive">
