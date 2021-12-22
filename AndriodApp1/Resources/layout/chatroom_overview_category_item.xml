@@ -8,7 +8,7 @@
     android:paddingLeft="4dp"
     android:paddingRight="4dp"
     android:paddingTop="4dp"
-    android:background="@color/slskAccent"
+    android:background="?attr/slskAccent"
     android:paddingBottom="4dp"
     android:orientation="horizontal"
     android:id="@+id/linearLayoutChatroomCategoryOverview">
@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         android:id="@+id/categoryHeader"
         android:text="categoryDummy"
-        android:background="@color/slskAccent"
+        android:background="?attr/slskAccent"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         />

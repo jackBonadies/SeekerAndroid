@@ -1391,23 +1391,21 @@ namespace AndriodApp1
             {
                 case SentStatus.Pending:
                 case SentStatus.Success:
-                    resourceIntColor = Resource.Color.mainPurple;
-                    break;
+                    return SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainPurple);
                 case SentStatus.Failed:
                     resourceIntColor = Resource.Color.hardErrorRed;
-                    break;
+                    if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                    {
+                        return GetColorFromInteger(ContextCompat.GetColor(SoulSeekState.ActiveActivityRef, resourceIntColor));
+                    }
+                    else
+                    {
+                        return SoulSeekState.ActiveActivityRef.Resources.GetColor(resourceIntColor);
+                    }
                 case SentStatus.None:
                     throw new Exception("Sent status should not be none");
             }
-
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
-            {
-                return GetColorFromInteger(ContextCompat.GetColor(SoulSeekState.ActiveActivityRef, resourceIntColor));
-            }
-            else
-            {
-                return SoulSeekState.ActiveActivityRef.Resources.GetColor(resourceIntColor);
-            }
+            return Color.Red; //unreachable
         }
 
         public void setItem(Message msg)

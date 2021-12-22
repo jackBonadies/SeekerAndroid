@@ -278,6 +278,26 @@ namespace AndriodApp1
             SetSpinnerPositionDayNight(dayNightMode);
             dayNightMode.ItemSelected += DayNightMode_ItemSelected;
 
+
+            Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
+            dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
+            String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.Red };
+            ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayVarientSpinnerOptionsStrings);
+            dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
+            SetSpinnerPositionDayVarient(dayVarientSpinner);
+            dayVarientSpinner.ItemSelected += DayVarient_ItemSelected;
+
+
+            Spinner nightVarientSpinner = FindViewById<Spinner>(Resource.Id.nightVarientSpinner);
+            nightVarientSpinner.ItemSelected -= NightVarient_ItemSelected;
+            String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.Red, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
+            ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, nightVarientSpinnerOptionsStrings);
+            nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
+            SetSpinnerPositionNightVarient(nightVarientSpinner);
+            nightVarientSpinner.ItemSelected += NightVarient_ItemSelected;
+
+
+
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
             imageView.Click += ImageView_Click;
             UpdateShareImageView();
@@ -1319,6 +1339,33 @@ namespace AndriodApp1
             (sender as ImageView).PerformLongClick();
         }
 
+
+        private void DayVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        {
+            SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(e.Position);
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                editor.PutInt(SoulSeekState.M_DayVarient, (int)(SoulSeekState.DayModeVarient));
+                bool success = editor.Commit();
+            }
+            SeekerApplication.SetActivityTheme(this);
+        }
+
+        private void NightVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        {
+            SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(e.Position);
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                editor.PutInt(SoulSeekState.M_NightVarient, (int)(SoulSeekState.NightModeVarient));
+                bool success = editor.Commit();
+            }
+            SeekerApplication.SetActivityTheme(this);
+        }
+
+
+
         private void DayNightMode_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
 
@@ -1417,9 +1464,16 @@ namespace AndriodApp1
 
         private void SetSpinnerPositionDayNight(Spinner s)
         {
-            s.SetSelection(Math.Max(SoulSeekState.DayNightMode,0)); //-1 -> 0
+            s.SetSelection(Math.Max(SoulSeekState.DayNightMode, 0)); //-1 -> 0
         }
-
+        private void SetSpinnerPositionDayVarient(Spinner s)
+        {
+            s.SetSelection((int)(SoulSeekState.DayModeVarient));
+        }
+        private void SetSpinnerPositionNightVarient(Spinner s)
+        {
+            s.SetSelection((int)(SoulSeekState.NightModeVarient));
+        }
         private void CloseButton_Click(object sender, EventArgs e)
         {
             this.Finish();
@@ -1868,6 +1922,150 @@ namespace AndriodApp1
                 var editor = SoulSeekState.SharedPreferences.Edit();
                 editor.PutString(SoulSeekState.M_ManualIncompleteDirectoryUri, SoulSeekState.ManualIncompleteDataDirectoryUri);
                 bool success = editor.Commit();
+            }
+        }
+
+    }
+
+    public static class ThemeHelper
+    {
+        public const string ClassicPurple = "Classic Purple";
+        public const string Grey = "Grey";
+        public const string Blue = "Blue";
+        public const string Red = "Red";
+        public const string AmoledClassicPurple = "Amoled - Classic Purple";
+        public const string AmoledGrey = "Amoled - Grey";
+
+        public enum DayThemeType : ushort
+        {
+            ClassicPurple = 0,
+            Grey = 1,
+            Blue = 2,
+            Red = 3,
+        }
+
+        public static DayThemeType FromDayThemeTypeString(string themeTypeString)
+        {
+            switch (themeTypeString)
+            {
+                case ClassicPurple:
+                    return DayThemeType.ClassicPurple;
+                case Grey:
+                    return DayThemeType.Grey;
+                case Blue:  
+                    return DayThemeType.Blue;
+                case Red:
+                    return DayThemeType.Red;
+                default:
+                    throw new Exception("unknown");
+            }
+        }
+
+        public static string ToDayThemeString(DayThemeType dayTheme)
+        {
+            switch (dayTheme)
+            {
+                case DayThemeType.ClassicPurple:
+                    return ClassicPurple;
+                case DayThemeType.Grey:
+                    return Grey;
+                case DayThemeType.Blue:
+                    return Blue;
+                case DayThemeType.Red:
+                    return Red;
+                default:
+                    throw new Exception("unknown");
+            }
+        }
+
+        public static int ToDayThemeProper(DayThemeType dayTheme)
+        {
+            switch (dayTheme)
+            {
+                case DayThemeType.ClassicPurple:
+                    return Resource.Style.DefaultLight;
+                case DayThemeType.Grey:
+                    return Resource.Style.DefaultDark_Grey; //TODO
+                case DayThemeType.Blue:
+                    return Resource.Style.DefaultLight_Blue;
+                case DayThemeType.Red:
+                    return Resource.Style.DefaultLight_Red;
+                default:
+                    throw new Exception("unknown");
+            }
+        }
+
+        public enum NightThemeType : ushort
+        {
+            ClassicPurple = 0,
+            Grey = 1,
+            Blue = 2,
+            Red = 3,
+            AmoledClassicPurple = 4,
+            AmoledGrey = 5
+        }
+
+        public static NightThemeType FromNightThemeTypeString(string themeTypeString)
+        {
+            switch (themeTypeString)
+            {
+                case ClassicPurple:
+                    return NightThemeType.ClassicPurple;
+                case Grey:
+                    return NightThemeType.Grey;
+                case Blue:
+                    return NightThemeType.Blue;
+                case Red:
+                    return NightThemeType.Red;
+                case AmoledClassicPurple:
+                    return NightThemeType.ClassicPurple;
+                case AmoledGrey:
+                    return NightThemeType.AmoledGrey;
+                default:
+                    throw new Exception("unknown");
+            }
+        }
+
+
+        public static string ToNightThemeString(NightThemeType nightTheme)
+        {
+            switch (nightTheme)
+            {
+                case NightThemeType.ClassicPurple:
+                    return ClassicPurple;
+                case NightThemeType.Grey:
+                    return Grey;
+                case NightThemeType.Blue:
+                    return Blue;
+                case NightThemeType.Red:
+                    return Red;
+                case NightThemeType.AmoledClassicPurple:
+                    return ClassicPurple;
+                case NightThemeType.AmoledGrey:
+                    return AmoledGrey;
+                default:
+                    throw new Exception("unknown");
+            }
+        }
+
+        public static int ToNightThemeProper(NightThemeType nightTheme)
+        {
+            switch (nightTheme)
+            {
+                case NightThemeType.ClassicPurple:
+                    return Resource.Style.DefaultDark;
+                case NightThemeType.Grey:
+                    return Resource.Style.DefaultDark_Grey;
+                case NightThemeType.Blue:
+                    return Resource.Style.DefaultDark_Blue;
+                case NightThemeType.Red:
+                    return Resource.Style.DefaultDark_Red;
+                case NightThemeType.AmoledClassicPurple:
+                    return Resource.Style.Amoled;
+                case NightThemeType.AmoledGrey:
+                    return Resource.Style.Amoled;
+                default:
+                    throw new Exception("unknown");
             }
         }
 

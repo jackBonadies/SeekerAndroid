@@ -1693,7 +1693,7 @@ namespace AndriodApp1
                 if(purple)
                 {
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
-                    cancel.SetColorFilter(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.mainTextColor), PorterDuff.Mode.SrcAtop);
+                    cancel.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
                 actv.SetCompoundDrawables(null,null,cancel,null);
             }

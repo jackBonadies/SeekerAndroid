@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-	<solid android:color="#ffffffff"/>
+	<solid android:color="?attr/mainPurple"/>
 	<!--This color (dialog_background) has to be hardcoded as color attributes are not allowed in drawables-->
 	<stroke android:width="3dp"
-		android:color="#ffffffff"
+		android:color="?attr/mainPurple"
         />
 
 	<!--<padding android:left="1dp"
@@ -12,6 +12,5 @@
 		android:bottom="1dp"
         />-->
 
-	<corners android:bottomRightRadius="2dp" android:bottomLeftRadius="2dp"
-		android:topLeftRadius="2dp" android:topRightRadius="2dp"/>
+	<corners android:topLeftRadius="2dp" android:topRightRadius="2dp"/>
 </shape>

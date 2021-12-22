@@ -2948,13 +2948,15 @@ namespace AndriodApp1
 
         public static void SetActivityTheme(Activity a)
         {
-            if(a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+            //useless returns the same thing every time
+            //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
+            if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
             {
-                a.SetTheme(Resource.Style.Amoled);
+                a.SetTheme(ThemeHelper.ToNightThemeProper(SoulSeekState.NightModeVarient));
             }
             else
             {
-                a.SetTheme(Resource.Style.DefaultLight);
+                a.SetTheme(ThemeHelper.ToDayThemeProper(SoulSeekState.DayModeVarient));
             }
         }
 
@@ -3209,6 +3211,8 @@ namespace AndriodApp1
                 SoulSeekState.SaveDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_SaveDataDirectoryUri, "");
                 SoulSeekState.NumberSearchResults = sharedPreferences.GetInt(SoulSeekState.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
                 SoulSeekState.DayNightMode = sharedPreferences.GetInt(SoulSeekState.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
+                SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(SoulSeekState.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
+                SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(sharedPreferences.GetInt(SoulSeekState.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple));
                 SoulSeekState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
                 SoulSeekState.AutoClearCompleteUploads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearCompleteUploads, false);
                 SoulSeekState.RememberSearchHistory = sharedPreferences.GetBoolean(SoulSeekState.M_RememberSearchHistory, true);
@@ -9924,6 +9928,8 @@ namespace AndriodApp1
         public static bool MemoryBackedDownload = false;
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
+        public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;
+        public static ThemeHelper.DayThemeType DayModeVarient = ThemeHelper.DayThemeType.ClassicPurple;
         public static bool RememberSearchHistory = true;
         public static SoulseekClient SoulseekClient = null;
         public static String Username = null;
@@ -10182,6 +10188,8 @@ namespace AndriodApp1
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
+        public const string M_NightVarient = "Momento_NightModeVarient";
+        public const string M_DayVarient = "Momento_DayModeVarient";
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";
         public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
         public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";

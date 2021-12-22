@@ -28,7 +28,7 @@
                 android:gravity="center_vertical"
                 app:srcCompat="@drawable/checkbox_blank_circle"
                 android:id="@+id/userStatus"
-                android:tint="@color/mainTextColor"
+                android:tint="?attr/mainTextColor"
                 />
 
         <TextView
@@ -66,7 +66,7 @@
     android:gravity="center_vertical"                
             app:srcCompat="@drawable/ic_more_vert_white_vector_32dp"
                     android:id="@+id/options"
-                    android:tint="@color/mainTextColor"
+                    android:tint="?attr/mainTextColor"
                     />-->
     </LinearLayout>
     <LinearLayout

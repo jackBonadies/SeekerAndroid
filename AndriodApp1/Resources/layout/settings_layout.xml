@@ -17,7 +17,7 @@
             android:id="@+id/setting_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/mainPurple"
+            android:background="?attr/mainPurple"
             android:minHeight="100dp"
             android:theme="?attr/actionBarTheme"
             tools:layout_editor_absoluteX="0dp"
@@ -208,7 +208,7 @@
                         
                         android:id="@+id/moreInfoButton"
                         app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="@color/mainTextColor"
+                        android:tint="?attr/mainTextColor"
             />-->
 
 
@@ -451,7 +451,7 @@
                     android:layout_gravity="center_vertical"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:id="@+id/helpServiceOnStartup"
-                    android:tint="@color/mainTextColor"
+                    android:tint="?attr/mainTextColor"
                 />
 
             </LinearLayout>
@@ -630,7 +630,7 @@
                     android:layout_gravity="center_vertical"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:id="@+id/memoryFileDownloadSwitchIcon"
-                    android:tint="@color/mainTextColor"
+                    android:tint="?attr/mainTextColor"
                 />
 
 
@@ -652,7 +652,7 @@
                     android:layout_weight="0.4"
                     android:layout_marginRight="10dp"
                     android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginBottom = "2dp"
                     android:layout_gravity="center_vertical"
                     android:paddingLeft="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
@@ -667,9 +667,85 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.4"
                     android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginBottom = "2dp"
                     android:layout_toRightOf="@+id/nightModeText"
                     android:id="@+id/nightModeSpinner"
+        />
+            </LinearLayout>
+
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/nightModeOptionLayout"
+                android:layout_marginTop = "2dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/dayModeVarientLayout"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Day Varient: "
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.4"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "2dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="10dp"
+                    android:textColor="?attr/normalTextColorNonTinted"
+                    android:paddingRight="10dp"
+                    android:id="@+id/dayModeVarientText"
+       />
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.4"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "2dp"
+                    android:layout_toRightOf="@+id/dayModeVarientText"
+                    android:id="@+id/dayVarientSpinner"
+        />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/dayModeVarientLayout"
+                android:layout_marginTop = "2dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/nightModeVarientLayout"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Night Varient: "
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="0.4"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="10dp"
+                    android:textColor="?attr/normalTextColorNonTinted"
+                    android:paddingRight="10dp"
+                    android:id="@+id/nightVarientText"
+       />
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.4"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:layout_toRightOf="@+id/nightVarientText"
+                    android:id="@+id/nightVarientSpinner"
         />
             </LinearLayout>
 
@@ -678,7 +754,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
-                android:layout_below="@id/nightModeOptionLayout"
+                android:layout_below="@id/nightModeVarientLayout"
                 android:id="@+id/sharingLayoutParent"
                 android:background="@drawable/border_group_box"
                 android:orientation="vertical"
@@ -719,7 +795,7 @@
                         
                         android:id="@+id/moreInfoButton"
                         app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="@color/mainTextColor"
+                        android:tint="?attr/mainTextColor"
             />
 
 
@@ -835,7 +911,7 @@
                         android:layout_gravity="center_vertical"
                         app:srcCompat="@drawable/ic_filter_list_black_32dp"
                         android:id="@+id/sharedStatus"
-                        android:tint="@color/mainTextColor"
+                        android:tint="?attr/mainTextColor"
                 />
                                         <Button
                         android:layout_centerHorizontal="true"
@@ -928,7 +1004,7 @@
                         
                         android:id="@+id/listeningHelp"
                         app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="@color/mainTextColor"
+                        android:tint="?attr/mainTextColor"
             />
                 </LinearLayout>
                 <LinearLayout
@@ -1028,7 +1104,7 @@
                         android:layout_width="26dp"
                         android:layout_height="26dp"
                         android:id="@+id/UPnPStatus"
-                        android:tint="@color/mainTextColor"
+                        android:tint="?attr/mainTextColor"
                         
             />
                 </LinearLayout>
@@ -1112,7 +1188,7 @@
                         
                         android:id="@+id/privHelp"
                         app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="@color/mainTextColor"
+                        android:tint="?attr/mainTextColor"
             />
 
 </LinearLayout>

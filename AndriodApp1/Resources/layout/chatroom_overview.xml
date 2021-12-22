@@ -35,7 +35,7 @@
       android:layout_centerHorizontal = "true"
         android:paddingBottom="150dp"
       android:layout_centerVertical="true"
-      android:textColor = "@color/mainTextColorHinted"
+      android:textColor = "?attr/mainTextColorHinted"
       android:textSize = "20dp" />
 
 </RelativeLayout>

@@ -13,7 +13,7 @@
 <!--        <TextView
         android:text="Expandable: Expanded"
         android:textSize="22sp"
-        android:textColor="@color/mainTextColor"
+        android:textColor="?attr/mainTextColor"
     android:layout_width="match_parent"
         android:paddingBottom="2dp"
         android:paddingTop="2dp"
@@ -29,7 +29,7 @@
         android:paddingLeft="10dp"
         android:text="Expandable: Collapsed"
         android:textSize="22sp"
-        android:textColor="@color/mainTextColor"
+        android:textColor="?attr/mainTextColor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     />
@@ -41,7 +41,7 @@
         android:paddingLeft="10dp"
         android:text="Medium"
         android:textSize="22sp"
-        android:textColor="@color/mainTextColor"
+        android:textColor="?attr/mainTextColor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     />
@@ -54,7 +54,7 @@
         
         android:text="Minimal"
         android:textSize="22sp"
-        android:textColor="@color/mainTextColor"
+        android:textColor="?attr/mainTextColor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     />-->
@@ -68,7 +68,7 @@
         android:textStyle="bold"
         android:text="@string/search_result_style"
         android:textSize="22sp"
-        android:textColor="@color/mainTextColor"
+        android:textColor="?attr/mainTextColor"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     />
@@ -86,8 +86,8 @@
                         android:layout_marginTop="6dp"
 
         android:textSize="18sp"
-            android:buttonTint="@color/slskAccent"
-        android:textColor="@color/mainTextColor"
+            android:buttonTint="?attr/slskAccent"
+        android:textColor="?attr/mainTextColor"
             />
 
       <RadioButton
@@ -98,8 +98,8 @@
          android:checked="false"
         android:textSize="18sp"
                         android:layout_marginTop="4dp"
-            android:buttonTint="@color/slskAccent"
-        android:textColor="@color/mainTextColor"
+            android:buttonTint="?attr/slskAccent"
+        android:textColor="?attr/mainTextColor"
           />
       <RadioButton
                         android:layout_marginTop="4dp"
@@ -110,8 +110,8 @@
          android:checked="false"
         android:text="@string/search_result_style_medium"
         android:textSize="18sp"
-            android:buttonTint="@color/slskAccent"
-        android:textColor="@color/mainTextColor"
+            android:buttonTint="?attr/slskAccent"
+        android:textColor="?attr/mainTextColor"
             />
 
       <RadioButton
@@ -122,8 +122,8 @@
          android:id="@+id/radioButtonMinimal"
          android:checked="false"
         android:textSize="18sp"
-            android:buttonTint="@color/slskAccent"
-        android:textColor="@color/mainTextColor"
+            android:buttonTint="?attr/slskAccent"
+        android:textColor="?attr/mainTextColor"
           />
    </RadioGroup>
 

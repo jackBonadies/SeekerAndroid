@@ -17,7 +17,7 @@
             android:id="@+id/view_user_info_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/mainPurple"
+            android:background="?attr/mainPurple"
             android:minHeight="100dp"
             android:theme="?attr/actionBarTheme"
             tools:layout_editor_absoluteX="0dp"
