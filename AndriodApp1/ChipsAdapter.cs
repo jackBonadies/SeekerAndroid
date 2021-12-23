@@ -226,7 +226,7 @@ namespace AndriodApp1
                             {
                                 startIndex = iii + 1;
                                 string basetype = allStr.Replace(" - all", "");
-                                var stringsToMove = sortedListPass1str.FindAll((ftype) => ftype.Contains(basetype) && ftype != allStr);
+                                var stringsToMove = sortedListPass1str.FindAll(((ftype) => ((ftype.Contains(basetype + " ") || ftype == basetype) && ftype != allStr)));
                                 foreach (string stringToMove in stringsToMove)
                                 {
                                     sortedListPass1str.Remove(stringToMove);

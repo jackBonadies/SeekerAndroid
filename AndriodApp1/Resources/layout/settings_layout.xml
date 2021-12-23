@@ -138,11 +138,15 @@
                 android:paddingLeft="4dp"
                 android:paddingRight="10dp"
                 android:layout_gravity="center"
+
+android:theme="@style/checkBoxStyle"
                 android:layout_marginTop = "10dp"
                 android:id="@+id/createCompleteAndIncompleteDirectories"
                 android:layout_marginBottom = "10dp"/>
 
                                             <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -183,6 +187,8 @@
                     android:orientation="horizontal"
                     android:gravity="center_horizontal|fill_horizontal|center">
                     <CheckBox
+
+android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Manually Set Incomplete Folder"
@@ -349,6 +355,8 @@
                 android:orientation="horizontal">
 
              <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -386,6 +394,8 @@
                 </LinearLayout>
 
             <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -411,6 +421,8 @@
                 android:id="@+id/keepAliveLayout"
                 android:orientation="horizontal">
                 <CheckBox
+
+android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/start_service_on_startup"
@@ -457,6 +469,8 @@
             </LinearLayout>
 
             <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -471,6 +485,8 @@
                 android:id="@+id/allowPrivateRoomInvitations"
                 android:layout_marginBottom = "10dp"/>
             <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -486,6 +502,8 @@
                 android:layout_marginBottom = "10dp"/>
 
                         <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -501,6 +519,8 @@
                 android:layout_marginBottom = "10dp"/>
 
             <CheckBox
+
+android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -525,6 +545,8 @@
                 android:id="@+id/searchHistoryLayout"
                 android:orientation="horizontal">
                 <CheckBox
+
+android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/remember_search_history"
@@ -566,6 +588,8 @@
                 android:id="@+id/recentUserHistoryLayout"
                 android:orientation="horizontal">
                 <CheckBox
+
+android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Remember Recent Users"
@@ -608,6 +632,8 @@
                 android:id="@+id/memoryFileDownloadSwitch"
                 android:orientation="horizontal">
                 <CheckBox
+
+android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_backed_downloads"
@@ -770,6 +796,8 @@
                     android:orientation="horizontal"
                     android:gravity="center_horizontal|fill_horizontal|center">
                     <CheckBox
+
+android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/enable_sharing"
@@ -980,6 +1008,8 @@
                     android:id="@+id/listeningRow1"
                     android:orientation="horizontal">
                     <CheckBox
+
+android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/enable_listening"
@@ -1081,6 +1111,8 @@
                     android:id="@+id/listeningRow3"
                     android:orientation="horizontal">
                     <CheckBox
+
+android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/use_pnp_for_port_forwarding"

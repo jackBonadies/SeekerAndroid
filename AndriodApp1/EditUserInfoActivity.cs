@@ -31,7 +31,7 @@ using System.Text;
 namespace AndriodApp1
 {
     [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
-    public class EditUserInfoActivity : Android.Support.V7.App.AppCompatActivity
+    public class EditUserInfoActivity : ThemeableActivity
     {
         public const string USER_INFO_PIC_DIR = "user_info_picture";
         private const int PICTURE_SELECTED = 2001;
@@ -124,7 +124,6 @@ namespace AndriodApp1
         private TextView pictureText = null;
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.edit_user_info_layout);
 

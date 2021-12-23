@@ -432,7 +432,7 @@ namespace AndriodApp1
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
     [IntentFilter(new[] { Intent.ActionSend },
     Categories = new[] { Intent.CategoryDefault }, DataMimeType = "text/plain", Label = "Search Here")]
-    public class SearchDialogDummyActivity : AppCompatActivity
+    public class SearchDialogDummyActivity : ThemeableActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {

@@ -35,7 +35,7 @@ using AndroidX.RecyclerView.Widget;
 namespace AndriodApp1
 {
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar")]
-    public class UserListActivity : Android.Support.V7.App.AppCompatActivity
+    public class UserListActivity : ThemeableActivity
     {
         public static string PopUpMenuOwnerHack = string.Empty; //hack to get which listview item owns the popup menu (for on menu item click).
         public static string IntentUserGoToBrowse = "GoToBrowse";
@@ -149,7 +149,6 @@ namespace AndriodApp1
         private RecyclerView recyclerViewUserList;
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
             base.OnCreate(savedInstanceState);
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.user_list_activity_layout);

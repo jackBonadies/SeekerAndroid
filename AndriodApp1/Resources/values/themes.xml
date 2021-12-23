@@ -12,8 +12,8 @@
 		<item name="cellbackColor">#00000000</item>
 		<item name="cellback">#ffffff</item>
 		<item name="cellbackColorDownloadDialog">#00000000</item>
-
-
+		<item name="expandIconColor">#959BDC</item>
+		<item name="cellStroke">#994f58c4</item>
 		<item name="dialog_background">#ffffffff</item>
 
 		<item name="secondaryColor">#cccccc</item>
@@ -22,66 +22,111 @@
 		<item name="slightestContrastColor">#e0e0e0</item>
 		<item name="slightContrastColor">#c7c7c7</item>
 		<item name="mainTextColor">#4f58c4</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_4f58c4</item>
 
 		<item name="mainTextColorHinted">#959BDC</item>
 
 		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_light</item>
 		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_light</item>
+		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
 
 	</style>
 
 	<style name="DefaultLight_Blue" parent="DefaultLight">
 		<item name="mainPurple">#126291</item>
 		<item name="whitePurpleForNavBar">#86b2cb</item>
+		<item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_86b2cb</item>
+
 		<item name="mainTextColorHinted">#86b2cb</item>
 		<item name="mainTextColor">#126291</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_126291</item>
 		<item name="slskAccent">#679DC6</item>
-		<item name="colorAccent">#054568</item>
+		<item name="cellStroke">#9086b2cb</item>
+		<item name="colorAccent">#86b2cb</item>
+		<item name="checkBoxColor">#4496ee</item>
+		<!--<item name="colorAccent">#054568</item>-->
 	</style>
 
 	<style name="DefaultLight_Red" parent="DefaultLight">
 		<item name="mainPurple">#B22525</item>
+		<item name="whitePurpleForNavBar">#d57676</item>
+		<item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_d57676</item>
+		<item name="mainTextColorHinted">#d57676</item>
 		<item name="mainTextColor">#B22525</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_B22525</item>
+
+		<item name="slskAccent">#d57676</item>
+		<item name="cellStroke">#90d57676</item>
+		<item name="colorAccent">#d57676</item>
+		<item name="checkBoxColor">#FC4C02</item>
 	</style>
 
-	<style name="DefaultDark_Red" parent="DefaultLight">
-		<item name="mainPurple">#B22525</item>
-		<item name="mainTextColor">#db8686</item>
-	</style>
 
 
 	<style name="DefaultDark_Blue" parent="DefaultDark">
 		<item name="mainPurple">#126291</item>
 		<item name="colorAccent">#86b2cb</item>
 		<item name="whitePurpleForNavBar">#86b2cb</item>
+		<item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_86b2cb</item>
 		<item name="mainTextColor">#86b2cb</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_86b2cb</item>
+
 		<item name="slskAccent">#679DC6</item>
+		<item name="cellStroke">#86b2cb</item>
+		<item name="expandIconColor">#86b2cb</item>
 		<item name="mainTextColorHinted">#86b2cb</item>
 	</style>
+
 	<style name="DefaultDark_Grey" parent="DefaultDark">
-		<item name="mainPurple">#424242</item>
+		<item name="mainPurple">#202124</item>
+		<item name="mainPurpleForNavBar">#202124</item>
+		<!--a grey accent looks very bad-->
 		<item name="colorAccent">#86b2cb</item>
-		<item name="whitePurpleForNavBar">#86b2cb</item>
+		<item name="whitePurpleForNavBar">#8B9CB2</item>
+		<item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_8B9CB2</item>
+
 		<item name="mainTextColor">#dddddd</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_dddddd</item>
+
+		<item name="cellStroke">#424242</item>
+		<item name="expandIconColor">#86b2cb</item>
+		<item name="mainTextColorHinted">#dddddd</item>
+		<item name="slskAccent">#2A4C6D</item>
+		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">@drawable/rounded_corner_dialog_background_dark_303030</item>
+		
+
+		<item name="cellbackColorDownloadDialog">#ff303030</item>
 	</style>
 
 	<style name="Amoled_Grey" parent="Amoled">
 		<item name="mainPurple">#333333</item>
-		<item name="colorAccent">#cccccc</item>
-		<item name="whitePurpleForNavBar">#cccccc</item>
+		<item name="mainPurpleForNavBar">#333333</item>
+		<item name="colorAccent">#86b2cb</item>
+		<item name="whitePurpleForNavBar">#8B9CB2</item>
+		<item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_8B9CB2</item>
+
 		<item name="mainTextColor">#dddddd</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_dddddd</item>
+
+		<item name="cellStroke">#424242</item>
+		<item name="expandIconColor">#9086b2cb</item>
+		<item name="mainTextColorHinted">#dddddd</item>
+		<item name="slskAccent">#2A4C6D</item>
+		<item name="normalTextColor">#FFFFFF</item>
 	</style>
 
 	<style name="DefaultDark" parent="AppTheme.NoActionBar">
-
+		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#FFFFFF</item>
 		<item name="normalTextColorNonTinted">#FFFFFF</item>
-
+		<item name="cellStroke">#959BDC</item>
 		<!--<item name="dialogBackground">#52000000</item>-->
 		<item name="cellbackColor">#ff303030</item>
 		<item name="cellback">#ff303030</item>
 		<item name="cellbackColorDownloadDialog">#ff424242</item>
 		<item name="mainTextColor">#bcc1f7</item>
+		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_bcc1f7</item>
+
 
 		<item name="dialog_background">#ff424242</item>
 
@@ -93,6 +138,7 @@
 
 		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark</item>
 		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark</item>
+		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
 
 		<item name="mainTextColorHinted">#bcc1f7</item>
 
@@ -101,13 +147,13 @@
 
 
 	<style name="Amoled" parent="DefaultDark">
-		
+		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#bcc1f7</item>
 		<item name="normalTextColorNonTinted">#FFFFFF</item>
 		
 		<!--Setting the window background color causes real bad UI issues on API19 emulator-->
 		<item name="android:windowBackground">#000000</item>
-
+		<item name="cellStroke">#90959BDC</item>
 
 		<item name="cellbackColor">#ff000000</item>
 		<item name="cellback">#ff000000</item>
@@ -124,6 +170,7 @@
 
 		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark_amoled</item>
 		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark_amoled</item>
+		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
 		<!--<item name="dialogBackground">#52000000</item>-->
 		
 		
