@@ -13,8 +13,12 @@
         <item name="windowNoTitle">true</item>
         <item name="mainPurple">#4f58c4</item>
         
-         <item name="whitePurpleForNavBar">#bcc1f7</item>
+          <item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_bcc1f7</item>
          
+         <item name="checkBoxColor">@color/colorAccent</item>
+
+         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
+
          <item name="slskAccent">#437eab</item>
     </style>
 
@@ -31,6 +35,12 @@
     <item name="android:paddingRight">10dp</item>
     <item name="android:background">?attr/mainPurple</item>
   </style>
+
+      <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
+    <item name="colorAccent">?attr/checkBoxColor</item>
+    <!--<item name="android:textColorSecondary">UNCHECKEDCOLOR</item>-->
+</style>
+
 
   <style name="navTextInactive">
     <item name="android:textColor">#ffffff</item>

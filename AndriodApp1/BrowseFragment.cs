@@ -1386,7 +1386,7 @@ namespace AndriodApp1
 #pragma warning disable 0618
                         if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                         {
-                            e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                            e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                             //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
                         }
                         else
@@ -1942,7 +1942,7 @@ namespace AndriodApp1
 #pragma warning disable 0618
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                     {
-                        itemView.DisplayName.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                        itemView.DisplayName.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
                     }
                     else
                     {

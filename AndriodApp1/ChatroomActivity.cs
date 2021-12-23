@@ -40,13 +40,12 @@ namespace AndriodApp1
 {
 
     [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
-    public class ChatroomActivity : Android.Support.V7.App.AppCompatActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
+    public class ChatroomActivity : ThemeableActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static ChatroomActivity ChatroomActivityRef = null;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
             MainActivity.LogDebug("chatroom activity on create");
             base.OnCreate(savedInstanceState);
 

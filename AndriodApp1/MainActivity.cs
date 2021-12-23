@@ -2897,7 +2897,7 @@ namespace AndriodApp1
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
             if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
             {
-                return c.Resources.GetDrawable(drawableRes, null);
+                return c.Resources.GetDrawable(drawableRes, SoulSeekState.ActiveActivityRef.Theme);
             }
             else
             {
@@ -2943,6 +2943,19 @@ namespace AndriodApp1
             catch (Exception e)
             {
                 MainActivity.LogFirebase("UpdateUserInfo" + e.Message + e.StackTrace);
+            }
+        }
+
+        public static List<WeakReference<ThemeableActivity>> Activities = new List<WeakReference<ThemeableActivity>>();
+
+        public static void RecreateActivies()
+        {
+            foreach(var weakRef in Activities)
+            {
+                if(weakRef.TryGetTarget(out var themeableActivity))
+                {
+                    themeableActivity.Recreate();
+                }
             }
         }
 
@@ -4060,14 +4073,31 @@ namespace AndriodApp1
     }
 
 
+    public class ThemeableActivity : AppCompatActivity
+    {
+        private WeakReference<ThemeableActivity> ourWeakRef;
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            SeekerApplication.Activities.Remove(ourWeakRef);
+        }
+
+        protected override void OnCreate(Bundle savedInstanceState)
+        {
+            SeekerApplication.SetActivityTheme(this);
+            ourWeakRef = new WeakReference<ThemeableActivity>(this, false);
+
+            SeekerApplication.Activities.Add(ourWeakRef);
+            base.OnCreate(savedInstanceState);
+        }
+    }
 
 
 
 
-
-        //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
+    //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
-    public class MainActivity : AppCompatActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : ThemeableActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         public static object SHARED_PREF_LOCK = new object();
         public const string logCatTag = "seeker";
@@ -4102,6 +4132,7 @@ namespace AndriodApp1
                         log.Debug(logCatTag, msg);
 #endif
         }
+
 
 
         public static void createNotificationChannel(Context c, string id, string name)
@@ -5830,9 +5861,9 @@ namespace AndriodApp1
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
-            LogDebug("Main Activity On Create");
             
+            LogDebug("Main Activity On Create");
+
 
 
             try
@@ -9746,7 +9777,7 @@ namespace AndriodApp1
                             SoulSeekState.ActiveActivityRef.RunOnUiThread( () => { 
                                 //show snackbar (for active activity, active content view) so they can go to it... TODO
                                 Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_received),uname), Snackbar.LengthLong).SetAction(Resource.String.view, action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                                 sb.Show();
                             });
                         }

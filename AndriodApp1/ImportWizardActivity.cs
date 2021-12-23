@@ -50,7 +50,7 @@ namespace AndriodApp1
 
 
 [Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar")]
-    public class ImportWizardActivity : Android.Support.V7.App.AppCompatActivity
+    public class ImportWizardActivity : ThemeableActivity
     {
         private const int IMPORT_FILE_SELECTED = 2000;
 
@@ -62,7 +62,6 @@ namespace AndriodApp1
         public static ImportedData? selectedImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
             base.OnCreate(savedInstanceState);
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 

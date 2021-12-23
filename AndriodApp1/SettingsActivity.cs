@@ -39,7 +39,7 @@ using Android.Support.V7.Widget.Helper;
 namespace AndriodApp1
 {
     [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar")]
-    public class SettingsActivity : Android.Support.V7.App.AppCompatActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
+    public class SettingsActivity : ThemeableActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
     {
         private int CHANGE_WRITE_EXTERNAL = 0x909;
         private int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
@@ -178,9 +178,7 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
             MainActivity.LogDebug("Settings Created");
-
 
 
             base.OnCreate(savedInstanceState);
@@ -281,7 +279,7 @@ namespace AndriodApp1
 
             Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
             dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
-            String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.Red };
+            String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
             ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayVarientSpinnerOptionsStrings);
             dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
             SetSpinnerPositionDayVarient(dayVarientSpinner);
@@ -290,7 +288,7 @@ namespace AndriodApp1
 
             Spinner nightVarientSpinner = FindViewById<Spinner>(Resource.Id.nightVarientSpinner);
             nightVarientSpinner.ItemSelected -= NightVarient_ItemSelected;
-            String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.Red, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
+            String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
             ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, nightVarientSpinnerOptionsStrings);
             nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
             SetSpinnerPositionNightVarient(nightVarientSpinner);
@@ -1156,38 +1154,6 @@ namespace AndriodApp1
                                 bool success = editor.Commit();
                             }
                         }
-
-                        //if(listenerPort.HasValue)
-                        //{
-                        //    SoulSeekState.ActiveActivityRef.RunOnUiThread( () => {
-                        //        if (SoulSeekState.ActiveActivityRef is SettingsActivity settingsActivity)
-                        //        {
-                        //            ViewGroup v = settingsActivity.FindViewById<ViewGroup>(Android.Resource.Id.Content);
-                        //            if(v!=null)
-                        //            {
-                        //                Action<View> restartSnackbarAction = new Action<View>((v) => {
-                        //                    MainActivity.LogInfoFirebase("Restart application clicked");
-                        //                    SoulSeekState.SoulseekClient.StopListening();
-                        //                    //Restart Application
-                        //                    Intent mainIntent = AndroidX.Core.Content.IntentCompat.MakeMainSelectorActivity(Intent.ActionMain, Intent.CategoryLauncher);
-                        //                    mainIntent.AddFlags(ActivityFlags.NewTask);
-                        //                    SoulSeekState.ActiveActivityRef.ApplicationContext.StartActivity(mainIntent);
-                        //                    System.Environment.Exit(0); //equivalent to System.Exit(0) in java.
-                        //                });
-
-                        //                bool state = SoulSeekState.SoulseekClient.GetListeningState();
-                        //                Snackbar sb = Snackbar.Make(v, "Note - changing port may require you to restart app.", Snackbar.LengthLong).SetAction("Restart", restartSnackbarAction).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                        //                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
-                        //                sb.Show();
-                        //            }
-                        //            else
-                        //            {
-                        //                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Note - changing port may require you to restart app.", ToastLength.Long).Show();
-                        //            }
-                        //        }
-                        //    });
-
-                        //}
                     }
                 });
             });
@@ -1342,26 +1308,55 @@ namespace AndriodApp1
 
         private void DayVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
+            var oldVarient = SoulSeekState.DayModeVarient;
             SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(e.Position);
-            lock (MainActivity.SHARED_PREF_LOCK)
+            if(oldVarient != SoulSeekState.DayModeVarient)
             {
-                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutInt(SoulSeekState.M_DayVarient, (int)(SoulSeekState.DayModeVarient));
-                bool success = editor.Commit();
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                    editor.PutInt(SoulSeekState.M_DayVarient, (int)(SoulSeekState.DayModeVarient));
+                    bool success = editor.Commit();
+                }
+                SeekerApplication.SetActivityTheme(this);
+                //if we are in day mode and the day varient is truly changed we need to recreate all activities
+                if(!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+                {
+                    SeekerApplication.RecreateActivies();
+                }
             }
-            SeekerApplication.SetActivityTheme(this);
         }
 
         private void NightVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(e.Position);
-            lock (MainActivity.SHARED_PREF_LOCK)
+            var oldVarient = SoulSeekState.NightModeVarient;
+            switch(e.Position)
             {
-                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutInt(SoulSeekState.M_NightVarient, (int)(SoulSeekState.NightModeVarient));
-                bool success = editor.Commit();
+                case 3:
+                    SoulSeekState.NightModeVarient = ThemeHelper.NightThemeType.AmoledClassicPurple;
+                    break;
+                case 4:
+                    SoulSeekState.NightModeVarient = ThemeHelper.NightThemeType.AmoledGrey;
+                    break;
+                default:
+                    SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(e.Position);
+                    break;
             }
-            SeekerApplication.SetActivityTheme(this);
+            if (oldVarient != SoulSeekState.NightModeVarient)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                    editor.PutInt(SoulSeekState.M_NightVarient, (int)(SoulSeekState.NightModeVarient));
+                    bool success = editor.Commit();
+                }
+                SeekerApplication.SetActivityTheme(this);
+                //if we are in day mode and the day varient is truly changed we need to recreate all activities
+                if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+                {
+                    SeekerApplication.RecreateActivies();
+                }
+            }
         }
 
 
@@ -1472,7 +1467,19 @@ namespace AndriodApp1
         }
         private void SetSpinnerPositionNightVarient(Spinner s)
         {
-            s.SetSelection((int)(SoulSeekState.NightModeVarient));
+            switch (SoulSeekState.NightModeVarient)
+            {
+                case ThemeHelper.NightThemeType.AmoledClassicPurple:
+                    s.SetSelection(3);
+                    break;
+                case ThemeHelper.NightThemeType.AmoledGrey:
+                    s.SetSelection(4);
+                    break;
+                default:
+                    s.SetSelection((int)(SoulSeekState.NightModeVarient));
+                    break;
+            }
+           
         }
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -1939,9 +1946,9 @@ namespace AndriodApp1
         public enum DayThemeType : ushort
         {
             ClassicPurple = 0,
-            Grey = 1,
+            Red = 1,
             Blue = 2,
-            Red = 3,
+            Grey = 3,
         }
 
         public static DayThemeType FromDayThemeTypeString(string themeTypeString)
@@ -2059,11 +2066,11 @@ namespace AndriodApp1
                 case NightThemeType.Blue:
                     return Resource.Style.DefaultDark_Blue;
                 case NightThemeType.Red:
-                    return Resource.Style.DefaultDark_Red;
+                    return Resource.Style.DefaultDark_Blue; //doesnt exist
                 case NightThemeType.AmoledClassicPurple:
                     return Resource.Style.Amoled;
                 case NightThemeType.AmoledGrey:
-                    return Resource.Style.Amoled;
+                    return Resource.Style.Amoled_Grey;
                 default:
                     throw new Exception("unknown");
             }

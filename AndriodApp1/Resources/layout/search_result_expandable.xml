@@ -146,7 +146,7 @@
         android:focusable="true"
         android:scaleX=".7"
         android:scaleY=".7"
-        android:tint="@color/expandIconColor"
+        android:tint="?attr/expandIconColor"
         app:srcCompat="@drawable/ic_expand_more_black_32dp"
         android:layout_width="40dp"
         android:layout_height="44dp"/>

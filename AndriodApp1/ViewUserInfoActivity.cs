@@ -32,7 +32,7 @@ using System.Text;
 namespace AndriodApp1
 {
     [Activity(Label = "ViewUserInfoActivity", Theme = "@style/AppTheme.NoActionBar")]
-    public class ViewUserInfoActivity : Android.Support.V7.App.AppCompatActivity
+    public class ViewUserInfoActivity : ThemeableActivity
     {
         public const string USERNAME_TO_VIEW = "USERNAME_TO_VIEW";
         public override bool OnCreateOptionsMenu(IMenu menu)

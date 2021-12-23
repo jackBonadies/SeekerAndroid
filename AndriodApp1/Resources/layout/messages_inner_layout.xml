@@ -55,7 +55,7 @@
             android:layout_alignParentEnd="true"
             android:background="?attr/selectableItemBackground"
             android:text="@string/send_message"
-            android:textColor="@drawable/buttonenableddisabledtextcolor" />
+            android:textColor="?attr/buttonEnabledDisabledTextColor" />
 
     </RelativeLayout>
 

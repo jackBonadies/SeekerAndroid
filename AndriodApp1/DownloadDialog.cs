@@ -176,7 +176,7 @@ namespace AndriodApp1
 
             log.Debug(MainActivity.logCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
             //Dialog.SetTitle("File Info"); //is this needed in any way??
 
@@ -375,7 +375,7 @@ namespace AndriodApp1
                             v = SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
                         }
                         Snackbar sb = Snackbar.Make(v, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                        (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                        (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor( SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor) );//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                         sb.Show(); 
                     }
                     catch
@@ -383,7 +383,7 @@ namespace AndriodApp1
                         try
                         {
                             Snackbar sb = Snackbar.Make(SoulSeekState.MainActivityRef.CurrentFocus, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor( SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor) );//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                             sb.Show();
                         }
                         catch
@@ -944,12 +944,12 @@ namespace AndriodApp1
 #pragma warning disable 0618
                 if((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected,null);
+                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                 }
                 else
                 {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
                 }
 #pragma warning restore 0618
@@ -960,12 +960,12 @@ namespace AndriodApp1
 #pragma warning disable 0618
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
+                    //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, this.Activity.Theme);
                 }
                 else
                 {
-                    e.View.Background = Resources.GetDrawable(Resource.Attribute.cellback);
+                    //e.View.Background = Resources.GetDrawable(Resource.Attribute.cellback);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Attribute.cellback);
                 }
 #pragma warning restore 0618
@@ -1403,14 +1403,14 @@ namespace AndriodApp1
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
                     //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...
-                    if(InNightMode(this.Context))
-                    {
-                        diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(Android.Graphics.Color.ParseColor("#bcc1f7")));
-                    }
-                    else
-                    {
-                        diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(Android.Graphics.Color.ParseColor("#4f58c4")));
-                    }
+                    //if(InNightMode(this.Context))
+                    //{
+                    //    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(Android.Graphics.Color.ParseColor("#bcc1f7")));
+                    //}
+                    //else
+                    //{
+                        diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(  SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor ) );
+                    //}
                     return true;
                 case Resource.Id.getUserInfo:
                     RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
@@ -1445,8 +1445,8 @@ namespace AndriodApp1
 #pragma warning disable 0618
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    itemView.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                    itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                    itemView.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
+                    itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
                 }
                 else
                 {
@@ -1460,7 +1460,7 @@ namespace AndriodApp1
 #pragma warning disable 0618
                  if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                  {
-                    itemView.Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
+                    itemView.Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, SoulSeekState.ActiveActivityRef.Theme);
                     //itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
                  }
                  else

@@ -43,7 +43,7 @@ namespace AndriodApp1
 {
     
     [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar",LaunchMode =Android.Content.PM.LaunchMode.SingleTask)]
-    public class MessagesActivity : Android.Support.V7.App.AppCompatActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
+    public class MessagesActivity : ThemeableActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
 
@@ -158,7 +158,7 @@ namespace AndriodApp1
                     MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
                     this.GetOverviewFragment().RefreshAdapter();
                     Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", GetUndoDeleteAllSnackBarAction()).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                    (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                    (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                     sb.Show();
                     return true;
 
@@ -448,7 +448,6 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
             base.OnCreate(savedInstanceState);
 
             MessagesActivityRef = this;
@@ -1127,7 +1126,7 @@ namespace AndriodApp1
             {
                 MessagesActivity.FromDeleteMessage = false;
                 Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong).SetAction("Undo", ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true)).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                 sb.Show();
             }
         }
@@ -1524,7 +1523,7 @@ namespace AndriodApp1
             MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
 
             Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong).SetAction("Undo", GetSnackBarAction(this.adapter, false)).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(Android.Graphics.Color.ParseColor("#BCC1F7"));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
             sb.Show();
         }
 
