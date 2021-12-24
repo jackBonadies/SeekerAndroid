@@ -20,6 +20,7 @@
 	<attr name="checkBoxColor" format="color" />
 	<attr name="expandIconColor" format="color" />
 	<attr name="mainPurpleForNavBar" format="color" />
+	<attr name="pseudo_window_background_color" format="color" />
 
 	<attr name="the_rounded_corner_background_drawable" format="reference" />
 	<attr name="the_rounded_corner_dialog_background_drawable" format="reference" />

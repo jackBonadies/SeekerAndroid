@@ -23,6 +23,8 @@
 
 		<item name="dialog_background">#ffffffff</item>
 
+		<item name="pseudo_window_background_color">#00000000</item>
+
 		<item name="secondaryColor">#cccccc</item>
 		<item name="cellTextColor">#2c3e50</item>
 		<item name="cellTextColorSubdued">#cc2c3e50</item>
@@ -174,6 +176,7 @@
 	</style>
 
 	<style name="DefaultDark" parent="AppTheme.NoActionBar">
+		<item name="pseudo_window_background_color">#00000000</item>
 		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#FFFFFF</item>
 		<item name="normalTextColorNonTinted">#FFFFFF</item>
@@ -212,12 +215,23 @@
 
 
 	<style name="Amoled" parent="DefaultDark">
+
+		
+
 		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#bcc1f7</item>
 		<item name="normalTextColorNonTinted">#FFFFFF</item>
 		
-		<!--Setting the window background color causes real bad UI issues on API19 emulator-->
+
+		<!--Setting the window background color causes real bad UI issues on API19 emulator
+		    So therefore the pseudo window background color attribute is needed.
+		    Otherwise it will simply not draw the backgrouund causing a "smearing" effect
+			  where say a button when scrolling, the previously drawn buttons will not 
+			  invalidate.-->
 		<item name="android:windowBackground">#000000</item>
+		<item name="pseudo_window_background_color">#ff000000</item>
+
+
 		<item name="cellStroke">#90959BDC</item>
 		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_90959BDC</item>
 		<item name="cell_shape">@drawable/cell_shape_90959BDC</item>
