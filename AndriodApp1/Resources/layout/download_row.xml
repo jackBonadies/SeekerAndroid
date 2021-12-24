@@ -7,7 +7,7 @@
     android:layout_height = "wrap_content"
     android:paddingBottom="4dp"
     android:paddingTop="2dp"
-    android:background = "@drawable/cell_shape_end_dldiag"
+    android:background = "?attr/cell_shape_end_dldiag"
     >
 
     <TextView

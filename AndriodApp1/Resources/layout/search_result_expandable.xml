@@ -7,7 +7,7 @@
     android:layout_height = "wrap_content"
    android:orientation="horizontal"
     android:descendantFocusability="beforeDescendants"
-    android:background="@drawable/cell_shape_end"
+    android:background="?attr/cell_shape_end"
     >
 
 
@@ -118,7 +118,7 @@
                android:textColor="@android:color/black"
                android:layout_height = "match_parent"
                android:layout_weight = ".5"
-               android:background = "@drawable/cell_shape"
+               android:background = "?attr/cell_shape"
                android:ellipsize = "end"
                android:padding = "5dp"
                android:textSize="12dp"

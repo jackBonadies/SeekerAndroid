@@ -12,7 +12,7 @@
         android:layout_width = "0dp"
         android:layout_height = "match_parent"
         android:layout_weight = "1.5"
-        android:background = "@drawable/cell_shape"
+        android:background = "?attr/cell_shape"
         android:ellipsize = "end"
         android:padding = "5dp"
         android:text = "1.5"
@@ -25,7 +25,7 @@
         android:layout_width = "0dp"
         android:layout_height = "match_parent"
         android:layout_weight = "3"
-        android:background = "@drawable/cell_shape"
+        android:background = "?attr/cell_shape"
         android:ellipsize = "end"
         android:padding = "5dp"
         android:text = "2"
@@ -38,7 +38,7 @@
          android:layout_weight = "1.5"
                 android:paddingLeft="2dp"
         android:paddingRight="2dp"
-         android:background = "@drawable/header_cell_shape_bottom"
+         android:background = "?attr/header_cell_shape_bottom"
         >
     <ProgressBar
         android:id="@+id/simpleProgressBar"
@@ -51,7 +51,7 @@
         android:paddingBottom = "5dp"
         
         android:singleLine = "true"
-        android:background = "@drawable/header_cell_shape_bottom"
+        android:background = "?attr/header_cell_shape_bottom"
         style="?android:attr/progressBarStyleHorizontal"
         android:max="100"
         android:scaleY="2"

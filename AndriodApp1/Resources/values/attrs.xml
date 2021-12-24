@@ -26,5 +26,17 @@
 	<attr name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific" format="reference" />
 	<attr name="bottom_nav_tab_background" format="reference" />
 	<attr name="buttonEnabledDisabledTextColor" format="reference" />
+	<attr name="header_cell_shape_bottom" format="reference" />
+	<attr name="CustomSelector" format="reference" />
+	<attr name="cell_shape_end" format="reference" />
+	<attr name="cell_shape" format="reference" />
+	<attr name="cell_shape_end_dldiag" format="reference" />
+	<attr name="cell_shape_dldiag" format="reference" />
+
+	<attr name="buttonStyle" format="reference" />
+	<attr name="rounded_bottom_left_purple" format="reference" />
+	<attr name="rounded_bottom_right_purple" format="reference" />
+	<attr name="rounded_top_purple" format="reference" />
+
 
 </resources>

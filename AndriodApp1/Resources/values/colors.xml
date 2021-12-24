@@ -48,4 +48,13 @@
 	
 	
   <color name="chipSeparatorColor">#ff606060</color>
+
+
+  <color name="absoluteBackColor1">#ff000000</color>
+  <color name="absoluteBackColor2">#ff303030</color>
+  <color name="absoluteBackColor3">#ffffff</color>
+
+  
+  
+  
 </resources>

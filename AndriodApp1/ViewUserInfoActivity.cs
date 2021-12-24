@@ -198,7 +198,9 @@ namespace AndriodApp1
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
+
+            base.OnCreate(savedInstanceState);
+
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.view_user_info_layout);
 
@@ -245,7 +247,7 @@ namespace AndriodApp1
 
 
 
-            base.OnCreate(savedInstanceState);
+            
         }
 
         protected override void OnResume()

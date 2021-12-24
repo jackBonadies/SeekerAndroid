@@ -124,6 +124,8 @@ namespace AndriodApp1
         private TextView pictureText = null;
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            base.OnCreate(savedInstanceState);
+
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.edit_user_info_layout);
 
@@ -151,7 +153,7 @@ namespace AndriodApp1
             Button clearImage = this.FindViewById<Button>(Resource.Id.buttonClearImage);
             clearImage.Click += ClearImage_Click;
             
-            base.OnCreate(savedInstanceState);
+            
         }
 
         private void DeleteImage(string image)

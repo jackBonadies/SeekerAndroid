@@ -15,7 +15,7 @@
         android:clickable="true"
         android:ellipsize="end"
         android:text="@string/chatroom_loading_ticker"
-        android:background="@drawable/cell_shape_end"
+        android:background="?attr/cell_shape_end"
         />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_messages"

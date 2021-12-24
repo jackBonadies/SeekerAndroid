@@ -11,7 +11,7 @@
         android:padding="4dp"
         android:id="@+id/header1"
         android:clickable="true"
-        android:background="@drawable/rounded_top_purple"
+        android:background="?attr/rounded_top_purple"
         android:orientation="horizontal">
 
             <LinearLayout
