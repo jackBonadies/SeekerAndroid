@@ -365,7 +365,7 @@ namespace AndriodApp1
 
             var currentSelection = new TextView(_mContext);
             currentSelection.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
-            currentSelection.SetTextColor(_mContext.Resources.GetColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor)));
+            currentSelection.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor));
             currentSelection.Gravity = GravityFlags.CenterVertical;
             currentSelection.Text = _mContext.GetString(Resource.String.current_location_);
             currentSelection.SetPadding((int)Math.Ceiling(10 * density), (int)Math.Ceiling(5 * density), 0, (int)Math.Ceiling(3 * density));
@@ -376,7 +376,7 @@ namespace AndriodApp1
 
             _mTitleView = new TextView(_mContext);
             _mTitleView.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
-            _mTitleView.SetTextColor(_mContext.Resources.GetColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor)));
+            _mTitleView.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor));
             _mTitleView.Gravity = GravityFlags.CenterVertical;
             _mTitleView.Text = title;
             _mTitleView.SetPadding((int)Math.Ceiling(10 * density), 0, (int)Math.Ceiling(10 * density), (int)Math.Ceiling(5 * density));

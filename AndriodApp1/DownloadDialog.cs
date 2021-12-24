@@ -944,12 +944,12 @@ namespace AndriodApp1
 #pragma warning disable 0618
                 if((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                 }
                 else
                 {
-                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
                 }
 #pragma warning restore 0618
@@ -960,13 +960,13 @@ namespace AndriodApp1
 #pragma warning disable 0618
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, null);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, this.Activity.Theme);
+                    e.View.Background = SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                 }
                 else
                 {
-                    //e.View.Background = Resources.GetDrawable(Resource.Attribute.cellback);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Attribute.cellback);
+                    e.View.Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback));
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback));
                 }
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Remove(e.Position);
@@ -1446,12 +1446,12 @@ namespace AndriodApp1
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
                     itemView.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
-                    itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
+                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
                 }
                 else
                 {
                     itemView.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected);
                 }
 #pragma warning restore 0618
             }
@@ -1460,14 +1460,14 @@ namespace AndriodApp1
 #pragma warning disable 0618
                  if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                  {
-                    itemView.Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_end_dldiag, SoulSeekState.ActiveActivityRef.Theme);
-                    //itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                 }
+                    itemView.Background = SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                    //itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                }
                  else
                  {
-                    itemView.Background = Owner.Resources.GetDrawable(Resource.Attribute.cellback);
-                    //itemView.FindViewById<TextView>(Resource.Id.textView1).Background = Owner.Resources.GetDrawable(Resource.Color.cellback);
-                 }
+                    itemView.Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback)); 
+                    //itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback));
+                }
             }
 #pragma warning restore 0618
             return itemView;

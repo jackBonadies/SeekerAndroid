@@ -67,7 +67,7 @@
             android:layout_marginRight="4dp"
             android:foreground="@drawable/button"
 
-android:background="@drawable/rounded_bottom_left_purple"
+android:background="?attr/rounded_bottom_left_purple"
 
 
             style="@style/SeekerButtonStyle"
@@ -84,7 +84,7 @@ android:background="@drawable/rounded_bottom_left_purple"
             android:foreground="@drawable/button"
             style="@style/SeekerButtonStyle"
 
-android:background="@drawable/rounded_bottom_right_purple"
+android:background="?attr/rounded_bottom_right_purple"
             android:text="Search" />
     </LinearLayout>
 </LinearLayout>
