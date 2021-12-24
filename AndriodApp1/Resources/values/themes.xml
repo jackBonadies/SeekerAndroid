@@ -76,7 +76,7 @@
 		<item name="mainTextColorHinted">#d57676</item>
 		<item name="mainTextColor">#B22525</item>
 		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_B22525</item>
-
+		<item name="expandIconColor">#90d57676</item>
 		<item name="slskAccent">#d57676</item>
 		<item name="cellStroke">#90d57676</item>
 		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_90d57676</item>
@@ -137,7 +137,7 @@
 		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_424242</item>
 		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_424242</item>
 
-		<item name="expandIconColor">#86b2cb</item>
+		<item name="expandIconColor">#a0abb1</item>
 		<item name="mainTextColorHinted">#dddddd</item>
 		<item name="slskAccent">#2A4C6D</item>
 		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">@drawable/rounded_corner_dialog_background_dark_303030</item>
@@ -156,7 +156,7 @@
 		<item name="colorAccent">#86b2cb</item>
 		<item name="whitePurpleForNavBar">#8B9CB2</item>
 		<item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_8B9CB2</item>
-
+		<item name="expandIconColor">#424242</item>
 		<item name="mainTextColor">#dddddd</item>
 		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_dddddd</item>
 

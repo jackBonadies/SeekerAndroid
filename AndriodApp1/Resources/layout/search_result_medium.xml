@@ -9,7 +9,7 @@
     android:layout_width = "fill_parent"
     android:layout_height = "wrap_content"
     android:descendantFocusability="beforeDescendants"
-
+    android:background = "?attr/cell_shape_end"
     >
     <TextView
         android:id = "@+id/folderNameTextView"
@@ -40,7 +40,7 @@
         android:layout_width = "0dp"
         android:layout_height = "match_parent"
         android:layout_weight = "1"
-        android:background = "?attr/cell_shape_end"
+        
         android:ellipsize = "end"
         android:paddingBottom = "5dp"
         android:paddingLeft = "5dp"
@@ -57,7 +57,6 @@
         android:layout_width = "0dp"
         android:layout_height = "match_parent"
         android:layout_weight = "1"
-        android:background = "?attr/cell_shape_end"
         android:textColor="?attr/cellTextColor"
         android:ellipsize = "end"
             android:textIsSelectable="false"
@@ -77,7 +76,6 @@
 
 
         android:layout_weight = ".5"
-        android:background = "?attr/cell_shape_end"
         android:ellipsize = "end"
             android:focusable="false"
 
@@ -96,7 +94,6 @@
 
 
         android:layout_weight = ".5"
-        android:background = "?attr/cell_shape_end"
         android:ellipsize = "end"
             android:focusable="false"
 
