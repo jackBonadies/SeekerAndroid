@@ -6,6 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+		<item name="android:windowActionModeOverlay">true</item>
+		<item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -23,6 +26,11 @@
          <item name="mainPurpleForNavBar">?attr/mainPurple</item>
 
          <item name="slskAccent">#437eab</item>
+
+
+		<item name="windowActionModeOverlay">true</item>
+		<item name="android:actionModeBackground">?attr/mainPurple</item>
+		<item name="actionModeBackground">?attr/mainPurple</item>
     </style>
 
 	<style name="MaterialThemeForChip" parent="Theme.MaterialComponents.Light.DarkActionBar">

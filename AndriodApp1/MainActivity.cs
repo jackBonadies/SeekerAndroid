@@ -1178,6 +1178,30 @@ namespace AndriodApp1
             }
         }
 
+        public void CancelSelectedItems(bool prepareForClean)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.CancelSelectedItems(prepareForClean);
+            }
+            else
+            {
+                Downloads.CancelSelectedItems(prepareForClean);
+            }
+        }
+
+        public void ClearSelectedItemsAndClean()
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                Uploads.ClearSelectedItemsAndClean();
+            }
+            else
+            {
+                Downloads.ClearSelectedItemsAndClean();
+            }
+        }
+
         public static void PerfomCleanupItems(IEnumerable<TransferItem> tis)
         {
             foreach(TransferItem ti in tis)
@@ -1979,6 +2003,48 @@ namespace AndriodApp1
             }
         }
 
+        public void ClearSelectedItemsAndClean()
+        {
+            lock (AllTransferItems)
+            {
+                bool isFolderItems = false;
+                if (TransfersFragment.GroupByFolder && TransfersFragment.GetCurrentlySelectedFolder() == null)
+                {
+                    isFolderItems = true;
+                }
+
+
+                if(isFolderItems)
+                {
+                    List<FolderItem> toClear = new List<FolderItem>();
+                    foreach (int pos in TransfersFragment.BatchSelectedItems)
+                    {
+                        toClear.Add(GetItemAtUserIndex(pos) as FolderItem);
+                    }
+                    foreach(FolderItem item in toClear)
+                    {
+                        ClearAllFromFolderAndClean(item);
+                    }
+
+                }
+                else
+                {
+                    List<TransferItem> toCleanUp = new List<TransferItem>();
+                    List<TransferItem> toClear = new List<TransferItem>();
+                    TransfersFragment.BatchSelectedItems.Sort();
+                    TransfersFragment.BatchSelectedItems.Reverse();
+                    foreach (int pos in TransfersFragment.BatchSelectedItems)
+                    {
+                        if (TransferItemManagerWrapper.NeedsCleanUp(GetItemAtUserIndex(pos) as TransferItem))
+                        {
+                            toCleanUp.Add(GetItemAtUserIndex(pos) as TransferItem);
+                        }
+                        this.RemoveAtUserIndex(pos);
+                    }
+                }
+            }
+        }
+
         public void ClearAll()
         {
             lock (AllTransferItems)
@@ -2036,6 +2102,42 @@ namespace AndriodApp1
                     //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
                 }
                 TransfersFragment.CancellationTokens.Clear();
+            }
+        }
+
+        public void CancelSelectedItems(bool prepareForClear = false)
+        {
+            lock (AllTransferItems)
+            {
+                bool isFolderItems = false;
+                if (TransfersFragment.GroupByFolder && TransfersFragment.GetCurrentlySelectedFolder() == null)
+                {
+                    isFolderItems = true;
+                }
+
+                for (int i = 0; i < TransfersFragment.BatchSelectedItems.Count; i++)
+                {
+                    //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
+                    if(isFolderItems)
+                    {
+                        FolderItem fi = this.GetItemAtUserIndex(TransfersFragment.BatchSelectedItems[i]) as FolderItem;
+                        CancelFolder(fi, prepareForClear);
+                    }
+                    else
+                    {
+                        TransferItem ti = this.GetItemAtUserIndex(TransfersFragment.BatchSelectedItems[i]) as TransferItem;
+                        if (prepareForClear)
+                        {
+                            if (ti.InProcessing) //let continuation action clear this guy
+                            {
+                                ti.CancelAndClearFlag = true;
+                            }
+                        }
+                        TransfersFragment.CancellationTokens.TryRemove(TransfersFragment.ProduceCancellationTokenKey(ti), out CancellationTokenSource token);
+                        token?.Cancel();
+                    }
+                    //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
+                }
             }
         }
 
@@ -9393,8 +9495,14 @@ namespace AndriodApp1
         public static int goToSearchTab = int.MaxValue;
         private void Pager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
         {
+            //if we are changing modes and the transfers action mode is not null (i.e. is active)
+            //then we need to get out of it.
+            if (TransfersFragment.TransfersActionMode != null)
+            {
+                TransfersFragment.TransfersActionMode.Finish();
+            }
             //in addition each fragment is responsible for expanding their menu...
-            if(e.Position==0)
+            if (e.Position==0)
             {
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                 this.SupportActionBar.SetHomeButtonEnabled(false);
