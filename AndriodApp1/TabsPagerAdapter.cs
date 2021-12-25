@@ -154,7 +154,7 @@ namespace AndriodApp1
         }
     }
 
-    
+
 
     public class LoginFragment : Fragment //, Android.Net.DnsResolver.ICallback //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
     {
@@ -167,7 +167,7 @@ namespace AndriodApp1
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            inflater.Inflate(Resource.Menu.account_menu,menu);
+            inflater.Inflate(Resource.Menu.account_menu, menu);
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
@@ -180,9 +180,9 @@ namespace AndriodApp1
             HasOptionsMenu = true;
             MainActivity.LogDebug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
-            if ((!SoulSeekState.currentlyLoggedIn) || SoulSeekState.Username==null || SoulSeekState.Password==null || SoulSeekState.Username==string.Empty)//you are not logged in if username or password is null
+            if ((!SoulSeekState.currentlyLoggedIn) || SoulSeekState.Username == null || SoulSeekState.Password == null || SoulSeekState.Username == string.Empty)//you are not logged in if username or password is null
             {
-                SoulSeekState.currentlyLoggedIn=false;
+                SoulSeekState.currentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
 
 
@@ -227,7 +227,7 @@ namespace AndriodApp1
                 Button bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                 bttn.Click += LogoutClick;
                 var welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                welcome.Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.welcome),SoulSeekState.Username);
+                welcome.Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.welcome), SoulSeekState.Username);
                 welcome.Visibility = ViewStates.Gone;
                 bttn.Visibility = ViewStates.Gone;
 
@@ -332,7 +332,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if(t.Exception!=null)
+                    if (t.Exception != null)
                     {
                         msgToLog = t.Exception.Message + t.Exception.StackTrace;
                     }
@@ -340,7 +340,7 @@ namespace AndriodApp1
                     msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login);
                 }
 
-                if(msgToLog!=string.Empty)
+                if (msgToLog != string.Empty)
                 {
                     MainActivity.LogDebug(msgToLog);
                     MainActivity.LogFirebase(msgToLog);
@@ -527,7 +527,7 @@ namespace AndriodApp1
                     Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
                     imm.HideSoftInputFromWindow(user.WindowToken, 0);
                 }
-                catch(System.Exception)
+                catch (System.Exception)
                 {
 
                 }
@@ -637,17 +637,17 @@ namespace AndriodApp1
     {
         public override int Compare(SearchResponse x, SearchResponse y)
         {
-            if(x.Username==y.Username)
+            if (x.Username == y.Username)
             {
-                if(x.Files.Count == y.Files.Count)
+                if (x.Files.Count == y.Files.Count)
                 {
-                    if(x.Files.First().Filename == y.Files.First().Filename)
+                    if (x.Files.First().Filename == y.Files.First().Filename)
                     {
                         return 0;
                     }
                 }
             }
-            return base.Compare(x,y); //the actual comparison for which is "better"
+            return base.Compare(x, y); //the actual comparison for which is "better"
         }
     }
 
@@ -790,7 +790,7 @@ namespace AndriodApp1
             SortedDictionary<SearchResponse, object> cloned = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
             foreach (var entry in SortHelper)
             {
-                if(!cloned.ContainsKey(entry.Key))
+                if (!cloned.ContainsKey(entry.Key))
                 {
                     cloned.Add(entry.Key, entry.Value);
                 }
@@ -846,7 +846,7 @@ namespace AndriodApp1
             searchTab.LastRanTime = new DateTime(savedState.LastRanTime);
             searchTab.SearchTarget = SearchTarget.Wishlist;
             searchTab.LastSearchResultsCount = searchTab.SearchResponses.Count;
-            if(SearchFragment.FilterSticky)
+            if (SearchFragment.FilterSticky)
             {
                 searchTab.FilterSticky = SearchFragment.FilterSticky;
                 searchTab.FilterString = SearchFragment.FilterStickyString;
@@ -855,7 +855,7 @@ namespace AndriodApp1
             searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
             foreach (SearchResponse resp in searchTab.SearchResponses)
             {
-                if(!searchTab.SortHelper.ContainsKey(resp))
+                if (!searchTab.SortHelper.ContainsKey(resp))
                 {
                     searchTab.SortHelper.Add(resp, null);
                 }
@@ -875,14 +875,14 @@ namespace AndriodApp1
             string stringToSave = string.Empty;
             //we should only save things we need for the wishlist searches.
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
-            if(tabsToSave.Count==0)
+            if (tabsToSave.Count == 0)
             {
                 MainActivity.LogDebug("Nothing to Save");
             }
             else
             {
-                Dictionary<int,SavedStateSearchTab> savedStates = new Dictionary<int, SavedStateSearchTab>();
-                foreach(int tabIndex in tabsToSave)
+                Dictionary<int, SavedStateSearchTab> savedStates = new Dictionary<int, SavedStateSearchTab>();
+                foreach (int tabIndex in tabsToSave)
                 {
                     savedStates.Add(tabIndex, SavedStateSearchTab.GetSavedStateFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
                 }
@@ -905,26 +905,26 @@ namespace AndriodApp1
         public static void RestoreStateFromSharedPreferences()
         {
             string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState, string.Empty);
-            if(savedState==string.Empty)
+            if (savedState == string.Empty)
             {
                 return;
             }
             else
             {
-                using(System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
+                using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
                     var savedStateDict = formatter.Deserialize(memStream) as Dictionary<int, SavedStateSearchTab>;
                     int lowestID = int.MaxValue;
-                    foreach(var pair in savedStateDict)
+                    foreach (var pair in savedStateDict)
                     {
-                        if(pair.Key<lowestID)
+                        if (pair.Key < lowestID)
                         {
                             lowestID = pair.Key;
                         }
                         SearchTabCollection[pair.Key] = SavedStateSearchTab.GetTabFromSavedState(pair.Value);
                     }
-                    if(lowestID!=int.MaxValue)
+                    if (lowestID != int.MaxValue)
                     {
                         lastWishlistID = lowestID;
                     }
@@ -947,7 +947,7 @@ namespace AndriodApp1
         public static System.Collections.Concurrent.ConcurrentDictionary<int, SearchTab> SearchTabCollection = new System.Collections.Concurrent.ConcurrentDictionary<int, SearchTab>();
         private static int lastSearchID = 0;
         private static int lastWishlistID = 0;
-        
+
         //all of these getters and setters work on current tab.
 
         public static int AddSearchTab() //returns ID of new search term added.
@@ -990,7 +990,7 @@ namespace AndriodApp1
             SearchTabCollection[lastWishlistID].CurrentlySearching = false;
 
             //*********************
-            
+
         }
 
         public static int LastSearchResultsCount
@@ -1247,13 +1247,13 @@ namespace AndriodApp1
 
 
         public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
-               
+
         public static IMenu ActionBarMenu = null;
         public static int LastSearchResponseCount = -1;
 
         private void ClearFilterStringAndCached(bool force = false)
         {
-            if(!FilterSticky || force)
+            if (!FilterSticky || force)
             {
                 SearchTabHelper.FilterString = string.Empty;
                 SearchTabHelper.FilteredResults = this.AreChipsFiltering();
@@ -1270,7 +1270,7 @@ namespace AndriodApp1
             //in case its out of range bc we add / rm enums in the future...
             foreach (int i in System.Enum.GetValues(typeof(SearchResultStyleEnum)))
             {
-                if(i==style)
+                if (i == style)
                 {
                     SearchResultStyle = (SearchResultStyleEnum)(i);
                     break;
@@ -1281,10 +1281,10 @@ namespace AndriodApp1
         public override void SetMenuVisibility(bool menuVisible)
         {
             //this is necessary if programmatically moving to a tab from another activity..
-            if(menuVisible)
+            if (menuVisible)
             {
                 var navigator = SoulSeekState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                if(navigator!=null)
+                if (navigator != null)
                 {
                     navigator.Menu.GetItem(1).SetCheckable(true);
                     navigator.Menu.GetItem(1).SetChecked(true);
@@ -1297,7 +1297,7 @@ namespace AndriodApp1
         {
             inflater.Inflate(Resource.Menu.search_menu, menu); //test432
             (menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable).CrossFadeEnabled = true;
-            if(SearchTabHelper.SearchTarget==SearchTarget.Wishlist)
+            if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
             {
                 menu.FindItem(Resource.Id.action_add_to_wishlist).SetVisible(false);
             }
@@ -1322,7 +1322,7 @@ namespace AndriodApp1
         public static void SetCustomViewTabNumberInner(ImageView imgView, Context c)
         {
             int numTabs = int.MinValue;
-            if (SearchTabHelper.SearchTarget==SearchTarget.Wishlist)
+            if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
             {
                 numTabs = -1;
             }
@@ -1331,9 +1331,9 @@ namespace AndriodApp1
                 numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
             }
             int idOfDrawable = int.MinValue;
-            if(numTabs>10)
+            if (numTabs > 10)
             {
-                numTabs=10;
+                numTabs = 10;
             }
             switch (numTabs)
             {
@@ -1402,15 +1402,15 @@ namespace AndriodApp1
                 imgView = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<ImageView>(Resource.Id.search_tabs);
             }
 
-            SetCustomViewTabNumberInner(imgView,c);
+            SetCustomViewTabNumberInner(imgView, c);
         }
 
         public EditText GetCustomViewSearchHere()
         {
-            if(this.Activity is Android.Support.V7.App.AppCompatActivity appCompat)
+            if (this.Activity is Android.Support.V7.App.AppCompatActivity appCompat)
             {
                 var editText = appCompat.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
-                if(editText==null)
+                if (editText == null)
                 {
 
                 }
@@ -1418,7 +1418,7 @@ namespace AndriodApp1
             }
             else
             {
-                var editText =  SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+                var editText = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
                 if (editText == null)
                 {
 
@@ -1438,12 +1438,12 @@ namespace AndriodApp1
             {
                 filter.Text = SearchTabHelper.FilterString;
             }
-            
+
         }
 
         private void SetTransitionDrawableState()
         {
-            if(SearchTabHelper.CurrentlySearching)
+            if (SearchTabHelper.CurrentlySearching)
             {
                 MainActivity.LogDebug("CURRENT SEARCHING SET TRANSITION DRAWABLE");
                 GetTransitionDrawable().StartTransition(0);
@@ -1457,9 +1457,9 @@ namespace AndriodApp1
             ActionBarMenu.FindItem(Resource.Id.action_search).SetVisible(true);
         }
 
-        public void GoToTab(int tabToGoTo, bool force, bool fromIntent =false)
+        public void GoToTab(int tabToGoTo, bool force, bool fromIntent = false)
         {
-            if(force || tabToGoTo != SearchTabHelper.CurrentTab)
+            if (force || tabToGoTo != SearchTabHelper.CurrentTab)
             {
                 int lastTab = SearchTabHelper.CurrentTab;
                 SearchTabHelper.CurrentTab = tabToGoTo;
@@ -1471,9 +1471,10 @@ namespace AndriodApp1
                 //set filter if not sticky
                 int fromTab = SearchTabHelper.CurrentTab;
 
-                Action a = new Action(() => {
+                Action a = new Action(() =>
+                {
 
-                    if(!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
+                    if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
                     {
                         Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.search_tab_error, ToastLength.Long).Show();
                         SearchTabHelper.CurrentTab = lastTab;
@@ -1506,7 +1507,7 @@ namespace AndriodApp1
 
                     if (SearchTabHelper.SearchTabCollection[fromTab].FilteredResults)
                     {
-                        if(SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
+                        if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
                         {
                             MainActivity.LogDebug("filtering...");
                             UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
@@ -1537,13 +1538,13 @@ namespace AndriodApp1
                         GetTransitionDrawable().InvalidateSelf();
                     }
                     this.SetCustomViewTabNumberImageViewState();
-                    if(this.Activity == null)
+                    if (this.Activity == null)
                     {
                         GetSearchFragmentMoreDiag();
                     }
                     this.Activity.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
                 });
-                if(SoulSeekState.MainActivityRef==null)
+                if (SoulSeekState.MainActivityRef == null)
                 {
                     MainActivity.LogFirebase("mainActivityRef is null GoToTab");
                 }
@@ -1556,11 +1557,11 @@ namespace AndriodApp1
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            
-            switch(item.ItemId)
+
+            switch (item.ItemId)
             {
                 case Resource.Id.action_search_target:
-                    if(SearchTabHelper.SearchTarget==SearchTarget.Wishlist)
+                    if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
                     {
                         Toast.MakeText(this.Context, Resource.String.wishlist_tab_target, ToastLength.Long).Show();
                         return true;
@@ -1568,14 +1569,14 @@ namespace AndriodApp1
                     ShowChangeTargetDialog();
                     return true;
                 case Resource.Id.action_search:
-                    if(SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
+                    if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                     {
                         MainActivity.LogDebug("transitionDrawable: REVERSE transition");
                         (item.Icon as Android.Graphics.Drawables.TransitionDrawable).ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                         SearchTabHelper.CancellationTokenSource.Cancel();
                         SearchTabHelper.CurrentlySearching = false;
                         return true;
-                    }		
+                    }
                     else
                     {
                         (item.Icon as Android.Graphics.Drawables.TransitionDrawable).StartTransition(SearchToCloseDuration);
@@ -1585,7 +1586,7 @@ namespace AndriodApp1
                         SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
                         EditText editText = SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                         string searchText = string.Empty;
-                        if(editText == null)
+                        if (editText == null)
                         {
                             searchText = SearchingText;
                         }
@@ -1602,9 +1603,9 @@ namespace AndriodApp1
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
                     return true;
-                //case Resource.Id.action_view_search_tabs:
-                //    ShowSearchTabsDialog();
-                //    return true;
+                    //case Resource.Id.action_view_search_tabs:
+                    //    ShowSearchTabsDialog();
+                    //    return true;
             }
             return base.OnOptionsItemSelected(item);
         }
@@ -1612,13 +1613,13 @@ namespace AndriodApp1
         public void AddSearchToWishlist()
         {
             //here we "fork" the current search, adding it to the wishlist
-            if(SearchTabHelper.LastSearchTerm==string.Empty || SearchTabHelper.LastSearchTerm == null)
+            if (SearchTabHelper.LastSearchTerm == string.Empty || SearchTabHelper.LastSearchTerm == null)
             {
-                Toast.MakeText(this.Context,Resource.String.perform_search_first, ToastLength.Long).Show();
+                Toast.MakeText(this.Context, Resource.String.perform_search_first, ToastLength.Long).Show();
                 return;
             }
             SearchTabHelper.AddWishlistSearchTabFromCurrent();
-            Toast.MakeText(this.Context, string.Format(this.Context.GetString(Resource.String.added_to_wishlist),SearchTabHelper.LastSearchTerm), ToastLength.Long).Show();
+            Toast.MakeText(this.Context, string.Format(this.Context.GetString(Resource.String.added_to_wishlist), SearchTabHelper.LastSearchTerm), ToastLength.Long).Show();
             this.SetCustomViewTabNumberImageViewState();
         }
 
@@ -1636,7 +1637,7 @@ namespace AndriodApp1
 
         public static SearchFragment GetSearchFragmentMoreDiag()
         {
-            if(SoulSeekState.ActiveActivityRef is MainActivity)
+            if (SoulSeekState.ActiveActivityRef is MainActivity)
             {
                 MainActivity.LogInfoFirebase("current activity is Main");
             }
@@ -1672,7 +1673,7 @@ namespace AndriodApp1
                 //    }
                 //}
 
-                searchTabDialog.Show(SoulSeekState.MainActivityRef.SupportFragmentManager, "search tab dialog"); 
+                searchTabDialog.Show(SoulSeekState.MainActivityRef.SupportFragmentManager, "search tab dialog");
                 //I tested this many times (outside of this clause).  Works very well.x
                 //But I dont know if not attached fragment will just cause other issues later on... yes it will as for example adding a new search tab, there are methods that rely on this.Activity and this.rootView etc.
                 return;
@@ -1682,23 +1683,23 @@ namespace AndriodApp1
 
         public static void UpdateDrawableState(EditText actv, bool purple = false)
         {
-            if(actv.Text==string.Empty || actv.Text == null)
+            if (actv.Text == string.Empty || actv.Text == null)
             {
                 actv.SetCompoundDrawables(null, null, null, null);
             }
             else
             {
-                var cancel = ContextCompat.GetDrawable(SoulSeekState.MainActivityRef,Resource.Drawable.ic_cancel_black_24dp);
+                var cancel = ContextCompat.GetDrawable(SoulSeekState.MainActivityRef, Resource.Drawable.ic_cancel_black_24dp);
                 cancel.SetBounds(0, 0, cancel.IntrinsicWidth, cancel.IntrinsicHeight);
-                if(purple)
+                if (purple)
                 {
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
                     cancel.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
-                actv.SetCompoundDrawables(null,null,cancel,null);
+                actv.SetCompoundDrawables(null, null, cancel, null);
             }
         }
-        
+
 
         public static void ConfigureSupportCustomView(View customView/*, Context contextJustInCase*/) //todo: seems to be an error. which seems entirely possible. where ActiveActivityRef does not get set yet.
         {
@@ -1711,11 +1712,11 @@ namespace AndriodApp1
                 actv.Touch += Actv_Touch;
                 //ContextCompat.GetDrawable(SoulSeekState.MainActivityRef,Resource.Drawable.ic_cancel_black_24dp);
             }
-            catch(System.ArgumentException e)
+            catch (System.ArgumentException e)
             {
                 MainActivity.LogFirebase("ArugmentException Value does not fall within range: " + SearchingText + " " + e.Message);
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
                 MainActivity.LogFirebase("catchException Value does not fall within range: " + SearchingText + " " + e.Message);
             }
@@ -1728,7 +1729,7 @@ namespace AndriodApp1
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
             string searchHistoryXML = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchHistory, string.Empty);
-            if(searchHistory==null||searchHistory.Count==0) // i think we just have to deserialize once??
+            if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
             {
                 if (searchHistoryXML == string.Empty)
                 {
@@ -1743,7 +1744,7 @@ namespace AndriodApp1
                     }
                     //noTransfers.Visibility = ViewStates.Gone;
                 }
-                
+
             }
 
             SetSearchHintTarget(SearchTabHelper.SearchTarget, actv);
@@ -1772,9 +1773,9 @@ namespace AndriodApp1
         {
             EditText editText = sender as EditText;
             e.Handled = false;
-            if(e.Event.GetX() >= (editText.Width - editText.TotalPaddingRight))
+            if (e.Event.GetX() >= (editText.Width - editText.TotalPaddingRight))
             {
-                if(e.Event.Action == MotionEventActions.Up)
+                if (e.Event.Action == MotionEventActions.Up)
                 {
                     //e.Handled = true;
                     editText.Text = string.Empty;
@@ -1794,11 +1795,11 @@ namespace AndriodApp1
         private static void Actv_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             //if it went from non empty to empty, or vice versa
-            if(SearchingText == string.Empty && e.Text.ToString() != string.Empty)
+            if (SearchingText == string.Empty && e.Text.ToString() != string.Empty)
             {
                 UpdateDrawableState(sender as EditText);
             }
-            else if(SearchingText != string.Empty && e.Text.ToString() == string.Empty)
+            else if (SearchingText != string.Empty && e.Text.ToString() == string.Empty)
             {
                 UpdateDrawableState(sender as EditText);
             }
@@ -1850,12 +1851,12 @@ namespace AndriodApp1
 
             public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
             {
-                
+
                 //return base.OnCreateView(inflater, container, savedInstanceState);
-                View rootView = inflater.Inflate(Resource.Layout.search_results_expandablexml,container);
+                View rootView = inflater.Inflate(Resource.Layout.search_results_expandablexml, container);
                 RadioGroup resultStyleRadioGroup = rootView.FindViewById<RadioGroup>(Resource.Id.radioGroup);
 
-                
+
 
                 switch (SearchFragment.SearchResultStyle)
                 {
@@ -1895,7 +1896,7 @@ namespace AndriodApp1
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.Minimal;
                         break;
                 }
-                if(prev!= SearchFragment.SearchResultStyle)
+                if (prev != SearchFragment.SearchResultStyle)
                 {
                     SearchFragment.Instance.SearchResultStyleChanged();
                 }
@@ -1912,11 +1913,11 @@ namespace AndriodApp1
             if (!SearchFragment.Instance.IsAdded)
             {
                 SearchFragment f = GetSearchFragment(); //is there an attached fragment?? i.e. is our instance just a stale one..
-                if(f==null)
+                if (f == null)
                 {
                     MainActivity.LogInfoFirebase("search fragment not on activities fragment manager");
                 }
-                else if(!f.IsAdded)
+                else if (!f.IsAdded)
                 {
                     MainActivity.LogInfoFirebase("search fragment from activities fragment manager is not added");
                 }
@@ -1929,7 +1930,7 @@ namespace AndriodApp1
             }
             //try
             //{
-                SearchFragment.Instance.ShowSearchTabsDialog();
+            SearchFragment.Instance.ShowSearchTabsDialog();
             //}
             //catch(Java.Lang.Exception ex)
             //{
@@ -1955,13 +1956,13 @@ namespace AndriodApp1
             bsdf.HasOptionsMenu = true;
             bsdf.ShowNow(SoulSeekState.MainActivityRef.SupportFragmentManager, "options");
         }
-        
+
         public static volatile SearchFragment Instance = null;
         public RecyclerView recyclerViewChips;
         public ChipsItemRecyclerAdapter recyclerChipsAdapter;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            Instance = this; 
+            Instance = this;
             HasOptionsMenu = true;
             //SoulSeekState.MainActivityRef.SupportActionBar.SetDisplayShowCustomEnabled(true);
             //SoulSeekState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
@@ -1983,7 +1984,7 @@ namespace AndriodApp1
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
             //if(SoulSeekState.ShowSmartFilters)
             //{
-                recyclerViewChips.Visibility = ViewStates.Visible;
+            recyclerViewChips.Visibility = ViewStates.Visible;
             //}
             //else
             //{
@@ -2019,7 +2020,7 @@ namespace AndriodApp1
             {
                 //v.SetFocusable(true); no bool method in xamarin...
             }
-            
+
             v.FocusableInTouchMode = true;
             //b.Focusable = true;
             //b.SetFocusable(ViewFocusability.Focusable);
@@ -2107,17 +2108,18 @@ namespace AndriodApp1
             SoulSeekState.ShowSmartFilters = !SoulSeekState.ShowSmartFilters;
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
             showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? "Hide Smart Filters" : "Show Smart Filters";
-            if(SoulSeekState.ShowSmartFilters)
+            if (SoulSeekState.ShowSmartFilters)
             {
-                if(SearchTabHelper.CurrentlySearching)
+                if (SearchTabHelper.CurrentlySearching)
                 {
                     return; //it will update on complete search
                 }
-                if((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
+                if ((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
                 {
                     List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    {
                         SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                     }));
@@ -2157,13 +2159,13 @@ namespace AndriodApp1
         /// <returns></returns>
         private bool AreChipsFiltering()
         {
-            if(!SoulSeekState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
+            if (!SoulSeekState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
                 return false;
             }
             else
             {
-                return SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems.Any(i=>i.IsChecked);
+                return SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems.Any(i => i.IsChecked);
             }
         }
 
@@ -2224,7 +2226,7 @@ namespace AndriodApp1
 
                 MainActivity.LogDebug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
-                if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden==Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
+                if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
                 {
                     try
                     {
@@ -2250,7 +2252,7 @@ namespace AndriodApp1
                     bsb.State = BottomSheetBehavior.StateHidden;
 
                 }
-                    //test.ClearFocus(); //doesnt do anything. //maybe focus the search text.
+                //test.ClearFocus(); //doesnt do anything. //maybe focus the search text.
 
                 bsb.State = BottomSheetBehavior.StateHidden;
             }
@@ -2259,7 +2261,7 @@ namespace AndriodApp1
         private void FilterSticky_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             FilterSticky = e.IsChecked;
-            if(FilterSticky)
+            if (FilterSticky)
             {
                 FilterStickyString = SearchTabHelper.FilterString;
             }
@@ -2275,7 +2277,7 @@ namespace AndriodApp1
 
         private void Search_EditorAction(object sender, TextView.EditorActionEventArgs e)
         {
-            if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || 
+            if (e.ActionId == Android.Views.InputMethods.ImeAction.Done ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
@@ -2285,7 +2287,7 @@ namespace AndriodApp1
                 if (editTextSearch == null)
                 {
                     EditText searchHere = (this.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
-                    if(searchHere!=null)
+                    if (searchHere != null)
                     {
                         //MainActivity.LogFirebase("editTextSearch is NULL only on cached activity");//these are both real cases that occur
                         editSearchText = searchHere.Text;
@@ -2363,15 +2365,15 @@ namespace AndriodApp1
             SetSearchHintTarget(SearchTarget.UserList);
         }
 
-        public static void SetSearchHintTarget(SearchTarget target, AutoCompleteTextView actv=null)
+        public static void SetSearchHintTarget(SearchTarget target, AutoCompleteTextView actv = null)
         {
-            if(actv==null)
+            if (actv == null)
             {
                 actv = SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
             }
-            if(actv!=null)
+            if (actv != null)
             {
-                switch(target)
+                switch (target)
                 {
                     case SearchTarget.AllUsers:
                         actv.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.search_here);
@@ -2380,10 +2382,10 @@ namespace AndriodApp1
                         actv.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.saerch_user_list);
                         break;
                     case SearchTarget.Room:
-                        actv.Hint = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.search_room_),SearchTabHelper.SearchTargetChosenRoom);
+                        actv.Hint = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.search_room_), SearchTabHelper.SearchTargetChosenRoom);
                         break;
                     case SearchTarget.ChosenUser:
-                        actv.Hint = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.search_user_),SearchTabHelper.SearchTargetChosenUser); 
+                        actv.Hint = string.Format(SeekerApplication.ApplicationContext.GetString(Resource.String.search_user_), SearchTabHelper.SearchTargetChosenUser);
                         break;
                     case SearchTarget.Wishlist:
                         actv.Hint = SeekerApplication.ApplicationContext.GetString(Resource.String.wishlist_search);
@@ -2396,21 +2398,21 @@ namespace AndriodApp1
         {
             Android.Graphics.Drawables.TransitionDrawable icon = ActionBarMenu?.FindItem(Resource.Id.action_search)?.Icon as Android.Graphics.Drawables.TransitionDrawable;
             //tested this and it works well
-            if(icon==null)
+            if (icon == null)
             {
-                if(this.Activity == null)
+                if (this.Activity == null)
                 {
                     MainActivity.LogInfoFirebase("GetTransitionDrawable activity is null");
                     SearchFragment f = GetSearchFragment();
-                    if(f==null)
+                    if (f == null)
                     {
                         MainActivity.LogInfoFirebase("GetTransitionDrawable no search fragment attached to activity");
                     }
-                    else if(!f.IsAdded)
+                    else if (!f.IsAdded)
                     {
                         MainActivity.LogInfoFirebase("GetTransitionDrawable attached but not added");
                     }
-                    else if(f.Activity==null)
+                    else if (f.Activity == null)
                     {
                         MainActivity.LogInfoFirebase("GetTransitionDrawable f.Activity activity is null");
                     }
@@ -2439,16 +2441,16 @@ namespace AndriodApp1
 
         private void SetRoomSpinnerAndEditTextInitial(Spinner s, EditText custom)
         {
-            if(SearchTabHelper.SearchTargetChosenRoom == string.Empty)
+            if (SearchTabHelper.SearchTargetChosenRoom == string.Empty)
             {
                 s.SetSelection(0);
             }
             else
             {
                 bool found = false;
-                for (int i=0;i<s.Adapter.Count; i++)
+                for (int i = 0; i < s.Adapter.Count; i++)
                 {
-                    if((string)(s.GetItemAtPosition(i)) == SearchTabHelper.SearchTargetChosenRoom)
+                    if ((string)(s.GetItemAtPosition(i)) == SearchTabHelper.SearchTargetChosenRoom)
                     {
                         found = true;
                         s.SetSelection(i);
@@ -2456,7 +2458,7 @@ namespace AndriodApp1
                         break;
                     }
                 }
-                if(!found)
+                if (!found)
                 {
                     s.SetSelection(s.Adapter.Count - 1);
                     custom.Text = SearchTabHelper.SearchTargetChosenRoom;
@@ -2485,12 +2487,12 @@ namespace AndriodApp1
             AndroidX.AppCompat.Widget.AppCompatRadioButton userList = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.targetUserList);
             AndroidX.AppCompat.Widget.AppCompatRadioButton room = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.targetRoom);
             List<string> possibleRooms = new List<string>();
-            if(ChatroomController.JoinedRoomNames!=null && ChatroomController.JoinedRoomNames.Count!=0)
+            if (ChatroomController.JoinedRoomNames != null && ChatroomController.JoinedRoomNames.Count != 0)
             {
                 possibleRooms = ChatroomController.JoinedRoomNames.ToList();
             }
             possibleRooms.Add(SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_));
-            roomListSpinner.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef,Resource.Layout.support_simple_spinner_dropdown_item,possibleRooms.ToArray());
+            roomListSpinner.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.support_simple_spinner_dropdown_item, possibleRooms.ToArray());
             SetRoomSpinnerAndEditTextInitial(roomListSpinner, customRoomName);
             chooseUserInput.Text = SearchTabHelper.SearchTargetChosenUser;
             switch (SearchTabHelper.SearchTarget)
@@ -2515,7 +2517,7 @@ namespace AndriodApp1
                     room.Checked = true;
                     chooseUserInput.Visibility = ViewStates.Gone;
                     targetRoomLayout.Visibility = ViewStates.Visible;
-                    if (roomListSpinner.SelectedItem.ToString()==SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
+                    if (roomListSpinner.SelectedItem.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
                     {
                         customRoomName.Visibility = ViewStates.Visible;
                         customRoomName.Text = SearchTabHelper.SearchTargetChosenRoom;
@@ -2538,11 +2540,11 @@ namespace AndriodApp1
             EventHandler<DialogClickEventArgs> eventHandlerClose = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
             {
                 SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
-                if(SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
+                if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
                 {
                     SoulSeekState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
                 }
-                if(sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
                 }
@@ -2586,17 +2588,17 @@ namespace AndriodApp1
         private bool first = true;
         private void RoomListSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            if(roomListSpinner.Adapter.Count - 1 == e.Position)
+            if (roomListSpinner.Adapter.Count - 1 == e.Position)
             {
                 customRoomName.Visibility = ViewStates.Visible;
                 if (first)
                 {
-                    first =false;
+                    first = false;
                 }
                 else
                 {
-                customRoomName.Text = string.Empty; //if you go off this and back then it should clear
-                SearchTabHelper.SearchTargetChosenRoom = string.Empty;
+                    customRoomName.Text = string.Empty; //if you go off this and back then it should clear
+                    SearchTabHelper.SearchTargetChosenRoom = string.Empty;
                 }
             }
             else
@@ -2613,7 +2615,7 @@ namespace AndriodApp1
 
         private string GetRoomListSpinnerSelection()
         {
-            if(roomListSpinner.SelectedItem.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
+            if (roomListSpinner.SelectedItem.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
             {
                 return SearchTabHelper.SearchTargetChosenRoom;
             }
@@ -2708,7 +2710,7 @@ namespace AndriodApp1
             public List<string> AllVarientsFileType;
             public List<string> SpecificFileType;
             public List<int> NumFiles;
-            public List<Tuple<int,int>> FileRanges;
+            public List<Tuple<int, int>> FileRanges;
 
             //these are the keywords.  keywords invarient will contain say "Paul and Jake", "Paul & Jake". they are OR'd inner.  both collections outer are AND'd.
             public List<string> Keywords;
@@ -2723,16 +2725,16 @@ namespace AndriodApp1
         public static ChipFilter ParseChips(SearchTab searchTab)
         {
             ChipFilter chipFilter = new ChipFilter();
-            var checkedChips = searchTab.ChipDataItems.Where(i=>i.IsChecked).ToList();
-            foreach(var chip in checkedChips)
+            var checkedChips = searchTab.ChipDataItems.Where(i => i.IsChecked).ToList();
+            foreach (var chip in checkedChips)
             {
-                if(chip.ChipType==ChipType.FileCount)
+                if (chip.ChipType == ChipType.FileCount)
                 {
-                    if(chip.DisplayText.EndsWith(" file"))
+                    if (chip.DisplayText.EndsWith(" file"))
                     {
                         chipFilter.NumFiles.Add(1);
                     }
-                    else if(chip.DisplayText.Contains(" to "))
+                    else if (chip.DisplayText.Contains(" to "))
                     {
                         int endmin = chip.DisplayText.IndexOf(" to ");
                         int min = int.Parse(chip.DisplayText.Substring(0, endmin));
@@ -2741,14 +2743,14 @@ namespace AndriodApp1
                     }
                     else if (chip.DisplayText.EndsWith(" files"))
                     {
-                        chipFilter.NumFiles.Add(int.Parse(chip.DisplayText.Replace(" files","")));
+                        chipFilter.NumFiles.Add(int.Parse(chip.DisplayText.Replace(" files", "")));
                     }
                 }
-                else if(chip.ChipType==ChipType.FileType)
+                else if (chip.ChipType == ChipType.FileType)
                 {
-                    if(chip.HasTag())
+                    if (chip.HasTag())
                     {
-                        foreach(var subChipString in chip.Children)
+                        foreach (var subChipString in chip.Children)
                         {
                             //its okay if this contains "mp3 (other)" say because if it does then by definition it will also contain
                             //mp3 - all bc we dont split groups.
@@ -2764,16 +2766,16 @@ namespace AndriodApp1
                     }
                     else if (chip.DisplayText.EndsWith(" - all"))
                     {
-                        chipFilter.AllVarientsFileType.Add(chip.DisplayText.Replace(" - all",""));
+                        chipFilter.AllVarientsFileType.Add(chip.DisplayText.Replace(" - all", ""));
                     }
                     else
                     {
                         chipFilter.SpecificFileType.Add(chip.DisplayText);
                     }
                 }
-                else if(chip.ChipType==ChipType.Keyword)
+                else if (chip.ChipType == ChipType.Keyword)
                 {
-                    if(chip.Children==null)
+                    if (chip.Children == null)
                     {
                         chipFilter.Keywords.Add(chip.DisplayText);
                     }
@@ -2795,7 +2797,7 @@ namespace AndriodApp1
             searchTab.FilterSpecialFlags.Clear();
             foreach (string word in filterStringSplit)
             {
-                if(word.Contains("mbr:")||word.Contains("minbitrate:"))
+                if (word.Contains("mbr:") || word.Contains("minbitrate:"))
                 {
                     searchTab.FilterSpecialFlags.ContainsSpecialFlags = true;
                     try
@@ -2807,7 +2809,7 @@ namespace AndriodApp1
 
                     }
                 }
-                else if(word.Contains("mfs:")||word.Contains("minfilesize:"))
+                else if (word.Contains("mfs:") || word.Contains("minfilesize:"))
                 {
                     searchTab.FilterSpecialFlags.ContainsSpecialFlags = true;
                     try
@@ -2819,24 +2821,24 @@ namespace AndriodApp1
 
                     }
                 }
-                else if(word.Contains("mfif:") || word.Contains("minfilesinfolder:"))
+                else if (word.Contains("mfif:") || word.Contains("minfilesinfolder:"))
                 {
                     searchTab.FilterSpecialFlags.ContainsSpecialFlags = true;
                     try
                     {
-                        searchTab.FilterSpecialFlags.MinFoldersInFile =  Integer.ParseInt(word.Split(':')[1]);
+                        searchTab.FilterSpecialFlags.MinFoldersInFile = Integer.ParseInt(word.Split(':')[1]);
                     }
-                    catch(System.Exception)
+                    catch (System.Exception)
                     {
 
                     }
                 }
-                else if(word=="isvbr")
+                else if (word == "isvbr")
                 {
                     searchTab.FilterSpecialFlags.ContainsSpecialFlags = true;
                     searchTab.FilterSpecialFlags.IsVBR = true;
                 }
-                else if(word=="iscbr")
+                else if (word == "iscbr")
                 {
                     searchTab.FilterSpecialFlags.ContainsSpecialFlags = true;
                     searchTab.FilterSpecialFlags.IsCBR = true;
@@ -2854,21 +2856,21 @@ namespace AndriodApp1
 
         private bool MatchesChipCriteria(SearchResponse s, ChipFilter chipFilter)
         {
-            if(chipFilter == null || chipFilter.IsEmpty())
+            if (chipFilter == null || chipFilter.IsEmpty())
             {
                 return true;
             }
             else
             {
                 bool match = chipFilter.NumFiles.Count == 0 && chipFilter.FileRanges.Count == 0;
-                foreach(int num in chipFilter.NumFiles)
+                foreach (int num in chipFilter.NumFiles)
                 {
-                    if(s.FileCount == num)
+                    if (s.FileCount == num)
                     {
                         match = true;
                     }
                 }
-                foreach (Tuple<int,int> range in chipFilter.FileRanges)
+                foreach (Tuple<int, int> range in chipFilter.FileRanges)
                 {
                     if (s.FileCount >= range.Item1 && s.FileCount <= range.Item2)
                     {
@@ -2895,7 +2897,7 @@ namespace AndriodApp1
                         match = true;
                     }
                 }
-                if(!match)
+                if (!match)
                 {
                     return false;
                 }
@@ -2903,7 +2905,7 @@ namespace AndriodApp1
                 string fullFname = s.Files.First().Filename;
                 foreach (string keyword in chipFilter.Keywords)
                 {
-                    if(!Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase)  &&
+                    if (!Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
                         !Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                     {
                         return false;
@@ -2913,7 +2915,7 @@ namespace AndriodApp1
                 {
                     //do any match?
                     bool anyMatch = false;
-                    foreach(string keyword in keywordsInvar)
+                    foreach (string keyword in keywordsInvar)
                     {
                         if (Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
                             Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
@@ -2922,7 +2924,7 @@ namespace AndriodApp1
                             break;
                         }
                     }
-                    if(!anyMatch)
+                    if (!anyMatch)
                     {
                         return false;
                     }
@@ -2984,52 +2986,52 @@ namespace AndriodApp1
             searchTab.FilteredResponses = searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
             {
-                if(!MatchesCriteria(s))
+                if (!MatchesCriteria(s))
                 {
                     return false;
                 }
-                else if(!MatchesChipCriteria(s, searchTab.ChipsFilter))
+                else if (!MatchesChipCriteria(s, searchTab.ChipsFilter))
                 {
                     return false;
                 }
                 else
                 {   //so it matches the word criteria.  now lets see if it matches the flags if any...
-                    if(!searchTab.FilterSpecialFlags.ContainsSpecialFlags)
+                    if (!searchTab.FilterSpecialFlags.ContainsSpecialFlags)
                     {
                         return true;
                     }
                     else
                     {
                         //we need to make sure this also matches our special flags
-                        if(searchTab.FilterSpecialFlags.MinFoldersInFile!=0)
+                        if (searchTab.FilterSpecialFlags.MinFoldersInFile != 0)
                         {
-                            if(searchTab.FilterSpecialFlags.MinFoldersInFile>s.Files.Count)
+                            if (searchTab.FilterSpecialFlags.MinFoldersInFile > s.Files.Count)
                             {
                                 return false;
                             }
                         }
-                        if(searchTab.FilterSpecialFlags.MinFileSizeMB!=0)
-                        {
-                            bool match = false;
-                            foreach(Soulseek.File f in s.Files)
-                            {
-                                int mb = (int)(f.Size)/(1024*1024);
-                                if(mb> searchTab.FilterSpecialFlags.MinFileSizeMB)
-                                {
-                                    match = true;
-                                }
-                            }
-                            if(!match)
-                            {
-                                return false;
-                            }
-                        }
-                        if(searchTab.FilterSpecialFlags.MinBitRateKBS!=0)
+                        if (searchTab.FilterSpecialFlags.MinFileSizeMB != 0)
                         {
                             bool match = false;
                             foreach (Soulseek.File f in s.Files)
                             {
-                                if(f.BitRate==null || !(f.BitRate.HasValue))
+                                int mb = (int)(f.Size) / (1024 * 1024);
+                                if (mb > searchTab.FilterSpecialFlags.MinFileSizeMB)
+                                {
+                                    match = true;
+                                }
+                            }
+                            if (!match)
+                            {
+                                return false;
+                            }
+                        }
+                        if (searchTab.FilterSpecialFlags.MinBitRateKBS != 0)
+                        {
+                            bool match = false;
+                            foreach (Soulseek.File f in s.Files)
+                            {
+                                if (f.BitRate == null || !(f.BitRate.HasValue))
                                 {
                                     continue;
                                 }
@@ -3043,12 +3045,12 @@ namespace AndriodApp1
                                 return false;
                             }
                         }
-                        if(searchTab.FilterSpecialFlags.IsCBR)
+                        if (searchTab.FilterSpecialFlags.IsCBR)
                         {
                             bool match = false;
                             foreach (Soulseek.File f in s.Files)
                             {
-                                if (f.IsVariableBitRate==false)//this is bool? can have no value...
+                                if (f.IsVariableBitRate == false)//this is bool? can have no value...
                                 {
                                     match = true;
                                 }
@@ -3063,7 +3065,7 @@ namespace AndriodApp1
                             bool match = false;
                             foreach (Soulseek.File f in s.Files)
                             {
-                                if (f.IsVariableBitRate==true)
+                                if (f.IsVariableBitRate == true)
                                 {
                                     match = true;
                                 }
@@ -3083,11 +3085,11 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("Text Changed: " + e.Text);
             string oldFilterString = SearchTabHelper.FilteredResults ? SearchTabHelper.FilterString : string.Empty;
-            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null)|| this.AreChipsFiltering())
+            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || this.AreChipsFiltering())
             {
                 SearchTabHelper.FilteredResults = true;
                 SearchTabHelper.FilterString = e.Text.ToString();
-                if(FilterSticky)
+                if (FilterSticky)
                 {
                     FilterStickyString = SearchTabHelper.FilterString;
                 }
@@ -3152,8 +3154,8 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-            editor.PutString(SoulSeekState.M_SearchHistory, string.Empty);
-            editor.Commit();
+                editor.PutString(SoulSeekState.M_SearchHistory, string.Empty);
+                editor.Commit();
             }
             if (SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView != null)
             {
@@ -3192,12 +3194,12 @@ namespace AndriodApp1
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
                 editor.PutString(SoulSeekState.M_SearchHistory, listOfSearchItems);
-                if(FilterSticky)
+                if (FilterSticky)
                 {
                     editor.PutBoolean(SoulSeekState.M_FilterSticky, FilterSticky);
                     editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
                 }
-                editor.PutInt(SoulSeekState.M_SearchResultStyle,(int)SearchResultStyle);
+                editor.PutInt(SoulSeekState.M_SearchResultStyle, (int)SearchResultStyle);
                 editor.Commit();
             }
         }
@@ -3234,7 +3236,7 @@ namespace AndriodApp1
             SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
             EditText editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
-            if(sender != null)
+            if (sender != null)
             {
                 (sender as AutoCompleteTextView).DismissDropDown();
             }
@@ -3248,23 +3250,23 @@ namespace AndriodApp1
                 MainActivity.LogDebug("ENTER PRESSED " + e.KeyCode.ToString());
                 PeformSearchLogic(sender);
             }
-            else if(e.KeyCode == Keycode.Del && e.Event.Action == KeyEventActions.Down)
+            else if (e.KeyCode == Keycode.Del && e.Event.Action == KeyEventActions.Down)
             {
                 (sender as AutoCompleteTextView).OnKeyDown(e.KeyCode, e.Event);
                 return;
             }
-            else if((e.Event.Action == KeyEventActions.Down || e.Event.Action == KeyEventActions.Up) && (e.KeyCode == Android.Views.Keycode.Back || e.KeyCode == Android.Views.Keycode.VolumeUp || e.KeyCode == Android.Views.Keycode.VolumeDown))
+            else if ((e.Event.Action == KeyEventActions.Down || e.Event.Action == KeyEventActions.Up) && (e.KeyCode == Android.Views.Keycode.Back || e.KeyCode == Android.Views.Keycode.VolumeUp || e.KeyCode == Android.Views.Keycode.VolumeDown))
             {
                 //for some reason e.Handled is always true coming in.  also only on down volume press does anything.
                 e.Handled = false;
             }
             else //this will only occur on unhandled keys which on the softkeyboard probably has to be in the above two categories....
             {
-                if(e.Event.Action == KeyEventActions.Down)
+                if (e.Event.Action == KeyEventActions.Down)
                 {
                     //MainActivity.LogDebug(e.KeyCode.ToString()); //happens on HW keyboard... event does NOT get called on SW keyboard. :)
                     //MainActivity.LogDebug((sender as AutoCompleteTextView).IsFocused.ToString());
-                    (sender as AutoCompleteTextView).OnKeyDown(e.KeyCode,e.Event);
+                    (sender as AutoCompleteTextView).OnKeyDown(e.KeyCode, e.Event);
                 }
             }
         }
@@ -3290,7 +3292,7 @@ namespace AndriodApp1
 
         private static void clearListView(bool fromWishlist)
         {
-            if(fromWishlist)
+            if (fromWishlist)
             {
                 return; //we combine results...
             }
@@ -3417,7 +3419,7 @@ namespace AndriodApp1
             //how desktop client does.
             //if(SearchTabHelper.CurrentTab == fromTab) //we want to sort 
             //{
-            lock(SearchTabHelper.SortHelper)
+            lock (SearchTabHelper.SortHelper)
             {
                 Tuple<bool, List<SearchResponse>> splitResponses = SplitMultiDirResponse(resp);
                 try
@@ -3427,7 +3429,7 @@ namespace AndriodApp1
                     { //we have multiple to add
                         foreach (SearchResponse splitResponse in splitResponses.Item2)
                         {
-                            if(fromWishlist && SearchTabHelper.SearchTabCollection[fromTab].SortHelper.ContainsKey(splitResponse))
+                            if (fromWishlist && SearchTabHelper.SearchTabCollection[fromTab].SortHelper.ContainsKey(splitResponse))
                             {
                                 continue;
                             }
@@ -3455,12 +3457,13 @@ namespace AndriodApp1
             }
             //only do fromWishlist if SearchFragment.Instance is not null...
 
-            if ((!fromWishlist || SearchFragment.Instance != null) && fromTab==SearchTabHelper.CurrentTab)
+            if ((!fromWishlist || SearchFragment.Instance != null) && fromTab == SearchTabHelper.CurrentTab)
             {
-                Action a = new Action(() => {
+                Action a = new Action(() =>
+                {
                     //SearchResponses.Add(resp);
                     //MainActivity.LogDebug("UI - SEARCH RESPONSE RECEIVED");
-                    if(fromTab != SearchTabHelper.CurrentTab)
+                    if (fromTab != SearchTabHelper.CurrentTab)
                     {
                         return;
                     }
@@ -3554,9 +3557,10 @@ namespace AndriodApp1
         private void PerformBackUpRefresh()
         {
             Handler h = new Handler(Looper.MainLooper);
-            h.PostDelayed(new Action(() => {
+            h.PostDelayed(new Action(() =>
+            {
                 var menuItem = ActionBarMenu?.FindItem(Resource.Id.action_search);
-                if(menuItem!=null)
+                if (menuItem != null)
                 {
                     menuItem.SetVisible(false);
                     menuItem.SetVisible(true);
@@ -3572,7 +3576,7 @@ namespace AndriodApp1
         {
             try
             {
-                if(!fromWishlist)
+                if (!fromWishlist)
                 {
                     Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SearchFragment.Instance.context.GetSystemService(Context.InputMethodService);
                     imm.HideSoftInputFromWindow(SearchFragment.Instance.rootView.WindowToken, 0);
@@ -3590,7 +3594,7 @@ namespace AndriodApp1
                 clearListView(fromWishlist);
                 //editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
                 //if(SoulSeekState.MainActivityRef==null)
                 //{
@@ -3615,13 +3619,14 @@ namespace AndriodApp1
             // if someone has 1 free upload slot and a queue size of 100, 143, 28, 5, etc. it worked just fine.
             int searchTimeout = SearchTabHelper.SearchTarget == SearchTarget.AllUsers ? 5000 : 12000;
 
-            Action<SearchResponseReceivedEventArgs> searchResponseReceived = new Action<SearchResponseReceivedEventArgs>((SearchResponseReceivedEventArgs e)=>{
+            Action<SearchResponseReceivedEventArgs> searchResponseReceived = new Action<SearchResponseReceivedEventArgs>((SearchResponseReceivedEventArgs e) =>
+            {
                 SoulseekClient_SearchResponseReceived(null, e, fromTab, fromWishlist);
-                });
+            });
 
             SearchOptions searchOptions = new SearchOptions(responseLimit: SoulSeekState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: SoulSeekState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
             SearchScope scope = null;
-            if(fromWishlist)
+            if (fromWishlist)
             {
                 scope = new SearchScope(SearchScopeType.Wishlist); //this is the same as passing no option for search scope 
             }
@@ -3629,34 +3634,37 @@ namespace AndriodApp1
             {
                 scope = new SearchScope(SearchScopeType.Network); //this is the same as passing no option for search scope
             }
-            else if(SearchTabHelper.SearchTarget == SearchTarget.UserList)
+            else if (SearchTabHelper.SearchTarget == SearchTarget.UserList)
             {
-                if(SoulSeekState.UserList==null||SoulSeekState.UserList.Count==0)
+                if (SoulSeekState.UserList == null || SoulSeekState.UserList.Count == 0)
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    {
                         Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.user_list_empty, ToastLength.Short).Show();
                     }
                     ));
                     return;
                 }
-                scope = new SearchScope(SearchScopeType.User, SoulSeekState.UserList.Select(item=>item.Username).ToArray());
+                scope = new SearchScope(SearchScopeType.User, SoulSeekState.UserList.Select(item => item.Username).ToArray());
             }
-            else if(SearchTabHelper.SearchTarget == SearchTarget.ChosenUser)
+            else if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser)
             {
-                if(SearchTabHelper.SearchTargetChosenUser == string.Empty)
+                if (SearchTabHelper.SearchTargetChosenUser == string.Empty)
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    {
                         Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_user, ToastLength.Short).Show();
                     }));
                     return;
                 }
                 scope = new SearchScope(SearchScopeType.User, new string[] { SearchTabHelper.SearchTargetChosenUser });
             }
-            else if(SearchTabHelper.SearchTarget == SearchTarget.Room)
+            else if (SearchTabHelper.SearchTarget == SearchTarget.Room)
             {
                 if (SearchTabHelper.SearchTargetChosenRoom == string.Empty)
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    {
                         Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_room, ToastLength.Short).Show();
                     }));
                     return;
@@ -3667,66 +3675,68 @@ namespace AndriodApp1
             {
                 Task<IReadOnlyCollection<SearchResponse>> t = null;
 
-                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope:scope, cancellationToken:cancellationToken);
+                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
-                t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>( (Task<IReadOnlyCollection<SearchResponse>> t)=>
-                {
-                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
+                t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
+               {
+                   SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
 
-                    if(!t.IsCompletedSuccessfully && t.Exception!=null)
-                    {
-                        MainActivity.LogDebug("search exception: " + t.Exception.Message);
-                    }
+                   if (!t.IsCompletedSuccessfully && t.Exception != null)
+                   {
+                       MainActivity.LogDebug("search exception: " + t.Exception.Message);
+                   }
 
-                    if(t.IsCanceled)
-                    {
+                   if (t.IsCanceled)
+                   {
                         //then the user pressed the button so we dont need to change it back...
                     }
-                    else
-                    {
+                   else
+                   {
 
-                        SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
-                            try
-                            {
-                                if(fromTab==SearchTabHelper.CurrentTab && !fromWishlist)
-                                {
-                                    MainActivity.LogDebug("transitionDrawable: ReverseTransition transition");
-                                    transitionDrawable.ReverseTransition(SearchToCloseDuration);
-                                    SearchFragment.Instance.PerformBackUpRefresh();
+                       SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                       {
+                           try
+                           {
+                               if (fromTab == SearchTabHelper.CurrentTab && !fromWishlist)
+                               {
+                                   MainActivity.LogDebug("transitionDrawable: ReverseTransition transition");
+                                   transitionDrawable.ReverseTransition(SearchToCloseDuration);
+                                   SearchFragment.Instance.PerformBackUpRefresh();
 
 
-                                }
-                            }
-                            catch(System.ObjectDisposedException e)
-                            { 
+                               }
+                           }
+                           catch (System.ObjectDisposedException e)
+                           {
                                 //since its disposed when you go back to the screen it will be the correct search icon again..
                                 //noop
                             }
-                        }));
-                        
-                    }
-                    if((!t.IsCanceled) && t.Result.Count==0 && !fromWishlist) //if t is cancelled, t.Result throws..
-                    {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();
-                        }));
-                    }
-                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
+                       }));
 
-                    if(fromWishlist)
+                   }
+                   if ((!t.IsCanceled) && t.Result.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
-                        WishlistController.SearchCompleted(fromTab);
-                    }
-                    else if(SearchTabHelper.SearchTabCollection[fromTab].SearchTarget == SearchTarget.Wishlist)
-                    {
-                        SearchTabHelper.SaveStateToSharedPreferences();
-                    }
+                       SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                       {
+                           Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();
+                       }));
+                   }
+                   SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
 
-                    if(fromTab== SearchTabHelper.CurrentTab)
-                    {
-                        if(SoulSeekState.ShowSmartFilters)
-                        {
+                   if (fromWishlist)
+                   {
+                       WishlistController.SearchCompleted(fromTab);
+                   }
+                   else if (SearchTabHelper.SearchTabCollection[fromTab].SearchTarget == SearchTarget.Wishlist)
+                   {
+                       SearchTabHelper.SaveStateToSharedPreferences();
+                   }
+
+                   if (fromTab == SearchTabHelper.CurrentTab)
+                   {
+                       if (SoulSeekState.ShowSmartFilters)
+                       {
 #if DEBUG
                             try
                             {
@@ -3746,80 +3756,83 @@ namespace AndriodApp1
 
 #endif
                             List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
-                            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
-                            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
-                                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
-                                SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
-                            }));
-                        }
+                           SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
+                           SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                           {
+                               SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                               SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+                           }));
+                       }
 
-                    }
+                   }
 
-                }));
+               }));
 
 
 
-                if(SearchTabHelper.FilteredResults && FilterSticky && !fromWishlist)
+                if (SearchTabHelper.FilteredResults && FilterSticky && !fromWishlist)
                 {
                     //remind the user that the filter is ON.
                     t.ContinueWith(new Action<Task>(
                         (Task t) =>
                         {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(()=>{
+                            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                            {
 
                                 RelativeLayout rel = SearchFragment.Instance.rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
                                 BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
-                                if(bsb.State == BottomSheetBehavior.StateHidden)
+                                if (bsb.State == BottomSheetBehavior.StateHidden)
                                 {
 
-                                View BSButton = SearchFragment.Instance.rootView.FindViewById<View>(Resource.Id.bsbutton);
-                                ObjectAnimator objectAnimator = new ObjectAnimator();
-                                ObjectAnimator anim1 = ObjectAnimator.OfFloat(BSButton, "scaleX", 2.0f);
-                                anim1.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
-                                anim1.SetDuration(200);
-                                ObjectAnimator anim2 = ObjectAnimator.OfFloat(BSButton, "scaleY", 2.0f);
-                                anim2.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
-                                anim2.SetDuration(200);
+                                    View BSButton = SearchFragment.Instance.rootView.FindViewById<View>(Resource.Id.bsbutton);
+                                    ObjectAnimator objectAnimator = new ObjectAnimator();
+                                    ObjectAnimator anim1 = ObjectAnimator.OfFloat(BSButton, "scaleX", 2.0f);
+                                    anim1.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
+                                    anim1.SetDuration(200);
+                                    ObjectAnimator anim2 = ObjectAnimator.OfFloat(BSButton, "scaleY", 2.0f);
+                                    anim2.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
+                                    anim2.SetDuration(200);
 
-                                ObjectAnimator anim3 = ObjectAnimator.OfFloat(BSButton, "scaleX", 1.0f);
-                                anim3.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
-                                anim3.SetDuration(1000);
-                                ObjectAnimator anim4 = ObjectAnimator.OfFloat(BSButton, "scaleY", 1.0f);
-                                anim4.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
-                                anim4.SetDuration(1000);
+                                    ObjectAnimator anim3 = ObjectAnimator.OfFloat(BSButton, "scaleX", 1.0f);
+                                    anim3.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
+                                    anim3.SetDuration(1000);
+                                    ObjectAnimator anim4 = ObjectAnimator.OfFloat(BSButton, "scaleY", 1.0f);
+                                    anim4.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
+                                    anim4.SetDuration(1000);
 
-                                AnimatorSet set1 = new AnimatorSet();
-                                set1.PlayTogether(anim1, anim2);
-                                //set1.Start();
+                                    AnimatorSet set1 = new AnimatorSet();
+                                    set1.PlayTogether(anim1, anim2);
+                                    //set1.Start();
 
-                                AnimatorSet set2 = new AnimatorSet();
-                                set2.PlayTogether(anim3, anim4);
-                                //set2.Start();
+                                    AnimatorSet set2 = new AnimatorSet();
+                                    set2.PlayTogether(anim3, anim4);
+                                    //set2.Start();
 
-                                AnimatorSet setTotal = new AnimatorSet();
-                                setTotal.PlaySequentially(set1,set2);
-                                setTotal.Start();
+                                    AnimatorSet setTotal = new AnimatorSet();
+                                    setTotal.PlaySequentially(set1, set2);
+                                    setTotal.Start();
 
                                 }
-                                
-                                }));
+
+                            }));
                         }
                         ));
                 }
             }
             catch (ArgumentNullException ane)
             {
-                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                {
                     string errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_search_text);
                     if (fromWishlist)
                     {
                         errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_wish_text);
                     }
 
-                Toast.MakeText(SoulSeekState.MainActivityRef, errorMsg, ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.MainActivityRef, errorMsg, ToastLength.Short).Show();
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
-                    if(!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
+                    if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
                         transitionDrawable.ResetTransition();
                     }
@@ -3830,7 +3843,8 @@ namespace AndriodApp1
             }
             catch (ArgumentException ae)
             {
-                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     string errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_search_text);
                     if (fromWishlist)
@@ -3856,27 +3870,28 @@ namespace AndriodApp1
             catch (System.Exception ue)
             {
                 //MainActivity.LogFirebase(new Java.Lang.Throwable(ue.Message + "searchclick_GENERALEXCEPTION"));
-                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                {
                     Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
                 }));
-                MainActivity.LogFirebase("tabpageradapter searchclick: "+ ue.Message);
+                MainActivity.LogFirebase("tabpageradapter searchclick: " + ue.Message);
                 return;
             }
-            if(!fromWishlist)
+            if (!fromWishlist)
             {
                 //add a new item to our search history
                 if (SoulSeekState.RememberSearchHistory)
                 {
-                    if(!searchHistory.Contains(searchString))
+                    if (!searchHistory.Contains(searchString))
                     {
                         searchHistory.Add(searchString);
                     }
                 }
                 var actv = SoulSeekState.MainActivityRef.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere); // lot of nullrefs with actv before this change....
-                if(actv==null)
+                if (actv == null)
                 {
                     actv = (SearchFragment.Instance.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                    if(actv==null)
+                    if (actv == null)
                     {
                         MainActivity.LogFirebase("actv stull null, cannot refresh adapter");
                         return;
@@ -3890,13 +3905,13 @@ namespace AndriodApp1
         {
             SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm = searchString;
             SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = DateTime.Now;
-            if(!fromWishlist)
+            if (!fromWishlist)
             {
                 //try to clearFocus on the search if you can (gets rid of blinking cursor)
                 ClearFocusSearchEditText();
                 MainActivity.LogDebug("Search_Click");
             }
-            
+
             if (!SoulSeekState.currentlyLoggedIn)
             {
                 if (!fromWishlist)
@@ -3905,7 +3920,7 @@ namespace AndriodApp1
                     tst.Show();
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
                     transitionDrawable.ResetTransition();
-                    
+
                 }
 
                 SearchTabHelper.CurrentlySearching = false;
@@ -3913,7 +3928,7 @@ namespace AndriodApp1
             }
             else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
-                if(fromWishlist)
+                if (fromWishlist)
                 {
                     return;
                 }
@@ -3934,7 +3949,7 @@ namespace AndriodApp1
                         });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(()=>{SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
+                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
 
                 }));
             }
@@ -3972,14 +3987,14 @@ namespace AndriodApp1
         private void RemoveSearch_Click(object sender, EventArgs e)
         {
             position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
-            if(position==-1) //in my case this happens if you delete too fast...
+            if (position == -1) //in my case this happens if you delete too fast...
             {
                 return;
             }
             int tabToRemove = localDataSet[position];
             bool isWishlist = (SearchTabHelper.SearchTabCollection[tabToRemove].SearchTarget == SearchTarget.Wishlist);
             SearchTabHelper.SearchTabCollection[tabToRemove].CancellationTokenSource?.Cancel();
-            if(isWishlist)
+            if (isWishlist)
             {
                 if (tabToRemove == SearchTabHelper.CurrentTab)
                 {
@@ -3990,9 +4005,9 @@ namespace AndriodApp1
 
 
                     //go to search tab instead (there is always one)
-                    string listOfKeys2 = System.String.Join(",",SearchTabHelper.SearchTabCollection.Keys);
+                    string listOfKeys2 = System.String.Join(",", SearchTabHelper.SearchTabCollection.Keys);
                     MainActivity.LogInfoFirebase("list of Keys: " + listOfKeys2);
-                    int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key=>key>=0).First();
+                    int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key => key >= 0).First();
                     SearchFragment.Instance.GoToTab(tabToGoTo, true);
                 }
                 else
@@ -4005,7 +4020,7 @@ namespace AndriodApp1
             }
             else
             {
-                if(tabToRemove == SearchTabHelper.CurrentTab)
+                if (tabToRemove == SearchTabHelper.CurrentTab)
                 {
                     SearchTabHelper.SearchTabCollection[tabToRemove] = new SearchTab(); //clear it..
                     SearchFragment.Instance.GoToTab(tabToRemove, true);
@@ -4013,8 +4028,8 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    
-                    if(SearchTabHelper.SearchTabCollection.Keys.Where(key => key >= 0).Count() == 1)
+
+                    if (SearchTabHelper.SearchTabCollection.Keys.Where(key => key >= 0).Count() == 1)
                     {
                         //it is the only non wishlist tab, so just clear it...  this can happen if we are on a wishlist tab and we clear all the normal tabs.
                         SearchTabHelper.SearchTabCollection[tabToRemove] = new SearchTab();
@@ -4029,7 +4044,7 @@ namespace AndriodApp1
                     }
                 }
             }
-            if(isWishlist)
+            if (isWishlist)
             {
                 SearchTabHelper.SaveStateToSharedPreferences();
             }
@@ -4086,10 +4101,10 @@ namespace AndriodApp1
         public void setItem(int i)
         {
             SearchTab searchTab = SearchTabHelper.SearchTabCollection[i];
-            if(searchTab.SearchTarget == SearchTarget.Wishlist)
+            if (searchTab.SearchTarget == SearchTarget.Wishlist)
             {
                 string timeString = "-";
-                if(searchTab.LastRanTime != DateTime.MinValue)
+                if (searchTab.LastRanTime != DateTime.MinValue)
                 {
                     timeString = Helpers.GetNiceDateTime(searchTab.LastRanTime);
                 }
@@ -4100,7 +4115,7 @@ namespace AndriodApp1
                 numResults.Text = searchTab.LastSearchResultsCount.ToString() + " Results";
             }
             string lastTerm = searchTab.LastSearchTerm;
-            if (lastTerm!=string.Empty && lastTerm != null)
+            if (lastTerm != string.Empty && lastTerm != null)
             {
                 lastSearchTerm.Text = searchTab.LastSearchTerm;
             }
@@ -4185,7 +4200,7 @@ namespace AndriodApp1
             recycleWishesAdapter.ForWishlist = true;
 
             wishlistTitle = view.FindViewById<TextView>(Resource.Id.wishlistTitle);
-            if(wishTabIds.Count==0)
+            if (wishTabIds.Count == 0)
             {
                 wishlistTitle.SetText(Resource.String.wishlist_empty_bold);
             }
@@ -4207,7 +4222,7 @@ namespace AndriodApp1
             {
                 drawable = this.Context.Resources.GetDrawable(Resource.Drawable.ic_add_black_24dp);
             }
-            newSearch.SetCompoundDrawablesWithIntrinsicBounds(drawable,null,null,null);
+            newSearch.SetCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
 
         }
 
@@ -4227,7 +4242,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             base.OnResume();
-            
+
             MainActivity.LogDebug("OnResume ran");
 
             Window window = Dialog.Window;//  getDialog().getWindow();
@@ -4299,7 +4314,7 @@ namespace AndriodApp1
 
     public class SearchAdapter : ArrayAdapter<SearchResponse>
     {
-        List<int> oppositePositions= new List<int>();
+        List<int> oppositePositions = new List<int>();
         public SearchAdapter(Context c, List<SearchResponse> items) : base(c, 0, items)
         {
             oppositePositions = new List<int>();
@@ -4310,7 +4325,7 @@ namespace AndriodApp1
             ISearchItemViewBase itemView = (ISearchItemViewBase)convertView;
             if (null == itemView)
             {
-                switch(SearchFragment.SearchResultStyle)
+                switch (SearchFragment.SearchResultStyle)
                 {
                     case SearchResultStyleEnum.ExpandedAll:
                     case SearchResultStyleEnum.CollapsedAll:
@@ -4358,12 +4373,12 @@ namespace AndriodApp1
             int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
             var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
             var img = ((sender as View).Parent.Parent as View).FindViewById<ImageView>(Resource.Id.expandableClick);
-            if(v.Visibility == ViewStates.Gone)
+            if (v.Visibility == ViewStates.Gone)
             {
                 img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
                 v.Visibility = ViewStates.Visible;
                 SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, GetItem(position));
-                if(SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
                 {
                     oppositePositions.Add(position);
                     oppositePositions.Sort();
@@ -4496,7 +4511,7 @@ namespace AndriodApp1
             viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item)); //todo maybe also cache this...
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
             viewFileType.Text = item.GetDominantFileType();
-            if(item.FreeUploadSlots>0)
+            if (item.FreeUploadSlots > 0)
             {
                 viewQueue.Text = "";
             }
@@ -4535,7 +4550,7 @@ namespace AndriodApp1
 
     public class ExpandableSearchItemFilesAdapter : ArrayAdapter<Soulseek.File>
     {
-        public ExpandableSearchItemFilesAdapter(Context c, List<Soulseek.File> files) : base(c,0,files.ToArray())
+        public ExpandableSearchItemFilesAdapter(Context c, List<Soulseek.File> files) : base(c, 0, files.ToArray())
         {
 
         }
@@ -4552,7 +4567,7 @@ namespace AndriodApp1
         }
     }
 
-    public class SearchItemViewExpandable: RelativeLayout, ISearchItemViewBase, IExpandable
+    public class SearchItemViewExpandable : RelativeLayout, ISearchItemViewBase, IExpandable
     {
         private TextView viewQueue;
         private TextView viewUsername;
@@ -4593,10 +4608,10 @@ namespace AndriodApp1
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach(Soulseek.File f in item.Files)
+            foreach (Soulseek.File f in item.Files)
             {
                 TextView tv = new TextView(SoulSeekState.MainActivityRef);
-                SetTextColor(tv,SoulSeekState.MainActivityRef);
+                SetTextColor(tv, SoulSeekState.MainActivityRef);
                 tv.Text = Helpers.GetFileNameFromFile(f.Filename);
                 viewToHideShow.AddView(tv);
             }
@@ -4617,11 +4632,11 @@ namespace AndriodApp1
             }
             viewFileType.Text = item.GetDominantFileType();
 
-            if(SearchFragment.SearchResultStyle==SearchResultStyleEnum.CollapsedAll && opposite ||
+            if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll && opposite ||
                 SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)
             {
                 viewToHideShow.Visibility = ViewStates.Visible;
-                PopulateFilesListView(viewToHideShow,item);
+                PopulateFilesListView(viewToHideShow, item);
                 //imageViewExpandable.ClearAnimation();
                 imageViewExpandable.Rotation = 0;
                 imageViewExpandable.SetImageResource(Resource.Drawable.ic_expand_less_white_32_dp);
@@ -4674,7 +4689,7 @@ namespace AndriodApp1
         {
             var typedValue = new TypedValue();
             c.Theme.ResolveAttribute(attr, typedValue, true);
-            if(typedValue.ResourceId == 0)
+            if (typedValue.ResourceId == 0)
             {
                 return GetColorFromInteger(typedValue.Data);
             }
@@ -4774,7 +4789,7 @@ namespace AndriodApp1
             set
             {
                 queuelength = value;
-                if (value==0)
+                if (value == 0)
                 {
                     Queued = false;
                 }
@@ -4796,11 +4811,11 @@ namespace AndriodApp1
 
         public void setupChildren();
 
-        public void setItem(ITransferItem ti);
+        public void setItem(ITransferItem ti, bool isInBatchMode);
 
-        public TransfersFragment.TransferViewHolder ViewHolder { get;set;}
+        public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
 
-        public ProgressBar progressBar { get;set;}
+        public ProgressBar progressBar { get; set; }
 
         public TextView GetAdditionalStatusInfoView();
     }
@@ -4859,7 +4874,7 @@ namespace AndriodApp1
             base.OnCreateContextMenu(menu);
         }
 
-        public void setItem(ITransferItem item)
+        public void setItem(ITransferItem item, bool isInBatchMode)
         {
             InnerTransferItem = item;
             FolderItem folderItem = item as FolderItem;
@@ -4871,7 +4886,7 @@ namespace AndriodApp1
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
             progressBar.Progress = folderItem.GetFolderProgress(out _, out _);
             viewUsername.Text = folderItem.Username;
-            if(item.IsUpload() && state.HasFlag(TransferStates.Cancelled))
+            if (item.IsUpload() && state.HasFlag(TransferStates.Cancelled))
             {
                 isFailed = true;
             }
@@ -4902,10 +4917,34 @@ namespace AndriodApp1
                 }
 #pragma warning restore 0618
             }
-
+            if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+            {
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                {
+                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                    //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                }
+                else
+                {
+                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
+                }
+            }
+            else
+            {
+                //this.Background
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                {
+                    this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                                           //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                }
+                else
+                {
+                    this.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
+                                           //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
+                }
+            }
         }
-
-
     }
 
     public class TransferViewHelper
@@ -4953,7 +4992,7 @@ namespace AndriodApp1
                 filesLongStatus.Text = string.Format("All {0} succeeded", numSucceeded);
                 currentFile.Visibility = ViewStates.Gone;
             }
-            else if (folderState.HasFlag(TransferStates.Errored)|| folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.TimedOut))
+            else if (folderState.HasFlag(TransferStates.Errored) || folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.TimedOut))
             {
                 int numFailed = 0;
                 int numSucceeded = 0;
@@ -4966,7 +5005,7 @@ namespace AndriodApp1
                         {
                             numSucceeded++;
                         }
-                        else if (ti.State.HasFlag(TransferStates.Errored)|| ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
+                        else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
                         {
                             numFailed++;
                         }
@@ -5051,7 +5090,7 @@ namespace AndriodApp1
             }
             else if (state.HasFlag(TransferStates.Cancelled))
             {
-                if(isUpload)
+                if (isUpload)
                 {
                     viewStatus.Text = "Aborted";
                 }
@@ -5158,7 +5197,7 @@ namespace AndriodApp1
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
-        public ProgressBar progressBar {get;set; }
+        public ProgressBar progressBar { get; set; }
 
         public TextView GetAdditionalStatusInfoView()
         {
@@ -5196,7 +5235,7 @@ namespace AndriodApp1
 
 
 
-        public void setItem(ITransferItem item)
+        public void setItem(ITransferItem item, bool isInBatchMode)
         {
             InnerTransferItem = item;
             TransferItem ti = item as TransferItem;
@@ -5236,8 +5275,36 @@ namespace AndriodApp1
                     progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
                 }
 #pragma warning restore 0618
-            }
+                if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+                {
+                    if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                    {
+                        this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                        //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                    }
+                    else
+                    {
+                        this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                        //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
+                    }
+                }
+                else
+                {
+                    //this.Background
+                    if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                    {
+                        this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                                               //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                    }
+                    else
+                    {
+                        this.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
+                                               //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
+                    }
+                }
 
+
+            }
         }
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
@@ -5253,14 +5320,14 @@ namespace AndriodApp1
 
     public class TransferItemViewMinimal : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
     {
-        public TransfersFragment.TransferViewHolder ViewHolder {get;set; }
+        public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewFilename;
-        public ITransferItem InnerTransferItem { get;set;}
+        public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
         private TextView viewStatusAdditionalInfo;
-        public ProgressBar progressBar {get;set; }
+        public ProgressBar progressBar { get; set; }
         public TransferItemViewMinimal(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_row, this, true);
@@ -5292,7 +5359,7 @@ namespace AndriodApp1
             //viewQueue = FindViewById<TextView>(Resource.Id.textView4);
         }
 
-        public void setItem(ITransferItem transferItem)
+        public void setItem(ITransferItem transferItem, bool isInBatchMode)
         {
             InnerTransferItem = transferItem;
             TransferItem ti = transferItem as TransferItem;
@@ -5396,7 +5463,7 @@ namespace AndriodApp1
         public static FolderItem CurrentlySelectedUploadFolder = null;
         public static bool CurrentlyInFolder()
         {
-            if(CurrentlySelectedDLFolder == null && CurrentlySelectedUploadFolder ==null)
+            if (CurrentlySelectedDLFolder == null && CurrentlySelectedUploadFolder == null)
             {
                 return false;
             }
@@ -5445,7 +5512,7 @@ namespace AndriodApp1
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            if(InUploadsMode)
+            if (InUploadsMode)
             {
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(true);
                 menu.FindItem(Resource.Id.action_abort_all).SetVisible(true);
@@ -5453,7 +5520,7 @@ namespace AndriodApp1
                 {
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
-                    
+
 
                     //todo: menu options.  clear all completed and aborted
                     //todo: menu options.  abort all - are you sure? dialog
@@ -5483,7 +5550,7 @@ namespace AndriodApp1
             {
                 menu.FindItem(Resource.Id.action_abort_all).SetVisible(false);
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(false);
-                if (CurrentlySelectedDLFolder==null)
+                if (CurrentlySelectedDLFolder == null)
                 {
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
@@ -5525,7 +5592,7 @@ namespace AndriodApp1
                         menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
                     }
 
-                    if(state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored) || isFailed) //i.e. if the overall state is failed OR if it contains any failed
+                    if (state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored) || isFailed) //i.e. if the overall state is failed OR if it contains any failed
                     {
                         menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
                     }
@@ -5557,7 +5624,7 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
                     MainActivity.LogInfoFirebase("Clear All Complete Pressed");
-                    if(CurrentlySelectedDLFolder==null)
+                    if (CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.ClearAllComplete();
                     }
@@ -5618,7 +5685,7 @@ namespace AndriodApp1
                 case Resource.Id.action_pause_all:
                     MainActivity.LogInfoFirebase("pause all Pressed");
                     SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    if(CurrentlySelectedDLFolder==null)
+                    if (CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.CancelAll();
                     }
@@ -5641,7 +5708,8 @@ namespace AndriodApp1
                         {
                             if (t.IsFaulted)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                {
                                     if (Context != null)
                                     {
                                         Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
@@ -5656,59 +5724,11 @@ namespace AndriodApp1
                             }
                             if (CurrentlySelectedDLFolder == null)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true); });
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
                             }
                             else
                             {
-                                DownloadRetryAllConditionLogic(false, false, CurrentlySelectedDLFolder);
-                            }
-                        }));
-                    }
-                    else
-                    {
-                        if(CurrentlySelectedDLFolder==null)
-                        {
-                            DownloadRetryAllConditionLogic(false, true);
-                        }
-                        else
-                        {
-                            DownloadRetryAllConditionLogic(false, false, CurrentlySelectedDLFolder);
-                        }
-                    }
-                    return true;
-                case Resource.Id.retry_all_failed:
-                    MainActivity.LogInfoFirebase("retry all failed Pressed");
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-                    {
-                        Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
-                        {
-                            return base.OnContextItemSelected(item);
-                        }
-                        t.ContinueWith(new Action<Task>((Task t) =>
-                        {
-                            if (t.IsFaulted)
-                            {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => {
-                                    if (Context != null)
-                                    {
-                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-                                    else
-                                    {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-
-                                });
-                                return;
-                            }
-                            if (CurrentlySelectedDLFolder == null)
-                            {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, true); });
-                            }
-                            else
-                            {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, CurrentlySelectedDLFolder); });
+                                DownloadRetryAllConditionLogic(false, false, CurrentlySelectedDLFolder, false);
                             }
                         }));
                     }
@@ -5716,16 +5736,70 @@ namespace AndriodApp1
                     {
                         if (CurrentlySelectedDLFolder == null)
                         {
-                            DownloadRetryAllConditionLogic(true, true);
+                            DownloadRetryAllConditionLogic(false, true, null, false);
                         }
                         else
                         {
-                            DownloadRetryAllConditionLogic(true, false, CurrentlySelectedDLFolder);
+                            DownloadRetryAllConditionLogic(false, false, CurrentlySelectedDLFolder, false);
                         }
                     }
                     return true;
+                case Resource.Id.retry_all_failed:
+                    RetryAllConditionEntry(true, false);
+                    return true;
             }
             return base.OnOptionsItemSelected(item);
+        }
+
+        public void RetryAllConditionEntry(bool failed, bool batchSelectedOnly)
+        {
+            MainActivity.LogInfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                {
+                    return;
+                }
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        {
+                            if (Context != null)
+                            {
+                                Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            }
+                            else
+                            {
+                                Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            }
+
+                        });
+                        return;
+                    }
+                    if (CurrentlySelectedDLFolder == null)
+                    {
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly); });
+                    }
+                    else
+                    {
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly); });
+                    }
+                }));
+            }
+            else
+            {
+                if (CurrentlySelectedDLFolder == null)
+                {
+                    DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly);
+                }
+                else
+                {
+                    DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly);
+                }
+            }
         }
 
 
@@ -5737,9 +5811,9 @@ namespace AndriodApp1
         {
             try
             {
-
+                TransfersActionMode?.Finish();
             }
-            catch(System.Exception)
+            catch (System.Exception)
             {
 
             }
@@ -5800,7 +5874,7 @@ namespace AndriodApp1
         public static void RestoreDownloadTransferItems(ISharedPreferences sharedPreferences)
         {
             string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_TransferList_v2, string.Empty); //TODO !!! replace
-            if(transferListv2 == string.Empty)
+            if (transferListv2 == string.Empty)
             {
                 RestoreDownloadTransferItemsLegacy(sharedPreferences);
             }
@@ -5840,7 +5914,7 @@ namespace AndriodApp1
 
                 TransferItemManagerDL = new TransferItemManager();
                 //populate the new data structure.
-                foreach(var ti in transferItemsLegacy)
+                foreach (var ti in transferItemsLegacy)
                 {
                     TransferItemManagerDL.Add(ti);
                 }
@@ -5863,15 +5937,15 @@ namespace AndriodApp1
         public static void BackwardsCompatFunction(List<TransferItem> transfers)
         {
             //this should eventually be removed.  its just for the old transfers which have state == None
-            foreach(var ti in transfers)
+            foreach (var ti in transfers)
             {
-                if(ti.State == TransferStates.None)
+                if (ti.State == TransferStates.None)
                 {
-                    if(ti.Failed)
+                    if (ti.Failed)
                     {
                         ti.State = TransferStates.Errored;
                     }
-                    else if(ti.Progress==100)
+                    else if (ti.Progress == 100)
                     {
                         ti.State = TransferStates.Succeeded;
                     }
@@ -5881,7 +5955,7 @@ namespace AndriodApp1
 
         private void SetNoTransfersMessage()
         {
-            if(TransfersFragment.InUploadsMode)
+            if (TransfersFragment.InUploadsMode)
             {
                 if (!(TransferItemManagerUploads.IsEmpty()))
                 {
@@ -5890,7 +5964,7 @@ namespace AndriodApp1
                 else
                 {
                     noTransfers.Visibility = ViewStates.Visible;
-                    if(MainActivity.MeetsSharingConditions())
+                    if (MainActivity.MeetsSharingConditions())
                     {
                         noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
                     }
@@ -5937,7 +6011,7 @@ namespace AndriodApp1
             //transferOptions.Click += TransferOptions_Click;
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
             sharedPreferences = SoulSeekState.SharedPreferences;
-            if(TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
+            if (TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             {
                 RestoreDownloadTransferItems(sharedPreferences);
                 RestoreUploadTransferItems(sharedPreferences);
@@ -5950,7 +6024,7 @@ namespace AndriodApp1
             //TransferAdapter customAdapter = new TransferAdapter(Context, transferItems);
             //primaryListView.Adapter = (customAdapter);
 
-            recycleLayoutManager = new CustomLinearLayoutManager(Activity); 
+            recycleLayoutManager = new CustomLinearLayoutManager(Activity);
             SetRecyclerAdapter();
             //if (savedInstanceState != null)
             //{
@@ -5988,7 +6062,7 @@ namespace AndriodApp1
         {
             ScrollPositionBeforeMovingIntoFolder = ((LinearLayoutManager)recycleLayoutManager).FindFirstVisibleItemPosition();
             View v = recyclerViewTransferItems.GetChildAt(0);
-            if (v==null)
+            if (v == null)
             {
                 ScrollOffsetBeforeMovingIntoFolder = 0;
             }
@@ -6003,11 +6077,16 @@ namespace AndriodApp1
             ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(ScrollPositionBeforeMovingIntoFolder, ScrollOffsetBeforeMovingIntoFolder); //if you dont do with offset, it scrolls it until the visible item is simply in view (so it will be at bottom, almost a whole screen off)
         }
 
+        public static ActionModeCallback TransfersActionModeCallback = null;
+        //public static Android.Support.V7.View.ActionMode TransfersActionMode = null;
+        public static ActionMode TransfersActionMode = null;
+        public static List<int> BatchSelectedItems = new List<int>();
+
         public void SetRecyclerAdapter()
         {
-            lock(TransferItemManagerWrapped.GetUICurrentList())
+            lock (TransferItemManagerWrapped.GetUICurrentList())
             {
-                if(GroupByFolder && !CurrentlyInFolder())
+                if (GroupByFolder && !CurrentlyInFolder())
                 {
                     recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItemManagerWrapped.GetUICurrentList() as List<FolderItem>);
                 }
@@ -6016,6 +6095,7 @@ namespace AndriodApp1
                     recyclerTransferAdapter = new TransferAdapterRecyclerIndividualItem(TransferItemManagerWrapped.GetUICurrentList() as List<TransferItem>);
                 }
                 recyclerTransferAdapter.TransfersFragment = this;
+                recyclerTransferAdapter.IsInBatchSelectMode = (TransfersActionMode != null);
                 recyclerViewTransferItems.SetAdapter(recyclerTransferAdapter);
             }
         }
@@ -6027,7 +6107,8 @@ namespace AndriodApp1
         /// <param name="e"></param>
         private void TranferQueueStateChanged(object sender, TransferItem e)
         {
-            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => {
+            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+            {
                 UpdateQueueState(e.FullFilename);
             }));
         }
@@ -6160,7 +6241,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             StaticHacks.TransfersFrag = this;
-            if(MainActivity.fromNotificationMoveToUploads)
+            if (MainActivity.fromNotificationMoveToUploads)
             {
                 MainActivity.fromNotificationMoveToUploads = false;
                 this.MoveToUploadForNotif();
@@ -6208,55 +6289,69 @@ namespace AndriodApp1
                 listOfUploadItems = writer.ToString();
             }
             lock (MainActivity.SHARED_PREF_LOCK)
-            lock (TransferStateSaveLock)
-            {
-                var editor = sharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_TransferList, listOfDownloadItems);
-                editor.PutString(SoulSeekState.M_TransferListUpload, listOfUploadItems);
-                editor.Commit();
-            }
+                lock (TransferStateSaveLock)
+                {
+                    var editor = sharedPreferences.Edit();
+                    editor.PutString(SoulSeekState.M_TransferList, listOfDownloadItems);
+                    editor.PutString(SoulSeekState.M_TransferListUpload, listOfUploadItems);
+                    editor.Commit();
+                }
 
 
 
 
-            //if (TransferItemManagerDL == null)
-            //{
-            //    return;
-            //}
-            //string serializedTransferItemManager = string.Empty;
-            //using (var writer = new System.IO.StringWriter())
-            //{
-            //    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerDL.GetType());
-            //    serializer.Serialize(writer, TransferItemManagerDL);
-            //    serializedTransferItemManager = writer.ToString();
-            //}
-            //lock (MainActivity.SHARED_PREF_LOCK)
-            //lock (TransferStateSaveLock)
-            //{
-            //    var editor = sharedPreferences.Edit();
-            //    editor.PutString(SoulSeekState.M_TransferList_v2, serializedTransferItemManager);
-            //    editor.Commit();
-            //}
+
         }
 
-        //public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        //{
-        //    base.OnCreateContextMenu(menu, (v as RecyclerView).GetLayoutManager().FindViewByPosition(0), menuInfo);
-        //    //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        //    menu.Add(0, 0, 0, "Retry Download");
-        //    menu.Add(1, 1, 1, "Clear from List");
-        //    menu.Add(2, 2, 2, "Cancel Download and Clear");
-        //}
 
-
-        private void DownloadRetryAllConditionLogic(bool failed, bool all, FolderItem specifiedFolderOnly=null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
+        private void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
         {
-            IEnumerable< TransferItem  > transferItemConditionList = new List<TransferItem >();
-            if(all)
+            IEnumerable<TransferItem> transferItemConditionList = new List<TransferItem>();
+            if(batchSelectedOnly)
             {
-                if(failed)
+                bool folderItems = false;
+                if(GroupByFolder && !CurrentlyInFolder())
                 {
-                    transferItemConditionList = TransferItemManagerDL.GetListOfFailed().Select(tup=>tup.Item1);
+                    folderItems = true;
+                }
+                List<TransferItem> tis = new List<TransferItem>();
+                foreach (int pos in BatchSelectedItems)
+                {
+                    if(folderItems)
+                    {
+                        var fi = TransferItemManagerDL.GetItemAtUserIndex(pos) as FolderItem;
+                        foreach(TransferItem ti in fi.TransferItems)
+                        {
+                            if (selectFailed && ti.Failed)
+                            {
+                                tis.Add(ti);
+                            }
+                            else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                            {
+                                tis.Add(ti);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var ti = TransferItemManagerDL.GetItemAtUserIndex(pos) as TransferItem;
+                        if(selectFailed && ti.Failed)
+                        {
+                            tis.Add(ti);
+                        }
+                        else if(!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                        {
+                            tis.Add(ti);
+                        }
+                    }
+                }
+                transferItemConditionList = tis;
+            }
+            else if (all)
+            {
+                if (selectFailed)
+                {
+                    transferItemConditionList = TransferItemManagerDL.GetListOfFailed().Select(tup => tup.Item1);
                 }
                 else
                 {
@@ -6265,7 +6360,7 @@ namespace AndriodApp1
             }
             else
             {
-                if (failed)
+                if (selectFailed)
                 {
                     transferItemConditionList = TransferItemManagerDL.GetListOfFailedFromFolder(specifiedFolderOnly).Select(tup => tup.Item1);
                 }
@@ -6275,16 +6370,16 @@ namespace AndriodApp1
                 }
             }
             bool exceptionShown = false;
-            foreach(TransferItem item in transferItemConditionList)
+            foreach (TransferItem item in transferItemConditionList)
             {
                 //TransferItem item1 = transferItems[info.Position];  
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 try
                 {
                     Android.Net.Uri incompleteUri = null;
-                    SetupCancellationToken(item,cancellationTokenSource, out _);
+                    SetupCancellationToken(item, cancellationTokenSource, out _);
                     Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.Size, cancellationTokenSource);
-                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource,item.QueueLength,0) { TransferItemReference = item })));
+                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -6293,7 +6388,7 @@ namespace AndriodApp1
                 }
                 catch (System.Exception error)
                 {
-                    Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                    Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
                     if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                     {
 
@@ -6302,7 +6397,7 @@ namespace AndriodApp1
                     {
                         MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
                     }
-                    if(!exceptionShown)
+                    if (!exceptionShown)
                     {
                         SoulSeekState.MainActivityRef.RunOnUiThread(a);
                         exceptionShown = true;
@@ -6313,23 +6408,24 @@ namespace AndriodApp1
                 //task.ContinueWith(SoulSeekState.MainActivityRef.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username,item1.FullFilename,item1.Size,task, cancellationTokenSource))));
                 item.Progress = 0; //no longer red... some good user feedback
                 item.Failed = false;
-                var refreshOnlySelected = new Action(() => { 
-                    
+                var refreshOnlySelected = new Action(() =>
+                {
+
                     int index = TransferItemManagerDL.GetUserIndexForTransferItem(item);
-                    if(index==-1&&InUploadsMode)
+                    if (index == -1 && InUploadsMode)
                     {
                         return;
                     }
                     recyclerTransferAdapter?.NotifyItemChanged(index);  //TODO: I dont like that we do the index later. things could have changed.
-                    
-                    
-                    });
+
+
+                });
                 lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
                 { //also can update this to do a partial refresh...
-                  refreshListView(refreshOnlySelected);
+                    refreshListView(refreshOnlySelected);
                 }
             }
-            
+
 
         }
 
@@ -6348,31 +6444,31 @@ namespace AndriodApp1
 
             TransferItem item1 = null;
             MainActivity.LogDebug("targetView is null? " + (targetView == null).ToString());
-            if(targetView == null)
+            if (targetView == null)
             {
-                SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist),ToastLength.Short);
+                SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
                 return;
             }
             string chosenFname = (targetView.InnerTransferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             string chosenUname = (targetView.InnerTransferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             MainActivity.LogDebug("chosenFname? " + chosenFname);
             item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
-            MainActivity.LogDebug("item1 is null?" + (item1==null).ToString());//tested
-            if (item1==null)
+            MainActivity.LogDebug("item1 is null?" + (item1 == null).ToString());//tested
+            if (item1 == null)
             {
                 SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
                 return;
             }
 
             //int tokenNum = int.MinValue;
-            if(SoulSeekState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
+            if (SoulSeekState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
             {
                 MainActivity.LogDebug("transfer is in Downloads !!! " + item1.FullFilename);
                 item1.CancelAndRetryFlag = true;
                 ClearTransferForRetry(item1, position);
-                if(item1.CancellationTokenSource!=null)
+                if (item1.CancellationTokenSource != null)
                 {
-                    if(!item1.CancellationTokenSource.IsCancellationRequested)
+                    if (!item1.CancellationTokenSource.IsCancellationRequested)
                     {
                         item1.CancellationTokenSource.Cancel();
                     }
@@ -6392,12 +6488,12 @@ namespace AndriodApp1
                 Android.Net.Uri incompleteUri = null;
                 SetupCancellationToken(item1, cancellationTokenSource, out _);
                 Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
-                    //SoulSeekState.SoulseekClient.DownloadAsync(
-                    //username: item1.Username,
-                    //filename: item1.FullFilename,
-                    //size: item1.Size,
-                    //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource,item1.QueueLength, 1) { TransferItemReference = item1 }))); //maybe do 1 here since we are already retrying it manually
+                //SoulSeekState.SoulseekClient.DownloadAsync(
+                //username: item1.Username,
+                //filename: item1.FullFilename,
+                //size: item1.Size,
+                //cancellationToken: cancellationTokenSource.Token);
+                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, 1) { TransferItemReference = item1 }))); //maybe do 1 here since we are already retrying it manually
             }
             catch (DuplicateTransferException)
             {
@@ -6407,7 +6503,7 @@ namespace AndriodApp1
             catch (System.Exception error)
             {
                 Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
-                if(error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
+                if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                 {
 
                 }
@@ -6418,7 +6514,7 @@ namespace AndriodApp1
                 SoulSeekState.MainActivityRef.RunOnUiThread(a);
                 return; //otherwise null ref with task!
             }
-            ClearTransferForRetry(item1,position);
+            ClearTransferForRetry(item1, position);
         }
 
         private void ClearTransferForRetry(TransferItem item1, int position)
@@ -6426,7 +6522,8 @@ namespace AndriodApp1
             item1.Progress = 0; //no longer red... some good user feedback
             item1.QueueLength = 0; //let the State Changed update this for us...
             item1.Failed = false;
-            var refreshOnlySelected = new Action(() => {
+            var refreshOnlySelected = new Action(() =>
+            {
 
                 MainActivity.LogDebug("notifyItemChanged " + position);
 
@@ -6454,7 +6551,7 @@ namespace AndriodApp1
                 Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                 return base.OnContextItemSelected(item);
             }
-            if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),ti.GetUsername(),SoulSeekState.ActiveActivityRef,this.View))
+            if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
             {
                 MainActivity.LogDebug("handled by commons");
                 return base.OnContextItemSelected(item);
@@ -6476,17 +6573,18 @@ namespace AndriodApp1
                         {
                             if (t.IsFaulted)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { 
-                                    if(Context!=null)
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                {
+                                    if (Context != null)
                                     {
-                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show(); 
+                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                     }
                                     else
                                     {
                                         Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                     }
-                                    
-                                    });
+
+                                });
                                 return;
                             }
                             SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryLogic(position); });
@@ -6506,7 +6604,7 @@ namespace AndriodApp1
                     {
                         try
                         {
-                            if(InUploadsMode)
+                            if (InUploadsMode)
                             {
                                 TransferItemManagerWrapped.RemoveAtUserIndex(position);
                             }
@@ -6515,10 +6613,10 @@ namespace AndriodApp1
                                 TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
                             }
                         }
-                        catch(ArgumentOutOfRangeException)
+                        catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.MainActivityRef,"Selected transfer does not exist anymore.. try again.",ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
@@ -6527,7 +6625,7 @@ namespace AndriodApp1
                     break;
                 case 2: //cancel and clear (downloads) OR abort and clear (uploads)
                     //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed"); 
+                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
                     ITransferItem tItem = null;
                     try
                     {
@@ -6539,7 +6637,7 @@ namespace AndriodApp1
                         Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                         return base.OnContextItemSelected(item);
                     }
-                    if(tItem is TransferItem tti)
+                    if (tItem is TransferItem tti)
                     {
                         bool wasInProgress = tti.State.HasFlag(TransferStates.InProgress);
                         CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
@@ -6559,7 +6657,7 @@ namespace AndriodApp1
                             recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
                     }
-                    else if(tItem is FolderItem fi)
+                    else if (tItem is FolderItem fi)
                     {
                         TransferItemManagerWrapped.CancelFolder(fi, true);
                         TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
@@ -6574,7 +6672,7 @@ namespace AndriodApp1
                         MainActivity.LogInfoFirebase("Cancel and Clear item pressed - bad item");
                     }
                     break;
-                case 3:  
+                case 3:
                     tItem = null;
                     try
                     {
@@ -6591,15 +6689,15 @@ namespace AndriodApp1
                     //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
 
 
-                    if(tItem is TransferItem)
+                    if (tItem is TransferItem)
                     {
                         GetQueuePosition(tItem as TransferItem);
                     }
-                    else if(tItem is FolderItem folderItem)
+                    else if (tItem is FolderItem folderItem)
                     {
-                        lock(folderItem.TransferItems)
+                        lock (folderItem.TransferItems)
                         {
-                            foreach(TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State == TransferStates.Queued))
+                            foreach (TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State == TransferStates.Queued))
                             {
                                 GetQueuePosition(transferItem);
                             }
@@ -6623,7 +6721,7 @@ namespace AndriodApp1
                         //tested on API25 and API30
                         //AndroidX.Core.Content.FileProvider
                         Android.Net.Uri uriToUse = null;
-                        if(SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
+                        if (SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
                         {
                             uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
                         }
@@ -6638,7 +6736,7 @@ namespace AndriodApp1
                         //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
                         this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
                     }
-                    catch(System.Exception e)
+                    catch (System.Exception e)
                     {
                         MainActivity.LogFirebase(e.Message + e.StackTrace);
                         Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
@@ -6657,7 +6755,8 @@ namespace AndriodApp1
                         {
                             if (t.IsFaulted)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                {
                                     if (Context != null)
                                     {
                                         Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
@@ -6670,12 +6769,12 @@ namespace AndriodApp1
                                 });
                                 return;
                             }
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem); });
+                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
                         }));
                     }
                     else
                     {
-                        DownloadRetryAllConditionLogic(false, false, ti as FolderItem);
+                        DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
                     }
                     break;
                 case 101: //pause folder or abort uploads (uploads)
@@ -6696,7 +6795,8 @@ namespace AndriodApp1
                         {
                             if (t.IsFaulted)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                {
                                     if (Context != null)
                                     {
                                         Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
@@ -6709,12 +6809,12 @@ namespace AndriodApp1
                                 });
                                 return;
                             }
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem); });
+                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
                         }));
                     }
                     else
                     {
-                        DownloadRetryAllConditionLogic(true, false, ti as FolderItem);
+                        DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
                     }
                     break;
                 case 103: //abort upload
@@ -6731,7 +6831,7 @@ namespace AndriodApp1
                         return base.OnContextItemSelected(item);
                     }
                     TransferItem uploadToCancel = tItem as TransferItem;
-                    
+
                     CancellationTokens.TryGetValue(ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
                     token?.Cancel();
                     //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
@@ -6744,7 +6844,7 @@ namespace AndriodApp1
                 case 104: //ignore (unshare) user
                     MainActivity.LogInfoFirebase("Unshare User item pressed");
                     IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
-                    foreach(var tiToCancel in tItems)
+                    foreach (var tiToCancel in tItems)
                     {
                         CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
                         token1?.Cancel();
@@ -6752,7 +6852,7 @@ namespace AndriodApp1
                         lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
                             int posOfCancelled = TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
-                            if(posOfCancelled!=-1)
+                            if (posOfCancelled != -1)
                             {
                                 recyclerTransferAdapter.NotifyItemChanged(posOfCancelled);
                             }
@@ -6760,9 +6860,178 @@ namespace AndriodApp1
                     }
                     SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, ti.GetUsername());
                     break;
+                case 105: //batch selection mode
+                    TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
+
+                    //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+                    //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
+                    TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                    recyclerTransferAdapter.IsInBatchSelectMode = true;
+                    ToggleItemBatchSelect(recyclerTransferAdapter, position);
+                    break;
             }
             return base.OnContextItemSelected(item);
         }
+
+        public static void ToggleItemBatchSelect(TransferAdapterRecyclerVersion recyclerTransferAdapter, int pos)
+        {
+            if (BatchSelectedItems.Contains(pos))
+            {
+                BatchSelectedItems.Remove(pos);
+            }
+            else
+            {
+                BatchSelectedItems.Add(pos);
+            }
+            recyclerTransferAdapter.NotifyItemChanged(pos);
+            int cnt = BatchSelectedItems.Count;
+            if (cnt == 0)
+            {
+                TransfersActionMode.Finish();
+            }
+            else
+            {
+                TransfersActionMode.Title = string.Format("{0} Selected", cnt.ToString());
+                TransfersActionMode.Invalidate();
+            }
+        }
+
+        public class ActionModeCallback : Java.Lang.Object, ActionMode.ICallback
+        {
+            public TransferAdapterRecyclerVersion Adapter;
+            public TransfersFragment Frag;
+            public bool OnCreateActionMode(ActionMode mode, IMenu menu)
+            {
+                mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
+                return true;
+            }
+
+            public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
+            {
+
+                if (TransfersFragment.InUploadsMode)
+                {
+                    //the only thing you can do is clear and abort the selected
+                    menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
+                    menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
+                    menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
+                    //mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
+                    return false;
+                }
+                else
+                {
+                    menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
+                    menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
+                    menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
+
+                    TransferStates transferStates = TransferStates.None;
+                    bool failed = false;
+                    foreach(int position in BatchSelectedItems)
+                    {
+                        var ti = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                        if(ti is TransferItem singleTi)
+                        {
+                            transferStates = singleTi.State | transferStates;
+                        }
+                        else if(ti is FolderItem folderTi)
+                        {
+                            transferStates = folderTi.GetState(out failed) | transferStates;
+                            if(failed)
+                            {
+                                transferStates = transferStates | TransferStates.Errored;
+                            }
+                        }
+                        if(transferStates.HasFlag(TransferStates.Cancelled))
+                        {
+                            menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(true);
+                        }
+                        if(transferStates.HasFlag(TransferStates.InProgress))
+                        {
+                            menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(true);
+                        }
+                        if(((transferStates & (TransferStates.Errored | TransferStates.Rejected | TransferStates.TimedOut)) != 0x0))
+                        {
+                            menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(true);
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
+            {
+                switch(item.ItemId)
+                {
+                    //this is the only option that uploads gets
+                    case Resource.Id.action_cancel_and_clear_all_batch:
+                        MainActivity.LogInfoFirebase("action_cancel_and_clear_batch Pressed");
+                        SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        TransferItemManagerWrapped.CancelSelectedItems(true);
+                        TransferItemManagerWrapped.ClearSelectedItemsAndClean();
+                        var selected = BatchSelectedItems.ToArray();
+                        BatchSelectedItems.Clear();
+                        foreach(int pos in selected)
+                        {
+                            Adapter.NotifyItemRemoved(pos);
+                        }
+                        //since all selected stuff is going away. its what Gmail action mode does.
+                        TransfersActionMode.Finish(); 
+                        break;
+                    case Resource.Id.pause_selected_batch:
+                        TransferItemManagerWrapped.CancelSelectedItems(false);
+                        selected = BatchSelectedItems.ToArray();
+                        BatchSelectedItems.Clear();
+                        foreach (int pos in selected)
+                        {
+                            Adapter.NotifyItemChanged(pos);
+                        }
+                        //since all selected stuff is going away. its what Gmail action mode does.
+                        TransfersActionMode.Finish();
+                        break;
+                    case Resource.Id.resume_selected_batch:
+                        Frag.RetryAllConditionEntry(false, true);
+                        selected = BatchSelectedItems.ToArray();
+                        BatchSelectedItems.Clear();
+                        foreach (int pos in selected)
+                        {
+                            Adapter.NotifyItemChanged(pos);
+                        }
+                        TransfersActionMode.Finish();
+                        break;
+                    case Resource.Id.retry_all_failed_batch:
+                        Frag.RetryAllConditionEntry(true, true);
+                        selected = BatchSelectedItems.ToArray();
+                        BatchSelectedItems.Clear();
+                        foreach (int pos in selected)
+                        {
+                            Adapter.NotifyItemChanged(pos);
+                        }
+                        TransfersActionMode.Finish();
+                        break;
+                    
+
+                }
+                return true;
+            }
+
+            public void OnDestroyActionMode(ActionMode mode)
+            {
+
+                int[] prevSelectedItems = new int[BatchSelectedItems.Count];
+                BatchSelectedItems.CopyTo(prevSelectedItems);
+                TransfersActionMode = null;
+                BatchSelectedItems.Clear();
+                this.Adapter.IsInBatchSelectMode = false;
+                foreach (int i in prevSelectedItems)
+                {
+                    this.Adapter.NotifyItemChanged(i);
+                }
+
+                //SoulSeekState.MainActivityRef.SupportActionBar.Show();
+            }
+
+        }
+
 
         public void GetQueuePosition(TransferItem ttItem)
         {
@@ -6779,7 +7048,7 @@ namespace AndriodApp1
                     else
                     {
                         int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t);
-                        if(indexOfItem==-1&&InUploadsMode)
+                        if (indexOfItem == -1 && InUploadsMode)
                         {
                             return null;
                         }
@@ -6804,14 +7073,14 @@ namespace AndriodApp1
                 int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename);
                 MainActivity.LogDebug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
                 MainActivity.LogDebug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
-                if(recyclerTransferAdapter.ItemCount == indexOfItem)
+                if (recyclerTransferAdapter.ItemCount == indexOfItem)
                 {
 
                 }
                 MainActivity.LogDebug("UI thread: " + Looper.MainLooper.IsCurrentThread);
                 recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
             }
-            catch(System.Exception)
+            catch (System.Exception)
             {
 
             }
@@ -6937,18 +7206,18 @@ namespace AndriodApp1
             //so this guys adapter is good and up to date.  but anything regarding View is bogus. Including the Views TextViews and InnerTransferItems. but its Adapter is good and visually everything looks fine...
 
             ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView; //its doing the wrong one!!! also its a bogus view, not shown anywhere on screen...
-            if(v!=null) //it scrolled out of view which is find bc it will get updated when it gets rebound....
+            if (v != null) //it scrolled out of view which is find bc it will get updated when it gets rebound....
             {
-                if(v is TransferItemViewFolder)
+                if (v is TransferItemViewFolder)
                 {
-                    
+
                     v.progressBar.Progress = (v.InnerTransferItem as FolderItem).GetFolderProgress(out long totalBytes, out long completedBytes);
 
                     TimeSpan? timeRemaining = null;
                     long bytesRemaining = totalBytes - completedBytes;
-                    if(avgSpeedBytes != 0)
+                    if (avgSpeedBytes != 0)
                     {
-                        timeRemaining = TimeSpan.FromSeconds(bytesRemaining/avgSpeedBytes);
+                        timeRemaining = TimeSpan.FromSeconds(bytesRemaining / avgSpeedBytes);
                     }
                     (v.InnerTransferItem as FolderItem).RemainingFolderTime = timeRemaining;
                     //TODO chain avg speeds so that its per folder rather than per transfer.
@@ -6976,8 +7245,8 @@ namespace AndriodApp1
                 else
                 {
                     v.progressBar.Progress = progress;
-                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), relevantItem,relevantItem.State);
-                    if(wasFailed)
+                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), relevantItem, relevantItem.State);
+                    if (wasFailed)
                     {
                         ClearProgressBarColor(v.progressBar);
                     }
@@ -7026,7 +7295,7 @@ namespace AndriodApp1
             //TransferAdapter customAdapter = null;
             if (Context == null)
             {
-                if(SoulSeekState.MainActivityRef == null)
+                if (SoulSeekState.MainActivityRef == null)
                 {
                     MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
@@ -7037,25 +7306,25 @@ namespace AndriodApp1
             {
                 //customAdapter = new TransferAdapter(Context, transferItems);
             }
-            if(this.noTransfers == null)
+            if (this.noTransfers == null)
             {
                 MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
                 return;
             }
             SetNoTransfersMessage();
-            if (specificRefreshAction==null)
+            if (specificRefreshAction == null)
             {
-            //primaryListView.Adapter = (customAdapter); try with just notifyDataSetChanged...
+                //primaryListView.Adapter = (customAdapter); try with just notifyDataSetChanged...
 
-                    //int oldCount = recyclerTransferAdapter.ItemCount;
-                    //int newCount = transferItems.Count;
-                    //MainActivity.LogDebug("!!! recyclerTransferAdapter.NotifyDataSetChanged() old:: " + oldCount + " new: " + newCount);
-                    ////old 73, new 73...
-                    //recyclerTransferAdapter.NotifyItemRangeRemoved(0,oldCount);
-                    //recyclerTransferAdapter.NotifyItemRangeInserted(0,newCount);
+                //int oldCount = recyclerTransferAdapter.ItemCount;
+                //int newCount = transferItems.Count;
+                //MainActivity.LogDebug("!!! recyclerTransferAdapter.NotifyDataSetChanged() old:: " + oldCount + " new: " + newCount);
+                ////old 73, new 73...
+                //recyclerTransferAdapter.NotifyItemRangeRemoved(0,oldCount);
+                //recyclerTransferAdapter.NotifyItemRangeInserted(0,newCount);
 
-                    recyclerTransferAdapter.NotifyDataSetChanged();
-                    //(primaryListView.Adapter as TransferAdapter).NotifyDataSetChanged();
+                recyclerTransferAdapter.NotifyDataSetChanged();
+                //(primaryListView.Adapter as TransferAdapter).NotifyDataSetChanged();
 
             }
             else
@@ -7076,7 +7345,7 @@ namespace AndriodApp1
 
             public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
             {
-                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem);
+                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem, this.IsInBatchSelectMode);
                 //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
             }
 
@@ -7094,17 +7363,30 @@ namespace AndriodApp1
                 }
                 view.setupChildren();
                 // .inflate(R.layout.text_row_item, viewGroup, false);
+                (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
                 return new TransferViewHolder(view as View);
             }
 
+            private void TransferAdapterRecyclerIndividualItem_Click(object sender, EventArgs e)
+            {
+                if (IsInBatchSelectMode)
+                {
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                }
+            }
+
             protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
             {
-                //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-                //pop.Inflate(Resource.Menu.download_diag_options);
-                //pop.Show();
-                setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
-                (sender as View).ShowContextMenu();
+                if (!IsInBatchSelectMode)
+                {
+                    setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    (sender as View).ShowContextMenu();
+                }
+                else
+                {
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                }
             }
 
         }
@@ -7119,7 +7401,7 @@ namespace AndriodApp1
 
             public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
             {
-                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as FolderItem);
+                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as FolderItem, this.IsInBatchSelectMode);
                 //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
             }
 
@@ -7135,30 +7417,44 @@ namespace AndriodApp1
 
             private void TransferAdapterRecyclerFolderItem_Click(object sender, EventArgs e)
             {
-                setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
-                FolderItem f = localDataSet[position] as FolderItem;
-                if(InUploadsMode)
+                if (IsInBatchSelectMode)
                 {
-                    CurrentlySelectedUploadFolder = f;
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
                 }
                 else
                 {
-                    CurrentlySelectedDLFolder = f;
+                    setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    FolderItem f = localDataSet[position] as FolderItem;
+                    if (InUploadsMode)
+                    {
+                        CurrentlySelectedUploadFolder = f;
+                    }
+                    else
+                    {
+                        CurrentlySelectedDLFolder = f;
+                    }
+
+                    TransfersFragment.SaveScrollPositionOnMovingIntoFolder();
+                    TransfersFragment.SetRecyclerAdapter();
+                    SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
+                    SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
                 }
-                
-                TransfersFragment.SaveScrollPositionOnMovingIntoFolder();
-                TransfersFragment.SetRecyclerAdapter();
-                SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
-                SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
             }
 
             protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
             {
-                //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-                //pop.Inflate(Resource.Menu.download_diag_options);
-                //pop.Show();
-                setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
-                (sender as View).ShowContextMenu();
+                if (IsInBatchSelectMode)
+                {
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                }
+                else
+                {
+                    //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
+                    //pop.Inflate(Resource.Menu.download_diag_options);
+                    //pop.Show();
+                    setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    (sender as View).ShowContextMenu();
+                }
             }
 
         }
@@ -7168,7 +7464,8 @@ namespace AndriodApp1
         {
             protected System.Collections.IList localDataSet;
             public override int ItemCount => localDataSet.Count;
-            protected int position=-1;
+            protected int position = -1;
+            public bool IsInBatchSelectMode;
 
             public TransfersFragment TransfersFragment;
 
@@ -7200,49 +7497,10 @@ namespace AndriodApp1
         }
 
 
-        //public class ContextMenuRecyclerView : RecyclerView
-        //{
-
-        //  private RecyclerViewContextMenuInfo mContextMenuInfo;
-
-        //        @Override
-        //  protected ContextMenu.ContextMenuInfo getContextMenuInfo()
-        //        {
-        //            return mContextMenuInfo;
-        //        }
-
-        //        @Override
-        //  public boolean showContextMenuForChild(View originalView)
-        //        {
-        //            final int longPressPosition = getChildPosition(originalView);
-        //            if (longPressPosition >= 0)
-        //            {
-        //                final long longPressId = getAdapter().getItemId(longPressPosition);
-        //                mContextMenuInfo = new RecyclerViewContextMenuInfo(longPressPosition, longPressId);
-        //                return super.showContextMenuForChild(originalView);
-        //            }
-        //            return false;
-        //        }
-
-        //        public static class RecyclerViewContextMenuInfo implements ContextMenu.ContextMenuInfo
-        //        {
-
-        //    public RecyclerViewContextMenuInfo(int position, long id)
-        //        {
-        //            this.position = position;
-        //            this.id = id;
-        //        }
-
-        //        final public int position;
-        //        final public long id;
-        //    }
-        //}
-
-
         public class TransferViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
         {
             private ITransferItemView transferItemView;
-            
+
 
             public TransferViewHolder(View view) : base(view)
             {
@@ -7269,25 +7527,25 @@ namespace AndriodApp1
                 bool isTransferItem = false;
                 bool anyFailed = false;
                 bool isUpload = false;
-                if(tvh?.InnerTransferItem is TransferItem tvhi)
+                if (tvh?.InnerTransferItem is TransferItem tvhi)
                 {
                     isTransferItem = true;
                     ti = tvhi;
                     isUpload = ti.IsUpload();
                 }
-                else if(tvh?.InnerTransferItem is FolderItem tvhf)
+                else if (tvh?.InnerTransferItem is FolderItem tvhf)
                 {
                     fi = tvhf;
                     folderItemState = fi.GetState(out anyFailed);
                     isUpload = fi.IsUpload();
                 }
-                
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-                if(!isUpload)
+
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+                if (!isUpload)
                 {
-                    if(isTransferItem)
+                    if (isTransferItem)
                     {
-                        if(tvh != null && ti != null&& ti.State.HasFlag(TransferStates.Cancelled) && ti.Progress>0)
+                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) && ti.Progress > 0)
                         {
                             menu.Add(0, 0, 0, Resource.String.resume_dl);
                         }
@@ -7302,7 +7560,7 @@ namespace AndriodApp1
                         {
                             menu.Add(0, 100, 0, "Resume Folder");
                         }
-                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed)&& !folderItemState.HasFlag(TransferStates.Succeeded)&& !folderItemState.HasFlag(TransferStates.Errored)&& !folderItemState.HasFlag(TransferStates.TimedOut)&& !folderItemState.HasFlag(TransferStates.Rejected)))
+                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
                         {
                             menu.Add(0, 101, 0, "Pause Folder");
                         }
@@ -7319,13 +7577,13 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState)));
+                        if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState))) ;
                         {
                             menu.Add(0, 101, 0, "Abort Uploads");
                         }
                     }
                 }
-                if(!isUpload)
+                if (!isUpload)
                 {
                     if (isTransferItem)
                     {
@@ -7378,25 +7636,25 @@ namespace AndriodApp1
                     }
                 }
 
-                if(!isUpload)
+                if (!isUpload)
                 {
                     if (isTransferItem)
                     {
 
-                        if (tvh!=null&& ti != null)
+                        if (tvh != null && ti != null)
                         {
-                            if(ti.QueueLength>0) 
+                            if (ti.QueueLength > 0)
                             {
                                 //the queue length of a succeeded download can be 183......
                                 //bc queue length AND free upload slots!!
-                                if(ti.State.HasFlag(TransferStates.Succeeded) ||
+                                if (ti.State.HasFlag(TransferStates.Succeeded) ||
                                     ti.State.HasFlag(TransferStates.Completed))
                                 {
                                     //no op
                                 }
                                 else
                                 {
-                                    menu.Add(3,3,3, Resource.String.refresh_queue_pos);
+                                    menu.Add(3, 3, 3, Resource.String.refresh_queue_pos);
                                 }
                             }
                         }
@@ -7427,9 +7685,9 @@ namespace AndriodApp1
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri!=string.Empty)
+                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri != string.Empty)
                         {
-                            menu.Add(4,4,4, Resource.String.play_file);
+                            menu.Add(4, 4, 4, Resource.String.play_file);
                         }
                     }
                     else
@@ -7441,20 +7699,21 @@ namespace AndriodApp1
                         }
                     }
                 }
-                var subMenu = menu.AddSubMenu(5,5,5,"User Options");
-                subMenu.Add(6,6,6,Resource.String.browse_user);
-                subMenu.Add(7,7,7, Resource.String.search_user_files);
+                var subMenu = menu.AddSubMenu(5, 5, 5, "User Options");
+                subMenu.Add(6, 6, 6, Resource.String.browse_user);
+                subMenu.Add(7, 7, 7, Resource.String.search_user_files);
                 Helpers.AddAddRemoveUserMenuItem(subMenu, 8, 8, 8, tvh.InnerTransferItem.GetUsername(), false);
-                subMenu.Add(9,9,9,Resource.String.msg_user);
-                subMenu.Add(10,10,10, Resource.String.get_user_info);
+                subMenu.Add(9, 9, 9, Resource.String.msg_user);
+                subMenu.Add(10, 10, 10, Resource.String.get_user_info);
                 Helpers.AddUserNoteMenuItem(subMenu, 11, 11, 11, tvh.InnerTransferItem.GetUsername());
                 Helpers.AddGivePrivilegesIfApplicable(subMenu, 12);
 
-                if(isUpload)
+                if (isUpload)
                 {
                     menu.Add(6, 104, 6, "Ignore (Unshare) User");
                 }
-
+                //finally batch selection mode
+                menu.Add(16, 105, 16, "Batch Select");
             }
 
         }
@@ -7462,7 +7721,7 @@ namespace AndriodApp1
         private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUI e)
         {
             bool needsRefresh = (e.ti.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.ti.IsUpload()) && !(TransfersFragment.InUploadsMode));
-            if(!needsRefresh)
+            if (!needsRefresh)
             {
                 return;
             }
@@ -7470,7 +7729,7 @@ namespace AndriodApp1
             {
                 if (e.fullRefresh)
                 {
-                    
+
                     Action action = refreshListViewSafe; //notify data set changed...
                                                          //if (indexRemoved!=-1)
                                                          //{
@@ -7501,7 +7760,7 @@ namespace AndriodApp1
                 {
                     try
                     {
-                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename+e.ti.Username);
+                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename + e.ti.Username);
 
                         DateTime now = DateTime.UtcNow;
                         DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.ti.FullFilename + e.ti.Username, now); //this returns now if the key is not in the dictionary!
@@ -7521,7 +7780,7 @@ namespace AndriodApp1
                             return;
                         }
 
-                        
+
                         //partial refresh just update progress..
                         //TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.ti.FullFilename, out index);
 
@@ -7529,7 +7788,8 @@ namespace AndriodApp1
 
                         //int indexToUpdate = transferItems.IndexOf(relevantItem);
 
-                        Activity?.RunOnUiThread(() => {
+                        Activity?.RunOnUiThread(() =>
+                        {
                             int index = -1;
                             index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
                             if (index == -1)
@@ -7555,10 +7815,11 @@ namespace AndriodApp1
 
         private void TransferStateChangedItem(object sender, TransferItem ti)
         {
-            Action action = new Action(() => {
+            Action action = new Action(() =>
+            {
 
                 int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti); //todo null ti
-                if(index==-1)
+                if (index == -1)
                 {
                     return; //this is likely an upload when we are on downloads page or vice versa.
                 }
@@ -7570,11 +7831,12 @@ namespace AndriodApp1
 
         private void TransferStateChanged(object sender, int index)
         {
-            Action action = new Action(() => { 
-                
-                refreshListViewSpecificItem(index); 
-                
-               });
+            Action action = new Action(() =>
+            {
+
+                refreshListViewSpecificItem(index);
+
+            });
             SoulSeekState.MainActivityRef.RunOnUiThread(action);
         }
 
@@ -7587,7 +7849,7 @@ namespace AndriodApp1
             MainActivity.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
             MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
 
-            if(recyclerTransferAdapter!=null)
+            if (recyclerTransferAdapter != null)
             {
                 recyclerTransferAdapter.NotifyDataSetChanged();
             }
@@ -7597,18 +7859,18 @@ namespace AndriodApp1
 
         private void MainActivity_TransferAddedUINotify(object sender, TransferItem e)
         {
-            if(MainActivity.OnUIthread())
+            if (MainActivity.OnUIthread())
             {
-                if(e.IsUpload() && InUploadsMode)
+                if (e.IsUpload() && InUploadsMode)
                 {
                     lock (TransferItemManagerWrapped.GetUICurrentList())
                     { //todo can update this to do a partial refresh... just the index..
-                        if(GroupByFolder && !CurrentlyInFolder())
+                        if (GroupByFolder && !CurrentlyInFolder())
                         {
                             //folderview - so we may insert or update
                             //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
                             refreshListView(); //just to be safe...
-                        
+
                         }
                         else
                         {
@@ -7643,11 +7905,11 @@ namespace AndriodApp1
         {
 
             MainActivity.ClearDownloadAddedEventsFromTarget(this);
-            MainActivity.DownloadAddedUINotify += SoulSeekState_DownloadAddedUINotify; 
+            MainActivity.DownloadAddedUINotify += SoulSeekState_DownloadAddedUINotify;
             //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
             //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
             //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
-            
+
 
             base.OnCreate(savedInstanceState);
         }
@@ -7655,9 +7917,10 @@ namespace AndriodApp1
 
         private void SoulSeekState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-            //occurs on nonUI thread...
-            //if there is any deadlock due to this, then do Thread.Start().
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
+                //occurs on nonUI thread...
+                //if there is any deadlock due to this, then do Thread.Start().
                 lock (TransferItemManagerDL.GetUICurrentList())
                 { //todo can update this to do a partial refresh... just the index..
                     refreshListView();
@@ -7697,90 +7960,4 @@ namespace AndriodApp1
 
 
     }
-
-    //    public class ChangeUserTargetDialog : Android.Support.V4.App.DialogFragment
-    //{
-    //    private EditText chooseUserInput = null;
-    //    private AndroidX.AppCompat.Widget.AppCompatRadioButton allUsers = null;
-    //    private AndroidX.AppCompat.Widget.AppCompatRadioButton chosenUser = null;
-    //    private AndroidX.AppCompat.Widget.AppCompatRadioButton userList = null;
-
-    //    public ChangeUserTargetDialog() :base()
-    //    {
-    //    }
-
-    //    public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    //    {
-    //        return inflater.Inflate(Resource.Layout.changeusertarget, container); //container is parent
-    //    }
-
-    //    public override void OnCreate(Bundle savedInstanceState)
-    //    {
-    //        base.OnCreate(savedInstanceState);
-    //    }
-
-
-    //    /// <summary>
-    //    /// Called after on create view
-    //    /// </summary>
-    //    /// <param name="view"></param>
-    //    /// <param name="savedInstanceState"></param>
-    //    public override void OnViewCreated(View view, Bundle savedInstanceState)
-    //    {
-    //        this.SetStyle((int)Android.App.DialogFragmentStyle.NoTitle, 0);
-    //        allUsers = this.View.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.allUsers);
-    //        chosenUser = this.View.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.chosenUser);
-    //        userList = this.View.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.targetUserList);
-
-    //        chooseUserInput = this.View.FindViewById<EditText>(Resource.Id.chosenUserInput);
-    //        chooseUserInput.Text = SearchFragment.SearchTargetChosenUser;
-
-
-    //        switch (SearchFragment.SearchTarget)
-    //        {
-    //            case SearchTarget.AllUsers:
-    //                allUsers.Checked = true;
-    //                chooseUserInput.Visibility = ViewStates.Gone;
-    //                break;
-    //            case SearchTarget.UserList:
-    //                userList.Checked = true;
-    //                chooseUserInput.Visibility = ViewStates.Gone;
-    //                break;
-    //            case SearchTarget.ChosenUser:
-    //                chosenUser.Checked = true;
-    //                chooseUserInput.Visibility = ViewStates.Visible;
-    //                break;
-
-    //        }
-
-    //        allUsers.Click += AllUsers_Click;
-    //        chosenUser.Click += ChosenUser_Click;
-    //        userList.Click += UserList_Click;
-    //        chooseUserInput.TextChanged += ChooseUserInput_TextChanged;
-    //    }
-
-    //    private void ChooseUserInput_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
-    //    {
-    //        SearchFragment.SearchTargetChosenUser = e.Text.ToString();
-    //    }
-
-    //    private void AllUsers_Click(object sender, EventArgs e)
-    //    {
-    //        SearchFragment.SearchTarget = SearchTarget.AllUsers;
-    //        chooseUserInput.Visibility = ViewStates.Gone;
-    //    }
-
-    //    private void ChosenUser_Click(object sender, EventArgs e)
-    //    {
-    //        SearchFragment.SearchTarget = SearchTarget.ChosenUser;
-    //        chooseUserInput.Visibility = ViewStates.Visible;
-    //    }
-
-    //    private void UserList_Click(object sender, EventArgs e)
-    //    {
-    //        SearchFragment.SearchTarget = SearchTarget.UserList;
-    //        chooseUserInput.Visibility = ViewStates.Gone;
-    //    }
-
-    //}
 }

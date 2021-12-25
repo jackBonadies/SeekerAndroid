@@ -1,0 +1,37 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+
+xmlns:app="http://schemas.android.com/apk/res-auto">
+
+	<item android:id="@+id/action_cancel_and_clear_all_batch"
+  android:title="Cancel and Clear All"
+  app:showAsAction="always"
+  android:iconifiedByDefault="true"
+  android:icon="@drawable/trash_can_outline"
+
+ />
+
+
+	<item android:id="@+id/resume_selected_batch"
+  android:title="Resume Selected"
+  app:showAsAction="never"
+  android:showAsAction="never"
+  android:iconifiedByDefault="false"
+ />
+
+	<item android:id="@+id/pause_selected_batch"
+  android:title="Pause Selected"
+  app:showAsAction="never"
+  android:showAsAction="never"
+  android:iconifiedByDefault="false"
+ />
+
+
+	<item android:id="@+id/retry_all_failed_batch"
+	android:title="Retry Failed"
+app:showAsAction="never"
+android:showAsAction="never"
+	android:iconifiedByDefault="false"
+ />
+
+
+</menu>
