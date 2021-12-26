@@ -2614,7 +2614,14 @@ namespace AndriodApp1
                 if (SoulSeekState.ActiveActivityRef != null)
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
+                        if(isPrivate)
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
+                        }
+                        else
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.publicRoomCreation), ToastLength.Short).Show();
+                        }
                     });
                 }
             }
