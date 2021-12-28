@@ -8,6 +8,10 @@
     android:paddingBottom="4dp"
     android:paddingTop="2dp"
     android:background = "?attr/cell_shape_end_dldiag"
+    
+    android:foreground="?android:attr/selectableItemBackground"
+    
+    
     >
 
     <TextView

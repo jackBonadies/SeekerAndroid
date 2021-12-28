@@ -27,7 +27,7 @@ namespace Soulseek
         /// </summary>
         /// <param name="response">The search response which raised the event.</param>
         /// <param name="search">The search instance with which to initialize data.</param>
-        internal SearchResponseReceivedEventArgs(SearchResponse response, Search search)
+        public SearchResponseReceivedEventArgs(SearchResponse response, Search search)
             : base(search)
         {
             Response = response;

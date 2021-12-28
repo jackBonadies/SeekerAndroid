@@ -6,6 +6,9 @@
     android:layout_width = "fill_parent"
     android:layout_height = "wrap_content"
     android:background = "@android:color/white"
+    
+    android:foreground="?android:attr/selectableItemBackground"
+    
     >
 
     <TextView

@@ -10,6 +10,8 @@
     android:layout_height = "wrap_content"
 
     android:descendantFocusability="beforeDescendants"
+    
+    android:foreground="?android:attr/selectableItemBackground"
 
     >
     <TextView

@@ -8,6 +8,9 @@
    android:orientation="horizontal"
     android:descendantFocusability="beforeDescendants"
     android:background="?attr/cell_shape_end"
+    
+    
+    
     >
 
 
@@ -20,6 +23,8 @@
     android:layout_height = "wrap_content"
     android:clickable="true"
     android:focusable="true"
+        
+        android:foreground="?android:attr/selectableItemBackground"
 
     >
     <TextView
@@ -137,6 +142,7 @@
             android:visibility="gone"
             android:paddingLeft="18dp"
             android:id="@+id/detailsExpandable"
+            android:paddingBottom = "8dp"
             >
             </LinearLayout>
 </LinearLayout>

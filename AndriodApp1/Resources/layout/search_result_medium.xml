@@ -8,6 +8,7 @@
     android:id = "@+id/relativeLayout1"
     android:layout_width = "fill_parent"
     android:layout_height = "wrap_content"
+    android:foreground="?android:attr/selectableItemBackground"
     android:descendantFocusability="beforeDescendants"
     android:background = "?attr/cell_shape_end"
     >

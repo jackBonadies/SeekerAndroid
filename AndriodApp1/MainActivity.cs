@@ -918,6 +918,39 @@ namespace AndriodApp1
             return Username;
         }
 
+        public string GetDisplayFolderName()
+        {
+            //this is similar to QT (in the case of Seeker multiple subdirectories)
+            //but not quite.
+            //QT will show subdirs/complete/Soulseek Downloads/Music/H: (where everything after subdirs is your download folder)
+            //whereas we just show subdirs
+            //subdirs is folder name in both cases for single folder, 
+            // and say (01 / 2020 / test_folder) for nested.
+            if (GetDirectoryLevel() == 1)
+            {
+                //they are the same
+                return FolderName;
+            }
+            else
+            {
+                //split reverse.
+                var reversedArray = this.FolderName.Split('\\').Reverse();
+                return string.Join('\\', reversedArray);
+            }
+        }
+
+        public int GetDirectoryLevel()
+        {
+            //just parent folder = level 1 (search result and browse single dir case)
+            //grandparent = level 2 (browse download subdirs case - i.e. Album, Album > covers)
+            //etc.
+            if (this.FolderName == null || !this.FolderName.Contains('\\'))
+            {
+                return 1;
+            }
+            return this.FolderName.Split('\\').Count();
+        }
+
         /// <summary>
         /// int - percent.
         /// </summary>
@@ -1054,7 +1087,7 @@ namespace AndriodApp1
             }
         }
 
-        public string FolderName;
+        public string FolderName; //this is always ex "Album Name" or for depth > 1 "GrandParent/Parent".  Display Folder name is reversed.
         public string Username;
         public List<TransferItem> TransferItems;
 
@@ -1976,7 +2009,7 @@ namespace AndriodApp1
 
         private static string GetFolderNameFromTransferItem(TransferItem ti)
         {
-            if(string.IsNullOrEmpty(ti.FolderName))
+            if(string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
             {
                 return Helpers.GetFolderNameFromFile(ti.FullFilename);
             }
@@ -6867,7 +6900,7 @@ namespace AndriodApp1
                     item1.QueueLength = 0;
                     Android.Net.Uri incompleteUri = null;
                     Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
-                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0) { TransferItemReference = item1 })));
+                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0, item1.GetDirectoryLevel()) { TransferItemReference = item1 })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -7979,7 +8012,7 @@ namespace AndriodApp1
                             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                             Android.Net.Uri incompleteUri = null;
                             Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
-                            retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception))));
+                            retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
                         }
                         catch (System.Exception e)
                         {
@@ -8100,7 +8133,7 @@ namespace AndriodApp1
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 Android.Net.Uri incompleteUri = null;
                                 Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
-                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 1, task.Exception))));
+                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 1, task.Exception, e.dlInfo.Depth))));
                             }
                             catch(System.Exception e)
                             {
@@ -8145,13 +8178,13 @@ namespace AndriodApp1
                 string finalUri = string.Empty;
                 if(task is Task<byte[]> tbyte)
                 {
-                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, out finalUri);
+                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, out finalUri);
                     SaveFileToMediaStore(path);
                 }
                 else if(task is Task<Tuple<string, string>> tString)
                 {
                     //move file...
-                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, out finalUri);
+                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, out finalUri);
                     SaveFileToMediaStore(path);
                 }
                 else
@@ -8558,10 +8591,10 @@ namespace AndriodApp1
         public static object lock_toplevel_ifexist_create = new object();
         public static object lock_album_ifexist_create = new object();
 
-        public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
+        public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
             string name = Helpers.GetFileNameFromFile(fullfilename);
-            string dir = Helpers.GetFolderNameFromFile(fullfilename);
+            //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
             bool useDownloadDir = false;
@@ -8616,7 +8649,7 @@ namespace AndriodApp1
                         }
                     }
 
-                    string fullDir = rootdir + @"/Soulseek Incomplete/" + Helpers.GenerateIncompleteFolderName(username, dir); //+ @"/" + name;
+                    string fullDir = rootdir + @"/Soulseek Incomplete/" + Helpers.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
                     musicDir = new Java.IO.File(fullDir);
                     lock(lock_album_ifexist_create)
                     {
@@ -8743,7 +8776,7 @@ namespace AndriodApp1
                     }
 
 
-                    string album_folder_name = Helpers.GenerateIncompleteFolderName(username, dir);
+                    string album_folder_name = Helpers.GenerateIncompleteFolderName(username, fullfilename, depth);
                     lock (lock_album_ifexist_create)
                     {
                         folderDir1 = slskDir1.FindFile(album_folder_name); //does the folder we want to save to exist
@@ -8880,10 +8913,10 @@ namespace AndriodApp1
 
 
 
-        private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, out string finalUri)
+        private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, int depth, out string finalUri)
         {
             string name = Helpers.GetFileNameFromFile(fullfilename);
-            string dir  = Helpers.GetFolderNameFromFile(fullfilename);
+            string dir  = Helpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
             if(memoryMode && (bytes == null || bytes.Length==0))
@@ -9067,16 +9100,41 @@ namespace AndriodApp1
                         slskDir1 = tempUsernameDir1;
                     }
 
-
-                    folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
-                    if(folderDir1 == null || !folderDir1.Exists())
+                    if(depth==1)
                     {
-                        LogDebug("Creating " + dir);
-                        folderDir1 = slskDir1.CreateDirectory(dir);
+                        folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
+                        if(folderDir1 == null || !folderDir1.Exists())
+                        {
+                            LogDebug("Creating " + dir);
+                            folderDir1 = slskDir1.CreateDirectory(dir);
+                        }
+                        if(folderDir1== null || !folderDir1.Exists())
+                        {
+                            LogFirebase("folderDir is null or does not exists");
+                        }
                     }
-                    if(folderDir1== null || !folderDir1.Exists())
+                    else
                     {
-                        LogFirebase("folderDir is null or does not exists");
+                        DocumentFile folderDirNext = null;
+                        folderDir1 = slskDir1;
+                        int _depth = depth;
+                        while (_depth > 0)
+                        {
+                            var parts = dir.Split('\\');
+                            string singleDir = parts[parts.Length - _depth];
+                            folderDirNext = folderDir1.FindFile(singleDir); //does the folder we want to save to exist
+                            if (folderDirNext == null || !folderDirNext.Exists())
+                            {
+                                LogDebug("Creating " + dir);
+                                folderDirNext = folderDir1.CreateDirectory(singleDir);
+                            }
+                            if (folderDirNext == null || !folderDirNext.Exists())
+                            {
+                                LogFirebase("folderDir is null or does not exists, depth" + _depth);
+                            }
+                            folderDir1 = folderDirNext;
+                            _depth--;
+                        }
                     }
                     //folderDir1 = slskDir1.FindFile(dir); //if it does not exist you then have to get it again!!
                 }
@@ -9765,17 +9823,18 @@ namespace AndriodApp1
         public Exception PreviousFailureException; //used for diagnostic purposes.
         public Android.Net.Uri IncompleteLocation = null; //used in the file backed case..
         public TransferItem TransferItemReference = null; //reference to the associated transfer item that we create based on this dl info. we use this to store the complete uri for later playback option.
-        public DownloadInfo(string usr, string file, long size,Task task, CancellationTokenSource token, int queueLength, int retryCount)
+        public int Depth = 1;
+        public DownloadInfo(string usr, string file, long size,Task task, CancellationTokenSource token, int queueLength, int retryCount, int depth)
         {
-            username = usr; fullFilename = file; downloadTask = task;Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount;
+            username = usr; fullFilename = file; downloadTask = task;Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; Depth = depth;
         }
-        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount,  Exception previousFailureException)
+        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount,  Exception previousFailureException, int depth)
         {
-            username = usr; fullFilename = file; downloadTask = task; Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; PreviousFailureException = previousFailureException; 
+            username = usr; fullFilename = file; downloadTask = task; Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; PreviousFailureException = previousFailureException; Depth = depth;
         }
-        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount, Android.Net.Uri incompleteLocation)
+        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount, Android.Net.Uri incompleteLocation, int depth)
         {
-            username = usr; fullFilename = file; downloadTask = task; Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; IncompleteLocation = incompleteLocation;
+            username = usr; fullFilename = file; downloadTask = task; Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; IncompleteLocation = incompleteLocation; Depth = depth;
         }
     }
 
@@ -10566,8 +10625,18 @@ namespace AndriodApp1
             }
         }
 
-        public static string GenerateIncompleteFolderName(string username, string albumFolderName)
+        public static string GenerateIncompleteFolderName(string username, string fullFileName, int depth)
         {
+            string albumFolderName = null;
+            if (depth==1)
+            {
+                albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
+            }
+            else
+            {
+                albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = albumFolderName.Replace('\\','_');
+            }
             string incompleteFolderName = username + "_" + albumFolderName;
             //Path.GetInvalidPathChars() doesnt seem like enough bc I still get failures on ''' and '&'
             foreach (char c in System.IO.Path.GetInvalidPathChars().Union(new []{'&','\''}))
@@ -11095,15 +11164,32 @@ namespace AndriodApp1
             }
         }
 
-        public static string GetFolderNameFromFile(string filename)
+        public static string GetFolderNameFromFile(string filename, int levels=1)
         {
             try
             {
-                int end = filename.LastIndexOf("\\");
-                string clipped = filename.Substring(0, end);
-                int beginning = clipped.LastIndexOf("\\") + 1;
-                return clipped.Substring(beginning);
-            }
+                int folderCount = 0;
+                int index = -1; //-1 is important.  i.e. in the case of Folder\test.mp3, it can be Folder.
+                int firstIndex = int.MaxValue;
+                for (int i = filename.Length - 1; i >= 0; i--)
+                {
+                    if (filename[i] == '\\')
+                    {
+                        folderCount++;
+                        if (firstIndex == int.MaxValue)
+                        {
+                            //strip off the file name
+                            firstIndex = i;
+                        }
+                        if (folderCount == (levels + 1))
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                return filename.Substring(index + 1, firstIndex - index - 1);
+            }           
             catch
             {
                 return "";
@@ -11986,3 +12072,49 @@ namespace AndriodApp1
 
 
 }
+
+
+#if DEBUG
+public static class TestClient
+{
+    public static async Task<IReadOnlyCollection<SearchResponse>> SearchAsync(string searchString, Action<SearchResponseReceivedEventArgs> actionToInvoke, CancellationToken ct)
+    {
+
+        await Task.Delay(2).ConfigureAwait(false);
+        var responseBag = new System.Collections.Concurrent.ConcurrentBag<SearchResponse>();
+        Random r = new Random();
+        int x = r.Next(0,3);
+        int maxSleep = 100;
+        switch(x)
+        {
+            case 0:
+                maxSleep = 1; //v fast case
+                break;
+            case 1:
+                maxSleep = 10; //fast case
+                break;
+            case 2:
+                maxSleep = 200; //trickling in case
+                break;
+        }
+        AndriodApp1.MainActivity.LogDebug("max sleep: " + maxSleep);
+        for (int i = 0; i < 1000; i++)
+        {
+            List<Soulseek.File> fs = new List<Soulseek.File>();
+            for (int j = 0; j < 1; j++)
+            {
+                fs.Add(new Soulseek.File(1, searchString + i + "\\" + "1. test filename " + i, 0, ".mp3", null));
+                fs.Add(new Soulseek.File(1, searchString + i + "\\" + "2. test filename " + i, 0, ".mp3", null));
+                fs.Add(new Soulseek.File(1, searchString + i + "\\" + "3. test filename " + i, 0, ".mp3", null));
+            }
+            SearchResponse response = new SearchResponse("test" + i, r.Next(0, 100000), r.Next(0, 10), r.Next(0, 12345), (long)(r.Next(0, 14556)), fs);
+            var eventArgs = new SearchResponseReceivedEventArgs(response, null);
+            responseBag.Add(response);
+            actionToInvoke(eventArgs);
+            ct.ThrowIfCancellationRequested();
+            System.Threading.Thread.Sleep(r.Next(0, maxSleep));
+        }
+        return responseBag.ToList().AsReadOnly();
+    }
+}
+#endif
