@@ -31,15 +31,16 @@
 
         android:id="@+id/recyclerViewChips" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_below = "@id/recyclerViewChips"
             android:minWidth="25px"
+            android:scrollbars="vertical"
                   android:paddingBottom="80dp"
             android:clipToPadding="false"
             android:minHeight="25px"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/listView1" />
+            android:id="@+id/recyclerViewSearches" />
 
     </RelativeLayout>
         <RelativeLayout

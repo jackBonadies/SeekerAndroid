@@ -1214,7 +1214,7 @@ namespace AndriodApp1
                 MainActivity.LogDebug("Search Fragment On Resume for wishlist");
                 this.GoToTab(MainActivity.goToSearchTab, false, true);
                 MainActivity.goToSearchTab = int.MaxValue;
-            }
+            }            
         }
         public View rootView = null;
         //private SearchResponse[] cachedSearchResults = null;
@@ -1262,6 +1262,7 @@ namespace AndriodApp1
                 SearchTabHelper.FilterSpecialFlags.Clear();
                 EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
                 filterText.Text = string.Empty;
+                FilterStickyString = string.Empty;
             }
         }
 
@@ -1307,6 +1308,11 @@ namespace AndriodApp1
             }
 
             ActionBarMenu = menu;
+
+            if(SearchTabHelper.CurrentlySearching)
+            {
+                GetTransitionDrawable().StartTransition(0);
+            }
             //ActionBar actionBar = getActionBar();
             //// add the custom view to the action bar
             //actionBar.setCustomView(R.layout.actionbar_view);
@@ -1438,7 +1444,7 @@ namespace AndriodApp1
             {
                 filter.Text = SearchTabHelper.FilterString;
             }
-
+            UpdateDrawableState(filter, true);
         }
 
         private void SetTransitionDrawableState()
@@ -1513,9 +1519,12 @@ namespace AndriodApp1
                             UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
                         }
                         SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-                        SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses); //this throws, its not ready..
-                        ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                        lv.Adapter = (customAdapter);
+                        //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses); //this throws, its not ready..
+                        //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
+                        //lv.Adapter = (customAdapter);
+
+                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
+                        recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
 
                         SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1523,10 +1532,13 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
-                        MainActivity.LogDebug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
-                        ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                        lv.Adapter = (customAdapter);
+                        //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
+                        //MainActivity.LogDebug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
+                        //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
+                        //lv.Adapter = (customAdapter);
+
+                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList());
+                        recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
 
                         SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1543,6 +1555,8 @@ namespace AndriodApp1
                         GetSearchFragmentMoreDiag();
                     }
                     this.Activity.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
+
+                    SetTransitionDrawableState();
                 });
                 if (SoulSeekState.MainActivityRef == null)
                 {
@@ -1823,17 +1837,17 @@ namespace AndriodApp1
             //notify changed isnt enough if the xml is different... it is enough in the case of expandAll to collapseAll tho..
 
             //(rootView.FindViewById<ListView>(Resource.Id.listView1).Adapter as SearchAdapter).NotifyDataSetChanged();
-            ListView lv = rootView.FindViewById<ListView>(Resource.Id.listView1);
+            RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
             if (SearchTabHelper.FilteredResults)
             {
-                SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.FilteredResponses);
-                lv.Adapter = (customAdapter);
+                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
+                rv.SetAdapter(customAdapter);
             }
             else
             {
-                SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.SearchResponses);
-                lv.Adapter = (customAdapter);
+                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
+                rv.SetAdapter(customAdapter);
             }
 
             //(rootView.FindViewById<ListView>(Resource.Id.listView1).Adapter as SearchAdapter)
@@ -1979,7 +1993,7 @@ namespace AndriodApp1
 
             //note: changing from AutoCompleteTextView to EditText fixes both the hardware keyboard issue, and the backspace issue.
 
-            ListView lv = rootView.FindViewById<ListView>(Resource.Id.listView1);
+            //this.listView = rootView.FindViewById<ListView>(Resource.Id.listView1);
 
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
             //if(SoulSeekState.ShowSmartFilters)
@@ -2004,6 +2018,7 @@ namespace AndriodApp1
             bsb.State = BottomSheetBehavior.StateHidden;
 
             CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
+            filterSticky.Checked = FilterSticky;
             filterSticky.CheckedChange += FilterSticky_CheckedChange;
 
             //bsb.SetBottomSheetCallback(new MyCallback());
@@ -2053,29 +2068,42 @@ namespace AndriodApp1
             //actv.KeyPress += Actv_KeyPress;
 
             //List<SearchResponse> rowItems = new List<SearchResponse>();
+            //if (SearchTabHelper.FilteredResults)
+            //{
+            //    SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.FilteredResponses);
+            //    listView.Adapter = (customAdapter);
+            //}
+            //else
+            //{
+            //    SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.SearchResponses);
+            //    listView.Adapter = (customAdapter);
+            //}
+
+
+            recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
+            recycleLayoutManager = new LinearLayoutManager(Activity);
+            recyclerViewTransferItems.SetItemAnimator(null); //todo
+            recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
             if (SearchTabHelper.FilteredResults)
             {
-                SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.FilteredResponses);
-                lv.Adapter = (customAdapter);
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
+                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                //CustomAdapter customAdapter = new CustomAdapter(Context, FilteredResponses);
+                //lv.Adapter = (customAdapter);
             }
             else
             {
-                SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.SearchResponses);
-                lv.Adapter = (customAdapter);
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
+                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                //CustomAdapter customAdapter = new CustomAdapter(Context, SearchResponses);
+                //lv.Adapter = (customAdapter);
             }
-            //showChips = true;
-            //if (showChips)// && SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems != null)
-            //{
-            //    var xx= new List<ChipDataItem>();
-            //    xx.Add(new ChipDataItem(ChipType.FileCount,true, "test"));
-            //    recyclerChipsAdapter = new ChipsItemRecyclerAdapter(xx);
-            //    recyclerViewChips.SetAdapter(recyclerChipsAdapter);
-            //}
 
-            lv.ItemClick -= Lv_ItemClick;
-            lv.ItemClick += Lv_ItemClick;
-            lv.Clickable = true;
-            lv.Focusable = true;
+
+            //listView.ItemClick -= Lv_ItemClick;
+            //listView.ItemClick += Lv_ItemClick;
+            //listView.Clickable = true;
+            //listView.Focusable = true;
             SoulSeekState.ClearSearchHistoryEventsFromTarget(this);
             SoulSeekState.ClearSearchHistory += SoulSeekState_ClearSearchHistory;
             SoulSeekState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
@@ -2090,11 +2118,11 @@ namespace AndriodApp1
             filterText.FocusChange += FilterText_FocusChange;
             filterText.EditorAction += FilterText_EditorAction;
             filterText.Touch += FilterText_Touch;
-            UpdateDrawableState(filterText);
             if (FilterSticky)
             {
                 filterText.Text = FilterStickyString;
             }
+            UpdateDrawableState(filterText, true);
 
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
             showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? "Hide Smart Filters" : "Show Smart Filters";
@@ -2982,8 +3010,8 @@ namespace AndriodApp1
             MainActivity.LogDebug("Words To Include: " + searchTab.WordsToInclude.ToString());
             MainActivity.LogDebug("Whether to Filer: " + searchTab.FilteredResults);
             MainActivity.LogDebug("FilterString: " + searchTab.FilterString);
-
-            searchTab.FilteredResponses = searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
+            searchTab.FilteredResponses.Clear();
+            searchTab.FilteredResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
             {
                 if (!MatchesCriteria(s))
@@ -3078,7 +3106,7 @@ namespace AndriodApp1
                         return true;
                     }
                 }
-            }));
+            })));
         }
 
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
@@ -3095,16 +3123,17 @@ namespace AndriodApp1
                 }
                 ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-                SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
-                ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                lv.Adapter = (customAdapter);
+                //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
+                //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
+                //lv.Adapter = (customAdapter);
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
+                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
             else
             {
                 SearchTabHelper.FilteredResults = false;
-                SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchResponses);
-                ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                lv.Adapter = (customAdapter);
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
+                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
 
             if (oldFilterString == string.Empty && e.Text.ToString() != string.Empty)
@@ -3128,16 +3157,20 @@ namespace AndriodApp1
             {
                 SearchTabHelper.FilteredResults = true;
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-                SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
-                ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                lv.Adapter = (customAdapter);
+
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
+                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+
+
+                //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
+                //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
+                //lv.Adapter = (customAdapter);
             }
             else
             {
                 SearchTabHelper.FilteredResults = false;
-                SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchResponses);
-                ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                lv.Adapter = (customAdapter);
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
+                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
         }
 
@@ -3308,9 +3341,9 @@ namespace AndriodApp1
             if (!fromWishlist)
             {
                 SearchFragment.Instance.ClearFilterStringAndCached();
-                SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchResponses);
-                ListView lv = SearchFragment.Instance.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                lv.Adapter = (customAdapter);
+
+                SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses?.ToList());
+                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
 
                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -3387,6 +3420,183 @@ namespace AndriodApp1
             base.OnAttach(activity);
         }
 
+        private RecyclerView.LayoutManager recycleLayoutManager;
+        private RecyclerView recyclerViewTransferItems;
+        private SearchAdapterRecyclerVersion recyclerSearchAdapter;
+
+        public class SearchAdapterRecyclerVersion : RecyclerView.Adapter
+        {
+            public List<int> oppositePositions = new List<int>();
+
+
+
+            public List<SearchResponse> localDataSet;
+            public override int ItemCount => localDataSet.Count;
+            private int position = -1;
+
+            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+            {
+
+
+                (holder as SearchViewHolder).getSearchItemView().setItem(localDataSet[position], position);
+                //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
+            }
+
+            public void setPosition(int position)
+            {
+                this.position = position;
+            }
+
+            public int getPosition()
+            {
+                return this.position;
+            }
+
+            //public override void OnViewRecycled(Java.Lang.Object holder)
+            //{
+            //    base.OnViewRecycled(holder);
+            //}
+
+            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
+            {
+                ISearchItemViewBase view = null;
+                switch (this.searchResultStyle)
+                {
+                    case SearchResultStyleEnum.ExpandedAll:
+                    case SearchResultStyleEnum.CollapsedAll:
+                        view = SearchItemViewExpandable.inflate(parent);
+                        (view as SearchItemViewExpandable).AdapterRef = this;
+                        (view as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
+                        (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
+                        break;
+                    case SearchResultStyleEnum.Medium:
+                        view = SearchItemViewMedium.inflate(parent);
+                        break;
+                    case SearchResultStyleEnum.Minimal:
+                        view = SearchItemViewMinimal.inflate(parent);
+                        break;
+                }
+                view.setupChildren();
+                // .inflate(R.layout.text_row_item, viewGroup, false);
+                //view.LongClick += TransferAdapterRecyclerVersion_LongClick;
+                (view as View).Click += View_Click;
+                return new SearchViewHolder(view as View);
+
+            }
+
+            private void View_Click(object sender, EventArgs e)
+            {
+                GetSearchFragment().showEditDialog((sender as ISearchItemViewBase).ViewHolder.AdapterPosition);
+            }
+
+            private SearchResultStyleEnum searchResultStyle;
+
+            public SearchAdapterRecyclerVersion(List<SearchResponse> ti)
+            {
+                oldList = null; // no longer valid...
+                localDataSet = ti;
+                searchResultStyle = SearchFragment.SearchResultStyle;
+                oppositePositions = new List<int>();
+            }
+
+            private void CustomAdapter_Click1(object sender, EventArgs e)
+            {
+                //MainActivity.LogInfoFirebase("CustomAdapter_Click1");
+                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
+                SearchFragment.Instance.showEditDialog(position);
+            }
+
+
+            private void CustomAdapter_Click(object sender, EventArgs e)
+            {
+                //throw new NotImplementedException();
+
+
+                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
+
+                //int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
+                var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
+                var img = ((sender as View).Parent.Parent as View).FindViewById<ImageView>(Resource.Id.expandableClick);
+                if (v.Visibility == ViewStates.Gone)
+                {
+                    img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
+                    v.Visibility = ViewStates.Visible;
+                    SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, this.localDataSet[position]);
+                    if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                    {
+                        oppositePositions.Add(position);
+                        oppositePositions.Sort();
+                    }
+                    else
+                    {
+                        oppositePositions.Remove(position);
+                    }
+                }
+                else
+                {
+                    img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
+                    v.Visibility = ViewStates.Gone;
+                    if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                    {
+                        oppositePositions.Remove(position);
+                    }
+                    else
+                    {
+                        oppositePositions.Add(position);
+                        oppositePositions.Sort();
+                    }
+                }
+            }
+        }
+
+        public class SearchViewHolder : RecyclerView.ViewHolder
+        {
+            private ISearchItemViewBase searchItemView;
+
+            public SearchViewHolder(View view) : base(view)
+            {
+                //super(view);
+                // Define click listener for the ViewHolder's View
+
+                searchItemView = (ISearchItemViewBase)view;
+                searchItemView.ViewHolder = this;
+                //searchItemView.SetOnCreateContextMenuListener(this);
+            }
+
+            public ISearchItemViewBase getSearchItemView()
+            {
+                return searchItemView;
+            }
+        }
+
+        public class SearchDiffCallback : DiffUtil.Callback
+        {
+            private List<SearchResponse> oldList;
+            private List<SearchResponse> newList;
+
+            public SearchDiffCallback(List<SearchResponse> _oldList, List<SearchResponse> _newList)
+            {
+                oldList = _oldList;
+                newList = _newList;
+            }
+
+            public override int NewListSize => newList.Count;
+
+            public override int OldListSize => oldList.Count;
+
+            public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                return oldList[oldItemPosition].Equals(newList[newItemPosition]); //my override
+            }
+
+            public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                return oldList[oldItemPosition] == newList[newItemPosition];
+            }
+        }
+
+
+
         //public override void OnStop()
         //{
         //    searchEditText.KeyPress -= Actv_KeyPress;
@@ -3407,6 +3617,25 @@ namespace AndriodApp1
         //    searchEditText.EditorAction += Search_EditorAction;
         //}
 
+        private static List<SearchResponse> GetOldList(string filter)
+        {
+            if(filter == oldListCondition)
+            {
+                return oldList;
+            }
+            return null;
+        }
+
+        private static void SetOldList(string filter, List<SearchResponse> searchResponses)
+        {
+            oldListCondition = !string.IsNullOrEmpty(filter) ? filter : null;
+            oldList = searchResponses;
+        }
+
+        private static List<SearchResponse> oldList = new List<SearchResponse>();
+        private static string oldListCondition = string.Empty;
+        private static List<SearchResponse> newList = new List<SearchResponse>();
+
         /// <summary>
         /// To add a search response to the list view
         /// </summary>
@@ -3419,6 +3648,8 @@ namespace AndriodApp1
             //how desktop client does.
             //if(SearchTabHelper.CurrentTab == fromTab) //we want to sort 
             //{
+
+
             lock (SearchTabHelper.SortHelper)
             {
                 Tuple<bool, List<SearchResponse>> splitResponses = SplitMultiDirResponse(resp);
@@ -3455,20 +3686,30 @@ namespace AndriodApp1
                 SearchTabHelper.SearchTabCollection[fromTab].SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Keys.ToList();
                 SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
             }
+
+            //if (fromTab == SearchTabHelper.CurrentTab)
+            //{
+            //    newList = SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Keys.ToList();
+            //}
             //only do fromWishlist if SearchFragment.Instance is not null...
 
             if ((!fromWishlist || SearchFragment.Instance != null) && fromTab == SearchTabHelper.CurrentTab)
             {
                 Action a = new Action(() =>
                 {
+                    AndriodApp1.SearchFragment.StopWatch.Stop();
+                    MainActivity.LogDebug("time between start and stop " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
+                    AndriodApp1.SearchFragment.StopWatch.Reset();
+                    AndriodApp1.SearchFragment.StopWatch.Start();
                     //SearchResponses.Add(resp);
                     //MainActivity.LogDebug("UI - SEARCH RESPONSE RECEIVED");
                     if (fromTab != SearchTabHelper.CurrentTab)
                     {
                         return;
                     }
+                    //int total = newList.Count;
                     int total = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-                    MainActivity.LogDebug("ui thread response received - search collection: " + total);
+                    MainActivity.LogDebug("START _ ui thread response received - search collection: " + total);
                     if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount == total)
                     {
                         MainActivity.LogDebug("already did it..: " + total);
@@ -3481,23 +3722,90 @@ namespace AndriodApp1
 
                     if (SearchTabHelper.SearchTabCollection[fromTab].FilteredResults)
                     {
-                        SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
-                        SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
-                        ListView lv = SearchFragment.Instance.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                        lv.Adapter = (customAdapter);
+                        //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses = newList;
+                        oldList = GetOldList(SearchTabHelper.SearchTabCollection[fromTab].FilterString);
+                        if(oldList == null)
+                        {
+                            SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
+                                                                                                                            //todo: diffutil.. was filtered -> now filtered...
+                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
+                            SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
+                        }
+                        else
+                        {
+                            //todo: place back
+                            var recyclerViewState = SearchFragment.Instance.recycleLayoutManager.OnSaveInstanceState();//  recyclerView.getLayoutManager().onSaveInstanceState();
+
+
+                            SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);
+                            MainActivity.LogDebug("refreshListView  oldList: " + oldList.Count + " newList " + newList.Count);
+                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses), true);
+                            //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
+                            //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
+                            res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
+
+
+                            SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
+                        }
+                        SetOldList(SearchTabHelper.SearchTabCollection[fromTab].FilterString, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.ToList());
+                        //SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
+                        //SearchFragment.Instance.listView.Adapter = (customAdapter);
                     }
                     else
                     {
-                        SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
-                        ListView lv = SearchFragment.Instance.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                        lv.Adapter = (customAdapter);
+                        oldList = GetOldList(null);
+                        List<SearchResponse> newListx = null;
+                        if (oldList == null)
+                        {
+                            newListx = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
+                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(newListx);
+                            SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
+                        }
+                        else
+                        {
+                            //the SaveInstanceState and RestoreInstanceState are needed, else autoscroll... even when animations are off...
+                            //https://stackoverflow.com/questions/43458146/diffutil-in-recycleview-making-it-autoscroll-if-a-new-item-is-added
+                            var recyclerViewState = SearchFragment.Instance.recycleLayoutManager.OnSaveInstanceState();//  recyclerView.getLayoutManager().onSaveInstanceState();
+
+                            newListx = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
+                            MainActivity.LogDebug("refreshListView  oldList: " + oldList.Count + " newList " + newListx.Count);
+                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, newListx), true);
+                            //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Clear();
+                            //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.AddRange(newList);
+                            SearchFragment.Instance.recyclerSearchAdapter.localDataSet.Clear();
+                            SearchFragment.Instance.recyclerSearchAdapter.localDataSet.AddRange(newListx);
+                            res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
+
+                            SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
+                        }
+
+                        //when I was adding an empty list here updates only took 1 millisecond (though updating was choppy and weird)... whereas with an actual diff it takes 10 - 50ms but looks a lot nicer.
+                        SetOldList(null, newListx); 
+                        // 
+
+                        //SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
+                        //SearchFragment.Instance.listView.Adapter = (customAdapter);
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = total;
+                    AndriodApp1.SearchFragment.StopWatch.Stop();
+                    MainActivity.LogDebug("time it takes to set adapter for " + total + " results: " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
+
+                    AndriodApp1.SearchFragment.StopWatch.Reset();
+                    AndriodApp1.SearchFragment.StopWatch.Start();
+                    
+
+//                    oldList = newList.ToList();
+
+                    MainActivity.LogDebug("END _ ui thread response received - search collection: " + total);
                 });
-                SoulSeekState.MainActivityRef?.RunOnUiThread(a);
+
+                  SoulSeekState.MainActivityRef?.RunOnUiThread(a);
+
             }
 
         }
+
+        public static System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
 
         private void Lv_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
@@ -3674,8 +3982,9 @@ namespace AndriodApp1
             try
             {
                 Task<IReadOnlyCollection<SearchResponse>> t = null;
-
-                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                oldList?.Clear();
+                //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
@@ -3701,7 +4010,16 @@ namespace AndriodApp1
                                if (fromTab == SearchTabHelper.CurrentTab && !fromWishlist)
                                {
                                    MainActivity.LogDebug("transitionDrawable: ReverseTransition transition");
-                                   transitionDrawable.ReverseTransition(SearchToCloseDuration);
+                                   //this can be stale, not part of anything anymore....
+                                   //no real way to test that.  IsVisible returns true...
+                                   try
+                                   {
+                                        GetSearchFragment().GetTransitionDrawable().ReverseTransition(SearchToCloseDuration);
+                                   }
+                                   catch
+                                   {
+
+                                   }
                                    SearchFragment.Instance.PerformBackUpRefresh();
 
 
@@ -3912,51 +4230,51 @@ namespace AndriodApp1
                 MainActivity.LogDebug("Search_Click");
             }
 
-            if (!SoulSeekState.currentlyLoggedIn)
-            {
-                if (!fromWishlist)
-                {
-                    Toast tst = Toast.MakeText(SearchFragment.Instance.context, Resource.String.must_be_logged_to_search, ToastLength.Long);
-                    tst.Show();
-                    MainActivity.LogDebug("transitionDrawable: RESET transition");
-                    transitionDrawable.ResetTransition();
+            //if (!SoulSeekState.currentlyLoggedIn)
+            //{
+            //    if (!fromWishlist)
+            //    {
+            //        Toast tst = Toast.MakeText(SearchFragment.Instance.context, Resource.String.must_be_logged_to_search, ToastLength.Long);
+            //        tst.Show();
+            //        MainActivity.LogDebug("transitionDrawable: RESET transition");
+            //        transitionDrawable.ResetTransition();
 
-                }
+            //    }
 
-                SearchTabHelper.CurrentlySearching = false;
-                return;
-            }
-            else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                if (fromWishlist)
-                {
-                    return;
-                }
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SearchFragment.Instance.context, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
-                        {
+            //    SearchTabHelper.CurrentlySearching = false;
+            //    return;
+            //}
+            //else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            //{
+            //    if (fromWishlist)
+            //    {
+            //        return;
+            //    }
+            //    Task t;
+            //    if (!MainActivity.ShowMessageAndCreateReconnectTask(SearchFragment.Instance.context, out t))
+            //    {
+            //        return;
+            //    }
+            //    t.ContinueWith(new Action<Task>((Task t) =>
+            //    {
+            //        if (t.IsFaulted)
+            //        {
+            //            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            //            {
 
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+            //                Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
 
-                        });
-                        return;
-                    }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
+            //            });
+            //            return;
+            //        }
+            //        SoulSeekState.MainActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
 
-                }));
-            }
-            else
-            {
+            //    }));
+            //}
+            //else
+            //{
                 SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
-            }
+            //}
         }
     }
 
@@ -4312,102 +4630,107 @@ namespace AndriodApp1
     //    }
     //}
 
-    public class SearchAdapter : ArrayAdapter<SearchResponse>
-    {
-        List<int> oppositePositions = new List<int>();
-        public SearchAdapter(Context c, List<SearchResponse> items) : base(c, 0, items)
-        {
-            oppositePositions = new List<int>();
-        }
+    //public class SearchAdapter : ArrayAdapter<SearchResponse>
+    //{
+    //    List<int> oppositePositions = new List<int>();
+    //    public SearchAdapter(Context c, List<SearchResponse> items) : base(c, 0, items)
+    //    {
+    //        oppositePositions = new List<int>();
+    //    }
 
-        public override View GetView(int position, View convertView, ViewGroup parent)
-        {
-            ISearchItemViewBase itemView = (ISearchItemViewBase)convertView;
-            if (null == itemView)
-            {
-                switch (SearchFragment.SearchResultStyle)
-                {
-                    case SearchResultStyleEnum.ExpandedAll:
-                    case SearchResultStyleEnum.CollapsedAll:
-                        itemView = SearchItemViewExpandable.inflate(parent);
-                        (itemView as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
-                        (itemView as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
-                        break;
-                    case SearchResultStyleEnum.Medium:
-                        itemView = SearchItemViewMedium.inflate(parent);
-                        break;
-                    case SearchResultStyleEnum.Minimal:
-                        itemView = SearchItemViewMinimal.inflate(parent);
-                        break;
-                }
-            }
-            bool opposite = oppositePositions.Contains(position);
-            itemView.setItem(GetItem(position), opposite); //this will do the right thing no matter what...
+    //    public override View GetView(int position, View convertView, ViewGroup parent)
+    //    {
+    //        ISearchItemViewBase itemView = (ISearchItemViewBase)convertView;
+    //        if (null == itemView)
+    //        {
+    //            switch (SearchFragment.SearchResultStyle)
+    //            {
+    //                case SearchResultStyleEnum.ExpandedAll:
+    //                case SearchResultStyleEnum.CollapsedAll:
+    //                    itemView = SearchItemViewExpandable.inflate(parent);
+    //                    (itemView as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
+    //                    (itemView as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
+    //                    break;
+    //                case SearchResultStyleEnum.Medium:
+    //                    itemView = SearchItemViewMedium.inflate(parent);
+    //                    break;
+    //                case SearchResultStyleEnum.Minimal:
+    //                    itemView = SearchItemViewMinimal.inflate(parent);
+    //                    break;
+    //            }
+    //        }
+    //        bool opposite = oppositePositions.Contains(position);
+    //        itemView.setItem(GetItem(position), opposite); //this will do the right thing no matter what...
 
 
-            //if(SearchFragment.SearchResultStyle==SearchResultStyleEnum.CollapsedAll)
-            //{
-            //    (itemView as IExpandable).Collapse();
-            //}
-            //else if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll)
-            //{
-            //    (itemView as IExpandable).Expand();
-            //}
+    //        //if(SearchFragment.SearchResultStyle==SearchResultStyleEnum.CollapsedAll)
+    //        //{
+    //        //    (itemView as IExpandable).Collapse();
+    //        //}
+    //        //else if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll)
+    //        //{
+    //        //    (itemView as IExpandable).Expand();
+    //        //}
 
-            //SETTING TOOLTIPTEXT does not allow list view item click!!! 
-            //itemView.TooltipText = "Queue Length: " + GetItem(position).QueueLength + System.Environment.NewLine + "Free Upload Slots: " + GetItem(position).FreeUploadSlots;
-            return itemView as View;
-            //return base.GetView(position, convertView, parent);
-        }
+    //        //SETTING TOOLTIPTEXT does not allow list view item click!!! 
+    //        //itemView.TooltipText = "Queue Length: " + GetItem(position).QueueLength + System.Environment.NewLine + "Free Upload Slots: " + GetItem(position).FreeUploadSlots;
+    //        return itemView as View;
+    //        //return base.GetView(position, convertView, parent);
+    //    }
 
-        private void CustomAdapter_Click1(object sender, EventArgs e)
-        {
-            MainActivity.LogInfoFirebase("CustomAdapter_Click1");
-            int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
-            SearchFragment.Instance.showEditDialog(position);
-        }
+    //    private void CustomAdapter_Click1(object sender, EventArgs e)
+    //    {
+    //        MainActivity.LogInfoFirebase("CustomAdapter_Click1");
+    //        int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
+    //        SearchFragment.Instance.showEditDialog(position);
+    //    }
 
-        private void CustomAdapter_Click(object sender, EventArgs e)
-        {
-            //throw new NotImplementedException();
-            int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
-            var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
-            var img = ((sender as View).Parent.Parent as View).FindViewById<ImageView>(Resource.Id.expandableClick);
-            if (v.Visibility == ViewStates.Gone)
-            {
-                img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
-                v.Visibility = ViewStates.Visible;
-                SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, GetItem(position));
-                if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
-                {
-                    oppositePositions.Add(position);
-                    oppositePositions.Sort();
-                }
-                else
-                {
-                    oppositePositions.Remove(position);
-                }
-            }
-            else
-            {
-                img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
-                v.Visibility = ViewStates.Gone;
-                if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
-                {
-                    oppositePositions.Remove(position);
-                }
-                else
-                {
-                    oppositePositions.Add(position);
-                    oppositePositions.Sort();
-                }
-            }
-        }
-    }
+    //    private void CustomAdapter_Click(object sender, EventArgs e)
+    //    {
+    //        //throw new NotImplementedException();
+    //        int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
+    //        var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
+    //        var img = ((sender as View).Parent.Parent as View).FindViewById<ImageView>(Resource.Id.expandableClick);
+    //        if (v.Visibility == ViewStates.Gone)
+    //        {
+    //            img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
+    //            v.Visibility = ViewStates.Visible;
+    //            SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, GetItem(position));
+    //            if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+    //            {
+    //                oppositePositions.Add(position);
+    //                oppositePositions.Sort();
+    //            }
+    //            else
+    //            {
+    //                oppositePositions.Remove(position);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
+    //            v.Visibility = ViewStates.Gone;
+    //            if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+    //            {
+    //                oppositePositions.Remove(position);
+    //            }
+    //            else
+    //            {
+    //                oppositePositions.Add(position);
+    //                oppositePositions.Sort();
+    //            }
+    //        }
+    //    }
+    //}
 
     public interface ISearchItemViewBase
     {
-        void setItem(SearchResponse item, bool opposite);
+        void setupChildren();
+        SearchFragment.SearchViewHolder ViewHolder
+        {
+            get;set;
+        }
+        void setItem(SearchResponse item, int opposite);
     }
 
     public class SearchItemViewMinimal : RelativeLayout, ISearchItemViewBase
@@ -4416,6 +4739,11 @@ namespace AndriodApp1
         private TextView viewFoldername;
         private TextView viewSpeed;
         //private TextView viewQueue;
+        public SearchFragment.SearchViewHolder ViewHolder
+        {
+            get; set;
+        }
+
         public SearchItemViewMinimal(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.test_row, this, true);
@@ -4433,7 +4761,7 @@ namespace AndriodApp1
             return itemView;
         }
 
-        private void setupChildren()
+        public void setupChildren()
         {
             viewUsername = FindViewById<TextView>(Resource.Id.textView1);
             viewFoldername = FindViewById<TextView>(Resource.Id.textView2);
@@ -4441,7 +4769,7 @@ namespace AndriodApp1
             //viewQueue = FindViewById<TextView>(Resource.Id.textView4);
         }
 
-        public void setItem(SearchResponse item, bool noop)
+        public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
@@ -4479,6 +4807,10 @@ namespace AndriodApp1
         private TextView viewSpeed;
         private TextView viewFileType;
         private TextView viewQueue;
+        public SearchFragment.SearchViewHolder ViewHolder
+        {
+            get; set;
+        }
         public SearchItemViewMedium(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium, this, true);
@@ -4496,7 +4828,7 @@ namespace AndriodApp1
             return itemView;
         }
 
-        private void setupChildren()
+        public void setupChildren()
         {
             viewUsername = FindViewById<TextView>(Resource.Id.userNameTextView);
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
@@ -4505,7 +4837,7 @@ namespace AndriodApp1
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
         }
 
-        public void setItem(SearchResponse item, bool noop)
+        public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item)); //todo maybe also cache this...
@@ -4576,6 +4908,15 @@ namespace AndriodApp1
         private TextView viewFileType;
         private ImageView imageViewExpandable;
         private LinearLayout viewToHideShow;
+
+        public SearchFragment.SearchAdapterRecyclerVersion AdapterRef;
+
+
+        public SearchFragment.SearchViewHolder ViewHolder
+        {
+            get; set;
+        }
+
         //private TextView viewQueue;
         public SearchItemViewExpandable(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -4594,7 +4935,7 @@ namespace AndriodApp1
             return itemView;
         }
 
-        private void setupChildren()
+        public void setupChildren()
         {
             viewUsername = FindViewById<TextView>(Resource.Id.userNameTextView);
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
@@ -4617,8 +4958,9 @@ namespace AndriodApp1
             }
         }
 
-        public void setItem(SearchResponse item, bool opposite)
+        public void setItem(SearchResponse item, int position)
         {
+            bool opposite = this.AdapterRef.oppositePositions.Contains(position);
             viewUsername.Text = item.Username;
             viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + "kbs"; //kb/s
@@ -4741,6 +5083,39 @@ namespace AndriodApp1
         public string GetFolderName()
         {
             return FolderName;
+        }
+
+        public string GetDisplayFolderName()
+        {
+            //this is similar to QT (in the case of Seeker multiple subdirectories)
+            //but not quite.
+            //QT will show subdirs/complete/Soulseek Downloads/Music/H: (where everything after subdirs is your download folder)
+            //whereas we just show subdirs
+            //subdirs is folder name in both cases for single folder, 
+            // and say (01 / 2020 / test_folder) for nested.
+            if(GetDirectoryLevel()==1)
+            {
+                //they are the same
+                return FolderName;
+            }
+            else
+            {
+                //split reverse.
+                var reversedArray = this.FolderName.Split('\\').Reverse();
+                return string.Join('\\',reversedArray);
+            }
+        }
+
+        public int GetDirectoryLevel()
+        {
+            //just parent folder = level 1 (search result and browse single dir case)
+            //grandparent = level 2 (browse download subdirs case - i.e. Album, Album > covers)
+            //etc.
+            if(this.FolderName == null || !this.FolderName.Contains('\\'))
+            {
+                return 1;
+            }
+            return this.FolderName.Split('\\').Count();
         }
 
         public string GetUsername()
@@ -4878,7 +5253,7 @@ namespace AndriodApp1
         {
             InnerTransferItem = item;
             FolderItem folderItem = item as FolderItem;
-            viewFoldername.Text = folderItem.FolderName;
+            viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed);
 
             TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload());
@@ -6379,7 +6754,7 @@ namespace AndriodApp1
                     Android.Net.Uri incompleteUri = null;
                     SetupCancellationToken(item, cancellationTokenSource, out _);
                     Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.Size, cancellationTokenSource);
-                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0) { TransferItemReference = item })));
+                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -6493,7 +6868,7 @@ namespace AndriodApp1
                 //filename: item1.FullFilename,
                 //size: item1.Size,
                 //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, 1) { TransferItemReference = item1 }))); //maybe do 1 here since we are already retrying it manually
+                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, 1, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //maybe do 1 here since we are already retrying it manually
             }
             catch (DuplicateTransferException)
             {

@@ -1082,7 +1082,7 @@ namespace AndriodApp1
                     totalItems = recusiveFullFileInfo.Count;
                 }
             }
-            bool downloadSubfolders = false;
+
             //show message with total num of files...
             if (containsSubDirs)
             {
@@ -1116,6 +1116,17 @@ namespace AndriodApp1
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
+                    if (containsSubDirs)
+                    {
+                        if (!justFilteredItems)
+                        {
+                            TagDepths(dataItemsForListView.First(), recusiveFullFileInfo);
+                        }
+                        else
+                        {
+                            TagDepths(filteredDataItemsForListView.First(), recusiveFullFileInfo);
+                        }
+                    }
                     DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
@@ -1126,6 +1137,52 @@ namespace AndriodApp1
             {
                 DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly);
             }
+        }
+
+        private static void TagDepths(DataItem d, List<FullFileInfo> recursiveFileInfo)
+        {
+            int lowestLevel = GetLevel(d.Node.Data.Name);
+            foreach (FullFileInfo fullFileInfo in recursiveFileInfo)
+            {
+                int level = GetLevel(fullFileInfo.FullFileName);
+                int depth = level - lowestLevel + 1;
+                #if DEBUG
+                if(depth==0)
+                {
+                    throw new Exception("depth is 0");
+                }
+                #endif
+                fullFileInfo.Depth = depth;
+            }
+
+        }
+
+        //private static int GetMaxDepth(DataItem d, List<FullFileInfo> recursiveFileInfo)
+        //{
+        //    int lowestLevel = GetLevel(d.Node.Data.Name);
+        //    int highestLevel = int.MinValue;
+        //    foreach(FullFileInfo fullFileInfo in recursiveFileInfo)
+        //    {
+        //        int level = GetLevel(fullFileInfo.FullFileName);
+        //        if(level > highestLevel)
+        //        {
+        //            highestLevel = level;
+        //        }
+        //    }
+        //    return highestLevel - lowestLevel + 1;
+        //}
+
+        private static int GetLevel(string fileName)
+        {
+            int count = 0;
+            foreach(char c in fileName)
+            {
+                if(c=='\\')
+                {
+                    count++;
+                }
+            }
+            return count;
         }
 
         private void DownloadUserFilesEntry()
@@ -1272,7 +1329,7 @@ namespace AndriodApp1
                 foreach (FullFileInfo file in files)
                 {
 
-                    DownloadDialog.SetupAndDownloadFile(username, file.FullFileName, file.Size, 0, out bool transferExists);
+                    DownloadDialog.SetupAndDownloadFile(username, file.FullFileName, file.Size, 0, file.Depth, out bool transferExists);
                     if(!transferExists)
                     {
                         allExist = false;
@@ -1744,6 +1801,7 @@ namespace AndriodApp1
             public long Size = 0;
             public string FileName = string.Empty;
             public string FullFileName = string.Empty;
+            public int Depth = 1;
         }
 
         public class DataItem

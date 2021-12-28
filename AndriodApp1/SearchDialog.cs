@@ -180,6 +180,9 @@ namespace AndriodApp1
                             artistname = fullString.Substring(artist_display_name_start_index, artist_display_name_end_index - artist_display_name_start_index);
                             trackname = AndriodApp1.HTMLUtilities.unescapeHtml(trackname);
                             artistname = AndriodApp1.HTMLUtilities.unescapeHtml(artistname);
+                            //all slashes in the html body are unicode escaped \u002F (ex. track name "this \ that")
+                            trackname = trackname.Replace(@"\u002F","\\",StringComparison.InvariantCultureIgnoreCase);
+                            artistname = artistname.Replace(@"\u002F","\\",StringComparison.InvariantCultureIgnoreCase);
                         }
                         else if (urlstring.Contains("://open.spotify"))
                         {

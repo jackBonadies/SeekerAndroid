@@ -21,7 +21,7 @@
             android:id="@+id/followingLinkLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/dialog_background"
+            android:background="?attr/dialog_background"
             android:orientation="vertical">
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/progressBarFollowingLink"

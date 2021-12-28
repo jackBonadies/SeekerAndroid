@@ -1049,14 +1049,14 @@ namespace AndriodApp1
             MainActivity.LogDebug("CreateDownloadTask");
             Task task = new Task(()=>
             {
-                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), out _);
+                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, out _);
 
             });
             return task;
         }
 
 
-        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, out bool errorExists)
+        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, out bool errorExists)
         {
             errorExists = false;
             Task dlTask = null;
@@ -1070,11 +1070,11 @@ namespace AndriodApp1
             try
             {
 
-                downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0);
+                downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
 
                 transferItem = new TransferItem();
                 transferItem.Filename = Helpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = Helpers.GetFolderNameFromFile(downloadInfo.fullFilename);
+                transferItem.FolderName = Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
@@ -1094,7 +1094,7 @@ namespace AndriodApp1
 
 
 
-                dlTask = DownloadFileAsync(username, fname, size, cancellationTokenSource);
+                dlTask = DownloadFileAsync(username, fname, size, cancellationTokenSource, depth);
 
                 var e = new DownloadAddedEventArgs(downloadInfo);
                 downloadInfo.downloadTask = dlTask;
@@ -1133,7 +1133,7 @@ namespace AndriodApp1
         /// <param name="cts"></param>
         /// <param name="incompleteUri"></param>
         /// <returns></returns>
-        public static Task DownloadFileAsync(string username, string fullfilename, long size, CancellationTokenSource cts)
+        public static Task DownloadFileAsync(string username, string fullfilename, long size, CancellationTokenSource cts, int depth=1) //an indicator for how much of the full filename to use...
         {
             MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
             Task dlTask = null;
@@ -1161,7 +1161,7 @@ namespace AndriodApp1
                         startOffset:partialLength, //this will get populated
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true),
                         cancellationToken: cts.Token,
-                        streamTask: GetStreamTask(username, fullfilename));
+                        streamTask: GetStreamTask(username, fullfilename, depth));
 
 
                 //System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, out incompleteUri, out partialLength);
@@ -1182,7 +1182,7 @@ namespace AndriodApp1
             return dlTask;
         }
 
-        public static Task<Tuple<System.IO.Stream, long, string, string>> GetStreamTask(string username, string fullfilename)
+        public static Task<Tuple<System.IO.Stream, long, string, string>> GetStreamTask(string username, string fullfilename, int depth = 1) //there has to be something extra here for args, bc we need to denote just how much of the fullFilename to use....
         {
             Task<Tuple<System.IO.Stream, long, string, string>> task = new Task<Tuple<System.IO.Stream, long, string, string>>(
                 () =>
@@ -1190,7 +1190,7 @@ namespace AndriodApp1
                     long partialLength = 0;
                     Android.Net.Uri incompleteUri = null;
                     Android.Net.Uri incompleteUriDirectory = null;
-                    System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, out incompleteUri, out incompleteUriDirectory, out partialLength);
+                    System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength); //something here to denote...
                     return new Tuple<System.IO.Stream, long, string, string>(streamToWriteTo, partialLength, incompleteUri.ToString(), incompleteUriDirectory.ToString());
                 });
             return task;
@@ -1256,7 +1256,7 @@ namespace AndriodApp1
             Task task = new Task(() => { 
                 foreach(Soulseek.File file in searchResponse.Files)
                 {
-                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), out _);
+                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, out _);
                 }
             });
             return task;
