@@ -19,7 +19,7 @@ namespace Soulseek
 {
     using System.Collections.Generic;
     using System.Linq;
-
+    
     /// <summary>
     ///     A response to a file search.
     /// </summary>
@@ -83,7 +83,8 @@ namespace Soulseek
         private string cachedDominantFileType = null;
         //we used to do this in SetItem.  That might get called too many times.. so lets cache the result so that we only do it once.
         //similar to before we only compute it when we actually need it (i.e. it scrolls into view).
-        public string GetDominantFileType()
+        //if hideLocked is true, then only iterate over unlocked files. else iterate over everything.
+        public string GetDominantFileType(bool hideLocked = true)
         {
             if(!string.IsNullOrEmpty(cachedDominantFileType))
             {
@@ -91,7 +92,7 @@ namespace Soulseek
             }
             //basically this works in two ways.  if the first file has a type of .mp3, .flac, .wav, .aiff, .wma, .aac then thats likely the type.
             //if not then we do a more expensive parsing, where we get the most common
-            string ext = System.IO.Path.GetExtension(this.Files.First().Filename);  //do not use Soulseek.File.Extension that will be "" most of the time...
+            string ext = System.IO.Path.GetExtension(this.FileCount > 0 ? this.Files.First().Filename : this.LockedFiles.First().Filename);  //do not use Soulseek.File.Extension that will be "" most of the time...
             string dominantTypeToReturn = "";
             if (SlskHelp.CommonHelpers.KNOWN_TYPES.Contains(ext))
             {
@@ -101,7 +102,8 @@ namespace Soulseek
             {
                 Dictionary<string, int> countTypes = new Dictionary<string, int>();
                 ext = "";
-                foreach (Soulseek.File f in this.Files)
+                var toIterate1 = hideLocked ? this.Files : this.Files.Concat(this.LockedFiles);
+                foreach (Soulseek.File f in toIterate1)
                 {
                     ext = System.IO.Path.GetExtension(f.Filename);
                     if (countTypes.ContainsKey(ext))
@@ -128,7 +130,8 @@ namespace Soulseek
             //now get a representative file and get some extra info (if any)
             Soulseek.File representative = null;
             Soulseek.File representative2 = null;
-            foreach (Soulseek.File f in this.Files)
+            var toIterate = hideLocked ? this.Files : this.Files.Concat(this.LockedFiles);
+            foreach (Soulseek.File f in toIterate)
             {
                 if (representative == null && dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
                 {

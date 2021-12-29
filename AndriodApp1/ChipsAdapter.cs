@@ -17,15 +17,25 @@ using Android.Util;
 using AndroidX.RecyclerView.Widget;
 using System.Collections.Generic;
 using System;
+
+using SearchResponseExtensions;
+
 namespace AndriodApp1
 {
 
     public static class ChipsHelper
     {
+        /// <summary>
+        /// If hide hidden is true then for counts only consider unlocked. else consider everything.
+        /// </summary>
+        /// <param name="responses"></param>
+        /// <param name="searchTerm"></param>
+        /// <param name="smartFilterOptions"></param>
+        /// <returns></returns>
         public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SoulSeekState.SmartFilterState smartFilterOptions)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-
+            bool hideHidden = SoulSeekState.HideLockedResults;
 
             //this is relevant to both
             if(smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
@@ -43,7 +53,7 @@ namespace AndriodApp1
                     //create file type, file num, and keyword buckets.
                     //get counts to show in order
                     //there are parent child relationships between 'fileType' and 'fileType (vbr/kbps/samples/depth)'
-                    string ftype = searchResponse.GetDominantFileType();
+                    string ftype = searchResponse.GetDominantFileType(hideHidden);
                     if (string.IsNullOrEmpty(ftype))
                     {
                         continue;
@@ -62,7 +72,7 @@ namespace AndriodApp1
                     //    fileTypeBases.Add(ftype.Substring(0,baseIndex));
                     //}
 
-                    int fcount = searchResponse.FileCount;
+                    int fcount = hideHidden ? searchResponse.FileCount : searchResponse.FileCount + searchResponse.LockedFileCount;
                     if (fileCountCounts.ContainsKey(fcount))
                     {
                         fileCountCounts[fcount]++;
@@ -74,7 +84,7 @@ namespace AndriodApp1
 
                     //TODO: keywords
                     #if DEBUG
-                    Console.WriteLine(Helpers.GetFolderNameFromFile(searchResponse.Files.First().Filename));
+                    Console.WriteLine(Helpers.GetFolderNameFromFile(searchResponse.GetElementAtAdapterPosition(false, 0).Filename));
                     #endif
                 }
 
@@ -405,7 +415,7 @@ namespace AndriodApp1
             for(int i=0; i < totalCount; i++)
             {
                 //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
-                string fline = Helpers.GetFolderNameFromFile(responses[i].Files.First().Filename);
+                string fline = Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                 //fline = fline.Replace(" - ", " ");
                 //fline = fline.Replace(", ", " ");
@@ -497,7 +507,7 @@ namespace AndriodApp1
             for (int i = 0; i < totalCount; i++)
             {
                 //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
-                string fline = Helpers.GetParentFolderNameFromFile(responses[i].Files.First().Filename);
+                string fline = Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                 //fline = fline.Replace(" - ", " ");
                 //fline = fline.Replace(", ", " ");

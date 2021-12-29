@@ -44,6 +44,7 @@ using Java.Interop;
 using Android.Animation;
 using AndroidX.RecyclerView.Widget;
 using System.Runtime.Serialization.Formatters.Binary;
+using SearchResponseExtensions;
 
 namespace AndriodApp1
 {
@@ -639,9 +640,13 @@ namespace AndriodApp1
         {
             if (x.Username == y.Username)
             {
-                if (x.Files.Count == y.Files.Count)
+                if ((x.FileCount == y.FileCount) && (x.LockedFileCount == y.LockedFileCount))
                 {
-                    if (x.Files.First().Filename == y.Files.First().Filename)
+                    if (x.FileCount != 0 && (x.Files.First().Filename == y.Files.First().Filename))
+                    {
+                        return 0;
+                    }
+                    if (x.LockedFileCount != 0 && (x.LockedFiles.First().Filename == y.LockedFiles.First().Filename))
                     {
                         return 0;
                     }
@@ -656,9 +661,10 @@ namespace AndriodApp1
         public virtual int Compare(SearchResponse x, SearchResponse y)
         {
             //highest precedence. locked files.
-            if ((x.LockedFileCount != 0 && y.LockedFileCount == 0) || (x.LockedFileCount == 0 && y.LockedFileCount != 0))
+            //so if any of the search responses have 0 unlocked files, they are considered the worst.
+            if ((x.FileCount != 0 && y.FileCount == 0) || (x.FileCount == 0 && y.FileCount != 0))
             {
-                if (x.LockedFileCount == 0)
+                if (y.FileCount == 0)
                 {
                     //x is better
                     return -1;
@@ -711,6 +717,10 @@ namespace AndriodApp1
             if (x.Files.Count != 0 && y.Files.Count != 0)
             {
                 return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
+            }
+            if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
+            {
+                return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
             }
             return 0;
         }
@@ -2882,7 +2892,7 @@ namespace AndriodApp1
             }
         }
 
-        private bool MatchesChipCriteria(SearchResponse s, ChipFilter chipFilter)
+        private bool MatchesChipCriteria(SearchResponse s, ChipFilter chipFilter, bool hideLocked)
         {
             if (chipFilter == null || chipFilter.IsEmpty())
             {
@@ -2891,16 +2901,17 @@ namespace AndriodApp1
             else
             {
                 bool match = chipFilter.NumFiles.Count == 0 && chipFilter.FileRanges.Count == 0;
+                int fcount = hideLocked ? s.FileCount : s.FileCount + s.LockedFileCount;
                 foreach (int num in chipFilter.NumFiles)
                 {
-                    if (s.FileCount == num)
+                    if (fcount == num)
                     {
                         match = true;
                     }
                 }
                 foreach (Tuple<int, int> range in chipFilter.FileRanges)
                 {
-                    if (s.FileCount >= range.Item1 && s.FileCount <= range.Item2)
+                    if (fcount >= range.Item1 && fcount <= range.Item2)
                     {
                         match = true;
                     }
@@ -2913,14 +2924,14 @@ namespace AndriodApp1
                 match = chipFilter.AllVarientsFileType.Count == 0 && chipFilter.SpecificFileType.Count == 0;
                 foreach (string varient in chipFilter.AllVarientsFileType)
                 {
-                    if (s.GetDominantFileType() == varient || s.GetDominantFileType().Contains(varient + " "))
+                    if (s.GetDominantFileType(hideLocked) == varient || s.GetDominantFileType(hideLocked).Contains(varient + " "))
                     {
                         match = true;
                     }
                 }
                 foreach (string specific in chipFilter.SpecificFileType)
                 {
-                    if (s.GetDominantFileType() == specific)
+                    if (s.GetDominantFileType(hideLocked) == specific)
                     {
                         match = true;
                     }
@@ -2930,7 +2941,7 @@ namespace AndriodApp1
                     return false;
                 }
 
-                string fullFname = s.Files.First().Filename;
+                string fullFname = s.Files.FirstOrDefault()?.Filename ?? s.LockedFiles.FirstOrDefault().Filename;
                 foreach (string keyword in chipFilter.Keywords)
                 {
                     if (!Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
@@ -2967,9 +2978,9 @@ namespace AndriodApp1
         }
 
 
-        private bool MatchesCriteria(SearchResponse s)
+        private bool MatchesCriteria(SearchResponse s, bool hideLocked)
         {
-            foreach (File f in s.Files)
+            foreach (File f in s.GetFiles(hideLocked))
             {
                 string dirString = Helpers.GetFolderNameFromFile(f.Filename);
                 string fileString = Helpers.GetFileNameFromFile(f.Filename);
@@ -3010,15 +3021,16 @@ namespace AndriodApp1
             MainActivity.LogDebug("Words To Include: " + searchTab.WordsToInclude.ToString());
             MainActivity.LogDebug("Whether to Filer: " + searchTab.FilteredResults);
             MainActivity.LogDebug("FilterString: " + searchTab.FilterString);
+            bool hideLocked = SoulSeekState.HideLockedResults;
             searchTab.FilteredResponses.Clear();
             searchTab.FilteredResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
             {
-                if (!MatchesCriteria(s))
+                if (!MatchesCriteria(s, hideLocked))
                 {
                     return false;
                 }
-                else if (!MatchesChipCriteria(s, searchTab.ChipsFilter))
+                else if (!MatchesChipCriteria(s, searchTab.ChipsFilter, hideLocked))
                 {
                     return false;
                 }
@@ -3033,7 +3045,7 @@ namespace AndriodApp1
                         //we need to make sure this also matches our special flags
                         if (searchTab.FilterSpecialFlags.MinFoldersInFile != 0)
                         {
-                            if (searchTab.FilterSpecialFlags.MinFoldersInFile > s.Files.Count)
+                            if (searchTab.FilterSpecialFlags.MinFoldersInFile > (hideLocked ? s.Files.Count : (s.Files.Count + s.LockedFiles.Count)))
                             {
                                 return false;
                             }
@@ -3041,7 +3053,7 @@ namespace AndriodApp1
                         if (searchTab.FilterSpecialFlags.MinFileSizeMB != 0)
                         {
                             bool match = false;
-                            foreach (Soulseek.File f in s.Files)
+                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
                             {
                                 int mb = (int)(f.Size) / (1024 * 1024);
                                 if (mb > searchTab.FilterSpecialFlags.MinFileSizeMB)
@@ -3057,7 +3069,7 @@ namespace AndriodApp1
                         if (searchTab.FilterSpecialFlags.MinBitRateKBS != 0)
                         {
                             bool match = false;
-                            foreach (Soulseek.File f in s.Files)
+                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
                             {
                                 if (f.BitRate == null || !(f.BitRate.HasValue))
                                 {
@@ -3076,7 +3088,7 @@ namespace AndriodApp1
                         if (searchTab.FilterSpecialFlags.IsCBR)
                         {
                             bool match = false;
-                            foreach (Soulseek.File f in s.Files)
+                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
                             {
                                 if (f.IsVariableBitRate == false)//this is bool? can have no value...
                                 {
@@ -3091,7 +3103,7 @@ namespace AndriodApp1
                         if (searchTab.FilterSpecialFlags.IsVBR)
                         {
                             bool match = false;
-                            foreach (Soulseek.File f in s.Files)
+                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
                             {
                                 if (f.IsVariableBitRate == true)
                                 {
@@ -3312,9 +3324,9 @@ namespace AndriodApp1
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
-            if (e.Response.Files.Count == 0 && SoulSeekState.HideLockedResults)
+            if (e.Response.FileCount == 0 && SoulSeekState.HideLockedResults || !SoulSeekState.HideLockedResults && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
             {
-                MainActivity.LogDebug("Skipping Locked");
+                MainActivity.LogDebug("Skipping Locked or 0/0");
                 return;
             }
             //MainActivity.LogDebug("SEARCH RESPONSE RECEIVED");
@@ -3361,9 +3373,10 @@ namespace AndriodApp1
         {
             try
             {
-                Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
-                if (origResponse.Files.Count != 0)
+                bool hideLocked = SoulSeekState.HideLockedResults;
+                if (origResponse.Files.Count != 0 || (!hideLocked && origResponse.LockedFiles.Count != 0))
                 {
+                    Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
                     foreach (File f in origResponse.Files)
                     {
                         string folderName = Helpers.GetFolderNameFromFile(f.Filename);
@@ -3379,19 +3392,49 @@ namespace AndriodApp1
                             folderFilePairs.Add(folderName, tempF);
                         }
                     }
-                    if (folderFilePairs.Keys.Count > 1)
+
+                    //I'm not sure if locked files and unlocked files can appear in the same folder,
+                    //but regardless, split them up into separate folders.
+                    //even if they both have the same foldername, they will have the lock symbol to differentiate them.
+                    Dictionary<string, List<File>> lockedFolderFilePairs = new Dictionary<string, List<File>>();
+                    if(!hideLocked)
+                    {
+                        foreach (File f in origResponse.LockedFiles)
+                        {
+                            string folderName = Helpers.GetFolderNameFromFile(f.Filename);
+                            if (lockedFolderFilePairs.ContainsKey(folderName))
+                            {
+                                //MainActivity.LogDebug("Split Foldername: " + folderName);
+                                lockedFolderFilePairs[folderName].Add(f);
+                            }
+                            else
+                            {
+                                List<File> tempF = new List<File>();
+                                tempF.Add(f);
+                                lockedFolderFilePairs.Add(folderName, tempF);
+                            }
+                        }
+                    }
+
+                    //we took the search response and split it into more than one folder.
+                    if ((folderFilePairs.Keys.Count + lockedFolderFilePairs.Keys.Count) > 1)
                     {
                         //split them
                         List<SearchResponse> splitSearchResponses = new List<SearchResponse>();
                         foreach (var pair in folderFilePairs)
                         {
-                            splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, pair.Value));
+                            splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, pair.Value, null));
+                        }
+                        foreach (var pair in lockedFolderFilePairs)
+                        {
+                            splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, null, pair.Value));
                         }
                         //MainActivity.LogDebug("User: " + origResponse.Username + " got split into " + folderFilePairs.Keys.Count);
                         return new Tuple<bool, List<SearchResponse>>(true, splitSearchResponses);
                     }
                     else
                     {
+                        //no need to split it.
                         return new Tuple<bool, List<SearchResponse>>(false, null);
                     }
 
@@ -3983,8 +4026,8 @@ namespace AndriodApp1
             {
                 Task<IReadOnlyCollection<SearchResponse>> t = null;
                 oldList?.Clear();
-                //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
-                t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
+                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
@@ -4772,7 +4815,7 @@ namespace AndriodApp1
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
+            viewFoldername.Text = Helpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString(); //kb/s
 
             //TEST
@@ -4780,23 +4823,6 @@ namespace AndriodApp1
 
 
             //viewQueue.Text = (item.QueueLength).ToString();
-        }
-
-        private string GetFileName(SearchResponse item)
-        {
-            try
-            {
-                if (item.Files.Count == 0)
-                {
-                    return "\\Locked\\";
-                }
-                File f = item.Files.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
         }
     }
 
@@ -4827,7 +4853,7 @@ namespace AndriodApp1
             SearchItemViewMedium itemView = (SearchItemViewMedium)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmedium_dummy, parent, false);
             return itemView;
         }
-
+        private bool hideLocked = false;
         public void setupChildren()
         {
             viewUsername = FindViewById<TextView>(Resource.Id.userNameTextView);
@@ -4835,14 +4861,15 @@ namespace AndriodApp1
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
+            hideLocked = SoulSeekState.HideLockedResults;
         }
 
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item)); //todo maybe also cache this...
+            viewFoldername.Text = Helpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
-            viewFileType.Text = item.GetDominantFileType();
+            viewFileType.Text = item.GetDominantFileType(hideLocked);
             if (item.FreeUploadSlots > 0)
             {
                 viewQueue.Text = "";
@@ -4856,22 +4883,7 @@ namespace AndriodApp1
 
         }
 
-        private string GetFileName(SearchResponse item)
-        {
-            try
-            {
-                if (item.Files.Count == 0)
-                {
-                    return "\\Locked\\";
-                }
-                File f = item.Files.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
-        }
+
     }
 
     public interface IExpandable
@@ -4944,12 +4956,13 @@ namespace AndriodApp1
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
+            hideLocked = SoulSeekState.HideLockedResults;
         }
-
+        private bool hideLocked = false;
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach (Soulseek.File f in item.Files)
+            foreach (Soulseek.File f in item.GetFiles(SoulSeekState.HideLockedResults))
             {
                 TextView tv = new TextView(SoulSeekState.MainActivityRef);
                 SetTextColor(tv, SoulSeekState.MainActivityRef);
@@ -4957,12 +4970,12 @@ namespace AndriodApp1
                 viewToHideShow.AddView(tv);
             }
         }
-
+        
         public void setItem(SearchResponse item, int position)
         {
             bool opposite = this.AdapterRef.oppositePositions.Contains(position);
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Helpers.GetFolderNameFromFile(GetFileName(item));
+            viewFoldername.Text = Helpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + "kbs"; //kb/s
             if (item.FreeUploadSlots > 0)
             {
@@ -4972,7 +4985,7 @@ namespace AndriodApp1
             {
                 viewQueue.Text = item.QueueLength.ToString();
             }
-            viewFileType.Text = item.GetDominantFileType();
+            viewFileType.Text = item.GetDominantFileType(hideLocked);
 
             if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll && opposite ||
                 SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)
@@ -4998,23 +5011,6 @@ namespace AndriodApp1
 
 
             //viewQueue.Text = (item.QueueLength).ToString();
-        }
-
-        private string GetFileName(SearchResponse item)
-        {
-            try
-            {
-                if (item.Files.Count == 0)
-                {
-                    return "\\Locked\\";
-                }
-                File f = item.Files.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
         }
 
         public void Expand()
