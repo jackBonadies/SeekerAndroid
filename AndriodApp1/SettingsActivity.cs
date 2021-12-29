@@ -212,6 +212,14 @@ namespace AndriodApp1
             freeUploadSlotsOnly.Checked = SoulSeekState.FreeUploadSlotsOnly;
             freeUploadSlotsOnly.CheckedChange += FreeUploadSlotsOnly_CheckedChange;
 
+            CheckBox showLockedSearch = FindViewById<CheckBox>(Resource.Id.showLockedInSearch);
+            showLockedSearch.Checked = !SoulSeekState.HideLockedResultsInSearch;
+            showLockedSearch.CheckedChange += ShowLockedSearch_CheckedChange;
+
+            CheckBox showLockedBrowse = FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse);
+            showLockedBrowse.Checked = !SoulSeekState.HideLockedResultsInBrowse;
+            showLockedBrowse.CheckedChange += ShowLockedBrowse_CheckedChange;
+
             allowPrivateRoomInvitations = FindViewById<CheckBox>(Resource.Id.allowPrivateRoomInvitations);
             allowPrivateRoomInvitations.Checked = SoulSeekState.AllowPrivateRoomInvitations;
             allowPrivateRoomInvitations.CheckedChange += AllowPrivateRoomInvitations_CheckedChange;
@@ -255,6 +263,7 @@ namespace AndriodApp1
             positionNumberPairs.Add(new Tuple<int, int>(4,50));
             positionNumberPairs.Add(new Tuple<int, int>(5,100));
             positionNumberPairs.Add(new Tuple<int, int>(6,250));
+            positionNumberPairs.Add(new Tuple<int, int>(7,1000));
             String[] options = new String[]{ positionNumberPairs[0].Item2.ToString(),
                                              positionNumberPairs[1].Item2.ToString(),
                                              positionNumberPairs[2].Item2.ToString(),
@@ -262,6 +271,7 @@ namespace AndriodApp1
                                              positionNumberPairs[4].Item2.ToString(),
                                              positionNumberPairs[5].Item2.ToString(),
                                              positionNumberPairs[6].Item2.ToString(),
+                                             positionNumberPairs[7].Item2.ToString(),
                 };
             ArrayAdapter<String> searchNumOptions = new ArrayAdapter<string>(this,Resource.Layout.support_simple_spinner_dropdown_item, options);
             searchNumSpinner.Adapter = searchNumOptions;
@@ -433,6 +443,17 @@ namespace AndriodApp1
 
 
         }
+
+        private void ShowLockedBrowse_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.HideLockedResultsInBrowse = !e.IsChecked;
+        }
+
+        private void ShowLockedSearch_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SoulSeekState.HideLockedResultsInSearch = !e.IsChecked;
+        }
+
         //private static AndroidX.AppCompat.App.AlertDialog configSmartFilters = null;
         private void ConfigSmartFilters_Click(object sender, EventArgs e)
         {
@@ -1498,12 +1519,16 @@ namespace AndriodApp1
             SoulSeekState.DisableDownloadToastNotification = false;
             SoulSeekState.MemoryBackedDownload = false;
             SoulSeekState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
+            SoulSeekState.HideLockedResultsInBrowse = true;
+            SoulSeekState.HideLockedResultsInSearch = true;
             (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SoulSeekState.AutoClearCompleteDownloads;
             (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SoulSeekState.AutoClearCompleteUploads;
             (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SoulSeekState.RememberSearchHistory;
             (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SoulSeekState.ShowRecentUsers;
             (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SoulSeekState.SharingOn;
             (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SoulSeekState.FreeUploadSlotsOnly;
+            (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SoulSeekState.HideLockedResultsInBrowse;
+            (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SoulSeekState.HideLockedResultsInSearch;
             (FindViewById<CheckBox>(Resource.Id.disableToastNotificationOnDownload) as CheckBox).Checked = SoulSeekState.DisableDownloadToastNotification;
             (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SoulSeekState.MemoryBackedDownload;
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
