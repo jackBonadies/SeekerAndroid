@@ -3021,7 +3021,7 @@ namespace AndriodApp1
             MainActivity.LogDebug("Words To Include: " + searchTab.WordsToInclude.ToString());
             MainActivity.LogDebug("Whether to Filer: " + searchTab.FilteredResults);
             MainActivity.LogDebug("FilterString: " + searchTab.FilterString);
-            bool hideLocked = SoulSeekState.HideLockedResults;
+            bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
             searchTab.FilteredResponses.Clear();
             searchTab.FilteredResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
@@ -3324,7 +3324,7 @@ namespace AndriodApp1
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
-            if (e.Response.FileCount == 0 && SoulSeekState.HideLockedResults || !SoulSeekState.HideLockedResults && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
+            if (e.Response.FileCount == 0 && SoulSeekState.HideLockedResultsInSearch || !SoulSeekState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
             {
                 MainActivity.LogDebug("Skipping Locked or 0/0");
                 return;
@@ -3373,7 +3373,7 @@ namespace AndriodApp1
         {
             try
             {
-                bool hideLocked = SoulSeekState.HideLockedResults;
+                bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
                 if (origResponse.Files.Count != 0 || (!hideLocked && origResponse.LockedFiles.Count != 0))
                 {
                     Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
@@ -4861,7 +4861,7 @@ namespace AndriodApp1
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SoulSeekState.HideLockedResults;
+            hideLocked = SoulSeekState.HideLockedResultsInSearch;
         }
 
         public void setItem(SearchResponse item, int noop)
@@ -4956,13 +4956,13 @@ namespace AndriodApp1
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SoulSeekState.HideLockedResults;
+            hideLocked = SoulSeekState.HideLockedResultsInSearch;
         }
         private bool hideLocked = false;
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach (Soulseek.File f in item.GetFiles(SoulSeekState.HideLockedResults))
+            foreach (Soulseek.File f in item.GetFiles(SoulSeekState.HideLockedResultsInSearch))
             {
                 TextView tv = new TextView(SoulSeekState.MainActivityRef);
                 SetTextColor(tv, SoulSeekState.MainActivityRef);

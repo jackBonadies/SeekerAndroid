@@ -3368,6 +3368,8 @@ namespace AndriodApp1
                 SoulSeekState.RememberSearchHistory = sharedPreferences.GetBoolean(SoulSeekState.M_RememberSearchHistory, true);
                 SoulSeekState.ShowRecentUsers = sharedPreferences.GetBoolean(SoulSeekState.M_RememberUserHistory, true);
                 SoulSeekState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(SoulSeekState.M_OnlyFreeUploadSlots, true);
+                SoulSeekState.HideLockedResultsInBrowse = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedBrowse, true);
+                SoulSeekState.HideLockedResultsInSearch = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedSearch, true);
                 SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, false);
                 SoulSeekState.MemoryBackedDownload = sharedPreferences.GetBoolean(SoulSeekState.M_MemoryBackedDownload, false);
                 SearchFragment.FilterSticky = sharedPreferences.GetBoolean(SoulSeekState.M_FilterSticky, false);
@@ -3757,7 +3759,7 @@ namespace AndriodApp1
         {
             //a search that we initiated completed...
             var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResults)).ToList();
+            var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch)).ToList();
             int newUniqueResults = differenceNewResults.Count;
             if (newUniqueResults >= 1)
             {
@@ -5982,7 +5984,7 @@ namespace AndriodApp1
 
         public static string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
         public static int SETTINGS_EXTERNAL = 0x430;
-        public static int DEFAULT_SEARCH_RESULTS = 30;
+        public static int DEFAULT_SEARCH_RESULTS = 50;
         private int WRITE_EXTERNAL = 9999;
         private int NEW_WRITE_EXTERNAL = 0x428;
         private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
@@ -9496,6 +9498,8 @@ namespace AndriodApp1
             editor.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
             editor.PutBoolean(SoulSeekState.M_RememberUserHistory, SoulSeekState.ShowRecentUsers);
             editor.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
+            editor.PutBoolean(SoulSeekState.M_HideLockedSearch, SoulSeekState.HideLockedResultsInSearch);
+            editor.PutBoolean(SoulSeekState.M_HideLockedBrowse, SoulSeekState.HideLockedResultsInBrowse);
             editor.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
             editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
             editor.PutBoolean(SoulSeekState.M_MemoryBackedDownload, SoulSeekState.MemoryBackedDownload);
@@ -9534,6 +9538,8 @@ namespace AndriodApp1
             outState.PutBoolean(SoulSeekState.M_MemoryBackedDownload, SoulSeekState.MemoryBackedDownload);
             outState.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
             outState.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
+            outState.PutBoolean(SoulSeekState.M_HideLockedSearch, SoulSeekState.HideLockedResultsInSearch);
+            outState.PutBoolean(SoulSeekState.M_HideLockedBrowse, SoulSeekState.HideLockedResultsInBrowse);
             outState.PutBoolean(SoulSeekState.M_DisableToastNotifications, SoulSeekState.DisableDownloadToastNotification);
             outState.PutInt(SoulSeekState.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
             outState.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
@@ -10136,7 +10142,10 @@ namespace AndriodApp1
         public static bool FreeUploadSlotsOnly = true;
         public static bool DisableDownloadToastNotification = false;
         public static bool AutoRetryDownload = true;
-        public static bool HideLockedResults = false;
+
+        public static bool HideLockedResultsInSearch = true;
+        public static bool HideLockedResultsInBrowse = true;
+
         public static bool MemoryBackedDownload = false;
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
@@ -10407,6 +10416,8 @@ namespace AndriodApp1
         public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";
         public const string M_RememberUserHistory = "Momento_RememberUserHistory";
         public const string M_OnlyFreeUploadSlots = "Momento_FreeUploadSlots";
+        public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";
+        public const string M_HideLockedSearch = "Momento_HideLockedSearch";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
@@ -11275,7 +11286,7 @@ namespace AndriodApp1
         {
             int numFiles = 0;
             long totalBytes = -1;
-            if (SoulSeekState.HideLockedResults)
+            if (SoulSeekState.HideLockedResultsInSearch)
             {
                 numFiles = searchResponse.FileCount;
                 totalBytes = searchResponse.Files.Sum(f=>f.Size);
@@ -11299,7 +11310,7 @@ namespace AndriodApp1
 
 
             var filesWithLength = searchResponse.Files.Where(f=>f.Length.HasValue);
-            if (!SoulSeekState.HideLockedResults)
+            if (!SoulSeekState.HideLockedResultsInSearch)
             {
                 filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
             }

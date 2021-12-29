@@ -74,7 +74,7 @@ namespace AndriodApp1
             //but when we get a dir response the files are just the end file names i.e. "02 - Same Damn Tune.mp3" so they cannot be downloaded like that...
             //can be fixed with d.Name + "\\" + f.Filename
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
-            bool hideLocked = SoulSeekState.HideLockedResults;
+            bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
             List<File> fullFilenameCollection = new List<File>();
             foreach(File f in d.Files)
             {
@@ -222,7 +222,7 @@ namespace AndriodApp1
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
             List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
             adapterList.AddRange(searchResponse.Files.ToList().Select(x=>new FileLockedUnlockedWrapper(x, false)));
-            if(!SoulSeekState.HideLockedResults)
+            if(!SoulSeekState.HideLockedResultsInSearch)
             {
                 adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x=>new FileLockedUnlockedWrapper(x, true)));
             }
@@ -581,7 +581,7 @@ namespace AndriodApp1
 
             //str.Close();
             //end logging code
-            bool hideLocked = SoulSeekState.HideLockedResults;
+            bool hideLocked = SoulSeekState.HideLockedResultsInBrowse;
             if (b.DirectoryCount==0&&b.LockedDirectoryCount!=0&&hideLocked)
             {
                 errorMsgToToast = SoulSeekState.MainActivityRef.GetString(Resource.String.browse_onlylocked);
@@ -799,7 +799,7 @@ namespace AndriodApp1
             }
             catch(Exception e)
             {
-                MainActivity.LogFirebase("CreateTree " + username + "  " + e.Message + e.StackTrace);
+                MainActivity.LogFirebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
                 throw e;
             }
 
@@ -860,7 +860,7 @@ namespace AndriodApp1
 
         private void DownloadSelectedLogic()
         {
-            bool hideLocked = SoulSeekState.HideLockedResults;
+            bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
             try
             {
                 List<Task> tsks = new List<Task>();
@@ -1270,7 +1270,7 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("CreateDownloadAllTask");
             Task task = new Task(() => { 
-                foreach(Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResults))
+                foreach(Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResultsInSearch))
                 {
                     SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, out _);
                 }
@@ -1359,10 +1359,15 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case Resource.Id.getFolderContents:
-                    string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResults, 0).Filename);
+                    string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0).Filename);
                     if(dirname==string.Empty)
                     {
                         MainActivity.LogFirebase("The dirname is empty!!");
+                        return true;
+                    }
+                    if(SoulSeekState.HideLockedResultsInSearch && searchResponse.FileCount==0 && searchResponse.LockedFileCount > 0)
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.", ToastLength.Short).Show();
                         return true;
                     }
                     if (!SoulSeekState.currentlyLoggedIn)
@@ -1404,7 +1409,7 @@ namespace AndriodApp1
                     }
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResults,0).Filename);
+                    string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);
                     Action<View> action = new Action<View>((v) => {
                         this.Dismiss();
                         ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);

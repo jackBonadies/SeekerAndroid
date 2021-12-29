@@ -35,7 +35,7 @@ namespace AndriodApp1
         public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SoulSeekState.SmartFilterState smartFilterOptions)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-            bool hideHidden = SoulSeekState.HideLockedResults;
+            bool hideHidden = SoulSeekState.HideLockedResultsInSearch;
 
             //this is relevant to both
             if(smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
