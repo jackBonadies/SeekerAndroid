@@ -3051,6 +3051,7 @@ namespace Soulseek
 
                 if (ex is UserOfflineException)
                 {
+                    download.State = TransferStates.Errored | TransferStates.UserOffline;
                     throw;
                 }
 

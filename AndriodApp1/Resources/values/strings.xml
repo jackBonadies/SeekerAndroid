@@ -621,4 +621,8 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 
       <string name="publicRoomCreation">Requesting public room creation</string>
 
+	<string name="failed_user_offline">Failed - User Offline</string>
+	<string name="failed_denied">Failed - Denied</string>
+
+
 </resources>
