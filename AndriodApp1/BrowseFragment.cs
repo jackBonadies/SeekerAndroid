@@ -968,11 +968,11 @@ namespace AndriodApp1
                     t.ContinueWith(new Action<Task>((Task t) => {
                         if (t.IsFaulted)
                         {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                                 //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
                                 //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
-                                Toast.MakeText(SoulSeekState.MainActivityRef, Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
 
                             });
                             return;
@@ -1233,11 +1233,11 @@ namespace AndriodApp1
                 t.ContinueWith(new Action<Task>((Task t) => {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                             //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
                             //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
-                            Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
 
                         });
                         return;
@@ -1294,11 +1294,11 @@ namespace AndriodApp1
                     t.ContinueWith(new Action<Task>((Task t) => {
                         if (t.IsFaulted)
                         {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { 
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { 
                                 //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
                                 //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
                                 
-                                Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
                                 
                                 });
                             return;
@@ -1736,7 +1736,7 @@ namespace AndriodApp1
                     if(staringPoint==null)
                     {
                         MainActivity.LogFirebase("SoulSeekState_BrowseResponseReceived: startingPoint is null");
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.Resources.GetString(Resource.String.error_browse_at_location),ToastLength.Long).Show(); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location),ToastLength.Long).Show(); });
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
