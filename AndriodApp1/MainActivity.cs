@@ -8053,23 +8053,23 @@ namespace AndriodApp1
                     }
                     else if (task.Exception.InnerException is Soulseek.TransferRejectedException) //derived class of TransferException...
                     {
-                        //we go here when trying to download a locked file...
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected)); };
+                        //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
+                        action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected),"_2_"); }; //needed
                     }
                     else if (task.Exception.InnerException is Soulseek.TransferException)
                     {
-                        action = () => { ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer),e.dlInfo.username)); };
+                        action = () => { ToastUIWithDebouncer(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer),e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
                     }
                     else if (task.Exception.InnerException is Soulseek.UserOfflineException)
                     {
-                        action = () => { ToastUI(task.Exception.InnerException.Message); };
+                        action = () => { ToastUIWithDebouncer(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
                     }
                     else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                             task.Exception.InnerException.Message != null &&
                             task.Exception.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
                     {
                         LogDebug("Task Exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
+                        action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                     {
@@ -8093,7 +8093,7 @@ namespace AndriodApp1
                     {
                         //MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect)); };
+                        action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
                     }
                     else
                     {
@@ -8227,6 +8227,31 @@ namespace AndriodApp1
         {
             Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(msgCode), ToastLength.Short).Show();
         }
+
+
+        /// <summary>
+        /// This is to solve the problem of, are all the toasts part of the same session?  
+        /// For example if you download a locked folder of 20 files, you will get immediately 20 toasts
+        /// So our logic is, if you just did a message, wait a full second before showing anything more.
+        /// </summary>
+        /// <param name="msgToToast"></param>
+        /// <param name="caseOrCode"></param>
+        /// <param name="usernameIfApplicable"></param>
+        private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable="")
+        {
+            long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            //if it does not exist then updatedTime will be curTime.  If it does exist but is older than a second then updated time will also be curTime.  In those two cases, show the toast.
+            long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode+usernameIfApplicable, curTime, (key, oldValue) => { 
+                
+                MainActivity.LogDebug("key exists: " + (curTime - oldValue).ToString());
+                
+                return ((curTime - oldValue)<1000) ? oldValue : curTime; });
+            if(updatedTime == curTime)
+            {
+                ToastUI(msgToToast);
+            }
+        }
+        private static System.Collections.Concurrent.ConcurrentDictionary<string, long> ToastUIDebouncer = new System.Collections.Concurrent.ConcurrentDictionary<string, long>();
 
         public static void ToastUI(string msg)
         {
