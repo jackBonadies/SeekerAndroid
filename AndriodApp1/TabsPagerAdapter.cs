@@ -5646,35 +5646,35 @@ namespace AndriodApp1
                     progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
                 }
 #pragma warning restore 0618
-                if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+
+            }
+
+            if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+            {
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                    {
-                        this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                        //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                    }
-                    else
-                    {
-                        this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                        //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                    }
+                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
+                    //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
                 }
                 else
                 {
-                    //this.Background
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                    {
-                        this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                                               //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                    }
-                    else
-                    {
-                        this.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                                               //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                    }
+                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
                 }
-
-
+            }
+            else
+            {
+                //this.Background
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                {
+                    this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                                           //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                }
+                else
+                {
+                    this.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
+                                           //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
+                }
             }
         }
 
