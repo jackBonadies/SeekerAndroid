@@ -53,6 +53,8 @@ using System.Collections.ObjectModel;
 using Android.Net.Wifi;
 using static Android.Provider.DocumentsContract;
 using Android.Util;
+using SearchResponseExtensions;
+
 //using System.IO;
 //readme:
 //dotnet add package Soulseek --version 1.0.0-rc3.1
@@ -3660,12 +3662,23 @@ namespace AndriodApp1
 
     public class SearchResponseComparer : IEqualityComparer<SearchResponse>
     {
+        private bool hideLockedResults = true;
+
+        public SearchResponseComparer(bool _hideLocked)
+        {
+            hideLockedResults = _hideLocked;
+        }
+
         public bool Equals(SearchResponse s1, SearchResponse s2)
         {
             if(s1.Username == s2.Username)
             {
                 if(s1.Files.Count == s2.Files.Count)
                 {
+                    if(s1.Files.Count == 0)
+                    {
+                        return s1.LockedFiles.First().Filename == s2.LockedFiles.First().Filename;
+                    }
                     if(s1.Files.First().Filename == s2.Files.First().Filename)
                     {
                         return true;
@@ -3679,7 +3692,7 @@ namespace AndriodApp1
 
         public int GetHashCode(SearchResponse s1)
         {
-            return s1.Username.GetHashCode() + s1.Files.First().Filename.GetHashCode();
+            return s1.Username.GetHashCode() + s1.GetElementAtAdapterPosition(hideLockedResults,0).Filename.GetHashCode();
         }
     }
 
@@ -3744,7 +3757,7 @@ namespace AndriodApp1
         {
             //a search that we initiated completed...
             var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer()).ToList();
+            var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResults)).ToList();
             int newUniqueResults = differenceNewResults.Count;
             if (newUniqueResults >= 1)
             {
@@ -8036,6 +8049,11 @@ namespace AndriodApp1
                     {
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
                     }
+                    else if (task.Exception.InnerException is Soulseek.TransferRejectedException) //derived class of TransferException...
+                    {
+                        //we go here when trying to download a locked file...
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected)); };
+                    }
                     else if (task.Exception.InnerException is Soulseek.TransferException)
                     {
                         action = () => { ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer),e.dlInfo.username)); };
@@ -8043,10 +8061,6 @@ namespace AndriodApp1
                     else if (task.Exception.InnerException is Soulseek.UserOfflineException)
                     {
                         action = () => { ToastUI(task.Exception.InnerException.Message); };
-                    }
-                    else if (task.Exception.InnerException is Soulseek.TransferRejectedException)
-                    {
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected)); };
                     }
                     else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                             task.Exception.InnerException.Message != null &&
@@ -10122,7 +10136,7 @@ namespace AndriodApp1
         public static bool FreeUploadSlotsOnly = true;
         public static bool DisableDownloadToastNotification = false;
         public static bool AutoRetryDownload = true;
-        public static bool HideLockedResults = true;
+        public static bool HideLockedResults = false;
         public static bool MemoryBackedDownload = false;
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
@@ -11164,6 +11178,52 @@ namespace AndriodApp1
             }
         }
 
+        private static string GetUnlockedFileName(SearchResponse item)
+        {
+            try
+            {
+                Soulseek.File f = item.Files.First();
+                return f.Filename;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static string GetLockedFileName(SearchResponse item)
+        {
+            try
+            {
+                Soulseek.File f = item.LockedFiles.First();
+                return f.Filename;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// This will prepend the lock when applicable..
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFolderNameForSearchResult(SearchResponse item)
+        {
+            if(item.FileCount>0)
+            {
+                return Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+            }
+            else if(item.LockedFileCount>0)
+            {
+                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFolderNameFromFile(GetLockedFileName(item));
+            }
+            else
+            {
+                return "\\Locked\\";
+            }
+        }
+
         public static string GetFolderNameFromFile(string filename, int levels=1)
         {
             try
@@ -11213,8 +11273,18 @@ namespace AndriodApp1
 
         public static string GetSubHeaderText(SearchResponse searchResponse)
         {
-            int numFiles = searchResponse.FileCount;
-            long totalBytes = searchResponse.Files.Sum(f=>f.Size);
+            int numFiles = 0;
+            long totalBytes = -1;
+            if (SoulSeekState.HideLockedResults)
+            {
+                numFiles = searchResponse.FileCount;
+                totalBytes = searchResponse.Files.Sum(f=>f.Size);
+            }
+            else
+            {
+                numFiles = searchResponse.FileCount + searchResponse.LockedFileCount;
+                totalBytes = searchResponse.Files.Sum(f => f.Size) + searchResponse.LockedFiles.Sum(f => f.Size);
+            }
 
             //if total bytes greater than 1GB 
             string sizeString = null;
@@ -11226,8 +11296,13 @@ namespace AndriodApp1
             {
                 sizeString = string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
             }
-            
+
+
             var filesWithLength = searchResponse.Files.Where(f=>f.Length.HasValue);
+            if (!SoulSeekState.HideLockedResults)
+            {
+                filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
+            }
             string timeString = null;
             if (filesWithLength.Count() > 0)
             {
@@ -12074,6 +12149,41 @@ namespace AndriodApp1
 }
 
 
+namespace SearchResponseExtensions
+{
+    public static class SearchResponseExtensions
+    {
+        public static IEnumerable<Soulseek.File> GetFiles(this SearchResponse searchResponse, bool hideLocked)
+        {
+            return hideLocked ? searchResponse.Files : searchResponse.Files.Concat(searchResponse.LockedFiles);
+        }
+
+        public static Soulseek.File GetElementAtAdapterPosition(this SearchResponse searchResponse, bool hideLocked, int position)
+        {
+            if(hideLocked)
+            {
+                return searchResponse.Files.ElementAt(position);
+            }
+            else
+            {
+                //we always do Files, then LockedFiles
+                if(position >= searchResponse.Files.Count)
+                {
+                    return searchResponse.LockedFiles.ElementAt(position - searchResponse.Files.Count);
+                }
+                else
+                {
+                    return searchResponse.Files.ElementAt(position);
+                }
+                
+            }
+            
+        }
+    }
+}
+
+
+
 #if DEBUG
 public static class TestClient
 {
@@ -12107,7 +12217,13 @@ public static class TestClient
                 fs.Add(new Soulseek.File(1, searchString + i + "\\" + "2. test filename " + i, 0, ".mp3", null));
                 fs.Add(new Soulseek.File(1, searchString + i + "\\" + "3. test filename " + i, 0, ".mp3", null));
             }
-            SearchResponse response = new SearchResponse("test" + i, r.Next(0, 100000), r.Next(0, 10), r.Next(0, 12345), (long)(r.Next(0, 14556)), fs);
+            //1 in 15 chance of being locked
+            bool locked = false;
+            if(r.Next(0, 15) == 0)
+            {
+                locked = true;
+            }
+            SearchResponse response = new SearchResponse("test" + i, r.Next(0, 100000), r.Next(0, 10), r.Next(0, 12345), (long)(r.Next(0, 14556)), locked ? null : fs, locked ? fs : null);
             var eventArgs = new SearchResponseReceivedEventArgs(response, null);
             responseBag.Add(response);
             actionToInvoke(eventArgs);

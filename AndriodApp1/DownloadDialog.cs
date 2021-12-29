@@ -39,7 +39,7 @@ using Google.Android.Material.Snackbar;
 using Soulseek;
 
 using log = Android.Util.Log;
-
+using SearchResponseExtensions;
 namespace AndriodApp1
 {
     class DownloadDialog : Android.Support.V4.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
@@ -74,13 +74,14 @@ namespace AndriodApp1
             //but when we get a dir response the files are just the end file names i.e. "02 - Same Damn Tune.mp3" so they cannot be downloaded like that...
             //can be fixed with d.Name + "\\" + f.Filename
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
+            bool hideLocked = SoulSeekState.HideLockedResults;
             List<File> fullFilenameCollection = new List<File>();
             foreach(File f in d.Files)
             {
                 string fName = d.Name + "\\" + f.Filename;
                 bool extraAttr = false;
                 //if it existed in the old folder then we can get some extra attributes
-                foreach (File fullFileInfo in searchResponse.Files)
+                foreach (File fullFileInfo in searchResponse.GetFiles(hideLocked))
                 {
                     if(fName==fullFileInfo.Filename)
                     {
@@ -219,7 +220,13 @@ namespace AndriodApp1
         private void UpdateListView()
         {
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
-            this.customAdapter = new DownloadCustomAdapter(SoulSeekState.MainActivityRef, searchResponse.Files.ToList());
+            List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
+            adapterList.AddRange(searchResponse.Files.ToList().Select(x=>new FileLockedUnlockedWrapper(x, false)));
+            if(!SoulSeekState.HideLockedResults)
+            {
+                adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x=>new FileLockedUnlockedWrapper(x, true)));
+            }
+            this.customAdapter = new DownloadCustomAdapter(SoulSeekState.MainActivityRef, adapterList);
             this.customAdapter.Owner = this;
             listView.Adapter = (customAdapter);
         }
@@ -574,8 +581,8 @@ namespace AndriodApp1
 
             //str.Close();
             //end logging code
-
-            if (b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
+            bool hideLocked = SoulSeekState.HideLockedResults;
+            if (b.DirectoryCount==0&&b.LockedDirectoryCount!=0&&hideLocked)
             {
                 errorMsgToToast = SoulSeekState.MainActivityRef.GetString(Resource.String.browse_onlylocked);
                 return null;
@@ -649,7 +656,7 @@ namespace AndriodApp1
                 //in that case we need to make a common root, as the directory everyone has (even if its the fake "@@adfadf" directory NOT TRUE)
                 //I think a quick hack would be.. is the first directory name contained in the last directory name
 
-                //mzawk case (This is SoulseekQT Im guessing)
+                //User case (This is SoulseekQT Im guessing)
                 //@@bvenl\0
                 //@@bvenl\1
                 //@@bvenl\2
@@ -658,21 +665,21 @@ namespace AndriodApp1
                 //@@bvenl\2\complete\1990\test
 
 
-                //meee
+                //User
                 //@@pulvh\FLAC Library
                 //@@pulvh\Old School
 
-                //BeerNecessities (This is Nicotine multi-root Im guessing)
-                //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\Billy Idol [video collection]"
-                //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\Nina Hagen - Video Collection"
-                //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\The Beatles - 1+ (all 27 tracks with 5.1 surround audio)"
+                //User (This is Nicotine multi-root Im guessing)
+                //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\ArtistName"
+                //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\ArtistName"
+                //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\ArtistName"
                 //FLAC"
                 //FLAC\..."...
-                //FLAC\\++Various Artists++\\VA - Winters Of Discontent - The Peel Sessions 77-83 (1991)"
+                //FLAC\\++Various Artists++\\Artist"
                 //NOTE THERE IS NO FAKE @@lskjdf
                 //sometimes the root is the empty string
 
-                //doggoli - the first is literally just '\\' not an actual directory name... (old PowerPC Mac version??)
+                //User - the first is literally just '\\' not an actual directory name... (old PowerPC Mac version??)
                 //\\
                 //\\Volumes
                 //...
@@ -681,7 +688,7 @@ namespace AndriodApp1
                 //adfzdg\\  (Note this should be adfzdg)...
                 //adfzdg\\Music
                 //I think this would be a special case where we simply remove the first dir.
-                if(dirArray[0].Name=="\\")
+                if (dirArray[0].Name=="\\")
                 {
                     dirArray = dirArray.Skip(1).ToArray();
                 }
@@ -845,6 +852,7 @@ namespace AndriodApp1
 
         private void DownloadSelectedLogic()
         {
+            bool hideLocked = SoulSeekState.HideLockedResults;
             try
             {
                 List<Task> tsks = new List<Task>();
@@ -852,7 +860,7 @@ namespace AndriodApp1
                 {
                     try
                     {
-                        Task tsk = CreateDownloadTask(searchResponse.Files.ElementAt(position));
+                        Task tsk = CreateDownloadTask(searchResponse.GetElementAtAdapterPosition(hideLocked, position));
                         if (tsk == null)
                         {
                             Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_duplicate), ToastLength.Long).Show(); });
@@ -1254,7 +1262,7 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("CreateDownloadAllTask");
             Task task = new Task(() => { 
-                foreach(Soulseek.File file in searchResponse.Files)
+                foreach(Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResults))
                 {
                     SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, out _);
                 }
@@ -1343,7 +1351,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case Resource.Id.getFolderContents:
-                    string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.Files.ElementAt(0).Filename);
+                    string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResults, 0).Filename);
                     if(dirname==string.Empty)
                     {
                         MainActivity.LogFirebase("The dirname is empty!!");
@@ -1388,7 +1396,7 @@ namespace AndriodApp1
                     }
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.Files.First().Filename);
+                    string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResults,0).Filename);
                     Action<View> action = new Action<View>((v) => {
                         this.Dismiss();
                         ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
@@ -1422,12 +1430,23 @@ namespace AndriodApp1
         }
     }
 
+    public class FileLockedUnlockedWrapper
+    {
+        public Soulseek.File File;
+        public bool IsLocked;
+        public FileLockedUnlockedWrapper(Soulseek.File _file, bool _isLocked)
+        {
+            File = _file;
+            IsLocked = _isLocked;
+        }
+    }
 
-    public class DownloadCustomAdapter : ArrayAdapter<Soulseek.File>
+
+    public class DownloadCustomAdapter : ArrayAdapter<FileLockedUnlockedWrapper>
     {
         public List<int> SelectedPositions = new List<int>();
         public Android.Support.V4.App.DialogFragment Owner = null;
-        public DownloadCustomAdapter(Context c, List<Soulseek.File> items) : base(c, 0, items)
+        public DownloadCustomAdapter(Context c, List<FileLockedUnlockedWrapper> items) : base(c, 0, items)
         {
         }
 
@@ -1504,11 +1523,18 @@ namespace AndriodApp1
             viewAttributes = FindViewById<TextView>(Resource.Id.textView3);
         }
 
-        public void setItem(Soulseek.File item)
+        public void setItem(FileLockedUnlockedWrapper wrapper)
         {
-            viewFilename.Text = Helpers.GetFileNameFromFile(item.Filename);
+            if(wrapper.IsLocked)
+            {
+                viewFilename.Text = new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFileNameFromFile(wrapper.File.Filename);
+            }
+            else
+            {
+                viewFilename.Text = Helpers.GetFileNameFromFile(wrapper.File.Filename);
+            }
             //viewSize.Text = string.Format("{0:0.##} mb", item.Size / (1024.0 * 1024.0));
-            viewAttributes.Text = Helpers.GetSizeLengthAttrString(item);
+            viewAttributes.Text = Helpers.GetSizeLengthAttrString(wrapper.File);
         }
 
         /// <summary>
