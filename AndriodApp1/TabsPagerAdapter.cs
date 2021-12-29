@@ -5252,7 +5252,7 @@ namespace AndriodApp1
             viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed);
 
-            TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload());
+            TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload(), true);
             TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, item, state);
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
             progressBar.Progress = folderItem.GetFolderProgress(out _, out _);
@@ -5453,7 +5453,7 @@ namespace AndriodApp1
         }
 
 
-        public static void SetViewStatusText(TextView viewStatus, TransferStates state, bool isUpload)
+        public static void SetViewStatusText(TextView viewStatus, TransferStates state, bool isUpload, bool isFolder)
         {
             if (state.HasFlag(TransferStates.Queued))
             {
@@ -5469,6 +5469,14 @@ namespace AndriodApp1
                 {
                     viewStatus.SetText(Resource.String.paused);
                 }
+            }
+            else if(isFolder && state.HasFlag(TransferStates.Rejected)) //if is folder we put the extra info here, else we put it in the additional status TextView
+            {
+                viewStatus.SetText(Resource.String.failed_denied);
+            }
+            else if (isFolder && state.HasFlag(TransferStates.UserOffline))
+            {
+                viewStatus.SetText(Resource.String.failed_user_offline);
             }
             else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
             {
@@ -5548,6 +5556,14 @@ namespace AndriodApp1
             {
                 viewStatusAdditionalInfo.Text = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_), item.GetQueueLength().ToString());
             }
+            else if(item is TransferItem && state.HasFlag(TransferStates.Rejected))
+            {
+                viewStatusAdditionalInfo.Text = "Denied";
+            }
+            else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
+            {
+                viewStatusAdditionalInfo.Text = "User is Offline";
+            }
             else
             {
                 viewStatusAdditionalInfo.Text = "";
@@ -5612,7 +5628,7 @@ namespace AndriodApp1
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.Progress;
-            TransferViewHelper.SetViewStatusText(viewStatus, ti.State, ti.IsUpload());
+            TransferViewHelper.SetViewStatusText(viewStatus, ti.State, ti.IsUpload(), false);
             TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, ti, ti.State);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;

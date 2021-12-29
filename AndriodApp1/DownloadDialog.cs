@@ -259,23 +259,7 @@ namespace AndriodApp1
         {
             try
             {
-                bool useDownloadDialogFragmentPre = false;
-                View vPre = null;
-                if (SoulSeekState.ActiveActivityRef is MainActivity)
-                {
-                    var f = (SoulSeekState.ActiveActivityRef as MainActivity).SupportFragmentManager.FindFragmentByTag("tag_download_test");
-                    if (f != null && f.IsVisible)
-                    {
-                        useDownloadDialogFragmentPre = true;
-                        vPre = f.View;
-                    }
-                }
-                if(!useDownloadDialogFragmentPre)
-                {
-                    vPre = SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
-                }
-
-                Snackbar.Make(vPre, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
+                Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
             }
             catch(Exception e)
             {
@@ -351,21 +335,6 @@ namespace AndriodApp1
                         }
                     }
 
-                    //TODO temp
-                    bool useDownloadDialogFragment = false;
-                    View v = null;
-                    if(SoulSeekState.ActiveActivityRef is MainActivity mar)
-                    {
-                        var f = mar.SupportFragmentManager.FindFragmentByTag("tag_download_test"); 
-                        //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
-                        if(f != null && f.IsVisible)
-                        {
-                            useDownloadDialogFragment = true;
-                            v = f.View;
-                        }
-                    }
-
-
                     Action<View> action = new Action<View>((v) => {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
@@ -377,11 +346,7 @@ namespace AndriodApp1
                     //Snackbar sb = Snackbar.Make(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.content), "Browse Response Received", Snackbar.LengthLong).SetAction("Go", action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
                     try
                     {
-                        if(!useDownloadDialogFragment)
-                        {
-                            v = SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
-                        }
-                        Snackbar sb = Snackbar.Make(v, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+                        Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
                         (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor( SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor) );//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                         sb.Show(); 
                     }
@@ -1365,7 +1330,7 @@ namespace AndriodApp1
                         MainActivity.LogFirebase("The dirname is empty!!");
                         return true;
                     }
-                    if(SoulSeekState.HideLockedResultsInSearch && searchResponse.FileCount==0 && searchResponse.LockedFileCount > 0)
+                    if(!SoulSeekState.HideLockedResultsInSearch && searchResponse.FileCount==0 && searchResponse.LockedFileCount > 0)
                     {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, "Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.", ToastLength.Short).Show();
                         return true;
@@ -1414,6 +1379,11 @@ namespace AndriodApp1
                         this.Dismiss();
                         ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
+                    if(!SoulSeekState.HideLockedResultsInSearch && SoulSeekState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    {
+                        //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
+                        startingDir = null;
+                    }
                     RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:

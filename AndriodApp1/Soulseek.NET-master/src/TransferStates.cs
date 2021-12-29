@@ -83,5 +83,10 @@ namespace Soulseek
         ///     Completed due to rejection by peer.
         /// </summary>
         Rejected = 512,
+
+        /// <summary>
+        ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
+        /// </summary>
+        UserOffline = 1024,
     }
 }

@@ -127,7 +127,7 @@ namespace AndriodApp1
                     else
                     {
                         startWithUserFragment = true;
-                        Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo)=>{return roomInfo.Name == goToRoom; });
+                        Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo)=>{return roomInfo.Name == goToRoom; }); //roomListParsed can be null, causing crash.
                         SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
                         //switch in that fragment...
                         //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
@@ -1485,7 +1485,7 @@ namespace AndriodApp1
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
                 return;
             }
-            if(msg.MessageText==string.Empty)
+            if(string.IsNullOrWhiteSpace(msg.MessageText))
             {
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.empty_message_error), ToastLength.Short).Show();

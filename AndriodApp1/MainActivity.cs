@@ -3280,9 +3280,10 @@ namespace AndriodApp1
         private static void UserListAddIfContainsUser(string username, UserData userData, UserStatus userStatus)
         {
             UserPresence? prevStatus = UserPresence.Offline;
+            bool found = false;
             lock (SoulSeekState.UserList)
             {
-                bool found = false;
+                
                 foreach (UserListItem item in SoulSeekState.UserList)
                 {
                     if (item.Username == username)
@@ -3308,7 +3309,8 @@ namespace AndriodApp1
             }
             //if user was previously offline and now they are not offline, then do the notification.
             //note - this method does not get called when first adding users. which I think is ideal for notifications.
-            if(!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && userStatus.Presence != UserPresence.Offline)
+            //if not in our user list, then this is likely a result of GetUserInfo!, so dont do any of this..
+            if(found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline)))
             {
                 MainActivity.LogDebug("from offline to online " + username);
                 if(SoulSeekState.UserOnlineAlerts != null && SoulSeekState.UserOnlineAlerts.ContainsKey(username))
@@ -3321,6 +3323,27 @@ namespace AndriodApp1
             {
                 MainActivity.LogDebug("NOT from offline to online " + username);
             }
+        }
+
+        public static View GetViewForSnackbar()
+        {
+            bool useDownloadDialogFragment = false;
+            View v = null;
+            if(SoulSeekState.ActiveActivityRef is MainActivity mar)
+            {
+                var f = mar.SupportFragmentManager.FindFragmentByTag("tag_download_test"); 
+                //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
+                if(f != null && f.IsVisible)
+                {
+                    useDownloadDialogFragment = true;
+                    v = f.View;
+                }
+            }
+            if (!useDownloadDialogFragment)
+            {
+                v = SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
+            }
+            return v;
         }
 
         public const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
@@ -9988,7 +10011,7 @@ namespace AndriodApp1
 
                             SoulSeekState.ActiveActivityRef.RunOnUiThread( () => { 
                                 //show snackbar (for active activity, active content view) so they can go to it... TODO
-                                Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_received),uname), Snackbar.LengthLong).SetAction(Resource.String.view, action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+                                Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_received),uname), Snackbar.LengthLong).SetAction(Resource.String.view, action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
                                 (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                                 sb.Show();
                             });
@@ -12197,6 +12220,11 @@ namespace SearchResponseExtensions
         public static IEnumerable<Soulseek.File> GetFiles(this SearchResponse searchResponse, bool hideLocked)
         {
             return hideLocked ? searchResponse.Files : searchResponse.Files.Concat(searchResponse.LockedFiles);
+        }
+
+        public static bool IsLockedOnly(this SearchResponse searchResponse)
+        {
+            return searchResponse.FileCount == 0 && searchResponse.LockedFileCount != 0;
         }
 
         public static Soulseek.File GetElementAtAdapterPosition(this SearchResponse searchResponse, bool hideLocked, int position)
