@@ -12112,16 +12112,21 @@ namespace AndriodApp1
     {
         public T Data;
         public bool IsFilteredOut = false;
+        public bool IsLocked = false;
         public TreeNode<T> Parent;
         public ICollection<TreeNode<T>> Children;
-        public TreeNode(T data)
+
+        public TreeNode(T data, bool isLocked)
         {
             this.Data = data;
             this.Children = new LinkedList<TreeNode<T>>();
+            this.IsLocked = isLocked;
         }
-        public TreeNode<T> AddChild(T child)
+
+
+        public TreeNode<T> AddChild(T child, bool isChildLocked)
         {
-            TreeNode<T> childNode = new TreeNode<T>(child) { Parent = this };
+            TreeNode<T> childNode = new TreeNode<T>(child, isChildLocked) { Parent = this };
             this.Children.Add(childNode);
             return childNode;
         }

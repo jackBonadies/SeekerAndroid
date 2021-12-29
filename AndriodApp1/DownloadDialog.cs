@@ -601,19 +601,27 @@ namespace AndriodApp1
                 TreeNode<Directory> curNode = null;
 
                 TreeNode<Directory> prevNodeDebug = null;
-                
-                var dirArray = b.Directories.ToArray();
+
+                Tuple<Directory,bool>[] dirInfoArray = null; //true if locked.
+                if(hideLocked)
+                {
+                    dirInfoArray = b.Directories.Select(d=>new Tuple<Directory, bool>(d, false)).ToArray();
+                }
+                else
+                {
+                    dirInfoArray = b.Directories.Select(d => new Tuple<Directory, bool>(d, false)).Concat(b.LockedDirectories.Select(d => new Tuple<Directory, bool>(d, true))).ToArray();
+                }
                 //TODO I think moving this out of a lambda would make it faster, but need to do unit tests first!
                 //StringComparer alphabetComparer = StringComparer.Create(new System.Globalization.CultureInfo("en-US"), true); //else 'a' is 26 behind 'A'
-                Array.Sort(dirArray,(x,y) =>
+                Array.Sort(dirInfoArray, (x,y) =>
                 {
-                    int len1 = x.Name.Count();
-                    int len2 = y.Name.Count();
+                    int len1 = x.Item1.Name.Count();
+                    int len2 = y.Item1.Name.Count();
                     int len = Math.Min(len1, len2);
                     for(int i=0;i<len;i++)
                     {
-                        char cx = x.Name[i];
-                        char cy = y.Name[i];
+                        char cx = x.Item1.Name[i];
+                        char cy = y.Item1.Name[i];
                         if(cx=='\\'||cy=='\\')
                         {
                             if(cx == '\\' && cy != '\\')
@@ -688,20 +696,20 @@ namespace AndriodApp1
                 //adfzdg\\  (Note this should be adfzdg)...
                 //adfzdg\\Music
                 //I think this would be a special case where we simply remove the first dir.
-                if (dirArray[0].Name=="\\")
+                if (dirInfoArray[0].Item1.Name=="\\")
                 {
-                    dirArray = dirArray.Skip(1).ToArray();
+                    dirInfoArray = dirInfoArray.Skip(1).ToArray();
                 }
-                else if(dirArray[0].Name.EndsWith("\\"))
+                else if(dirInfoArray[0].Item1.Name.EndsWith("\\"))
                 {
-                    dirArray[0] = new Directory(dirArray[0].Name.Substring(0, dirArray[0].Name.Length-1),dirArray[0].Files);
+                    dirInfoArray[0] = new Tuple<Directory, bool>(new Directory(dirInfoArray[0].Item1.Name.Substring(0, dirInfoArray[0].Item1.Name.Length-1), dirInfoArray[0].Item1.Files), dirInfoArray[0].Item2);
                 }
 
 
 
                 bool emptyRoot = false;
                 //if(dirArray[dirArray.Length-1].Name.Contains(dirArray[0].Name))
-                if(Helpers.IsChildDirString(dirArray[dirArray.Length-1].Name,dirArray[0].Name, true) || dirArray[dirArray.Length - 1].Name.Equals(dirArray[0].Name))
+                if(Helpers.IsChildDirString(dirInfoArray[dirInfoArray.Length-1].Item1.Name, dirInfoArray[0].Item1.Name, true) || dirInfoArray[dirInfoArray.Length - 1].Item1.Name.Equals(dirInfoArray[0].Item1.Name))
                 {
                     //normal single tree case..
                 }
@@ -709,7 +717,7 @@ namespace AndriodApp1
                 {
                     //we need to set the first root..
                     //GetLongestCommonParent(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
-                    string newRootDirName = GetLongestCommonParent(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
+                    string newRootDirName = GetLongestCommonParent(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name);
                     if (newRootDirName==string.Empty)
                     {
                         //MainActivity.LogFirebase("Root is the empty string: " + username); //this is fine
@@ -730,39 +738,39 @@ namespace AndriodApp1
                     Directory rootDirectory = new Directory(newRootDirName);
 
                     //kickstart things
-                    rootNode = new TreeNode<Directory>(rootDirectory);
+                    rootNode = new TreeNode<Directory>(rootDirectory, false); //the children will set themselves as locked
                     prevDirName = newRootDirName;
                     curNode = rootNode;
                 }
 
 
 
-                foreach (Directory d in dirArray)
+                foreach (Tuple<Directory, bool> dInfo in dirInfoArray)
                 {
                     if(prevDirName == string.Empty && !emptyRoot) //this means that you did not set anything. sometimes the root literally IS empty.. see BeerNecessities
                     {
-                        rootNode = new TreeNode<Directory>(d);
+                        rootNode = new TreeNode<Directory>(dInfo.Item1, dInfo.Item2);
                         curNode = rootNode;
-                        prevDirName = d.Name;
+                        prevDirName = dInfo.Item1.Name;
                     }
-                    else if(Helpers.IsChildDirString(d.Name,prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
+                    else if(Helpers.IsChildDirString(dInfo.Item1.Name,prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
                     {
                         if(!filter)
                         {
-                            curNode = curNode.AddChild(d); //add child and now curNode points to the next guy
+                            curNode = curNode.AddChild(dInfo.Item1, dInfo.Item2); //add child and now curNode points to the next guy
                         }
                         else
                         {
-                            curNode = curNode.AddChild(FilterDirectory(d, wordsToAvoid, wordsToInclude));
+                            curNode = curNode.AddChild(FilterDirectory(dInfo.Item1, wordsToAvoid, wordsToInclude), dInfo.Item2);
                             curNode.IsFilteredOut = true;
                         }
-                        prevDirName = d.Name;
+                        prevDirName = dInfo.Item1.Name;
                     }
                     else
                     { //go up one OR more than one
-                        prevNodeDebug = new TreeNode<Directory>(curNode.Data);
+                        prevNodeDebug = new TreeNode<Directory>(curNode.Data, dInfo.Item2);
                         curNode = curNode.Parent; //This is not good if the first node is not the root...
-                        while(!Helpers.IsChildDirString(d.Name, curNode.Data.Name, curNode?.Parent == null))
+                        while(!Helpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
                         {
                             if(curNode.Parent==null)
                             {
@@ -772,14 +780,14 @@ namespace AndriodApp1
                         }
                         if (!filter)
                         {
-                            curNode = curNode.AddChild(d); //add child and now curNode points to the next guy
+                            curNode = curNode.AddChild(dInfo.Item1, dInfo.Item2); //add child and now curNode points to the next guy
                         }
                         else
                         {
-                            curNode = curNode.AddChild(FilterDirectory(d, wordsToAvoid, wordsToInclude));
+                            curNode = curNode.AddChild(FilterDirectory(dInfo.Item1, wordsToAvoid, wordsToInclude), dInfo.Item2);
                             curNode.IsFilteredOut = true;
                         }
-                        prevDirName = d.Name;
+                        prevDirName = dInfo.Item1.Name;
                     }
                 }
 

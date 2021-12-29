@@ -1830,11 +1830,25 @@ namespace AndriodApp1
             {
                 if(IsDirectory())
                 {
-                    return Helpers.GetFileNameFromFile(Name);
+                    if(this.Node.IsLocked)
+                    {
+                        return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFileNameFromFile(Name);
+                    }
+                    else
+                    {
+                        return Helpers.GetFileNameFromFile(Name);
+                    }
                 }
                 else
                 {
-                    return Name;
+                    if (this.Node.IsLocked)
+                    {
+                        return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Name;
+                    }
+                    else
+                    {
+                        return Name;
+                    }
                 }
             }
         }
@@ -1965,13 +1979,16 @@ namespace AndriodApp1
         {
             public List<int> SelectedPositions = new List<int>();
             public BrowseFragment Owner = null;
+            //private bool hideLocked = false;
             public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner) : base(c, 0, items)
             {
                 Owner = owner;
+                //hideLocked = SoulSeekState.HideLockedResults;
             }
 
             public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner, int[]? selectedPos) : base(c, 0, items)
             {
+                //hideLocked = SoulSeekState.HideLockedResults;
                 Owner = owner;
                 if(selectedPos!=null && selectedPos.Count()!=0)
                 {
