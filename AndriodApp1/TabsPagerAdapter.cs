@@ -4230,12 +4230,20 @@ namespace AndriodApp1
             //}
             catch (System.Exception ue)
             {
-                //MainActivity.LogFirebase(new Java.Lang.Throwable(ue.Message + "searchclick_GENERALEXCEPTION"));
+
                 SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
                 {
+                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
+                    MainActivity.LogDebug("transitionDrawable: RESET transition");
+
                     Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
+                    MainActivity.LogFirebase("tabpageradapter searchclick: " + ue.Message);
+
+                    if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
+                    {
+                        transitionDrawable.ResetTransition();
+                    }
                 }));
-                MainActivity.LogFirebase("tabpageradapter searchclick: " + ue.Message);
                 return;
             }
             if (!fromWishlist)
@@ -4273,51 +4281,51 @@ namespace AndriodApp1
                 MainActivity.LogDebug("Search_Click");
             }
 
-            //if (!SoulSeekState.currentlyLoggedIn)
-            //{
-            //    if (!fromWishlist)
-            //    {
-            //        Toast tst = Toast.MakeText(SearchFragment.Instance.context, Resource.String.must_be_logged_to_search, ToastLength.Long);
-            //        tst.Show();
-            //        MainActivity.LogDebug("transitionDrawable: RESET transition");
-            //        transitionDrawable.ResetTransition();
-
-            //    }
-
-            //    SearchTabHelper.CurrentlySearching = false;
-            //    return;
-            //}
-            //else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            //{
-            //    if (fromWishlist)
-            //    {
-            //        return;
-            //    }
-            //    Task t;
-            //    if (!MainActivity.ShowMessageAndCreateReconnectTask(SearchFragment.Instance.context, out t))
-            //    {
-            //        return;
-            //    }
-            //    t.ContinueWith(new Action<Task>((Task t) =>
-            //    {
-            //        if (t.IsFaulted)
-            //        {
-            //            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
-            //            {
-
-            //                Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-
-            //            });
-            //            return;
-            //        }
-            //        SoulSeekState.MainActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
-
-            //    }));
-            //}
-            //else
-            //{
-                SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
-            //}
+            if (!SoulSeekState.currentlyLoggedIn)
+            {
+                if (!fromWishlist)
+                {
+                    Toast tst = Toast.MakeText(SearchFragment.Instance.context, Resource.String.must_be_logged_to_search, ToastLength.Long);
+                    tst.Show();
+                    MainActivity.LogDebug("transitionDrawable: RESET transition");
+                    transitionDrawable.ResetTransition();
+           
+                }
+           
+                SearchTabHelper.CurrentlySearching = false;
+                return;
+            }
+            else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                if (fromWishlist)
+                {
+                    return;
+                }
+                Task t;
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SearchFragment.Instance.context, out t))
+                {
+                    return;
+                }
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        {
+           
+                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+           
+                        });
+                        return;
+                    }
+                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
+           
+                }));
+            }
+            else
+            {
+            SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
+            }
         }
     }
 
