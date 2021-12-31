@@ -941,7 +941,7 @@ namespace AndriodApp1
 
         public void SendMessageAPI(Message msg)
         {
-            if(string.IsNullOrWhiteSpace(msg.MessageText))
+            if(string.IsNullOrEmpty(msg.MessageText))
             {
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
                 return;
