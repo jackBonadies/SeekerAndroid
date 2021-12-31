@@ -1485,7 +1485,7 @@ namespace AndriodApp1
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
                 return;
             }
-            if(string.IsNullOrWhiteSpace(msg.MessageText))
+            if(string.IsNullOrEmpty(msg.MessageText))
             {
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.empty_message_error), ToastLength.Short).Show();

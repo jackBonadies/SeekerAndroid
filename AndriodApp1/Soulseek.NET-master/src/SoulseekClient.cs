@@ -2004,7 +2004,7 @@ namespace Soulseek
                 throw new ArgumentException("The username must not be a null or empty string, or one consisting only of whitespace", nameof(username));
             }
 
-            if (string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrEmpty(message))
             {
                 throw new ArgumentException("The message must not be a null or empty string, or one consisting only of whitespace", nameof(message));
             }
@@ -2038,7 +2038,7 @@ namespace Soulseek
                 throw new ArgumentException("The room name must not be a null or empty string, or one consisting only of whitespace", nameof(roomName));
             }
 
-            if (string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrEmpty(message))
             {
                 throw new ArgumentException("The message must not be a null or empty string, or one consisting only of whitespace", nameof(message));
             }
@@ -2107,7 +2107,7 @@ namespace Soulseek
                 throw new ArgumentException("The room name must not be a null or empty string, or one consisting only of whitespace", nameof(roomName));
             }
 
-            if (string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrEmpty(message))
             {
                 throw new ArgumentException("The message must not be a null or empty string, or one consisting only of whitespace", nameof(message));
             }
