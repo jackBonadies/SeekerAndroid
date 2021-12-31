@@ -778,7 +778,7 @@ namespace AndriodApp1
         public List<string> WordsToAvoid = new List<string>();
         public List<string> WordsToInclude = new List<string>();
         public FilterSpecialFlags FilterSpecialFlags = new FilterSpecialFlags();
-        public List<SearchResponse> FilteredResponses = new List<SearchResponse>();
+        public List<SearchResponse> UI_SearchResponses = new List<SearchResponse>();
         public SearchTarget SearchTarget = SearchTarget.AllUsers;
         public bool CurrentlySearching = false;
         public string SearchTargetChosenRoom = string.Empty;
@@ -812,7 +812,7 @@ namespace AndriodApp1
             clone.WordsToAvoid = this.WordsToAvoid.ToList();
             clone.WordsToInclude = this.WordsToInclude.ToList();
             clone.FilterSpecialFlags = this.FilterSpecialFlags;
-            clone.FilteredResponses = this.FilteredResponses.ToList();
+            clone.UI_SearchResponses = this.UI_SearchResponses.ToList();
             clone.CurrentlySearching = this.CurrentlySearching;
             clone.SearchTarget = this.SearchTarget;
             clone.SearchTargetChosenRoom = this.SearchTargetChosenRoom;
@@ -1143,15 +1143,15 @@ namespace AndriodApp1
             }
         }
 
-        public static List<SearchResponse> FilteredResponses
+        public static List<SearchResponse> UI_SearchResponses
         {
             get
             {
-                return SearchTabCollection[CurrentTab].FilteredResponses;
+                return SearchTabCollection[CurrentTab].UI_SearchResponses;
             }
             set
             {
-                SearchTabCollection[CurrentTab].FilteredResponses = value;
+                SearchTabCollection[CurrentTab].UI_SearchResponses = value;
             }
         }
         public static SearchTarget SearchTarget
@@ -1271,7 +1271,12 @@ namespace AndriodApp1
                 SearchTabHelper.WordsToInclude.Clear();
                 SearchTabHelper.FilterSpecialFlags.Clear();
                 EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
-                filterText.Text = string.Empty;
+                if(filterText.Text != string.Empty)
+                {
+                    //else you trigger the event.
+                    filterText.Text = string.Empty;
+                    UpdateDrawableState(filterText, true);
+                }
                 FilterStickyString = string.Empty;
             }
         }
@@ -1533,7 +1538,7 @@ namespace AndriodApp1
                         //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                         //lv.Adapter = (customAdapter);
 
-                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
+                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
                         recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
 
                         SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
@@ -1546,8 +1551,8 @@ namespace AndriodApp1
                         //MainActivity.LogDebug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
                         //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                         //lv.Adapter = (customAdapter);
-
-                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList());
+                        SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
+                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
                         recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
 
                         SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
@@ -1851,12 +1856,13 @@ namespace AndriodApp1
 
             if (SearchTabHelper.FilteredResults)
             {
-                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
+                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 rv.SetAdapter(customAdapter);
             }
             else
             {
-                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
+                SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
+                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 rv.SetAdapter(customAdapter);
             }
 
@@ -2096,14 +2102,15 @@ namespace AndriodApp1
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
             if (SearchTabHelper.FilteredResults)
             {
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
                 //CustomAdapter customAdapter = new CustomAdapter(Context, FilteredResponses);
                 //lv.Adapter = (customAdapter);
             }
             else
             {
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
+                SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
+                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
                 //CustomAdapter customAdapter = new CustomAdapter(Context, SearchResponses);
                 //lv.Adapter = (customAdapter);
@@ -3022,8 +3029,8 @@ namespace AndriodApp1
             MainActivity.LogDebug("Whether to Filer: " + searchTab.FilteredResults);
             MainActivity.LogDebug("FilterString: " + searchTab.FilterString);
             bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
-            searchTab.FilteredResponses.Clear();
-            searchTab.FilteredResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
+            searchTab.UI_SearchResponses.Clear();
+            searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
             {
                 if (!MatchesCriteria(s, hideLocked))
@@ -3127,6 +3134,10 @@ namespace AndriodApp1
             string oldFilterString = SearchTabHelper.FilteredResults ? SearchTabHelper.FilterString : string.Empty;
             if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || this.AreChipsFiltering())
             {
+
+#if DEBUG
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+#endif
                 SearchTabHelper.FilteredResults = true;
                 SearchTabHelper.FilterString = e.Text.ToString();
                 if (FilterSticky)
@@ -3134,18 +3145,67 @@ namespace AndriodApp1
                     FilterStickyString = SearchTabHelper.FilterString;
                 }
                 ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+
+                var oldList = SearchTabHelper.UI_SearchResponses.ToList();
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+
+                
+
+#if DEBUG
+
+                int oldCount = oldList.Count;
+                int newCount = SearchTabHelper.UI_SearchResponses.Count();
+                MainActivity.LogDebug($"update filtered only - old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
+
+#endif
+
+                //DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.UI_SearchResponses), true);
+
                 //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
                 //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                 //lv.Adapter = (customAdapter);
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
-                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+
+                //res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
+#if DEBUG
+                sw.Stop();
+#endif
+                //DIFFUTIL is extremely extremely slow going from large to small number i.e. 1000 to 250 results.  
+                //it takes a full 700ms.  Whereas NotifyDataSetChanged and setting the adapter take 0-7ms. with notifydatasetcahnged being a bit faster.
+
+                recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top. (unlike old method)
+#if DEBUG
+                MainActivity.LogDebug($"old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
+
+#endif
+                
             }
             else
             {
                 SearchTabHelper.FilteredResults = false;
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
-                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                SearchTabHelper.FilterString = string.Empty;
+                if (FilterSticky)
+                {
+                    FilterStickyString = SearchTabHelper.FilterString;
+                }
+                ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+
+
+
+                // DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(SearchTabHelper.UI_SearchResponses, SearchTabHelper.SearchResponses), true);
+
+
+                SearchTabHelper.UI_SearchResponses.Clear();
+                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
+                //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
+                //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
+
+                //res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
+
+
+
+
+                recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top.
+                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
 
             if (oldFilterString == string.Empty && e.Text.ToString() != string.Empty)
@@ -3170,10 +3230,12 @@ namespace AndriodApp1
                 SearchTabHelper.FilteredResults = true;
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.FilteredResponses);
-                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
+                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
 
-
+                recyclerSearchAdapter.NotifyDataSetChanged();
+                bool refSame = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.UI_SearchResponses);
+                bool refSame2 = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].UI_SearchResponses);
                 //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
                 //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                 //lv.Adapter = (customAdapter);
@@ -3181,8 +3243,11 @@ namespace AndriodApp1
             else
             {
                 SearchTabHelper.FilteredResults = false;
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses.ToList());
-                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                SearchTabHelper.UI_SearchResponses.Clear();// = SearchTabHelper.SearchResponses.ToList();
+                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);// = SearchTabHelper.SearchResponses.ToList();
+                //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
+                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                recyclerSearchAdapter.NotifyDataSetChanged();
             }
         }
 
@@ -3347,14 +3412,15 @@ namespace AndriodApp1
             SearchTabHelper.SortHelper.Clear();
             SearchTabHelper.SearchResponses.Clear();
             SearchTabHelper.LastSearchResponseCount = -1;
-            SearchTabHelper.FilteredResponses.Clear();
+            SearchTabHelper.UI_SearchResponses.Clear();
             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = null;
             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipsFilter = null;
             if (!fromWishlist)
             {
                 SearchFragment.Instance.ClearFilterStringAndCached();
 
-                SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchResponses?.ToList());
+                SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
+                SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
 
                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
@@ -3771,7 +3837,7 @@ namespace AndriodApp1
                         {
                             SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
                                                                                                                             //todo: diffutil.. was filtered -> now filtered...
-                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
+                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
                             SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
                         }
                         else
@@ -3782,7 +3848,7 @@ namespace AndriodApp1
 
                             SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);
                             MainActivity.LogDebug("refreshListView  oldList: " + oldList.Count + " newList " + newList.Count);
-                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses), true);
+                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses), true);
                             //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
                             //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
                             res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
@@ -3790,7 +3856,7 @@ namespace AndriodApp1
 
                             SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
                         }
-                        SetOldList(SearchTabHelper.SearchTabCollection[fromTab].FilterString, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.ToList());
+                        SetOldList(SearchTabHelper.SearchTabCollection[fromTab].FilterString, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses.ToList());
                         //SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
                         //SearchFragment.Instance.listView.Adapter = (customAdapter);
                     }
@@ -3800,8 +3866,9 @@ namespace AndriodApp1
                         List<SearchResponse> newListx = null;
                         if (oldList == null)
                         {
-                            newListx = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
-                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(newListx);
+                            SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
+                            newListx = SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses;
+                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
                             SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
                         }
                         else
@@ -3877,7 +3944,7 @@ namespace AndriodApp1
                 SearchResponse dlDiagResp = null;
                 if (SearchTabHelper.FilteredResults)
                 {
-                    dlDiagResp = SearchTabHelper.FilteredResponses.ElementAt<SearchResponse>(pos);
+                    dlDiagResp = SearchTabHelper.UI_SearchResponses.ElementAt<SearchResponse>(pos);
                 }
                 else
                 {
@@ -3892,7 +3959,7 @@ namespace AndriodApp1
                 System.String msg = string.Empty;
                 if (SearchTabHelper.FilteredResults)
                 {
-                    msg = "Filtered.Count " + SearchTabHelper.FilteredResponses.Count.ToString() + " position selected = " + pos.ToString();
+                    msg = "Filtered.Count " + SearchTabHelper.UI_SearchResponses.Count.ToString() + " position selected = " + pos.ToString();
                 }
                 else
                 {
@@ -4026,8 +4093,8 @@ namespace AndriodApp1
             {
                 Task<IReadOnlyCollection<SearchResponse>> t = null;
                 oldList?.Clear();
-                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
-                //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
+                //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
@@ -4280,7 +4347,7 @@ namespace AndriodApp1
                 ClearFocusSearchEditText();
                 MainActivity.LogDebug("Search_Click");
             }
-
+            #if !DEBUG
             if (!SoulSeekState.currentlyLoggedIn)
             {
                 if (!fromWishlist)
@@ -4324,8 +4391,11 @@ namespace AndriodApp1
             }
             else
             {
+            #endif
             SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
+            #if !DEBUG
             }
+            #endif
         }
     }
 
