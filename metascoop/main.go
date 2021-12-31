@@ -240,11 +240,11 @@ func main() {
 
 			// Now update with some info
 
-			setIfEmpty(meta, "AuthorName", apkInfo.Author())
-			setIfEmpty(meta, "Name", apkInfo.Name())
-			setIfEmpty(meta, "SourceCode", apkInfo.GitURL)
-			setIfEmpty(meta, "License", apkInfo.License)
-			setIfEmpty(meta, "Description", apkInfo.Description)
+			setNonEmpty(meta, "AuthorName", apkInfo.Author())
+			setNonEmpty(meta, "Name", apkInfo.Name())
+			setNonEmpty(meta, "SourceCode", apkInfo.GitURL)
+			setNonEmpty(meta, "License", apkInfo.License)
+			setNonEmpty(meta, "Description", apkInfo.Description)
 
 			var summary = apkInfo.Summary
 			// See https://f-droid.org/en/docs/Build_Metadata_Reference/#Summary for max length
@@ -255,7 +255,7 @@ func main() {
 				log.Printf("Truncated summary to length of %d (max length)", len(summary))
 			}
 
-			setIfEmpty(meta, "Summary", summary)
+			setNonEmpty(meta, "Summary", summary)
 
 			if len(apkInfo.Categories) != 0 {
 				meta["Categories"] = apkInfo.Categories
@@ -441,8 +441,8 @@ func main() {
 	// If we have relevant changes, we exit with code 0
 }
 
-func setIfEmpty(m map[string]interface{}, key string, value string) {
-	if value != "" && m[key] == nil || m[key] == "" || m[key] == "Unknown" {
+func setNonEmpty(m map[string]interface{}, key string, value string) {
+	if value != "" || m[key] == "Unknown" {
 		m[key] = value
 
 		log.Printf("Set %s to %q", key, value)
