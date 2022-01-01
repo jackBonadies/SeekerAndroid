@@ -3743,7 +3743,8 @@ namespace AndriodApp1
         public static bool IsInitialized = false;
 
         private static System.Timers.Timer WishlistTimer = null;
-        private static System.Collections.Concurrent.ConcurrentDictionary<int, List<SearchResponse>> OldResultsToCompare = new System.Collections.Concurrent.ConcurrentDictionary<int, List<SearchResponse>>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>> OldResultsToCompare = new System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>>();
+        private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new System.Collections.Concurrent.ConcurrentDictionary<int,int>();
 
         public static void Initialize() //we need the wishlist interval before we can init
         {
@@ -3768,6 +3769,11 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("Wishlist interval is: " + searchIntervalMilliseconds);
                 searchIntervalMilliseconds = 2* 60 * 1000; //min of 2 mins...
             }
+
+//#if DEBUG
+//            searchIntervalMilliseconds = 1000 * 30;
+//#endif
+
             WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
             WishlistTimer.AutoReset = true;
             WishlistTimer.Elapsed += WishlistTimer_Elapsed;
@@ -3781,9 +3787,11 @@ namespace AndriodApp1
         public static void SearchCompleted(int id)
         {
             //a search that we initiated completed...
-            var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch)).ToList();
-            int newUniqueResults = differenceNewResults.Count;
+            //var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
+            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch)).ToList();
+            OldResultsToCompare.TryRemove(id, out _); //save memory. wont always exist if the tab got deleted during the search.  exceptions thrown here dont crash anything tho.
+            int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
+            
             if (newUniqueResults >= 1)
             {
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
@@ -3845,9 +3853,35 @@ namespace AndriodApp1
                     }
                     //oldestId is the one we want to autosearch
 
-                    OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToList();
-                    
-                    SearchFragment.SearchAPI((new CancellationTokenSource()).Token ,null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
+                    //search response count: 4220 hashSet count: 1000 time 102 ms
+                    //search response count: 13880 hashSet count: 1000 time 71 ms
+                    //search response count: 14655 hashSet count: 1000 time 174 ms
+                    //search response count: 2615 hashSet count: 999 time 21 ms
+                    //search response count: 15758 hashSet count: 1000 time 124 ms
+                    //search response count: 937 hashSet count: 937 time 4 ms
+
+                    //this is incase someone is privileged (searching every 2 mins) and perhaps they only have 1 wishlist search.  we dont want the second to begin when the first hasnt even ended.
+                    //there arent really any downsides if this happens actually....
+                    if(!OldResultsToCompare.ContainsKey(oldestId)) //this is better than setting currentlySearching bc currentlySearching changes UI components like the transition drawable, which I think is just too much happening for the user.
+                    {
+#if DEBUG
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        sw.Start();
+#endif
+                        OldNumResults[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count;
+                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch));
+#if DEBUG
+                        sw.Stop();
+                        MainActivity.LogDebug($"search response count: {SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count} hashSet count: {OldResultsToCompare[oldestId].Count} time {sw.ElapsedMilliseconds} ms");
+                        MainActivity.LogDebug("now searching " + oldestId);
+#endif
+                        //SearchTabHelper.SearchTabCollection[oldestId].CurrentlySearching = true;
+                        SearchFragment.SearchAPI((new CancellationTokenSource()).Token ,null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
+                    }
+                    else
+                    {
+                        MainActivity.LogDebug("was already searching " + oldestId);
+                    }
 
                 }
             }
@@ -6329,7 +6363,12 @@ namespace AndriodApp1
 
             UpdateForScreenSize();
 
-            
+            //#if DEBUG //todo remove
+
+            //WishlistController.SearchIntervalMilliseconds = 1000*30;
+            //WishlistController.Initialize();
+
+            //#endif
 
 
             if (SoulSeekState.UseLegacyStorage())
