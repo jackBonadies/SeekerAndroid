@@ -654,6 +654,11 @@ namespace AndriodApp1
             }
             return base.Compare(x, y); //the actual comparison for which is "better"
         }
+
+        //public override int GetHashCode()
+        //{
+        //    return base.GetHashCode();
+        //}
     }
 
     public class SearchResultComparable : IComparer<SearchResponse>
@@ -867,11 +872,30 @@ namespace AndriodApp1
             {
                 if (!searchTab.SortHelper.ContainsKey(resp))
                 {
+                    //bool isItActuallyNotThere = true;
+                    //foreach(var key in searchTab.SortHelper.Keys)
+                    //{
+                    //    if (key.Username == resp.Username)
+                    //    {
+                    //        if ((key.FileCount == resp.FileCount) && (key.LockedFileCount == resp.LockedFileCount))
+                    //        {
+                    //            if (key.FileCount != 0 && (key.Files.First().Filename == resp.Files.First().Filename))
+                    //            {
+                    //                isItActuallyNotThere = false;
+                    //            }
+                    //            if (key.LockedFileCount != 0 && (key.LockedFiles.First().Filename == resp.LockedFiles.First().Filename))
+                    //            {
+                    //                isItActuallyNotThere = false;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+
                     searchTab.SortHelper.Add(resp, null);
                 }
                 else
                 {
-
+                    
                 }
             }
             return searchTab;
@@ -921,6 +945,10 @@ namespace AndriodApp1
             }
             else
             {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                MainActivity.LogDebug("base64 string length: " + sw.ElapsedMilliseconds);
+
                 using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
@@ -939,6 +967,8 @@ namespace AndriodApp1
                         lastWishlistID = lowestID;
                     }
                 }
+                sw.Stop();
+                MainActivity.LogDebug("RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
         }
 
@@ -1571,7 +1601,10 @@ namespace AndriodApp1
                     }
                     this.Activity.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
 
-                    SetTransitionDrawableState();
+                    if (!fromIntent)
+                    {
+                        SetTransitionDrawableState();
+                    }
                 });
                 if (SoulSeekState.MainActivityRef == null)
                 {
@@ -2466,6 +2499,7 @@ namespace AndriodApp1
                         MainActivity.LogInfoFirebase("we should be using the fragment manager one...");
                     }
                 }
+                //when coming from an intent its actually (toolbar.Menu.FindItem(Resource.Id.action_search)) that is null.  so the menu is there, just no action_search menu item.
                 Android.Support.V7.Widget.Toolbar toolbar = (this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
                 return toolbar.Menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable;
             }
@@ -3769,7 +3803,7 @@ namespace AndriodApp1
                     { //we have multiple to add
                         foreach (SearchResponse splitResponse in splitResponses.Item2)
                         {
-                            if (fromWishlist && SearchTabHelper.SearchTabCollection[fromTab].SortHelper.ContainsKey(splitResponse))
+                            if (fromWishlist && WishlistController.OldResultsToCompare[fromTab].Contains(splitResponse))
                             {
                                 continue;
                             }
@@ -3778,7 +3812,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        if (fromWishlist && SearchTabHelper.SearchTabCollection[fromTab].SortHelper.ContainsKey(resp))
+                        if (fromWishlist && WishlistController.OldResultsToCompare[fromTab].Contains(resp))
                         {
                         }
                         else
@@ -3806,10 +3840,12 @@ namespace AndriodApp1
             {
                 Action a = new Action(() =>
                 {
+                    #if DEBUG
                     AndriodApp1.SearchFragment.StopWatch.Stop();
-                    MainActivity.LogDebug("time between start and stop " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
+                    //MainActivity.LogDebug("time between start and stop " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
                     AndriodApp1.SearchFragment.StopWatch.Reset();
                     AndriodApp1.SearchFragment.StopWatch.Start();
+                    #endif
                     //SearchResponses.Add(resp);
                     //MainActivity.LogDebug("UI - SEARCH RESPONSE RECEIVED");
                     if (fromTab != SearchTabHelper.CurrentTab)
@@ -3818,16 +3854,16 @@ namespace AndriodApp1
                     }
                     //int total = newList.Count;
                     int total = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-                    MainActivity.LogDebug("START _ ui thread response received - search collection: " + total);
+                    //MainActivity.LogDebug("START _ ui thread response received - search collection: " + total);
                     if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount == total)
                     {
-                        MainActivity.LogDebug("already did it..: " + total);
+                        //MainActivity.LogDebug("already did it..: " + total);
                         //we already updated for this one.
                         //the UI marshelled calls are delayed.  as a result there will be many all coming in with the final search response count of say 751.  
                         return;
                     }
 
-                    MainActivity.LogDebug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
+                    //MainActivity.LogDebug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
 
                     if (SearchTabHelper.SearchTabCollection[fromTab].FilteredResults)
                     {
@@ -3878,8 +3914,13 @@ namespace AndriodApp1
                             var recyclerViewState = SearchFragment.Instance.recycleLayoutManager.OnSaveInstanceState();//  recyclerView.getLayoutManager().onSaveInstanceState();
 
                             newListx = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
+                            #if DEBUG
+                            if(oldList.Count==0)
+                            {
                             MainActivity.LogDebug("refreshListView  oldList: " + oldList.Count + " newList " + newListx.Count);
-                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, newListx), true);
+                            }
+                            #endif
+                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, newListx), true); //race condition where gototab sets oldList to empty and so in DiffUtil we get an index out of range.... or maybe a wishlist happening at thte same time does it??????
                             //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Clear();
                             //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.AddRange(newList);
                             SearchFragment.Instance.recyclerSearchAdapter.localDataSet.Clear();
@@ -3898,15 +3939,15 @@ namespace AndriodApp1
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = total;
                     AndriodApp1.SearchFragment.StopWatch.Stop();
-                    MainActivity.LogDebug("time it takes to set adapter for " + total + " results: " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
-
+                    //MainActivity.LogDebug("time it takes to set adapter for " + total + " results: " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
+                    #if DEBUG
                     AndriodApp1.SearchFragment.StopWatch.Reset();
                     AndriodApp1.SearchFragment.StopWatch.Start();
-                    
+                    #endif
 
 //                    oldList = newList.ToList();
 
-                    MainActivity.LogDebug("END _ ui thread response received - search collection: " + total);
+                    //MainActivity.LogDebug("END _ ui thread response received - search collection: " + total);
                 });
 
                   SoulSeekState.MainActivityRef?.RunOnUiThread(a);
@@ -4092,7 +4133,11 @@ namespace AndriodApp1
             try
             {
                 Task<IReadOnlyCollection<SearchResponse>> t = null;
-                oldList?.Clear();
+                if(fromTab == SearchTabHelper.CurrentTab)
+                {
+                    //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
+                    oldList?.Clear();
+                }
                 //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
                 t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
