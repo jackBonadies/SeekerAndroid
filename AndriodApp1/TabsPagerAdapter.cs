@@ -45,6 +45,7 @@ using Android.Animation;
 using AndroidX.RecyclerView.Widget;
 using System.Runtime.Serialization.Formatters.Binary;
 using SearchResponseExtensions;
+using AndroidX.DocumentFile.Provider;
 
 namespace AndriodApp1
 {
@@ -798,6 +799,12 @@ namespace AndriodApp1
         public List<ChipDataItem> ChipDataItems;
         public SearchFragment.ChipFilter ChipsFilter;
 
+        public bool IsLoaded()
+        {
+            return this.SearchResponses != null;
+        }
+
+
         public SearchTab Clone(bool forWishlist)
         {
             SearchTab clone = new SearchTab();
@@ -833,12 +840,94 @@ namespace AndriodApp1
     }
 
     [Serializable]
+    public class SavedStateSearchTabHeader
+    {
+        string LastSearchTerm;
+        long LastRanTime;
+        int LastSearchResultsCount;
+
+        /// <summary>
+        /// Get what you need to display the tab (i.e. result count, term, last ran)
+        /// </summary>
+        /// <param name="searchTab"></param>
+        /// <returns></returns>
+        public static SavedStateSearchTabHeader GetSavedStateHeaderFromTab(SearchTab searchTab)
+        {
+            SavedStateSearchTabHeader searchTabState = new SavedStateSearchTabHeader();
+            searchTabState.LastSearchResultsCount = searchTab.LastSearchResultsCount;
+            searchTabState.LastSearchTerm = searchTab.LastSearchTerm;
+            searchTabState.LastRanTime = searchTab.LastRanTime.Ticks;
+            return searchTabState;
+        }
+
+        /// <summary>
+        /// these by definition will always be wishlist tabs...
+        /// this restores the wishlist tabs, optionally with the search results, otherwise they will be added later.
+        /// </summary>
+        /// <param name="savedState"></param>
+        /// <returns></returns>
+        public static SearchTab GetTabFromSavedState(SavedStateSearchTabHeader savedStateHeader, List<SearchResponse> responses)
+        {
+            SearchTab searchTab = new SearchTab();
+            searchTab.SearchResponses = responses;
+            searchTab.LastSearchTerm = savedStateHeader.LastSearchTerm;
+            searchTab.LastRanTime = new DateTime(savedStateHeader.LastRanTime);
+            searchTab.SearchTarget = SearchTarget.Wishlist;
+            searchTab.LastSearchResultsCount = responses != null ? responses.Count : savedStateHeader.LastSearchResultsCount;
+            if (SearchFragment.FilterSticky)
+            {
+                searchTab.FilterSticky = SearchFragment.FilterSticky;
+                searchTab.FilterString = SearchFragment.FilterStickyString;
+                SearchFragment.ParseFilterString(searchTab);
+            }
+            searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
+            if(responses != null)
+            {
+                foreach (SearchResponse resp in searchTab.SearchResponses)
+                {
+                    if (!searchTab.SortHelper.ContainsKey(resp))
+                    {
+                        //bool isItActuallyNotThere = true;
+                        //foreach(var key in searchTab.SortHelper.Keys)
+                        //{
+                        //    if (key.Username == resp.Username)
+                        //    {
+                        //        if ((key.FileCount == resp.FileCount) && (key.LockedFileCount == resp.LockedFileCount))
+                        //        {
+                        //            if (key.FileCount != 0 && (key.Files.First().Filename == resp.Files.First().Filename))
+                        //            {
+                        //                isItActuallyNotThere = false;
+                        //            }
+                        //            if (key.LockedFileCount != 0 && (key.LockedFiles.First().Filename == resp.LockedFiles.First().Filename))
+                        //            {
+                        //                isItActuallyNotThere = false;
+                        //            }
+                        //        }
+                        //    }
+                        //}
+
+                        searchTab.SortHelper.Add(resp, null);
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+            return searchTab;
+
+        }
+
+
+    }
+
+    [Serializable]
     public class SavedStateSearchTab
     {
         //there are all of the things we must save in order to later restore a SearchTab
-        List<SearchResponse> searchResponses;
-        string LastSearchTerm;
-        long LastRanTime;
+        public List<SearchResponse> searchResponses;
+        public string LastSearchTerm;
+        public long LastRanTime;
         public static SavedStateSearchTab GetSavedStateFromTab(SearchTab searchTab)
         {
             SavedStateSearchTab searchTabState = new SavedStateSearchTab();
@@ -853,12 +942,20 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="savedState"></param>
         /// <returns></returns>
-        public static SearchTab GetTabFromSavedState(SavedStateSearchTab savedState)
+        public static SearchTab GetTabFromSavedState(SavedStateSearchTab savedState, bool searchResponsesOnly=false, SearchTab oldTab = null)
         {
             SearchTab searchTab = new SearchTab();
             searchTab.SearchResponses = savedState.searchResponses;
-            searchTab.LastSearchTerm = savedState.LastSearchTerm;
-            searchTab.LastRanTime = new DateTime(savedState.LastRanTime);
+            if(!searchResponsesOnly)
+            {
+                searchTab.LastSearchTerm = savedState.LastSearchTerm;
+                searchTab.LastRanTime = new DateTime(savedState.LastRanTime);
+            }
+            else
+            {
+                searchTab.LastSearchTerm = oldTab.LastSearchTerm;
+                searchTab.LastRanTime = oldTab.LastRanTime;
+            }
             searchTab.SearchTarget = SearchTarget.Wishlist;
             searchTab.LastSearchResultsCount = searchTab.SearchResponses.Count;
             if (SearchFragment.FilterSticky)
@@ -904,8 +1001,9 @@ namespace AndriodApp1
 
     public class SearchTabHelper
     {
-        public static void SaveStateToSharedPreferences()
+        public static void SaveStateToSharedPreferencesFullLegacy()
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             string stringToSave = string.Empty;
             //we should only save things we need for the wishlist searches.
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
@@ -931,14 +1029,280 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_SearchTabsState, stringToSave);
+                editor.PutString(SoulSeekState.M_SearchTabsState_LEGACY, stringToSave);
                 editor.Commit();
+            }
+
+            sw.Stop();
+            MainActivity.LogDebug("OLD STYLE: " + sw.ElapsedMilliseconds);
+        }
+
+        public static void RemoveTabFromSharedPrefs(int wishlistSearchResultsToRemove, Context c)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
+            if (!wishlist_dir.Exists())
+            {
+                wishlist_dir.Mkdir();
+            }
+            string name = System.Math.Abs(wishlistSearchResultsToRemove) + "_wishlist_tab";
+            Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
+            if(!fileForOurInternalStorage.Delete())
+            {
+                MainActivity.LogDebug("HEADERS - Delete Search Results: FAILED TO DELETE");
+                MainActivity.LogFirebase("HEADERS - Delete Search Results: FAILED TO DELETE");
+            }
+
+            sw.Stop();
+            MainActivity.LogDebug("HEADERS - Delete Search Results: " + sw.ElapsedMilliseconds);
+        }
+
+
+        public static void SaveAllSearchTabsToDisk(Context c)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            string stringToSave = string.Empty;
+            //we should only save things we need for the wishlist searches.
+            List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
+            if (tabsToSave.Count == 0)
+            {
+                MainActivity.LogDebug("Nothing to Save");
+            }
+            else
+            {
+                foreach (int tabIndex in tabsToSave)
+                {
+                    SaveSearchResultsToDisk(tabIndex, c);
+                }
+            }
+            sw.Stop();
+            MainActivity.LogDebug("HEADERS - Save ALL Search Results: " + sw.ElapsedMilliseconds);
+        }
+
+        /// <summary>
+        /// Restoring them when someone taps them is fast enough even for 1000 results...
+        /// So this method probably isnt needed.
+        /// </summary>
+        /// <param name="c"></param>
+        public static void RestoreAllSearchTabsFromDisk(Context c)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            string stringToSave = string.Empty;
+            //we should only save things we need for the wishlist searches.
+            List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
+            if (tabsToSave.Count == 0)
+            {
+                MainActivity.LogDebug("Nothing to Save");
+            }
+            else
+            {
+                foreach (int tabIndex in tabsToSave)
+                {
+                    RestoreSearchResultsFromDisk(tabIndex, c);
+                }
+            }
+            sw.Stop();
+            MainActivity.LogDebug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
+        }
+
+
+        public static void SaveSearchResultsToDisk(int wishlistSearchResultsToSave, Context c)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
+            if (!wishlist_dir.Exists())
+            {
+                wishlist_dir.Mkdir();
+            }
+            string name = System.Math.Abs(wishlistSearchResultsToSave) + "_wishlist_tab"; 
+            Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
+            System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
+
+
+            using (System.IO.MemoryStream searchRes = new System.IO.MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(searchRes, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses);
+                byte[] arr = searchRes.ToArray();
+                outputStream.Write(arr,0,arr.Length);
+                outputStream.Flush();
+                outputStream.Close();
+            }
+
+            sw.Stop();
+            MainActivity.LogDebug("HEADERS - Save Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses.Count);
+        }
+
+
+        public static void RestoreSearchResultsFromDisk(int wishlistSearchResultsToRestore, Context c)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
+            //if (!wishlist_dir.Exists())
+            //{
+            //    wishlist_dir.Mkdir();
+            //}
+            string name = System.Math.Abs(wishlistSearchResultsToRestore) + "_wishlist_tab";
+            Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
+
+            //there are two cases.
+            //  1) we imported the term.  In that case there are no results yet as it hasnt been ran.  Which is fine.  
+            //  2) its a bug.
+            if(!fileForOurInternalStorage.Exists())
+            {
+                if(SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount == 0 || SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime == DateTime.MinValue)
+                {
+                    //nothing to do.  this is the good case..
+                }
+                else
+                {
+                    //log error... but still safely fix the state. otherwise the user wont even be able to load the app without crash...
+                    MainActivity.LogFirebase("search tab does not exist on disk but it should... ");
+                    SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime = DateTime.MinValue;
+                    SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResponseCount = 0;
+                    SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount = 0;
+                    try
+                    {
+                        //may not be on UI thread if from wishlist timer elapsed...
+                        Toast.MakeText(c, "Failed to restore wishlist search results from disk", ToastLength.Long).Show();
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                //safely fix the state. even in case of error...
+                SavedStateSearchTab tab = new SavedStateSearchTab();
+                tab.searchResponses = new List<SearchResponse>();
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                return;
+            }
+
+            using(System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            {
+                MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
+
+                using(System.IO.MemoryStream ms = new System.IO.MemoryStream())
+                {
+                    inputStream.CopyTo(ms);
+                    ms.Position = 0;
+                    MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    //SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].SearchResponses = formatter.Deserialize(ms) as List<SearchResponse>;
+                    SavedStateSearchTab tab = new SavedStateSearchTab();
+                    tab.searchResponses = formatter.Deserialize(ms) as List<SearchResponse>;
+                    SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+
+                    //SearchTabCollection[pair.Key] = SavedStateSearchTab.GetTabFromSavedState(pair.Value);
+                }
+            }
+
+            sw.Stop();
+            MainActivity.LogDebug("HEADERS - Restore Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].SearchResponses.Count);
+        }
+
+
+        public static void SaveHeadersToSharedPrefs()
+        {
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            string stringToSave = string.Empty;
+            //we should only save things we need for the wishlist searches.
+            List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
+            if (tabsToSave.Count == 0)
+            {
+                MainActivity.LogDebug("Nothing to Save");
+            }
+            else
+            {
+                Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
+                foreach (int tabIndex in tabsToSave)
+                {
+                    savedStates.Add(tabIndex, SavedStateSearchTabHeader.GetSavedStateHeaderFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
+                }
+                using (System.IO.MemoryStream savedStateStream = new System.IO.MemoryStream())
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(savedStateStream, savedStates);
+                    stringToSave = Convert.ToBase64String(savedStateStream.ToArray());
+                }
+            }
+
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutString(SoulSeekState.M_SearchTabsState_Headers, stringToSave);
+                editor.Commit();
+            }
+
+            sw.Stop();
+            MainActivity.LogDebug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);
+        }
+
+        //load legacy, and then save new to shared prefs and disk
+        public static void ConvertLegacyWishlistsIfApplicable(Context c)
+        {
+            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_LEGACY, string.Empty);
+            if (savedState == string.Empty)
+            {
+                //nothing to do...
+                return;
+            }
+            else
+            {
+                MainActivity.LogDebug("Converting Wishlists to New Format...");
+                RestoreStateFromSharedPreferencesLegacy();
+                SoulSeekState.SharedPreferences.Edit().Remove(SoulSeekState.M_SearchTabsState_LEGACY).Commit();
+                //string x = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_LEGACY, string.Empty); //works, string is empty.
+                SaveHeadersToSharedPrefs();
+                SaveAllSearchTabsToDisk(c);
             }
         }
 
-        public static void RestoreStateFromSharedPreferences()
+        public static void RestoreHeadersFromSharedPreferences()
         {
-            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState, string.Empty);
+            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_Headers, string.Empty);
+            if (savedState == string.Empty)
+            {
+                return;
+            }
+            else
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+
+                MainActivity.LogDebug("HEADERS - base64 string length: " + sw.ElapsedMilliseconds);
+
+                using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    var savedStateDict = formatter.Deserialize(memStream) as Dictionary<int, SavedStateSearchTabHeader>;
+                    int lowestID = int.MaxValue;
+                    foreach (var pair in savedStateDict)
+                    {
+                        if (pair.Key < lowestID)
+                        {
+                            lowestID = pair.Key;
+                        }
+                        SearchTabCollection[pair.Key] = SavedStateSearchTabHeader.GetTabFromSavedState(pair.Value, null);
+                    }
+                    if (lowestID != int.MaxValue)
+                    {
+                        lastWishlistID = lowestID;
+                    }
+                }
+                sw.Stop();
+                MainActivity.LogDebug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
+            }
+            //SoulSeekState.SharedPreferences.Edit().Remove
+        }
+
+        public static void RestoreStateFromSharedPreferencesLegacy()
+        {
+            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_LEGACY, string.Empty);
             if (savedState == string.Empty)
             {
                 return;
@@ -1013,7 +1377,8 @@ namespace AndriodApp1
             SearchTabCollection[lastWishlistID].CurrentlySearching = false;
 
             //*********************
-            SearchTabHelper.SaveStateToSharedPreferences();
+            SearchTabHelper.SaveSearchResultsToDisk(lastWishlistID, SoulSeekState.ActiveActivityRef);
+            SearchTabHelper.SaveHeadersToSharedPrefs();
         }
 
         /// <summary>
@@ -1531,6 +1896,14 @@ namespace AndriodApp1
                         SearchTabHelper.CurrentTab = lastTab;
                         fromTab = lastTab;
                         return;
+                    }
+
+                    if(tabToGoTo<0)
+                    {
+                        if(!SearchTabHelper.SearchTabCollection[fromTab].IsLoaded())
+                        {
+                            SearchTabHelper.RestoreSearchResultsFromDisk(tabToGoTo, SoulSeekState.ActiveActivityRef);
+                        }
                     }
 
                     GetCustomViewSearchHere().Text = SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm;
@@ -4138,8 +4511,8 @@ namespace AndriodApp1
                     //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
                     oldList?.Clear();
                 }
-                //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
-                t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
+                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
@@ -4203,7 +4576,10 @@ namespace AndriodApp1
                    }
                    else if (SearchTabHelper.SearchTabCollection[fromTab].SearchTarget == SearchTarget.Wishlist)
                    {
-                       SearchTabHelper.SaveStateToSharedPreferences();
+                       //this is if the search was not automatic (i.e. wishlist timer elapsed) but was performed in the wishlist tab..
+                       //therefore save the new results...
+                       SearchTabHelper.SaveHeadersToSharedPrefs();
+                       SearchTabHelper.SaveSearchResultsToDisk(fromTab, SoulSeekState.ActiveActivityRef);
                    }
 
                    if (fromTab == SearchTabHelper.CurrentTab)
@@ -4530,7 +4906,8 @@ namespace AndriodApp1
             }
             if (isWishlist)
             {
-                SearchTabHelper.SaveStateToSharedPreferences();
+                SearchTabHelper.SaveHeadersToSharedPrefs();
+                SearchTabHelper.RemoveTabFromSharedPrefs(tabToRemove, SoulSeekState.ActiveActivityRef);
             }
             SearchFragment.Instance.SetCustomViewTabNumberImageViewState();
         }
@@ -4633,7 +5010,7 @@ namespace AndriodApp1
     }
 
 
-    public class SearchTabDialog : Android.Support.V4.App.DialogFragment
+    public class SearchTabDialog : Android.Support.V4.App.DialogFragment, ViewTreeObserver.IOnGlobalLayoutListener
     {
         private RecyclerView recyclerViewSearches = null;
         private RecyclerView recyclerViewWishlists = null;
@@ -4654,6 +5031,36 @@ namespace AndriodApp1
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             return inflater.Inflate(Resource.Layout.search_tab_layout, container); //error inflating MaterialButton
+        }
+
+        public void OnGlobalLayout()
+        {
+            ////onresume the dialog isnt drawn so you dont know the height.
+            ////this is to give the dialog a max height of 95%
+            //Window window = Dialog.Window;
+            //this.View.ViewTreeObserver.RemoveOnGlobalLayoutListener(this);
+            ////if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN)
+            ////{
+            ////    yourView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+            ////}
+            ////else
+            ////{
+            ////    yourView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            ////}
+            //Point size = new Point();
+
+            //Display display = window.WindowManager.DefaultDisplay;
+            //display.GetSize(size);
+
+            //int width = size.X;
+            //int height = size.Y;
+
+            //if(this.View.Height > (height * .95))
+            //{
+            //    window.SetLayout((int)(width * 0.90), (int)(height * 0.95));//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
+            //    window.SetGravity(GravityFlags.Center);
+            //}
+
         }
 
         /// <summary>
@@ -4728,14 +5135,22 @@ namespace AndriodApp1
             base.OnResume();
 
             MainActivity.LogDebug("OnResume ran");
+            //this.View.ViewTreeObserver.AddOnGlobalLayoutListener(this);
+            //Window window = Dialog.Window;//  getDialog().getWindow();
+            
+            //int currentWindowHeight = window.DecorView.Height;
+            //int currentWindowWidth = window.DecorView.Width;
 
-            Window window = Dialog.Window;//  getDialog().getWindow();
+            //int xxx = this.View.RootView.Width;
+            //int xxxxx = this.View.Width;
+
             Point size = new Point();
-
+            Window window = Dialog.Window;
             Display display = window.WindowManager.DefaultDisplay;
             display.GetSize(size);
 
             int width = size.X;
+            //int height = size.Y;
 
             window.SetLayout((int)(width * 0.90), Android.Views.WindowManagerLayoutParams.WrapContent);//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
             window.SetGravity(GravityFlags.Center);

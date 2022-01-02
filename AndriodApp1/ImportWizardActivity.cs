@@ -275,7 +275,8 @@ namespace AndriodApp1
                 //this guys state will always be good (SeekerApplication - on create)
                 SearchTabHelper.AddWishlistSearchTabFromString(wish);
             }
-            SearchTabHelper.SaveStateToSharedPreferences();
+            SearchTabHelper.SaveHeadersToSharedPrefs();
+            //SearchTabHelper.SaveAllSearchTabsToDisk(SoulSeekState.ActiveActivityRef); //there are no additional results...
             Helpers.SaveUserNotes();
             if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
             {
