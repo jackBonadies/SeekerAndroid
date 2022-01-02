@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
-
 using Android;
 using Android.App;
 using Android.Content;
@@ -2259,13 +2258,65 @@ namespace AndriodApp1
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
             SoulSeekState.SharedPreferences = sharedPrefs;
-            RestoreSoulSeekState(sharedPrefs);
+            RestoreSoulSeekState(sharedPrefs, this);
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
 
+            //Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri);
+            //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, chosenUri);
+            //var df = SoulSeekState.RootDocumentFile.FindFile("saved_tabs");
+            //var strm =this.ContentResolver.OpenInputStream(df.Uri);
+            //Dictionary<int, SavedStateSearchTab> savedStates = new Dictionary<int, SavedStateSearchTab>();
+            //List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
+            //foreach (int tabIndex in tabsToSave)
+            //{
+            //    savedStates.Add(tabIndex, SavedStateSearchTab.GetSavedStateFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
+            //}
+            //string stringToSave = string.Empty;
+            //using (System.IO.MemoryStream savedStateStream = new System.IO.MemoryStream())
+            //{
+            //    BinaryFormatter formatter = new BinaryFormatter();
+            //    var sw = System.Diagnostics.Stopwatch.StartNew();
+            //    sw.Start();
+            //    formatter.Serialize(savedStateStream, savedStates);
+            //    sw.Stop();
+
+            //    stringToSave = Convert.ToBase64String(savedStateStream.ToArray());
+
+            //    MainActivity.LogDebug($"serialize length: {stringToSave.Length} sw.EllapsedMilliseconds: {sw.ElapsedMilliseconds} ms");
+
+
+            //    sw = System.Diagnostics.Stopwatch.StartNew();
+            //    savedStateStream.Position = 0;
+            //    System.IO.MemoryStream s1 = new System.IO.MemoryStream();
+            //    sw.Start();
+            //    foreach(var searchTab in savedStates.Values)
+            //    {
+            //        foreach(SearchResponse s in searchTab.searchResponses)
+            //        {
+            //            ////exactly the same speed.
+            //            var b = s.ToByteArray();
+            //            s1.Write(b,0,b.Length);
+            //        }
+            //    }
+            //    sw.Stop();
+
+            //    MainActivity.LogDebug($"custom {sw.ElapsedMilliseconds} ms");
+
+            //    sw = System.Diagnostics.Stopwatch.StartNew();
+            //    savedStateStream.Position=0;
+            //    sw.Start();
+            //    var savedStateDict1 = formatter.Deserialize(savedStateStream) as Dictionary<int, SavedStateSearchTab>;
+            //    sw.Stop();
+            //    MainActivity.LogDebug($"deserialize length: {stringToSave.Length} sw.EllapsedMilliseconds: {sw.ElapsedMilliseconds} ms");
+            //}
+
+
+            //return;
+
 
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
-                                                                                   //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
+            //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
             //this does not restart Android.App.Application. so putting it here is a much better place... in MainActivity.OnCreate it would restart the activity every time.
             if (AppCompatDelegate.DefaultNightMode != SoulSeekState.DayNightMode)
             {
@@ -3373,7 +3424,7 @@ namespace AndriodApp1
         }
 
 
-        public static void RestoreSoulSeekState(ISharedPreferences sharedPreferences) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
+        public static void RestoreSoulSeekState(ISharedPreferences sharedPreferences, Context c) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
         {   //day night mode sets the static, saves to shared preferences the new value, sets appcompat value, which recreates everything and calls restoreSoulSEekstate(bundle) where the bundle was older than shared prefs
             //because saveSoulSeekstate was not called in the meantime...
             if (sharedPreferences != null)
@@ -3417,7 +3468,14 @@ namespace AndriodApp1
                 SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
                 SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
-                SearchTabHelper.RestoreStateFromSharedPreferences();
+                //SearchTabHelper.RestoreStateFromSharedPreferencesLegacy();
+
+                //SearchTabHelper.SaveHeadersToSharedPrefs();
+                //SearchTabHelper.SaveAllSearchTabsToDisk(c);
+                SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
+                SearchTabHelper.RestoreHeadersFromSharedPreferences();
+                //SearchTabHelper.RestoreAllSearchTabsFromDisk(c);
+
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
             }
         }
@@ -3771,7 +3829,7 @@ namespace AndriodApp1
             }
 
 //#if DEBUG
-//            searchIntervalMilliseconds = 1000 * 30;
+//            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
 //#endif
 
             WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
@@ -3826,7 +3884,8 @@ namespace AndriodApp1
                     }
                 });
             }
-            SearchTabHelper.SaveStateToSharedPreferences();
+            SearchTabHelper.SaveHeadersToSharedPrefs();
+            SearchTabHelper.SaveSearchResultsToDisk(id, SoulSeekState.ActiveActivityRef);
         }
 
         private static void WishlistTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -3862,7 +3921,14 @@ namespace AndriodApp1
 
                     //this is incase someone is privileged (searching every 2 mins) and perhaps they only have 1 wishlist search.  we dont want the second to begin when the first hasnt even ended.
                     //there arent really any downsides if this happens actually....
-                    if(!OldResultsToCompare.ContainsKey(oldestId)) //this is better than setting currentlySearching bc currentlySearching changes UI components like the transition drawable, which I think is just too much happening for the user.
+
+                    if (!SearchTabHelper.SearchTabCollection[oldestId].IsLoaded())
+                    {
+                        SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SoulSeekState.ActiveActivityRef);
+                    }
+
+
+                    if (!OldResultsToCompare.ContainsKey(oldestId)) //this is better than setting currentlySearching bc currentlySearching changes UI components like the transition drawable, which I think is just too much happening for the user.
                     {
 #if DEBUG
                         var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -6367,7 +6433,7 @@ namespace AndriodApp1
 
             //WishlistController.SearchIntervalMilliseconds = 1000*30;
             //WishlistController.Initialize();
-
+            
             //#endif
 
 
@@ -10518,7 +10584,8 @@ namespace AndriodApp1
         public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
         public const string M_ShowSmartFilters = "Momento_ShowSmartFilters";
         public const string M_chatroomsToNotify = "Momento_chatroomsToNotify";
-        public const string M_SearchTabsState = "Momento_SearchTabsState";
+        public const string M_SearchTabsState_LEGACY = "Momento_SearchTabsState";
+        public const string M_SearchTabsState_Headers = "Momento_SearchTabsState_Headers";
 
         public const string M_UploadSpeed = "Momento_UploadSpeed";
         public const string M_UploadDirectoryUri = "Momento_UploadDirectoryUri";
@@ -12319,11 +12386,9 @@ public static class TestClient
         for (int i = 0; i < 1000; i++)
         {
             List<Soulseek.File> fs = new List<Soulseek.File>();
-            for (int j = 0; j < 1; j++)
+            for (int j = 0; j < 15; j++)
             {
-                fs.Add(new Soulseek.File(1, searchString + i + "\\" + "1. test filename " + i, 0, ".mp3", null));
-                fs.Add(new Soulseek.File(1, searchString + i + "\\" + "2. test filename " + i, 0, ".mp3", null));
-                fs.Add(new Soulseek.File(1, searchString + i + "\\" + "3. test filename " + i, 0, ".mp3", null));
+                fs.Add(new Soulseek.File(1, searchString + i + "\\" + $"{j}. test filename " + i, 0, ".mp3", null));
             }
             //1 in 15 chance of being locked
             bool locked = false;
