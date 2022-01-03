@@ -5568,7 +5568,7 @@ namespace AndriodApp1
                         }
 
                         pairs.Add(presentableName,new Tuple<long, string, Tuple<int, int, int, int>>(size, childUri.ToString(),attributes)); //NEED TO STORE THEM HERE...
-                        index.Add(indexNum,presentableName); //throws on same key
+                        index.Add(indexNum,presentableName); //throws on same key (the file in question ends with unicode EOT char (\u04)).
                         indexNum++;
                         if(indexNum % 50 == 0)
                         {

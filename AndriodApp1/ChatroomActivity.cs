@@ -342,6 +342,25 @@ namespace AndriodApp1
             return true;
         }
 
+#if DEBUG
+        public void MassMessagesTestMethod()
+        {
+            Task.Run(() =>
+            {
+                var r = new Random();
+                System.Threading.Thread.Sleep(100);
+                for (int i = 0; i < 1000; i++)
+                {
+                    System.Threading.Thread.Sleep(r.Next(0, 100));
+                    Message m = new Message("test", 1, false, DateTime.Now, DateTime.UtcNow, "test" + i, false);
+                    ChatroomController.AddMessage(ChatroomInnerFragment.OurRoomInfo.Name, m); //background thread
+                    ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(ChatroomInnerFragment.OurRoomInfo.Name, m));
+                }
+                //produces an immediate collection was modified on the .Last() call.  could not have been an easier test ;)
+            });
+        }
+#endif
+
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
@@ -360,6 +379,9 @@ namespace AndriodApp1
                     ChatroomController.ToggleAutoJoin(ChatroomInnerFragment.OurRoomInfo.Name, true, this);
                     return true;
                 case Resource.Id.toggle_notify_room_action:
+                    //#if DEBUG
+                    //this.MassMessagesTestMethod();
+                    //#endif
                     ChatroomController.ToggleNotifyRoom(ChatroomInnerFragment.OurRoomInfo.Name, true, this);
                     return true;
                 case Resource.Id.view_user_list_action:
@@ -1198,12 +1220,31 @@ namespace AndriodApp1
 
                     if(roomArgs.FromUsConfirmation) //special case, the message is already there we just need to update it
                     {
-                        recyclerAdapter.NotifyItemChanged(messagesInternal.Count - 1);
+                        //the old way (of just doing count - 1) only worked when no messages got there in the mean time.
+                        //to test just put a small delay in the send method and receive msg in meantime, and old method will fail...
+                        int indexToUpdate = messagesInternal.Count - 1;
+                        try
+                        {
+                            for (int i = messagesInternal.Count - 1; i>=0; i--)
+                            {
+                                if(System.Object.ReferenceEquals(messagesInternal[i],roomArgs.Message))
+                                {
+                                    indexToUpdate = i;
+                                    break;
+                                }
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            MainActivity.LogFirebase("OnMessageRecieved" + ex.Message);
+                        }
+                        recyclerAdapter.NotifyItemChanged(indexToUpdate);
                     }
                     else
                     {
-                        Message msg = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].Last();
-                        messagesInternal.Add(msg);
+                        //Message msg = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].Last(); //throws every time when testing with mass message test.
+                        //the above method is O(n) and if anything gets enqueued in the mean time (which can happen since Enqueue() happens on background thread) it throws.
+                        messagesInternal.Add(roomArgs.Message);
                         int lastVisibleItemPosition = recycleLayoutManager.FindLastVisibleItemPosition();
                         MainActivity.LogDebug("lastVisibleItemPosition : " + lastVisibleItemPosition);
                         recyclerAdapter.NotifyItemInserted(messagesInternal.Count - 1);
@@ -1702,19 +1743,22 @@ namespace AndriodApp1
 
     public class MessageReceivedArgs
     {
-        public MessageReceivedArgs(string roomName)
+        public MessageReceivedArgs(string roomName, Message m)
         {
             RoomName = roomName;
+            Message = m;
         }
-        public MessageReceivedArgs(string roomName, bool fromUsPending, bool fromUsCon)
+        public MessageReceivedArgs(string roomName, bool fromUsPending, bool fromUsCon, Message m)
         {
             RoomName= roomName;
             FromUsPending = fromUsPending;
             FromUsConfirmation= fromUsCon;
+            Message = m;
         }
         public string RoomName;
         public bool FromUsPending;
         public bool FromUsConfirmation;
+        public Message Message;
     }
 
     public class ChatroomController
@@ -1780,8 +1824,9 @@ namespace AndriodApp1
                 SpecialMessageCode code = reconnect ? SpecialMessageCode.Reconnect : SpecialMessageCode.Disconnect;
                 foreach (string room in PrevJoined)
                 {
-                    ChatroomController.AddMessage(room, new Message(DateTime.Now, DateTime.UtcNow, code));
-                    ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs( room ));
+                    Message m = new Message(DateTime.Now, DateTime.UtcNow, code);
+                    ChatroomController.AddMessage(room, m); //background thread
+                    ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs( room, m ));
                 }
             }
         }
@@ -1872,12 +1917,15 @@ namespace AndriodApp1
         public static void SendChatroomMessageLogic(string roomName, Message msg) //you can start out with a message...
         {
 
-            ChatroomController.AddMessage(roomName,msg);
+            ChatroomController.AddMessage(roomName,msg); //ui thread.
 
             //MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
-            ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, true, false));
+            ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, true, false, msg));
             Action<Task> continueWithAction = new Action<Task>((Task t) =>
             {
+                //#if DEBUG
+                //System.Threading.Thread.Sleep(3000);
+                //#endif 
                 if (t.IsFaulted)
                 {
                     msg.SentMsgStatus = SentStatus.Failed;
@@ -1888,7 +1936,7 @@ namespace AndriodApp1
                     msg.SentMsgStatus = SentStatus.Success;
                 }
                 //MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
-                ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, false, true));
+                ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, false, true, msg));
             });
             SoulSeekState.SoulseekClient.SendRoomMessageAsync(roomName, msg.MessageText).ContinueWith(continueWithAction);
         }
@@ -2370,8 +2418,8 @@ namespace AndriodApp1
                 //we already logged it..
                 return;
             }
-            AddMessage(e.RoomName, msg);
-            MessageReceived?.Invoke(null,new MessageReceivedArgs(e.RoomName));
+            AddMessage(e.RoomName, msg); //background thread
+            MessageReceived?.Invoke(null,new MessageReceivedArgs(e.RoomName, msg));
         }
 
         private static void SoulseekClient_RoomLeft(object sender, Soulseek.RoomLeftEventArgs e)
