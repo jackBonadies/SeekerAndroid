@@ -6473,7 +6473,7 @@ namespace AndriodApp1
             }
             else
             {
-                menu.FindItem(Resource.Id.action_abort_all).SetVisible(false);
+                menu.FindItem(Resource.Id.action_abort_all).SetVisible(false); //nullref here...
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(false);
                 if (CurrentlySelectedDLFolder == null)
                 {
