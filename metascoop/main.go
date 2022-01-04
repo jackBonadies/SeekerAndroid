@@ -241,7 +241,11 @@ func main() {
 			// Now update with some info
 
 			setNonEmpty(meta, "AuthorName", apkInfo.Author())
-			setNonEmpty(meta, "Name", apkInfo.Name())
+			fn := apkInfo.FriendlyName
+			if fn == "" {
+				fn = apkInfo.Name()
+			}
+			setNonEmpty(meta, "Name", fn)
 			setNonEmpty(meta, "SourceCode", apkInfo.GitURL)
 			setNonEmpty(meta, "License", apkInfo.License)
 			setNonEmpty(meta, "Description", apkInfo.Description)

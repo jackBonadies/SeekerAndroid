@@ -31,9 +31,6 @@ type AppInfo struct {
 }
 
 func (a AppInfo) Name() string {
-	if a.FriendlyName != "" {
-		return a.FriendlyName
-	}
 	return a.keyName
 }
 

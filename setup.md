@@ -65,6 +65,7 @@ Now you can edit the `apps.yaml` file to include a new app. Usually you just nee
 ```yml
 notality:
   git: https://github.com/xarantolus/notality
+  name: "Notality"
   description: |
     Notality is a very simple note taking app. I mostly built it to learn how Flutter works, but it's functional and you can use it.
 
