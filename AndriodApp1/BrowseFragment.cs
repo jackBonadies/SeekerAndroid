@@ -620,7 +620,10 @@ namespace AndriodApp1
                 //}
                 if (word.StartsWith('-'))
                 {
-                    WordsToAvoid.Add(word);
+                    if (word.Length > 1)//if just '-' dont remove everything. just skip it.
+                    {
+                        WordsToAvoid.Add(word.Substring(1)); //skip the '-'
+                    }
                 }
                 else
                 {

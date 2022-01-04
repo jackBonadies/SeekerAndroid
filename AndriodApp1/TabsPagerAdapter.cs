@@ -3297,7 +3297,10 @@ namespace AndriodApp1
                 }
                 else if (word.StartsWith('-'))
                 {
-                    searchTab.WordsToAvoid.Add(word);
+                    if(word.Length>1)//if just '-' dont remove everything. just skip it.
+                    {
+                        searchTab.WordsToAvoid.Add(word.Substring(1)); //skip the '-'
+                    }
                 }
                 else
                 {
