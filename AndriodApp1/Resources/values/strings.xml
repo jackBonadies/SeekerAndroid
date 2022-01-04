@@ -506,7 +506,7 @@ Directory Count: {5}"</string>
   <string name="cancel_and_clear">Cancel Download and Clear</string>
   <string name="resume_dl">Resume Download</string>
   <string name="refresh_queue_pos">Refresh Queue Position</string>
-  <string name="play_file">Play File</string>
+  <string name="play_file">Open File</string>
   <string name="chosen_transfer_doesnt_exist">Chosen Transfer Item does not exist anymore.</string>
   <string name="position_is_still_">Position in Queue is still: {0}</string>
   <string name="failed_to_play">Failed to play file in default player</string>
