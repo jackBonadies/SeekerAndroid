@@ -8287,13 +8287,18 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            LogDebug("The task did not complete due to unhandled exception");
-                            if(action==null)
-                            {
-                                action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.error_unspecified)); };
-                            }
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
-                            return;
+                                //string msgDebug1 = "unhandled exception info: " + task.Exception.Message + " " + task.Exception.StackTrace;
+                                //string msgDebug2 = "unhandled exception sub info: " + task.Exception.InnerException?.Message + " " + task.Exception.InnerException?.StackTrace;
+                                //MainActivity.LogFirebase(msgDebug1);
+                                //MainActivity.LogFirebase(msgDebug2);
+                                LogDebug("The task did not complete due to unhandled exception");
+                                if(action==null)
+                                {
+                                    //action = () => { ToastUI(msgDebug1); ToastUI(msgDebug2); };
+                                    action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.error_unspecified)); };
+                                }
+                                SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
+                                return;
                         }
                     }
 
@@ -10855,7 +10860,7 @@ namespace AndriodApp1
             }
             if (dt.Date == DateTime.Now.Date)
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt",cultureInfo); //cultureInfo can be null without issue..
+                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
             }
             else
             {
@@ -10863,34 +10868,81 @@ namespace AndriodApp1
             }
         }
 
+        [Flags]
+        public enum SpecialMessageType : short
+        {
+            None = 0,
+            SlashMe = 1,
+            MagnetLink = 2,
+            SlskLink = 4,  //not yet implemented
+        }
+
         /// <summary>
         /// true if '/me ' message
         /// </summary>
         /// <returns>true if special message</returns>
-        public static bool IsSpecialMessage(string msg)
+        public static bool IsSpecialMessage(string msg, out SpecialMessageType specialMessageType)
         {
-            if(string.IsNullOrEmpty(msg))
+            specialMessageType = SpecialMessageType.None;
+            if (string.IsNullOrEmpty(msg))
             {
                 return false;
             }
             if(msg.StartsWith(@"/me "))
             {
+                specialMessageType = SpecialMessageType.SlashMe;
+                return true;
+            }
+            if (msg.Contains(@"magnet:?xt=urn:"))
+            {
+                specialMessageType = SpecialMessageType.MagnetLink;
                 return true;
             }
             return false;
         }
 
+        private readonly static System.Text.RegularExpressions.Regex MagnetLinkRegex = new System.Text.RegularExpressions.Regex(@"magnet:\?xt=urn:[^ ""]+");
+
+        public static void ConfigureSpecialLinks(TextView textView, string msgText, SpecialMessageType specialMessageType)
+        {
+            Android.Text.SpannableString messageText = new Android.Text.SpannableString(msgText);
+            if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink))
+            {
+                var matches = MagnetLinkRegex.Matches(msgText);
+                //add in our spans.
+                if (matches.Count > 0)
+                {
+                    foreach (var match in matches)
+                    {
+                        var m = match as System.Text.RegularExpressions.Match;
+                        var ourMagnetSpan = new MagnetLinkClickableSpan(m.Value);
+                        messageText.SetSpan(ourMagnetSpan, m.Index, m.Index + m.Length, Android.Text.SpanTypes.InclusiveExclusive);
+                    }
+                }
+            }
+            textView.TextFormatted = messageText;
+        }
+
         public static string ParseSpecialMessage(string msg)
         {
-            if (!IsSpecialMessage(msg))
+            if (IsSpecialMessage(msg, out SpecialMessageType specialMessageType))
             {
-                return msg;
+                //if slash me dont include other special links, too excessive.
+                if(specialMessageType == SpecialMessageType.SlashMe)
+                {
+                    //"/me goes to the store"
+                    //"goes to the store" + style
+                    return msg.Substring(4, msg.Length - 4);
+                }
+                else
+                {
+                    return msg;
+                }
             }
             else
             {
-                //"/me goes to the store"
-                //"goes to the store" + style
-                return msg.Substring(4,msg.Length-4);
+                return msg;
+
             }
         }
 
@@ -11154,10 +11206,24 @@ namespace AndriodApp1
 
         public static void SetMessageTextView(TextView viewMessage, Message msg)
         {
-            if (Helpers.IsSpecialMessage(msg.MessageText))
+            if (Helpers.IsSpecialMessage(msg.MessageText, out SpecialMessageType specialMessageType))
             {
-                viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
-                viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
+                if(specialMessageType.HasFlag(SpecialMessageType.SlashMe))
+                {
+                    viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
+                    viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
+                }
+                else if(specialMessageType.HasFlag(SpecialMessageType.MagnetLink))
+                {
+                    viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
+                    Helpers.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
+                }
+                else
+                {
+                    //fallback
+                    viewMessage.Text = msg.MessageText;
+                    viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
+                }
             }
             else
             {
@@ -11957,6 +12023,29 @@ namespace AndriodApp1
             builder.Show();
         }
     }
+
+    public class MagnetLinkClickableSpan : Android.Text.Style.ClickableSpan
+    {
+        private string textClicked;
+        public MagnetLinkClickableSpan(string _textClicked)
+        {
+            textClicked = _textClicked;
+        }
+        public override void OnClick(View widget)
+        {
+            try
+            {
+                Intent followLink = new Intent(Intent.ActionView);
+                followLink.SetData(Android.Net.Uri.Parse(textClicked));
+                SoulSeekState.ActiveActivityRef.StartActivity(followLink);
+            }
+            catch (Android.Content.ActivityNotFoundException e)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, "No Activity Found to handle Magnet Links.  Please Install a BitTorrent Client.", ToastLength.Long).Show();
+            }
+        }
+    }
+
 
     public static class MicroTagReader
     {
