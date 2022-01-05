@@ -4,7 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="4dp"
     android:orientation="horizontal"
     android:id="@+id/linearLayoutSearchTabItem">
 
@@ -12,6 +11,9 @@
     android:layout_width="wrap_content"
     android:orientation="vertical"
     android:layout_weight="8"
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:paddingLeft="4dp"
     android:id="@+id/searchTabItemMain"
     android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
@@ -47,6 +49,12 @@
         app:srcCompat="@drawable/outline_cancel_white_24"
         android:id="@+id/searchTabItemRemove"
         android:tint="?attr/mainTextColor"
+        
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp"
+        android:paddingRight="4dp"
+        android:paddingLeft="4dp"
+        
         />
 
 

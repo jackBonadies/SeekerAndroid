@@ -40,4 +40,12 @@ app:showAsAction="never"
 android:iconifiedByDefault="false"
  />
 
+
+	<item android:id="@+id/action_message_user"
+ android:title="@string/msg_user"
+ app:showAsAction="never"
+ android:iconifiedByDefault="false"
+ />
+
+
 </menu>

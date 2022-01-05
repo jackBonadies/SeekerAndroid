@@ -594,7 +594,7 @@ namespace AndriodApp1
                 view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick; 
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
-                //(view as View).Click += MessageOverviewClick;
+                (view as View).Click += view.UserRowView_Click;
                 (view as View).LongClick += view.UserRowView_LongClick;
                 return new UserRowViewHolder(view as View);
             }
@@ -608,6 +608,7 @@ namespace AndriodApp1
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).LongClick += ChatroomReceivedAdapter_LongClick;
+                (view as View).Click += view.UserRowView_Click;
                 (view as View).LongClick += view.UserRowView_LongClick;
                 return new UserRowViewHolder(view as View);
             }
@@ -621,8 +622,6 @@ namespace AndriodApp1
             }
 
         }
-
-
     }
 
 
@@ -704,6 +703,12 @@ namespace AndriodApp1
         }
 
         public void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
+        {
+            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (sender as View).ShowContextMenu();
+        }
+
+        public void UserRowView_Click(object sender, EventArgs e)
         {
             (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
             (sender as View).ShowContextMenu();
