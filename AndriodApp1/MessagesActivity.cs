@@ -202,7 +202,7 @@ namespace AndriodApp1
 
         public void ShowEditTextMessageUserDialog()
         {
-            if(SoulSeekState.Username==null || SoulSeekState.Username == string.Empty)
+            if(MainActivity.IsLoggedIn())
             {
                 Toast.MakeText(this, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
                 return;
@@ -951,6 +951,21 @@ namespace AndriodApp1
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
                 return;
             }
+
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+                if (t.IsFaulted)
+                {
+                    if (!(t.Exception.InnerException is FaultPropagationException))
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                    }
+                    throw new FaultPropagationException();
+                }
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                    SendMessageLogic(msg);
+                }));
+            });
+
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
@@ -960,20 +975,18 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
-                    if (t.IsFaulted)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
-                        return;
-                    }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
-                        SendMessageLogic(msg);
-                    }));
-                }));
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
             }
             else
             {
-                SendMessageLogic(msg);
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment"))
+                {
+                    return;
+                }
+                else
+                {
+                    SendMessageLogic(msg);
+                }
             }
 
         }

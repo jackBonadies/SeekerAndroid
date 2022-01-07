@@ -778,7 +778,7 @@ namespace AndriodApp1
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if(SoulSeekState.Username==string.Empty || SoulSeekState.Username==null)
+            if(MainActivity.IsLoggedIn())
             {
                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;

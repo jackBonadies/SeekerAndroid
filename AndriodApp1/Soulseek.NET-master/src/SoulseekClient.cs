@@ -2713,7 +2713,9 @@ namespace Soulseek
                     IPEndPoint = ipEndPoint;
 
                     ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, $"Logging in");
-
+                    //#if DEBUG
+                    //System.Threading.Thread.Sleep(4000);
+                    //#endif
                     using var loginFailureCts = new CancellationTokenSource();
                     using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, loginFailureCts.Token);
 

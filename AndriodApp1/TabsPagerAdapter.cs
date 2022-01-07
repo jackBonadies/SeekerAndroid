@@ -182,7 +182,7 @@ namespace AndriodApp1
             HasOptionsMenu = true;
             MainActivity.LogDebug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
-            if ((!SoulSeekState.currentlyLoggedIn) || SoulSeekState.Username == null || SoulSeekState.Password == null || SoulSeekState.Username == string.Empty)//you are not logged in if username or password is null
+            if (MainActivity.IsLoggedIn())//you are not logged in if username or password is null
             {
                 SoulSeekState.currentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
@@ -293,6 +293,7 @@ namespace AndriodApp1
             bool cannotLogin = false;
             string msg = string.Empty;
             string msgToLog = string.Empty;
+            bool clearUserPass = true;
             if (t != null && t.Status == TaskStatus.Faulted)
             {
                 if (t.Exception != null && t.Exception.InnerExceptions != null && t.Exception.InnerExceptions.Count != 0)
@@ -310,6 +311,7 @@ namespace AndriodApp1
                         if (t.Exception.InnerExceptions[0].Message.Contains("Network is unreachable"))
                         {
                             cannotLogin = true;
+                            clearUserPass = false;
                             msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
                         }
                         else if (t.Exception.InnerExceptions[0].Message.Contains("Connection refused"))
@@ -349,7 +351,7 @@ namespace AndriodApp1
                 }
 
                 MainActivity.AddLoggedInLayout(this.rootView);
-                MainActivity.BackToLogInLayout(this.rootView, LogInClick);
+                MainActivity.BackToLogInLayout(this.rootView, LogInClick, clearUserPass);
             }
 
             //SoulSeekState.ManualResetEvent.WaitOne();

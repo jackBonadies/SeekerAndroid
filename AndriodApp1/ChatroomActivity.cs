@@ -1517,9 +1517,25 @@ namespace AndriodApp1
         }
 
 
-
         public void SendChatroomMessageAPI(string roomName, Message msg)
         {
+
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+                if (t.IsFaulted)
+                {
+                    //only show once for the original fault.
+                    MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
+                    if(!(t.Exception.InnerException is FaultPropagationException))
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                    }
+                    throw new FaultPropagationException();
+                }
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                    ChatroomController.SendChatroomMessageLogic(roomName, msg);
+                }));
+            });
+
             if (!SoulSeekState.currentlyLoggedIn)
             {
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
@@ -1535,6 +1551,7 @@ namespace AndriodApp1
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
+                MainActivity.LogDebug("CurrentlyLoggedInButDisconnectedState: TRUE");
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
@@ -1542,23 +1559,23 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
-                    if (t.IsFaulted)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
-                        return;
-                    }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
-                        ChatroomController.SendChatroomMessageLogic(roomName, msg);
-                    }));
-                }));
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
             }
             else
             {
-                ChatroomController.SendChatroomMessageLogic(roomName, msg);
+                if(MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment")) 
+                {
+                    return;
+                }
+                else
+                {
+                  ChatroomController.SendChatroomMessageLogic(roomName, msg);
+                }
             }
 
         }
+
+
 
         private void SendMessage_Click(object sender, EventArgs e)
         {
