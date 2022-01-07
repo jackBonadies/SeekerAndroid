@@ -2351,6 +2351,7 @@ namespace AndriodApp1
                 SoulSeekState.SoulseekClient.Connected += SoulseekClient_Connected;
                 SoulSeekState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
                 SoulSeekState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
+                SoulSeekState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
                 SoulSeekState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
                 SoulSeekState.BrowseResponseReceived += BrowseFragment.SoulSeekState_BrowseResponseReceived;
 
@@ -2379,7 +2380,14 @@ namespace AndriodApp1
 
         }
 
-
+        private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
+        {
+            MainActivity.LogDebug("disconnected");
+            lock(OurCurrentLoginTaskSyncObject)
+            {
+                OurCurrentLoginTask = null;
+            }
+        }
 
         public static void AcquireTransferLocksAndResetTimer()
         {
@@ -2939,6 +2947,10 @@ namespace AndriodApp1
 
         private void SoulseekClient_LoggedIn(object sender, EventArgs e)
         {
+            lock (OurCurrentLoginTaskSyncObject)
+            {
+                OurCurrentLoginTask = null;
+            }
             ChatroomController.JoinAutoJoinRoomsAndPreviousJoined();
             //ChatroomController.ConnectionLapse.Add(new Tuple<bool, DateTime>(true, DateTime.UtcNow)); //just testing obv remove later...
             MainActivity.LogDebug("logged in " + DateTime.UtcNow.ToString());
@@ -3048,10 +3060,12 @@ namespace AndriodApp1
                 Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short).Show();
             }
         }
-
+        public static Task OurCurrentLoginTask = null;
+        public static object OurCurrentLoginTaskSyncObject = new object();
         public static Task ConnectAndPerformPostConnectTasks(string username, string password)
         {
             Task t = SoulSeekState.SoulseekClient.ConnectAsync(username, password);
+            OurCurrentLoginTask = t;
             t.ContinueWith(PerformPostConnectTasks);
             return t;
         }
@@ -3779,6 +3793,9 @@ namespace AndriodApp1
         }
     }
 
+    public class FaultPropagationException : System.Exception
+    {
+    }
 
     public class WishlistController
     {
@@ -7596,6 +7613,28 @@ namespace AndriodApp1
             MainActivity.LogFirebase(e.Message);
         }
 
+        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null)
+        {
+            lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
+            {
+                if (SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.Connecting) || SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggingIn))
+                {
+                    //MainActivity.LogDebug("IsLoggingInTaskCurrentlyBeingPerformed: TRUE");
+                    SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+                    if (msg != null)
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
+                    }
+                    return true;
+                }
+                else
+                {
+                    //MainActivity.LogDebug("IsLoggingInTaskCurrentlyBeingPerformed: FALSE");
+                    return false;
+                }
+            }
+        }
+
         public static bool ShowMessageAndCreateReconnectTask(Context c, out Task connectTask)
         {
             if(c==null)
@@ -8558,11 +8597,17 @@ namespace AndriodApp1
             }
         }
 
+        public static bool IsLoggedIn()
+        {
+            return (!SoulSeekState.currentlyLoggedIn) || SoulSeekState.Username == null || SoulSeekState.Password == null || SoulSeekState.Username == string.Empty;
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="rootView"></param>
-        public static void BackToLogInLayout(View rootView, EventHandler LogInClick)
+        public static void BackToLogInLayout(View rootView, EventHandler LogInClick, bool clearUserPass = true)
         {
             var action = new Action(() => {
                 //this is the case where it already has the loggedin fragment loaded.
@@ -8636,6 +8681,11 @@ namespace AndriodApp1
                 {
                     editText.Visibility = ViewStates.Visible;
                     editText2.Visibility = ViewStates.Visible;
+                    if(!clearUserPass && !string.IsNullOrEmpty(SoulSeekState.Username))
+                    {
+                        editText.Text = SoulSeekState.Username;
+                        editText2.Text = SoulSeekState.Password;
+                    }
                     textView.Visibility = ViewStates.Visible;
                     buttonLogin.Visibility = ViewStates.Visible;
                     noAccountHelp.Visibility = ViewStates.Visible;
