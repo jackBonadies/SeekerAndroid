@@ -812,11 +812,15 @@ namespace AndriodApp1
             SearchTab clone = new SearchTab();
             clone.SearchResponses = this.SearchResponses.ToList();
             SortedDictionary<SearchResponse, object> cloned = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
-            foreach (var entry in SortHelper)
+            //without lock, extremely easy to reproduce "collection was modified" exception if creating wishlist tab while searching.
+            lock(SortHelper)
             {
-                if (!cloned.ContainsKey(entry.Key))
+                foreach (var entry in SortHelper)
                 {
-                    cloned.Add(entry.Key, entry.Value);
+                    if (!cloned.ContainsKey(entry.Key))
+                    {
+                        cloned.Add(entry.Key, entry.Value);
+                    }
                 }
             }
             clone.SortHelper = cloned;
