@@ -12,14 +12,14 @@
     <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
     <color name="lightPurpleNotTransparent">#959BDC</color>
 
-	
-
-
-	
-	
 
 
 
+	<color name="androidStockMessagesNewBlue">#0B57D0</color>
+
+
+
+	<color name="defaultTextColor">#ff737373</color>
 
 
 	<color name="offline">#F7636A</color>

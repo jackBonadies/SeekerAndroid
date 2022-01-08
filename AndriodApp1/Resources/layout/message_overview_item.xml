@@ -8,15 +8,42 @@
     android:padding="4dp"
     tools:context="android.PageFragment"
     android:orientation="vertical"
+    android:foreground="?android:attr/selectableItemBackground"
     android:id="@+id/linearLayoutMessageOverview">
-    <TextView
-    android:layout_width="match_parent"
+
+    <LinearLayout
+            android:layout_width="match_parent"
     android:layout_height="wrap_content"
+        android:paddingRight="12dp"
+         android:orientation="horizontal">
+    <TextView
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+            android:layout_weight="1"
         android:id="@+id/username"
     android:text="usernameDummy"
-    android:textSize="22sp"
-    android:textStyle="bold"
+    android:textSize="20sp"
         />
+            <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+        android:id="@+id/dateTimeAgo"
+    android:text="Dec 22"
+            
+    android:textSize="14sp"
+            android:layout_gravity="center_vertical"
+        />
+        <ImageView
+            android:layout_width="16sp"
+            android:layout_height="16sp"
+            android:layout_marginLeft="12dp"
+            android:id="@+id/unreadImageView"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            android:tint="@color/androidStockMessagesNewBlue"
+            app:srcCompat="@drawable/checkbox_blank_circle"/>
+    
+        </LinearLayout>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
