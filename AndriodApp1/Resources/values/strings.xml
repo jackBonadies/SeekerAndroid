@@ -581,7 +581,11 @@ Directory Count: {5}"</string>
   <string name="item_total_plural">{0} items total</string>
 
   <string name="subfolders_warning">This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
-  <string name="current_folder_only">Current Folder Only</string>
+
+	<string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
+
+
+	<string name="current_folder_only">Current Folder Only</string>
   <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
 
   <string name="about_body">

@@ -823,7 +823,13 @@ namespace AndriodApp1
             }
         }
 
-        private void DownloadSelectedLogic()
+        private void DownloadSelectedLogic_NotQueued()
+        {
+            DownloadSelectedLogic(false);
+        }
+
+
+        private void DownloadSelectedLogic(bool queuePaused)
         {
             bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
             try
@@ -833,7 +839,7 @@ namespace AndriodApp1
                 {
                     try
                     {
-                        Task tsk = CreateDownloadTask(searchResponse.GetElementAtAdapterPosition(hideLocked, position));
+                        Task tsk = CreateDownloadTask(searchResponse.GetElementAtAdapterPosition(hideLocked, position), queuePaused);
                         if (tsk == null)
                         {
                             Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_duplicate), ToastLength.Long).Show(); });
@@ -906,12 +912,12 @@ namespace AndriodApp1
                             SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                             return;
                         }
-                        SoulSeekState.MainActivityRef.RunOnUiThread(DownloadSelectedLogic);
+                        SoulSeekState.MainActivityRef.RunOnUiThread(DownloadSelectedLogic_NotQueued);
                 }));
             }
             else
             {
-                DownloadSelectedLogic();
+                DownloadSelectedLogic(false);
             }
 
         }
@@ -978,7 +984,7 @@ namespace AndriodApp1
                         return;
                     }
                     MainActivity.LogDebug("DownloadDialog Dl_Click");
-                    var task = CreateDownloadAllTask();
+                    var task = CreateDownloadAllTask(false);
                     task.Start(); //start task immediately
                     SoulSeekState.MainActivityRef.RunOnUiThread(() => {
                     Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
@@ -1001,7 +1007,7 @@ namespace AndriodApp1
             else
             {
                 MainActivity.LogDebug("DownloadDialog Dl_Click");
-                var task = CreateDownloadAllTask(); 
+                var task = CreateDownloadAllTask(false); 
                 task.Start(); //start task immediately
                 Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
                 task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
@@ -1009,7 +1015,7 @@ namespace AndriodApp1
             }
         }
 
-        private Task CreateDownloadTask(Soulseek.File file)
+        private Task CreateDownloadTask(Soulseek.File file, bool queuePaused)
         {
             //TODO TODO downloadInfoList is stale..... not what you want to use....
             //TransfersFragment frag = (StaticHacks.TransfersFrag as TransfersFragment);
@@ -1030,21 +1036,19 @@ namespace AndriodApp1
             MainActivity.LogDebug("CreateDownloadTask");
             Task task = new Task(()=>
             {
-                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, out _);
+                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, out _);
 
             });
             return task;
         }
 
 
-        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, out bool errorExists)
+        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, bool queuePaused, out bool errorExists)
         {
             errorExists = false;
             Task dlTask = null;
-            Android.Net.Uri incompleteUri = null;
             System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
             bool exists = false;
-            TransferItem originalTransferItem;
             TransferItem transferItem = null;
             DownloadInfo downloadInfo = null;
             System.Threading.CancellationTokenSource oldCts = null;
@@ -1061,15 +1065,26 @@ namespace AndriodApp1
                 transferItem.Size = downloadInfo.Size;
                 transferItem.QueueLength = downloadInfo.QueueLength;
 
-                try
+                if(!queuePaused)
                 {
-                    TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
-                }
-                catch (Exception errr)
-                {
-                    MainActivity.LogFirebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                    try
+                    {
+                        TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
+                    }
+                    catch (Exception errr)
+                    {
+                        MainActivity.LogFirebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                    }
                 }
                 transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
+
+                if(queuePaused)
+                {
+                    transferItem.State = TransferStates.Cancelled;
+                    MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null)); //otherwise the ui will not refresh.
+                    return;
+                }
+
                 downloadInfo.TransferItemReference = transferItem;
 
 
@@ -1231,13 +1246,13 @@ namespace AndriodApp1
             }
         }
 
-        private Task CreateDownloadAllTask()
+        private Task CreateDownloadAllTask(bool queuePaused)
         {
             MainActivity.LogDebug("CreateDownloadAllTask");
             Task task = new Task(() => { 
                 foreach(Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResultsInSearch))
                 {
-                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, out _);
+                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, out _);
                 }
             });
             return task;

@@ -190,10 +190,10 @@ namespace AndriodApp1
                     GoUpDirectory();
                     return true;
                 case Resource.Id.action_download_files:
-                    DownloadUserFilesEntry();
+                    DownloadUserFilesEntry(false);
                     return true;
                 case Resource.Id.action_download_selected_files:
-                    DownloadSelectedFiles();
+                    DownloadSelectedFiles(false);
                     (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
@@ -906,7 +906,7 @@ namespace AndriodApp1
             }
         }
 
-        private void DownloadSelectedFiles()
+        private void DownloadSelectedFiles(bool queuePaused)
         {
             if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count==0))
             {
@@ -981,7 +981,7 @@ namespace AndriodApp1
                             return;
                         }
                         //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                        CreateDownloadAllTask(slskFile.ToArray()).Start();
+                        CreateDownloadAllTask(slskFile.ToArray(), queuePaused).Start();
                     }));
                 }
                 else
@@ -991,12 +991,12 @@ namespace AndriodApp1
                     //    MainActivity.LogDebug(f.FileName);
                     //}
 
-                    CreateDownloadAllTask(slskFile.ToArray()).Start();
+                    CreateDownloadAllTask(slskFile.ToArray(), queuePaused).Start();
                 }
             }
         }
 
-        private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recusiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly)
+        private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recusiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly, bool queuePaused)
         {
             if (downloadSubfolders)
             {
@@ -1005,7 +1005,7 @@ namespace AndriodApp1
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                     return;
                 }
-                DownloadListOfFiles(recusiveFullFileInfo);
+                DownloadListOfFiles(recusiveFullFileInfo, queuePaused);
             }
             else
             {
@@ -1014,11 +1014,11 @@ namespace AndriodApp1
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                     return;
                 }
-                DownloadListOfFiles(topLevelFullFileInfoOnly);
+                DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused);
             }
         }
 
-        private void DownloadUserFilesEntryStage2(bool justFilteredItems)
+        private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
         {
             if (justFilteredItems && filteredDataItemsForListView.Count == 0)
             {
@@ -1112,10 +1112,17 @@ namespace AndriodApp1
                     recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), totalItems);
                 }
 
-                builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning), recursiveStr, topLevelStr));
+                if(queuePaused)
+                {
+                    builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning_queue_paused), recursiveStr, topLevelStr));
+                }
+                else
+                {
+                    builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning), recursiveStr, topLevelStr));
+                }
                 EventHandler<DialogClickEventArgs> eventHandlerCurrentFolder = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly);
+                    DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
@@ -1130,7 +1137,7 @@ namespace AndriodApp1
                             TagDepths(filteredDataItemsForListView.First(), recusiveFullFileInfo);
                         }
                     }
-                    DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly);
+                    DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
                 builder.SetNegativeButton(Resource.String.current_folder_only, eventHandlerCurrentFolder);
@@ -1138,7 +1145,7 @@ namespace AndriodApp1
             }
             else
             {
-                DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly);
+                DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
             }
         }
 
@@ -1188,7 +1195,7 @@ namespace AndriodApp1
             return count;
         }
 
-        private void DownloadUserFilesEntry()
+        private void DownloadUserFilesEntry(bool queuePaused)
         {
             if (dataItemsForListView.Count == 0)
             {
@@ -1203,11 +1210,11 @@ namespace AndriodApp1
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(false);
+                    DownloadUserFilesEntryStage2(false, queuePaused);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerFiltered = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(true);
+                    DownloadUserFilesEntryStage2(true, queuePaused);
                 });
                 b.SetPositiveButton(Resource.String.just_filtered, eventHandlerFiltered);
                 b.SetNegativeButton(Resource.String.all, eventHandlerAll);
@@ -1215,13 +1222,13 @@ namespace AndriodApp1
             }
             else
             {
-                DownloadUserFilesEntryStage2(false);
+                DownloadUserFilesEntryStage2(false, queuePaused);
             }
 
 
         }
 
-        private void DownloadListOfFiles(List<FullFileInfo> slskFiles)
+        private void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused)
         {
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
@@ -1246,80 +1253,80 @@ namespace AndriodApp1
                         return;
                     }
                     //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                    CreateDownloadAllTask(slskFiles.ToArray()).Start();
+                    CreateDownloadAllTask(slskFiles.ToArray(), queuePaused).Start();
                 }));
             }
             else
             {
                 //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                CreateDownloadAllTask(slskFiles.ToArray()).Start();
+                CreateDownloadAllTask(slskFiles.ToArray(), queuePaused).Start();
             }
         }
 
-        private void DownloadUserFiles()
-        {
-            if(dataItemsForListView.Count == 0)
-            {
-                Toast.MakeText(this.Context,this.Resources.GetString(Resource.String.nothing_to_download),ToastLength.Long).Show();
-            }
-            else if(dataItemsForListView[0].IsDirectory())
-            {
-                Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.not_recursive_dirs_avaialbe_to_download), ToastLength.Long).Show();
-            }
-            else
-            {
-                //List<Soulseek.File> slskFile = new List<File>();
-                //List<UserFilename> = new List<UserFilename>();
-                List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                lock(dataItemsForListView)
-                {
-                foreach(DataItem d in dataItemsForListView)
-                {
-                    //d.Node.Data.Name is complete dirname "@@uwtsp\\music\\electronica\\manual - lost days, open skies and streaming tides [2007]"
-                    //d.File.Filename is filename "1. track 1.mp3"
-                    FullFileInfo f = new FullFileInfo();
-                    f.FileName = d.File.Filename;
-                    f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                    f.Size = d.File.Size;
-                    slskFile.Add(f);
-                }
-                }
-                if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-                {
-                    //we disconnected. login then do the rest.
-                    //this is due to temp lost connection
-                    Task t;
-                    if(!MainActivity.ShowMessageAndCreateReconnectTask(this.Context,out t))
-                    {
-                        return;
-                    }
+        //private void DownloadUserFiles()
+        //{
+        //    if(dataItemsForListView.Count == 0)
+        //    {
+        //        Toast.MakeText(this.Context,this.Resources.GetString(Resource.String.nothing_to_download),ToastLength.Long).Show();
+        //    }
+        //    else if(dataItemsForListView[0].IsDirectory())
+        //    {
+        //        Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.not_recursive_dirs_avaialbe_to_download), ToastLength.Long).Show();
+        //    }
+        //    else
+        //    {
+        //        //List<Soulseek.File> slskFile = new List<File>();
+        //        //List<UserFilename> = new List<UserFilename>();
+        //        List<FullFileInfo> slskFile = new List<FullFileInfo>();
+        //        lock(dataItemsForListView)
+        //        {
+        //        foreach(DataItem d in dataItemsForListView)
+        //        {
+        //            //d.Node.Data.Name is complete dirname "@@uwtsp\\music\\electronica\\manual - lost days, open skies and streaming tides [2007]"
+        //            //d.File.Filename is filename "1. track 1.mp3"
+        //            FullFileInfo f = new FullFileInfo();
+        //            f.FileName = d.File.Filename;
+        //            f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
+        //            f.Size = d.File.Size;
+        //            slskFile.Add(f);
+        //        }
+        //        }
+        //        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+        //        {
+        //            //we disconnected. login then do the rest.
+        //            //this is due to temp lost connection
+        //            Task t;
+        //            if(!MainActivity.ShowMessageAndCreateReconnectTask(this.Context,out t))
+        //            {
+        //                return;
+        //            }
 
-                    t.ContinueWith(new Action<Task>((Task t) => {
-                        if (t.IsFaulted)
-                        {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { 
-                                //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-                                //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
+        //            t.ContinueWith(new Action<Task>((Task t) => {
+        //                if (t.IsFaulted)
+        //                {
+        //                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { 
+        //                        //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
+        //                        //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
                                 
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
+        //                        Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
                                 
-                                });
-                            return;
-                        }
-                        //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                        CreateDownloadAllTask(slskFile.ToArray()).Start();
-                    }));
-                }
-                else
-                {
-                    //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                    CreateDownloadAllTask(slskFile.ToArray()).Start();
-                }
-            }
-        }
+        //                        });
+        //                    return;
+        //                }
+        //                //CreateDownloadAllTask(slskFile.ToArray()).Start();
+        //                CreateDownloadAllTask(slskFile.ToArray()).Start();
+        //            }));
+        //        }
+        //        else
+        //        {
+        //            //CreateDownloadAllTask(slskFile.ToArray()).Start();
+        //            CreateDownloadAllTask(slskFile.ToArray()).Start();
+        //        }
+        //    }
+        //}
 
 
-        private Task CreateDownloadAllTask(FullFileInfo[] files)
+        private Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused)
         {
             if(username==SoulSeekState.Username)
             {
@@ -1332,7 +1339,7 @@ namespace AndriodApp1
                 foreach (FullFileInfo file in files)
                 {
 
-                    DownloadDialog.SetupAndDownloadFile(username, file.FullFileName, file.Size, 0, file.Depth, out bool transferExists);
+                    DownloadDialog.SetupAndDownloadFile(username, file.FullFileName, file.Size, 0, file.Depth, queuePaused, out bool transferExists);
                     if(!transferExists)
                     {
                         allExist = false;
@@ -1351,7 +1358,15 @@ namespace AndriodApp1
                 else
                 {
                     toast1 = new Action(() => {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                        if(queuePaused)
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Queued for Download", ToastLength.Short).Show();
+                        }
+                        else
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                        }
+                        
                     });
                 }
 
