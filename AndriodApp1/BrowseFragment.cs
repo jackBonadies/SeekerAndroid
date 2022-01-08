@@ -1712,6 +1712,7 @@ namespace AndriodApp1
                 SoulSeekState.MainActivityRef.RunOnUiThread(() => {
                     EditText filterText = BrowseFragment.Instance.rootView.FindViewById<EditText>(Resource.Id.filterText);
                     filterText.Text = string.Empty;
+                    SearchFragment.UpdateDrawableState(filterText, true);
                 });
             }
         }
@@ -1792,6 +1793,7 @@ namespace AndriodApp1
             listViewDirectories.ItemClick += ListViewDirectories_ItemClick; //tempHackItemClick =true; 
                                                                             //}
 
+            MainActivity.LogInfoFirebase("RefreshOnRecieved " + CurrentUsername);
             //!!!collection was modified exception!!!
             //guessing from modifying dataItemsForListView which can happen in this method and in others...
             currentUsernameUI = CurrentUsername;
