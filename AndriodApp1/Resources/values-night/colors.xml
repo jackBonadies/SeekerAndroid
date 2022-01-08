@@ -7,9 +7,9 @@
     
     <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
     <color name="lightPurpleNotTransparent">#959BDC</color>
-    
-  
-  
+
+
+	<color name="androidStockMessagesNewBlue">#A8C7FA</color>
   
 
   <color name="offline">#F7636A</color>
@@ -23,12 +23,12 @@
   <color name="mainPurpleTurnedOff">#77437eab</color>
   <color name="chatBoxSplitterElevation">#6E6E6E</color>
   <color name="header_chatroom_list">#787878</color>
-  
-  
-  
+
+	<color name="defaultTextColor">#ffC1C1C1</color>
 
 
-  <color name="subTextColor">#ffC7C7C7</color>
+
+	<color name="subTextColor">#ffC7C7C7</color>
 	<color name="slightTint">#18ffffff</color>
 
 	

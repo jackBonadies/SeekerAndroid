@@ -637,6 +637,11 @@ namespace AndriodApp1
         public static System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>> RootMessages = null; //this is for when the user logs in as different people
         public static System.Collections.Concurrent.ConcurrentDictionary<string,List<Message>> Messages = null;//new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
         public static string MessagesUsername = string.Empty;
+
+
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UnreadUsernames = null;//basically a concurrent hashset.
+
+
         //static MessageController()
         //{
         //    lock (MessageListLockObject)
@@ -653,6 +658,7 @@ namespace AndriodApp1
             {
                 RestoreMessagesFromSharedPrefs(SoulSeekState.SharedPreferences);
             }
+            RestoreUnreadStateDict(SoulSeekState.SharedPreferences);
             IsInitialized = true;
         }
 
@@ -698,6 +704,8 @@ namespace AndriodApp1
             //do notification
             //on UI thread..
             ShowNotification(msg);
+
+            SetAsUnreadAndSaveIfApplicable(e.Username);
 
             //save to prefs
             SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
@@ -820,6 +828,91 @@ namespace AndriodApp1
                 }
             }
         }
+
+        public static void RestoreUnreadStateDict(ISharedPreferences sharedPrefs)
+        {
+            string unreadMessageUsernames = sharedPrefs.GetString(SoulSeekState.M_UnreadMessageUsernames, string.Empty);
+            if (unreadMessageUsernames == string.Empty)
+            {
+                UnreadUsernames = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
+            }
+            else
+            {
+                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(unreadMessageUsernames)))
+                {
+                    BinaryFormatter binaryFormatter = new BinaryFormatter();
+                    UnreadUsernames = binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, byte>;
+                }
+            }
+        }
+
+        public static void SaveUnreadStateDict(ISharedPreferences sharedPrefs)
+        {
+            //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
+            if (UnreadUsernames == null)
+            {
+                return;
+            }
+            if(UnreadUsernames.IsEmpty)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = sharedPrefs.Edit();
+                    editor.PutString(SoulSeekState.M_UnreadMessageUsernames, String.Empty);
+                    bool success = editor.Commit();
+                }
+            }
+            string messagesString = string.Empty;
+            using (System.IO.MemoryStream messagesStream = new System.IO.MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(messagesStream, UnreadUsernames);
+                messagesString = Convert.ToBase64String(messagesStream.ToArray());
+                if (messagesString != null && messagesString != string.Empty)
+                {
+                    lock (MainActivity.SHARED_PREF_LOCK)
+                    {
+                        var editor = sharedPrefs.Edit();
+                        editor.PutString(SoulSeekState.M_UnreadMessageUsernames, messagesString);
+                        bool success = editor.Commit();
+                    }
+                }
+            }
+
+        }
+
+        public static void SetAsUnreadAndSaveIfApplicable(string username)
+        {
+            if (UnreadUsernames.ContainsKey(username))
+            {
+                return; //nothing to do.
+            }
+            else
+            {
+                if(MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
+                {
+                    //if we are already at this user then dont set as unread.
+                    return;
+                }
+                MainActivity.LogDebug("set");
+                UnreadUsernames.TryAdd(username, 0);
+                SaveUnreadStateDict(SoulSeekState.SharedPreferences);
+            }
+        }
+
+        public static void UnsetAsUnreadAndSaveIfApplicable(string username)
+        {
+            if (!UnreadUsernames.ContainsKey(username))
+            {
+                return; //nothing to do.
+            }
+            else
+            {
+                MainActivity.LogDebug("unset");
+                UnreadUsernames.TryRemove(username, out _);
+                SaveUnreadStateDict(SoulSeekState.SharedPreferences);
+            }
+        }
     }
 
 
@@ -835,6 +928,7 @@ namespace AndriodApp1
         private EditText editTextEnterMessage = null;
         private Button sendMessage = null;
         public static string Username = null;
+        public static bool currentlyResumed = false;
 
         public MessagesInnerFragment() : base()
         {
@@ -931,6 +1025,19 @@ namespace AndriodApp1
 
                 editTextEnterMessage.Text = string.Empty;
             }
+        }
+
+        public override bool OnContextItemSelected(IMenuItem item)
+        {
+            switch (item.ItemId)
+            {
+                case 0: //"Copy Text"
+                    Helpers.CopyTextToClipboard(this.Activity, MessagesInnerRecyclerAdapter.ContextMenuMessageData.MessageText);
+                    break;
+                default:
+                    return base.OnContextItemSelected(item);
+            }
+            return true;
         }
 
         public override void OnSaveInstanceState(Bundle outState)
@@ -1057,6 +1164,21 @@ namespace AndriodApp1
                 MessageController.MessageReceived += OnMessageReceived;
             }
             base.OnAttach(activity);
+        }
+
+        public override void OnResume()
+        {
+            MainActivity.LogDebug("inner frag resume");
+            MessageController.UnsetAsUnreadAndSaveIfApplicable(Username);
+            currentlyResumed = true;
+            base.OnResume();
+        }
+
+        public override void OnPause()
+        {
+            MainActivity.LogDebug("inner frag pause");
+            currentlyResumed = false;
+            base.OnPause();
         }
 
         public override void OnDetach()
@@ -1230,6 +1352,7 @@ namespace AndriodApp1
 
     public class MessagesInnerRecyclerAdapter : RecyclerView.Adapter
     {
+        public static Message ContextMenuMessageData;
         private List<Message> localDataSet;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
@@ -1290,6 +1413,7 @@ namespace AndriodApp1
             {
                 MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
                 view.setupChildren();
+                view.LongClick += View_LongClick;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
                 return new MessageInnerViewSentHolder(view as View);
@@ -1298,6 +1422,7 @@ namespace AndriodApp1
             {
                 MessageInnerViewReceived view = MessageInnerViewReceived.inflate(parent);
                 view.setupChildren();
+                view.LongClick += View_LongClick;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
                 return new MessageInnerViewReceivedHolder(view as View);
@@ -1305,17 +1430,29 @@ namespace AndriodApp1
 
         }
 
+        private void View_LongClick(object sender, View.LongClickEventArgs e)
+        {
+            if(sender is MessageInnerViewSent msgSent)
+            {
+                ContextMenuMessageData = msgSent.DataItem;
+            }
+            else if(sender is MessageInnerViewReceived msgRecv)
+            {
+                ContextMenuMessageData = msgRecv.DataItem;
+            }
+            (sender as View).ShowContextMenu();
+        }
+
         public MessagesInnerRecyclerAdapter(List<Message> ti)
         {
             localDataSet = ti;
         }
-
     }
 
 
 
 
-    public class MessageInnerViewSentHolder : RecyclerView.ViewHolder
+    public class MessageInnerViewSentHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
     {
         public MessageInnerViewSent messageInnerView;
 
@@ -1327,16 +1464,21 @@ namespace AndriodApp1
 
             messageInnerView = (MessageInnerViewSent)view;
             messageInnerView.ViewHolder = this;
-            //(MessageOverviewView as View).SetOnCreateContextMenuListener(this);
+            (messageInnerView as MessageInnerViewSent).SetOnCreateContextMenuListener(this);
         }
 
         public MessageInnerViewSent getUnderlyingView()
         {
             return messageInnerView;
         }
+
+        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
+        }
     }
 
-    public class MessageInnerViewReceivedHolder : RecyclerView.ViewHolder
+    public class MessageInnerViewReceivedHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
     {
         public MessageInnerViewReceived messageInnerView;
 
@@ -1348,12 +1490,17 @@ namespace AndriodApp1
 
             messageInnerView = (MessageInnerViewReceived)view;
             messageInnerView.ViewHolder = this;
-            //(MessageOverviewView as View).SetOnCreateContextMenuListener(this);
+            (messageInnerView as MessageInnerViewReceived).SetOnCreateContextMenuListener(this);
         }
 
         public MessageInnerViewReceived getUnderlyingView()
         {
             return messageInnerView;
+        }
+
+        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
         }
     }
 
@@ -1422,6 +1569,7 @@ namespace AndriodApp1
 
         public void setItem(Message msg)
         {
+            DataItem = msg;
             cardView.CardBackgroundColor = Android.Content.Res.ColorStateList.ValueOf( GetColorFromMsgStatus(msg.SentMsgStatus) );
             if(msg.SentMsgStatus == SentStatus.Pending)
             {
@@ -1437,6 +1585,8 @@ namespace AndriodApp1
             }
             Helpers.SetMessageTextView(viewMessage, msg);
         }
+
+        public Message DataItem;
     }
 
     public class MessageInnerViewReceived : ConstraintLayout
@@ -1469,9 +1619,11 @@ namespace AndriodApp1
 
         public void setItem(Message msg)
         {
+            DataItem = msg;
             viewTimeStamp.Text = Helpers.GetNiceDateTime( msg.LocalDateTime );
             Helpers.SetMessageTextView(viewMessage, msg);
         }
+        public Message DataItem;
     }
 
 
@@ -1671,6 +1823,8 @@ namespace AndriodApp1
         public MessageOverviewHolder ViewHolder { get; set; }
         private TextView viewUsername;
         private TextView viewMessage;
+        private TextView viewDateTimeAgo;
+        private ImageView unreadImageView;
 
         public MessageOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -1693,18 +1847,48 @@ namespace AndriodApp1
         {
             viewUsername = FindViewById<TextView>(Resource.Id.username);
             viewMessage = FindViewById<TextView>(Resource.Id.message);
+            viewDateTimeAgo = FindViewById<TextView>(Resource.Id.dateTimeAgo);
+            unreadImageView = FindViewById<ImageView>(Resource.Id.unreadImageView);
         }
 
         public void setItem(string username)
         {
             viewUsername.Text = username;
             Message m = MessageController.Messages[username].Last();
+
+            viewDateTimeAgo.Text = Helpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
+
+            if(MessageController.UnreadUsernames.ContainsKey(username))
+            {
+                unreadImageView.Visibility = ViewStates.Visible;
+                viewUsername.SetTypeface(viewUsername.Typeface,TypefaceStyle.Bold);
+                viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Bold);
+                viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Bold);
+                viewUsername.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef,Resource.Attribute.normalTextColorNonTinted));
+                viewDateTimeAgo.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef,Resource.Attribute.normalTextColorNonTinted));
+                viewMessage.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef,Resource.Attribute.normalTextColorNonTinted));
+            }
+            else
+            {
+                unreadImageView.Visibility = ViewStates.Gone;
+                viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Normal);
+                viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Normal);
+                viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Normal);
+                viewUsername.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewDateTimeAgo.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewMessage.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+            }
+
             string msgText = m.MessageText;
             if (m.FromMe)
             {
                 msgText = "\u21AA" + msgText;
             }
             viewMessage.Text = msgText;
+            //viewMessage.SetTextColor()
+            //viewMessage.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor))
         }
     }
+
+
 }

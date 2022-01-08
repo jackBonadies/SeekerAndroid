@@ -10613,6 +10613,7 @@ namespace AndriodApp1
         public const string M_TransferListUpload = "Momento_Upload_List";
         public const string M_TransferListUpload_v2 = "Momento_Upload_UpdatedTransferListWithFolders";
         public const string M_Messages = "Momento_Messages";
+        public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
@@ -11549,6 +11550,30 @@ namespace AndriodApp1
             catch
             {
                 return "";
+            }
+        }
+
+        public static string GetDateTimeSinceAbbrev(DateTime dtThen)
+        {
+            var dtNow = DateTime.Now; //2.5 microseconds
+            if (dtNow.Day == dtThen.Day)
+            {
+                //if on same day then show time. 24 hour time? maybe option to change?
+                //ex. 2:45, 20:34
+                //hh:mm
+                return dtThen.ToString("H:mm");
+            }
+            else if (dtNow.Year == dtThen.Year)
+            {
+                //if different day but same year show month day
+                //ex. Jan 4
+                return dtThen.ToString("MMM d"); // d = 7 or 17.
+            }
+            else
+            {
+                //if different year show full.
+                //ex. Dec 30 2021
+                return dtThen.ToString("MMM d yyyy");
             }
         }
 
