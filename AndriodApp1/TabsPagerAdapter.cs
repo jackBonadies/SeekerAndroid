@@ -8479,7 +8479,7 @@ namespace AndriodApp1
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) && ti.Progress > 0)
+                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
                         {
                             menu.Add(0, 0, 0, Resource.String.resume_dl);
                         }
