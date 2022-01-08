@@ -138,6 +138,9 @@ namespace AndriodApp1
                 case Resource.Id.add_user_action:
                     ShowEditTextDialogAddUserToList();
                     return true;
+                case Resource.Id.sort_user_list_action:
+                    ShowSortUserListDialog();
+                    return true;
                 case Android.Resource.Id.Home:
                     OnBackPressed();
                     return true;
@@ -176,23 +179,118 @@ namespace AndriodApp1
             RefreshUserList();
         }
 
+        public enum SortOrder
+        {
+            DateAddedAsc = 0,
+            DateAddedDesc = 1,
+            Alphabetical = 2,
+            OnlineStatus = 3
+        }
+
+        public class UserListAlphabeticalComparer : IComparer<UserListItem>
+        {
+            // Compares by UserCount then Name
+            public int Compare(UserListItem x, UserListItem y)
+            {
+                if (x is UserListItem xData && y is UserListItem yData)
+                {
+                    return xData.Username.CompareTo(yData.Username);
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// This will do it like QT does it, where ties will be broken by Alphabet.
+        /// </summary>
+        public class UserListOnlineStatusComparer : IComparer<UserListItem>
+        {
+            // Compares by UserCount then Name
+            public int Compare(UserListItem x, UserListItem y)
+            {
+
+                int xStatus = x.DoesNotExist ? -1 : (int)UserRowView.GetStatusFromItem(x, out _);
+                int yStatus = y.DoesNotExist ? -1 : (int)UserRowView.GetStatusFromItem(y, out _);
+
+                if(xStatus == yStatus)
+                {
+                    //tie breaker is alphabet
+                    return x.Username.CompareTo(y.Username);
+                }
+                else
+                {
+                    return yStatus - xStatus;
+                }
+            }
+        }
+
+
+        public static List<UserListItem> GetSortedUserList(List<UserListItem> userlistOrig, bool isIgnoreList)
+        {
+            //always copy so the original does not get messed up, since it stores info on date added.
+            List<UserListItem> userlist = userlistOrig.ToList();
+            if(!isIgnoreList)
+            {
+                switch(UserListSortOrder)
+                {
+                    case SortOrder.DateAddedAsc:
+                        return userlist;
+                    case SortOrder.DateAddedDesc:
+                        userlist.Reverse();
+                        return userlist;
+                    case SortOrder.Alphabetical:
+                        userlist.Sort(new UserListAlphabeticalComparer());
+                        return userlist;
+                    case SortOrder.OnlineStatus:
+                        userlist.Sort(new UserListOnlineStatusComparer());
+                        return userlist;
+                    default:
+                        return userlist;
+                }
+            }
+            else
+            {
+                switch (UserListSortOrder)
+                {
+                    case SortOrder.DateAddedAsc:
+                        return userlist;
+                    case SortOrder.DateAddedDesc:
+                        userlist.Reverse();
+                        return userlist;
+                    case SortOrder.Alphabetical:
+                        userlist.Sort(new UserListAlphabeticalComparer());
+                        return userlist;
+                    case SortOrder.OnlineStatus:
+                        //we do not keep any data on ignored users online status.
+                        userlist.Sort(new UserListAlphabeticalComparer());
+                        return userlist;
+                    default:
+                        return userlist;
+                }
+            }
+
+        }
+
         private static List<UserListItem> ParseUserListForPresentation()
         {
             List <UserListItem> forAdapter = new List<UserListItem>();
             if (SoulSeekState.UserList.Count!=0)
             {
                 forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.friends),UserRole.Category));
-                forAdapter.AddRange(SoulSeekState.UserList);
+                forAdapter.AddRange(GetSortedUserList(SoulSeekState.UserList, false));
             }
             if(SoulSeekState.IgnoreUserList.Count!=0)
             {
                 forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignored), UserRole.Category));
-                forAdapter.AddRange(SoulSeekState.IgnoreUserList);
+                forAdapter.AddRange(GetSortedUserList(SoulSeekState.IgnoreUserList, true));
             }
             return forAdapter;
         }
 
-        private void RefreshUserList()
+        public void RefreshUserList()
         {
             if (SoulSeekState.UserList != null)
             {
@@ -204,11 +302,74 @@ namespace AndriodApp1
             }
         }
 
+        public class UserListDiffCallback : DiffUtil.Callback
+        {
+            private List<UserListItem> oldList;
+            private List<UserListItem> newList;
+
+            public UserListDiffCallback(List<UserListItem> _oldList, List<UserListItem> _newList)
+            {
+                oldList = _oldList;
+                newList = _newList;
+            }
+
+            public override int NewListSize => newList.Count;
+
+            public override int OldListSize => oldList.Count;
+
+            /// <summary>
+            /// Doesnt seem to do anything.  still need to notify item changed, else it will be stale...
+            /// </summary>
+            /// <param name="oldItemPosition"></param>
+            /// <param name="newItemPosition"></param>
+            /// <returns></returns>
+            public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                return oldList[oldItemPosition].Username.Equals(newList[newItemPosition].Username) && UserRowView.GetStatusFromItem(oldList[oldItemPosition], out _) == UserRowView.GetStatusFromItem(newList[newItemPosition], out _);
+            }
+
+            public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
+            {
+                return oldList[oldItemPosition].Username.Equals(newList[newItemPosition].Username);
+            }
+        }
+
         private void OnUserStatusChanged(object sender, string username)
         {
             if(MainActivity.OnUIthread())
             {
-                recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+                if(UserListSortOrder == SortOrder.OnlineStatus)
+                {
+
+                    var oldList = recyclerAdapter.localDataSet.ToList();
+                    recyclerAdapter.localDataSet.Clear();
+                    recyclerAdapter.localDataSet.AddRange(ParseUserListForPresentation());
+
+                    DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new UserListDiffCallback(oldList, recyclerAdapter.localDataSet), true);
+                    //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
+                    //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
+                    res.DispatchUpdatesTo(recyclerAdapter);
+
+                    recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+                    //int prevPosition = recyclerAdapter.GetPositionForUsername(username);
+                    //recyclerAdapter.localDataSet.Clear();
+                    //recyclerAdapter.localDataSet.AddRange(ParseUserListForPresentation());
+                    //int newPosition = recyclerAdapter.GetPositionForUsername(username);
+                    //if(prevPosition!=newPosition)
+                    //{
+                    //    recyclerAdapter.NotifyItemMoved(prevPosition, newPosition);
+                    //}
+                    //else
+                    //{
+                    //    recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+                    //}
+
+
+                }
+                else
+                {
+                    recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+                }
             }
             else
             {
@@ -344,6 +505,91 @@ namespace AndriodApp1
             }
         }
 
+        public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
+        private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
+        public void ShowSortUserListDialog()
+        {
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            builder.SetTitle("Sort Users By");
+
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.change_sort_order_dialog, this.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
+
+            AndroidX.AppCompat.Widget.AppCompatRadioButton onlineStatus = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.onlineStatus);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton alphaOrder = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.alphaOrder);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton dateAddedDesc = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.dateAddedDesc);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton dateAddedAsc = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.dateAddedAsc);
+
+            RadioGroup radioGroupChangeUserSort = viewInflated.FindViewById<RadioGroup>(Resource.Id.radioGroupChangeUserSort);
+            radioGroupChangeUserSort.CheckedChange += RadioGroupChangeUserSort_CheckedChange;
+
+
+            switch (UserListSortOrder)
+            {
+                case SortOrder.DateAddedAsc:
+                    dateAddedAsc.Checked = true;
+                    break;
+                case SortOrder.DateAddedDesc:
+                    dateAddedDesc.Checked = true;
+                    break;
+                case SortOrder.Alphabetical:
+                    alphaOrder.Checked = true;
+                    break;
+                case SortOrder.OnlineStatus:
+                    onlineStatus.Checked = true;
+                    break;
+            }
+
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandlerClose = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    dialogInstance.Dismiss();
+                }
+                dialogInstance = null; //memory cleanup
+            });
+
+            builder.SetPositiveButton(Resource.String.okay, eventHandlerClose);
+            dialogInstance = builder.Create();
+            dialogInstance.Show();
+
+        }
+
+        private void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
+        {
+            SortOrder prev = UserListSortOrder;
+            switch (e.CheckedId)
+            {
+                case Resource.Id.dateAddedAsc:
+                    UserListSortOrder = SortOrder.DateAddedAsc;
+                    break;
+                case Resource.Id.dateAddedDesc:
+                    UserListSortOrder = SortOrder.DateAddedDesc;
+                    break;
+                case Resource.Id.alphaOrder:
+                    UserListSortOrder = SortOrder.Alphabetical;
+                    break;
+                case Resource.Id.onlineStatus:
+                    UserListSortOrder = SortOrder.OnlineStatus;
+                    break;
+            }
+
+            if(prev != UserListSortOrder)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutInt(SoulSeekState.M_UserListSortOrder, (int)UserListSortOrder);
+                    editor.Commit();
+                }
+                this.RefreshUserList();
+            }
+        }
 
         public void ShowEditTextDialogAddUserToList()
         {
@@ -521,7 +767,7 @@ namespace AndriodApp1
 
     public class RecyclerUserListAdapter : RecyclerView.Adapter
     {
-        private List<UserListItem> localDataSet;
+        public List<UserListItem> localDataSet;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
         public static int VIEW_FRIEND = 0;
@@ -746,6 +992,24 @@ namespace AndriodApp1
             Toast.MakeText(SoulSeekState.ActiveActivityRef, (sender as ImageView).TooltipText, ToastLength.Short).Show();
         }
 
+        //both item.UserStatus and item.UserData have status
+        public static Soulseek.UserPresence GetStatusFromItem(UserListItem uli, out bool statusExists)
+        {
+            statusExists = false;
+            Soulseek.UserPresence status = Soulseek.UserPresence.Away;
+            if (uli.UserStatus != null)
+            {
+                statusExists = true;
+                status = uli.UserStatus.Presence;
+            }
+            else if (uli.UserData != null)
+            {
+                statusExists = true;
+                status = uli.UserData.Status;
+            }
+            return status;
+        }
+
         public void setItem(UserListItem item)
         {
             BoundItem = item;
@@ -782,20 +1046,7 @@ namespace AndriodApp1
                     viewOnlineAlerts.Visibility = ViewStates.Invisible;
                 }
 
-                //both item.UserStatus and item.UserData have status
-                bool statusExists = false;
-                Soulseek.UserPresence status = Soulseek.UserPresence.Away;
-                if(item.UserStatus != null)
-                {
-                    statusExists = true;
-                    status = item.UserStatus.Presence;
-                }
-                else if(item.UserData!=null)
-                {
-                    statusExists = true;
-                    status = item.UserData.Status;
-                }
-
+                Soulseek.UserPresence status = GetStatusFromItem(item, out bool statusExists);
 
                 if(item.Role == UserRole.Ignored)
                 {
