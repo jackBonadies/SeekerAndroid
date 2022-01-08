@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="@dimen/abc_action_bar_content_inset_material"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RadioGroup
+        android:id="@+id/radioGroupChangeUserSort"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+    <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/dateAddedAsc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date Added (Asc)"
+           
+            />
+    <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/dateAddedDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date Added (Desc)"
+            
+            />
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/alphaOrder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+            
+            />
+                <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/onlineStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Online Status"
+            
+            />
+    </RadioGroup>
+
+</LinearLayout>

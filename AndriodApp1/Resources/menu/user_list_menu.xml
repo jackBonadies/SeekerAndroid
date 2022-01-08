@@ -18,6 +18,12 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
       android:title="@string/add_user"
       app:showAsAction="always"/>
 
+	<item
+	android:id="@+id/sort_user_list_action"
+	android:icon="@drawable/baseline_add_white_24"
+	android:title="Sort Order"
+	app:showAsAction="never"/>
+
   <!-- Settings, should always be in the overflow --><!--
   <item android:id="@+id/action_settings"
         android:title="@string/abc_menu_enter_shortcut_label"

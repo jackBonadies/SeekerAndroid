@@ -3482,6 +3482,8 @@ namespace AndriodApp1
                 SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
                 SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
+                UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
+
                 //SearchTabHelper.RestoreStateFromSharedPreferencesLegacy();
 
                 //SearchTabHelper.SaveHeadersToSharedPrefs();
@@ -10615,6 +10617,7 @@ namespace AndriodApp1
         public const string M_Messages = "Momento_Messages";
         public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
+        public const string M_UserListSortOrder = "Momento_UserListSortHistory";
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
