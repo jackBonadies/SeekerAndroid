@@ -1474,6 +1474,11 @@ namespace AndriodApp1
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
+            //this class is shared by both chatroom and messages......
+            if(v is MessageInnerViewSent msgSent)
+            {
+                ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewSent).DataItem;
+            }
             menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
         }
     }

@@ -935,7 +935,7 @@ namespace AndriodApp1
                 MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
                 view.setupChildren();
                 // .inflate(R.layout.text_row_item, viewGroup, false);
-                //(view as View).Click += MessageOverviewClick;
+                (view as View).LongClick += ChatroomReceivedAdapter_LongClick;
                 return new MessageInnerViewSentHolder(view as View);
             }
             else if(viewType == VIEW_RECEIVER)
@@ -963,8 +963,15 @@ namespace AndriodApp1
             //pop.Inflate(Resource.Menu.download_diag_options);
             //pop.Show();
             //setPosition((sender as RoomUserItemView).ViewHolder.AdapterPosition);
-
-            ChatroomInnerFragment.MessagesLongClickData = (sender as GroupMessageInnerViewReceived).DataItem;
+            if(sender is GroupMessageInnerViewReceived recv)
+            {
+                ChatroomInnerFragment.MessagesLongClickData = recv.DataItem;
+            }
+            else if(sender is MessageInnerViewSent sent)
+            {
+                ChatroomInnerFragment.MessagesLongClickData = sent.DataItem;
+            }
+            
 
             (sender as View).ShowContextMenu();
         }
