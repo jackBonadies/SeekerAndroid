@@ -857,7 +857,14 @@ namespace AndriodApp1
                     }
 
                 }
-                Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                if(!queuePaused)
+                {
+                    Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                }
+                else
+                {
+                    Toast.MakeText(Context, "Download is Queued", ToastLength.Short).Show();
+                }
                 foreach (Task tsk in tsks)
                 {
                     tsk.Wait();
@@ -984,12 +991,7 @@ namespace AndriodApp1
                         return;
                     }
                     MainActivity.LogDebug("DownloadDialog Dl_Click");
-                    var task = CreateDownloadAllTask(false);
-                    task.Start(); //start task immediately
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
-                    });
-                    task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
+                    DownloadAll(false); 
                     
                 }));
                 try
@@ -1007,12 +1009,27 @@ namespace AndriodApp1
             else
             {
                 MainActivity.LogDebug("DownloadDialog Dl_Click");
-                var task = CreateDownloadAllTask(false); 
-                task.Start(); //start task immediately
-                Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
-                task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
+                DownloadAll(false);
                 Dismiss();
             }
+        }
+
+        private void DownloadAll(bool queuePaused)
+        {
+            var task = CreateDownloadAllTask(queuePaused);
+            task.Start(); //start task immediately
+            SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                if(!queuePaused)
+                {
+                    Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                }
+                else
+                {
+                    Toast.MakeText(Context, "Download is Queued", ToastLength.Short).Show();
+                }
+
+            });
+            task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }
 
         private Task CreateDownloadTask(Soulseek.File file, bool queuePaused)
@@ -1420,6 +1437,18 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.getUserInfo:
                     RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
+                    return true;
+                case Resource.Id.download_folder_as_queued:
+                    DownloadAll(true);
+                    Dismiss();
+                    return true;
+                case Resource.Id.download_selected_as_queued:
+                    if (this.customAdapter.SelectedPositions.Count == 0)
+                    {
+                        Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                        return true;
+                    }
+                    DownloadSelectedLogic(true);
                     return true;
                 default:
                     return false;

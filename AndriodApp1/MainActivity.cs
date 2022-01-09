@@ -11071,6 +11071,28 @@ namespace AndriodApp1
             }
         }
 
+        private static void SetAddNoteEditNoteTitle(IMenuItem menuItem, string username)
+        {
+            if (menuItem != null && !string.IsNullOrEmpty(username))
+            {
+                if (SoulSeekState.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
+                {
+                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note))
+                    {
+                        menuItem.SetTitle(Resource.String.edit_note);
+                    }
+
+                }
+                else
+                {
+                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note))
+                    {
+                        menuItem.SetTitle(Resource.String.add_note);
+                    }
+                }
+            }
+        }
+
         public static void SetMenuTitles(IMenu menu, string username)
         {
             var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
@@ -11079,6 +11101,8 @@ namespace AndriodApp1
             SetAddRemoveTitle(menuItem, username);
             menuItem = menu.FindItem(Resource.Id.addUser);
             SetAddRemoveTitle(menuItem, username);
+            menuItem = menu.FindItem(Resource.Id.action_add_note);
+            SetAddNoteEditNoteTitle(menuItem, username);
         }
 
 
@@ -11596,16 +11620,7 @@ namespace AndriodApp1
             }
 
             //if total bytes greater than 1GB 
-            string sizeString = null;
-            if(totalBytes > 1024*1024*1024)
-            {
-                sizeString = string.Format("{0:0.##} gb", totalBytes / (1024.0 * 1024.0 * 1024.0));
-            }
-            else
-            {
-                sizeString = string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
-            }
-
+            string sizeString = GetHumanReadableSize(totalBytes);
 
             var filesWithLength = searchResponse.Files.Where(f=>f.Length.HasValue);
             if (!SoulSeekState.HideLockedResultsInSearch)
@@ -11698,6 +11713,17 @@ namespace AndriodApp1
             }
         }
 
+        public static string GetHumanReadableSize(long totalBytes)
+        {
+            if (totalBytes > 1024 * 1024 * 1024)
+            {
+                return string.Format("{0:0.##} gb", totalBytes / (1024.0 * 1024.0 * 1024.0));
+            }
+            else
+            {
+                return string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
+            }
+        }
 
 
         public static string GetHumanReadableTime(int totalSeconds)

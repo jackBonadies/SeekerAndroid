@@ -28,24 +28,65 @@ app:showAsAction="never"
 android:iconifiedByDefault="false"
  />
 
-  <item android:id="@+id/action_add_user"
-android:title="@string/add_user"
-app:showAsAction="never"
-android:iconifiedByDefault="false"
- />
-
-  <item android:id="@+id/action_get_user_info"
-android:title="@string/get_user_info"
-app:showAsAction="never"
-android:iconifiedByDefault="false"
- />
 
 
-	<item android:id="@+id/action_message_user"
- android:title="@string/msg_user"
- app:showAsAction="never"
- android:iconifiedByDefault="false"
- />
+	<item android:id="@+id/userOptions"
+	 android:title="User Options" >
+
+		<menu>
+
+				<item android:id="@+id/action_add_user"
+	android:title="@string/add_user"
+	app:showAsAction="never"
+	android:iconifiedByDefault="false"
+	 />
 
 
+	 				<item android:id="@+id/action_add_note"
+	android:title="@string/add_note"
+	app:showAsAction="never"
+	android:iconifiedByDefault="false"
+	 />
+
+	  <item android:id="@+id/action_get_user_info"
+	android:title="@string/get_user_info"
+	app:showAsAction="never"
+	android:iconifiedByDefault="false"
+	 />
+
+
+		<item android:id="@+id/action_message_user"
+	 android:title="@string/msg_user"
+	 app:showAsAction="never"
+	 android:iconifiedByDefault="false"
+	 />
+ 		</menu>
+ 	</item>
+
+	 	<item android:id="@+id/moreOptions"
+	 android:title="More Options" >
+
+	 		<menu>
+
+				<item android:id="@+id/action_queue_folder_paused"
+	android:title="Queue Folder as Paused"
+	app:showAsAction="never"
+	android:iconifiedByDefault="false"
+	 />
+
+
+	 				<item android:id="@+id/action_queue_selected_paused"
+	android:title="Queue Selected as Paused"
+	app:showAsAction="never"
+	android:iconifiedByDefault="false"
+	 />
+
+	  <item android:id="@+id/action_show_folder_info"
+	android:title="Show Folder Info"
+	app:showAsAction="never"
+	android:iconifiedByDefault="false"
+	 />
+
+ 		</menu>
+ 	</item>
 </menu>
