@@ -54,7 +54,11 @@ namespace AndriodApp1
         public static string CurrentUsername;
         private static Tuple<string,List<DataItem>> cachedFilteredDataItemsForListView = null;//to help with superSetQueries new Tuple<string, List<DataItem>>; 
         private static int diagnostics_count;
-        private static List<DataItem> filteredDataItemsForListView = new List<DataItem>(); 
+        private static List<DataItem> filteredDataItemsForListView = new List<DataItem>();
+
+        private static List<DataItem> dataItemsForDownload = null;
+        private static List<DataItem> filteredDataItemsForDownload = null;
+
         private static bool refreshOnCreate = false;
         private bool tempHackItemClick = false;
         private static string username = "";
@@ -183,6 +187,9 @@ namespace AndriodApp1
             }
             switch (item.ItemId)
             {
+                case Resource.Id.action_queue_folder_paused:
+                    DownloadUserFilesEntry(true, true);
+                    return true;
                 case Resource.Id.action_browse_user:
                     ShowEditTextBrowseUserDialog();
                     return true;
@@ -190,10 +197,19 @@ namespace AndriodApp1
                     GoUpDirectory();
                     return true;
                 case Resource.Id.action_download_files:
-                    DownloadUserFilesEntry(false);
+                    DownloadUserFilesEntry(false, true);
                     return true;
                 case Resource.Id.action_download_selected_files:
                     DownloadSelectedFiles(false);
+                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
+                    ClearAllSelectedPositions();
+                    return true;
+                case Resource.Id.action_show_folder_info:
+                    var folderSummary = GetFolderSummary(dataItemsForListView);
+                    ShowFolderSummaryDialog(folderSummary);
+                    return true;
+                case Resource.Id.action_queue_selected_paused:
+                    DownloadSelectedFiles(true);
                     (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
@@ -260,6 +276,9 @@ namespace AndriodApp1
             listViewDirectories = this.rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
             listViewDirectories.ItemClick -= ListViewDirectories_ItemClick; //there may be a change of this not getting attached which would be bad
             listViewDirectories.ItemClick += ListViewDirectories_ItemClick; //there may be a change of this not getting attached which would be bad
+            listViewDirectories.ItemLongClick -= ListViewDirectories_ItemLongClick;
+            listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
+            this.RegisterForContextMenu(listViewDirectories);
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
 
             treePathRecyclerView = this.rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewHorizontalPath);
@@ -342,6 +361,8 @@ namespace AndriodApp1
 
             return this.rootView;
         }
+
+
 
         private void FilterText_Touch(object sender, View.TouchEventArgs e)
         {
@@ -852,6 +873,65 @@ namespace AndriodApp1
         }
 
 
+        public class FolderSummary
+        {
+            public int LengthSeconds = 0;
+            public long SizeBytes = 0;
+            public int NumFiles = 0;
+            public int NumSubFolders = 0;
+            public void AddFile(Soulseek.File file)
+            {
+                if(file.Length.HasValue)
+                {
+                    LengthSeconds += file.Length.Value;
+                }
+                SizeBytes += file.Size;
+                NumFiles++;
+            }
+        }
+
+        public static FolderSummary GetFolderSummary(DataItem di)
+        {
+            FolderSummary folderSummary = new FolderSummary();
+            SumFiles(folderSummary, di);
+            return folderSummary;
+        }
+
+        public static FolderSummary GetFolderSummary(List<DataItem> di)
+        {
+            FolderSummary folderSummary = new FolderSummary();
+            foreach (var childNode in di)
+            {
+                SumFiles(folderSummary, childNode);
+            }
+            return folderSummary;
+        }
+
+        private static void SumFiles(FolderSummary fileSummary, DataItem d)
+        {
+            if (d.File != null)
+            {
+                fileSummary.AddFile(d.File);
+                return;
+            }
+            else
+            {
+                foreach (Soulseek.File slskFile in d.Directory.Files) //files in dir
+                {
+                    fileSummary.AddFile(slskFile);
+                }
+                foreach (var childNode in d.Node.Children) //dirs in dir
+                {
+                    fileSummary.NumSubFolders++;
+                    SumFiles(fileSummary, new DataItem(childNode.Data, childNode));
+                }
+                return;
+            }
+        }
+
+
+
+
         private List<DataItem> FilterBrowseList(List<DataItem> unfiltered)
         {
             System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
@@ -1020,7 +1100,7 @@ namespace AndriodApp1
 
         private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
         {
-            if (justFilteredItems && filteredDataItemsForListView.Count == 0)
+            if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
             {
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                 return;
@@ -1033,9 +1113,9 @@ namespace AndriodApp1
             List<FullFileInfo> topLevelFullFileInfoOnly = new List<FullFileInfo>();
             if (!justFilteredItems)
             {
-                lock (dataItemsForListView)
+                lock (dataItemsForDownload)
                 {
-                    foreach (DataItem d in dataItemsForListView)
+                    foreach (DataItem d in dataItemsForDownload)
                     {
                         if (d.IsDirectory())
                         {
@@ -1054,15 +1134,15 @@ namespace AndriodApp1
                 }
                 if (containsSubDirs)
                 {
-                    recusiveFullFileInfo = GetRecursiveFullFileInfo(dataItemsForListView);
+                    recusiveFullFileInfo = GetRecursiveFullFileInfo(dataItemsForDownload);
                     totalItems = recusiveFullFileInfo.Count;
                 }
             }
             else
             {
-                lock (filteredDataItemsForListView)
+                lock (filteredDataItemsForDownload)
                 {
-                    foreach (DataItem d in filteredDataItemsForListView)
+                    foreach (DataItem d in filteredDataItemsForDownload)
                     {
                         if (d.IsDirectory())
                         {
@@ -1081,7 +1161,7 @@ namespace AndriodApp1
                 }
                 if (containsSubDirs)
                 {
-                    recusiveFullFileInfo = GetRecursiveFullFileInfo(filteredDataItemsForListView);
+                    recusiveFullFileInfo = GetRecursiveFullFileInfo(filteredDataItemsForDownload);
                     totalItems = recusiveFullFileInfo.Count;
                 }
             }
@@ -1130,11 +1210,11 @@ namespace AndriodApp1
                     {
                         if (!justFilteredItems)
                         {
-                            TagDepths(dataItemsForListView.First(), recusiveFullFileInfo);
+                            TagDepths(dataItemsForDownload.First(), recusiveFullFileInfo);
                         }
                         else
                         {
-                            TagDepths(filteredDataItemsForListView.First(), recusiveFullFileInfo);
+                            TagDepths(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
                         }
                     }
                     DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
@@ -1195,14 +1275,35 @@ namespace AndriodApp1
             return count;
         }
 
-        private void DownloadUserFilesEntry(bool queuePaused)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="queuePaused"></param>
+        /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting a single folder.</param>
+        /// <param name="positionOfFolderToDownload"></param>
+        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, int positionOfFolderToDownload=-1)
         {
-            if (dataItemsForListView.Count == 0)
+            if(downloadShownInListView)
+            {
+                dataItemsForDownload = dataItemsForListView.ToList();
+                filteredDataItemsForDownload = filteredDataItemsForListView.ToList();
+            }
+            else
+            {
+                //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
+                dataItemsForDownload = new List<DataItem>();
+                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, FilteredResults);
+                PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
+                filteredDataItemsForDownload = FilterBrowseList(dataItemsForDownload.ToList());
+            }
+
+
+            if (dataItemsForDownload.Count == 0)
             {
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                 return;
             }
-            if(FilteredResults && (dataItemsForListView.Count != filteredDataItemsForListView.Count))
+            if(FilteredResults && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
@@ -1380,31 +1481,94 @@ namespace AndriodApp1
             GoUpDirectory();
         }
 
-
-
-
-
-        private void ListViewDirectories_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        private DataItem GetItemSelected(int position, bool filteredResults)
         {
-            cachedFilteredDataItemsForListView = null;
-            bool filteredResults = FilteredResults;
             DataItem itemSelected = null;
             if (filteredResults)
             {
                 try
                 {
-                    itemSelected = filteredDataItemsForListView[e.Position];
+                    itemSelected = filteredDataItemsForListView[position];
                 }
-                catch(IndexOutOfRangeException) //this did happen to me.... when filtering...
+                catch (IndexOutOfRangeException) //this did happen to me.... when filtering...
                 {
-                    MainActivity.LogFirebase("ListViewDirectories_ItemClick position: " + e.Position + "filteredDataItemsForListView.Count: " + filteredDataItemsForListView.Count);
-                    MainActivity.LogDebug("ListViewDirectories_ItemClick position: " + e.Position + "filteredDataItemsForListView.Count: " + filteredDataItemsForListView.Count);
-                    return;
+                    MainActivity.LogFirebase("ListViewDirectories_ItemClick position: " + position + "filteredDataItemsForListView.Count: " + filteredDataItemsForListView.Count);
+                    MainActivity.LogDebug("ListViewDirectories_ItemClick position: " + position + "filteredDataItemsForListView.Count: " + filteredDataItemsForListView.Count);
+                    return null;
                 }
             }
             else
             {
-                itemSelected = dataItemsForListView[e.Position]; //out of bounds here...
+                itemSelected = dataItemsForListView[position]; //out of bounds here...
+            }
+            return itemSelected;
+        }
+        public static int ItemPositionLongClicked = -1;
+        private void ListViewDirectories_ItemLongClick(object sender, AdapterView.ItemLongClickEventArgs e)
+        {
+            bool filteredResults = FilteredResults;
+            DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
+            if (itemSelected == null)
+            {
+                return;
+            }
+            if (itemSelected.IsDirectory())
+            {
+                e.Handled = true;
+                //show options
+                //SoulSeekState.ActiveActivityRef.Open
+                //this.RegisterForContextMenu(e.View);
+                ItemPositionLongClicked = e.Position;
+                this.listViewDirectories.ShowContextMenu();
+                //BrowseFragment.Instance.Context
+
+                //e.Handled = true;
+                //e.View.ShowContextMenu(); //causes stack overflow...
+                //this.UnregisterForContextMenu(e.View);
+
+            }
+            else
+            {
+                //no special long click event if file.
+                this.ListViewDirectories_ItemClick(sender, new AdapterView.ItemClickEventArgs(e.Parent,e.View, e.Position, e.Id));
+            }
+        }
+
+        private void PopulateDataItemsToItemSelected(List<DataItem> dirs, DataItem itemSelected)
+        {
+            dirs.Clear();
+            if (itemSelected.Node.Children.Count != 0) //then more directories
+            {
+                foreach (TreeNode<Directory> d in itemSelected.Node.Children)
+                {
+                    dirs.Add(new DataItem(d.Data, d));
+                }
+                //here we do files as well......
+                if (itemSelected.Directory != null && itemSelected.Directory.FileCount != 0)
+                {
+                    foreach (File f in itemSelected.Directory.Files)
+                    {
+                        dirs.Add(new DataItem(f, itemSelected.Node));
+                    }
+                }
+            }
+            else
+            {
+                foreach (File f in itemSelected.Directory.Files)
+                {
+                    dirs.Add(new DataItem(f, itemSelected.Node));
+                }
+            }
+        }
+
+        private void ListViewDirectories_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        {
+            cachedFilteredDataItemsForListView = null;
+            bool filteredResults = FilteredResults;
+            DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
+            if(itemSelected==null)
+            {
+                return;
             }
 
             bool isFile = false;
@@ -1420,30 +1584,10 @@ namespace AndriodApp1
                         return;
                     }
                     SaveScrollPosition();
-                    dataItemsForListView.Clear();
-                    if (itemSelected.Node.Children.Count != 0) //then more directories
-                    {
-                        foreach (TreeNode<Directory> d in itemSelected.Node.Children)
-                        {
-                            dataItemsForListView.Add(new DataItem(d.Data, d));
-                        }
-                        //here we do files as well......
-                        if(itemSelected.Directory!=null && itemSelected.Directory.FileCount!=0)
-                        {
-                            foreach (File f in itemSelected.Directory.Files)
-                            {
-                                dataItemsForListView.Add(new DataItem(f, itemSelected.Node));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (File f in itemSelected.Directory.Files)
-                        {
-                            dataItemsForListView.Add(new DataItem(f, itemSelected.Node));
-                        }
-                    }
-                    if(!filteredResults)
+
+                    PopulateDataItemsToItemSelected(dataItemsForListView, itemSelected);
+
+                    if (!filteredResults)
                     {
                         SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
                         //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
@@ -1694,6 +1838,54 @@ namespace AndriodApp1
             }
         }
 
+        public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+            menu.Add(0, 0, 0, "Download Folder");
+            menu.Add(1, 1, 1, "Queue Folder as Paused");
+            menu.Add(2, 2, 2, "Show Folder Info");
+            base.OnCreateContextMenu(menu, v, menuInfo);
+        }
+
+        public override bool OnContextItemSelected(IMenuItem item)
+        {
+            switch(item.ItemId)
+            {
+                case 0:
+                    DownloadUserFilesEntry(false, false, ItemPositionLongClicked);
+                    return true;
+                case 1:
+                    DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
+                    return true;
+                case 2:
+                    DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
+                    var folderSummary = GetFolderSummary(itemSelected);
+
+                    ShowFolderSummaryDialog(folderSummary);
+
+                    return true;
+            }
+            return base.OnContextItemSelected(item);
+        }
+
+        public void ShowFolderSummaryDialog(FolderSummary folderSummary)
+        {
+            string lengthTime = folderSummary.LengthSeconds == 0 ? "Length: -" : string.Format("Length: {0}", Helpers.GetHumanReadableTime(folderSummary.LengthSeconds));
+            string sizeString = string.Format("Size: {0}", Helpers.GetHumanReadableSize(folderSummary.SizeBytes));
+
+            string numFilesString = string.Format("Num Files: {0}", folderSummary.NumFiles);
+            string numSubFoldersString = string.Format("Num Subfolders: {0}", folderSummary.NumSubFolders);
+
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
+
+            void OnCloseClick(object sender, DialogClickEventArgs e)
+            {
+                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+            }
+
+            var diag = builder.SetMessage(numFilesString + System.Environment.NewLine + System.Environment.NewLine + numSubFoldersString + System.Environment.NewLine + System.Environment.NewLine + sizeString + System.Environment.NewLine + System.Environment.NewLine + lengthTime).SetPositiveButton("Close", OnCloseClick).Create();
+            diag.Show();
+            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+        }
 
         private TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
         {
@@ -1805,8 +1997,14 @@ namespace AndriodApp1
             //if(!tempHackItemClick)
             //{
             listViewDirectories.ItemClick -= ListViewDirectories_ItemClick;
-            listViewDirectories.ItemClick += ListViewDirectories_ItemClick; //tempHackItemClick =true; 
-                                                                            //}
+            listViewDirectories.ItemClick += ListViewDirectories_ItemClick;
+            listViewDirectories.ItemLongClick -= ListViewDirectories_ItemLongClick;
+            listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
+
+
+
+            //tempHackItemClick =true; 
+            //}
 
             MainActivity.LogInfoFirebase("RefreshOnRecieved " + CurrentUsername);
             //!!!collection was modified exception!!!
@@ -1815,6 +2013,7 @@ namespace AndriodApp1
             SetBrowseAdapters(false, dataItemsForListView, true);
             //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this); //on UI thread. in a lock.
         }
+
 
         public class FullFileInfo
         {
