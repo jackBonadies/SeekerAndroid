@@ -1270,8 +1270,9 @@ namespace AndriodApp1
                 if(df==null || !df.Exists())
                 {
                     MainActivity.LogDebug("delete failed - null or not exist");
+                    MainActivity.LogInfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SoulSeekState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
                 }
-                if(!df.Delete())
+                if(!df.Delete()) //nullref
                 {
                     MainActivity.LogDebug("delete failed");
                 }
@@ -2360,7 +2361,6 @@ namespace AndriodApp1
                 MessageController.Initialize();
                 ChatroomController.Initialize();
 
-                SoulSeekState.DownloadAdded += MainActivity.SoulSeekState_DownloadAdded;
 
 
                 SoulseekClient.ErrorLogHandler += MainActivity.SoulseekClient_ErrorLogHandler;
@@ -3887,7 +3887,7 @@ namespace AndriodApp1
 
                         Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
                         Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
-                        notifIntent.AddFlags(ActivityFlags.SingleTop);
+                        notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                         notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
@@ -3983,6 +3983,7 @@ namespace AndriodApp1
         public const string CHANNEL_ID = "my channel id";
         public const string CHANNEL_NAME = "Foreground Download Service";
         public const string FromTransferString = "FromTransfer";
+        public const int NonZeroRequestCode = 7672;
         public override IBinder OnBind(Intent intent)
         {
             return null; //does not allow binding. 
@@ -3993,9 +3994,10 @@ namespace AndriodApp1
         public static Notification CreateNotification(Context context, String contentText)
         {
             Intent notifIntent = new Intent(context, typeof(MainActivity));
+            notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(FromTransferString, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, 0);
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, 0);
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText);
@@ -4088,9 +4090,10 @@ namespace AndriodApp1
     public class UploadForegroundService : Service
     {
         public const int NOTIF_ID = 1112;
+        public const int NonZeroRequestCode = 7671;
         public const string CHANNEL_ID = "my channel id - upload";
         public const string CHANNEL_NAME = "Foreground Upload Service";
-        public const string FromTransferString = "FromTransfer"; //todo update for onclick...
+        public const string FromTransferUploadString = "FromTransfer_UPLOAD"; //todo update for onclick...
         public override IBinder OnBind(Intent intent)
         {
             return null; //does not allow binding. 
@@ -4101,9 +4104,12 @@ namespace AndriodApp1
         public static Notification CreateNotification(Context context, String contentText)
         {
             Intent notifIntent = new Intent(context, typeof(MainActivity));
-            notifIntent.PutExtra(FromTransferString, 2);
+            //notifIntent.
+            notifIntent.AddFlags(ActivityFlags.SingleTop);
+            notifIntent.PutExtra(FromTransferUploadString, 2);
+            
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, 0);
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, 0);
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText);
@@ -6154,8 +6160,19 @@ namespace AndriodApp1
         protected override void OnCreate(Bundle savedInstanceState)
         {
             
-            LogDebug("Main Activity On Create");
-
+            //basically if the Intent created the MainActivity, then we want to handle it (i.e. if from "Search Here")
+            //however, if we say rotate the device or leave and come back to it (and the activity got destroyed in the mean time) then
+            //it will re-handle the activity each time.  We can check if it is truly "new" by looking at the savedInstanceState.
+            bool reborn = false;
+            if(savedInstanceState==null)
+            {
+                LogDebug("Main Activity On Create NEW");
+            }
+            else
+            {
+                reborn = true;
+                LogDebug("Main Activity On Create REBORN");
+            }
 
 
             try
@@ -6231,10 +6248,25 @@ namespace AndriodApp1
             pager.Adapter = adapter;
             pager.AddOnPageChangeListener(new OnPageChangeLister1());
             //tabs.SetupWithViewPager(pager);
-
-            if(Intent!=null)
+            //this is a relatively safe way that prevents rotates from redoing the intent.
+            bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
+            Intent = Intent.PutExtra("ALREADY_HANDLED", true);
+            //Intent = i;
+            if (Intent!=null)
             {
-                if(Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1)==2)
+                //if(Intent.Flags == (ActivityFlags.LaunchedFromHistory | ActivityFlags.NewTask))
+                //{
+                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY | FLAG_ACTIVITY_NEW_TASK
+                //    //-back button then resumed from history
+                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                //    //-home button then resumed from history
+                //    //FLAG_ACTIVITY_NEW_TASK
+                //    //-clicking app icon or intent filter
+                //    MainActivity.LogDebug("new task | launched from history");
+                //}
+
+
+                if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1)==2)
                 {
                     pager.SetCurrentItem(2,false);
                 }
@@ -6254,7 +6286,7 @@ namespace AndriodApp1
                 {
                     pager.SetCurrentItem(1, false);
                 }
-                else if(Intent.GetIntExtra(WishlistController.FromWishlistString,-1)==1)
+                else if(Intent.GetIntExtra(WishlistController.FromWishlistString,-1)== 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
                 {
                     SoulSeekState.MainActivityRef = this; //set these early. they are needed
                     SoulSeekState.ActiveActivityRef = this; 
@@ -6277,7 +6309,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            if(SearchFragment.Instance?.IsResumed ?? false)
+                            if(SearchFragment.Instance?.IsResumed ?? false) //!??! this logic is backwards...
                             {
                                 MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
                                 goToSearchTab = tabID; //we read this we resume
@@ -6296,7 +6328,7 @@ namespace AndriodApp1
                         pager.SetCurrentItem(1, false);
                     }
                 }
-                else if (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)
+                else if ( ((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1)==2)  || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2 )) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
                 {
                     HandleFromNotificationUploadIntent();
                 }
@@ -6305,7 +6337,7 @@ namespace AndriodApp1
                     MainActivity.LogInfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
                 }
-                else if(SearchSendIntentHelper.IsFromActionSend(Intent))
+                else if(SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
                 {
                     SoulSeekState.MainActivityRef = this;
                     SoulSeekState.ActiveActivityRef = this;
@@ -6315,14 +6347,18 @@ namespace AndriodApp1
                     {
                         MainActivity.LogDebug("lets go to a new fresh tab");
                         int newTabToGoTo = SearchTabHelper.AddSearchTab();
+
+                        MainActivity.LogDebug("search fragment null? " + (SearchFragment.Instance == null).ToString());
+
                         if (SearchFragment.Instance?.IsResumed ?? false)
                         {
-                            MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
-                            goToSearchTab = newTabToGoTo; //we read this we resume
+                            //if resumed is true
+                            SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
                         }
                         else
                         {
-                            SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
+                            MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
+                            goToSearchTab = newTabToGoTo; //we read this we resume
                         }
                     }
 
@@ -6846,7 +6882,7 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("OnNewIntent");
             base.OnNewIntent(intent);
-            this.Intent = intent;
+            Intent = intent.PutExtra("ALREADY_HANDLED", true);
             if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
             {
                 MainActivity.LogInfoFirebase("is null: " + (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false)).ToString());
@@ -6883,7 +6919,7 @@ namespace AndriodApp1
                     pager.SetCurrentItem(1, false);
                 }
             }
-            else if (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)
+            else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2))) //else every rotation will change Downloads to Uploads.
             {
                 HandleFromNotificationUploadIntent();
             }
@@ -6903,6 +6939,10 @@ namespace AndriodApp1
                 //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
                 //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
                 pager.SetCurrentItem(1, false);
+            }
+            else if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
+            {
+                pager.SetCurrentItem(2, false);
             }
         }
 
@@ -10563,7 +10603,7 @@ namespace AndriodApp1
 
 
 
-        public static event EventHandler<DownloadAddedEventArgs> DownloadAdded;
+        //public static event EventHandler<DownloadAddedEventArgs> DownloadAdded;
         /// <summary>
         /// Occurs after we set up the DownloadAdded transfer item.
         /// </summary>
