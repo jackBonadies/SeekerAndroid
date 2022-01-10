@@ -219,7 +219,8 @@ namespace AndriodApp1
                 outState.PutBoolean("SaveStateAtChatroomInner", true);
                 MainActivity.LogDebug("SaveStateAtChatroomInner OnSaveInstanceState");
                 SaveStartingRoomInfo(outState, f as ChatroomInnerFragment);
-                ChatroomController.currentlyInsideRoomName = ChatroomInnerFragment.OurRoomInfo.Name;
+                MainActivity.LogDebug("currentlyInsideRoomName -- OnSaveInstanceState -- " + ChatroomController.currentlyInsideRoomName);
+                //ChatroomController.currentlyInsideRoomName = ChatroomInnerFragment.OurRoomInfo.Name; //this sets it after we are leaving....
             }
             else
             {
@@ -1395,7 +1396,7 @@ namespace AndriodApp1
             {
                 recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
             }
-
+            MainActivity.LogDebug("currentlyInsideRoomName -- OnCreateView Inner -- " + ChatroomController.currentlyInsideRoomName);
             ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
             HookUpEventHandlers(true);
             created=true;
@@ -1489,14 +1490,15 @@ namespace AndriodApp1
             
             if (created) //attach can happen before we created our view...
             {
-                try
-                {
-                ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name; //nullref
-                }
-                catch(Exception e)
-                {
-                    MainActivity.LogDebug("1" + e.Message);
-                }
+                //try
+                //{
+                //    MainActivity.LogDebug("currentlyInsideRoomName -- OnAttach -- " + ChatroomController.currentlyInsideRoomName);
+                //    ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name; //nullref
+                //}
+                //catch(Exception e)
+                //{
+                //    MainActivity.LogDebug("1" + e.Message);
+                //}
                 try
                 {
                 messagesInternal = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].ToList();
@@ -1516,9 +1518,27 @@ namespace AndriodApp1
             base.OnAttach(activity);
         }
 
+        public override void OnPause()
+        {
+            MainActivity.LogDebug("currentlyInsideRoomName OnPause -- nulling");
+            ChatroomController.currentlyInsideRoomName = string.Empty;
+            base.OnPause();
+        }
+
+        public override void OnResume()
+        {
+            MainActivity.LogDebug("currentlyInsideRoomName OnResume");
+            if (OurRoomInfo!=null)
+            {
+                ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
+            }
+            base.OnResume();
+        }
+
         public override void OnDetach()
         {
-            ChatroomController.currentlyInsideRoomName = string.Empty;
+            MainActivity.LogDebug("currentlyInsideRoomName OnDetach -- nulling");
+            
             HookUpEventHandlers(false);
             base.OnDetach();
         }
