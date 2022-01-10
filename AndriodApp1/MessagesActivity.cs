@@ -359,6 +359,8 @@ namespace AndriodApp1
                         Intent intent = new Intent(this, typeof(MainActivity));
                         intent.AddFlags(ActivityFlags.ClearTop);   
                         this.StartActivity(intent);
+                        this.Finish(); //without this, pressing back just launches the main activity (messages will still be behind it)
+                        //and so you can go back infinitely, it will show messages behind it, then it will launch main again, then messages behind it, etc.
                         return;
                     }
                     else
@@ -450,6 +452,18 @@ namespace AndriodApp1
         {
             base.OnCreate(savedInstanceState);
 
+
+            bool reborn = false;
+            if (savedInstanceState == null)
+            {
+                MainActivity.LogDebug("Messages Activity On Create NEW");
+            }
+            else
+            {
+                reborn = true;
+                MainActivity.LogDebug("Messages Activity On Create REBORN");
+            }
+
             MessagesActivityRef = this;
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.messages_main_layout);
@@ -512,6 +526,7 @@ namespace AndriodApp1
             {
                 if(Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
                 {
+                    MainActivity.LogDebug("coming from message tapped");
                     string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
                     if(goToUsersMessages==string.Empty)
                     {
