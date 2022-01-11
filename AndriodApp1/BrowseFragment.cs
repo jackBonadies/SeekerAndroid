@@ -1887,32 +1887,35 @@ namespace AndriodApp1
                 GetPathItemsInternal(pathItems, treeNode.Parent, false);
             }
         }
-
+        //https://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
+        //onContextItemSelected() is called for all currently existing fragments starting with the first added one.
+        public const int UNIQUE_BROWSE_GROUP_ID = 304;
         public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            menu.Add(0, 0, 0, "Download Folder");
-            menu.Add(1, 1, 1, "Queue Folder as Paused");
-            menu.Add(2, 2, 2, "Show Folder Info");
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 0, 0, "Download Folder");
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 1, 1, "Queue Folder as Paused");
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 2, 2, "Show Folder Info");
             base.OnCreateContextMenu(menu, v, menuInfo);
         }
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
-            switch(item.ItemId)
+            if(item.GroupId == UNIQUE_BROWSE_GROUP_ID)
             {
-                case 0:
-                    DownloadUserFilesEntry(false, false, ItemPositionLongClicked);
-                    return true;
-                case 1:
-                    DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
-                    return true;
-                case 2:
-                    DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
-                    var folderSummary = GetFolderSummary(itemSelected);
-
-                    ShowFolderSummaryDialog(folderSummary);
-
-                    return true;
+                switch(item.ItemId)
+                {
+                    case 0:
+                        DownloadUserFilesEntry(false, false, ItemPositionLongClicked);
+                        return true;
+                    case 1:
+                        DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
+                        return true;
+                    case 2:
+                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
+                        var folderSummary = GetFolderSummary(itemSelected);
+                        ShowFolderSummaryDialog(folderSummary);
+                        return true;
+                }
             }
             return base.OnContextItemSelected(item);
         }

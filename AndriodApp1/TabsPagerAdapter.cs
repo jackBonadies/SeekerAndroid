@@ -7473,336 +7473,339 @@ namespace AndriodApp1
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
-            int position = recyclerTransferAdapter.getPosition();
-            ITransferItem ti = null;
-            try
+            if(item.GroupId == UNIQUE_TRANSFER_GROUP_ID)
             {
-                ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                return base.OnContextItemSelected(item);
-            }
-            if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
-            {
-                MainActivity.LogDebug("handled by commons");
-                return base.OnContextItemSelected(item);
-            }
+                int position = recyclerTransferAdapter.getPosition();
+                ITransferItem ti = null;
+                try
+                {
+                    ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                    Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                    return base.OnContextItemSelected(item);
+                }
+                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
+                {
+                    MainActivity.LogDebug("handled by commons");
+                    return base.OnContextItemSelected(item);
+                }
 
-            switch (item.ItemId)
-            {
-                case 0:
-                    //retry download (resume download)
+                switch (item.ItemId)
+                {
+                    case 0:
+                        //retry download (resume download)
 
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-                    {
-                        Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
-                            return base.OnContextItemSelected(item);
-                        }
-                        t.ContinueWith(new Action<Task>((Task t) =>
-                        {
-                            if (t.IsFaulted)
+                            Task t;
+                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                return base.OnContextItemSelected(item);
+                            }
+                            t.ContinueWith(new Action<Task>((Task t) =>
+                            {
+                                if (t.IsFaulted)
                                 {
-                                    if (Context != null)
+                                    SoulSeekState.MainActivityRef.RunOnUiThread(() =>
                                     {
-                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-                                    else
-                                    {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
+                                        if (Context != null)
+                                        {
+                                            Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        }
+                                        else
+                                        {
+                                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        }
 
-                                });
-                                return;
-                            }
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryLogic(position); });
-                        }));
-                    }
-                    else
-                    {
-                        DownloadRetryLogic(position);
-                    }
-                    //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
-                    break;
-                case 1:
-                    //clear complete?
-                    //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-                    MainActivity.LogInfoFirebase("Clear Complete item pressed");
-                    lock (TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
-                    {
-                        try
-                        {
-                            if (InUploadsMode)
-                            {
-                                TransferItemManagerWrapped.RemoveAtUserIndex(position);
-                            }
-                            else
-                            {
-                                TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
-                            }
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                            return base.OnContextItemSelected(item);
-                        }
-                        recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
-                        //refreshListView();
-                    }
-                    break;
-                case 2: //cancel and clear (downloads) OR abort and clear (uploads)
-                    //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-                    MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
-                    ITransferItem tItem = null;
-                    try
-                    {
-                        tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                        Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                        return base.OnContextItemSelected(item);
-                    }
-                    if (tItem is TransferItem tti)
-                    {
-                        bool wasInProgress = tti.State.HasFlag(TransferStates.InProgress);
-                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
-                        uptoken?.Cancel();
-                        //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                        CancellationTokens.Remove(ProduceCancellationTokenKey(tti), out _);
-                        lock (TransferItemManagerWrapped.GetUICurrentList())
-                        {
-                            if (InUploadsMode)
-                            {
-                                TransferItemManagerWrapped.RemoveAtUserIndex(position);
-                            }
-                            else
-                            {
-                                TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
-                            }
-                            recyclerTransferAdapter.NotifyItemRemoved(position);
-                        }
-                    }
-                    else if (tItem is FolderItem fi)
-                    {
-                        TransferItemManagerWrapped.CancelFolder(fi, true);
-                        TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
-                        lock (TransferItemManagerWrapped.GetUICurrentList())
-                        {
-                            //TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
-                            recyclerTransferAdapter.NotifyItemRemoved(position);
-                        }
-                    }
-                    else
-                    {
-                        MainActivity.LogInfoFirebase("Cancel and Clear item pressed - bad item");
-                    }
-                    break;
-                case 3:
-                    tItem = null;
-                    try
-                    {
-                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position);
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        //MainActivity.LogFirebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                        Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                        return base.OnContextItemSelected(item);
-                    }
-
-                    //the folder implementation will re-request all queued files
-                    //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
-
-
-                    if (tItem is TransferItem)
-                    {
-                        GetQueuePosition(tItem as TransferItem);
-                    }
-                    else if (tItem is FolderItem folderItem)
-                    {
-                        lock (folderItem.TransferItems)
-                        {
-                            foreach (TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State == TransferStates.Queued))
-                            {
-                                GetQueuePosition(transferItem);
-                            }
-                        }
-                    }
-                    break;
-                case 4:
-                    tItem = null;
-                    try
-                    {
-                        tItem = TransferItemManagerDL.GetItemAtUserIndex(position) as TransferItem;
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        //MainActivity.LogFirebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                        Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                        return base.OnContextItemSelected(item);
-                    }
-                    try
-                    {
-                        //tested on API25 and API30
-                        //AndroidX.Core.Content.FileProvider
-                        Android.Net.Uri uriToUse = null;
-                        if (SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
-                        {
-                            uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
+                                    });
+                                    return;
+                                }
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryLogic(position); });
+                            }));
                         }
                         else
                         {
-                            uriToUse = Android.Net.Uri.Parse((tItem as TransferItem).FinalUri);
+                            DownloadRetryLogic(position);
                         }
-                        Intent playFileIntent = new Intent(Intent.ActionView);
-                        //playFileIntent.SetDataAndType(uriToUse,"audio/*");  
-                        playFileIntent.SetDataAndType(uriToUse, Helpers.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
-                        playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
-                        //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
-                        this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
-                    }
-                    catch (System.Exception e)
-                    {
-                        MainActivity.LogFirebase(e.Message + e.StackTrace);
-                        Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
-                    }
-                    break;
-                case 100: //resume folder
-                    MainActivity.LogInfoFirebase("resume folder Pressed");
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-                    {
-                        Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                        //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
+                        break;
+                    case 1:
+                        //clear complete?
+                        //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
+                        MainActivity.LogInfoFirebase("Clear Complete item pressed");
+                        lock (TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
                         {
+                            try
+                            {
+                                if (InUploadsMode)
+                                {
+                                    TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                                }
+                                else
+                                {
+                                    TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
+                                }
+                            }
+                            catch (ArgumentOutOfRangeException)
+                            {
+                                //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                                Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                                return base.OnContextItemSelected(item);
+                            }
+                            recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
+                            //refreshListView();
+                        }
+                        break;
+                    case 2: //cancel and clear (downloads) OR abort and clear (uploads)
+                        //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
+                        MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
+                        ITransferItem tItem = null;
+                        try
+                        {
+                            tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
-                        t.ContinueWith(new Action<Task>((Task t) =>
+                        if (tItem is TransferItem tti)
                         {
-                            if (t.IsFaulted)
+                            bool wasInProgress = tti.State.HasFlag(TransferStates.InProgress);
+                            CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
+                            uptoken?.Cancel();
+                            //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
+                            CancellationTokens.Remove(ProduceCancellationTokenKey(tti), out _);
+                            lock (TransferItemManagerWrapped.GetUICurrentList())
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                if (InUploadsMode)
                                 {
-                                    if (Context != null)
-                                    {
-                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-                                    else
-                                    {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-
-                                });
-                                return;
+                                    TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                                }
+                                else
+                                {
+                                    TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
+                                }
+                                recyclerTransferAdapter.NotifyItemRemoved(position);
                             }
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
-                        }));
-                    }
-                    else
-                    {
-                        DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
-                    }
-                    break;
-                case 101: //pause folder or abort uploads (uploads)
-                    TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
-                    int index = TransferItemManagerWrapped.GetIndexForFolderItem(ti as FolderItem);
-                    recyclerTransferAdapter.NotifyItemChanged(index);
-                    break;
-                case 102: //retry failed downloads from folder
-                    MainActivity.LogInfoFirebase("retry folder Pressed");
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-                    {
-                        Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                        }
+                        else if (tItem is FolderItem fi)
                         {
+                            TransferItemManagerWrapped.CancelFolder(fi, true);
+                            TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
+                            lock (TransferItemManagerWrapped.GetUICurrentList())
+                            {
+                                //TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
+                                recyclerTransferAdapter.NotifyItemRemoved(position);
+                            }
+                        }
+                        else
+                        {
+                            MainActivity.LogInfoFirebase("Cancel and Clear item pressed - bad item");
+                        }
+                        break;
+                    case 3:
+                        tItem = null;
+                        try
+                        {
+                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position);
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            //MainActivity.LogFirebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
-                        t.ContinueWith(new Action<Task>((Task t) =>
+
+                        //the folder implementation will re-request all queued files
+                        //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
+
+
+                        if (tItem is TransferItem)
                         {
-                            if (t.IsFaulted)
+                            GetQueuePosition(tItem as TransferItem);
+                        }
+                        else if (tItem is FolderItem folderItem)
+                        {
+                            lock (folderItem.TransferItems)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                foreach (TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State == TransferStates.Queued))
                                 {
-                                    if (Context != null)
-                                    {
-                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-                                    else
-                                    {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-
-                                });
-                                return;
+                                    GetQueuePosition(transferItem);
+                                }
                             }
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
-                        }));
-                    }
-                    else
-                    {
-                        DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
-                    }
-                    break;
-                case 103: //abort upload
-                    MainActivity.LogInfoFirebase("Abort Upload item pressed");
-                    tItem = null;
-                    try
-                    {
-                        tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                        Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                        return base.OnContextItemSelected(item);
-                    }
-                    TransferItem uploadToCancel = tItem as TransferItem;
+                        }
+                        break;
+                    case 4:
+                        tItem = null;
+                        try
+                        {
+                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position) as TransferItem;
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            //MainActivity.LogFirebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            return base.OnContextItemSelected(item);
+                        }
+                        try
+                        {
+                            //tested on API25 and API30
+                            //AndroidX.Core.Content.FileProvider
+                            Android.Net.Uri uriToUse = null;
+                            if (SoulSeekState.UseLegacyStorage() && Helpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
+                            {
+                                uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
+                            }
+                            else
+                            {
+                                uriToUse = Android.Net.Uri.Parse((tItem as TransferItem).FinalUri);
+                            }
+                            Intent playFileIntent = new Intent(Intent.ActionView);
+                            //playFileIntent.SetDataAndType(uriToUse,"audio/*");  
+                            playFileIntent.SetDataAndType(uriToUse, Helpers.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
+                            playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
+                            //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
+                            this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
+                        }
+                        catch (System.Exception e)
+                        {
+                            MainActivity.LogFirebase(e.Message + e.StackTrace);
+                            Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
+                        }
+                        break;
+                    case 100: //resume folder
+                        MainActivity.LogInfoFirebase("resume folder Pressed");
+                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        {
+                            Task t;
+                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                            {
+                                return base.OnContextItemSelected(item);
+                            }
+                            t.ContinueWith(new Action<Task>((Task t) =>
+                            {
+                                if (t.IsFaulted)
+                                {
+                                    SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                    {
+                                        if (Context != null)
+                                        {
+                                            Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        }
+                                        else
+                                        {
+                                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        }
 
-                    CancellationTokens.TryGetValue(ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
-                    token?.Cancel();
-                    //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                    CancellationTokens.Remove(ProduceCancellationTokenKey(uploadToCancel), out _);
-                    lock (TransferItemManagerWrapped.GetUICurrentList())
-                    {
-                        recyclerTransferAdapter.NotifyItemChanged(position);
-                    }
-                    break;
-                case 104: //ignore (unshare) user
-                    MainActivity.LogInfoFirebase("Unshare User item pressed");
-                    IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
-                    foreach (var tiToCancel in tItems)
-                    {
-                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
-                        token1?.Cancel();
-                        CancellationTokens.Remove(ProduceCancellationTokenKey(tiToCancel), out _);
+                                    });
+                                    return;
+                                }
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
+                            }));
+                        }
+                        else
+                        {
+                            DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
+                        }
+                        break;
+                    case 101: //pause folder or abort uploads (uploads)
+                        TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
+                        int index = TransferItemManagerWrapped.GetIndexForFolderItem(ti as FolderItem);
+                        recyclerTransferAdapter.NotifyItemChanged(index);
+                        break;
+                    case 102: //retry failed downloads from folder
+                        MainActivity.LogInfoFirebase("retry folder Pressed");
+                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        {
+                            Task t;
+                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                            {
+                                return base.OnContextItemSelected(item);
+                            }
+                            t.ContinueWith(new Action<Task>((Task t) =>
+                            {
+                                if (t.IsFaulted)
+                                {
+                                    SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                    {
+                                        if (Context != null)
+                                        {
+                                            Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        }
+                                        else
+                                        {
+                                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        }
+
+                                    });
+                                    return;
+                                }
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
+                            }));
+                        }
+                        else
+                        {
+                            DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
+                        }
+                        break;
+                    case 103: //abort upload
+                        MainActivity.LogInfoFirebase("Abort Upload item pressed");
+                        tItem = null;
+                        try
+                        {
+                            tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            return base.OnContextItemSelected(item);
+                        }
+                        TransferItem uploadToCancel = tItem as TransferItem;
+
+                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
+                        token?.Cancel();
+                        //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
+                        CancellationTokens.Remove(ProduceCancellationTokenKey(uploadToCancel), out _);
                         lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
-                            int posOfCancelled = TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
-                            if (posOfCancelled != -1)
+                            recyclerTransferAdapter.NotifyItemChanged(position);
+                        }
+                        break;
+                    case 104: //ignore (unshare) user
+                        MainActivity.LogInfoFirebase("Unshare User item pressed");
+                        IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
+                        foreach (var tiToCancel in tItems)
+                        {
+                            CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
+                            token1?.Cancel();
+                            CancellationTokens.Remove(ProduceCancellationTokenKey(tiToCancel), out _);
+                            lock (TransferItemManagerWrapped.GetUICurrentList())
                             {
-                                recyclerTransferAdapter.NotifyItemChanged(posOfCancelled);
+                                int posOfCancelled = TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
+                                if (posOfCancelled != -1)
+                                {
+                                    recyclerTransferAdapter.NotifyItemChanged(posOfCancelled);
+                                }
                             }
                         }
-                    }
-                    SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, ti.GetUsername());
-                    break;
-                case 105: //batch selection mode
-                    TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
+                        SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, ti.GetUsername());
+                        break;
+                    case 105: //batch selection mode
+                        TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
 
-                    //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-                    //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
-                    TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
-                    recyclerTransferAdapter.IsInBatchSelectMode = true;
-                    ToggleItemBatchSelect(recyclerTransferAdapter, position);
-                    break;
+                        //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+                        //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
+                        TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                        recyclerTransferAdapter.IsInBatchSelectMode = true;
+                        ToggleItemBatchSelect(recyclerTransferAdapter, position);
+                        break;
+                }
             }
             return base.OnContextItemSelected(item);
         }
@@ -8430,7 +8433,7 @@ namespace AndriodApp1
 
         }
 
-
+        public const int UNIQUE_TRANSFER_GROUP_ID = 303;
         public class TransferViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
         {
             private ITransferItemView transferItemView;
@@ -8481,22 +8484,22 @@ namespace AndriodApp1
                     {
                         if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
                         {
-                            menu.Add(0, 0, 0, Resource.String.resume_dl);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 0, 0, Resource.String.resume_dl);
                         }
                         else
                         {
-                            menu.Add(0, 0, 0, Resource.String.retry_dl);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 0, 0, Resource.String.retry_dl);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
                         {
-                            menu.Add(0, 100, 0, "Resume Folder");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 100, 0, "Resume Folder");
                         }
                         else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
                         {
-                            menu.Add(0, 101, 0, "Pause Folder");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, "Pause Folder");
                         }
                     }
                 }
@@ -8506,14 +8509,14 @@ namespace AndriodApp1
                     {
                         if (tvh != null && ti != null && !(Helpers.IsUploadCompleteOrAborted(ti.State)))
                         {
-                            menu.Add(0, 103, 0, "Abort Upload");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, "Abort Upload");
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState))) ;
                         {
-                            menu.Add(0, 101, 0, "Abort Uploads");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, "Abort Uploads");
                         }
                     }
                 }
@@ -8523,23 +8526,23 @@ namespace AndriodApp1
                     {
                         if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
                         {
-                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
                         }
                         else
                         {
-                            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.cancel_and_clear);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
                         {
-                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                         }
                         else
                         {
-                            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.cancel_and_clear);
                         }
                     }
                 }
@@ -8549,23 +8552,23 @@ namespace AndriodApp1
                     {
                         if (tvh != null && ti != null && (Helpers.IsUploadCompleteOrAborted(ti.State)))
                         {
-                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
                         }
                         else
                         {
-                            menu.Add(2, 2, 2, "Abort and Clear Upload");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, "Abort and Clear Upload");
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && (Helpers.IsUploadCompleteOrAborted(folderItemState)))
                         {
-                            menu.Add(1, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                         }
                         else
                         {
-                            menu.Add(2, 2, 2, "Abort and Clear Uploads");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, "Abort and Clear Uploads");
                         }
                     }
                 }
@@ -8588,7 +8591,7 @@ namespace AndriodApp1
                                 }
                                 else
                                 {
-                                    menu.Add(3, 3, 3, Resource.String.refresh_queue_pos);
+                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 3, 3, Resource.String.refresh_queue_pos);
                                 }
                             }
                         }
@@ -8608,7 +8611,7 @@ namespace AndriodApp1
                                 }
                                 else
                                 {
-                                    menu.Add(3, 3, 3, Resource.String.refresh_queue_pos);
+                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 3, 3, Resource.String.refresh_queue_pos);
                                 }
                             }
                         }
@@ -8621,7 +8624,7 @@ namespace AndriodApp1
                     {
                         if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri != string.Empty)
                         {
-                            menu.Add(4, 4, 4, Resource.String.play_file);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 4, 4, Resource.String.play_file);
                         }
                     }
                     else
@@ -8629,25 +8632,25 @@ namespace AndriodApp1
                         if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
                         {
                             //no op
-                            menu.Add(4, 102, 4, "Retry Failed Files");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 102, 4, "Retry Failed Files");
                         }
                     }
                 }
-                var subMenu = menu.AddSubMenu(5, 5, 5, "User Options");
-                subMenu.Add(6, 6, 6, Resource.String.browse_user);
-                subMenu.Add(7, 7, 7, Resource.String.search_user_files);
-                Helpers.AddAddRemoveUserMenuItem(subMenu, 8, 8, 8, tvh.InnerTransferItem.GetUsername(), false);
-                subMenu.Add(9, 9, 9, Resource.String.msg_user);
-                subMenu.Add(10, 10, 10, Resource.String.get_user_info);
-                Helpers.AddUserNoteMenuItem(subMenu, 11, 11, 11, tvh.InnerTransferItem.GetUsername());
+                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, 5, 5, "User Options");
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 6, 6, Resource.String.browse_user);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, Resource.String.search_user_files);
+                Helpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 8, 8, tvh.InnerTransferItem.GetUsername(), false);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 9, 9, Resource.String.msg_user);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.get_user_info);
+                Helpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 11, 11, tvh.InnerTransferItem.GetUsername());
                 Helpers.AddGivePrivilegesIfApplicable(subMenu, 12);
 
                 if (isUpload)
                 {
-                    menu.Add(6, 104, 6, "Ignore (Unshare) User");
+                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 104, 6, "Ignore (Unshare) User");
                 }
                 //finally batch selection mode
-                menu.Add(16, 105, 16, "Batch Select");
+                menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, "Batch Select");
             }
 
         }
