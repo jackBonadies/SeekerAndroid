@@ -5865,8 +5865,56 @@ namespace AndriodApp1
         }
     }
 
+
+
+
     public class TransferViewHelper
     {
+        /// <summary>
+        /// In Progress = InProgress proper, initializing, requested. 
+        /// If In Progress or Queued you should be able to pause it (the official client lets you).
+        /// </summary>
+        /// <param name="transferItems"></param>
+        /// <param name="numInProgress"></param>
+        /// <param name="numFailed"></param>
+        /// <param name="numPaused"></param>
+        /// <param name="numSucceeded"></param>
+        public static void GetStatusNumbers(IEnumerable<TransferItem> transferItems, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued)
+        {
+            numInProgress = 0;
+            numFailed = 0;
+            numPaused = 0;
+            numSucceeded = 0;
+            numQueued = 0;
+            lock (transferItems)
+            {
+                foreach (var ti in transferItems)
+                {
+                    if(ti.State.HasFlag(TransferStates.Queued))
+                    {
+                        numQueued++;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested))
+                    {
+                        numInProgress++;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
+                    {
+                        numFailed++;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.Cancelled))
+                    {
+                        numPaused++;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.Succeeded))
+                    {
+                        numSucceeded++;
+                    }
+                }
+            }
+        }
+
+
         public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState)
         {
             //if in progress, X files remaining, Current File:
@@ -5914,6 +5962,7 @@ namespace AndriodApp1
             {
                 int numFailed = 0;
                 int numSucceeded = 0;
+                int numPaused = 0;
                 lock (fi.TransferItems)
                 {
 
@@ -5927,17 +5976,14 @@ namespace AndriodApp1
                         {
                             numFailed++;
                         }
+                        else if (ti.State.HasFlag(TransferStates.Cancelled))
+                        {
+                            numPaused++;
+                        }
                     }
                 }
 
-                if (numSucceeded != 0)
-                {
-                    filesLongStatus.Text = string.Format("{0} failed, {1} succeeded", numFailed, numSucceeded);
-                }
-                else
-                {
-                    filesLongStatus.Text = string.Format("All {0} failed", numFailed);
-                }
+                SetFilesLongStatusIfNotInProgress(filesLongStatus, fi, numFailed, numSucceeded, numPaused);
                 currentFile.Visibility = ViewStates.Gone;
                 //set views + visi
             }
@@ -5971,24 +6017,7 @@ namespace AndriodApp1
                     //error
                 }
 
-                string cancelledString = fi.IsUpload() ? "aborted" : "paused";
-
-                if (numSucceeded == 0 && numFailed == 0)
-                {
-                    filesLongStatus.Text = string.Format("All {0} {1}", numPaused, cancelledString);
-                }
-                else if (numSucceeded == 0)
-                {
-                    filesLongStatus.Text = string.Format("{0} {1}, {2} failed", numPaused, cancelledString, numFailed);
-                }
-                else if (numFailed == 0)
-                {
-                    filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded", numPaused, cancelledString, numSucceeded);
-                }
-                else
-                {
-                    filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded, {3} failed", numPaused, cancelledString, numSucceeded, numFailed);
-                }
+                SetFilesLongStatusIfNotInProgress(filesLongStatus, fi, numFailed, numSucceeded, numPaused);
                 currentFile.Visibility = ViewStates.Gone;
                 //set views + visi
             }
@@ -5997,6 +6026,40 @@ namespace AndriodApp1
 
             }
 
+        }
+
+        private static void SetFilesLongStatusIfNotInProgress(TextView filesLongStatus, FolderItem fi, int numFailed, int numSucceeded, int numPaused)
+        {
+            string cancelledString = fi.IsUpload() ? "aborted" : "paused";
+            // 0 0 0 isnt one.
+            if (numSucceeded == 0 && numFailed == 0 && numPaused != 0) //all paused
+            {
+                filesLongStatus.Text = string.Format("All {0} {1}", numPaused, cancelledString);
+            }
+            else if (numSucceeded == 0 && numFailed != 0 && numPaused == 0) //all failed
+            {
+                filesLongStatus.Text = string.Format("All {0} failed", numFailed);
+            }
+            else if (numSucceeded == 0 && numFailed != 0 && numPaused != 0) //all failed or paused
+            {
+                filesLongStatus.Text = string.Format("{0} {1}, {2} failed", numPaused, cancelledString, numFailed);
+            }
+            else if (numSucceeded != 0 && numFailed == 0 && numPaused == 0) //all succeeded
+            {
+                filesLongStatus.Text = string.Format("All {0} succeeded", numSucceeded);
+            }
+            else if (numSucceeded != 0 && numFailed == 0 && numPaused != 0) //all succeeded or paused
+            {
+                filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded", numPaused, cancelledString, numSucceeded);
+            }
+            else if (numSucceeded != 0 && numFailed != 0 && numPaused == 0) //all succeeded or failed
+            {
+                filesLongStatus.Text = string.Format("{0} failed, {1} succeeded", numFailed, numSucceeded);
+            }
+            else //all
+            {
+                filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded, {3} failed", numPaused, cancelledString, numSucceeded, numFailed);
+            }
         }
 
 
@@ -6497,42 +6560,54 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    var state = CurrentlySelectedDLFolder.GetState(out bool isFailed);
 
-                    if (state.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
+                    TransferViewHelper.GetStatusNumbers(CurrentlySelectedDLFolder.TransferItems, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued);
+                    //var state = CurrentlySelectedDLFolder.GetState(out bool isFailed);
+
+                    if (numPaused != 0)
                     {
-                        menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
                         menu.FindItem(Resource.Id.action_resume_all).SetVisible(true);
                     }
-                    else if ((!state.HasFlag(TransferStates.Completed) && !state.HasFlag(TransferStates.Succeeded) && !state.HasFlag(TransferStates.Errored) && !state.HasFlag(TransferStates.TimedOut) && !state.HasFlag(TransferStates.Rejected)))
+                    else
+                    {
+                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
+                    }
+
+                    if (numInProgress != 0 || numQueued != 0)
                     {
                         menu.FindItem(Resource.Id.action_pause_all).SetVisible(true);
-                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
                     }
                     else
                     {
                         menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
-                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
                     }
 
-                    if ((state.HasFlag(TransferStates.Succeeded)))
+                    if(numSucceeded != 0)
                     {
                         menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(true);
-                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
                     }
                     else
                     {
                         menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
-                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
                     }
 
-                    if (state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.Errored) || isFailed) //i.e. if the overall state is failed OR if it contains any failed
+                    if(numFailed != 0)
                     {
                         menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
                     }
                     else
                     {
                         menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
+                    }
+
+                    //i.e. if there are any not in the succeeded state that clear all complete would clear
+                    if (numFailed != 0 || numInProgress != 0 || numPaused != 0)
+                    {
+                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
+                    }
+                    else
+                    {
+                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
                     }
 
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
@@ -6687,6 +6762,9 @@ namespace AndriodApp1
 
         public void RetryAllConditionEntry(bool failed, bool batchSelectedOnly)
         {
+            //get the batch selected transfer items ahead of time, because the next thing we do is clear the batch selected indices
+            //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
+            var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
             MainActivity.LogInfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
@@ -6699,7 +6777,7 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                         {
                             if (Context != null)
                             {
@@ -6707,7 +6785,7 @@ namespace AndriodApp1
                             }
                             else
                             {
-                                Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                             }
 
                         });
@@ -6715,11 +6793,11 @@ namespace AndriodApp1
                     }
                     if (CurrentlySelectedDLFolder == null)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
                     }
                     else
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
                     }
                 }));
             }
@@ -6727,11 +6805,11 @@ namespace AndriodApp1
             {
                 if (CurrentlySelectedDLFolder == null)
                 {
-                    DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly);
+                    DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
                 }
                 else
                 {
-                    DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly);
+                    DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
                 }
             }
         }
@@ -7237,49 +7315,58 @@ namespace AndriodApp1
 
         }
 
+        private List<TransferItem> GetBatchSelectedItemsForRetryCondition(bool selectFailed)
+        {
+            bool folderItems = false;
+            if (GroupByFolder && !CurrentlyInFolder())
+            {
+                folderItems = true;
+            }
+            List<TransferItem> tis = new List<TransferItem>();
+            foreach (int pos in BatchSelectedItems)
+            {
+                if (folderItems)
+                {
+                    var fi = TransferItemManagerDL.GetItemAtUserIndex(pos) as FolderItem;
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        if (selectFailed && ti.Failed)
+                        {
+                            tis.Add(ti);
+                        }
+                        else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                        {
+                            tis.Add(ti);
+                        }
+                    }
+                }
+                else
+                {
+                    var ti = TransferItemManagerDL.GetItemAtUserIndex(pos) as TransferItem;
+                    if (selectFailed && ti.Failed)
+                    {
+                        tis.Add(ti);
+                    }
+                    else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                    {
+                        tis.Add(ti);
+                    }
+                }
+            }
+            return tis;
+        }
 
-        private void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
+
+        private void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis=null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
         {
             IEnumerable<TransferItem> transferItemConditionList = new List<TransferItem>();
             if(batchSelectedOnly)
             {
-                bool folderItems = false;
-                if(GroupByFolder && !CurrentlyInFolder())
+                if(batchSelectedTis==null)
                 {
-                    folderItems = true;
+                    throw new System.Exception("No batch selected transfer items provided");
                 }
-                List<TransferItem> tis = new List<TransferItem>();
-                foreach (int pos in BatchSelectedItems)
-                {
-                    if(folderItems)
-                    {
-                        var fi = TransferItemManagerDL.GetItemAtUserIndex(pos) as FolderItem;
-                        foreach(TransferItem ti in fi.TransferItems)
-                        {
-                            if (selectFailed && ti.Failed)
-                            {
-                                tis.Add(ti);
-                            }
-                            else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
-                            {
-                                tis.Add(ti);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var ti = TransferItemManagerDL.GetItemAtUserIndex(pos) as TransferItem;
-                        if(selectFailed && ti.Failed)
-                        {
-                            tis.Add(ti);
-                        }
-                        else if(!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
-                        {
-                            tis.Add(ti);
-                        }
-                    }
-                }
-                transferItemConditionList = tis;
+                transferItemConditionList = batchSelectedTis;
             }
             else if (all)
             {
@@ -7342,29 +7429,51 @@ namespace AndriodApp1
                 //task.ContinueWith(SoulSeekState.MainActivityRef.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username,item1.FullFilename,item1.Size,task, cancellationTokenSource))));
                 item.Progress = 0; //no longer red... some good user feedback
                 item.Failed = false;
-                var refreshOnlySelected = new Action(() =>
-                {
 
-                    int index = TransferItemManagerDL.GetUserIndexForTransferItem(item);
-                    if (index == -1 && InUploadsMode)
-                    {
-                        return;
-                    }
-                    recyclerTransferAdapter?.NotifyItemChanged(index);  //TODO: I dont like that we do the index later. things could have changed.
-
-
-                });
-                lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
-                { //also can update this to do a partial refresh...
-                    refreshListView(refreshOnlySelected);
-                }
             }
 
+            var refreshOnlySelected = new Action(() =>
+            {
+                HashSet<int> indicesToUpdate = new HashSet<int>();
+                foreach(TransferItem ti in transferItemConditionList)
+                {
+                    int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti);
+                    if(pos==-1)
+                    {
+                        MainActivity.LogDebug("pos == -1!!");
+                        continue;
+                    }
+                    
+                    if(indicesToUpdate.Contains(pos))
+                    {
+                        //this is for if we are in a folder.  since previously we would update a folder of 10 items, 10 times which looked quite glitchy...
+                        MainActivity.LogDebug($"skipping same pos {pos}");
+                    }
+                    else
+                    {
+                        indicesToUpdate.Add(pos);
+                    }
+                }
+                if (InUploadsMode)
+                {
+                    return;
+                }
+                foreach(int i in indicesToUpdate)
+                {
+                    MainActivity.LogDebug($"updating {i}");
+                    recyclerTransferAdapter?.NotifyItemChanged(i);
+                }
 
+
+            });
+            lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
+            { //also can update this to do a partial refresh...
+                refreshListView(refreshOnlySelected);
+            }
         }
 
 
-        private void DownloadRetryLogic(int position)
+        private void DownloadRetryLogic(ITransferItem transferItem)
         {
             //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
             //its possible that in between creating this contextmenu and getting here that the transfer items changed especially if maybe a re-login was done...
@@ -7374,21 +7483,22 @@ namespace AndriodApp1
             //NEVER USE GetChildAt!!!  IT WILL RETURN NULL IF YOU HAVE MORE THAN ONE PAGE OF DATA
             //FindViewByPosition works PERFECTLY.  IT RETURNS THE VIEW CORRESPONDING TO THE TRANSFER LIST..
 
-            ITransferItemView targetView = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(position) as ITransferItemView;
+            //ITransferItemView targetView = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(position) as ITransferItemView;
 
-            TransferItem item1 = null;
-            MainActivity.LogDebug("targetView is null? " + (targetView == null).ToString());
-            if (targetView == null)
-            {
-                SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
-                return;
-            }
-            string chosenFname = (targetView.InnerTransferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
-            string chosenUname = (targetView.InnerTransferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
+            //TransferItem item1 = null;
+            //MainActivity.LogDebug("targetView is null? " + (targetView == null).ToString());
+            //if (targetView == null)
+            //{
+            //    SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
+            //    return;
+            //}
+            string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
+            string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             MainActivity.LogDebug("chosenFname? " + chosenFname);
-            item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
+            TransferItem item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
+            int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1);
             MainActivity.LogDebug("item1 is null?" + (item1 == null).ToString());//tested
-            if (item1 == null)
+            if (item1 == null || indexToRefresh==-1)
             {
                 SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
                 return;
@@ -7399,7 +7509,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogDebug("transfer is in Downloads !!! " + item1.FullFilename);
                 item1.CancelAndRetryFlag = true;
-                ClearTransferForRetry(item1, position);
+                ClearTransferForRetry(item1, indexToRefresh);
                 if (item1.CancellationTokenSource != null)
                 {
                     if (!item1.CancellationTokenSource.IsCancellationRequested)
@@ -7448,7 +7558,7 @@ namespace AndriodApp1
                 SoulSeekState.MainActivityRef.RunOnUiThread(a);
                 return; //otherwise null ref with task!
             }
-            ClearTransferForRetry(item1, position);
+            ClearTransferForRetry(item1, indexToRefresh);
         }
 
         private void ClearTransferForRetry(TransferItem item1, int position)
@@ -7475,18 +7585,26 @@ namespace AndriodApp1
         {
             if(item.GroupId == UNIQUE_TRANSFER_GROUP_ID)
             {
-                int position = recyclerTransferAdapter.getPosition();
-                ITransferItem ti = null;
-                try
+                ITransferItem ti = recyclerTransferAdapter.getSelectedItem();
+                int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
+                MainActivity.LogDebug($"position: {position} ti name: {ti.GetDisplayName()}");
+                //try
+                //{
+                //    ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
+                //}
+                //catch (ArgumentOutOfRangeException)
+                //{
+                //    //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                //    Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                //    return base.OnContextItemSelected(item);
+                //}
+                
+                if(position == -1)
                 {
-                    ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                     Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                     return base.OnContextItemSelected(item);
                 }
+
                 if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
                 {
                     MainActivity.LogDebug("handled by commons");
@@ -7495,7 +7613,7 @@ namespace AndriodApp1
 
                 switch (item.ItemId)
                 {
-                    case 0:
+                    case 0: //single transfer only
                         //retry download (resume download)
 
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -7523,12 +7641,12 @@ namespace AndriodApp1
                                     });
                                     return;
                                 }
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryLogic(position); });
+                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
                             }));
                         }
                         else
                         {
-                            DownloadRetryLogic(position);
+                            DownloadRetryLogic(ti);
                         }
                         //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
                         break;
@@ -7833,6 +7951,50 @@ namespace AndriodApp1
             }
         }
 
+        public static void UpdateBatchSelectedItemsIfApplicable(TransferItem ti)
+        {
+            if(TransfersActionMode==null)
+            {
+                return;
+            }
+            int userPostionBeingRemoved = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
+            if(userPostionBeingRemoved == -1)
+            {
+                //it is not currently on our screen, perhaps it is in uploads (and we are in downloads) or we are inside a folder (and it is outside)
+                MainActivity.LogDebug("batch on, different screen item removed");
+                return;
+            }
+            MainActivity.LogDebug("batch on, updating: " + userPostionBeingRemoved);
+            //adjust numbers
+            int cnt = BatchSelectedItems.Count;
+            for (int i = cnt - 1; i >= 0; i--)
+            {
+                int position = BatchSelectedItems[i];
+                if (position < userPostionBeingRemoved)
+                {
+                    continue;
+                }
+                else if (position == userPostionBeingRemoved)
+                {
+                    BatchSelectedItems.RemoveAt(i);
+                }
+                else
+                {
+                    BatchSelectedItems[i] = position - 1;
+                }
+            }
+            //if there was only 1 and its the one that just finished then take us out of batchSelectedItems
+            if(BatchSelectedItems.Count == 0)
+            {
+                TransfersActionMode.Finish();
+            }
+            else if(BatchSelectedItems.Count != cnt) //if we have 1 less now.
+            {
+                TransfersActionMode.Title = string.Format("{0} Selected", BatchSelectedItems.Count.ToString());
+                TransfersActionMode.Invalidate();
+            }
+        }
+
         public class ActionModeCallback : Java.Lang.Object, ActionMode.ICallback
         {
             public TransferAdapterRecyclerVersion Adapter;
@@ -7863,34 +8025,36 @@ namespace AndriodApp1
 
                     TransferStates transferStates = TransferStates.None;
                     bool failed = false;
+                    List<TransferItem> transfersSelected = new List<TransferItem>();
                     foreach(int position in BatchSelectedItems)
                     {
                         var ti = TransferItemManagerWrapped.GetItemAtUserIndex(position);
                         if(ti is TransferItem singleTi)
                         {
-                            transferStates = singleTi.State | transferStates;
+                            transfersSelected.Add(singleTi);
                         }
                         else if(ti is FolderItem folderTi)
                         {
-                            transferStates = folderTi.GetState(out failed) | transferStates;
-                            if(failed)
-                            {
-                                transferStates = transferStates | TransferStates.Errored;
-                            }
-                        }
-                        if(transferStates.HasFlag(TransferStates.Cancelled))
-                        {
-                            menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(true);
-                        }
-                        if(transferStates.HasFlag(TransferStates.InProgress))
-                        {
-                            menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(true);
-                        }
-                        if(((transferStates & (TransferStates.Errored | TransferStates.Rejected | TransferStates.TimedOut)) != 0x0))
-                        {
-                            menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(true);
+                            transfersSelected.AddRange(folderTi.TransferItems);
                         }
                     }
+                    TransferViewHelper.GetStatusNumbers(transfersSelected, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued);
+
+                    if(numPaused!=0)
+                    {
+                        menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(true);
+                    }
+                    if(numInProgress!=0 || numQueued!=0)
+                    {
+                        menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(true);
+                    }
+                    if(numFailed!=0)
+                    {
+                        menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(true);
+                    }
+
+                    //clear all complete??
+
                 }
                 return false;
             }
@@ -8317,7 +8481,7 @@ namespace AndriodApp1
             {
                 if (!IsInBatchSelectMode)
                 {
-                    setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    setSelectedItem((sender as ITransferItemView).InnerTransferItem);
                     (sender as View).ShowContextMenu();
                 }
                 else
@@ -8327,6 +8491,9 @@ namespace AndriodApp1
             }
 
         }
+
+        
+
 
 
         public class TransferAdapterRecyclerFolderItem : TransferAdapterRecyclerVersion
@@ -8360,8 +8527,8 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
-                    FolderItem f = localDataSet[position] as FolderItem;
+                    FolderItem f = (sender as ITransferItemView).InnerTransferItem as FolderItem;
+                    setSelectedItem(f);
                     if (InUploadsMode)
                     {
                         CurrentlySelectedUploadFolder = f;
@@ -8389,7 +8556,7 @@ namespace AndriodApp1
                     //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
                     //pop.Inflate(Resource.Menu.download_diag_options);
                     //pop.Show();
-                    setPosition((sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    setSelectedItem((sender as ITransferItemView).InnerTransferItem);
                     (sender as View).ShowContextMenu();
                 }
             }
@@ -8401,19 +8568,32 @@ namespace AndriodApp1
         {
             protected System.Collections.IList localDataSet;
             public override int ItemCount => localDataSet.Count;
-            protected int position = -1;
+            protected ITransferItem selectedItem = null;
             public bool IsInBatchSelectMode;
 
             public TransfersFragment TransfersFragment;
-
-            public void setPosition(int position)
+#if DEBUG
+            public void SelectedDebugInfo(ITransferItem iti)
             {
-                this.position = position;
+
+                int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
+                MainActivity.LogDebug($"position: {position} ti name: {iti.GetDisplayName()}");
+
+            }
+#endif
+
+            public void setSelectedItem(ITransferItem item)
+            {
+                this.selectedItem = item;
+#if DEBUG
+                SelectedDebugInfo(item);
+#endif
+
             }
 
-            public int getPosition()
+            public ITransferItem getSelectedItem()
             {
-                return this.position;
+                return this.selectedItem;
             }
 
             //public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
@@ -8514,7 +8694,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState))) ;
+                        if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState)));
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, "Abort Uploads");
                         }
