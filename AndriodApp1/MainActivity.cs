@@ -397,15 +397,15 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                         {
 
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
 
                         });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });
 
                 }));
             }
@@ -11986,15 +11986,15 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                         {
 
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
 
                         });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
                 }));
                 return true;
             }

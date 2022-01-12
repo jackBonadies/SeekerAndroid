@@ -487,15 +487,15 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                         {
 
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
 
                         });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(()=>{AddUserLogic(c,username,UIaction, massImportCase); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{AddUserLogic(c,username,UIaction, massImportCase); });
 
                 }));
             }
