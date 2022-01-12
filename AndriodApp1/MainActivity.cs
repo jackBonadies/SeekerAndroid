@@ -1496,6 +1496,18 @@ namespace AndriodApp1
                 return Downloads.GetIndexForFolderItem(folderItem);
             }
         }
+
+        public int GetUserIndexForITransferItem(ITransferItem iti)
+        {
+            if (TransfersFragment.InUploadsMode)
+            {
+                return Uploads.GetUserIndexForITransferItem(iti);
+            }
+            else
+            {
+                return Downloads.GetUserIndexForITransferItem(iti);
+            }
+        }
     }
 
     [Serializable]
@@ -1768,6 +1780,22 @@ namespace AndriodApp1
             lock(AllFolderItems)
             {
                 return AllFolderItems.IndexOf(ti);
+            }
+        }
+
+        public int GetUserIndexForITransferItem(ITransferItem iti)
+        {
+            if (iti is TransferItem ti)
+            {
+                return GetUserIndexForTransferItem(ti);
+            }
+            else if (iti is FolderItem fi)
+            {
+                return GetIndexForFolderItem(fi);
+            }
+            else
+            {
+                return -1;
             }
         }
 
@@ -2779,11 +2807,12 @@ namespace AndriodApp1
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
 
                 // int indexRemoved = -1;
-                if ( ((SoulSeekState.AutoClearCompleteDownloads && !isUpload)||SoulSeekState.AutoClearCompleteUploads && isUpload) && System.Math.Abs(percentComplete - 100) < .001 ) //if 100% complete and autoclear //todo: autoclear on upload
+                if ( ((SoulSeekState.AutoClearCompleteDownloads && !isUpload)||(SoulSeekState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001 ) //if 100% complete and autoclear //todo: autoclear on upload
                 {
 
                     Action action = new Action(() => {
                         //int before = TransfersFragment.transferItems.Count;
+                        TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
                         TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
                         //int after = TransfersFragment.transferItems.Count;
                         //MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
@@ -3847,9 +3876,9 @@ namespace AndriodApp1
                 searchIntervalMilliseconds = 2* 60 * 1000; //min of 2 mins...
             }
 
-//#if DEBUG
-//            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
-//#endif
+#if DEBUG
+            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
+#endif
 
             WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
             WishlistTimer.AutoReset = true;
