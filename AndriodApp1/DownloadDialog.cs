@@ -360,7 +360,7 @@ namespace AndriodApp1
                         }
                         catch
                         {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), ToastLength.Short).Show();
                         }
                     }
                     
@@ -384,7 +384,7 @@ namespace AndriodApp1
         {
             if (!SoulSeekState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
                 return;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -392,17 +392,17 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.MainActivityRef, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
                 {
                     return;
                 }
                 t.ContinueWith(new Action<Task>((Task t) => {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(()=>{RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(()=>{RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
                 }));
             }
             else
