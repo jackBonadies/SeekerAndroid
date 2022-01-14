@@ -5884,6 +5884,10 @@ namespace AndriodApp1
             if (isFailed)//state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut))
             {
                 progressBar.Progress = 100;
+                if (this.showSize)
+                {
+                    (viewProgressSize as AndriodApp1.TransfersFragment.ProgressSizeTextView).Progress = 100;
+                }
 #pragma warning disable 0618
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
@@ -8485,6 +8489,7 @@ namespace AndriodApp1
                     v.progressBar.Progress = prog;
                     if(v.GetShowProgressSize())
                     {
+                        (v.GetProgressSizeTextView() as ProgressSizeTextView).Progress = prog;
                         TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), prog, completedBytes);
                     }
 
