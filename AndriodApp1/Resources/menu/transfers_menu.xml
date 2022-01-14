@@ -61,4 +61,21 @@ android:iconifiedByDefault="false"
  android:iconifiedByDefault="false"
  />
 
+	<item android:id="@+id/styleOptions"
+	 android:title="Options" >
+
+		<menu>
+			<item android:id="@+id/action_show_size"
+	   android:title="Show Size"
+	   app:showAsAction="never"
+	   android:iconifiedByDefault="false"
+	 />
+			<item android:id="@+id/action_show_speed"
+		  android:title="Show Speed"
+		  app:showAsAction="never"
+		  android:iconifiedByDefault="false"
+ />
+		</menu>
+
+	</item>
 </menu>

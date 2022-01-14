@@ -5681,11 +5681,17 @@ namespace AndriodApp1
             return isUpload;
         }
 
+        public double GetAvgSpeed()
+        {
+            return AvgSpeed;
+        }
+
         public string Filename;
         public string Username;
         public string FolderName;
         public string FullFilename;
         public int Progress;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
         public TimeSpan? RemainingTime;
         public bool Failed;
         public TransferStates State;
@@ -5694,6 +5700,8 @@ namespace AndriodApp1
         public bool Queued = false;
         private int queuelength = 0;
         public bool CancelAndRetryFlag = false;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public double AvgSpeed = 0;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool CancelAndClearFlag = false;
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -5736,6 +5744,12 @@ namespace AndriodApp1
         public ProgressBar progressBar { get; set; }
 
         public TextView GetAdditionalStatusInfoView();
+
+        public TextView GetProgressSizeTextView();
+
+        public bool GetShowProgressSize();
+
+        public bool GetShowSpeed();
     }
 
     public class TransferItemViewFolder : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
@@ -5746,6 +5760,7 @@ namespace AndriodApp1
         private TextView viewCurrentFilename;
         private TextView viewNumRemaining;
 
+        private TextView viewProgressSize;
         private TextView viewStatus; //In Queue, Failed, Done, In Progress
         private TextView viewStatusAdditionalInfo; //if in Queue then show position, if In Progress show time remaining.
 
@@ -5758,20 +5773,68 @@ namespace AndriodApp1
             return viewStatusAdditionalInfo;
         }
 
+        public TextView GetProgressSizeTextView()
+        {
+            return viewProgressSize;
+        }
+
+        public bool showSize;
+        public bool showSpeed;
+            
+        public bool GetShowProgressSize()
+        {
+            return showSize;
+        }
+
+        public bool GetShowSpeed()
+        {
+            return showSpeed;
+        }
+
         public TransferItemViewFolder(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
+            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
+
+            if (_showSizes)
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
+            }
+            else
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
+            }
+
             setupChildren();
         }
         public TransferItemViewFolder(Context context, IAttributeSet attrs) : base(context, attrs)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
+            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
+
+            if (_showSizes)
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
+            }
+            else
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
+            }
+
             setupChildren();
         }
 
-        public static TransferItemViewFolder inflate(ViewGroup parent)
+        public static TransferItemViewFolder inflate(ViewGroup parent, bool _showSize, bool _showSpeed)
         {
-            TransferItemViewFolder itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy, parent, false);
+            TransferItemViewFolder itemView = null;
+            if(_showSize)
+            {
+               itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress, parent, false);
+            }
+            else
+            {
+                itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy, parent, false);
+            }
+            itemView.showSpeed = _showSpeed;
+            itemView.showSize = _showSize;
             return itemView;
         }
 
@@ -5780,6 +5843,7 @@ namespace AndriodApp1
             viewUsername = FindViewById<TextView>(Resource.Id.textViewUser);
             viewFoldername = FindViewById<TextView>(Resource.Id.textViewFoldername);
             progressBar = FindViewById<ProgressBar>(Resource.Id.simpleProgressBar);
+            viewProgressSize = FindViewById<TextView>(Resource.Id.textViewProgressSize);
 
             viewStatus = FindViewById<TextView>(Resource.Id.textViewStatus);
             viewStatusAdditionalInfo = FindViewById<TextView>(Resource.Id.textViewStatusAdditionalInfo);
@@ -5799,10 +5863,19 @@ namespace AndriodApp1
             viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed);
 
+            
             TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload(), true);
-            TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, item, state);
+            TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, item, state, true); //TODOTODO
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
-            progressBar.Progress = folderItem.GetFolderProgress(out _, out _);
+            int prog = folderItem.GetFolderProgress(out long totalBytes, out _);
+            progressBar.Progress = prog;
+            if(this.showSize)
+            {
+                (viewProgressSize as TransfersFragment.ProgressSizeTextView).Progress = prog;
+                TransferViewHelper.SetSizeText(viewProgressSize, prog, totalBytes);
+            }
+            
+
             viewUsername.Text = folderItem.Username;
             if (item.IsUpload() && state.HasFlag(TransferStates.Cancelled))
             {
@@ -6063,6 +6136,35 @@ namespace AndriodApp1
         }
 
 
+
+        public static void SetSizeText(TextView size, int progress, long sizeBytes)
+        {
+            if(progress == 100)
+            {
+                if(sizeBytes > 1024*1024)
+                {
+                    size.Text = System.String.Format("{0:F1}mb", sizeBytes / 1048576.0);
+                }
+                else
+                {
+                    size.Text = System.String.Format("{0:F1}kb", sizeBytes / 1024.0);
+                }
+            }
+            else
+            {
+                long bytesTransferred = progress * sizeBytes;
+                if (sizeBytes > 1024 * 1024)
+                {
+                    size.Text = System.String.Format("{0:F1}/{1:F1}mb", bytesTransferred / (1048576.0 * 100.0), sizeBytes / 1048576.0);
+                }
+                else
+                {
+                    size.Text = System.String.Format("{0:F1}/{1:F1}kb", bytesTransferred / (1024.0 * 100.0), sizeBytes / 1024.0);
+                }
+            }
+        }
+
+
         public static void SetViewStatusText(TextView viewStatus, TransferStates state, bool isUpload, bool isFolder)
         {
             if (state.HasFlag(TransferStates.Queued))
@@ -6156,11 +6258,19 @@ namespace AndriodApp1
             }
         }
 
-        public static void SetAdditionalStatusText(TextView viewStatusAdditionalInfo, ITransferItem item, TransferStates state)
+        public static void SetAdditionalStatusText(TextView viewStatusAdditionalInfo, ITransferItem item, TransferStates state, bool showSpeed)
         {
             if (state.HasFlag(TransferStates.InProgress))
             {
-                viewStatusAdditionalInfo.Text = GetTimeRemainingString(item.GetRemainingTime());
+                //Helpers.GetTransferSpeedString(avgSpeedBytes);
+                if(showSpeed)
+                {
+                    viewStatusAdditionalInfo.Text = Helpers.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
+                }
+                else
+                {
+                    viewStatusAdditionalInfo.Text = GetTimeRemainingString(item.GetRemainingTime());
+                }
             }
             else if (state.HasFlag(TransferStates.Queued) && !(item.IsUpload()))
             {
@@ -6191,6 +6301,7 @@ namespace AndriodApp1
 
         private TextView viewStatus; //In Queue, Failed, Done, In Progress
         private TextView viewStatusAdditionalInfo; //if in Queue then show position, if In Progress show time remaining.
+        private TextView progressSize; //if in Queue then show position, if In Progress show time remaining.
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
@@ -6201,20 +6312,68 @@ namespace AndriodApp1
             return viewStatusAdditionalInfo;
         }
 
+        public TextView GetProgressSizeTextView()
+        {
+            return progressSize;
+        }
+
+        public bool GetShowProgressSize()
+        {
+            return showSizes;
+        }
+        public bool GetShowSpeed()
+        {
+            return showSpeed;
+        }
+
+
+        public bool showSpeed;
+        public bool showSizes;
         public TransferItemViewDetails(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
+            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
+
+            if(_showSizes)
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
+            }
+            else
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
+            }
+            
             setupChildren();
         }
         public TransferItemViewDetails(Context context, IAttributeSet attrs) : base(context, attrs)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
+            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
+
+            if (_showSizes)
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
+            }
+            else
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
+            }
+
             setupChildren();
         }
 
-        public static TransferItemViewDetails inflate(ViewGroup parent)
+        public static TransferItemViewDetails inflate(ViewGroup parent, bool _showSizes, bool _showSpeed)
         {
-            TransferItemViewDetails itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy, parent, false);
+            
+            TransferItemViewDetails itemView = null;
+            if(_showSizes)
+            {
+                itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy_showProgressSize, parent, false);
+            }
+            else
+            {
+                itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy, parent, false);
+            }
+            itemView.showSpeed = _showSpeed;
+            itemView.showSizes = _showSizes;
             return itemView;
         }
 
@@ -6226,7 +6385,10 @@ namespace AndriodApp1
 
             viewStatus = FindViewById<TextView>(Resource.Id.textViewStatus);
             viewStatusAdditionalInfo = FindViewById<TextView>(Resource.Id.textViewStatusAdditionalInfo);
+
+            progressSize = FindViewById<TextView>(Resource.Id.textViewProgressSize);
             //viewQueue = FindViewById<TextView>(Resource.Id.textView4);
+
         }
 
 
@@ -6238,8 +6400,12 @@ namespace AndriodApp1
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.Progress;
+            if(this.showSizes)
+            {
+                TransferViewHelper.SetSizeText(progressSize, ti.Progress, ti.Size);
+            }
             TransferViewHelper.SetViewStatusText(viewStatus, ti.State, ti.IsUpload(), false);
-            TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, ti, ti.State);
+            TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, ti, ti.State, this.showSpeed);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;
             if (item.IsUpload() && ti.State.HasFlag(TransferStates.Cancelled))
@@ -6315,114 +6481,6 @@ namespace AndriodApp1
     }
 
 
-    public class TransferItemViewMinimal : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
-    {
-        public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
-        private TextView viewUsername;
-        private TextView viewFoldername;
-        private TextView viewFilename;
-        public ITransferItem InnerTransferItem { get; set; }
-        //private TextView viewQueue;
-        private TextView viewStatusAdditionalInfo;
-        public ProgressBar progressBar { get; set; }
-        public TransferItemViewMinimal(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_row, this, true);
-            setupChildren();
-        }
-        public TransferItemViewMinimal(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_row, this, true);
-            setupChildren();
-        }
-
-        public TextView GetAdditionalStatusInfoView()
-        {
-            return viewStatusAdditionalInfo;
-        }
-
-        public static TransferItemViewMinimal inflate(ViewGroup parent)
-        {
-            TransferItemViewMinimal itemView = (TransferItemViewMinimal)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_row_dummy, parent, false);
-            return itemView;
-        }
-
-
-        public void setupChildren()
-        {
-            viewUsername = FindViewById<TextView>(Resource.Id.textView1);
-            viewFilename = FindViewById<TextView>(Resource.Id.textView2);
-            progressBar = FindViewById<ProgressBar>(Resource.Id.simpleProgressBar);
-            //viewQueue = FindViewById<TextView>(Resource.Id.textView4);
-        }
-
-        public void setItem(ITransferItem transferItem, bool isInBatchMode)
-        {
-            InnerTransferItem = transferItem;
-            TransferItem ti = transferItem as TransferItem;
-            viewFilename.Text = ti.Filename;
-            progressBar.Progress = ti.Progress;
-            viewUsername.Text = ti.Username;
-            if (ti.Failed)
-            {
-                progressBar.Progress = 100;
-#pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                {
-                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.Red);
-                }
-                else
-                {
-                    progressBar.ProgressDrawable.SetColorFilter(Color.Red, PorterDuff.Mode.Multiply);
-                }
-#pragma warning restore 0618
-            }
-            else
-            {
-#pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                {
-                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
-                }
-                else
-                {
-                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
-                }
-#pragma warning restore 0618
-            }
-
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            base.OnCreateContextMenu(menu);
-            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            menu.Add(0, 0, 0, Resource.String.retry_dl);
-            menu.Add(1, 1, 1, Resource.String.clear_from_list);
-            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
-        }
-    }
-
-    //public class TransferAdapter : ArrayAdapter<TransferItem>
-    //{
-    //    public TransferAdapter(Context c, List<TransferItem> items) : base(c, 0, items)
-    //    {
-
-    //    }
-
-    //    public override View GetView(int position, View convertView, ViewGroup parent)
-    //    {
-    //        TransferItemView itemView = (TransferItemView)convertView;
-    //        if (null == itemView)
-    //        {
-    //            itemView = TransferItemView.inflate(parent);
-    //            itemView.LongClickable = true;
-    //        }
-    //        itemView.setItem(GetItem(position));
-    //        return itemView;
-    //        //return base.GetView(position, convertView, parent);
-    //    }
-    //}
 
 
     public class CustomLinearLayoutManager : LinearLayoutManager
@@ -6614,6 +6672,25 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(false);
                 }
             }
+
+            if (SoulSeekState.TransferViewShowSizes)
+            {
+                menu.FindItem(Resource.Id.action_show_size).SetTitle("Hide Size");
+            }
+            else
+            {
+                menu.FindItem(Resource.Id.action_show_size).SetTitle("Show Size");
+            }
+
+            if (SoulSeekState.TransferViewShowSpeed)
+            {
+                menu.FindItem(Resource.Id.action_show_speed).SetTitle("Hide Speed");
+            }
+            else
+            {
+                menu.FindItem(Resource.Id.action_show_speed).SetTitle("Show Speed");
+            }
+
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -6646,6 +6723,14 @@ namespace AndriodApp1
                 case Resource.Id.action_toggle_group_by: //toggle group by. group / ungroup by folder.
                     GroupByFolder = !GroupByFolder;
                     SetRecyclerAdapter();
+                    return true;
+                case Resource.Id.action_show_size:
+                    SoulSeekState.TransferViewShowSizes = !SoulSeekState.TransferViewShowSizes;
+                    SetRecyclerAdapter(true);
+                    return true;
+                case Resource.Id.action_show_speed:
+                    SoulSeekState.TransferViewShowSpeed = !SoulSeekState.TransferViewShowSpeed;
+                    SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
                     MainActivity.LogInfoFirebase("Clear All Complete Pressed");
@@ -7094,10 +7179,27 @@ namespace AndriodApp1
         public static ActionMode TransfersActionMode = null;
         public static List<int> BatchSelectedItems = new List<int>();
 
-        public void SetRecyclerAdapter()
+        public void SetRecyclerAdapter(bool restoreState = false)
         {
             lock (TransferItemManagerWrapped.GetUICurrentList())
             {
+                int prevScrollPos =0;
+                int scrollOffset = 0;
+                if (restoreState)
+                {
+                    prevScrollPos = ((LinearLayoutManager)recycleLayoutManager).FindFirstVisibleItemPosition();
+                    View v = recyclerViewTransferItems.GetChildAt(0);
+                    if (v == null)
+                    {
+                        scrollOffset = 0;
+                    }
+                    else
+                    {
+                        scrollOffset = v.Top - recyclerViewTransferItems.Top;
+                    }
+                }
+
+
                 if (GroupByFolder && !CurrentlyInFolder())
                 {
                     recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItemManagerWrapped.GetUICurrentList() as List<FolderItem>);
@@ -7109,6 +7211,11 @@ namespace AndriodApp1
                 recyclerTransferAdapter.TransfersFragment = this;
                 recyclerTransferAdapter.IsInBatchSelectMode = (TransfersActionMode != null);
                 recyclerViewTransferItems.SetAdapter(recyclerTransferAdapter);
+
+                if(restoreState)
+                {
+                    ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(prevScrollPos, scrollOffset);
+                }
             }
         }
 
@@ -7581,6 +7688,16 @@ namespace AndriodApp1
             }
         }
 
+        private bool NotLoggedInShowMessageGaurd(string msg)
+        {
+            if(!SoulSeekState.currentlyLoggedIn)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Must be logged in to " + msg, ToastLength.Short).Show();
+                return true;
+            }
+            return false;
+        }
+
         public override bool OnContextItemSelected(IMenuItem item)
         {
             if(item.GroupId == UNIQUE_TRANSFER_GROUP_ID)
@@ -7615,6 +7732,10 @@ namespace AndriodApp1
                 {
                     case 0: //single transfer only
                         //retry download (resume download)
+                        if(NotLoggedInShowMessageGaurd("start transfer"))
+                        {
+                            return true;
+                        }
 
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
@@ -7727,6 +7848,10 @@ namespace AndriodApp1
                         }
                         break;
                     case 3:
+                        if (NotLoggedInShowMessageGaurd("get queue position"))
+                        {
+                            return true;
+                        }
                         tItem = null;
                         try
                         {
@@ -7796,7 +7921,47 @@ namespace AndriodApp1
                             Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
                         }
                         break;
+                    case 7: //browse at location (browse at folder)
+                        if (NotLoggedInShowMessageGaurd("browse folder"))
+                        {
+                            return true;
+                        }
+                        if (ti is TransferItem ttti)
+                        {
+                            string startingDir = Helpers.GetDirectoryRequestFolderName(ttti.FullFilename);
+                            Action<View> action = new Action<View>((v) => {
+                                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                            });
+
+                            DownloadDialog.RequestFilesApi(ttti.Username, this.View, action, startingDir);
+                        }
+                        else if(ti is FolderItem fi)
+                        {
+                            if(fi.IsEmpty())
+                            {
+                                //since if auto clear is on, and the menu is already up, the final item in this folder can clear before we end up selecting something.
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef,"Folder is empty.",ToastLength.Short).Show();
+                                return true;
+                            }
+                            string startingDir = Helpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
+                            for (int i=0; i < fi.GetDirectoryLevel() - 1; i++)
+                            {
+                                startingDir = Helpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
+                            }
+
+                            
+                            Action<View> action = new Action<View>((v) => {
+                                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                            });
+
+                            DownloadDialog.RequestFilesApi(fi.Username, this.View, action, startingDir);
+                        }
+                        break;
                     case 100: //resume folder
+                        if (NotLoggedInShowMessageGaurd("resume folder"))
+                        {
+                            return true;
+                        }
                         MainActivity.LogInfoFirebase("resume folder Pressed");
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
@@ -7837,6 +8002,10 @@ namespace AndriodApp1
                         recyclerTransferAdapter.NotifyItemChanged(index);
                         break;
                     case 102: //retry failed downloads from folder
+                        if (NotLoggedInShowMessageGaurd("retry folder"))
+                        {
+                            return true;
+                        }
                         MainActivity.LogInfoFirebase("retry folder Pressed");
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
@@ -8312,7 +8481,12 @@ namespace AndriodApp1
                 if (v is TransferItemViewFolder)
                 {
 
-                    v.progressBar.Progress = (v.InnerTransferItem as FolderItem).GetFolderProgress(out long totalBytes, out long completedBytes);
+                    int prog = (v.InnerTransferItem as FolderItem).GetFolderProgress(out long totalBytes, out long completedBytes);
+                    v.progressBar.Progress = prog;
+                    if(v.GetShowProgressSize())
+                    {
+                        TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), prog, completedBytes);
+                    }
 
                     TimeSpan? timeRemaining = null;
                     long bytesRemaining = totalBytes - completedBytes;
@@ -8325,7 +8499,15 @@ namespace AndriodApp1
 
                     if (relevantItem.State.HasFlag(TransferStates.InProgress))
                     {
-                        v.GetAdditionalStatusInfoView().Text = TransferViewHelper.GetTimeRemainingString(timeRemaining);
+                        if(v.GetShowSpeed())
+                        {
+                            v.GetAdditionalStatusInfoView().Text = Helpers.GetTransferSpeedString(avgSpeedBytes) + "  •  " + TransferViewHelper.GetTimeRemainingString(timeRemaining);
+                        }
+                        else
+                        {
+                            v.GetAdditionalStatusInfoView().Text = TransferViewHelper.GetTimeRemainingString(timeRemaining);
+                        }
+                        
                     }
                     else if (relevantItem.State.HasFlag(TransferStates.Queued) && !(relevantItem.IsUpload()))
                     {
@@ -8346,7 +8528,11 @@ namespace AndriodApp1
                 else
                 {
                     v.progressBar.Progress = progress;
-                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), relevantItem, relevantItem.State);
+                    if(v.GetShowProgressSize())
+                    {
+                        TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), relevantItem.Progress, relevantItem.Size);
+                    }
+                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), relevantItem, relevantItem.State, v.GetShowSpeed());
                     if (wasFailed)
                     {
                         ClearProgressBarColor(v.progressBar);
@@ -8453,15 +8639,8 @@ namespace AndriodApp1
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
                 bool TYPE_TO_USE = true;
-                ITransferItemView view = null;
-                if (TYPE_TO_USE)
-                {
-                    view = TransferItemViewDetails.inflate(parent);
-                }
-                else
-                {
-                    view = TransferItemViewMinimal.inflate(parent);
-                }
+                ITransferItemView view = TransferItemViewDetails.inflate(parent, this.showSizes, this.showSpeed);
+
                 view.setupChildren();
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
@@ -8511,7 +8690,7 @@ namespace AndriodApp1
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ITransferItemView view = TransferItemViewFolder.inflate(parent);
+                ITransferItemView view = TransferItemViewFolder.inflate(parent, this.showSizes, this.showSpeed);
                 view.setupChildren();
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
@@ -8563,6 +8742,43 @@ namespace AndriodApp1
 
         }
 
+        public class ProgressSizeTextView : TextView
+        {
+            public int Progress = 0;
+            private readonly bool isInNightMode = false;
+            public ProgressSizeTextView(Context context, IAttributeSet attrs) : base(context, attrs)
+            {
+                isInNightMode = DownloadDialog.InNightMode(context);
+            }
+            protected override void OnDraw(Canvas canvas)
+            {
+                if(isInNightMode)
+                {
+                    canvas.Save();
+                    this.SetTextColor(Color.White);
+                    base.OnDraw(canvas);
+                    canvas.Restore();
+                }
+                else
+                {
+                    Rect rect = new Rect();
+                    this.GetDrawingRect(rect);
+                    rect.Right = (int)(rect.Left + (Progress * .01) * (rect.Right - rect.Left));
+                    canvas.Save();
+                    canvas.ClipRect(rect, Region.Op.Difference);
+                    this.SetTextColor(Color.Black);
+                    base.OnDraw(canvas);
+                    canvas.Restore();    
+
+                    canvas.Save();
+                    canvas.ClipRect(rect, Region.Op.Intersect); // lets draw inside center rect only
+                    this.SetTextColor(Color.White);
+                    base.OnDraw(canvas);
+                    canvas.Restore();
+                }
+            }
+        }
+
 
         public abstract class TransferAdapterRecyclerVersion : RecyclerView.Adapter //<TransferAdapterRecyclerVersion.TransferViewHolder>
         {
@@ -8605,10 +8821,13 @@ namespace AndriodApp1
 
 
 
-
+            protected readonly bool showSpeed = false;
+            protected readonly bool showSizes = false;
             public TransferAdapterRecyclerVersion(System.Collections.IList tranfersList)
             {
                 localDataSet = tranfersList;
+                showSpeed = SoulSeekState.TransferViewShowSpeed;
+                showSizes = SoulSeekState.TransferViewShowSizes;
             }
 
         }
@@ -8818,12 +9037,13 @@ namespace AndriodApp1
                 }
                 var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, 5, 5, "User Options");
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 6, 6, Resource.String.browse_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, Resource.String.search_user_files);
-                Helpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 8, 8, tvh.InnerTransferItem.GetUsername(), false);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 9, 9, Resource.String.msg_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.get_user_info);
-                Helpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 11, 11, tvh.InnerTransferItem.GetUsername());
-                Helpers.AddGivePrivilegesIfApplicable(subMenu, 12);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, "Browse At Location");
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 8, 8, Resource.String.search_user_files);
+                Helpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 9, 9, tvh.InnerTransferItem.GetUsername(), false);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.msg_user);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 11, 11, Resource.String.get_user_info);
+                Helpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 12, 12, tvh.InnerTransferItem.GetUsername());
+                Helpers.AddGivePrivilegesIfApplicable(subMenu, 13);
 
                 if (isUpload)
                 {
