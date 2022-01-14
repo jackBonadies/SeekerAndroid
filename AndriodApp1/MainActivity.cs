@@ -881,6 +881,7 @@ namespace AndriodApp1
         public string GetFolderName();
         public string GetUsername();
         public TimeSpan? GetRemainingTime();
+        public double GetAvgSpeed();
         public int GetQueueLength();
         public bool IsUpload();
     }
@@ -897,11 +898,20 @@ namespace AndriodApp1
             return TransferItems[0].IsUpload();
         }
 
-        public TimeSpan? RemainingFolderTime;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public TimeSpan? RemainingFolderTime; //this should never be serialized
 
         public TimeSpan? GetRemainingTime()
         {
             return RemainingFolderTime;
+        }
+
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public double AvgSpeed; //this could one day be serialized if you want say speed history (like QT does)
+
+        public double GetAvgSpeed()
+        {
+            return AvgSpeed;
         }
 
         public string GetDisplayName()
@@ -2805,6 +2815,7 @@ namespace AndriodApp1
                 double percentComplete = e.Transfer.PercentComplete;
                 relevantItem.Progress = (int)percentComplete;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
+                relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
 
                 // int indexRemoved = -1;
                 if ( ((SoulSeekState.AutoClearCompleteDownloads && !isUpload)||(SoulSeekState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001 ) //if 100% complete and autoclear //todo: autoclear on upload
@@ -3487,6 +3498,10 @@ namespace AndriodApp1
                 SoulSeekState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(SoulSeekState.M_OnlyFreeUploadSlots, true);
                 SoulSeekState.HideLockedResultsInBrowse = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedBrowse, true);
                 SoulSeekState.HideLockedResultsInSearch = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedSearch, true);
+
+                SoulSeekState.TransferViewShowSizes = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSizes, false);
+                SoulSeekState.TransferViewShowSpeed = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSpeed, false);
+
                 SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, false);
                 SoulSeekState.MemoryBackedDownload = sharedPreferences.GetBoolean(SoulSeekState.M_MemoryBackedDownload, false);
                 SearchFragment.FilterSticky = sharedPreferences.GetBoolean(SoulSeekState.M_FilterSticky, false);
@@ -9776,6 +9791,8 @@ namespace AndriodApp1
             editor.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
             editor.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
             editor.PutBoolean(SoulSeekState.M_RememberUserHistory, SoulSeekState.ShowRecentUsers);
+            editor.PutBoolean(SoulSeekState.M_TransfersShowSizes, SoulSeekState.TransferViewShowSizes);
+            editor.PutBoolean(SoulSeekState.M_TransfersShowSpeed, SoulSeekState.TransferViewShowSpeed);
             editor.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
             editor.PutBoolean(SoulSeekState.M_HideLockedSearch, SoulSeekState.HideLockedResultsInSearch);
             editor.PutBoolean(SoulSeekState.M_HideLockedBrowse, SoulSeekState.HideLockedResultsInBrowse);
@@ -10425,6 +10442,9 @@ namespace AndriodApp1
         public static bool HideLockedResultsInSearch = true;
         public static bool HideLockedResultsInBrowse = true;
 
+        public static bool TransferViewShowSizes = false;
+        public static bool TransferViewShowSpeed = false;
+
         public static bool MemoryBackedDownload = false;
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
@@ -10699,6 +10719,8 @@ namespace AndriodApp1
         public const string M_OnlyFreeUploadSlots = "Momento_FreeUploadSlots";
         public const string M_HideLockedBrowse = "Momento_HideLockedBrowse";
         public const string M_HideLockedSearch = "Momento_HideLockedSearch";
+        public const string M_TransfersShowSizes = "Momento_TransfersShowSizes";
+        public const string M_TransfersShowSpeed = "Momento_TransfersShowSpeed";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
@@ -11646,6 +11668,18 @@ namespace AndriodApp1
             catch
             {
                 return "";
+            }
+        }
+
+        public static string GetTransferSpeedString(double bytesPerSecond)
+        {
+            if(bytesPerSecond > 1048576) //more than 1MB
+            {
+                return string.Format("{0:F1}mbs", bytesPerSecond / 1048576.0);
+            }
+            else
+            {
+                return string.Format("{0:F1}kbs", bytesPerSecond/1024.0);
             }
         }
 

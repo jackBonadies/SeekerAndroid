@@ -39,5 +39,7 @@
 	<attr name="rounded_bottom_right_purple" format="reference" />
 	<attr name="rounded_top_purple" format="reference" />
 
+	<attr name="show_progress_size" format="boolean" />
+
 
 </resources>
