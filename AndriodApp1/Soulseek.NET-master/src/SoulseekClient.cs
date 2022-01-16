@@ -2905,7 +2905,7 @@ namespace Soulseek
 
                     // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
                     // by the remote client will erroneously be reported as zero and the transfer will fail.
-                    download.Size ??= transferRequestAcknowledgement.FileSize;
+                    download.Size ??= transferRequestAcknowledgement.FileSize; //this line should probably be above update state
 
                     // prepare a wait for the overall completion of the download
                     downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);

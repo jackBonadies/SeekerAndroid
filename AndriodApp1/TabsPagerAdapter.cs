@@ -5686,6 +5686,18 @@ namespace AndriodApp1
             return AvgSpeed;
         }
 
+        public long? GetSizeForDL()
+        {
+            if(this.Size==-1)
+            {
+                return null;
+            }
+            else
+            {
+                return this.Size;
+            }
+        }
+
         public string Filename;
         public string Username;
         public string FolderName;
@@ -5696,6 +5708,7 @@ namespace AndriodApp1
         public bool Failed;
         public TransferStates State;
         public long Size;
+        
         public bool isUpload;
         public bool Queued = false;
         private int queuelength = 0;
@@ -6149,9 +6162,13 @@ namespace AndriodApp1
                 {
                     size.Text = System.String.Format("{0:F1}mb", sizeBytes / 1048576.0);
                 }
-                else
+                else if(sizeBytes >= 0)
                 {
                     size.Text = System.String.Format("{0:F1}kb", sizeBytes / 1024.0);
+                }
+                else
+                {
+                    size.Text = "??";
                 }
             }
             else
@@ -6161,9 +6178,13 @@ namespace AndriodApp1
                 {
                     size.Text = System.String.Format("{0:F1}/{1:F1}mb", bytesTransferred / (1048576.0 * 100.0), sizeBytes / 1048576.0);
                 }
-                else
+                else if (sizeBytes >= 0)
                 {
                     size.Text = System.String.Format("{0:F1}/{1:F1}kb", bytesTransferred / (1024.0 * 100.0), sizeBytes / 1024.0);
+                }
+                else
+                {
+                    size.Text = "??";
                 }
             }
         }
@@ -7510,7 +7531,7 @@ namespace AndriodApp1
                 {
                     Android.Net.Uri incompleteUri = null;
                     SetupCancellationToken(item, cancellationTokenSource, out _);
-                    Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.Size, cancellationTokenSource);
+                    Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource);
                     task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
@@ -7642,7 +7663,7 @@ namespace AndriodApp1
 
                 Android.Net.Uri incompleteUri = null;
                 SetupCancellationToken(item1, cancellationTokenSource, out _);
-                Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
+                Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource);
                 //SoulSeekState.SoulseekClient.DownloadAsync(
                 //username: item1.Username,
                 //filename: item1.FullFilename,
@@ -7708,7 +7729,7 @@ namespace AndriodApp1
             {
                 ITransferItem ti = recyclerTransferAdapter.getSelectedItem();
                 int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
-                MainActivity.LogDebug($"position: {position} ti name: {ti.GetDisplayName()}");
+                //MainActivity.LogDebug($"position: {position} ti name: {ti.GetDisplayName()}");
                 //try
                 //{
                 //    ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
@@ -8880,8 +8901,16 @@ namespace AndriodApp1
                     folderItemState = fi.GetState(out anyFailed);
                     isUpload = fi.IsUpload();
                 }
+                //else
+                //{
+                    //shouldnt happen....
+                    AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+                    int pos1 = info?.Position ?? -1;
+                //}
 
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+
+                //if somehow we got here without setting the transfer item. then set it now...  you have menuInfo.Position, AND tvh.InnerTransferItem. and recyclerTransfer.GetSelectedItem() to check for null.
+
                 if (!isUpload)
                 {
                     if (isTransferItem)

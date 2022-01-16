@@ -272,7 +272,7 @@ namespace AndriodApp1
             }
             catch(InvalidOperationException)
             {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                SoulSeekState.MainActivityRef.RunOnUiThread(()=>{Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
                 return;
             }
             Action<Task<BrowseResponse>> continueWithAction = new Action<Task<BrowseResponse>>((br) => {
@@ -290,12 +290,12 @@ namespace AndriodApp1
                 if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
                 {
                     //timeout
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
                     return;
                 }
                 else if(br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect"))
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
                     return;
                 }
                 else if (br.IsFaulted)
@@ -313,21 +313,21 @@ namespace AndriodApp1
                     SoulSeekState.OnBrowseResponseReceived(br.Result, tree, username, atLocation);
                 }
 
-                SoulSeekState.MainActivityRef.RunOnUiThread(()=> {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=> {
                     if(tree==null)
                     {
                         //error case
                         if(errorString != null && errorString!=string.Empty)
                         {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, errorString, ToastLength.Long).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, errorString, ToastLength.Long).Show();
                         }
                         else
                         {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.browse_user_wefailedtoparse), ToastLength.Long).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_wefailedtoparse), ToastLength.Long).Show();
                         }
                         return;
                     }
-                    if(((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
+                    if(SoulSeekState.MainActivityRef != null && ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
                     {
                         if(SoulSeekState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))
                         {
@@ -368,6 +368,48 @@ namespace AndriodApp1
                     });
             });
             browseResponseTask.ContinueWith(continueWithAction);
+        }
+
+
+        public static void GetFolderContentsAPI(string username, string dirname, Action<Task<Directory>> continueWithAction)
+        {
+            if (!SoulSeekState.currentlyLoggedIn)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
+                return;
+            }
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                //we disconnected. login then do the rest.
+                //this is due to temp lost connection
+                Task conTask;
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out conTask))
+                {
+                    return;
+                }
+                conTask.ContinueWith(new Action<Task>((Task connectionTask) =>
+                {
+                    if (connectionTask.IsFaulted)
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                            Toast tst2 = Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                            tst2.Show();
+                        }));
+                        return;
+                    }
+                    else
+                    {
+                        //the original logic...
+                        Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname);
+                        t.ContinueWith(continueWithAction);
+                    }
+                }));
+            }
+            else
+            {
+                Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname); //throws not logged in...
+                t.ContinueWith(continueWithAction);
+            }
         }
 
         private void ReqFiles_Click(object sender, EventArgs e)
@@ -1146,7 +1188,7 @@ namespace AndriodApp1
         /// <param name="cts"></param>
         /// <param name="incompleteUri"></param>
         /// <returns></returns>
-        public static Task DownloadFileAsync(string username, string fullfilename, long size, CancellationTokenSource cts, int depth=1) //an indicator for how much of the full filename to use...
+        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth=1) //an indicator for how much of the full filename to use...
         {
             MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
             Task dlTask = null;
@@ -1367,43 +1409,7 @@ namespace AndriodApp1
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, "Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.", ToastLength.Short).Show();
                         return true;
                     }
-                    if (!SoulSeekState.currentlyLoggedIn)
-                    {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
-                        return true;
-                    }
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-                    {
-                        //we disconnected. login then do the rest.
-                        //this is due to temp lost connection
-                        Task conTask;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out conTask))
-                        {
-                            return true;
-                        }
-                        conTask.ContinueWith(new Action<Task>((Task connectionTask)=>
-                        {
-                            if(connectionTask.IsFaulted)
-                            {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => { 
-                                        Toast tst2 = Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                                        tst2.Show(); 
-                                    }));
-                                return;
-                            }
-                            else
-                            {
-                                //the original logic...
-                                Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(searchResponse.Username, dirname);
-                                t.ContinueWith(DirectoryReceivedContAction);
-                            }
-                        }));
-                    }
-                    else
-                    {
-                        Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(searchResponse.Username, dirname); //throws not logged in...
-                        t.ContinueWith(DirectoryReceivedContAction);
-                    }
+                    GetFolderContentsAPI(searchResponse.Username, dirname, DirectoryReceivedContAction);
                     return true;
                 case Resource.Id.browseAtLocation:
                     string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);

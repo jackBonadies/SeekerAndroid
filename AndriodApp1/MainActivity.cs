@@ -2697,6 +2697,13 @@ namespace AndriodApp1
                 {
                     relevantItem.IncompleteParentUri = null; //not needed anymore.
                 }
+                //if(relevantItem.Size==-1)
+                //{
+                //    if(e.Transfer.Size!=0)
+                //    {
+                //        relevantItem.Size = e.Transfer.Size;
+                //    }
+                //}
             }
             if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
@@ -2764,7 +2771,7 @@ namespace AndriodApp1
             {
                 if(relevantItem == null && e.Transfer.State == TransferStates.Requested)
                 {
-                    return; //TODO sometimes this can happen to fast.  this is okay thouugh bc it will soon go to another state.
+                    return; //TODO sometimes this can happen too fast.  this is okay thouugh bc it will soon go to another state.
                 }
                 if(relevantItem == null && e.Transfer.State == TransferStates.InProgress)
                 {
@@ -4431,6 +4438,149 @@ namespace AndriodApp1
 
             SeekerApplication.Activities.Add(ourWeakRef);
             base.OnCreate(savedInstanceState);
+        }
+    }
+
+
+    public class SlskLinkMenuActivity : ThemeableActivity
+    {
+        public const int FromSlskLinkCopyLink = 78;
+        public const int FromSlskLinkBrowseAtLocation = 79;
+        //public const int FromSlskLinkDownloadFolder = 80;
+        public const int FromSlskLinkDownloadFiles = 81;
+        public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+            if (v is TextView && Helpers.ShowSlskLinkContextMenu)
+            {
+                if (!Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
+                {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
+                    return;
+                }
+
+                if (isFile)
+                {
+                    //download file
+                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, "Download File");
+                    //show containing folder
+                }
+                else
+                {
+                    //download folder
+                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, "Download Folder");
+                    //show folder
+                }
+                menu.Add(FromSlskLinkBrowseAtLocation, FromSlskLinkBrowseAtLocation, 2, "Browse At Location");
+                menu.Add(FromSlskLinkCopyLink, FromSlskLinkCopyLink, 3, "Copy Link");
+            }
+            base.OnCreateContextMenu(menu, v, menuInfo);
+        }
+
+        public override void OnContextMenuClosed(IMenu menu)
+        {
+            Helpers.ShowSlskLinkContextMenu = false;
+            base.OnContextMenuClosed(menu);
+        }
+
+        //public static void DownloadFilesActionEntry(Task<Directory> dirTask)
+        //{
+        //    DownloadFilesLogic(dirTask,null);
+        //}
+
+        public static void DownloadFilesLogic(Task<Directory> dirTask, string _uname, string thisFileOnly=null)
+        {
+            if (dirTask.IsFaulted)
+            {
+                //failed to follow link..
+                if (dirTask.Exception?.InnerException?.Message != null)
+                {
+                    if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Request timed out", ToastLength.Short).Show();
+                    }
+                    MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
+                }
+                Toast.MakeText(SoulSeekState.MainActivityRef, "Failed to follow link", ToastLength.Short).Show();
+                MainActivity.LogDebug("DirectoryReceivedContAction faulted");
+            }
+            else
+            {
+                List< BrowseFragment.FullFileInfo > fullFileInfos = new List<BrowseFragment.FullFileInfo>();
+
+                //the filenames for these files are NOT the fullname.
+                //the fullname is dirTask.Result.Name "\\" f.Filename
+
+                foreach (var f in dirTask.Result.Files)
+                {
+                    string fullFilename = dirTask.Result.Name + "\\" + f.Filename;
+                    if (thisFileOnly == null)
+                    {
+                        fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size });
+                    }
+                    else
+                    {
+                        if(fullFilename == thisFileOnly)
+                        {
+                            //add
+                            fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size });
+                            break;
+                        }
+                    }
+                }
+
+
+                if(fullFileInfos.Count==0)
+                {
+                    if(thisFileOnly==null)
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short).Show();
+                    }
+                    else
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short).Show();
+                    }
+                    return;
+                }
+
+                BrowseFragment.DownloadListOfFiles(fullFileInfos, false, _uname);
+
+
+            }
+        }
+
+        public override bool OnContextItemSelected(IMenuItem item)
+        {
+            switch (item.ItemId)
+            {
+                case FromSlskLinkBrowseAtLocation: //Browse At Location
+                    Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
+                    Action<View> action = new Action<View>((v) => {
+                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                        this.StartActivity(intent);
+                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                    });
+                    
+                    DownloadDialog.RequestFilesApi(username, null, action, dirPath);
+                    break;
+                case FromSlskLinkCopyLink:
+                    Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, Helpers.SlskLinkClickedData);
+                    break;
+                case FromSlskLinkDownloadFiles:
+                    Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
+                    Action<Task<Directory>> ContAction = null;
+                    if(isFile)
+                    {
+                        ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, fullFilePath); };
+                    }
+                    else
+                    {
+                        ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, null); };
+                    }
+                    DownloadDialog.GetFolderContentsAPI(_username, _dirPath, ContAction);
+                    break;
+            }
+            return true;
         }
     }
 
@@ -7145,7 +7295,7 @@ namespace AndriodApp1
                 {
                     item1.QueueLength = 0;
                     Android.Net.Uri incompleteUri = null;
-                    Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.Size, cancellationTokenSource);
+                    Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource);
                     task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0, item1.GetDirectoryLevel()) { TransferItemReference = item1 })));
                 }
                 catch (DuplicateTransferException)
@@ -11019,7 +11169,7 @@ namespace AndriodApp1
             None = 0,
             SlashMe = 1,
             MagnetLink = 2,
-            SlskLink = 4,  //not yet implemented
+            SlskLink = 4,
         }
 
         /// <summary>
@@ -11043,10 +11193,16 @@ namespace AndriodApp1
                 specialMessageType = SpecialMessageType.MagnetLink;
                 return true;
             }
+            if (msg.Contains(@"slsk://"))
+            {
+                specialMessageType = SpecialMessageType.SlskLink;
+                return true;
+            }
             return false;
         }
 
         private readonly static System.Text.RegularExpressions.Regex MagnetLinkRegex = new System.Text.RegularExpressions.Regex(@"magnet:\?xt=urn:[^ ""]+");
+        private readonly static System.Text.RegularExpressions.Regex SlskLinkRegex = new System.Text.RegularExpressions.Regex(@"slsk://[^ ""]+");
 
         public static void ConfigureSpecialLinks(TextView textView, string msgText, SpecialMessageType specialMessageType)
         {
@@ -11065,6 +11221,21 @@ namespace AndriodApp1
                     }
                 }
             }
+            if(specialMessageType.HasFlag(SpecialMessageType.SlskLink))
+            {
+                var matches = SlskLinkRegex.Matches(msgText);
+                //add in our spans.
+                if (matches.Count > 0)
+                {
+                    foreach (var match in matches)
+                    {
+                        var m = match as System.Text.RegularExpressions.Match;
+                        var ourSlskSpan = new SlskLinkClickableSpan(m.Value);
+                        messageText.SetSpan(ourSlskSpan, m.Index, m.Index + m.Length, Android.Text.SpanTypes.InclusiveExclusive);
+                    }
+                }
+            }
+            textView.MovementMethod = Android.Text.Method.LinkMovementMethod.Instance; //needed for slsk:// not needed for magnet. weird.
             textView.TextFormatted = messageText;
         }
 
@@ -11382,7 +11553,7 @@ namespace AndriodApp1
                     viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
                 }
-                else if(specialMessageType.HasFlag(SpecialMessageType.MagnetLink))
+                else if(specialMessageType.HasFlag(SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SpecialMessageType.SlskLink))
                 {
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
                     Helpers.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
@@ -11589,6 +11760,54 @@ namespace AndriodApp1
             {
                 return "";
             }
+        }
+
+        public static string SlskLinkClickedData = null;
+        public static bool ShowSlskLinkContextMenu = false;
+
+        /// <summary>
+        /// returns false if unable to parse
+        /// </summary>
+        /// <param name="linkStringToParse"></param>
+        /// <param name="username"></param>
+        /// <param name="dirPath"></param>
+        /// <param name="fullFilePath"></param>
+        /// <param name="isFile"></param>
+        /// <returns></returns>
+        public static bool ParseSlskLinkString(string linkStringToParse, out string username, out string dirPath, out string fullFilePath, out bool isFile)
+        {
+            try
+            {
+                if(linkStringToParse.EndsWith('/'))
+                {
+                    isFile = false;
+                }
+                else
+                {
+                    isFile = true;
+                }
+
+                linkStringToParse = linkStringToParse.Substring(7);
+                linkStringToParse = Android.Net.Uri.Decode(linkStringToParse);
+                username = linkStringToParse.Substring(0,linkStringToParse.IndexOf('/'));
+                fullFilePath = linkStringToParse.Substring(linkStringToParse.IndexOf('/') + 1).TrimEnd('/').Replace('/','\\');
+                if(isFile)
+                {
+                    dirPath = Helpers.GetDirectoryRequestFolderName(fullFilePath);
+                }
+                else
+                {
+                    dirPath = fullFilePath;
+                }
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("failure to parse: " + linkStringToParse);
+                username=dirPath=fullFilePath=null;
+                isFile=false;
+                return false;
+            }
+            return true;
         }
 
         private static string GetLockedFileName(SearchResponse item)
@@ -12240,6 +12459,7 @@ namespace AndriodApp1
         }
         public override void OnClick(View widget)
         {
+            MainActivity.LogDebug("magnet link click");
             try
             {
                 Intent followLink = new Intent(Intent.ActionView);
@@ -12253,6 +12473,23 @@ namespace AndriodApp1
         }
     }
 
+    public class SlskLinkClickableSpan : Android.Text.Style.ClickableSpan
+    {
+        private string textClicked;
+        public SlskLinkClickableSpan(string _textClicked)
+        {
+            textClicked = _textClicked;
+        }
+        public override void OnClick(View widget)
+        {
+            MainActivity.LogDebug("slsk link click");
+            Helpers.SlskLinkClickedData = textClicked;
+            Helpers.ShowSlskLinkContextMenu = true;
+            SoulSeekState.ActiveActivityRef.RegisterForContextMenu(widget);
+            SoulSeekState.ActiveActivityRef.OpenContextMenu(widget);
+            SoulSeekState.ActiveActivityRef.UnregisterForContextMenu(widget);
+        }
+    }
 
     public static class MicroTagReader
     {
