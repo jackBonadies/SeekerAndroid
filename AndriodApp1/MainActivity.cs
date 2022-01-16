@@ -11810,6 +11810,16 @@ namespace AndriodApp1
             return true;
         }
 
+        public static string CreateSlskLink(bool isDirectory, string fullFileOrFolderName, string username)
+        {
+            string link = username + "/" + fullFileOrFolderName.Replace("\\","/");
+            if(isDirectory)
+            {
+                link = link + "/";
+            }
+            return "slsk://" + Android.Net.Uri.Encode(link,"/");
+        }
+
         private static string GetLockedFileName(SearchResponse item)
         {
             try

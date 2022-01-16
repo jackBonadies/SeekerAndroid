@@ -87,6 +87,18 @@ android:iconifiedByDefault="false"
 	android:iconifiedByDefault="false"
 	 />
 
+				<item android:id="@+id/action_copy_folder_url"
+		  android:title="Copy Folder URL"
+		  app:showAsAction="never"
+		  android:iconifiedByDefault="false"
+	 />
+
+				<item android:id="@+id/action_copy_selected_url"
+	  android:title="Copy Selected URL"
+	  app:showAsAction="never"
+	  android:iconifiedByDefault="false"
+	 />
+
  		</menu>
  	</item>
 </menu>
