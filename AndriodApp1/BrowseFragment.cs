@@ -159,7 +159,7 @@ namespace AndriodApp1
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            if(IsResponseLoaded())
+            if (IsResponseLoaded())
             {
                 inflater.Inflate(Resource.Menu.browse_menu_full, menu);
             }
@@ -172,7 +172,35 @@ namespace AndriodApp1
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
+            int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
+
             Helpers.SetMenuTitles(menu,username);
+            
+            if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
+            {
+                if (numSelected == 0)
+                {
+                    menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(false);
+                    menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(false);
+                }
+                else if (numSelected > 0)
+                {
+                    menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(true);
+                    menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(true);
+                    menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(true);
+                    if(numSelected > 1)
+                    {
+                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle("Copy Selected URLs");
+                    }
+                    else
+                    {
+                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle("Copy Selected URL");
+                    }
+                }
+            }
+
+
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -210,6 +238,17 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_queue_selected_paused:
                     DownloadSelectedFiles(true);
+                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
+                    ClearAllSelectedPositions();
+                    return true;
+                case Resource.Id.action_copy_folder_url:
+                    string fullDirName = dataItemsForListView[0].Node.Data.Name;
+                    string slskLink = Helpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
+                    Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef,"Link Copied",ToastLength.Short).Show();
+                    return true;
+                case Resource.Id.action_copy_selected_url:
+                    CopySelectedURLs();
                     (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
@@ -1034,6 +1073,84 @@ namespace AndriodApp1
             {
                 //not worth throwing over
             }
+        }
+
+        private void CopySelectedURLs()
+        {
+            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
+            {
+                Toast.MakeText(this.Context, "Nothing to Copy", ToastLength.Long).Show();
+            }
+            else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
+            {
+                Toast.MakeText(this.Context, "Nothing Selected", ToastLength.Long).Show();
+            }
+            else
+            {
+                List<FullFileInfo> slskFile = new List<FullFileInfo>();
+                if (FilteredResults)
+                {
+                    lock (filteredDataItemsForListView)
+                    {
+                        for (int i = 0; i < filteredDataItemsForListView.Count; i++)
+                        {
+                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            {
+                                DataItem d = filteredDataItemsForListView[i];
+                                FullFileInfo f = new FullFileInfo();
+                                f.FileName = d.File.Filename;
+                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
+                                f.Size = d.File.Size;
+                                slskFile.Add(f);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //List<Soulseek.File> slskFile = new List<File>();
+                    //List<UserFilename> = new List<UserFilename>();
+
+                    lock (dataItemsForListView)
+                    {
+                        for (int i = 0; i < dataItemsForListView.Count; i++)
+                        {
+                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            {
+                                DataItem d = dataItemsForListView[i];
+                                FullFileInfo f = new FullFileInfo();
+                                f.FileName = d.File.Filename;
+                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
+                                f.Size = d.File.Size;
+                                slskFile.Add(f);
+                            }
+                        }
+                    }
+                }
+
+
+                string linkToCopy = string.Empty;
+                foreach (FullFileInfo ffi in slskFile)
+                {
+                    //there is something before us
+                    if(linkToCopy != string.Empty)
+                    {
+                        linkToCopy = linkToCopy + " \n";
+                    }
+                    linkToCopy = linkToCopy + Helpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
+                }
+                Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, linkToCopy);
+                if((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
+                {
+                    Toast.MakeText(this.Context, "Links Copied", ToastLength.Short).Show();
+                }
+                else
+                {
+                    Toast.MakeText(this.Context, "Link Copied", ToastLength.Short).Show();
+                }
+            }
+
+
         }
 
         private void DownloadSelectedFiles(bool queuePaused)
@@ -1901,6 +2018,7 @@ namespace AndriodApp1
             menu.Add(UNIQUE_BROWSE_GROUP_ID, 0, 0, "Download Folder");
             menu.Add(UNIQUE_BROWSE_GROUP_ID, 1, 1, "Queue Folder as Paused");
             menu.Add(UNIQUE_BROWSE_GROUP_ID, 2, 2, "Show Folder Info");
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 3, 3, "Copy URL");
             base.OnCreateContextMenu(menu, v, menuInfo);
         }
 
@@ -1920,6 +2038,13 @@ namespace AndriodApp1
                         DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
                         var folderSummary = GetFolderSummary(itemSelected);
                         ShowFolderSummaryDialog(folderSummary);
+                        return true;
+                    case 3:
+                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
+                        //bool isDir = itemSelected.IsDirectory();
+                        string slskLink = Helpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
+                        Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Link Copied", ToastLength.Short).Show();
                         return true;
                 }
             }
@@ -2320,10 +2445,15 @@ namespace AndriodApp1
                 if (dataItem.IsDirectory())
                 {
                     itemView.FolderIndicator.Visibility = ViewStates.Visible;
+                    itemView.FileDetails.Visibility = ViewStates.Gone;
+                    //itemView.ContainingViewGroup.SetPadding(0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom), 0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom));
                 }
                 else
                 {
                     itemView.FolderIndicator.Visibility = ViewStates.Gone;
+                    itemView.FileDetails.Visibility = ViewStates.Visible;
+                    itemView.FileDetails.Text = Helpers.GetSizeLengthAttrString(dataItem.File);
+                    //itemView.ContainingViewGroup.SetPadding(0,SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
                 }
                 itemView.DisplayName.Text = dataItem.GetDisplayName();
                 return itemView;
@@ -2538,7 +2668,9 @@ namespace AndriodApp1
     public class BrowseResponseItemView : LinearLayout
     {
         public TextView DisplayName;
+        public TextView FileDetails;
         public ImageView FolderIndicator;
+        public LinearLayout ContainingViewGroup;
         public BrowseResponseItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.browse_response_item, this, true);
@@ -2560,6 +2692,8 @@ namespace AndriodApp1
         {
             DisplayName = FindViewById<TextView>(Resource.Id.displayName);
             FolderIndicator = FindViewById<ImageView>(Resource.Id.folderIndicator);
+            FileDetails = FindViewById<TextView>(Resource.Id.fileDetails);
+            ContainingViewGroup = FindViewById<LinearLayout>(Resource.Id.containingViewGroup);
         }
     }
 }

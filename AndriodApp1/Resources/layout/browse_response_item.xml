@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+            android:paddingTop="1sp"
+        android:paddingBottom="2sp"
+    android:id="@+id/containingViewGroup"
+    android:orientation="vertical">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+        android:paddingBottom="0dp"
+        android:layout_marginBottom="0dp"
     android:orientation="horizontal">
+
+
     <TextView
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:paddingLeft="4dp"
-        android:paddingTop="4sp"
-        android:paddingBottom="4sp"
+
         android:textSize="14sp"
         android:textColor="?attr/normalTextColor"
         android:id="@+id/displayName"
@@ -25,4 +38,20 @@
         android:visibility="gone"
         android:layout_gravity="center_vertical"
         app:srcCompat="@drawable/chevron_right"/>
+
+        
+    </LinearLayout>
+            <TextView
+        android:id = "@+id/fileDetails"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:textSize="10sp"
+        android:textColor="?attr/cellTextColorSubdued"
+        
+               android:paddingTop="0dp"
+               android:layout_marginTop="0dp"
+        android:ellipsize = "end"
+        android:paddingLeft="5dp"
+        android:text = "15mb - 10:14 - 245kbps"
+        android:singleLine = "true" />
 </LinearLayout>
