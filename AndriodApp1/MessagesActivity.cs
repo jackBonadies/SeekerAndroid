@@ -43,7 +43,7 @@ namespace AndriodApp1
 {
     
     [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar",LaunchMode =Android.Content.PM.LaunchMode.SingleTask)]
-    public class MessagesActivity : ThemeableActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
+    public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
 
@@ -1489,6 +1489,12 @@ namespace AndriodApp1
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
+            //if this is the slsk link menu then we are done, dont add anything extra.
+            if(menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
+            {
+                return;
+            }
+
             //this class is shared by both chatroom and messages......
             if(v is MessageInnerViewSent msgSent)
             {
@@ -1520,6 +1526,10 @@ namespace AndriodApp1
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
+            if(Helpers.ShowSlskLinkContextMenu)
+            {
+                return;
+            }
             menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
         }
     }

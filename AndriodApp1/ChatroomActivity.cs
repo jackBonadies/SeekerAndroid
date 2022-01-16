@@ -40,7 +40,7 @@ namespace AndriodApp1
 {
 
     [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
-    public class ChatroomActivity : ThemeableActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
+    public class ChatroomActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static ChatroomActivity ChatroomActivityRef = null;
 
@@ -989,6 +989,11 @@ namespace AndriodApp1
     {
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
+            if(Helpers.ShowSlskLinkContextMenu)
+            {
+                return;
+            }
+
             //its possible to get here without the AdapterLongClick depending on what part you hold down on the message.  I am not sure why...
             if(v is GroupMessageInnerViewReceived)
             {
@@ -1197,6 +1202,10 @@ namespace AndriodApp1
         public static Message MessagesLongClickData = null;
         public override bool OnContextItemSelected(IMenuItem item)
         {
+            //if(Helpers.ShowSlskLinkContextMenu)
+            //{
+            //    return base.OnContextItemSelected(item);
+            //}
             //MainActivity.LogDebug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
             string username = MessagesLongClickData.Username;
             if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, this.View))
@@ -3947,7 +3956,7 @@ namespace AndriodApp1
                 }
             }
 
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
 
 
             if(canRemoveUser)

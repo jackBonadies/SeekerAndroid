@@ -280,7 +280,7 @@ namespace AndriodApp1
             listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
             this.RegisterForContextMenu(listViewDirectories);
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
-
+            
             treePathRecyclerView = this.rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewHorizontalPath);
             treePathLayoutManager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             treePathRecyclerView.SetLayoutManager(treePathLayoutManager);
@@ -1111,7 +1111,7 @@ namespace AndriodApp1
                             return;
                         }
                         //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                        CreateDownloadAllTask(slskFile.ToArray(), queuePaused).Start();
+                        CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                     }));
                 }
                 else
@@ -1121,7 +1121,7 @@ namespace AndriodApp1
                     //    MainActivity.LogDebug(f.FileName);
                     //}
 
-                    CreateDownloadAllTask(slskFile.ToArray(), queuePaused).Start();
+                    CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                 }
             }
         }
@@ -1135,7 +1135,7 @@ namespace AndriodApp1
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                     return;
                 }
-                DownloadListOfFiles(recusiveFullFileInfo, queuePaused);
+                DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
             }
             else
             {
@@ -1144,7 +1144,7 @@ namespace AndriodApp1
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                     return;
                 }
-                DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused);
+                DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
             }
         }
 
@@ -1379,14 +1379,20 @@ namespace AndriodApp1
 
         }
 
-        private void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused)
+        /// <summary>
+        /// Safe entrypoint for anyone to call.
+        /// </summary>
+        /// <param name="slskFiles"></param>
+        /// <param name="queuePaused"></param>
+        /// <param name="_username"></param>
+        public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
                 {
                     return;
                 }
@@ -1398,19 +1404,19 @@ namespace AndriodApp1
                             //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
                             //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
 
                         });
                         return;
                     }
                     //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                    CreateDownloadAllTask(slskFiles.ToArray(), queuePaused).Start();
+                    CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
                 }));
             }
             else
             {
                 //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                CreateDownloadAllTask(slskFiles.ToArray(), queuePaused).Start();
+                CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
             }
         }
 
@@ -1477,11 +1483,11 @@ namespace AndriodApp1
         //}
 
 
-        private Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused)
+        public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string _username)
         {
-            if(username==SoulSeekState.Username)
+            if(_username == SoulSeekState.Username)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {Toast.MakeText(SoulSeekState.ActiveActivityRef,this.Resources.GetString(Resource.String.cannot_download_from_self),ToastLength.Long).Show(); });
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self),ToastLength.Long).Show(); });
                 return new Task(()=>{ }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
             }
             MainActivity.LogDebug("CreateDownloadAllTask");
@@ -1490,7 +1496,7 @@ namespace AndriodApp1
                 foreach (FullFileInfo file in files)
                 {
 
-                    DownloadDialog.SetupAndDownloadFile(username, file.FullFileName, file.Size, 0, file.Depth, queuePaused, out bool transferExists);
+                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, 0, file.Depth, queuePaused, out bool transferExists);
                     if(!transferExists)
                     {
                         allExist = false;
@@ -1503,7 +1509,7 @@ namespace AndriodApp1
                 if (allExist)
                 {
                     toast1 = new Action(() => {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show(); });
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show(); });
                 
                 }
                 else
@@ -1515,7 +1521,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
                         }
                         
                     });
@@ -1940,7 +1946,7 @@ namespace AndriodApp1
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
-        private TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
+        public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
         {
             if(rootTree.Data.Name == nameToFindDirName)
             {
@@ -1995,7 +2001,7 @@ namespace AndriodApp1
                 username = e.Username;
                 if(e.StartingLocation!=null&&e.StartingLocation!=string.Empty)
                 {
-                    var staringPoint = BrowseFragment.Instance.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
+                    var staringPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
 
                     if(staringPoint==null)
                     {
