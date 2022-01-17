@@ -1178,17 +1178,17 @@ namespace AndriodApp1
             }
         }
 
-        /// <summary>
-        /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
-        /// its the same as the old SoulSeekState.SoulseekClient.DownloadAsync but with a few bells and whistles...
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="fullfilename"></param>
-        /// <param name="size"></param>
-        /// <param name="cts"></param>
-        /// <param name="incompleteUri"></param>
-        /// <returns></returns>
-        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth=1) //an indicator for how much of the full filename to use...
+            /// <summary>
+            /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
+            /// its the same as the old SoulSeekState.SoulseekClient.DownloadAsync but with a few bells and whistles...
+            /// </summary>
+            /// <param name="username"></param>
+            /// <param name="fullfilename"></param>
+            /// <param name="size"></param>
+            /// <param name="cts"></param>
+            /// <param name="incompleteUri"></param>
+            /// <returns></returns>
+            public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth=1) //an indicator for how much of the full filename to use...
         {
             MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
             Task dlTask = null;
@@ -1199,6 +1199,7 @@ namespace AndriodApp1
                         username: username,
                         filename: fullfilename,
                         size: size,
+                        options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurGoverner),
                         cancellationToken: cts.Token);
             }
             else
@@ -1214,7 +1215,7 @@ namespace AndriodApp1
                         null,
                         size: size,
                         startOffset:partialLength, //this will get populated
-                        options: new TransferOptions(disposeOutputStreamOnCompletion: true),
+                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurGoverner),
                         cancellationToken: cts.Token,
                         streamTask: GetStreamTask(username, fullfilename, depth));
 
