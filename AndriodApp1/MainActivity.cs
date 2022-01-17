@@ -2642,7 +2642,90 @@ namespace AndriodApp1
             //});
         }
 
+        public static class SpeedLimitHelper
+        {
 
+            public static void RemoveUser(string username)
+            {
+                UserDelays.TryRemove(username, out _);
+                LastAvgSpeed.TryRemove(username, out _);
+            }
+
+            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
+            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> LastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
+            public static Task OurGoverner(Soulseek.Transfer t, CancellationToken cts)
+            {
+                try
+                {
+                    if (SoulSeekState.SpeedLimitDownloadOn)
+                    {
+
+                        if (UserDelays.TryGetValue(t.Username, out double msDelay))
+                        {
+                            bool exists = LastAvgSpeed.TryGetValue(t.Username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
+                            if (exists && t.AverageSpeed == lastAvgSpeed)
+                            {
+#if DEBUG
+                                Console.WriteLine("dont update");
+#endif
+                                //do not adjust as we have not yet recalculated the average speed
+                                return Task.Delay((int)msDelay, cts);
+                            }
+
+                            LastAvgSpeed[t.Username] = t.AverageSpeed;
+
+                            double avgSpeed = t.AverageSpeed;
+                            if (!SoulSeekState.SpeedLimitDownloadIsPerTransfer && LastAvgSpeed.Count > 1)
+                            {
+
+                                //its threadsafe when using linq on concurrent dict itself.
+                                avgSpeed = LastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
+#if DEBUG
+                                Console.WriteLine("multiple total speed " + avgSpeed);
+#endif
+                            }
+
+                            if (avgSpeed > SoulSeekState.SpeedLimitDownloadBytesSec)
+                            {
+#if DEBUG
+                                Console.WriteLine("speed too high " + t.AverageSpeed + "   " + msDelay);
+#endif
+                                UserDelays[t.Username] = msDelay = msDelay * 1.1;
+
+                            }
+                            else
+                            {
+#if DEBUG
+                                Console.WriteLine("speed too low " + t.AverageSpeed + "   " + msDelay);
+#endif
+                                UserDelays[t.Username] = msDelay = msDelay * 0.9;
+                            }
+
+                            return Task.Delay((int)msDelay, cts);
+                        }
+                        else
+                        {
+                            //first time we need to guess a decent value
+                            //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
+                            double msDelaySeed = 1000 * 16384.0 / SoulSeekState.SpeedLimitDownloadBytesSec;
+                            UserDelays[t.Username] = msDelaySeed;
+                            LastAvgSpeed[t.Username] = t.AverageSpeed;
+                            return Task.Delay((int)msDelaySeed, cts);
+                        }
+
+                    }
+                    else
+                    {
+                        return Task.CompletedTask;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MainActivity.LogFirebase("SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
+                    return Task.CompletedTask;
+                }
+            }
+        }
 
 
         public class ProgressUpdatedUI : EventArgs
@@ -2707,6 +2790,7 @@ namespace AndriodApp1
             }
             if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
+                SeekerApplication.SpeedLimitHelper.RemoveUser(e.Transfer.Username);
                 if(relevantItem == null)
                 {
                     return;
@@ -2749,6 +2833,7 @@ namespace AndriodApp1
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed))
             {
+                SeekerApplication.SpeedLimitHelper.RemoveUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;
@@ -10612,6 +10697,13 @@ namespace AndriodApp1
         public static String SaveDataDirectoryUri = null;
         public static String UploadDataDirectoryUri = null;
         public static String ManualIncompleteDataDirectoryUri = null;
+        
+        public static bool SpeedLimitDownloadOn = true;
+        public static bool SpeedLimitUploadOn = false;
+        public static int SpeedLimitDownloadBytesSec = 100 * 1024;//1048576;
+        public static int SpeedLimitUploadBytesSec = 1048576;
+        public static bool SpeedLimitDownloadIsPerTransfer = true;
+        public static bool SpeedLimitUploadIsPerTransfer = true;
 
         public static bool ShowSmartFilters = true;
         public static SmartFilterState SmartFilterOptions;
