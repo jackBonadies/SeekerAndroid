@@ -165,6 +165,18 @@ namespace AndriodApp1
         private ViewGroup listeningSubLayout2;
         private ViewGroup listeningSubLayout3;
 
+        private ViewGroup limitDlSpeedSubLayout;
+        Button changeDlSpeed;
+        TextView dlSpeedTextView;
+        Spinner dlLimitPerTransfer;
+
+
+        private ViewGroup limitUlSpeedSubLayout;
+        Button changeUlSpeed;
+        TextView ulSpeedTextView;
+        Spinner ulLimitPerTransfer;
+
+
         Button sharedFolderButton;
         Button browseSelfButton;
         Button rescanSharesButton;
@@ -342,6 +354,41 @@ namespace AndriodApp1
             enableListening.Checked = SoulSeekState.ListenerEnabled;
             enableListening.CheckedChange += EnableListening_CheckedChange;
 
+            CheckBox enableDlSpeedLimits = FindViewById<CheckBox>(Resource.Id.enable_dl_speed_limits);
+            enableDlSpeedLimits.Checked = SoulSeekState.SpeedLimitDownloadOn;
+            enableDlSpeedLimits.CheckedChange += EnableDlSpeedLimits_CheckedChange;
+
+            CheckBox enableUlSpeedLimits = FindViewById<CheckBox>(Resource.Id.enable_ul_speed_limits);
+            enableUlSpeedLimits.Checked = SoulSeekState.SpeedLimitUploadOn;
+            enableUlSpeedLimits.CheckedChange += EnableUlSpeedLimits_CheckedChange;
+
+
+            limitDlSpeedSubLayout = FindViewById<ViewGroup>(Resource.Id.dlSpeedSubLayout);
+            dlSpeedTextView = FindViewById<TextView>(Resource.Id.downloadSpeed);
+            changeDlSpeed = FindViewById<Button>(Resource.Id.changeDlSpeed);
+            changeDlSpeed.Click += ChangeDlSpeed_Click;
+            dlLimitPerTransfer = FindViewById<Spinner>(Resource.Id.dlPerTransfer);
+            SetSpeedTextView(dlSpeedTextView, false);
+
+            limitUlSpeedSubLayout = FindViewById<ViewGroup>(Resource.Id.ulSpeedSubLayout);
+            ulSpeedTextView = FindViewById<TextView>(Resource.Id.uploadSpeed);
+            changeUlSpeed = FindViewById<Button>(Resource.Id.changeUlSpeed);
+            changeUlSpeed.Click += ChangeUlSpeed_Click;
+            ulLimitPerTransfer = FindViewById<Spinner>(Resource.Id.ulPerTransfer);
+            SetSpeedTextView(ulSpeedTextView, true);
+
+            UpdateSpeedLimitsState();
+
+            String[] dlOptions = new String[]{ "Per Transfer", "Global" };
+            ArrayAdapter<String> dlOptionsStrings = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dlOptions);
+            dlLimitPerTransfer.Adapter = dlOptionsStrings;
+            SetSpinnerPositionSpeed(dlLimitPerTransfer, false);
+            dlLimitPerTransfer.ItemSelected += DlLimitPerTransfer_ItemSelected;
+
+            ulLimitPerTransfer.Adapter = dlOptionsStrings;
+            SetSpinnerPositionSpeed(ulLimitPerTransfer, true);
+            ulLimitPerTransfer.ItemSelected += UlLimitPerTransfer_ItemSelected;
+
             ImageView listeningMoreInfo  = FindViewById<ImageView>(Resource.Id.listeningHelp);
             listeningMoreInfo.Click += ListeningMoreInfo_Click;
 
@@ -442,6 +489,62 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void UlLimitPerTransfer_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        {
+            if (e.Position == 0)
+            {
+                SoulSeekState.SpeedLimitUploadIsPerTransfer = true;
+            }
+            else
+            {
+                SoulSeekState.SpeedLimitUploadIsPerTransfer = false;
+            }
+        }
+
+        private void ChangeUlSpeed_Click(object sender, EventArgs e)
+        {
+            ShowChangeDialog(ChangeDialogType.ChangeUL);
+        }
+
+        private void DlLimitPerTransfer_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        {
+            if(e.Position == 0)
+            {
+                SoulSeekState.SpeedLimitDownloadIsPerTransfer = true;
+            }
+            else
+            {
+                SoulSeekState.SpeedLimitDownloadIsPerTransfer = false;
+            }
+        }
+
+        private void ChangeDlSpeed_Click(object sender, EventArgs e)
+        {
+            ShowChangeDialog(ChangeDialogType.ChangeDL);
+        }
+
+        private void EnableDlSpeedLimits_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            if (e.IsChecked == SoulSeekState.SpeedLimitDownloadOn)
+            {
+                return;
+            }
+            SoulSeekState.SpeedLimitDownloadOn = e.IsChecked;
+            UpdateSpeedLimitsState();
+            SeekerApplication.SaveSpeedLimitState();
+        }
+
+        private void EnableUlSpeedLimits_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            if (e.IsChecked == SoulSeekState.SpeedLimitUploadOn)
+            {
+                return;
+            }
+            SoulSeekState.SpeedLimitUploadOn = e.IsChecked;
+            UpdateSpeedLimitsState();
+            SeekerApplication.SaveSpeedLimitState();
         }
 
         private void ShowLockedBrowse_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -847,37 +950,98 @@ namespace AndriodApp1
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
             Helpers.ViewUri(uri,this);
         }
-        private static AndroidX.AppCompat.App.AlertDialog changePortDialog = null;
+        private static AndroidX.AppCompat.App.AlertDialog changeDialog = null;
         private void ChangePort_Click(object sender, EventArgs e)
+        {
+            ShowChangeDialog(ChangeDialogType.ChangePort);
+        }
+
+        public enum ChangeDialogType
+        {
+            ChangePort = 0,
+            ChangeDL = 1,
+            ChangeUL = 2,
+        }
+
+        private void ShowChangeDialog(ChangeDialogType changeDialogType)
         {
             MainActivity.LogInfoFirebase("ShowChangePortDialog");
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-            builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
+            if(changeDialogType == ChangeDialogType.ChangePort)
+            {
+                builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
+            }
+            else if (changeDialogType == ChangeDialogType.ChangeDL)
+            {
+                builder.SetTitle("Change Download Speed (kb/s):");
+            }
+            else if(changeDialogType == ChangeDialogType.ChangeUL)
+            {
+                builder.SetTitle("Change Upload Speed (kb/s):");
+            }
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_port, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosePortEditText);
+            if (changeDialogType == ChangeDialogType.ChangeDL)
+            {
+                input.Hint = "Enter Speed in Kb/s";
+            }
+            else if (changeDialogType == ChangeDialogType.ChangeUL)
+            {
+                input.Hint = "Enter Speed in Kb/s";
+            }
             builder.SetView(viewInflated);
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                int portNum = -1;
-                if(!int.TryParse(input.Text, out portNum))
+                if(changeDialogType == ChangeDialogType.ChangePort)
                 {
-                    Toast.MakeText(this, Resource.String.port_failed_parse, ToastLength.Long).Show();
-                    return;
+                    int portNum = -1;
+                    if (!int.TryParse(input.Text, out portNum))
+                    {
+                        Toast.MakeText(this, Resource.String.port_failed_parse, ToastLength.Long).Show();
+                        return;
+                    }
+                    if (portNum < 1024 || portNum > 65535)
+                    {
+                        Toast.MakeText(this, Resource.String.port_out_of_range, ToastLength.Long).Show();
+                        return;
+                    }
+                    ReconfigureOptionsAPI(null, null, portNum);
+                    SoulSeekState.ListenerPort = portNum;
+                    UPnpManager.Instance.Feedback = true;
+                    UPnpManager.Instance.SearchAndSetMappingIfRequired();
+                    SeekerApplication.SaveListeningState();
+                    SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
+                    changeDialog.Dismiss();
                 }
-                if(portNum<1024 || portNum>65535)
+                else if(changeDialogType == ChangeDialogType.ChangeUL || changeDialogType == ChangeDialogType.ChangeDL)
                 {
-                    Toast.MakeText(this, Resource.String.port_out_of_range, ToastLength.Long).Show();
-                    return;
+                    int dlSpeedKbs = -1;
+                    if (!int.TryParse(input.Text, out dlSpeedKbs))
+                    {
+                        Toast.MakeText(this, "Speed failed to parse", ToastLength.Long).Show();
+                        return;
+                    }
+                    if (dlSpeedKbs < 64)
+                    {
+                        Toast.MakeText(this, "Minimum Speed is 64 kb/s", ToastLength.Long).Show();
+                        return;
+                    }
+                    if(changeDialogType == ChangeDialogType.ChangeDL)
+                    {
+                        SoulSeekState.SpeedLimitDownloadBytesSec = 1024 * dlSpeedKbs;
+                        SetSpeedTextView(FindViewById<TextView>(Resource.Id.downloadSpeed), false);
+                    }
+                    else
+                    {
+                        SoulSeekState.SpeedLimitUploadBytesSec = 1024 * dlSpeedKbs;
+                        SetSpeedTextView(FindViewById<TextView>(Resource.Id.uploadSpeed), true);
+                    }
+                    
+                    SeekerApplication.SaveSpeedLimitState();
+                    changeDialog.Dismiss();
                 }
-                ReconfigureOptionsAPI(null, null, portNum);
-                SoulSeekState.ListenerPort = portNum;
-                UPnpManager.Instance.Feedback = true;
-                UPnpManager.Instance.SearchAndSetMappingIfRequired();
-                SeekerApplication.SaveListeningState();
-                SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
-                changePortDialog.Dismiss();
 
             });
 
@@ -889,7 +1053,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    changePortDialog.Dismiss();
+                    changeDialog.Dismiss();
                 }
 
             });
@@ -926,8 +1090,8 @@ namespace AndriodApp1
             builder.SetPositiveButton(Resource.String.okay, eventHandler);
             builder.SetNegativeButton(Resource.String.cancel, cancelHandler);
 
-            changePortDialog = builder.Create();
-            changePortDialog.Show();
+            changeDialog = builder.Create();
+            changeDialog.Show();
         }
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
@@ -945,6 +1109,38 @@ namespace AndriodApp1
         private static void SetPortViewText(TextView tv)
         {
             tv.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.port) + ": " + SoulSeekState.ListenerPort.ToString();
+        }
+
+        private static void SetSpeedTextView(TextView tv, bool isUpload)
+        {
+            int speedKbs = isUpload ? (SoulSeekState.SpeedLimitUploadBytesSec / 1024) : (SoulSeekState.SpeedLimitDownloadBytesSec / 1024);
+            tv.Text = speedKbs.ToString() + " kb/s";
+        }
+
+        private static void SetSpinnerPositionSpeed(Spinner spinner, bool isUpload)
+        {
+            if(isUpload)
+            {
+                if (SoulSeekState.SpeedLimitUploadIsPerTransfer)
+                {
+                    spinner.SetSelection(0);
+                }
+                else
+                {
+                    spinner.SetSelection(1);
+                }
+            }
+            else
+            {
+                if(SoulSeekState.SpeedLimitDownloadIsPerTransfer)
+                {
+                    spinner.SetSelection(0);
+                }
+                else
+                {
+                    spinner.SetSelection(1);
+                }
+            }
         }
 
         private static void SetPrivStatusView(TextView tv)
@@ -1317,6 +1513,51 @@ namespace AndriodApp1
                 useUPnPCheckBox.Clickable = false;
                 changePort.Clickable = false;
                 checkStatus.Clickable = false;
+            }
+        }
+
+        private void UpdateSpeedLimitsState()
+        {
+            if (SoulSeekState.SpeedLimitDownloadOn)
+            {
+                limitDlSpeedSubLayout.Enabled = true;
+                limitDlSpeedSubLayout.Alpha = 1.0f;
+                dlSpeedTextView.Alpha = 1.0f;
+                changeDlSpeed.Alpha = 1.0f;
+                changeDlSpeed.Clickable = true;
+                dlLimitPerTransfer.Alpha = 1.0f;
+                dlLimitPerTransfer.Clickable = true;
+            }
+            else
+            {
+                limitDlSpeedSubLayout.Enabled = false;
+                limitDlSpeedSubLayout.Alpha = 0.5f;
+                dlSpeedTextView.Alpha = 0.5f;
+                changeDlSpeed.Alpha = 0.5f;
+                changeDlSpeed.Clickable = false;
+                dlLimitPerTransfer.Alpha = 0.5f;
+                dlLimitPerTransfer.Clickable = false;
+            }
+
+            if (SoulSeekState.SpeedLimitUploadOn)
+            {
+                limitUlSpeedSubLayout.Enabled = true;
+                limitUlSpeedSubLayout.Alpha = 1.0f;
+                ulSpeedTextView.Alpha = 1.0f;
+                changeUlSpeed.Alpha = 1.0f;
+                changeUlSpeed.Clickable = true;
+                ulLimitPerTransfer.Alpha = 1.0f;
+                ulLimitPerTransfer.Clickable = true;
+            }
+            else
+            {
+                limitUlSpeedSubLayout.Enabled = false;
+                limitUlSpeedSubLayout.Alpha = 0.5f;
+                ulSpeedTextView.Alpha = 0.5f;
+                changeUlSpeed.Alpha = 0.5f;
+                changeUlSpeed.Clickable = false;
+                ulLimitPerTransfer.Alpha = 0.5f;
+                ulLimitPerTransfer.Clickable = false;
             }
         }
 

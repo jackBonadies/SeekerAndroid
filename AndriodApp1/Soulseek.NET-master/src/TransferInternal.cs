@@ -26,13 +26,14 @@ namespace Soulseek
     /// </summary>
     internal sealed class TransferInternal
     {
-        private readonly int progressUpdateLimit = 50;
-        private readonly double speedAlpha = 2f / 10;
+        private readonly int progressUpdateLimit = 100;
+        private readonly double speedAlpha = 2f / 50;
         private double lastProgressBytes = 0;
         private long startOffset = 0;
         private DateTime? lastProgressTime = null;
         private bool speedInitialized = false;
         private TransferStates state = TransferStates.None;
+        public double currentSpeed;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TransferInternal"/> class.
@@ -197,7 +198,7 @@ namespace Soulseek
 
             if (ts.HasValue && ((!speedInitialized && bytesTransferred > 0) || ts.Value.TotalMilliseconds >= progressUpdateLimit || State.HasFlag(TransferStates.Completed)))
             {
-                var currentSpeed = (bytesTransferred - lastProgressBytes) / (ts.Value.TotalMilliseconds / 1000d);
+                currentSpeed = (bytesTransferred - lastProgressBytes) / (ts.Value.TotalMilliseconds / 1000d);
                 AverageSpeed = !speedInitialized ? currentSpeed : ((currentSpeed - AverageSpeed) * speedAlpha) + AverageSpeed;
                 speedInitialized = true;
                 lastProgressTime = DateTime.UtcNow; //71ns

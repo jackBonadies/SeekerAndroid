@@ -3002,7 +3002,7 @@ namespace Soulseek
                     UpdateState(TransferStates.InProgress, incompleteUriParentString);
                     UpdateProgress(startOffset); //this is good.
 
-                    await download.Connection.ReadAsync(download.Size.Value - startOffset, outputStream, (cancelToken) => options.Governor(new Transfer(download), cancelToken), cancellationToken).ConfigureAwait(false);
+                    await download.Connection.ReadAsync(download.Size.Value - startOffset, outputStream, (cancelToken) => options.Governor(download.currentSpeed, download.Username, cancelToken), cancellationToken).ConfigureAwait(false);
 
                     download.State = TransferStates.Succeeded;
 
@@ -3821,7 +3821,7 @@ namespace Soulseek
 
                     if (length - startOffset > 0)
                     {
-                        await upload.Connection.WriteAsync(length - startOffset, inputStream, (cancelToken) => options.Governor(new Transfer(upload), cancelToken), cancellationToken).ConfigureAwait(false);
+                        await upload.Connection.WriteAsync(length - startOffset, inputStream, (cancelToken) => options.Governor(upload.currentSpeed, upload.Username, cancelToken), cancellationToken).ConfigureAwait(false);
                     }
 
                     upload.State = TransferStates.Succeeded;

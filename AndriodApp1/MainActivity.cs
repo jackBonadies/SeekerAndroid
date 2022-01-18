@@ -2653,63 +2653,66 @@ namespace AndriodApp1
 
             public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
             public static System.Collections.Concurrent.ConcurrentDictionary<string, double> LastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
-            public static Task OurGoverner(Soulseek.Transfer t, CancellationToken cts)
+            public static Task OurGoverner(double currentSpeed, string username, CancellationToken cts)
             {
                 try
                 {
                     if (SoulSeekState.SpeedLimitDownloadOn)
                     {
 
-                        if (UserDelays.TryGetValue(t.Username, out double msDelay))
+                        if (UserDelays.TryGetValue(username, out double msDelay))
                         {
-                            bool exists = LastAvgSpeed.TryGetValue(t.Username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                            if (exists && t.AverageSpeed == lastAvgSpeed)
+                            bool exists = LastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
+                            if (exists && currentSpeed == lastAvgSpeed)
                             {
 #if DEBUG
-                                Console.WriteLine("dont update");
+                                System.Console.WriteLine("dont update");
 #endif
                                 //do not adjust as we have not yet recalculated the average speed
                                 return Task.Delay((int)msDelay, cts);
                             }
 
-                            LastAvgSpeed[t.Username] = t.AverageSpeed;
+                            LastAvgSpeed[username] = currentSpeed;
 
-                            double avgSpeed = t.AverageSpeed;
+                            double avgSpeed = currentSpeed;
                             if (!SoulSeekState.SpeedLimitDownloadIsPerTransfer && LastAvgSpeed.Count > 1)
                             {
 
                                 //its threadsafe when using linq on concurrent dict itself.
                                 avgSpeed = LastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
 #if DEBUG
-                                Console.WriteLine("multiple total speed " + avgSpeed);
+                                System.Console.WriteLine("multiple total speed " + avgSpeed);
 #endif
                             }
 
                             if (avgSpeed > SoulSeekState.SpeedLimitDownloadBytesSec)
                             {
 #if DEBUG
-                                Console.WriteLine("speed too high " + t.AverageSpeed + "   " + msDelay);
+                                System.Console.WriteLine("speed too high " + currentSpeed + "   " + msDelay);
 #endif
-                                UserDelays[t.Username] = msDelay = msDelay * 1.1;
+                                UserDelays[username] = msDelay = msDelay * 1.04;
 
                             }
                             else
                             {
 #if DEBUG
-                                Console.WriteLine("speed too low " + t.AverageSpeed + "   " + msDelay);
+                                System.Console.WriteLine("speed too low " + currentSpeed + "   " + msDelay);
 #endif
-                                UserDelays[t.Username] = msDelay = msDelay * 0.9;
+                                UserDelays[username] = msDelay = msDelay * 0.96;
                             }
 
                             return Task.Delay((int)msDelay, cts);
                         }
                         else
                         {
+#if DEBUG
+                            System.Console.WriteLine("first time guess");
+#endif
                             //first time we need to guess a decent value
                             //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
                             double msDelaySeed = 1000 * 16384.0 / SoulSeekState.SpeedLimitDownloadBytesSec;
-                            UserDelays[t.Username] = msDelaySeed;
-                            LastAvgSpeed[t.Username] = t.AverageSpeed;
+                            UserDelays[username] = msDelaySeed;
+                            LastAvgSpeed[username] = currentSpeed;
                             return Task.Delay((int)msDelaySeed, cts);
                         }
 
@@ -3594,6 +3597,13 @@ namespace AndriodApp1
                 SoulSeekState.TransferViewShowSizes = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSizes, false);
                 SoulSeekState.TransferViewShowSpeed = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSpeed, false);
 
+                SoulSeekState.SpeedLimitUploadOn = sharedPreferences.GetBoolean(SoulSeekState.M_UploadLimitEnabled, false);
+                SoulSeekState.SpeedLimitDownloadOn = sharedPreferences.GetBoolean(SoulSeekState.M_DownloadLimitEnabled, false);
+                SoulSeekState.SpeedLimitUploadIsPerTransfer = sharedPreferences.GetBoolean(SoulSeekState.M_UploadPerTransfer, true);
+                SoulSeekState.SpeedLimitDownloadIsPerTransfer = sharedPreferences.GetBoolean(SoulSeekState.M_DownloadPerTransfer, true);
+                SoulSeekState.SpeedLimitUploadBytesSec = sharedPreferences.GetInt(SoulSeekState.M_UploadSpeedLimitBytes, 4 * 1024 * 1024);
+                SoulSeekState.SpeedLimitDownloadBytesSec = sharedPreferences.GetInt(SoulSeekState.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
+
                 SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, false);
                 SoulSeekState.MemoryBackedDownload = sharedPreferences.GetBoolean(SoulSeekState.M_MemoryBackedDownload, false);
                 SearchFragment.FilterSticky = sharedPreferences.GetBoolean(SoulSeekState.M_FilterSticky, false);
@@ -3650,6 +3660,23 @@ namespace AndriodApp1
                 editor.PutBoolean(SoulSeekState.M_ListenerEnabled, SoulSeekState.ListenerEnabled);
                 editor.PutInt(SoulSeekState.M_ListenerPort, SoulSeekState.ListenerPort);
                 editor.PutBoolean(SoulSeekState.M_ListenerUPnpEnabled, SoulSeekState.ListenerUPnpEnabled);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveSpeedLimitState()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutBoolean(SoulSeekState.M_DownloadLimitEnabled, SoulSeekState.SpeedLimitDownloadOn);
+                editor.PutBoolean(SoulSeekState.M_DownloadPerTransfer, SoulSeekState.SpeedLimitDownloadIsPerTransfer);
+                editor.PutInt(SoulSeekState.M_DownloadSpeedLimitBytes, SoulSeekState.SpeedLimitDownloadBytesSec);
+
+                editor.PutBoolean(SoulSeekState.M_UploadLimitEnabled, SoulSeekState.SpeedLimitUploadOn);
+                editor.PutBoolean(SoulSeekState.M_UploadPerTransfer, SoulSeekState.SpeedLimitUploadIsPerTransfer);
+                editor.PutInt(SoulSeekState.M_UploadSpeedLimitBytes, SoulSeekState.SpeedLimitUploadBytesSec);
+
                 editor.Commit();
             }
         }
@@ -10698,10 +10725,10 @@ namespace AndriodApp1
         public static String UploadDataDirectoryUri = null;
         public static String ManualIncompleteDataDirectoryUri = null;
         
-        public static bool SpeedLimitDownloadOn = true;
+        public static bool SpeedLimitDownloadOn = false;
         public static bool SpeedLimitUploadOn = false;
-        public static int SpeedLimitDownloadBytesSec = 100 * 1024;//1048576;
-        public static int SpeedLimitUploadBytesSec = 1048576;
+        public static int SpeedLimitDownloadBytesSec = 4 * 1024 * 1024;//1048576;
+        public static int SpeedLimitUploadBytesSec = 4 * 1024 * 1024;
         public static bool SpeedLimitDownloadIsPerTransfer = true;
         public static bool SpeedLimitUploadIsPerTransfer = true;
 
@@ -11005,6 +11032,15 @@ namespace AndriodApp1
         public const string M_ListenerEnabled = "Momento_ListenerEnabled";
         public const string M_ListenerPort = "Momento_ListenerPort";
         public const string M_ListenerUPnpEnabled = "Momento_ListenerUPnpEnabled";
+
+        public const string M_DownloadLimitEnabled = "M_DownloadLimitEnabled";
+        public const string M_DownloadPerTransfer = "M_DownloadPerTransfer";
+        public const string M_DownloadSpeedLimitBytes = "M_DownloadSpeedLimitBytes";
+
+        public const string M_UploadLimitEnabled = "M_UploadLimitEnabled";
+        public const string M_UploadPerTransfer = "M_UploadPerTransfer";
+        public const string M_UploadSpeedLimitBytes = "M_UploadSpeedLimitBytes";
+
 
         public const string M_UserInfoBio = "Momento_UserInfoBio";
         public const string M_UserInfoPicture = "Momento_UserInfoPicture";

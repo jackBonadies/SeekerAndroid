@@ -64,7 +64,10 @@
 
 
 
-
+		<style name="CustomSpinnerTheme" parent="@android:style/Widget.TextView.SpinnerItem">
+			<item name="android:textSize">14sp</item>
+			<item name="android:textColor">?attr/normalTextColor</item>
+		</style>
 
 
   <style name="SeekerButtonStyle">
