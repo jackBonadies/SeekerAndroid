@@ -26,8 +26,8 @@ namespace Soulseek
     /// </summary>
     public class TransferOptions
     {
-        private readonly Func<Transfer, CancellationToken, Task> defaultGovernor =
-            (tx, token) => Task.CompletedTask;
+        private readonly Func<double, string, CancellationToken, Task> defaultGovernor =
+            (a, b, token) => Task.CompletedTask;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TransferOptions"/> class.
@@ -45,7 +45,7 @@ namespace Soulseek
         ///     A value indicating whether the output stream should be closed upon transfer completion.
         /// </param>
         public TransferOptions(
-            Func<Transfer, CancellationToken, Task> governor = null,
+            Func<double, string, CancellationToken, Task> governor = null,
             Action<TransferStateChangedEventArgs> stateChanged = null,
             Action<TransferProgressUpdatedEventArgs> progressUpdated = null,
             int maximumLingerTime = 3000,
@@ -73,7 +73,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets the delegate used to govern transfer speed. (Default = a delegate returning Task.CompletedTask).
         /// </summary>
-        public Func<Transfer, CancellationToken, Task> Governor { get; }
+        public Func<double, string, CancellationToken, Task> Governor { get; }
 
         /// <summary>
         ///     Gets the maximum linger time, in milliseconds, that a connection will attempt to cleanly close following a

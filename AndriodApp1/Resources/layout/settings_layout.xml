@@ -1153,7 +1153,7 @@ android:theme="@style/checkBoxStyle"
                     android:orientation="horizontal">
                     <CheckBox
 
-android:theme="@style/checkBoxStyle"
+                        android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/use_pnp_for_port_forwarding"
@@ -1183,6 +1183,214 @@ android:theme="@style/checkBoxStyle"
                 </LinearLayout>
             </LinearLayout>
 
+
+
+
+                       <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_below="@id/listeningLayout"
+                android:id="@+id/limitDownloadSpeedLayout"
+                android:background="@drawable/border_group_box"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/dlSpeedRow1"
+                    android:orientation="horizontal">
+                    <CheckBox
+
+android:theme="@style/checkBoxStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Limit Download Speed"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/enable_dl_speed_limits"
+            />
+<!--                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/listeningHelp"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="?attr/mainTextColor"
+            />-->
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginLeft="26dp"
+                    android:layout_marginBottom="10dp"
+                    android:id="@+id/dlSpeedSubLayout"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Speed: 10000DUMMY"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginBottom = "2dp"
+                        android:textColor="?attr/normalTextColorNonTinted"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/downloadSpeed"
+            />
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Set"
+                        android:id="@+id/changeDlSpeed"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        
+                        android:layout_gravity="center_vertical"
+                        android:minHeight="16dp"
+                        android:layout_marginRight="10dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+            />
+                                    <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.4"
+                    android:id="@+id/dlPerTransfer"
+        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+
+                                   <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_below="@id/limitDownloadSpeedLayout"
+                android:id="@+id/limitUploadSpeedLayout"
+                android:background="@drawable/border_group_box"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/ulSpeedRow1"
+                    android:orientation="horizontal">
+                    <CheckBox
+
+android:theme="@style/checkBoxStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Limit Upload Speed"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/enable_ul_speed_limits"
+            />
+<!--                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/listeningHelp"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="?attr/mainTextColor"
+            />-->
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginLeft="26dp"
+                    android:layout_marginBottom="10dp"
+                    android:id="@+id/ulSpeedSubLayout"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Speed: 10000DUMMY"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginBottom = "2dp"
+                        android:textColor="?attr/normalTextColorNonTinted"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/uploadSpeed"
+            />
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Set"
+                        android:id="@+id/changeUlSpeed"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        
+                        android:layout_gravity="center_vertical"
+                        android:minHeight="16dp"
+                        android:layout_marginRight="10dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+            />
+                                    <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.4"
+                    android:id="@+id/ulPerTransfer"
+        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+
+
+
             <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -1190,7 +1398,7 @@ android:theme="@style/checkBoxStyle"
     android:orientation="horizontal"
     android:layout_width="match_parent"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@id/listeningLayout"
+                android:layout_below="@id/limitUploadSpeedLayout"
                 android:id="@+id/privLayout"
     android:layout_height="wrap_content">
 
