@@ -1199,7 +1199,7 @@ namespace AndriodApp1
                         username: username,
                         filename: fullfilename,
                         size: size,
-                        options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurGoverner),
+                        options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
                         cancellationToken: cts.Token);
             }
             else
@@ -1215,7 +1215,7 @@ namespace AndriodApp1
                         null,
                         size: size,
                         startOffset:partialLength, //this will get populated
-                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurGoverner),
+                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
                         cancellationToken: cts.Token,
                         streamTask: GetStreamTask(username, fullfilename, depth));
 
