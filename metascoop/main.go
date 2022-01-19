@@ -8,10 +8,6 @@ import (
 	"io"
 	"io/fs"
 	"log"
-	"metascoop/apps"
-	"metascoop/file"
-	"metascoop/git"
-	"metascoop/md"
 	"net/http"
 	"os"
 	"os/exec"
@@ -21,6 +17,10 @@ import (
 
 	"github.com/google/go-github/v39/github"
 	"golang.org/x/oauth2"
+	"metascoop/apps"
+	"metascoop/file"
+	"metascoop/git"
+	"metascoop/md"
 )
 
 func main() {

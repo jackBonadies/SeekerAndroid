@@ -1,8 +1,9 @@
 package main
 
 import (
-	"metascoop/apps"
 	"testing"
+
+	"metascoop/apps"
 )
 
 func TestAppsFile(t *testing.T) {

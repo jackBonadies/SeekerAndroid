@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"metascoop/apps"
 	"os"
+
+	"metascoop/apps"
 )
 
 const (
