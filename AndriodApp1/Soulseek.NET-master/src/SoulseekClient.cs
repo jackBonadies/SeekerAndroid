@@ -2857,247 +2857,283 @@ namespace Soulseek
                 TransferProgressUpdated?.Invoke(this, eventArgs);
             }
 
-            var transferStartRequestedWaitKey = new WaitKey(MessageCode.Peer.TransferRequest, download.Username, download.Filename);
-            string incompleteUriString = null;
-            string incompleteUriParentString = null;
             try
             {
-
-                Task downloadCompleted;
-
-                //Diagnostic.Info($"!!! - Requesting User Endpoint {Path.GetFileName(filename)}");
-                //InvokeDebugLogHandler($"!!! - Requesting User Endpoint  {Path.GetFileName(filename)}");
-
-                var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
-                var peerConnection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
-
-                // prepare two waits; one for the transfer response to confirm that our request is acknowledged and another for
-                // the eventual transfer request sent when the peer is ready to send the file. the response message should be
-                // returned immediately, while the request will be sent only when we've reached the front of the remote queue.
-                var transferRequestAcknowledged = Waiter.Wait<TransferResponse>(
-                    new WaitKey(MessageCode.Peer.TransferResponse, download.Username, download.Token), null, cancellationToken);
-                var transferStartRequested = Waiter.WaitIndefinitely<TransferRequest>(transferStartRequestedWaitKey, cancellationToken);
-
-                // request the file
-                //Diagnostic.Info($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
-                //InvokeDebugLogHandler($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
-                await peerConnection.WriteAsync(new TransferRequest(TransferDirection.Download, token, filename), cancellationToken).ConfigureAwait(false);
-                UpdateState(TransferStates.Requested, null);
-
-                var transferRequestAcknowledgement = await transferRequestAcknowledged.ConfigureAwait(false);
-
-                if(outputStream==null)
+                //the download queue is before any communication with the client.
+                var taskToAwaitOn = SimultaneousDownloadsGatekeeper.Enter(username, cancellationToken);
+                if (!taskToAwaitOn.IsCompleted)
                 {
-                    streamTask.Start();
-                    var t = await streamTask.ConfigureAwait(false); //obv this can throw
-                    outputStream = t.Item1;
-                    startOffset = t.Item2;
-                    incompleteUriString = t.Item3;
-                    incompleteUriParentString = t.Item4;
-                }
-                download.StartOffset = startOffset;//its okay to update start offset here. its before any writes.
-
-
-                if (transferRequestAcknowledgement.IsAllowed)
-                {
-                    // the peer is ready to initiate the transfer immediately; we are bypassing their queue.
-                    UpdateState(TransferStates.Initializing, incompleteUriParentString);
-
-                    // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
-                    // by the remote client will erroneously be reported as zero and the transfer will fail.
-                    download.Size ??= transferRequestAcknowledgement.FileSize; //this line should probably be above update state
-
-                    // prepare a wait for the overall completion of the download
-                    downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);
-
-                    // connect to the peer to retrieve the file; for these types of transfers, we must initiate the transfer connection.
-                    download.Connection = await PeerConnectionManager
-                        .GetTransferConnectionAsync(username, endpoint, transferRequestAcknowledgement.Token, cancellationToken)
-                        .ConfigureAwait(false);
-                }
-#if NETSTANDARD2_0
-                else if (transferRequestAcknowledgement.Message.Contains("not shared"))
-#else
-                else if (transferRequestAcknowledgement.Message.Contains("not shared", StringComparison.InvariantCultureIgnoreCase))
+                    //update status DownloadLocalQueue
+#if DEBUG
+                    Console.WriteLine("we are waiting: " + username);
 #endif
-                {
-                    throw new TransferRejectedException(transferRequestAcknowledgement.Message);
+                    UpdateState(TransferStates.Requested, null);
                 }
-                else
+                await taskToAwaitOn.ConfigureAwait(false);
+#if DEBUG
+                Console.WriteLine("we are starting: " + username);
+#endif
+                var transferStartRequestedWaitKey = new WaitKey(MessageCode.Peer.TransferRequest, download.Username, download.Filename);
+                string incompleteUriString = null;
+                string incompleteUriParentString = null;
+                try
                 {
-                    // the download is remotely queued, so put it in the local queue.
-                    UpdateState(TransferStates.Queued, incompleteUriParentString);
 
-                    // wait for the peer to respond that they are ready to start the transfer
-                    var transferStartRequest = await transferStartRequested.ConfigureAwait(false);
+                    Task downloadCompleted;
 
-                    // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
-                    // by the remote client will erroneously be reported as zero and the transfer will fail.
-                    download.Size ??= transferStartRequest.FileSize;
-                    download.RemoteToken = transferStartRequest.Token;
+                    //Diagnostic.Info($"!!! - Requesting User Endpoint {Path.GetFileName(filename)}");
+                    //InvokeDebugLogHandler($"!!! - Requesting User Endpoint  {Path.GetFileName(filename)}");
 
-                    UpdateState(TransferStates.Initializing, incompleteUriParentString);
+                    var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
+                    var peerConnection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
 
-                    // also prepare a wait for the overall completion of the download
-                    downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);
+                    // prepare two waits; one for the transfer response to confirm that our request is acknowledged and another for
+                    // the eventual transfer request sent when the peer is ready to send the file. the response message should be
+                    // returned immediately, while the request will be sent only when we've reached the front of the remote queue.
+                    var transferRequestAcknowledged = Waiter.Wait<TransferResponse>(
+                        new WaitKey(MessageCode.Peer.TransferResponse, download.Username, download.Token), null, cancellationToken);
+                    var transferStartRequested = Waiter.WaitIndefinitely<TransferRequest>(transferStartRequestedWaitKey, cancellationToken);
 
-                    // respond to the peer that we are ready to accept the file but first, get a fresh connection (or maybe it's
-                    // cached in the manager) to the peer in case it disconnected and was purged while we were waiting.
-                    peerConnection = await PeerConnectionManager
-                        .GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken)
-                        .ConfigureAwait(false);
+                    // request the file
+                    //Diagnostic.Info($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
+                    //InvokeDebugLogHandler($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
+                    await peerConnection.WriteAsync(new TransferRequest(TransferDirection.Download, token, filename), cancellationToken).ConfigureAwait(false);
+                    UpdateState(TransferStates.Requested, null);
 
-                    // prepare a wait for the eventual transfer connection
-                    var connectionTask = PeerConnectionManager
-                        .AwaitTransferConnectionAsync(download.Username, download.Filename, download.RemoteToken.Value, cancellationToken);
+                    var transferRequestAcknowledgement = await transferRequestAcknowledged.ConfigureAwait(false);
 
-                    // initiate the connection
-                    await peerConnection.WriteAsync(new TransferResponse(download.RemoteToken.Value, download.Size ?? 0), cancellationToken).ConfigureAwait(false);
-
-                    try
+                    if(outputStream==null)
                     {
-                        download.Connection = await connectionTask.ConfigureAwait(false);
+                        streamTask.Start();
+                        var t = await streamTask.ConfigureAwait(false); //obv this can throw
+                        outputStream = t.Item1;
+                        startOffset = t.Item2;
+                        incompleteUriString = t.Item3;
+                        incompleteUriParentString = t.Item4;
                     }
-                    catch (ConnectionException)
+                    download.StartOffset = startOffset;//its okay to update start offset here. its before any writes.
+
+
+                    if (transferRequestAcknowledgement.IsAllowed)
                     {
-                        // if the remote user doesn't initiate a transfer connection, try to initiate one from this end. the
-                        // remote client in this scenario is most likely Nicotine+.
+                        // the peer is ready to initiate the transfer immediately; we are bypassing their queue.
+                        UpdateState(TransferStates.Initializing, incompleteUriParentString);
+
+                        // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
+                        // by the remote client will erroneously be reported as zero and the transfer will fail.
+                        download.Size ??= transferRequestAcknowledgement.FileSize; //this line should probably be above update state
+
+                        // prepare a wait for the overall completion of the download
+                        downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);
+
+                        // connect to the peer to retrieve the file; for these types of transfers, we must initiate the transfer connection.
                         download.Connection = await PeerConnectionManager
-                            .GetTransferConnectionAsync(username, endpoint, download.RemoteToken.Value, cancellationToken)
+                            .GetTransferConnectionAsync(username, endpoint, transferRequestAcknowledgement.Token, cancellationToken)
                             .ConfigureAwait(false);
                     }
-                }
-
-                download.Connection.DataRead += (sender, e) => UpdateProgress(download.StartOffset + e.CurrentLength);
-                download.Connection.Disconnected += (sender, e) =>
-                {
-                    // this is less than ideal, but because the connection can disconnect at any time this is the definitive way
-                    // to be sure we conclude the transfer in a way that accurately represents what happened.
-                    if (download.State.HasFlag(TransferStates.Succeeded))
+    #if NETSTANDARD2_0
+                    else if (transferRequestAcknowledgement.Message.Contains("not shared"))
+    #else
+                    else if (transferRequestAcknowledgement.Message.Contains("not shared", StringComparison.InvariantCultureIgnoreCase))
+    #endif
                     {
-                        Waiter.Complete(download.WaitKey);
-                    }
-                    else if (e.Exception is TimeoutException)
-                    {
-                        download.State = TransferStates.TimedOut;
-                        Waiter.Throw(download.WaitKey, e.Exception);
-                    }
-                    else if (e.Exception is OperationCanceledException)
-                    {
-                        download.State = TransferStates.Cancelled;
-                        Waiter.Throw(download.WaitKey, e.Exception);
+                        throw new TransferRejectedException(transferRequestAcknowledgement.Message);
                     }
                     else
                     {
-                        Waiter.Throw(download.WaitKey, new ConnectionException($"Transfer failed: {e.Message}", e.Exception));
+                        // the download is remotely queued, so put it in the local queue.
+                        UpdateState(TransferStates.Queued, incompleteUriParentString);
+
+                        // wait for the peer to respond that they are ready to start the transfer
+                        var transferStartRequest = await transferStartRequested.ConfigureAwait(false);
+
+                        // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
+                        // by the remote client will erroneously be reported as zero and the transfer will fail.
+                        download.Size ??= transferStartRequest.FileSize;
+                        download.RemoteToken = transferStartRequest.Token;
+
+                        UpdateState(TransferStates.Initializing, incompleteUriParentString);
+
+                        // also prepare a wait for the overall completion of the download
+                        downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);
+
+                        // respond to the peer that we are ready to accept the file but first, get a fresh connection (or maybe it's
+                        // cached in the manager) to the peer in case it disconnected and was purged while we were waiting.
+                        peerConnection = await PeerConnectionManager
+                            .GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken)
+                            .ConfigureAwait(false);
+
+                        // prepare a wait for the eventual transfer connection
+                        var connectionTask = PeerConnectionManager
+                            .AwaitTransferConnectionAsync(download.Username, download.Filename, download.RemoteToken.Value, cancellationToken);
+
+                        // initiate the connection
+                        await peerConnection.WriteAsync(new TransferResponse(download.RemoteToken.Value, download.Size ?? 0), cancellationToken).ConfigureAwait(false);
+
+                        try
+                        {
+                            download.Connection = await connectionTask.ConfigureAwait(false);
+                        }
+                        catch (ConnectionException)
+                        {
+                            // if the remote user doesn't initiate a transfer connection, try to initiate one from this end. the
+                            // remote client in this scenario is most likely Nicotine+.
+                            download.Connection = await PeerConnectionManager
+                                .GetTransferConnectionAsync(username, endpoint, download.RemoteToken.Value, cancellationToken)
+                                .ConfigureAwait(false);
+                        }
                     }
-                };
 
-                try
-                {
-                    Diagnostic.Debug($"Seeking download of {Path.GetFileName(download.Filename)} from {username} to starting offset of {startOffset} bytes");
-                    var startOffsetBytes = BitConverter.GetBytes(startOffset);
-                    await download.Connection.WriteAsync(startOffsetBytes, cancellationToken).ConfigureAwait(false);
-
-                    UpdateState(TransferStates.InProgress, incompleteUriParentString);
-                    UpdateProgress(startOffset); //this is good.
-
-                    await download.Connection.ReadAsync(download.Size.Value - startOffset, outputStream, (cancelToken) => options.Governor(download.currentSpeed, download.Username, cancelToken), cancellationToken).ConfigureAwait(false);
-
-                    download.State = TransferStates.Succeeded;
-
-                    download.Connection.Disconnect("Transfer complete");
-                    if(outputStream.CanSeek)
+                    download.Connection.DataRead += (sender, e) => UpdateProgress(download.StartOffset + e.CurrentLength);
+                    download.Connection.Disconnected += (sender, e) =>
                     {
-                        Diagnostic.Info($"Download of {Path.GetFileName(download.Filename)} from {username} complete ({startOffset + outputStream.Position} of {download.Size} bytes).");
+                        // this is less than ideal, but because the connection can disconnect at any time this is the definitive way
+                        // to be sure we conclude the transfer in a way that accurately represents what happened.
+                        if (download.State.HasFlag(TransferStates.Succeeded))
+                        {
+                            Waiter.Complete(download.WaitKey);
+                        }
+                        else if (e.Exception is TimeoutException)
+                        {
+                            download.State = TransferStates.TimedOut;
+                            Waiter.Throw(download.WaitKey, e.Exception);
+                        }
+                        else if (e.Exception is OperationCanceledException)
+                        {
+                            download.State = TransferStates.Cancelled;
+                            Waiter.Throw(download.WaitKey, e.Exception);
+                        }
+                        else
+                        {
+                            Waiter.Throw(download.WaitKey, new ConnectionException($"Transfer failed: {e.Message}", e.Exception));
+                        }
+                    };
+
+                    try
+                    {
+                        Diagnostic.Debug($"Seeking download of {Path.GetFileName(download.Filename)} from {username} to starting offset of {startOffset} bytes");
+                        var startOffsetBytes = BitConverter.GetBytes(startOffset);
+                        await download.Connection.WriteAsync(startOffsetBytes, cancellationToken).ConfigureAwait(false);
+
+                        UpdateState(TransferStates.InProgress, incompleteUriParentString);
+                        UpdateProgress(startOffset); //this is good.
+
+                        await download.Connection.ReadAsync(download.Size.Value - startOffset, outputStream, (cancelToken) => options.Governor(download.currentSpeed, download.Username, cancelToken), cancellationToken).ConfigureAwait(false);
+
+                        download.State = TransferStates.Succeeded;
+
+                        download.Connection.Disconnect("Transfer complete");
+                        if(outputStream.CanSeek)
+                        {
+                            Diagnostic.Info($"Download of {Path.GetFileName(download.Filename)} from {username} complete ({startOffset + outputStream.Position} of {download.Size} bytes).");
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        download.Connection.Disconnect(exception: ex);
+                    }
+
+                    // wait for the download to complete this wait is either completed (on success) or thrown (on anything other than
+                    // success) in the Disconnected event handler of the transfer connection
+                    await downloadCompleted.ConfigureAwait(false); //the downlaodCompletedTask can through Collection Modified exception and read error werite failed ENOENT no such file or dir...
+                    return new Tuple<string,string>(incompleteUriString,incompleteUriParentString);
+                }
+                catch (TransferRejectedException ex)
+                {
+                    download.State = TransferStates.Rejected;
+
+                    throw new TransferRejectedException($"Download of file {filename} rejected by user {username}: {ex.Message}", ex);
+                }
+                catch (OperationCanceledException ex)
+                {
+                    download.State = TransferStates.Cancelled;
+                    download.Connection?.Disconnect("Transfer cancelled", ex);
+
+                    Diagnostic.Debug(ex.ToString());
+                    throw;
+                }
+                catch (TimeoutException ex)
+                {
+                    download.State = TransferStates.TimedOut;
+                    download.Connection?.Disconnect("Transfer timed out", ex);
+
+                    Diagnostic.Debug(ex.ToString());
+                    throw;
                 }
                 catch (Exception ex)
                 {
-                    download.Connection.Disconnect(exception: ex);
+                    download.State = TransferStates.Errored;
+                    download.Connection?.Disconnect("Transfer error", ex);
+
+                    Diagnostic.Debug(ex.ToString());
+
+                    if (ex is UserOfflineException)
+                    {
+                        download.State = TransferStates.Errored | TransferStates.UserOffline;
+                        throw;
+                    }
+
+                    throw new SoulseekClientException($"Failed to download file {filename} from user {username}: {ex.Message}", ex);
                 }
-
-                // wait for the download to complete this wait is either completed (on success) or thrown (on anything other than
-                // success) in the Disconnected event handler of the transfer connection
-                await downloadCompleted.ConfigureAwait(false); //the downlaodCompletedTask can through Collection Modified exception and read error werite failed ENOENT no such file or dir...
-                return new Tuple<string,string>(incompleteUriString,incompleteUriParentString);
-            }
-            catch (TransferRejectedException ex)
-            {
-                download.State = TransferStates.Rejected;
-
-                throw new TransferRejectedException($"Download of file {filename} rejected by user {username}: {ex.Message}", ex);
-            }
-            catch (OperationCanceledException ex)
-            {
-                download.State = TransferStates.Cancelled;
-                download.Connection?.Disconnect("Transfer cancelled", ex);
-
-                Diagnostic.Debug(ex.ToString());
-                throw;
-            }
-            catch (TimeoutException ex)
-            {
-                download.State = TransferStates.TimedOut;
-                download.Connection?.Disconnect("Transfer timed out", ex);
-
-                Diagnostic.Debug(ex.ToString());
-                throw;
-            }
-            catch (Exception ex)
-            {
-                download.State = TransferStates.Errored;
-                download.Connection?.Disconnect("Transfer error", ex);
-
-                Diagnostic.Debug(ex.ToString());
-
-                if (ex is UserOfflineException)
+                finally
                 {
-                    download.State = TransferStates.Errored | TransferStates.UserOffline;
-                    throw;
-                }
+                    // clean up the waits in case the code threw before they were awaited.
+                    Waiter.Complete(download.WaitKey);
+                    Waiter.Cancel(transferStartRequestedWaitKey);
 
-                throw new SoulseekClientException($"Failed to download file {filename} from user {username}: {ex.Message}", ex);
+                    download.Connection?.Dispose();
+
+                    // change state so we can fire the progress update a final time with the updated state. little bit of a hack to
+                    // avoid cloning the download
+                    download.State = TransferStates.Completed | download.State;
+                    if(outputStream?.CanSeek ?? false)
+                    {
+                        UpdateProgress(download.StartOffset + outputStream.Position);
+                    }
+                    UpdateState(download.State, incompleteUriParentString);
+
+
+                    if (options.DisposeOutputStreamOnCompletion && outputStream!=null)
+                    {
+                        try
+                        {
+                            await outputStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+    #if NETSTANDARD2_0
+                            outputStream.Dispose();
+    #else
+                            await outputStream.DisposeAsync().ConfigureAwait(false);
+    #endif
+                        }
+                    }
+                }
             }
             finally
             {
-                // clean up the waits in case the code threw before they were awaited.
-                Waiter.Complete(download.WaitKey);
-                Waiter.Cancel(transferStartRequestedWaitKey);
-
-                download.Connection?.Dispose();
-
-                // change state so we can fire the progress update a final time with the updated state. little bit of a hack to
-                // avoid cloning the download
-                download.State = TransferStates.Completed | download.State;
-                if(outputStream?.CanSeek ?? false)
-                {
-                    UpdateProgress(download.StartOffset + outputStream.Position);
-                }
-                UpdateState(download.State, incompleteUriParentString);
-
-                InvokeDebugLogHandler("Try remove " + download.Token + " - "  + download.Filename);
+                InvokeDebugLogHandler("Try remove " + download.Token + " - " + download.Filename);
                 bool allCancelled = false;
                 try
                 {
                     //if you canclled one of them, then test, did you cancel all?
                     if (download.State.HasFlag(TransferStates.Cancelled))
                     {
-                        allCancelled = Downloads.Values.All((TransferInternal ti)=>{return ti.State.HasFlag(TransferStates.Cancelled);});
+                        allCancelled = Downloads.Values.All((TransferInternal ti) => { return ti.State.HasFlag(TransferStates.Cancelled); });
                     }
-                    if(allCancelled)
+                    if (allCancelled)
                     {
                         InvokeDebugLogHandler("All cancelled worked with: " + Downloads.Values.Count);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                     InvokeErrorLogHandler("The cancelled checking failed: " + e.Message);
+                    InvokeErrorLogHandler("The cancelled checking failed: " + e.Message);
                 }
                 Downloads.TryRemove(download.Token, out _); //all cancelled do eventually get here.  But sometimes something bad happens and they do not get removed for some reason...
-                //also sometimes cancel all does work just fine and kills the service....
+                                                            //also sometimes cancel all does work just fine and kills the service....
                 InvokeDebugLogHandler("Successfully removed? () " + download.Filename);
-                if(allCancelled)
+                if (allCancelled)
                 {
                     InvokeDebugLogHandler("They are all cancelled");
                     InvokeDownloadAddedRemovedInternalHandler(0);
@@ -3107,21 +3143,15 @@ namespace Soulseek
                     InvokeDownloadAddedRemovedInternalHandler(Downloads.Count);
                 }
                 InvokeDebugLogHandler("New count is: " + Downloads.Count); //the bad case says that there is still one thing left.. even though downloads.count is 0....
-                if (options.DisposeOutputStreamOnCompletion && outputStream!=null)
-                {
-                    try
-                    {
-                        await outputStream.FlushAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    finally
-                    {
-#if NETSTANDARD2_0
-                        outputStream.Dispose();
-#else
-                        await outputStream.DisposeAsync().ConfigureAwait(false);
+
+#if DEBUG
+                Console.WriteLine("finished: " + username);
 #endif
-                    }
-                }
+                SimultaneousDownloadsGatekeeper.Exit(username);
+#if DEBUG
+                Console.WriteLine("status counts: " + SimultaneousDownloadsGatekeeper.usernameCounts.Count);
+                Console.WriteLine("status queued: " + SimultaneousDownloadsGatekeeper.usernameTimeQueued.Count);
+#endif
             }
         }
 
@@ -3995,4 +4025,230 @@ namespace Soulseek
             }
         }
     }
+
+    public static class SimultaneousDownloadsGatekeeper
+    {
+        private static int maxUsersConcurrent = 1;
+        private static bool restrictConcurrentUsers = false;
+
+        public static void Initialize(bool on, int maxUsers)
+        {
+            restrictConcurrentUsers = on;
+            maxUsersConcurrent = maxUsers;
+        }
+
+        /// <summary>
+        /// Either get the existing task. or create a new task in the waiting state if we are already at capacity, or in the set state if below capacity.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static Task<bool> Enter(string username, CancellationToken cancellationToken)
+        {
+            if (RestrictConcurrentUsers)
+            {
+                Task<bool> taskToAwaitOn = null;
+                lock (lockObject)
+                {
+                    //these MREs stay in the dict until the last username download completes.
+                    if (usernameMREs.ContainsKey(username))
+                    {
+                        //we already created a task for it.
+#if DEBUG
+                        Console.WriteLine("contains key: " + username);
+#endif
+                        taskToAwaitOn = usernameMREs[username].Task;
+                        usernameCounts[username]++;
+                    }
+                    else
+                    {
+                        if (usernameCounts.Count > (MaxUsersConcurrent - 1))
+                        {
+                            //add someone to wait.
+#if DEBUG
+                            Console.WriteLine("adding to wait: " + username);
+#endif
+                            var newTCS = new TaskCompletionSource<bool>();
+                            usernameMREs[username] = newTCS;
+                            //we need to wait til someone frees us
+                            usernameTimeQueued[username] = DateTime.UtcNow.Ticks;
+                            cancellationToken.Register(() => newTCS.TrySetCanceled());
+                            taskToAwaitOn = newTCS.Task;
+                            usernameCounts[username] = 1;
+                        }
+                        else
+                        {
+                            //someone to go immediately.
+#if DEBUG
+                            Console.WriteLine("adding to go immediately: " + username);
+#endif
+                            usernameMREs[username] = new TaskCompletionSource<bool>();
+                            usernameMREs[username].SetResult(true);
+                            taskToAwaitOn = usernameMREs[username].Task;
+                            usernameCounts[username] = 1;
+                        }
+                    }
+                }
+
+
+                return taskToAwaitOn;
+            }
+            else
+            {
+                return Task.FromResult(true);
+            }
+        }
+
+        public static void Exit(string username)
+        {
+            if (RestrictConcurrentUsers)
+            {
+                lock (lockObject)
+                {
+                    if (!usernameCounts.ContainsKey(username))
+                    {
+                        //this should not happen.
+#if DEBUG
+                        Console.WriteLine("username counts does not contain key");
+#endif
+                    }
+                    else
+                    {
+                        usernameCounts[username]--;
+                        if (usernameCounts[username] == 0)
+                        {
+                            //these users downloads are done.
+                            Console.WriteLine($"downloads from {username} are done");
+
+                            usernameCounts.Remove(username); //now the max concurrency check is one less.
+                            bool wasInProgress = true;
+                            if (usernameMREs.ContainsKey(username))
+                            {
+                                //if this was the task that got cancelled, aka we never were in progress, and so we should not free up a slot for someone else..
+                                wasInProgress = !usernameMREs[username].Task.Status.HasFlag(TaskStatus.Canceled);
+                                if (!wasInProgress)
+                                {
+                                    Console.WriteLine("was cancelled while on the MRE..");
+                                }
+                            }
+                            usernameMREs.Remove(username);
+                            usernameTimeQueued.Remove(username); //may not be present.
+
+                            //let the next person go, if applicable
+                            if (usernameTimeQueued.Count > 0 && wasInProgress)
+                            {
+                                long minTime = long.MaxValue;
+                                string userWaitingLongest = string.Empty;
+                                foreach (var kvp in usernameTimeQueued)
+                                {
+                                    //to avoid a race condition do not free someone if their status was just cancelled.
+                                    if (kvp.Value < minTime && usernameMREs[kvp.Key].Task.Status.HasFlag(TaskStatus.WaitingForActivation))
+                                    {
+                                        minTime = kvp.Value;
+                                        userWaitingLongest = kvp.Key;
+                                    }
+                                }
+                                Console.WriteLine("let this user go: " + userWaitingLongest);
+
+                                if (userWaitingLongest != string.Empty)
+                                {
+                                    usernameMREs[userWaitingLongest].TrySetResult(true);
+                                    usernameTimeQueued.Remove(userWaitingLongest);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+
+        public static int MaxUsersConcurrent
+        {
+            get
+            {
+                return maxUsersConcurrent;
+            }
+            set
+            {
+                if (maxUsersConcurrent != value)
+                {
+                    //going from off to on.
+                    if (value < maxUsersConcurrent)
+                    {
+                        maxUsersConcurrent = value;
+                    }
+                    else
+                    {
+                        //going from on to off
+                        //free everyone.
+                        int numToFree = value - maxUsersConcurrent;
+                        lock (lockObject)
+                        {
+                            var toFree = usernameTimeQueued.ToList();
+                            toFree.Sort((x, y) => y.Value.CompareTo(x.Value));
+                            var toFreeTake = toFree.Take(numToFree);
+
+                            foreach (var unameKVP in toFreeTake)
+                            {
+                                Console.WriteLine("let user go:: " + unameKVP.Key);
+                                usernameMREs[unameKVP.Key].TrySetResult(true); //they will still go though the exit clause to remove their MRE when the time comes, decrease their count, etc.
+                                usernameTimeQueued.Remove(unameKVP.Key); //since we no longer need to free this guy..
+                                                                         //usernameMREs.Remove(uname);
+                            }
+                        }
+                        maxUsersConcurrent = value;
+                    }
+                }
+            }
+        }
+
+        public static bool RestrictConcurrentUsers
+        {
+            get
+            {
+                return restrictConcurrentUsers;
+            }
+            set
+            {
+                if (restrictConcurrentUsers != value)
+                {
+                    //going from off to on.
+                    if (value)
+                    {
+                        restrictConcurrentUsers = value;
+                    }
+                    else
+                    {
+                        //going from on to off
+                        //free everyone.
+                        lock (lockObject)
+                        {
+                            if (usernameMREs.Count > 0)
+                            {
+                                foreach (var kvp in usernameMREs)
+                                {
+                                    kvp.Value.TrySetResult(true);
+                                }
+                                usernameMREs.Clear();
+                                usernameCounts.Clear();
+                                usernameTimeQueued.Clear();
+                            }
+                        }
+                        restrictConcurrentUsers = value;
+                    }
+                }
+            }
+        }
+
+        private static object lockObject = new object();
+        public static Dictionary<string, int> usernameCounts = new Dictionary<string, int>();
+
+        //this is to preserve the order in and out.  also all and only users who are waiting will get added to this.
+        public static Dictionary<string, long> usernameTimeQueued = new Dictionary<string, long>();
+        public static Dictionary<string, TaskCompletionSource<bool>> usernameMREs = new Dictionary<string, TaskCompletionSource<bool>>();
+    }
 }
+

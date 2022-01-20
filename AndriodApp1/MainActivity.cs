@@ -2675,7 +2675,7 @@ namespace AndriodApp1
                             if (exists && currentSpeed == lastAvgSpeed)
                             {
 #if DEBUG
-                                System.Console.WriteLine("dont update");
+                                //System.Console.WriteLine("dont update");
 #endif
                                 //do not adjust as we have not yet recalculated the average speed
                                 return Task.Delay((int)msDelay, cts);
@@ -2690,14 +2690,14 @@ namespace AndriodApp1
                                 //its threadsafe when using linq on concurrent dict itself.
                                 avgSpeed = DownloadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
 #if DEBUG
-                                System.Console.WriteLine("multiple total speed " + avgSpeed);
+                                //System.Console.WriteLine("multiple total speed " + avgSpeed);
 #endif
                             }
 
                             if (avgSpeed > SoulSeekState.SpeedLimitDownloadBytesSec)
                             {
 #if DEBUG
-                                System.Console.WriteLine("speed too high " + currentSpeed + "   " + msDelay);
+                                //System.Console.WriteLine("speed too high " + currentSpeed + "   " + msDelay);
 #endif
                                 DownloadUserDelays[username] = msDelay = msDelay * 1.04;
 
@@ -2705,7 +2705,7 @@ namespace AndriodApp1
                             else
                             {
 #if DEBUG
-                                System.Console.WriteLine("speed too low " + currentSpeed + "   " + msDelay);
+                                //System.Console.WriteLine("speed too low " + currentSpeed + "   " + msDelay);
 #endif
                                 DownloadUserDelays[username] = msDelay = msDelay * 0.96;
                             }
@@ -2715,7 +2715,7 @@ namespace AndriodApp1
                         else
                         {
 #if DEBUG
-                            System.Console.WriteLine("first time guess");
+                            //System.Console.WriteLine("first time guess");
 #endif
                             //first time we need to guess a decent value
                             //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
@@ -2752,7 +2752,7 @@ namespace AndriodApp1
                             if (exists && currentSpeed == lastAvgSpeed)
                             {
 #if DEBUG
-                                System.Console.WriteLine("UL dont update");
+                                //System.Console.WriteLine("UL dont update");
 #endif
                                 //do not adjust as we have not yet recalculated the average speed
                                 return Task.Delay((int)msDelay, cts);
@@ -2767,14 +2767,14 @@ namespace AndriodApp1
                                 //its threadsafe when using linq on concurrent dict itself.
                                 avgSpeed = UploadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
 #if DEBUG
-                                System.Console.WriteLine("UL multiple total speed " + avgSpeed);
+                                //System.Console.WriteLine("UL multiple total speed " + avgSpeed);
 #endif
                             }
 
                             if (avgSpeed > SoulSeekState.SpeedLimitUploadBytesSec)
                             {
 #if DEBUG
-                                System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
+                                //System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
 #endif
                                 UploadUserDelays[username] = msDelay = msDelay * 1.04;
 
@@ -2782,7 +2782,7 @@ namespace AndriodApp1
                             else
                             {
 #if DEBUG
-                                System.Console.WriteLine("UL speed too low " + currentSpeed + "   " + msDelay);
+                                //System.Console.WriteLine("UL speed too low " + currentSpeed + "   " + msDelay);
 #endif
                                 UploadUserDelays[username] = msDelay = msDelay * 0.96;
                             }
@@ -2792,7 +2792,7 @@ namespace AndriodApp1
                         else
                         {
 #if DEBUG
-                            System.Console.WriteLine("UL first time guess");
+                            //System.Console.WriteLine("UL first time guess");
 #endif
                             //first time we need to guess a decent value
                             //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
@@ -3716,6 +3716,8 @@ namespace AndriodApp1
                 SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
+
+                SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(SoulSeekState.M_LimitSimultaneousDownloads,false), sharedPreferences.GetInt(SoulSeekState.M_MaxSimultaneousLimit,1));
 
                 //SearchTabHelper.RestoreStateFromSharedPreferencesLegacy();
 
@@ -11063,6 +11065,10 @@ namespace AndriodApp1
         public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
+
+        public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
+        public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";
+
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";

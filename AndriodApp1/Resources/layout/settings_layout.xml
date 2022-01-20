@@ -1387,8 +1387,98 @@ android:theme="@style/checkBoxStyle"
 
             </LinearLayout>
 
+           <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_below="@id/limitUploadSpeedLayout"
+                android:id="@+id/limitConcurrentDownloadsLayout"
+                android:background="@drawable/border_group_box"
+                android:orientation="vertical"
+                >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "2dp"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/limitConcurrentDownloadsSublayout"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal|fill_horizontal|center">
+                    <CheckBox
+
+android:theme="@style/checkBoxStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Limit concurrent downloads"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "2dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/limitConcurrentDownloadsCheckBox"
+       />
 
 
+<!--                                        <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "2dp"
+                        
+                        android:id="@+id/moreInfoConcurrent"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="?attr/mainTextColor"
+            />-->
+</LinearLayout>
+                                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "12dp"
+                    android:layout_marginLeft="26dp"
+                    android:layout_marginBottom="18dp"
+                    android:id="@+id/limitConcurrentDownloadsSublayout2"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Max # of Concurrent Downloads: 1"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginBottom = "2dp"
+                        android:textColor="?attr/normalTextColorNonTinted"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="10dp"
+                        android:id="@+id/concurrentDownloadsLabel"
+            />
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Change"
+                        android:id="@+id/changeConcurrentDownloads"
+                        android:textSize="12dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="false"
+                        
+                        android:layout_gravity="center_vertical"
+                        android:minHeight="16dp"
+                        android:layout_marginRight="10dp"
+                        android:foreground="@drawable/button"
+                        style="@style/SeekerButtonStyle"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+            />
+            </LinearLayout>
+        </LinearLayout>
 
 
             <LinearLayout
@@ -1398,7 +1488,7 @@ android:theme="@style/checkBoxStyle"
     android:orientation="horizontal"
     android:layout_width="match_parent"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@id/limitUploadSpeedLayout"
+                android:layout_below="@id/limitConcurrentDownloadsLayout"
                 android:id="@+id/privLayout"
     android:layout_height="wrap_content">
 

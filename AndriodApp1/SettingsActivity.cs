@@ -176,6 +176,11 @@ namespace AndriodApp1
         TextView ulSpeedTextView;
         Spinner ulLimitPerTransfer;
 
+        private ViewGroup concurrentDlSublayout;
+        private TextView concurrentDlLabel;
+        private Button concurrentDlButton;
+        private CheckBox concurrentDlCheckbox;
+
 
         Button sharedFolderButton;
         Button browseSelfButton;
@@ -379,6 +384,20 @@ namespace AndriodApp1
 
             UpdateSpeedLimitsState();
 
+            concurrentDlSublayout = FindViewById<ViewGroup>(Resource.Id.limitConcurrentDownloadsSublayout2);
+            concurrentDlLabel = FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel);
+            concurrentDlCheckbox = FindViewById<CheckBox>(Resource.Id.limitConcurrentDownloadsCheckBox);
+            concurrentDlCheckbox.Checked = Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers;
+            concurrentDlCheckbox.CheckedChange += ConcurrentDlCheckbox_CheckedChange;
+
+            concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
+            concurrentDlButton.Click += ConcurrentDlBottom_Click;
+            concurrentDlLabel.Text = $"Max # of Concurrent Downloads: {Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent}";
+
+            
+
+            UpdateConcurrentDownloadLimitsState();
+
             String[] dlOptions = new String[]{ "Per Transfer", "Global" };
             ArrayAdapter<String> dlOptionsStrings = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dlOptions);
             dlLimitPerTransfer.Adapter = dlOptionsStrings;
@@ -489,6 +508,22 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void ConcurrentDlCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            if (e.IsChecked == Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers)
+            {
+                return;
+            }
+            Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers = e.IsChecked;
+            this.UpdateConcurrentDownloadLimitsState();
+            SaveMaxConcurrentDownloadsSettings();
+        }
+
+        private void ConcurrentDlBottom_Click(object sender, EventArgs e)
+        {
+            ShowChangeDialog(ChangeDialogType.ConcurrentDL);
         }
 
         private void UlLimitPerTransfer_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
@@ -961,6 +996,7 @@ namespace AndriodApp1
             ChangePort = 0,
             ChangeDL = 1,
             ChangeUL = 2,
+            ConcurrentDL = 3,
         }
 
         private void ShowChangeDialog(ChangeDialogType changeDialogType)
@@ -979,6 +1015,10 @@ namespace AndriodApp1
             {
                 builder.SetTitle("Change Upload Speed (kb/s):");
             }
+            else if(changeDialogType == ChangeDialogType.ConcurrentDL)
+            {
+                builder.SetTitle("Max # of Concurrent Downloads:");
+            }
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_port, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosePortEditText);
@@ -989,6 +1029,10 @@ namespace AndriodApp1
             else if (changeDialogType == ChangeDialogType.ChangeUL)
             {
                 input.Hint = "Enter Speed in Kb/s";
+            }
+            else if (changeDialogType == ChangeDialogType.ConcurrentDL)
+            {
+                input.Hint = "Enter Max to Download Simultaneously";
             }
             builder.SetView(viewInflated);
 
@@ -1040,6 +1084,26 @@ namespace AndriodApp1
                     }
                     
                     SeekerApplication.SaveSpeedLimitState();
+                    changeDialog.Dismiss();
+                }
+                else if(changeDialogType == ChangeDialogType.ConcurrentDL)
+                {
+                    int concurrentDL = -1;
+                    if (!int.TryParse(input.Text, out concurrentDL))
+                    {
+                        Toast.MakeText(this, "Failed to Parse Number", ToastLength.Long).Show();
+                        return;
+                    }
+                    if (concurrentDL < 1)
+                    {
+                        Toast.MakeText(this, "Must be greater than 0", ToastLength.Long).Show();
+                        return;
+                    }
+
+                    Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent = concurrentDL;
+                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = $"Max # of Concurrent Downloads: {Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent}";
+
+                    SaveMaxConcurrentDownloadsSettings();
                     changeDialog.Dismiss();
                 }
 
@@ -1513,6 +1577,24 @@ namespace AndriodApp1
                 useUPnPCheckBox.Clickable = false;
                 changePort.Clickable = false;
                 checkStatus.Clickable = false;
+            }
+        }
+
+        private void UpdateConcurrentDownloadLimitsState()
+        {
+            if (Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers)
+            {
+                concurrentDlSublayout.Enabled = true;
+                concurrentDlSublayout.Alpha = 1.0f;
+                concurrentDlButton.Clickable = true;
+                concurrentDlButton.Alpha = 1.0f;
+            }
+            else
+            {
+                concurrentDlSublayout.Enabled = false;
+                concurrentDlSublayout.Alpha = 0.5f;
+                concurrentDlButton.Clickable = false;
+                concurrentDlButton.Alpha = 0.5f;
             }
         }
 
@@ -2184,6 +2266,17 @@ namespace AndriodApp1
                 editor.PutBoolean(SoulSeekState.M_UseManualIncompleteDirectoryUri, SoulSeekState.OverrideDefaultIncompleteLocations);
                 editor.PutBoolean(SoulSeekState.M_AdditionalUsernameSubdirectories, SoulSeekState.CreateUsernameSubfolders);
                 editor.PutString(SoulSeekState.M_ManualIncompleteDirectoryUri, SoulSeekState.ManualIncompleteDataDirectoryUri);
+                bool success = editor.Commit();
+            }
+        }
+
+        public static void SaveMaxConcurrentDownloadsSettings()
+        {
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutBoolean(SoulSeekState.M_LimitSimultaneousDownloads, Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers);
+                editor.PutInt(SoulSeekState.M_MaxSimultaneousLimit, Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent);
                 bool success = editor.Commit();
             }
         }
