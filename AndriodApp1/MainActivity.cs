@@ -2265,6 +2265,23 @@ namespace AndriodApp1
                 }
             }
         }
+
+        /// <summary>
+        /// i.e. the folders to NOT delete
+        /// </summary>
+        /// <returns></returns>
+        public List<string> GetInUseIncompleteFolderNames()
+        {
+            List<string> foldersToNotDelete = new List<string>();
+            lock(AllFolderItems)
+            {
+                foreach(FolderItem fi in AllFolderItems)
+                {
+                    foldersToNotDelete.Add(Helpers.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
+                }
+            }
+            return foldersToNotDelete;
+        }
     }
 
 
@@ -9248,6 +9265,10 @@ namespace AndriodApp1
         {
             atDirectory.CreateFile("nomedia/customnomedia",".nomedia");
         }
+
+        
+
+
 
         public static object lock_toplevel_ifexist_create = new object();
         public static object lock_album_ifexist_create = new object();

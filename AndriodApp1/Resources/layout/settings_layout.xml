@@ -296,9 +296,56 @@ android:theme="@style/checkBoxStyle"
 
                 </TableRow>
                 </TableLayout>
+                                    <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "0dp"
+                    android:layout_marginBottom = "12dp"
+                        
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/clearIncompleteSubLayout"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal|fill_horizontal|center">
+            <Button
+                android:layout_centerHorizontal="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear Folder"
+
+                    android:textSize="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:paddingLeft="7dp"
+                    android:paddingRight="7dp"
+                            android:textAllCaps="false"
+                            android:layout_marginLeft="28dp"
+                style="@style/SeekerButtonStyle"
+                android:foreground="@drawable/button"
+                android:id="@+id/clearIncompleteFolder"
+       />
+
+
+<!--                                        <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "10dp"
+                        android:layout_marginBottom = "10dp"
+                        
+                        android:id="@+id/moreInfoButton"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="?attr/mainTextColor"
+            />-->
 
 
                 </LinearLayout>
+
+                </LinearLayout>
+
+
+
 
             </LinearLayout>
 

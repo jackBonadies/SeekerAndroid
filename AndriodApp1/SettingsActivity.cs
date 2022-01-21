@@ -493,6 +493,8 @@ namespace AndriodApp1
             changeIncompleteDirectory.Click += ChangeIncompleteDirectory;
             incompleteFolderViewLayout = this.FindViewById<ViewGroup>(Resource.Id.incompleteDirectoryLayout);
 
+            Button cleanUpIncompleteDirectory = this.FindViewById<Button>(Resource.Id.clearIncompleteFolder);
+            cleanUpIncompleteDirectory.Click += CleanUpIncompleteDirectory_Click;
 
             SetIncompleteDirectoryState();
             SetCompleteFolderView();
@@ -508,6 +510,11 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void CleanUpIncompleteDirectory_Click(object sender, EventArgs e)
+        {
+            ClearIncompleteFolder();
         }
 
         private void ConcurrentDlCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -989,6 +996,166 @@ namespace AndriodApp1
         private void ChangePort_Click(object sender, EventArgs e)
         {
             ShowChangeDialog(ChangeDialogType.ChangePort);
+        }
+
+        public void ClearIncompleteFolder()
+        {
+            List<string> doNotDelete = TransfersFragment.TransferItemManagerDL.GetInUseIncompleteFolderNames();
+
+            bool useDownloadDir = false;
+            if (SoulSeekState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+            {
+                useDownloadDir = true;
+            }
+            bool useTempDir = false;
+            if (SettingsActivity.UseTempDirectory())
+            {
+                useTempDir = true;
+            }
+            bool useCustomDir = false;
+            if (SettingsActivity.UseIncompleteManualFolder())
+            {
+                useCustomDir = true;
+            }
+
+            bool folderExists = false;
+            int folderCount = 0;
+            if (SoulSeekState.UseLegacyStorage() && (SoulSeekState.RootDocumentFile == null && useDownloadDir))
+            {
+                string rootdir = string.Empty;
+                //if (SoulSeekState.RootDocumentFile==null)
+                //{
+                rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                //}
+                //else
+                //{
+                //    rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                //    rootdir = SoulSeekState.RootDocumentFile.Uri.Path; //returns junk...
+                //}
+
+                if (!(new Java.IO.File(rootdir)).Exists())
+                {
+                    (new Java.IO.File(rootdir)).Mkdirs();
+                }
+                //string rootdir = GetExternalFilesDir(Android.OS.Environment.DirectoryMusic)
+                string incompleteDirString = rootdir + @"/Soulseek Incomplete/";
+                Java.IO.File incompleteDir = new Java.IO.File(incompleteDirString);
+                folderExists = CleanIncompleteFolder(incompleteDir, doNotDelete, out folderCount);
+            }
+            else
+            {
+                DocumentFile rootdir = null;
+                if (useDownloadDir)
+                {
+                    rootdir = SoulSeekState.RootDocumentFile;
+                    MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
+                }
+                else if (useTempDir)
+                {
+                    Java.IO.File appPrivateExternal = SoulSeekState.ActiveActivityRef.GetExternalFilesDir(null);
+                    rootdir = DocumentFile.FromFile(appPrivateExternal);
+                    MainActivity.LogDebug("using temp incomplete dir");
+                }
+                else if (useCustomDir)
+                {
+                    rootdir = SoulSeekState.RootIncompleteDocumentFile;
+                    MainActivity.LogDebug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                }
+
+                folderExists = CleanIncompleteFolder(rootdir.FindFile("Soulseek Incomplete"), doNotDelete, out folderCount);
+            }
+
+            if (!folderExists)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Incomplete Folder is empty", ToastLength.Long).Show();
+            }
+            else if (folderExists && folderCount == 0)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, "No eligible items to clear", ToastLength.Long).Show();
+            }
+            else
+            {
+                string plural = String.Empty;
+                if (folderCount > 1)
+                {
+                    plural = "s";
+                }
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, $"Cleared {folderCount} folder" + plural, ToastLength.Long).Show();
+            }
+        }
+
+        public bool CleanIncompleteFolder(DocumentFile incompleteDirectory, List<string> incompleteFoldersToNotDelete, out int folderCount)
+        {
+            folderCount = 0;
+            if(incompleteDirectory == null || !incompleteDirectory.Exists())
+            {
+                return false;
+            }
+            else
+            {
+                foreach(DocumentFile f in incompleteDirectory.ListFiles())
+                {
+                    // we dont create files at the root level other than .nomedia which stays.
+                    if(f.IsDirectory)
+                    {
+                        if(!incompleteFoldersToNotDelete.Contains(f.Name))
+                        {
+                            folderCount++;
+                            DeleteDocumentFolder(f);
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+
+        public void DeleteDocumentFolder(DocumentFile folder)
+        {
+            if(!folder.Delete())
+            {
+                foreach(DocumentFile f in folder.ListFiles())
+                {
+                    f.Delete();
+                }
+                folder.Delete();
+            }
+        }
+
+        public bool CleanIncompleteFolder(Java.IO.File incompleteDirectory, List<string> incompleteFoldersToNotDelete, out int folderCount)
+        {
+            folderCount = 0;
+            if (incompleteDirectory == null || !incompleteDirectory.Exists())
+            {
+                return false;
+            }
+            else
+            {
+                foreach (Java.IO.File f in incompleteDirectory.ListFiles())
+                {
+                    // we dont create files at the root level other than .nomedia which stays.
+                    if (f.IsDirectory)
+                    {
+                        if (!incompleteFoldersToNotDelete.Contains(f.Name))
+                        {
+                            folderCount++;
+                            DeleteLegacyFolder(f);
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+
+        public void DeleteLegacyFolder(Java.IO.File folder)
+        {
+            if (!folder.Delete())
+            {
+                foreach (Java.IO.File f in folder.ListFiles())
+                {
+                    f.Delete();
+                }
+                folder.Delete();
+            }
         }
 
         public enum ChangeDialogType
