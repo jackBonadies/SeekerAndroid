@@ -338,6 +338,12 @@ namespace AndriodApp1
             ImageView moreInfoButton = FindViewById<ImageView>(Resource.Id.moreInfoButton);
             moreInfoButton.Click += MoreInfoButton_Click;
 
+            ImageView moreInfoButtonClearIncomplete = FindViewById<ImageView>(Resource.Id.moreInfoButtonClearIncomplete);
+            moreInfoButtonClearIncomplete.Click += MoreInfoButtonClearIncomplete_Click;
+
+            ImageView moreInfoConcurrent = FindViewById<ImageView>(Resource.Id.moreInfoConcurrent);
+            moreInfoConcurrent.Click += MoreInfoConcurrent_Click;
+
             browseSelfButton = FindViewById<Button>(Resource.Id.browseSelfButton);
             browseSelfButton.Click += BrowseSelfButton_Click;
 
@@ -510,6 +516,20 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void MoreInfoConcurrent_Click(object sender, EventArgs e)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var diag = builder.SetMessage(Resource.String.concurrent_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            diag.Show();
+        }
+
+        private void MoreInfoButtonClearIncomplete_Click(object sender, EventArgs e)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var diag = builder.SetMessage(Resource.String.clear_incomplete_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            diag.Show();
         }
 
         private void CleanUpIncompleteDirectory_Click(object sender, EventArgs e)
