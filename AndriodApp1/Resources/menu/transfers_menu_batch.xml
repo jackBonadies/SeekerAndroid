@@ -33,5 +33,19 @@ android:showAsAction="never"
 	android:iconifiedByDefault="false"
  />
 
+	<item android:id="@+id/invert_selection"
+	android:title="Invert Selection"
+app:showAsAction="never"
+android:showAsAction="never"
+	android:iconifiedByDefault="false"
+ />
+
+	<item android:id="@+id/select_all"
+	android:title="Select All"
+app:showAsAction="never"
+android:showAsAction="never"
+	android:iconifiedByDefault="false"
+ />
+
 
 </menu>

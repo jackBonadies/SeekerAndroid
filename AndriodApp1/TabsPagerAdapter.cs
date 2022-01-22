@@ -6866,6 +6866,16 @@ namespace AndriodApp1
                 case Resource.Id.retry_all_failed:
                     RetryAllConditionEntry(true, false);
                     return true;
+                case Resource.Id.batch_select:
+                    TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
+                    ForceOutIfZeroSelected = false;
+                    //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+                    //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
+                    TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                    recyclerTransferAdapter.IsInBatchSelectMode = true;
+                    TransfersActionMode.Title = string.Format("0 Selected");
+                    TransfersActionMode.Invalidate();
+                    return true;
             }
             return base.OnOptionsItemSelected(item);
         }
@@ -7742,7 +7752,18 @@ namespace AndriodApp1
         {
             if(item.GroupId == UNIQUE_TRANSFER_GROUP_ID)
             {
+                if(recyclerTransferAdapter==null)
+                {
+                    MainActivity.LogInfoFirebase("recyclerTransferAdapter is null");
+                }
+
                 ITransferItem ti = recyclerTransferAdapter.getSelectedItem();
+
+                if (ti == null)
+                {
+                    MainActivity.LogInfoFirebase("ti is null");
+                }
+
                 int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
                 //MainActivity.LogDebug($"position: {position} ti name: {ti.GetDisplayName()}");
                 //try
@@ -8125,7 +8146,7 @@ namespace AndriodApp1
                         break;
                     case 105: //batch selection mode
                         TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
-
+                        ForceOutIfZeroSelected = true;
                         //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
                         //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                         TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
@@ -8137,6 +8158,7 @@ namespace AndriodApp1
             return base.OnContextItemSelected(item);
         }
 
+        public static bool ForceOutIfZeroSelected = true;
         public static void ToggleItemBatchSelect(TransferAdapterRecyclerVersion recyclerTransferAdapter, int pos)
         {
             if (BatchSelectedItems.Contains(pos))
@@ -8149,7 +8171,7 @@ namespace AndriodApp1
             }
             recyclerTransferAdapter.NotifyItemChanged(pos);
             int cnt = BatchSelectedItems.Count;
-            if (cnt == 0)
+            if (cnt == 0 && ForceOutIfZeroSelected)
             {
                 TransfersActionMode.Finish();
             }
@@ -8216,6 +8238,15 @@ namespace AndriodApp1
 
             public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
             {
+                if (BatchSelectedItems.Count == 0)
+                {
+                    menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(false);
+                }
+                else
+                {
+                    menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(true);
+                }
+
 
                 if (TransfersFragment.InUploadsMode)
                 {
@@ -8223,7 +8254,6 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
                     menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
                     menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
-                    //mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
                     return false;
                 }
                 else
@@ -8318,8 +8348,36 @@ namespace AndriodApp1
                         }
                         TransfersActionMode.Finish();
                         break;
-                    
+                    case Resource.Id.select_all:
+                        BatchSelectedItems.Clear();
+                        int cnt = TransfersActionModeCallback.Adapter.ItemCount;
+                        for (int i = 0; i < cnt; i ++)
+                        {
+                            BatchSelectedItems.Add(i);
+                        }
 
+                        TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
+
+                        TransfersActionMode.Title = string.Format("{0} Selected", cnt.ToString());
+                        TransfersActionMode.Invalidate();
+                        return true;
+                    case Resource.Id.invert_selection:
+                        ForceOutIfZeroSelected = false;
+                        List<int> oldOnes = BatchSelectedItems.ToList();
+                        BatchSelectedItems.Clear();
+                        List<int> all = new List<int>();
+                        int cnt1 = TransfersActionModeCallback.Adapter.ItemCount;
+                        for (int i = 0; i < cnt1; i++)
+                        {
+                            all.Add(i);
+                        }
+                        BatchSelectedItems = all.Except(oldOnes).ToList();
+
+                        TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
+
+                        TransfersActionMode.Title = string.Format("{0} Selected", BatchSelectedItems.Count.ToString());
+                        TransfersActionMode.Invalidate();
+                        return true;
                 }
                 return true;
             }
@@ -8845,7 +8903,10 @@ namespace AndriodApp1
 #if DEBUG
                 SelectedDebugInfo(item);
 #endif
-
+                if(this.selectedItem == null)
+                {
+                    MainActivity.LogInfoFirebase("selected item was set as null");
+                }
             }
 
             public ITransferItem getSelectedItem()
