@@ -559,6 +559,7 @@ namespace AndriodApp1
             DebounceTimer.Stop();
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
             filterText.Text = FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
+            SearchFragment.UpdateDrawableState(filterText, true);
         }
 
         private string currentUsernameUI;

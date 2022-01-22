@@ -61,6 +61,12 @@ android:iconifiedByDefault="false"
  android:iconifiedByDefault="false"
  />
 
+	<item android:id="@+id/batch_select"
+  android:title="Batch Select"
+  app:showAsAction="never"
+  android:iconifiedByDefault="false"
+ />
+
 	<item android:id="@+id/styleOptions"
 	 android:title="Options" >
 
