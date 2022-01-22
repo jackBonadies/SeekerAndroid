@@ -1719,7 +1719,7 @@ namespace AndriodApp1
                 //here we do files as well......
                 if (itemSelected.Directory != null && itemSelected.Directory.FileCount != 0)
                 {
-                    foreach (File f in itemSelected.Directory.Files)
+                    foreach (File f in itemSelected.Directory.OrderedFiles)
                     {
                         dirs.Add(new DataItem(f, itemSelected.Node));
                     }
@@ -1727,7 +1727,7 @@ namespace AndriodApp1
             }
             else
             {
-                foreach (File f in itemSelected.Directory.Files)
+                foreach (File f in itemSelected.Directory.OrderedFiles)
                 {
                     dirs.Add(new DataItem(f, itemSelected.Node));
                 }
@@ -1892,7 +1892,7 @@ namespace AndriodApp1
                 //here we do files as well......
                 if (item.Data != null && item.Data.FileCount != 0)
                 {
-                    foreach (File f in item.Data.Files)
+                    foreach (File f in item.Data.OrderedFiles)
                     {
                         dataItemsForListView.Add(new DataItem(f, item));
                     }
@@ -2143,7 +2143,7 @@ namespace AndriodApp1
                     //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
 
 
-                    foreach (File f in staringPoint.Data.Files)
+                    foreach (File f in staringPoint.Data.OrderedFiles)
                     {
                         dataItemsForListView.Add(new DataItem(f, staringPoint));
                     }
@@ -2158,7 +2158,7 @@ namespace AndriodApp1
                     //here we do files as well......  **I added this bc on your first browse you will not get any root dir files....
                     if (e.BrowseResponseTree.Data != null && e.BrowseResponseTree.Data.FileCount != 0)
                     {
-                        foreach (File f in e.BrowseResponseTree.Data.Files)
+                        foreach (File f in e.BrowseResponseTree.Data.OrderedFiles)
                         {
                             dataItemsForListView.Add(new DataItem(f, e.BrowseResponseTree));
                         }
