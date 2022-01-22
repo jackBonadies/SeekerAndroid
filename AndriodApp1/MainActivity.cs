@@ -2504,6 +2504,8 @@ namespace AndriodApp1
             return false;
         }
 
+        public static bool TransfersDownloadsCompleteStale = false; //whether a dl completes since we have last saved transfers to disk.
+        public static DateTime TransfersLastSavedTime = DateTime.MinValue; //whether a dl completes since we have last saved transfers to disk.
 
 
         public static volatile int UPLOAD_COUNT = -1; // a hack see below
@@ -2948,6 +2950,8 @@ namespace AndriodApp1
                 if (!e.Transfer.State.HasFlag(TransferStates.Cancelled))
                 {
                     //clear queued flag...
+                    SeekerApplication.TransfersDownloadsCompleteStale = true;
+                    TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences,false,120);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
@@ -4343,7 +4347,8 @@ namespace AndriodApp1
         {
             SoulSeekState.DownloadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
-
+            //save once complete
+            TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 0);
             base.OnDestroy();
         }
 
@@ -4647,6 +4652,16 @@ namespace AndriodApp1
         {
             base.OnDestroy();
             SeekerApplication.Activities.Remove(ourWeakRef);
+            if(SeekerApplication.Activities.Count==0)
+            {
+                MainActivity.LogDebug("----- On Destory ------ Last Activity ------");
+                TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, true);
+            }
+            else
+            {
+                MainActivity.LogDebug("----- On Destory ------ NOT Last Activity ------");
+                TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 0);
+            }
         }
 
         protected override void OnCreate(Bundle savedInstanceState)

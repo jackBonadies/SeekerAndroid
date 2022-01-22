@@ -7412,37 +7412,52 @@ namespace AndriodApp1
 
         public static object TransferStateSaveLock = new object();
 
-        public static void SaveTransferItems(ISharedPreferences sharedPreferences)
+        public static void SaveTransferItems(ISharedPreferences sharedPreferences, bool force=true, int maxSecondsUpdate=0)
         {
-            if (TransferItemManagerDL?.AllTransferItems == null)
+            MainActivity.LogDebug("---- saving transfer items enter ----");
+#if DEBUG
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            sw.Start();
+#endif
+
+            if(force || (SeekerApplication.TransfersDownloadsCompleteStale && DateTime.UtcNow.Subtract(SeekerApplication.TransfersLastSavedTime).TotalSeconds > maxSecondsUpdate)) //stale and we havent updated too recently..
             {
-                return;
-            }
-            string listOfDownloadItems = string.Empty;
-            string listOfUploadItems = string.Empty;
-            using (var writer = new System.IO.StringWriter())
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerDL.AllTransferItems.GetType());
-                serializer.Serialize(writer, TransferItemManagerDL.AllTransferItems);
-                listOfDownloadItems = writer.ToString();
-            }
-            using (var writer = new System.IO.StringWriter())
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerUploads.AllTransferItems.GetType());
-                serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
-                listOfUploadItems = writer.ToString();
-            }
-            lock (MainActivity.SHARED_PREF_LOCK)
-                lock (TransferStateSaveLock)
+                MainActivity.LogDebug("---- saving transfer items actual save ----");
+                if (TransferItemManagerDL?.AllTransferItems == null)
                 {
-                    var editor = sharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_TransferList, listOfDownloadItems);
-                    editor.PutString(SoulSeekState.M_TransferListUpload, listOfUploadItems);
-                    editor.Commit();
+                    return;
                 }
+                string listOfDownloadItems = string.Empty;
+                string listOfUploadItems = string.Empty;
+                using (var writer = new System.IO.StringWriter())
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerDL.AllTransferItems.GetType());
+                    serializer.Serialize(writer, TransferItemManagerDL.AllTransferItems);
+                    listOfDownloadItems = writer.ToString();
+                }
+                using (var writer = new System.IO.StringWriter())
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerUploads.AllTransferItems.GetType());
+                    serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
+                    listOfUploadItems = writer.ToString();
+                }
+                lock (MainActivity.SHARED_PREF_LOCK)
+                    lock (TransferStateSaveLock)
+                    {
+                        var editor = sharedPreferences.Edit();
+                        editor.PutString(SoulSeekState.M_TransferList, listOfDownloadItems);
+                        editor.PutString(SoulSeekState.M_TransferListUpload, listOfUploadItems);
+                        editor.Commit();
+                    }
 
+                SeekerApplication.TransfersDownloadsCompleteStale = false;
+                SeekerApplication.TransfersLastSavedTime = DateTime.UtcNow;
+            }
 
-
+#if DEBUG
+            sw.Stop();
+            MainActivity.LogDebug("saving time: " + sw.ElapsedMilliseconds);
+#endif
 
 
         }
