@@ -60,6 +60,17 @@ namespace Soulseek
         /// </summary>
         public IReadOnlyCollection<File> Files { get; }
 
+        /// <summary>
+        ///     Gets the collection of files in alphabetical order.
+        /// </summary>
+        public IEnumerable<File> OrderedFiles
+        {
+            get
+            {
+                return this.Files.OrderBy(x => x.Filename);
+            }
+        }
+
         public Directory DeepCopy()
         {
             Directory d = new Directory(this.Name,this.Files.ToList()); //this creates a new list.. you can add or remove without affecting original...
