@@ -2318,6 +2318,8 @@ namespace AndriodApp1
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
 
+            SoulSeekState.OffsetFromUtcCached = DateTime.Now.Subtract(DateTime.UtcNow);
+
             //Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri);
             //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, chosenUri);
             //var df = SoulSeekState.RootDocumentFile.FindFile("saved_tabs");
@@ -4008,6 +4010,9 @@ namespace AndriodApp1
 
         private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
         {
+
+            MainActivity.LogDebug($"{e.Username} status changed");
+
             if (e.Username == SoulSeekState.Username)
             {
                 //not sure this will ever happen
@@ -10863,6 +10868,8 @@ namespace AndriodApp1
         public static volatile bool DownloadKeepAliveServiceRunning = false;
         public static volatile bool UploadKeepAliveServiceRunning = false;
 
+        public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
+
 
         public static SlskHelp.SharedFileCache SharedFileCache = null;
         public static int UploadSpeed = -1; //bytes
@@ -11104,6 +11111,12 @@ namespace AndriodApp1
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";
+
+
+        public const string M_RoomUserListSortOrder = "Momento_RoomUserListSortOrder";
+        public const string M_RoomUserListShowFriendsAtTop = "Momento_RoomUserListShowFriendsAtTop";
+        //public const string M_UserListSortOrder = "Momento_UserListSortHistory";
+
 
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";

@@ -66,6 +66,25 @@ android:id="@+id/give_up_membership_action"
 android:icon="@drawable/baseline_refresh_white_24"
 android:title="@string/give_up_membership"
 app:showAsAction="never"/>
+
+	<item android:id="@+id/chatStyleOptions"
+	 android:title="Options" >
+
+		<menu>
+
+			<item
+		  android:id="@+id/hide_show_ticker_action"
+		  android:title="Hide Ticker View"
+          android:iconifiedByDefault="false"
+		  app:showAsAction="never"/>
+
+			<item
+		  android:id="@+id/hide_show_user_status_action"
+		  android:title="Hide Status View"
+          android:iconifiedByDefault="false"
+		  app:showAsAction="never"/>
+		</menu>
+	</item>
   <!-- Settings, should always be in the overflow -->
   <!--
   <item android:id="@+id/action_settings"
