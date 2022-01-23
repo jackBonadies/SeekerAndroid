@@ -44,6 +44,9 @@ namespace AndriodApp1
     {
         public static ChatroomActivity ChatroomActivityRef = null;
 
+        public static bool ShowStatusesView = true;
+        public static bool ShowTickerView = true;
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             MainActivity.LogDebug("chatroom activity on create");
@@ -339,6 +342,23 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.toggle_notify_room_action).SetTitle(this.Resources.GetString(Resource.String.notification_off));
                 }
 
+                if(ChatroomActivity.ShowTickerView)
+                {
+                    menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle("Hide Ticker View");
+                }
+                else
+                {
+                    menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle("Show Ticker View");
+                }
+
+                if(ChatroomActivity.ShowStatusesView)
+                {
+                    menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle("Hide Status View");
+                }
+                else
+                {
+                    menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle("Show Status View");
+                }
             }
             return true;
         }
@@ -386,7 +406,7 @@ namespace AndriodApp1
                     ChatroomController.ToggleNotifyRoom(ChatroomInnerFragment.OurRoomInfo.Name, true, this);
                     return true;
                 case Resource.Id.view_user_list_action:
-                    ShowUserListDialog(ChatroomInnerFragment.OurRoomInfo, ChatroomController.IsPrivate(ChatroomInnerFragment.OurRoomInfo));
+                    ShowUserListDialog(ChatroomInnerFragment.OurRoomInfo, ChatroomController.IsPrivate(ChatroomInnerFragment.OurRoomInfo.Name));
                     return true;
                 case Resource.Id.show_all_tickers_action:
                     ShowAllTickersDialog(ChatroomInnerFragment.OurRoomInfo.Name);
@@ -410,6 +430,23 @@ namespace AndriodApp1
                     Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentSearchRoom, 1);
                     this.StartActivity(intent);
+                    return true;
+                case Resource.Id.hide_show_ticker_action:
+                    ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
+                    var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
+                    if(ChatroomActivity.ShowTickerView)
+                    {
+                        f.currentTickerView.Visibility = ViewStates.Visible;
+                    }
+                    else
+                    {
+                        f.currentTickerView.Visibility = ViewStates.Gone;
+                    }
+                    return true;
+                case Resource.Id.hide_show_user_status_action:
+                    ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
+                    var f1 = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
+                    f1.SetStatusesView();
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -862,6 +899,118 @@ namespace AndriodApp1
     }
 
 
+    public class UserStatusView : LinearLayout
+    {
+        public RecyclerView.ViewHolder ViewHolder { get; set; }
+        private TextView viewUserStatus;
+
+        public UserStatusView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        {
+            LayoutInflater.From(context).Inflate(Resource.Layout.user_status_update_item, this, true);
+            setupChildren();
+        }
+        public UserStatusView(Context context, IAttributeSet attrs) : base(context, attrs)
+        {
+            LayoutInflater.From(context).Inflate(Resource.Layout.user_status_update_item, this, true);
+            setupChildren();
+        }
+
+        public static UserStatusView inflate(ViewGroup parent)
+        {
+            UserStatusView itemView = (UserStatusView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.user_status_update_item_dummy, parent, false);
+            return itemView;
+        }
+
+        public void setupChildren()
+        {
+            viewUserStatus = FindViewById<TextView>(Resource.Id.userStatusMessage);
+        }
+
+        private void SetMessageText(TextView userStatus, ChatroomController.StatusMessageUpdate data)
+        {
+            string statusMessage = null;
+            DateTime dateTimeLocal = data.DateTimeUtc.Add(SoulSeekState.OffsetFromUtcCached);
+            string timePrefix = $"[{Helpers.GetNiceDateTimeGroupChat(dateTimeLocal)}]";
+            switch (data.StatusType)
+            {
+                case ChatroomController.StatusMessageType.Joined:
+                    statusMessage = "{0} {1} joined";
+                    break;
+                case ChatroomController.StatusMessageType.Left:
+                    statusMessage = "{0} {1} left";
+                    break;
+                case ChatroomController.StatusMessageType.WentAway:
+                    statusMessage = "{0} {1} went away";
+                    break;
+                case ChatroomController.StatusMessageType.CameBack:
+                    statusMessage = "{0} {1} came back";
+                    break;
+            }
+            userStatus.Text = string.Format(statusMessage, timePrefix, data.Username);
+        }
+
+        public void setItem(ChatroomController.StatusMessageUpdate userStatusMessage)
+        {
+            SetMessageText(viewUserStatus, userStatusMessage);
+            //string msgText = m.ChatroomText;
+            //if (m.FromMe)
+            //{
+            //    msgText = "\u21AA" + msgText;
+            //}
+            //viewUsersInRoom.Text = msgText;
+        }
+    }
+
+
+    public class UserStatusHolder : RecyclerView.ViewHolder
+    {
+        public UserStatusView userStatusInnerView;
+
+
+        public UserStatusHolder(View view) : base(view)
+        {
+            //super(view);
+            // Define click listener for the ViewHolder's View
+
+            userStatusInnerView = (UserStatusView)view;
+            userStatusInnerView.ViewHolder = this;
+            //(MessageOverviewView as View).SetOnCreateContextMenuListener(this);
+        }
+
+        public UserStatusView getUnderlyingView()
+        {
+            return userStatusInnerView;
+        }
+    }
+
+
+    public class ChatroomStatusesRecyclerAdapter : RecyclerView.Adapter
+    {
+        private List<ChatroomController.StatusMessageUpdate> localDataSet;
+        public override int ItemCount => localDataSet.Count;
+
+        public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+        {
+            (holder as UserStatusHolder).getUnderlyingView().setItem(localDataSet[position]);
+            //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
+        }
+
+        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
+        {
+
+            UserStatusView view = UserStatusView.inflate(parent);
+            view.setupChildren();
+            // .inflate(R.layout.text_row_item, viewGroup, false);
+            //(view as View).Click += MessageOverviewClick;
+            return new UserStatusHolder(view as View);
+
+        }
+
+        public ChatroomStatusesRecyclerAdapter(List<ChatroomController.StatusMessageUpdate> ti)
+        {
+            localDataSet = ti;
+        }
+    }
 
 
     public class ChatroomInnerRecyclerAdapter : RecyclerView.Adapter
@@ -1095,12 +1244,19 @@ namespace AndriodApp1
         private LinearLayoutManager recycleLayoutManager;
         private ChatroomInnerRecyclerAdapter recyclerAdapter;
         private List<Message> messagesInternal = null;
+        private List<ChatroomController.StatusMessageUpdate>  UI_statusMessagesInternal = null;
+
         //private string currentTickerText = string.Empty;
         private bool created = false;
         private View rootView = null;
         private EditText editTextEnterMessage = null;
         private Button sendMessage = null;
-        private TextView currentTickerView = null;
+        public TextView currentTickerView = null;
+
+        private RecyclerView recyclerViewStatusesView;
+        private LinearLayoutManager recycleLayoutManagerStatuses;
+        private ChatroomStatusesRecyclerAdapter recyclerUserStatusAdapter;
+
         public static Soulseek.RoomInfo OurRoomInfo = null;
 
         //these are for if we get killed by system on the chatroom inner fragment and we do not yet have the room list.
@@ -1110,7 +1266,7 @@ namespace AndriodApp1
 
         public bool IsPrivate()
         {
-            return ChatroomController.IsPrivate(OurRoomInfo);
+            return ChatroomController.IsPrivate(OurRoomInfo.Name);
         }
         public bool IsOwned()
         {
@@ -1313,6 +1469,114 @@ namespace AndriodApp1
         {
             //nothing to do UNLESS you are planning on showing something live.
             //maybe if you have a number counter, then its useful..
+            if (!ChatroomActivity.ShowStatusesView)
+            {
+                return;
+            }
+            else
+            {
+                if (OurRoomInfo == null || OurRoomInfo.Name != e.RoomName)
+                {
+                    //not our room..
+                    return;
+                }
+
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    MainActivity.LogDebug("event handler for status view " + e.Joined);
+                    UI_statusMessagesInternal.Add(e.StatusMessageUpdate.Value);
+                    int lastVisibleItemPosition = recycleLayoutManagerStatuses.FindLastVisibleItemPosition();
+                    MainActivity.LogDebug("lastVisibleItemPosition : " + lastVisibleItemPosition);
+                    recyclerUserStatusAdapter.NotifyItemInserted(UI_statusMessagesInternal.Count - 1);
+
+                    if (lastVisibleItemPosition >= UI_statusMessagesInternal.Count - 2) //since its based on the old list index so -1 -1
+                    {
+                        if (UI_statusMessagesInternal.Count != 0)
+                        {
+                            recyclerViewStatusesView.ScrollToPosition(UI_statusMessagesInternal.Count - 1);
+                        }
+                    }
+
+
+                });
+            }
+        }
+
+        public void SetStatusesView()
+        {
+            if (ChatroomActivity.ShowStatusesView)
+            {
+                recyclerViewStatusesView.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                recyclerViewStatusesView.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            if (ChatroomController.JoinedRoomStatusUpdateMessages.ContainsKey(OurRoomInfo.Name))
+            {
+                MainActivity.LogDebug("we have the room messages");
+                UI_statusMessagesInternal = ChatroomController.JoinedRoomStatusUpdateMessages[OurRoomInfo.Name].ToList();
+            }
+            else
+            {
+                UI_statusMessagesInternal = new List<ChatroomController.StatusMessageUpdate>();
+            }
+
+
+            recyclerUserStatusAdapter = new ChatroomStatusesRecyclerAdapter(UI_statusMessagesInternal); //this depends tightly on MessageController... since these are just strings..
+            recyclerViewStatusesView.SetAdapter(recyclerUserStatusAdapter);
+
+            if (UI_statusMessagesInternal.Count != 0)
+            {
+                recyclerViewStatusesView.ScrollToPosition(UI_statusMessagesInternal.Count - 1);
+            }
+        }
+
+        /// <summary>
+        /// Since recyclerview does not have a click event itself.
+        /// </summary>
+        public class CustomClickEvent : Java.Lang.Object, Android.Views.View.IOnTouchListener
+        {
+            public RecyclerView RecyclerView;
+            private float mStartX;
+            private float mStartY;
+            bool View.IOnTouchListener.OnTouch(View recyclerView, MotionEvent event1)
+            {
+                bool isConsumed = false;
+                switch (event1.Action)
+                {
+                    case MotionEventActions.Down:
+                        mStartX = event1.GetX();
+                        mStartY = event1.GetY();
+                        break;
+                    case MotionEventActions.Up:
+                        float endX = event1.GetX();
+                        float endY = event1.GetY();
+                        if (detectClick(mStartX, mStartY, endX, endY))
+                        {
+                            RecyclerView.PerformClick();
+                        }
+                        break;
+                }
+                return isConsumed;
+            }
+
+            private static bool detectClick(float startX, float startY, float endX, float endY)
+            {
+                return Math.Abs(startX - endX) < 3.0 && Math.Abs(startY - endY) < 3.0;
+            }
+
+            //void RecyclerView.IOnItemTouchListener.OnRequestDisallowInterceptTouchEvent(bool disallow)
+            //{
+
+            //}
+
+            //void RecyclerView.IOnItemTouchListener.OnTouchEvent(RecyclerView recyclerView, MotionEvent @event)
+            //{
+
+            //}
         }
 
 
@@ -1328,6 +1592,9 @@ namespace AndriodApp1
             rootView = inflater.Inflate(Resource.Layout.chatroom_inner_layout, container, false);
             currentTickerView = rootView.FindViewById<TextView>(Resource.Id.current_ticker);
             currentTickerView.Click += CurrentTickerView_Click;
+
+
+
             editTextEnterMessage = rootView.FindViewById<EditText>(Resource.Id.edit_gchat_message);
             sendMessage = rootView.FindViewById<Button>(Resource.Id.button_gchat_send);
 
@@ -1376,6 +1643,30 @@ namespace AndriodApp1
                 currentTickerView.Text = this.Resources.GetString(Resource.String.loading_current_ticker);
             }
 
+            if (ChatroomActivity.ShowTickerView)
+            {
+                currentTickerView.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                currentTickerView.Visibility = ViewStates.Gone;
+            }
+
+            recyclerViewSmall = true;
+            recyclerViewStatusesView = rootView.FindViewById<RecyclerView>(Resource.Id.room_statuses_recycler_view);
+
+            CustomClickEvent cce = new CustomClickEvent();
+            cce.RecyclerView = recyclerViewStatusesView;
+            recyclerViewStatusesView.SetOnTouchListener(cce);
+
+            recyclerViewStatusesView.Click += RecyclerViewStatusesView_Click;
+            recycleLayoutManagerStatuses = new LinearLayoutManager(Activity);
+            recycleLayoutManagerStatuses.StackFromEnd = false;
+            recycleLayoutManagerStatuses.ReverseLayout = false;
+            recyclerViewStatusesView.SetLayoutManager(recycleLayoutManagerStatuses);
+
+
+
 
 
             if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
@@ -1407,7 +1698,11 @@ namespace AndriodApp1
             }
             MainActivity.LogDebug("currentlyInsideRoomName -- OnCreateView Inner -- " + ChatroomController.currentlyInsideRoomName);
             ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
-            HookUpEventHandlers(true);
+            HookUpEventHandlers(true); //this NEEDS to be strictly before SetStatusesView
+            MainActivity.LogDebug("set up statuses view");
+            SetStatusesView();
+            MainActivity.LogDebug("finish set up statuses view");
+           
             created=true;
 
             Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)ChatroomActivity.ChatroomActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
@@ -1419,6 +1714,31 @@ namespace AndriodApp1
 
         }
 
+        private bool recyclerViewSmall = true;
+        private void RecyclerViewStatusesView_Click(object sender, EventArgs e)
+        {
+            int dps = 200;
+            recyclerViewSmall = !recyclerViewSmall;
+            if (recyclerViewSmall)
+            {
+                dps = 80;
+            }
+            float scale = this.Context.Resources.DisplayMetrics.Density;
+            int pixels = (int)(dps * scale + 0.5f);
+
+            recyclerViewStatusesView.LayoutParameters.Height = pixels;//in px
+            recyclerViewStatusesView.ForceLayout(); //include children in the remeasure and relayout (not sure if necessary)
+            recyclerViewStatusesView.Invalidate(); //redraw
+            recyclerViewStatusesView.RequestLayout(); //relayout (for size changes)
+
+
+            //recyclerViewStatusesView.
+
+            if (recyclerViewSmall)
+            {
+
+            }
+        }
 
         private void CurrentTickerView_Click(object sender, EventArgs e)
         {
@@ -1496,9 +1816,10 @@ namespace AndriodApp1
 
         public override void OnAttach(Context activity)
         {
-            
+            MainActivity.LogDebug("OnAttach chatroom inner fragment !!");
             if (created) //attach can happen before we created our view...
             {
+                MainActivity.LogDebug("iscreated= true OnAttach chatroom inner fragment !!");
                 //try
                 //{
                 //    MainActivity.LogDebug("currentlyInsideRoomName -- OnAttach -- " + ChatroomController.currentlyInsideRoomName);
@@ -1522,7 +1843,13 @@ namespace AndriodApp1
                 {
                     MainActivity.LogDebug("2" + e.Message);
                 }
+                MainActivity.LogDebug("set setatus view");
+                SetStatusesView();
+                MainActivity.LogDebug("set setatus view end");
+                MainActivity.LogDebug("hook up event handlers ");
                 HookUpEventHandlers(true);
+                MainActivity.LogDebug("hook up event handlers end");
+
             }
             base.OnAttach(activity);
         }
@@ -1703,7 +2030,7 @@ namespace AndriodApp1
         {
             if(FilterString!=string.Empty)
             {
-                return original.Where((roomInfo) => {return roomInfo.Name.Contains(FilterString); }).ToList();
+                return original.Where((roomInfo) => {return roomInfo.Name.Contains(FilterString, StringComparison.InvariantCultureIgnoreCase); }).ToList();
             }
             else
             {
@@ -1786,11 +2113,15 @@ namespace AndriodApp1
         public bool Joined;
         public string User;
         public string RoomName;
-        public UserJoinedOrLeftEventArgs(string roomName, bool joined, string user)
+        public ChatroomController.StatusMessageUpdate? StatusMessageUpdate; 
+        public Soulseek.UserData UserData; 
+        public UserJoinedOrLeftEventArgs(string roomName, bool joined, string user, ChatroomController.StatusMessageUpdate? statusMessageUpdate = null, Soulseek.UserData uData = null, bool isOperator = false)
         {
             Joined = joined;
             User = user;
             RoomName = roomName;
+            StatusMessageUpdate = statusMessageUpdate;
+            UserData = uData;
         }
     }
 
@@ -1852,7 +2183,23 @@ namespace AndriodApp1
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomInfo> ModeratedRoomData = new System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomInfo>();
 
+        public struct StatusMessageUpdate
+        {
+            public StatusMessageType StatusType;
+            public string Username;
+            public DateTime DateTimeUtc;
+            public StatusMessageUpdate(StatusMessageType statusType, string username, DateTime dateTimeUtc)
+            {
+                StatusType = statusType;
+                Username = username;
+                DateTimeUtc = dateTimeUtc;
+            }
+        }
+
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>> JoinedRoomStatusUpdateMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>>();
+
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<Message>> JoinedRoomMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<Message>>();
+
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> JoinedRoomMessagesLastUserHelper = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, List<Soulseek.RoomTicker>> JoinedRoomTickers = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Soulseek.RoomTicker>>();
@@ -1885,13 +2232,13 @@ namespace AndriodApp1
         }
 
 
-        public static bool IsPrivate(Soulseek.RoomInfo roomInfo)
+        public static bool IsPrivate(string roomName)
         {
-            if(RoomList.Private.Any(privRoom => { return privRoom.Name == roomInfo.Name; }))
+            if(RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
             {
                 return true;
             }
-            else if(RoomList.Owned.Any(privRoom => { return privRoom.Name == roomInfo.Name; }))
+            else if(RoomList.Owned.Any(privRoom => { return privRoom.Name == roomName; }))
             {
                 return true;
             }
@@ -1926,37 +2273,47 @@ namespace AndriodApp1
             return ChatroomController.JoinedRoomData[roomname].Owner == SoulSeekState.Username;
         }
 
-        public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate)
+        public static bool PutFriendsOnTop = false;
+        public static SortOrderChatroomUsers SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical;
+
+        public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate, string filterString="")
         {
-            if(isPrivate)
+            List<Soulseek.UserData> chatroomUserData = new List<Soulseek.UserData>();
+
+            var userlist = ChatroomController.JoinedRoomData[roomName].Users.ToList();
+
+            var opList = ChatroomController.JoinedRoomData[roomName].Operators?.ToList();
+            var owner = ChatroomController.JoinedRoomData[roomName].Owner;
+            //int timeJoined = 0;
+            foreach (Soulseek.UserData user in userlist) //userlist is in the order that they joined
             {
-                List<Soulseek.UserData> chatroomUserData = new List<Soulseek.UserData>();
-                var userlist = ChatroomController.JoinedRoomData[roomName].Users.ToList();
-                var opList = ChatroomController.JoinedRoomData[roomName].Operators.ToList();
-                var owner = ChatroomController.JoinedRoomData[roomName].Owner;
-                foreach (Soulseek.UserData user in userlist)
+                Soulseek.UserRole userRole = Soulseek.UserRole.Normal;
+                if (isPrivate)
                 {
-                    if(user.Username==owner)
+                    if (user.Username==owner)
                     {
-                        chatroomUserData.Add(GetChatroomUserData(user,Soulseek.UserRole.Owner));
+                        userRole = Soulseek.UserRole.Owner;
                     }
                     else if(opList.Contains(user.Username))
                     {
-                        chatroomUserData.Add(GetChatroomUserData(user, Soulseek.UserRole.Operator));
-                    }
-                    else
-                    {
-                        chatroomUserData.Add(GetChatroomUserData(user, Soulseek.UserRole.Normal));
+                        userRole = Soulseek.UserRole.Operator;
                     }
                 }
-                chatroomUserData.Sort(new ChatroomUserDataComparer());
-                return chatroomUserData;
+                if(user.Username.Contains(filterString))
+                {
+                    chatroomUserData.Add(GetChatroomUserData(user, userRole));
+                }
+            }
+            chatroomUserData.Sort(new ChatroomUserDataComparer(PutFriendsOnTop, SortChatroomUsersBy));
+            return chatroomUserData;
+        }
 
-            }
-            else
-            {
-                return ChatroomController.JoinedRoomData[roomName].Users.ToList();
-            }
+        public enum SortOrderChatroomUsers
+        {
+            //DateJoinedAsc = 0,  //the user list is NOT given to us in any order.  so cant do these.
+            //DateJoinedDesc = 1,
+            Alphabetical = 2,
+            OnlineStatus = 3
         }
 
         public static Soulseek.ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
@@ -2121,16 +2478,61 @@ namespace AndriodApp1
             // Compares by UserCount then Name
             public int Compare(Soulseek.UserData x, Soulseek.UserData y)
             {
+                //always put owners and operators first in private rooms. this is the primary condition.
                 if(x is Soulseek.ChatroomUserData xData && y is Soulseek.ChatroomUserData yData)
                 {
-                    return (int)yData.ChatroomUserRole - (int)xData.ChatroomUserRole;
+                    if((int)yData.ChatroomUserRole != (int)xData.ChatroomUserRole)
+                    {
+                        return (int)yData.ChatroomUserRole - (int)xData.ChatroomUserRole;
+                    }
                 }
-                else
+
+                if(PutFriendsOnTop)
                 {
-                    return 0;
+                    bool xFriend = MainActivity.UserListContainsUser(x.Username);
+                    bool yFriend = MainActivity.UserListContainsUser(y.Username);
+                    if(xFriend && !yFriend)
+                    {
+                        return -1; //x is better
+                    }
+                    else if(yFriend && !xFriend)
+                    {
+                        return 1; //y is better
+                    }
+                    //else we continue on to the next criteria
                 }
+
+                switch(SortCriteria)
+                {
+                    case SortOrderChatroomUsers.Alphabetical:
+                        return x.Username.CompareTo(y.Username);
+                    case SortOrderChatroomUsers.OnlineStatus:
+                        if(x.Status == Soulseek.UserPresence.Online && y.Status != Soulseek.UserPresence.Online)
+                        {
+                            return -1;
+                        }
+                        else if (x.Status != Soulseek.UserPresence.Online && y.Status == Soulseek.UserPresence.Online)
+                        {
+                            return 1;
+                        }
+                        else
+                        {
+                            return x.Username.CompareTo(y.Username);
+                        }
+                }
+
+                return 0;
+            }
+            private bool PutFriendsOnTop = false;
+            private SortOrderChatroomUsers SortCriteria = SortOrderChatroomUsers.Alphabetical;
+            public ChatroomUserDataComparer(bool putFriendsOnTop, SortOrderChatroomUsers sortCriteria)
+            {
+                PutFriendsOnTop = putFriendsOnTop;
+                SortCriteria = sortCriteria;
             }
         }
+
+        
 
         public static void ToggleAutoJoin(string roomName, bool feedback, Context c)
         {
@@ -2348,7 +2750,7 @@ namespace AndriodApp1
             {
                 //bad
             }
-            RoomModeratorsChanged?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName, e.Added, e.Username));
+            RoomModeratorsChanged?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName, e.Added, e.Username, null, null, true));
 
 
         }
@@ -2442,6 +2844,37 @@ namespace AndriodApp1
             }
         }
 
+        public enum StatusMessageType
+        {
+            Joined = 1,
+            Left = 2,
+            WentAway = 3,
+            CameBack = 4,
+        }
+
+        public static void AddStatusMessage(string roomName, StatusMessageUpdate statusMessageUpdate)
+        {
+            if (JoinedRoomStatusUpdateMessages.ContainsKey(roomName))
+            {
+                //check last name structure
+                //if last name is this then set msg.SpecialSameUserFlag = true;
+                JoinedRoomStatusUpdateMessages[roomName].Enqueue(statusMessageUpdate);
+                if (JoinedRoomStatusUpdateMessages[roomName].Count > 100)
+                {
+                    JoinedRoomStatusUpdateMessages[roomName].Dequeue();
+                }
+            }
+            else
+            {
+                JoinedRoomStatusUpdateMessages[roomName] = new Queue<StatusMessageUpdate>();
+                JoinedRoomStatusUpdateMessages[roomName].Enqueue(statusMessageUpdate);
+                if (JoinedRoomStatusUpdateMessages[roomName].Count > 100)
+                {
+                    JoinedRoomStatusUpdateMessages[roomName].Dequeue();
+                }
+            }
+        }
+
         private static void FlagLastUsernameViaHelper(string roomName, Message msg)
         {
             string lastUser = JoinedRoomMessagesLastUserHelper.GetValueOrDefault(roomName);
@@ -2487,7 +2920,9 @@ namespace AndriodApp1
             {
                 //bad
             }
-            UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName,false,e.Username));
+            StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(StatusMessageType.Left, e.Username, DateTime.UtcNow);
+            ChatroomController.AddStatusMessage(e.RoomName, statusMessageUpdate);
+            UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName,false,e.Username, statusMessageUpdate, null, false));
         }
 
         private static void SoulseekClient_RoomJoined(object sender, Soulseek.RoomJoinedEventArgs e)
@@ -2506,7 +2941,10 @@ namespace AndriodApp1
             {
                 //bad
             }
-            UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName, true, e.Username));
+            
+            StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(StatusMessageType.Joined, e.Username, DateTime.UtcNow);
+            ChatroomController.AddStatusMessage(e.RoomName, statusMessageUpdate);
+            UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName, true, e.Username, statusMessageUpdate, e.UserData, false));
         }
 
         private static void SoulseekClient_RoomTickerAdded(object sender, Soulseek.RoomTickerAddedEventArgs e)
@@ -3194,6 +3632,7 @@ namespace AndriodApp1
                             JoinedRoomNames.Add(roomName);
                             //TODO: SAVE
                         }
+                        //we will be part of the room data!!! we also get this AFTER we get the user joined event for ourself.
                         JoinedRoomData[roomName] = taskRoomData.Result;
                         RoomDataReceived?.Invoke(null,new EventArgs());
                     }
@@ -3657,27 +4096,55 @@ namespace AndriodApp1
         {
             if (e.RoomName==OurRoomName)
             {
-                UpdateData();
+                UpdateDataIncremental(e.Joined, e.User, e.UserData);
             }
         }
 
-        public void OnRoomModeratorsChanged(object sender, UserJoinedOrLeftEventArgs eventArgs)
+        public void OnRoomModeratorsChanged(object sender, UserJoinedOrLeftEventArgs e)
         {
             //TODO diffutil stuff... well we can do the diffutil since its easy to see who got added / removed...
-            if(eventArgs.RoomName == OurRoomName)
+            if(e.RoomName == OurRoomName)
             {
-                UpdateData();
+                UpdateDataIncremental(e.Joined, e.User, e.UserData);
             }
         }
 
-        private void UpdateData()
+        private void UpdateDataIncremental(bool joined, string uname, Soulseek.UserData udata)
         {
             try
             {
                 this.Activity.RunOnUiThread( () => {
-                    roomUserListAdapter = new RoomUserListRecyclerAdapter(ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate));
-                    recyclerViewUsers.SetAdapter(roomUserListAdapter);
-                    roomUserListAdapter.NotifyDataSetChanged();
+
+                    if(joined)
+                    {
+                        if(uname.Contains(FilterText))
+                        {
+                            Soulseek.ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
+                            UI_userDataList.Add(cud);
+                            UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                            int itemInsertedAt = UI_userDataList.IndexOf(cud);
+                            roomUserListAdapter.NotifyItemInserted(itemInsertedAt);
+                        }
+                    }
+                    else
+                    {
+                        int indexToRemove = -1;
+                        for(int i=0;i<UI_userDataList.Count;i++)
+                        {
+                            if(UI_userDataList[i].Username == uname)
+                            {
+                                indexToRemove = i;
+                                break;
+                            }
+                        }
+                        if(indexToRemove==-1)
+                        {
+                            MainActivity.LogDebug("not there" + uname);
+                            return;
+                        }
+                        UI_userDataList.RemoveAt(indexToRemove);
+                        roomUserListAdapter.NotifyItemRemoved(indexToRemove);
+                    }
                 });
             }
             catch(Exception e)
@@ -3690,6 +4157,119 @@ namespace AndriodApp1
         {
             return inflater.Inflate(Resource.Layout.room_users_dialog, container); //container is parent
         }
+
+        public class ToolbarMenuItemClickListener : Java.Lang.Object, Android.Support.V7.Widget.Toolbar.IOnMenuItemClickListener
+        {
+            public RoomUserListDialog RoomDialog;
+            public bool OnMenuItemClick(IMenuItem item)
+            {
+                switch(item.ItemId)
+                {
+                    case Resource.Id.sort_room_user_list_action:
+                        RoomDialogInstance = RoomDialog;
+                        ShowSortRoomUserListDialog();
+                        return true;
+                }
+                return true;
+            }
+        }
+
+
+        private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
+        private static RoomUserListDialog RoomDialogInstance;
+        public static void ShowSortRoomUserListDialog()
+        {
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+            builder.SetTitle("Sort Users By");
+
+            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.change_sort_room_user_list_dialog, SoulSeekState.ActiveActivityRef.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
+
+            //AndroidX.AppCompat.Widget.AppCompatRadioButton onlineStatus = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.onlineStatus);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton alphaOrder = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.alphaOrder);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton onlineStatus = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.onlineStatus);
+
+            RadioGroup radioGroupChangeUserSort = viewInflated.FindViewById<RadioGroup>(Resource.Id.radioGroupChangeUserSort);
+            radioGroupChangeUserSort.CheckedChange += RadioGroupChangeUserSort_CheckedChange;
+
+            CheckBox alwaysPlaceFriendsAtTopCheckBox = viewInflated.FindViewById<CheckBox>(Resource.Id.alwaysPlaceFriendsAtTop);
+            alwaysPlaceFriendsAtTopCheckBox.Checked = ChatroomController.PutFriendsOnTop;
+            alwaysPlaceFriendsAtTopCheckBox.CheckedChange += AlwaysPlaceFriendsAtTopCheckBox_CheckedChange;
+
+            switch (ChatroomController.SortChatroomUsersBy)
+            {
+                case ChatroomController.SortOrderChatroomUsers.Alphabetical:
+                    alphaOrder.Checked = true;
+                    break;
+                case ChatroomController.SortOrderChatroomUsers.OnlineStatus:
+                    onlineStatus.Checked = true;
+                    break;
+            }
+
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandlerClose = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    dialogInstance.Dismiss();
+                }
+                RoomDialogInstance = null;
+                dialogInstance = null; //memory cleanup
+            });
+
+            builder.SetPositiveButton(Resource.String.okay, eventHandlerClose);
+            dialogInstance = builder.Create();
+            dialogInstance.Show();
+
+        }
+
+        private static void AlwaysPlaceFriendsAtTopCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            bool putFriendsAtTop = ChatroomController.PutFriendsOnTop;
+            ChatroomController.PutFriendsOnTop = e.IsChecked;
+            if (putFriendsAtTop != ChatroomController.PutFriendsOnTop)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutBoolean(SoulSeekState.M_RoomUserListShowFriendsAtTop, ChatroomController.PutFriendsOnTop);
+                    editor.Commit();
+                }
+                RoomDialogInstance.RefreshUserListFull();
+            }
+        }
+
+        private static void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
+        {
+            ChatroomController.SortOrderChatroomUsers prev = ChatroomController.SortChatroomUsersBy;
+            switch (e.CheckedId)
+            {
+                case Resource.Id.onlineStatus:
+                    ChatroomController.SortChatroomUsersBy = ChatroomController.SortOrderChatroomUsers.OnlineStatus;
+                    break;
+                case Resource.Id.alphaOrder:
+                    ChatroomController.SortChatroomUsersBy = ChatroomController.SortOrderChatroomUsers.Alphabetical;
+                    break;
+            }
+
+            if (prev != ChatroomController.SortChatroomUsersBy)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutInt(SoulSeekState.M_RoomUserListSortOrder, (int)ChatroomController.SortChatroomUsersBy);
+                    editor.Commit();
+                }
+                RoomDialogInstance.RefreshUserListFull();
+            }
+        }
+
+
+        private List<Soulseek.UserData> UI_userDataList = null;
 
         /// <summary>
         /// Called after on create view
@@ -3707,22 +4287,68 @@ namespace AndriodApp1
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);
             this.Dialog.SetTitle(OurRoomName);
 
+
+            var toolbar = (Android.Support.V7.Widget.Toolbar)view.FindViewById(Resource.Id.roomUsersDialogToolbar);
+            var tmicl = new ToolbarMenuItemClickListener();
+            tmicl.RoomDialog = this;
+            toolbar.SetOnMenuItemClickListener(tmicl);
+            toolbar.InflateMenu(Resource.Menu.room_user_dialog_menu);
+            toolbar.Title = OurRoomName;
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryHint = "Filter Users...";
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryTextChange += RoomUserListDialog_QueryTextChange;
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
+
+
             recyclerViewUsers = view.FindViewById<RecyclerView>(Resource.Id.recyclerViewUsers);
             recyclerViewUsers.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             recycleLayoutManager = new LinearLayoutManager(Activity);
-            roomUserListAdapter = new RoomUserListRecyclerAdapter(ChatroomController.GetWrappedUserData(OurRoomName,IsPrivate));
-            recyclerViewUsers.SetAdapter(roomUserListAdapter);
+            this.RefreshUserListFull();
+            //userViewDataList = ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate, out this.cachedNewestTimeJoined);
+            //roomUserListAdapter = new RoomUserListRecyclerAdapter(userViewDataList);
+            //recyclerViewUsers.SetAdapter(roomUserListAdapter);
             recyclerViewUsers.SetLayoutManager(recycleLayoutManager);
             this.RegisterForContextMenu(recyclerViewUsers);
-            UpdateListView();
         }
 
-        private void UpdateListView()
+        public void RefreshUserListFull()
         {
-            //var users = ChatroomController.JoinedRoomData[OurRoomName].Users;
-            //roomUserListAdapter = new RoomUserListRecyclerAdapter(this.Activity, users);
-            ////roomUserListAdapter.Owner = this;
-            //listViewTickers.Adapter = tickerAdapter;
+            UI_userDataList = ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate, this.FilterText);
+            roomUserListAdapter = new RoomUserListRecyclerAdapter(UI_userDataList);
+            recyclerViewUsers.SetAdapter(roomUserListAdapter);
+        }
+
+        private void RoomUserListDialog_QueryTextSubmit(object sender, Android.Support.V7.Widget.SearchView.QueryTextSubmitEventArgs e)
+        {
+            //nothing to do. we do it as text change.
+        }
+
+        private void RoomUserListDialog_QueryTextChange(object sender, Android.Support.V7.Widget.SearchView.QueryTextChangeEventArgs e)
+        {
+            string oldText = FilterText;
+            FilterText = e.NewText;
+            if(FilterText.Contains(oldText))
+            {
+                //more restrictive so just filter out based on our current..
+                var filtered = UI_userDataList.Where(x=>x.Username.Contains(FilterText,StringComparison.InvariantCultureIgnoreCase)).ToList();
+                UI_userDataList.Clear();
+                UI_userDataList.AddRange(filtered);
+                this.roomUserListAdapter.NotifyDataSetChanged();
+            }
+            else
+            {
+                //less restrictive so get from main data source.
+                UI_userDataList.Clear();
+                UI_userDataList.AddRange(ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate, this.FilterText));
+                this.roomUserListAdapter.NotifyDataSetChanged();
+            }
+        }
+
+        private string FilterText = string.Empty;
+
+        private void FilterUIUsersView()
+        {
+            UI_userDataList.Clear();
+            
         }
 
         //public bool OnMenuItemClick(IMenuItem item)
@@ -3874,12 +4500,19 @@ namespace AndriodApp1
             RoomUserItemView view = RoomUserItemView.inflate(parent);
             view.setupChildren();
             // .inflate(R.layout.text_row_item, viewGroup, false);
+            (view as View).Click += RoomUserListRecyclerAdapter_Click;
             (view as View).LongClick += RoomUserListRecyclerAdapter_LongClick;
             return new RoomUserItemViewHolder(view as View);
 
 
         }
 
+        private void RoomUserListRecyclerAdapter_Click(object sender, EventArgs e)
+        {
+            RoomUserListDialog.longClickedUserData = (sender as RoomUserItemView).DataItem;
+
+            (sender as View).ShowContextMenu();
+        }
 
         private void RoomUserListRecyclerAdapter_LongClick(object sender, View.LongClickEventArgs e)
         {
@@ -3932,7 +4565,8 @@ namespace AndriodApp1
             bool canRemoveModPriviledgesAndApplicable = false;
             bool canAddModPriviledgesAndApplicable = false;
             bool canRemoveUser = false;
-            if(roomUserItemView.DataItem is Soulseek.ChatroomUserData cData) //that means we are in a private room
+            bool isPrivate = ChatroomController.IsPrivate(RoomUserListDialog.OurRoomName);
+            if (isPrivate && roomUserItemView.DataItem is Soulseek.ChatroomUserData cData) //that means we are in a private room
             {
                 if(ChatroomController.AreWeOwner(RoomUserListDialog.OurRoomName))
                 {

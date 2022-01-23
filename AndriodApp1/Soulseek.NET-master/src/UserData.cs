@@ -18,7 +18,7 @@
 namespace Soulseek
 {
     /// <summary>
-    /// Like Userdata but has an additional flag for role
+    /// Like Userdata but has an additional flag for role.
     /// </summary>
     [System.Serializable]
     public class ChatroomUserData : UserData
@@ -31,9 +31,10 @@ namespace Soulseek
         }
 
         /// <summary>
-        ///     Gets chatroom user role
+        ///     Gets or sets chatroom user role.
         /// </summary>
         public Soulseek.UserRole ChatroomUserRole { get; set;}
+
     }
 
 
