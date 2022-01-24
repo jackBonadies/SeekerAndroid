@@ -4805,10 +4805,10 @@ namespace AndriodApp1
                     });
                     
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);
-                    break;
+                    return true;
                 case FromSlskLinkCopyLink:
                     Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, Helpers.SlskLinkClickedData);
-                    break;
+                    return true;
                 case FromSlskLinkDownloadFiles:
                     Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
                     Action<Task<Directory>> ContAction = null;
@@ -4821,9 +4821,9 @@ namespace AndriodApp1
                         ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, null); };
                     }
                     DownloadDialog.GetFolderContentsAPI(_username, _dirPath, ContAction);
-                    break;
+                    return true;
             }
-            return true;
+            return base.OnContextItemSelected(item);
         }
     }
 
