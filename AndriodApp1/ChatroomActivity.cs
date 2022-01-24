@@ -1732,13 +1732,16 @@ namespace AndriodApp1
             //TextView noMessagesView = rootView.FindViewById<TextView>(Resource.Id.noMessagesView);
             recyclerViewInner = rootView.FindViewById<RecyclerView>(Resource.Id.recycler_messages);
             //recyclerViewInner.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
+
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recycleLayoutManager.StackFromEnd = true;
             recycleLayoutManager.ReverseLayout = false;
             recyclerAdapter = new ChatroomInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
             recyclerViewInner.SetAdapter(recyclerAdapter);
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
-            recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
+
+            //does not work on sub23
+            //recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
 
 
             this.RegisterForContextMenu(recyclerViewInner);
@@ -1934,6 +1937,9 @@ namespace AndriodApp1
                 {
                     MainActivity.LogDebug("2" + e.Message);
                 }
+
+                
+
                 MainActivity.LogDebug("set setatus view");
                 SetStatusesView();
                 MainActivity.LogDebug("set setatus view end");
