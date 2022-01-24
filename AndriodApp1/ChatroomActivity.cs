@@ -1249,6 +1249,7 @@ namespace AndriodApp1
         //private string currentTickerText = string.Empty;
         private bool created = false;
         private View rootView = null;
+        private View fabScrollToNewest = null;
         private EditText editTextEnterMessage = null;
         private Button sendMessage = null;
         public TextView currentTickerView = null;
@@ -1428,6 +1429,11 @@ namespace AndriodApp1
                             {
                                 recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
                             }
+                        }
+                        //we are now too far away.
+                        if(recycleLayoutManager.ItemCount - lastVisibleItemPosition > scroll_pos_too_far)
+                        {
+                            fabScrollToNewest.Visibility = ViewStates.Visible;
                         }
                     }
 
@@ -1664,9 +1670,10 @@ namespace AndriodApp1
             recycleLayoutManagerStatuses.StackFromEnd = false;
             recycleLayoutManagerStatuses.ReverseLayout = false;
             recyclerViewStatusesView.SetLayoutManager(recycleLayoutManagerStatuses);
-
-
-
+            fabScrollToNewest = rootView.FindViewById<View>(Resource.Id.bsbutton);
+            (fabScrollToNewest as Android.Support.Design.Widget.FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
+            fabScrollToNewest.Clickable = true;
+            fabScrollToNewest.Click += ScrollToBottomClick;
 
 
             if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
@@ -1691,6 +1698,9 @@ namespace AndriodApp1
             recyclerAdapter = new ChatroomInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
             recyclerViewInner.SetAdapter(recyclerAdapter);
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
+            recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
+
+
             this.RegisterForContextMenu(recyclerViewInner);
             if (messagesInternal.Count != 0)
             {
@@ -1712,6 +1722,30 @@ namespace AndriodApp1
             ChatroomActivity.ChatroomActivityRef.InvalidateOptionsMenu();
             return rootView;
 
+        }
+
+        private const int scroll_pos_too_far = 16;
+
+        private void RecyclerViewInner_ScrollChange(object sender, View.ScrollChangeEventArgs e)
+        {
+            //the messages start at 0
+            //and so what matters is how far the last message is from the count.
+            //so if last message is 19 and count is 21 then you are one behind..
+            if(recycleLayoutManager.FindLastVisibleItemPosition() == (recycleLayoutManager.ItemCount - 1) || recycleLayoutManager.ItemCount == 0) //you can see the latest message.
+            {
+                fabScrollToNewest.Visibility = ViewStates.Gone;
+            }
+            else if(recycleLayoutManager.ItemCount - recycleLayoutManager.FindLastVisibleItemPosition() > scroll_pos_too_far)
+            {
+                fabScrollToNewest.Visibility = ViewStates.Visible;
+            }
+            MainActivity.LogDebug("count " + recycleLayoutManager.ItemCount);
+            MainActivity.LogDebug("last vis " + recycleLayoutManager.FindLastVisibleItemPosition());
+        }
+
+        private void ScrollToBottomClick(object sender, EventArgs e)
+        {
+            this.recyclerViewInner.ScrollToPosition(this.recyclerAdapter.ItemCount - 1);
         }
 
         private bool recyclerViewSmall = true;

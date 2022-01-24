@@ -21,6 +21,15 @@
 		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_994f58c4</item>
 		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_994f58c4</item>
 
+
+
+
+		<item name="floating_action_bar_to_bottom_icon">#5F5F5F</item>
+		<item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
+
+
+
+
 		<item name="dialog_background">#ffffffff</item>
 
 		<item name="pseudo_window_background_color">#00000000</item>
@@ -176,6 +185,11 @@
 	</style>
 
 	<style name="DefaultDark" parent="AppTheme.NoActionBar">
+
+		<item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
+		<item name="floating_action_bar_to_bottom_background">#202020</item>
+
+
 		<item name="pseudo_window_background_color">#00000000</item>
 		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#FFFFFF</item>
@@ -216,7 +230,8 @@
 
 	<style name="Amoled" parent="DefaultDark">
 
-		
+		<item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
+		<item name="floating_action_bar_to_bottom_background">#303030</item>
 
 		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#bcc1f7</item>

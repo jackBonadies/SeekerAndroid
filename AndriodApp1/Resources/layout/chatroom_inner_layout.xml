@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    
+    android:animateLayoutChanges="true"
     android:layout_height="match_parent">
     <TextView
         android:layout_width="match_parent"
@@ -26,17 +26,40 @@
         android:paddingBottom="4dp"
         android:background="?attr/cell_shape_end"
         />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_messages"
+        <RelativeLayout
+        android:id="@+id/test1"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:layout_marginBottom="8dp"
-
+        >
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_messages"
+        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
         />
 
 
+               <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:visibility="gone"
+        android:background="?attr/floating_action_bar_to_bottom_background"
+        android:backgroundTint="?attr/floating_action_bar_to_bottom_background"
+        android:tint="?attr/floating_action_bar_to_bottom_icon"
+        app:backgroundTint="?attr/floating_action_bar_to_bottom_background"
+
+        app:fabSize="mini"
+            android:elevation="1000dp"
+            android:translationZ="100dp"
+        android:id="@+id/bsbutton"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+             android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+        />
+        </RelativeLayout>
 
     <View
         android:id="@+id/view"
