@@ -18,9 +18,9 @@
         android:text="@string/chatroom_loading_ticker"
         android:background="?attr/cell_shape_end"
         />
-        <androidx.recyclerview.widget.RecyclerView
+        <AndriodApp1.RecyclerView2
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="82dp"
         android:id="@+id/room_statuses_recycler_view"
         android:clickable="true"    
         android:paddingBottom="4dp"
