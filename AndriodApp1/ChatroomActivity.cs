@@ -45,7 +45,7 @@ namespace AndriodApp1
         public static ChatroomActivity ChatroomActivityRef = null;
 
         public static bool ShowStatusesView = true;
-        public static bool ShowTickerView = true;
+        public static bool ShowTickerView = false;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -442,11 +442,23 @@ namespace AndriodApp1
                     {
                         f.currentTickerView.Visibility = ViewStates.Gone;
                     }
+                    lock (MainActivity.SHARED_PREF_LOCK)
+                    {
+                        var editor = SoulSeekState.SharedPreferences.Edit();
+                        editor.PutBoolean(SoulSeekState.M_ShowTickerView, ChatroomActivity.ShowTickerView);
+                        editor.Commit();
+                    }
                     return true;
                 case Resource.Id.hide_show_user_status_action:
                     ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
                     var f1 = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
                     f1.SetStatusesView();
+                    lock (MainActivity.SHARED_PREF_LOCK)
+                    {
+                        var editor = SoulSeekState.SharedPreferences.Edit();
+                        editor.PutBoolean(SoulSeekState.M_ShowStatusesView, ChatroomActivity.ShowStatusesView);
+                        editor.Commit();
+                    }
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -1182,6 +1194,8 @@ namespace AndriodApp1
         {
             return messageInnerView;
         }
+
+        
     }
 
     public class GroupMessageInnerViewReceived : ConstraintLayout
@@ -1234,7 +1248,32 @@ namespace AndriodApp1
         }
     }
 
+    public class RecyclerView2 : RecyclerView
+    {
+        public RecyclerView2(Context context) : base(context)
+        {
+        }
 
+        public RecyclerView2(Context context, IAttributeSet attrSet) : base(context, attrSet)
+        {
+
+        }
+
+        public RecyclerView2(Context context, IAttributeSet attrSet, int defStyle) : base(context, attrSet, defStyle)
+        {
+
+        }
+
+        protected override void OnSizeChanged(int w, int h, int oldw, int oldh)
+        {
+            base.OnSizeChanged(w, h, oldw, oldh);
+            if(oldh > h)
+            {
+                MainActivity.LogDebug("size changed to smaller...");
+                this.GetLayoutManager().ScrollToPosition(this.GetLayoutManager().ItemCount - 1);
+            }
+        }
+    }
 
 
 
@@ -1254,7 +1293,7 @@ namespace AndriodApp1
         private Button sendMessage = null;
         public TextView currentTickerView = null;
 
-        private RecyclerView recyclerViewStatusesView;
+        private RecyclerView2 recyclerViewStatusesView;
         private LinearLayoutManager recycleLayoutManagerStatuses;
         private ChatroomStatusesRecyclerAdapter recyclerUserStatusAdapter;
 
@@ -1659,8 +1698,8 @@ namespace AndriodApp1
             }
 
             recyclerViewSmall = true;
-            recyclerViewStatusesView = rootView.FindViewById<RecyclerView>(Resource.Id.room_statuses_recycler_view);
-
+            recyclerViewStatusesView = rootView.FindViewById<RecyclerView2>(Resource.Id.room_statuses_recycler_view);
+            
             CustomClickEvent cce = new CustomClickEvent();
             cce.RecyclerView = recyclerViewStatusesView;
             recyclerViewStatusesView.SetOnTouchListener(cce);
@@ -1674,6 +1713,7 @@ namespace AndriodApp1
             (fabScrollToNewest as Android.Support.Design.Widget.FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
             fabScrollToNewest.Clickable = true;
             fabScrollToNewest.Click += ScrollToBottomClick;
+            
 
 
             if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
@@ -1751,11 +1791,23 @@ namespace AndriodApp1
         private bool recyclerViewSmall = true;
         private void RecyclerViewStatusesView_Click(object sender, EventArgs e)
         {
+            if(recyclerViewSmall)
+            {
+                //dont expand if there is nothing to show..
+                if(this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition()==0 && this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition() >= this.recycleLayoutManagerStatuses.ItemCount - 1)
+                {
+                    MainActivity.LogDebug("too small to expand" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
+                    MainActivity.LogDebug("too small to expand" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
+                    MainActivity.LogDebug("too small to expand");
+                    return;
+                }
+            }
+
             int dps = 200;
             recyclerViewSmall = !recyclerViewSmall;
             if (recyclerViewSmall)
             {
-                dps = 80;
+                dps = 82;
             }
             float scale = this.Context.Resources.DisplayMetrics.Density;
             int pixels = (int)(dps * scale + 0.5f);
@@ -1764,15 +1816,20 @@ namespace AndriodApp1
             recyclerViewStatusesView.ForceLayout(); //include children in the remeasure and relayout (not sure if necessary)
             recyclerViewStatusesView.Invalidate(); //redraw
             recyclerViewStatusesView.RequestLayout(); //relayout (for size changes)
-
-
-            //recyclerViewStatusesView.
-
-            if (recyclerViewSmall)
-            {
-
-            }
         }
+
+        //happens too late...
+        //private void RecyclerViewStatusesView_LayoutChange(object sender, View.LayoutChangeEventArgs e)
+        //{
+        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + e.OldTop + "   " + e.Top);
+        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + e.OldBottom + "   " + e.Bottom);
+        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
+        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
+        //    if(e.OldBottom > e.Bottom)
+        //    {
+        //        this.recycleLayoutManagerStatuses.ScrollToPosition(this.recycleLayoutManagerStatuses.ItemCount - 1);
+        //    }
+        //}
 
         private void CurrentTickerView_Click(object sender, EventArgs e)
         {

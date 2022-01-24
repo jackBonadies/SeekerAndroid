@@ -3751,6 +3751,11 @@ namespace AndriodApp1
                 //SearchTabHelper.RestoreAllSearchTabsFromDisk(c);
 
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
+
+                ChatroomActivity.ShowStatusesView = sharedPreferences.GetBoolean(SoulSeekState.M_ShowStatusesView, true);
+                ChatroomActivity.ShowTickerView = sharedPreferences.GetBoolean(SoulSeekState.M_ShowTickerView, false);
+                ChatroomController.SortChatroomUsersBy = (ChatroomController.SortOrderChatroomUsers)(sharedPreferences.GetInt(SoulSeekState.M_RoomUserListSortOrder, 2)); //default is 2 = alphabetical..
+                ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(SoulSeekState.M_RoomUserListShowFriendsAtTop, false);
             }
         }
 
@@ -11115,6 +11120,8 @@ namespace AndriodApp1
 
         public const string M_RoomUserListSortOrder = "Momento_RoomUserListSortOrder";
         public const string M_RoomUserListShowFriendsAtTop = "Momento_RoomUserListShowFriendsAtTop";
+        public const string M_ShowStatusesView = "Momento_ShowStatusesView";
+        public const string M_ShowTickerView = "Momento_ShowTickerView";
         //public const string M_UserListSortOrder = "Momento_UserListSortHistory";
 
 
