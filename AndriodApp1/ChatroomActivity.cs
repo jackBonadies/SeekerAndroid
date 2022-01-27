@@ -1525,10 +1525,23 @@ namespace AndriodApp1
                     //not our room..
                     return;
                 }
-
+                //MainActivity.LogDebug("nonUI event handler for status view " + e.Joined);
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    MainActivity.LogDebug("event handler for status view " + e.Joined);
+                    //MainActivity.LogDebug("UI event handler for status view " + e.Joined);
+                    if(e.User == SoulSeekState.Username && UI_statusMessagesInternal.Count > 0)
+                    {
+                        //this is to correct an issue where:
+                        //  (non UI thread) we join and are added to the room data
+                        //  (UI thread) we get the room data and set up (with count of 1)
+                        //  (UI thread) the event handler for us being added finally gets run
+                        
+                        if(UI_statusMessagesInternal.Last().Equals(e.StatusMessageUpdate.Value))
+                        {
+                            MainActivity.LogDebug("UI event - throwing away the duplicate.." + e.Joined);
+                            return; //we already have this exact status message.
+                        }
+                    }
                     UI_statusMessagesInternal.Add(e.StatusMessageUpdate.Value);
                     int lastVisibleItemPosition = recycleLayoutManagerStatuses.FindLastVisibleItemPosition();
                     MainActivity.LogDebug("lastVisibleItemPosition : " + lastVisibleItemPosition);
@@ -1549,6 +1562,9 @@ namespace AndriodApp1
 
         public void SetStatusesView()
         {
+            //#if DEBUG //exposes bug that is now fixed.
+            //System.Threading.Thread.Sleep(1000);
+            //#endif
             if (ChatroomActivity.ShowStatusesView)
             {
                 recyclerViewStatusesView.Visibility = ViewStates.Visible;
@@ -1569,6 +1585,7 @@ namespace AndriodApp1
                 UI_statusMessagesInternal = new List<ChatroomController.StatusMessageUpdate>();
             }
 
+            //MainActivity.LogDebug("SetStatusView Count: " + UI_statusMessagesInternal.Count);
 
             recyclerUserStatusAdapter = new ChatroomStatusesRecyclerAdapter(UI_statusMessagesInternal); //this depends tightly on MessageController... since these are just strings..
             recyclerViewStatusesView.SetAdapter(recyclerUserStatusAdapter);
@@ -1741,8 +1758,10 @@ namespace AndriodApp1
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
 
             //does not work on sub23
-            //recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
-
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+            {
+                recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
+            }
 
             this.RegisterForContextMenu(recyclerViewInner);
             if (messagesInternal.Count != 0)
@@ -1782,8 +1801,8 @@ namespace AndriodApp1
             {
                 fabScrollToNewest.Visibility = ViewStates.Visible;
             }
-            MainActivity.LogDebug("count " + recycleLayoutManager.ItemCount);
-            MainActivity.LogDebug("last vis " + recycleLayoutManager.FindLastVisibleItemPosition());
+            //MainActivity.LogDebug("count " + recycleLayoutManager.ItemCount);
+            //MainActivity.LogDebug("last vis " + recycleLayoutManager.FindLastVisibleItemPosition());
         }
 
         private void ScrollToBottomClick(object sender, EventArgs e)
