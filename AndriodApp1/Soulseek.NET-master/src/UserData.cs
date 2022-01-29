@@ -100,7 +100,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets the status of the user (0 = offline, 1 = away, 2 = online).
         /// </summary>
-        public UserPresence Status { get; protected set; }
+        public UserPresence Status { get; set; }
 
         /// <summary>
         ///     Gets the username of the user.

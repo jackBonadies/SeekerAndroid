@@ -2399,7 +2399,8 @@ namespace AndriodApp1
                 //SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
                 SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations,listenPort:SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler)); //Enable Listener is False.  Default is True.
                 SoulSeekState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
-                SoulSeekState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged;
+                SoulSeekState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
+                SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
                 //SoulSeekState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
                 SoulSeekState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
@@ -2436,6 +2437,13 @@ namespace AndriodApp1
 
 
         }
+
+        /// <summary>
+        /// This is the one we should be hooking up to.
+        /// This is due to the fact that the server sends us the same user update multiple times if they are of multiple interests.
+        /// i.e. if we have Added Them, we are in Chatroom A, B, and C with them, then we get 4 status updates.
+        /// </summary>
+        public static EventHandler<UserStatusChangedEventArgs> UserStatusChangedDeDuplicated;
 
         private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
         {
@@ -3587,7 +3595,7 @@ namespace AndriodApp1
         /// <param name="username"></param>
         /// <param name="userData"></param>
         /// <param name="userStatus"></param>
-        private static void UserListAddIfContainsUser(string username, UserData userData, UserStatus userStatus)
+        private static bool UserListAddIfContainsUser(string username, UserData userData, UserStatus userStatus)
         {
             UserPresence? prevStatus = UserPresence.Offline;
             bool found = false;
@@ -3633,6 +3641,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogDebug("NOT from offline to online " + username);
             }
+            return found;
         }
 
         public static View GetViewForSnackbar()
@@ -4011,28 +4020,44 @@ namespace AndriodApp1
             }
         }
 
-        public static EventHandler<string> UserStatusChangedUIEvent;
+        private static string DeduplicateUsername = null;
+        private static Soulseek.UserPresence DeduplicateStatus = Soulseek.UserPresence.Offline;
+        private void SoulseekClient_UserStatusChanged_Deduplicator(object sender, UserStatusChangedEventArgs e)
+        {
+            
+            if(DeduplicateUsername == e.Username && DeduplicateStatus == e.Status)
+            {
+                MainActivity.LogDebug($"throwing away {e.Username} status changed");
+                return;
+            }
+            else
+            {
+                MainActivity.LogDebug($"handling {e.Username} status changed");
+                DeduplicateUsername = e.Username;
+                DeduplicateStatus = e.Status;
+                SeekerApplication.UserStatusChangedDeDuplicated?.Invoke(sender, e);
+            }
+        }
 
+
+        public static EventHandler<string> UserStatusChangedUIEvent;
         private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
         {
-
-            MainActivity.LogDebug($"{e.Username} status changed");
-
             if (e.Username == SoulSeekState.Username)
             {
                 //not sure this will ever happen
             }
             else
             {
-                if (SoulSeekState.UserList == null)
+                //we get user status changed for those we are in the same room as us
+                if (SoulSeekState.UserList != null)
                 {
-                    MainActivity.LogFirebase("UserList is null on user status receive");
-                }
-                else
-                {
-                    MainActivity.LogDebug("user status changed " + e.Username);
-                    UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
-                    SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
+                    bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
+                    if(found)
+                    {
+                        MainActivity.LogDebug("friend status changed " + e.Username);
+                        SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
+                    }
                 }
             }
 
