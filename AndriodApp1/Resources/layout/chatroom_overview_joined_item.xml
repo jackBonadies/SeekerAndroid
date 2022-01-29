@@ -9,14 +9,30 @@
     android:orientation="horizontal"
     android:descendantFocusability="afterDescendants"
     android:id="@+id/linearLayoutChatroomOverview">
-    <TextView
+    <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="6"
+        android:orientation="horizontal"
+        >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
         android:id="@+id/roomName"
         android:text="roomNameDummy"
         android:textSize="22sp"
         />
+        <ImageView
+            android:layout_width="12sp"
+            android:layout_height="12sp"
+            android:layout_marginLeft="6dp"
+            android:id="@+id/unreadImageView"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            android:tint="@color/androidStockMessagesNewBlue"
+            app:srcCompat="@drawable/checkbox_blank_circle"/>
+
+    </LinearLayout>
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
