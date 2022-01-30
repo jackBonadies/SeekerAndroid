@@ -12479,31 +12479,14 @@ namespace AndriodApp1
         {
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            Notification notification = null;
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-            {
-                notification =
-                      new Notification.Builder(context, channelID)
+            Notification notification = new NotificationCompat.Builder(context, channelID)
                       .SetContentTitle(titleText)
                       .SetContentText(contentText)
+                      
                       .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
                       .SetContentIntent(pendingIntent)
                       .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
                       .SetTicker(titleText).Build();
-            }
-            else
-            {
-                notification =
-#pragma warning disable CS0618 // Type or member is obsolete
-                  new Notification.Builder(context)
-#pragma warning restore CS0618 // Type or member is obsolete
-                  .SetContentTitle(titleText)
-                  .SetContentText(contentText)
-                  .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                  .SetContentIntent(pendingIntent)
-                  .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                  .SetTicker(titleText).Build();
-            }
 
             return notification;
 

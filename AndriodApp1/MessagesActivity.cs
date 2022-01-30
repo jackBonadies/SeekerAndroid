@@ -41,11 +41,18 @@ using System.Threading.Tasks;
 
 namespace AndriodApp1
 {
-    
+
     [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar",LaunchMode =Android.Content.PM.LaunchMode.SingleTask)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
+
+        /// <summary>
+        /// basically this keeps track of the direct reply messages stack.
+        /// if a user replies to a message from notification or gets a new one when the notificaiton is up, then it gets added to.
+        /// but once the user clears the notification OR goes to the activity to respond to the message then it gets cleared.
+        /// </summary>
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<MessageController.MessageNotifExtended>> DirectReplyMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<MessageController.MessageNotifExtended>>();
 
         public void ChangeToInnerFragment(string username)
         {
@@ -763,32 +770,262 @@ namespace AndriodApp1
             }
         }
 
+        public struct MessageNotifExtended
+        {
+            public bool IsSpecialMessage;
+            public string Username;
+            public bool IsOurMessage; //You
+            public string MessageText;
+        }
+
+        public static Android.Text.SpannableStringBuilder GetSpannableForCollapsed(MessageNotifExtended messageNotifExtended)
+        {
+            Android.Text.SpannableStringBuilder ssb = new Android.Text.SpannableStringBuilder();
+
+            if (messageNotifExtended.IsSpecialMessage)
+            {
+                string title = "Messages with " + messageNotifExtended.Username;
+                var titleSpan = new Android.Text.SpannableString(title + " \n");
+                titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColor)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
+                titleSpan.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
+
+                ssb.Append(titleSpan);
+
+                var spannableStringError = new Android.Text.SpannableString(messageNotifExtended.MessageText);
+                spannableStringError.SetSpan(new Android.Text.Style.ForegroundColorSpan(Color.Red), 0, messageNotifExtended.MessageText.Length, Android.Text.SpanTypes.InclusiveInclusive);
+                ssb.Append(spannableStringError);
+                return ssb;
+            }
+
+            string uname = messageNotifExtended.IsOurMessage ? "You" : messageNotifExtended.Username;
+            var spannableString = new Android.Text.SpannableString(uname + " ");
+
+            Android.Text.Style.ForegroundColorSpan fcs = null;
+            if(messageNotifExtended.IsOurMessage)
+            {
+                fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+            }
+            else
+            {
+                fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+            }
+            spannableString.SetSpan(fcs, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
+
+            var bld = new Android.Text.Style.StyleSpan(TypefaceStyle.Bold);
+            spannableString.SetSpan(bld, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
+
+
+            ssb.Append(spannableString);
+            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+            string msgToShow = "\n" + messageNotifExtended.MessageText;
+            var spannableString2 = new Android.Text.SpannableString(msgToShow); 
+            //spannableString2.SetSpan(textColorSubdued, 0, msgToShow.Length, SpanTypes.InclusiveInclusive);
+            ssb.Append(spannableString2);
+            return ssb;
+        }
+
+
+        public static Android.Text.SpannableStringBuilder GetSpannableForExpanded(List<MessageNotifExtended> messageNotifExtended)
+        {
+            var lastFive = messageNotifExtended.TakeLast(5); //not nearly enough room to display 8
+            string lastUsername = null;
+            Android.Text.SpannableStringBuilder ssb = new Android.Text.SpannableStringBuilder();
+
+            bool showErrors = true;
+            if (!lastFive.Last().IsSpecialMessage)
+            {
+                showErrors = false;
+            }
+
+            for (int i = 0; i < lastFive.Count(); i++)
+            {
+                var msg = lastFive.ElementAt(i);
+
+                if (msg.IsSpecialMessage)
+                {
+                    if (!showErrors)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        var spannableString = new Android.Text.SpannableString(msg.MessageText + ((i != lastFive.Count() - 1) ? " \n" : string.Empty));
+                        spannableString.SetSpan(new Android.Text.Style.ForegroundColorSpan(Color.Red), 0, msg.MessageText.Length, Android.Text.SpanTypes.InclusiveInclusive);
+                        //spannableString.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), 0, msg.MessageText.Length, Android.Text.SpanTypes.InclusiveInclusive);
+                        ssb.Append(spannableString);
+                        continue;
+                    }
+                }
+                string uname = msg.IsOurMessage ? "You" : msg.Username;
+                if (lastUsername != uname)
+                {
+                    //add header
+                    
+                    var spannableString = new Android.Text.SpannableString(uname + " \n"); //space after to prevent android bug
+
+                    Android.Text.Style.ForegroundColorSpan fcs = null;
+                    if (msg.IsOurMessage)
+                    {
+                        fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColor)); //normal color text...
+                    }
+                    else
+                    {
+                        fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                    }
+                    spannableString.SetSpan(fcs, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
+
+                    var bld = new Android.Text.Style.StyleSpan(TypefaceStyle.Bold);
+                    spannableString.SetSpan(bld, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
+
+                    ssb.Append(spannableString);
+
+                }
+                //now append text
+                Android.Text.SpannableString spannableString2 = null;
+                if (i != lastFive.Count() - 1)
+                {
+                    spannableString2 = new Android.Text.SpannableString(msg.MessageText + "\n");
+                }
+                else
+                {
+                    spannableString2 = new Android.Text.SpannableString(msg.MessageText);
+                }
+                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+                //spannableString2.SetSpan(textColorSubdued, 0, msg.MessageText.Length, SpanTypes.InclusiveInclusive);
+                ssb.Append(spannableString2);
+
+                lastUsername = uname;
+            }
+
+            return ssb;
+        }
+
+
+
         public static string CHANNEL_ID = "Private Messages ID";
         public static string CHANNEL_NAME = "Private Messages";
         public static string FromUserName = "FromThisUser";
         public static string ComingFromMessageTapped = "FromAMessage";
 
-        public static void ShowNotification(Message msg)
+        public static void ShowNotificationLogic(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureReason = "")
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                try
+            try
+            {
+                Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+
+
+                Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
+                notifIntent.AddFlags(ActivityFlags.SingleTop);
+                notifIntent.PutExtra(FromUserName, msg.Username); //so we can go to this user..
+                notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
+                PendingIntent pendingIntent =
+                    PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+
+                //no direct reply in <26 and so the actions are rather pointless..
+                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
                 {
-                    Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
-                    Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
-                    notifIntent.AddFlags(ActivityFlags.SingleTop);
-                    notifIntent.PutExtra(FromUserName, msg.Username); //so we can go to this user..
-                    notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
-                    PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
-                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+
+
+                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel("Send Message...").Build();
+                    Intent replayIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
+                    replayIntent.PutExtra("direct_reply_extra", true);
+                    replayIntent.SetAction("seeker_direct_reply");
+                    replayIntent.PutExtra("seeker_username", msg.Username);
+                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), replayIntent, PendingIntentFlags.UpdateCurrent);
+                    NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.baseline_chat_bubble_white_24, "Reply", replyPendingIntent).SetAllowGeneratedReplies(false).AddRemoteInput(remoteInput).Build(); //TODO icon
+
+
+                    //NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("me").SetConversationTitle("hi hello there").SetGroupConversation(true);
+
+                    var mne = new MessageNotifExtended() {Username = msg.Username, IsOurMessage = fromOurResponse, IsSpecialMessage = directReplyFailure, MessageText = directReplyFailure ? directReplayFailureReason : msg.MessageText };
+
+                    //if(!directReplyFailure)
+                    //{
+                        if (MessagesActivity.DirectReplyMessages.ContainsKey(msg.Username))
+                        {
+                            MessagesActivity.DirectReplyMessages[msg.Username].Add(mne);
+                        }
+                        else
+                        {
+                            MessagesActivity.DirectReplyMessages[msg.Username] = new List<MessageNotifExtended>();
+                            MessagesActivity.DirectReplyMessages[msg.Username].Add(mne);
+                        }
+                    //}
+
+
+                    //foreach (NotificationCompat.MessagingStyle.Message message in MessagesActivity.DirectReplyMessages[msg.Username])
+                    //{
+                    //    messagingStyle.AddMessage(message);
+                    //}
+
+                
+                    RemoteViews notificationLayout = new RemoteViews(SoulSeekState.ActiveActivityRef.PackageName, Resource.Layout.simple_custom_notification);
+                    RemoteViews notificationLayoutExpanded = new RemoteViews(SoulSeekState.ActiveActivityRef.PackageName, Resource.Layout.simple_custom_notification);
+
+                    notificationLayout.SetTextViewText(Resource.Id.textView1, GetSpannableForCollapsed(MessagesActivity.DirectReplyMessages[msg.Username].Last()));
+                    notificationLayoutExpanded.SetTextViewText(Resource.Id.textView1, GetSpannableForExpanded(MessagesActivity.DirectReplyMessages[msg.Username]));
+
+
+                    Intent clearNotifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
+                    clearNotifIntent.PutExtra("clear_notif_extra", true);
+                    clearNotifIntent.SetAction("seeker_clear_notification");
+                    clearNotifIntent.PutExtra("seeker_username", msg.Username);
+                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), clearNotifIntent, PendingIntentFlags.UpdateCurrent);
+
+
+
+                    Intent markAsReadIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
+                    markAsReadIntent.PutExtra("mark_as_read_extra", true);
+                    markAsReadIntent.SetAction("seeker_mark_as_read");
+
+
+                    markAsReadIntent.PutExtra("seeker_username", msg.Username);
+                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), markAsReadIntent, PendingIntentFlags.UpdateCurrent); //else the new extras will not arrive...
+
+                    string markAsRead = "Mark As Read";
+                    if (fromOurResponse)
+                    {
+                        markAsRead = "Dismiss";
+                    }
+
+                    //setColor ?? todo
+                    Notification notification = new NotificationCompat.Builder(SoulSeekState.ActiveActivityRef, CHANNEL_ID)
+                        .AddAction(Resource.Drawable.baseline_chat_bubble_white_24, markAsRead, markAsReadPendingIntent)
+                        .AddAction(replyAction)
+                        .SetStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                        .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
+                        //.SetCategory(NotificationCompat.CategoryMessage)
+                        .SetContentIntent(pendingIntent)
+                        .SetCustomContentView(notificationLayout)
+                        .SetCustomBigContentView(notificationLayoutExpanded)
+                        .SetColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor))
+                        .SetAutoCancel(true) //so when we tap it will go away. does not apply to actions though.
+                        .SetOnlyAlertOnce(fromOurResponse) //it will make noise on new messages...
+                        .SetDeleteIntent(clearNotifPendingIntent)
+                        .Build();
+                    
                     // notificationId is a unique int for each notification that you must define
+                    notificationManager.Notify(msg.Username.GetHashCode(), notification);
+
+                }
+                else
+                {
+                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
                     notificationManager.Notify(msg.Username.GetHashCode(), n);
                 }
-                catch(System.Exception e)
-                {
-                    MainActivity.LogFirebase("ShowNotification failed: " + e.Message + e.StackTrace);
-                }
+            }
+            catch (System.Exception e)
+            {
+                MainActivity.LogFirebase("ShowNotification failed: " + e.Message + e.StackTrace);
+            }
+
+        }
+
+        public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "")
+        {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                ShowNotificationLogic(msg,fromOurResponse, directReplyFailure, directReplayFailureMessage);
             });
         }
 
@@ -1061,16 +1298,24 @@ namespace AndriodApp1
             base.OnSaveInstanceState(outState);
         }
 
-        public void SendMessageAPI(Message msg)
+        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false)
         {
             if(string.IsNullOrEmpty(msg.MessageText))
             {
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
+                if(fromDirectReplyAction)
+                {
+                    MessageController.ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
+                }
                 return;
             }
             if (!SoulSeekState.currentlyLoggedIn)
             {
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
+                if (fromDirectReplyAction)
+                {
+                    MessageController.ShowNotification(msg, true, true, "Failure - Currently Logged Out.");
+                }
                 return;
             }
 
@@ -1081,10 +1326,14 @@ namespace AndriodApp1
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
                     }
+                    if (fromDirectReplyAction)
+                    {
+                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Log In.");
+                    }
                     throw new FaultPropagationException();
                 }
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
-                    SendMessageLogic(msg);
+                    SendMessageLogic(msg, fromDirectReplyAction);
                 }));
             });
 
@@ -1107,22 +1356,25 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    SendMessageLogic(msg);
+                    SendMessageLogic(msg, fromDirectReplyAction);
                 }
             }
 
         }
 
-        public void SendMessageLogic(Message msg) //you can start out with a message...
+        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction) //you can start out with a message...
         {
-            if(MessageController.Messages.Keys.Contains(Username))
+            MainActivity.LogDebug("SendMessageLogic");
+
+            string usernameToMessage = msg.Username;
+            if (MessageController.Messages.Keys.Contains(usernameToMessage))
             {
-                MessageController.Messages[Username].Add(msg);
+                MessageController.Messages[usernameToMessage].Add(msg);
             }
             else
             {
-                MessageController.Messages[Username] = new List<Message>(); //our first message to them..
-                MessageController.Messages[Username].Add(msg);
+                MessageController.Messages[usernameToMessage] = new List<Message>(); //our first message to them..
+                MessageController.Messages[usernameToMessage].Add(msg);
             }
             MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
             MessageController.RaiseMessageReceived(msg);
@@ -1130,17 +1382,31 @@ namespace AndriodApp1
             {
                 if(t.IsFaulted)
                 {
+                    MainActivity.LogDebug("faulted " + t.Exception.ToString());
+                    MainActivity.LogDebug("faulted " + t.Exception.InnerException.Message.ToString());
                     msg.SentMsgStatus = SentStatus.Failed;
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_send_message, ToastLength.Long).Show();
+
+                    if (fromDirectReplyAction)
+                    {
+                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Send Message.");
+                    }
                 }
                 else
                 {
+                    MainActivity.LogDebug("did not fault");
                     msg.SentMsgStatus = SentStatus.Success;
+
+                    if (fromDirectReplyAction)
+                    {
+                        MessageController.ShowNotification(msg, true, false);
+                    }
                 }
                 MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
                 MessageController.RaiseMessageReceived(msg);
             });
-            SoulSeekState.SoulseekClient.SendPrivateMessageAsync(Username, msg.MessageText).ContinueWith(continueWithAction);
+            MainActivity.LogDebug("useranme to mesasge " + usernameToMessage);
+            SoulSeekState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
         }
 
 
@@ -1184,6 +1450,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             MainActivity.LogDebug("inner frag resume");
+            MessagesActivity.DirectReplyMessages.TryRemove(Username, out _);
             MessageController.UnsetAsUnreadAndSaveIfApplicable(Username);
             currentlyResumed = true;
             base.OnResume();
@@ -1917,6 +2184,59 @@ namespace AndriodApp1
             viewMessage.Text = msgText;
             //viewMessage.SetTextColor()
             //viewMessage.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor))
+        }
+    }
+
+    [BroadcastReceiver(Exported = false, Label = "OurMessagesBroadcastReceiver")]
+    public class MessagesBroadcastReceiver : BroadcastReceiver
+    {
+        public override void OnReceive(Context context, Intent intent)
+        {
+            //bool directReply = intent.GetBooleanExtra("direct_reply_extra",false);
+            
+            //bool markAsRead = intent.GetBooleanExtra("mark_as_read_extra", false);
+            string uname = intent.GetStringExtra("seeker_username");
+
+            //bool delete = intent.GetBooleanExtra("clear_notif_extra", false);
+
+            bool delete = intent.Action == "seeker_clear_notification";
+            bool markAsRead = intent.Action == "seeker_mark_as_read";
+            bool directReply = intent.Action == "seeker_direct_reply";
+
+            MainActivity.LogDebug(intent.Action == null ? "MessagesBroadcastReceiver null" : ("MessagesBroadcastReceiver " + intent.Action));
+
+            if (delete)
+            {
+                MessagesActivity.DirectReplyMessages.TryRemove(uname, out _);
+                return;
+            }
+
+            
+
+            if(markAsRead)
+            {
+                MessageController.UnreadUsernames.TryRemove(uname, out _);
+
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                // notificationId is a unique int for each notification that you must define
+                notificationManager.Cancel(uname.GetHashCode());
+                return;
+            }
+
+            Bundle remoteInputBundle = AndroidX.Core.App.RemoteInput.GetResultsFromIntent(intent);
+            if(directReply)
+            {
+                MessageController.UnreadUsernames.TryRemove(uname, out _);
+                if (remoteInputBundle != null)
+                {
+                    string replyText = remoteInputBundle.GetString("key_text_result");
+                    //Message msg = new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, replyText, false);
+                    MainActivity.LogDebug("direct reply " + replyText + " " + uname);
+                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, DateTime.Now, DateTime.UtcNow, replyText, true, SentStatus.Pending), true);
+
+                    
+                }
+            }
         }
     }
 
