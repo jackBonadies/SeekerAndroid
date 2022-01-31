@@ -49,7 +49,7 @@ namespace AndriodApp1
 
 
 
-[Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar")]
+[Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class ImportWizardActivity : ThemeableActivity
     {
         private const int IMPORT_FILE_SELECTED = 2000;

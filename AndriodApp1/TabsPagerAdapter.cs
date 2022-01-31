@@ -5570,10 +5570,18 @@ namespace AndriodApp1
             viewToHideShow.Visibility = ViewStates.Gone;
         }
 
-        public static Color GetColorFromAttribute(Context c, int attr)
+        public static Color GetColorFromAttribute(Context c, int attr, Resources.Theme overrideTheme = null)
         {
             var typedValue = new TypedValue();
-            c.Theme.ResolveAttribute(attr, typedValue, true);
+            if(overrideTheme != null)
+            {
+                overrideTheme.ResolveAttribute(attr, typedValue, true);
+            }
+            else
+            {
+                c.Theme.ResolveAttribute(attr, typedValue, true);
+            }
+            
             if (typedValue.ResourceId == 0)
             {
                 return GetColorFromInteger(typedValue.Data);

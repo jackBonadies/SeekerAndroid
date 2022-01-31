@@ -42,7 +42,7 @@ using System.Threading.Tasks;
 namespace AndriodApp1
 {
 
-    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar",LaunchMode =Android.Content.PM.LaunchMode.SingleTask)]
+    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar",LaunchMode =Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
@@ -778,7 +778,85 @@ namespace AndriodApp1
             public string MessageText;
         }
 
-        public static Android.Text.SpannableStringBuilder GetSpannableForCollapsed(MessageNotifExtended messageNotifExtended)
+        private static Color GetYouTextColor(bool useNightColors)
+        {
+            //for api 31+ use secondary color
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            {
+                if (useNightColors)
+                {
+                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SoulSeekState.ActiveActivityRef.Theme);
+                }
+                else
+                {
+                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SoulSeekState.ActiveActivityRef.Theme);
+                }
+            }
+            else
+            {
+                if (useNightColors)
+                {
+                    return Color.White;
+                }
+                else
+                {
+                    return Color.Black;
+                }
+            }
+        }
+
+        private static Color GetNiceAndroidBlueNotifColor(bool useNightColors)
+        {
+            var newTheme = SoulSeekState.ActiveActivityRef.Resources.NewTheme();
+            newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors), true);
+            return SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.android_default_notification_blue_color, newTheme);
+        }
+
+        private static Color GetOtherTextColor(bool useNightColors)
+        {
+            //for api 31+ use primary color
+            if(Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            {
+                if(useNightColors)
+                {
+                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SoulSeekState.ActiveActivityRef.Theme);
+                }
+                else
+                {
+                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SoulSeekState.ActiveActivityRef.Theme);
+                }
+            }
+            else
+            {
+                //todo
+                var newTheme = SoulSeekState.ActiveActivityRef.Resources.NewTheme();
+                newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors), true);
+                return SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.android_default_notification_complementary_color, newTheme);
+            }
+        }
+
+        private static Color GetActionTextColor(bool useNightColors)
+        {
+            //for api 31+ use primary color
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            {
+                return GetOtherTextColor(useNightColors);
+            }
+            else
+            {
+                //todo
+                if (useNightColors)
+                {
+                    return Color.White;
+                }
+                else
+                {
+                    return Color.Black;
+                }
+            }
+        }
+
+        public static Android.Text.SpannableStringBuilder GetSpannableForCollapsed(MessageNotifExtended messageNotifExtended, bool useNightColors)
         {
             Android.Text.SpannableStringBuilder ssb = new Android.Text.SpannableStringBuilder();
 
@@ -786,7 +864,7 @@ namespace AndriodApp1
             {
                 string title = "Messages with " + messageNotifExtended.Username;
                 var titleSpan = new Android.Text.SpannableString(title + " \n");
-                titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColor)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
+                titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
                 titleSpan.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
 
                 ssb.Append(titleSpan);
@@ -803,11 +881,11 @@ namespace AndriodApp1
             Android.Text.Style.ForegroundColorSpan fcs = null;
             if(messageNotifExtended.IsOurMessage)
             {
-                fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+                fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors));
             }
             else
             {
-                fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                fcs = new Android.Text.Style.ForegroundColorSpan(GetOtherTextColor(useNightColors));
             }
             spannableString.SetSpan(fcs, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
 
@@ -825,7 +903,7 @@ namespace AndriodApp1
         }
 
 
-        public static Android.Text.SpannableStringBuilder GetSpannableForExpanded(List<MessageNotifExtended> messageNotifExtended)
+        public static Android.Text.SpannableStringBuilder GetSpannableForExpanded(List<MessageNotifExtended> messageNotifExtended, bool useNightColors)
         {
             var lastFive = messageNotifExtended.TakeLast(5); //not nearly enough room to display 8
             string lastUsername = null;
@@ -866,11 +944,11 @@ namespace AndriodApp1
                     Android.Text.Style.ForegroundColorSpan fcs = null;
                     if (msg.IsOurMessage)
                     {
-                        fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColor)); //normal color text...
+                        fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors)); //normal color text...
                     }
                     else
                     {
-                        fcs = new Android.Text.Style.ForegroundColorSpan(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                        fcs = new Android.Text.Style.ForegroundColorSpan(GetOtherTextColor(useNightColors));
                     }
                     spannableString.SetSpan(fcs, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
 
@@ -900,6 +978,34 @@ namespace AndriodApp1
             return ssb;
         }
 
+        /// <summary>
+        /// Will get if the system (i.e. not the app) is in night mode.
+        /// Because for notification colors only the system matters!!
+        /// </summary>
+        /// <returns></returns>
+        public static bool GetIfSystemIsInNightMode()
+        {
+            if(SoulSeekState.DayNightMode == (int)(Android.Support.V7.App.AppCompatDelegate.ModeNightFollowSystem))
+            {
+                //if we follow the system then we can just return whether our app is in night mode.
+                return DownloadDialog.InNightMode(SoulSeekState.ActiveActivityRef);
+            }
+            else
+            {
+                //if we do not follow the system we have to use the UI Mode Service
+                UiModeManager uiModeManager = (UiModeManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.UiModeService);//getSystemService(Context.UI_MODE_SERVICE);
+                int mode = (int)(uiModeManager.NightMode);
+                if(mode == (int)UiNightMode.Yes)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
 
 
         public static string CHANNEL_ID = "Private Messages ID";
@@ -919,12 +1025,14 @@ namespace AndriodApp1
                 notifIntent.PutExtra(FromUserName, msg.Username); //so we can go to this user..
                 notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                 PendingIntent pendingIntent =
-                    PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                    PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
 
                 //no direct reply in <26 and so the actions are rather pointless..
                 if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
                 {
+
+                    bool systemIsInNightMode = GetIfSystemIsInNightMode();
 
 
                     AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel("Send Message...").Build();
@@ -932,7 +1040,7 @@ namespace AndriodApp1
                     replayIntent.PutExtra("direct_reply_extra", true);
                     replayIntent.SetAction("seeker_direct_reply");
                     replayIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), replayIntent, PendingIntentFlags.UpdateCurrent);
+                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), replayIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, false)); //mutable, the end user needs to be able to mutate with direct replay action..
                     NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.baseline_chat_bubble_white_24, "Reply", replyPendingIntent).SetAllowGeneratedReplies(false).AddRemoteInput(remoteInput).Build(); //TODO icon
 
 
@@ -963,15 +1071,15 @@ namespace AndriodApp1
                     RemoteViews notificationLayout = new RemoteViews(SoulSeekState.ActiveActivityRef.PackageName, Resource.Layout.simple_custom_notification);
                     RemoteViews notificationLayoutExpanded = new RemoteViews(SoulSeekState.ActiveActivityRef.PackageName, Resource.Layout.simple_custom_notification);
 
-                    notificationLayout.SetTextViewText(Resource.Id.textView1, GetSpannableForCollapsed(MessagesActivity.DirectReplyMessages[msg.Username].Last()));
-                    notificationLayoutExpanded.SetTextViewText(Resource.Id.textView1, GetSpannableForExpanded(MessagesActivity.DirectReplyMessages[msg.Username]));
+                    notificationLayout.SetTextViewText(Resource.Id.textView1, GetSpannableForCollapsed(MessagesActivity.DirectReplyMessages[msg.Username].Last(), systemIsInNightMode));
+                    notificationLayoutExpanded.SetTextViewText(Resource.Id.textView1, GetSpannableForExpanded(MessagesActivity.DirectReplyMessages[msg.Username], systemIsInNightMode));
 
 
                     Intent clearNotifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     clearNotifIntent.PutExtra("clear_notif_extra", true);
                     clearNotifIntent.SetAction("seeker_clear_notification");
                     clearNotifIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), clearNotifIntent, PendingIntentFlags.UpdateCurrent);
+                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), clearNotifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
 
 
 
@@ -981,16 +1089,17 @@ namespace AndriodApp1
 
 
                     markAsReadIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), markAsReadIntent, PendingIntentFlags.UpdateCurrent); //else the new extras will not arrive...
+                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), markAsReadIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)); //else the new extras will not arrive...
 
                     string markAsRead = "Mark As Read";
-                    if (fromOurResponse)
-                    {
-                        markAsRead = "Dismiss";
-                    }
+                    //android messages app does "mark as read" even after you respond so I think it is fine..
+                    //if (fromOurResponse)
+                    //{
+                    //    markAsRead = "Dismiss";
+                    //}
 
                     //setColor ?? todo
-                    Notification notification = new NotificationCompat.Builder(SoulSeekState.ActiveActivityRef, CHANNEL_ID)
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(SoulSeekState.ActiveActivityRef, CHANNEL_ID)
                         .AddAction(Resource.Drawable.baseline_chat_bubble_white_24, markAsRead, markAsReadPendingIntent)
                         .AddAction(replyAction)
                         .SetStyle(new NotificationCompat.DecoratedCustomViewStyle())
@@ -999,12 +1108,18 @@ namespace AndriodApp1
                         .SetContentIntent(pendingIntent)
                         .SetCustomContentView(notificationLayout)
                         .SetCustomBigContentView(notificationLayoutExpanded)
-                        .SetColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor))
                         .SetAutoCancel(true) //so when we tap it will go away. does not apply to actions though.
                         .SetOnlyAlertOnce(fromOurResponse) //it will make noise on new messages...
-                        .SetDeleteIntent(clearNotifPendingIntent)
-                        .Build();
-                    
+                        .SetDeleteIntent(clearNotifPendingIntent);
+
+                    //if android 12+ let the system pick the color.  it will make it Android.Resource.Color.SystemAccent1100 if dark Android.Resource.Color.SystemAccent1600 otherwise.
+                    if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.S) 
+                    {
+                        builder.SetColor(GetNiceAndroidBlueNotifColor(systemIsInNightMode));
+                    }
+
+                    var notification = builder.Build();
+
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(msg.Username.GetHashCode(), notification);
 
@@ -1450,7 +1565,16 @@ namespace AndriodApp1
         public override void OnResume()
         {
             MainActivity.LogDebug("inner frag resume");
-            MessagesActivity.DirectReplyMessages.TryRemove(Username, out _);
+
+            if(MessagesActivity.DirectReplyMessages.TryRemove(Username, out _))
+            {
+                MainActivity.LogDebug("remove the notification history");
+                //remove the now possibly void notification
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                // notificationId is a unique int for each notification that you must define
+                notificationManager.Cancel(Username.GetHashCode());
+            }
+
             MessageController.UnsetAsUnreadAndSaveIfApplicable(Username);
             currentlyResumed = true;
             base.OnResume();
@@ -1546,6 +1670,18 @@ namespace AndriodApp1
                 (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                 sb.Show();
             }
+            MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
+        }
+
+        public override void OnPause()
+        {
+            base.OnPause();
+            MessagesBroadcastReceiver.MarkAsReadFromNotification -= UpdateMarkAsReadFromNotif;
+        }
+
+        private void UpdateMarkAsReadFromNotif(object o, string uname)
+        {
+            recyclerAdapter.NotifyNameChanged(uname);
         }
 
         public class MessageOverviewComparer : IComparer<KeyValuePair<string, List<Message>>>
@@ -2087,6 +2223,15 @@ namespace AndriodApp1
             this.NotifyItemInserted(pos);
         }
 
+        public void NotifyNameChanged(string name)
+        {
+            int pos = localDataSet.IndexOf(name);
+            if (pos != -1)
+            {
+                this.NotifyItemChanged(pos);
+            }
+        }
+
         public MessagesOverviewRecyclerAdapter(List<string> ti)
         {
             localDataSet = ti;
@@ -2190,6 +2335,11 @@ namespace AndriodApp1
     [BroadcastReceiver(Exported = false, Label = "OurMessagesBroadcastReceiver")]
     public class MessagesBroadcastReceiver : BroadcastReceiver
     {
+        /// <summary>
+        /// Just in case we press it while on the message overview page
+        /// </summary>
+        public static EventHandler<string> MarkAsReadFromNotification;
+
         public override void OnReceive(Context context, Intent intent)
         {
             //bool directReply = intent.GetBooleanExtra("direct_reply_extra",false);
@@ -2220,6 +2370,9 @@ namespace AndriodApp1
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.Cancel(uname.GetHashCode());
+
+                MarkAsReadFromNotification?.Invoke(null, uname);
+
                 return;
             }
 

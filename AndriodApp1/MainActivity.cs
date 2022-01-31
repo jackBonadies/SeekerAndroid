@@ -2372,7 +2372,6 @@ namespace AndriodApp1
 
             //return;
 
-
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
             //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
             //this does not restart Android.App.Application. so putting it here is a much better place... in MainActivity.OnCreate it would restart the activity every time.
@@ -3678,7 +3677,7 @@ namespace AndriodApp1
                     notifIntent.AddFlags(ActivityFlags.SingleTop);
                     notifIntent.PutExtra(FromUserOnlineAlert, true);
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                     Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
@@ -4199,7 +4198,7 @@ namespace AndriodApp1
                         notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
-                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                         Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID,  SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
                         NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                         // notificationId is a unique int for each notification that you must define
@@ -4305,7 +4304,7 @@ namespace AndriodApp1
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(FromTransferString, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, 0);
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText);
@@ -4418,7 +4417,7 @@ namespace AndriodApp1
             notifIntent.PutExtra(FromTransferUploadString, 2);
             
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, 0);
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText);
@@ -4536,7 +4535,7 @@ namespace AndriodApp1
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, 0);
+                PendingIntent.GetActivity(context, 0, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content));
@@ -4629,7 +4628,7 @@ namespace AndriodApp1
 
 
 
-    [Activity(Label = "CloseActivity", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "CloseActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class CloseActivity : AppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -4856,7 +4855,7 @@ namespace AndriodApp1
 
 
     //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
     public class MainActivity : ThemeableActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         public static object SHARED_PREF_LOCK = new object();
@@ -6698,6 +6697,18 @@ namespace AndriodApp1
                 TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
             }
 
+
+
+            //if (uiModeManager.NightMode == UiModeManager.ModeNightYes)
+            //{
+            //    // System is in Night mode
+            //}
+            //else if (uiModeManager.NightMode == Android.App.UiNightMode.Yes)
+            //{
+            //    // System is in Day mode
+            //}
+
+
             //restoreSoulSeekState(savedInstanceState);
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
@@ -7711,7 +7722,7 @@ namespace AndriodApp1
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(UPLOADS_NOTIF_EXTRA, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             Notification notification = null;
@@ -11743,6 +11754,26 @@ namespace AndriodApp1
                 {
                     menu.Add(indexToUse, indexToUse, indexToUse, Resource.String.give_privileges);
                 }
+            }
+        }
+
+        public static PendingIntentFlags AppendMutabilityIfApplicable(PendingIntentFlags existingFlags, bool immutable)
+        {
+            if((int)Android.OS.Build.VERSION.SdkInt >= 23)
+            {
+                if(immutable)
+                {
+                    return existingFlags | PendingIntentFlags.Immutable;
+                }
+                else
+                {
+                    return existingFlags | PendingIntentFlags.Mutable;
+                }
+            }
+            else
+            {
+                //immutable flag was only introduced in 23 so if less than that we always need to OR with mutable (or we can just leave it alone). (remember mutable is the default)
+                return existingFlags;
             }
         }
 

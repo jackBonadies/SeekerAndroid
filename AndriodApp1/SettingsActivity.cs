@@ -38,7 +38,7 @@ using Android.Support.V7.Widget.Helper;
 
 namespace AndriodApp1
 {
-    [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class SettingsActivity : ThemeableActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
     {
         private int CHANGE_WRITE_EXTERNAL = 0x909;
@@ -2619,6 +2619,53 @@ namespace AndriodApp1
                     return Resource.Style.Amoled_Grey;
                 default:
                     throw new Exception("unknown");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isNightMode">This is for the SYSTEM</param>
+        /// <returns></returns>
+        public static int GetThemeInChosenDayNightMode(bool isNightMode)
+        {
+            if (SoulSeekState.ActiveActivityRef.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+            {
+                if(isNightMode)
+                {
+                    return ThemeHelper.ToNightThemeProper(SoulSeekState.NightModeVarient);
+                }
+                else
+                {
+                    switch (SoulSeekState.NightModeVarient)
+                    {
+                        case NightThemeType.ClassicPurple:
+                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
+                        case NightThemeType.Blue:
+                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.Blue);
+                        default:
+                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
+                    }
+                }
+            }
+            else
+            {
+                if (!isNightMode)
+                {
+                    return ThemeHelper.ToDayThemeProper(SoulSeekState.DayModeVarient);
+                }
+                else
+                {
+                    switch (SoulSeekState.DayModeVarient)
+                    {
+                        case DayThemeType.ClassicPurple:
+                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
+                        case DayThemeType.Blue:
+                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.Blue);
+                        default:
+                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
+                    }
+                }
             }
         }
 
