@@ -23,6 +23,11 @@
 
 
 
+		<item name="android_default_notification_blue_color">#4978B8</item>
+		<item name="android_default_notification_complementary_color">#B88949</item>
+		<item name="seeker_notification_other_person_color">#6449B7</item>
+
+
 
 		<item name="floating_action_bar_to_bottom_icon">#5F5F5F</item>
 		<item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
@@ -52,6 +57,10 @@
 
 	<style name="DefaultLight_Blue" parent="DefaultLight">
 		<item name="mainPurple">#126291</item>
+
+
+		<item name="seeker_notification_other_person_color">#47B2A4</item>
+
 
 		<!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_126291</item>
@@ -96,6 +105,8 @@
 		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_90d57676</item>
 		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_90d57676</item>
 
+		<item name="seeker_notification_other_person_color">#B54848</item>
+
 		<item name="colorAccent">#d57676</item>
 		<item name="checkBoxColor">#FC4C02</item>
 	</style>
@@ -122,7 +133,9 @@
 		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_86b2cb</item>
 		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_86b2cb</item>
 
-		<item name="expandIconColor">#86b2cb</item>
+		<item name="seeker_notification_other_person_color">#8ACFC6</item>
+
+	    <item name="expandIconColor">#86b2cb</item>
 		<item name="mainTextColorHinted">#86b2cb</item>
 	</style>
 
@@ -189,6 +202,10 @@
 		<item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
 		<item name="floating_action_bar_to_bottom_background">#202020</item>
 
+		<item name="android_default_notification_blue_color">#8AB4F8</item>
+		<item name="android_default_notification_complementary_color">#f8ce8a</item>
+
+		<item name="seeker_notification_other_person_color">#AF9AF4</item>
 
 		<item name="pseudo_window_background_color">#00000000</item>
 		<item name="expandIconColor">#ffffffff</item>

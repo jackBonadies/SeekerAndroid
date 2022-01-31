@@ -30,7 +30,7 @@ using System.Text;
 
 namespace AndriodApp1
 {
-    [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
+    [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
     public class EditUserInfoActivity : ThemeableActivity
     {
         public const string USER_INFO_PIC_DIR = "user_info_picture";

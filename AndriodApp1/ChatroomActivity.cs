@@ -39,7 +39,7 @@ using System.Threading.Tasks;
 namespace AndriodApp1
 {
 
-    [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
+    [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
     public class ChatroomActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static ChatroomActivity ChatroomActivityRef = null;
@@ -3288,7 +3288,7 @@ namespace AndriodApp1
                     notifIntent.PutExtra(FromRoomName, roomName); //so we can go to this user..
                     notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, PendingIntentFlags.UpdateCurrent);
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                     Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
@@ -4394,6 +4394,9 @@ namespace AndriodApp1
                     }
                     else
                     {
+                        bool wasAtTop = recycleLayoutManager.FindFirstCompletelyVisibleItemPosition() == 0;
+                        int positionOfTopItem = recycleLayoutManager.FindFirstVisibleItemPosition();
+
                         UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
                         int newPosition = -1;
                         for (int i = 0; i < UI_userDataList.Count; i++)
@@ -4404,8 +4407,28 @@ namespace AndriodApp1
                                 break;
                             }
                         }
+
+                        IParcelable p = null;
+                        if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
+                        {
+                            p = recycleLayoutManager.OnSaveInstanceState();
+                        }
+
                         roomUserListAdapter.NotifyItemMoved(previousPosition,newPosition);
                         roomUserListAdapter.NotifyItemChanged(newPosition); //this is always necessary..
+
+                        if (wasAtTop)
+                        {
+                            MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                            recycleLayoutManager.ScrollToPosition(0);
+                        }
+                        else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
+                        {
+                            MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                            recycleLayoutManager.OnRestoreInstanceState(p);
+                        }
+
+
                     }
 
                 });
@@ -4697,12 +4720,75 @@ namespace AndriodApp1
             return a;
         }
 
+        private Action GetUpdateUserListRoomActionAddedRemoved(Soulseek.UserData longClickedUserData)
+        {
+            Action a = null;
+            if (ChatroomController.PutFriendsOnTop)
+            {
+                a = new Action(() => {
+                    bool wasAtTop = recycleLayoutManager.FindFirstCompletelyVisibleItemPosition() == 0;
+                    int positionOfTopItem = recycleLayoutManager.FindFirstVisibleItemPosition();
+
+                    int previousPosition = -1;
+                    for (int i = 0; i < UI_userDataList.Count; i++)
+                    {
+                        if (UI_userDataList[i].Username == longClickedUserData.Username)
+                        {
+                            previousPosition = i;
+                            break;
+                        }
+                    }
+                    if (previousPosition == -1)
+                    {
+                        return;
+                    }
+                    UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                    int newPosition = -1;
+                    for (int i = 0; i < UI_userDataList.Count; i++)
+                    {
+                        if (UI_userDataList[i].Username == longClickedUserData.Username)
+                        {
+                            newPosition = i;
+                            break;
+                        }
+                    }
+
+                    IParcelable p = null;
+                    if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
+                    {
+                        p = recycleLayoutManager.OnSaveInstanceState();
+                    }
+
+                    roomUserListAdapter.NotifyItemMoved(previousPosition, newPosition);
+                    roomUserListAdapter.NotifyItemChanged(newPosition); //this is always necessary..
+
+                    if(wasAtTop)
+                    {
+                        MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                        recycleLayoutManager.ScrollToPosition(0);
+                    }
+                    else if(positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
+                    {
+                        MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                        recycleLayoutManager.OnRestoreInstanceState(p);
+                    }
+                });
+            }
+            else
+            {
+                a = new Action(() => {
+                    NotifyItemChanged(longClickedUserData);
+                });
+            }
+            return a;
+        }
+
         public override bool OnContextItemSelected(IMenuItem item)
         {
             var userdata = longClickedUserData;
             if(item.ItemId!=0) //this is "Remove User" as in Remove User from Room!
             {
-                if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomAction(userdata)))
+                if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
                     MainActivity.LogDebug("Handled by commons");
                     return base.OnContextItemSelected(item);

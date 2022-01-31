@@ -34,7 +34,7 @@ using AndroidX.RecyclerView.Widget;
 
 namespace AndriodApp1
 {
-    [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class UserListActivity : ThemeableActivity
     {
         public static string PopUpMenuOwnerHack = string.Empty; //hack to get which listview item owns the popup menu (for on menu item click).

@@ -31,7 +31,7 @@ using System.Text;
 
 namespace AndriodApp1
 {
-    [Activity(Label = "ViewUserInfoActivity", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "ViewUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class ViewUserInfoActivity : ThemeableActivity
     {
         public const string USERNAME_TO_VIEW = "USERNAME_TO_VIEW";
