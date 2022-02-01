@@ -2557,11 +2557,13 @@ namespace AndriodApp1
                     else
                     {
                         //only do this if we absolutely must
-                        this.StartForegroundService(uploadServiceIntent);//added in 26
+                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
+                        //this.StartForegroundService(uploadServiceIntent);
                     }
                 }
                 else
                 {
+                    //even when targetting and compiling for api 31, old devices can still do this just fine.
                     this.StartService(uploadServiceIntent); //this will throw if the app is in background.
                 }
                 SoulSeekState.UploadKeepAliveServiceRunning = true;
@@ -2639,11 +2641,13 @@ namespace AndriodApp1
                     else
                     {
                         //only do this if we absolutely must
-                        this.StartForegroundService(downloadServiceIntent);//added in 26
+                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
+                        //this.StartForegroundService(downloadServiceIntent);
                     }
                 }
                 else
                 {
+                    //even when targetting and compiling for api 31, old devices can still do this just fine.
                     this.StartService(downloadServiceIntent); //this will throw if the app is in background.
                 }
                 SoulSeekState.DownloadKeepAliveServiceRunning = true;
@@ -4307,7 +4311,7 @@ namespace AndriodApp1
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText);
+            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
         }
 
 
@@ -4420,7 +4424,7 @@ namespace AndriodApp1
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText);
+            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
         }
 
 
@@ -4538,7 +4542,7 @@ namespace AndriodApp1
                 PendingIntent.GetActivity(context, 0, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content));
+            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true);
         }
 
 
@@ -12506,22 +12510,35 @@ namespace AndriodApp1
         }
 
 
-        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce=true)
+        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce=true, bool forForegroundService = false)
         {
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            Notification notification = new NotificationCompat.Builder(context, channelID)
-                      .SetContentTitle(titleText)
-                      .SetContentText(contentText)
-                      
-                      .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                      .SetContentIntent(pendingIntent)
-                      .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                      .SetTicker(titleText).Build();
 
+            //here we use the non compat notif builder as we want the special SetForegroundServiceBehavior method to prevent the new 10 second foreground notification delay.
+            Notification notification = null;
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 31 && forForegroundService)
+            {
+                notification = new Notification.Builder(context, channelID)
+                          .SetContentTitle(titleText)
+                          .SetContentText(contentText)
+                          .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
+                          .SetContentIntent(pendingIntent)
+                          .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
+                          .SetForegroundServiceBehavior((int)(Android.App.NotificationForegroundService.Immediate)) //new for api 31+
+                          .SetTicker(titleText).Build();
+            }
+            else
+            {
+                notification = new NotificationCompat.Builder(context, channelID)
+                          .SetContentTitle(titleText)
+                          .SetContentText(contentText)
+                          .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
+                          .SetContentIntent(pendingIntent)
+                          .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
+                          .SetTicker(titleText).Build();
+            }
             return notification;
-
-
 
         }
 
