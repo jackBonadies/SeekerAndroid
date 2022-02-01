@@ -244,6 +244,16 @@ namespace AndriodApp1
                 PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View,GravityFlags.Right);
                 popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
                 popup.Inflate(Resource.Menu.download_diag_options);
+
+                if(customAdapter.SelectedPositions.Count > 0)
+                {
+                    popup.Menu.FindItem(Resource.Id.download_selected_as_queued).SetVisible(true);
+                }
+                else
+                {
+                    popup.Menu.FindItem(Resource.Id.download_selected_as_queued).SetVisible(false);
+                }
+
                 popup.Show();
             }
             catch (System.Exception error)
