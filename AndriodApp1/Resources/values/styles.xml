@@ -11,12 +11,22 @@
 		<item name="windowActionModeOverlay">true</item>
     </style>
 
+	<style name="OutlinedRoundedBox" parent="">
+		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
+	</style>
+
+	<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="Widget.Design.TextInputLayout">
+		<item name="cornerFamily">rounded</item>
+		<item name="cornerSize">8dp</item>
+	</style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 		<item name="mainPurple">#4f58c4</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_4f58c4</item>-->
         <item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_4f58c4</item>
+        <item name="rounded_button">@drawable/rounded_button_4f58c4</item>
         <item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_4f58c4</item>
         <item name="rounded_top_purple">@drawable/rounded_top_purple_4f58c4</item>
         
@@ -74,7 +84,7 @@
     <item name="android:textColor">#ffffff</item>
     <item name="android:paddingLeft">10dp</item>
     <item name="android:paddingRight">10dp</item>
-    <item name="android:background">?attr/mainPurple</item>
+    <item name="android:background">?attr/rounded_button</item>
   </style>
 
   <style name="navTextInactive">

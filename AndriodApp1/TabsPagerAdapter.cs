@@ -163,7 +163,7 @@ namespace AndriodApp1
         private volatile View rootView;
         private Button cbttn;
         private TextView cWelcome;
-        private TextView cLoading;
+        private ViewGroup cLoading;
         private bool refreshView = false;
 
 
@@ -173,6 +173,31 @@ namespace AndriodApp1
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
+        private static void EnableDisableLoginButton(EditText uname, EditText passwd, Button login)
+        {
+            if(string.IsNullOrEmpty(uname.Text) || string.IsNullOrEmpty(passwd.Text))
+            {
+                login.Alpha = 0.5f;
+                login.Clickable = false;
+            }
+            else
+            {
+                login.Alpha = 1.0f;
+                login.Clickable = true;
+            }
+            try
+            {
+                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+            }
+            catch (System.Exception err)
+            {
+                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+            }
+        }
+
+        private Button loginButton = null;
+        private EditText usernameTextEdit = null;
+        private EditText passwordTextEdit = null;
 
 
         //private bool firstTime = true;
@@ -188,11 +213,16 @@ namespace AndriodApp1
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
 
 
-                Button bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                bttn.Click += LogInClick;
+                loginButton = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
+                loginButton.Click += LogInClick;
+                usernameTextEdit = rootView.FindViewById<EditText>(Resource.Id.etUsername);
+                passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
+                usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
+                usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+                passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
+                passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+                EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton);
 
-                rootView.FindViewById<EditText>(Resource.Id.editText).FocusChange += SearchFragment.MainActivity_FocusChange;
-                rootView.FindViewById<EditText>(Resource.Id.editText2).FocusChange += SearchFragment.MainActivity_FocusChange;
                 //StaticHacks.RootView = this.rootView;
                 //firstTime = false;
                 return rootView;
@@ -210,7 +240,7 @@ namespace AndriodApp1
                     }
                     catch (InvalidOperationException)
                     {
-                        Toast.MakeText(this.Context, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
                         MainActivity.LogFirebase("We are already logging in");
                     }
                     //Task login = SoulSeekState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SoulSeekState.Username, SoulSeekState.Password);
@@ -227,6 +257,7 @@ namespace AndriodApp1
                 this.rootView = inflater.Inflate(Resource.Layout.loggedin, container, false);
                 StaticHacks.RootView = this.rootView;
                 Button bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                
                 bttn.Click += LogoutClick;
                 var welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
                 welcome.Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.welcome), SoulSeekState.Username);
@@ -239,11 +270,16 @@ namespace AndriodApp1
 
                 Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 0);
                 this.cbttn = bttn;
-                this.cLoading = rootView.FindViewById<TextView>(Resource.Id.loadingView);
+                this.cLoading = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                 this.cWelcome = welcome;
                 //firstTime = false;
                 return rootView;
             }
+        }
+
+        private void UsernamePasswordTextEdit_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
+        {
+            EnableDisableLoginButton(this.usernameTextEdit, this.passwordTextEdit, loginButton);
         }
 
 
@@ -327,6 +363,12 @@ namespace AndriodApp1
 
                         }
                     }
+                    else if (t.Exception.InnerExceptions[0].Message != null && t.Exception.InnerExceptions[0].Message.Contains("wait timed out")) 
+                    {
+                        //this happens at work where slsk is banned. technically its due to connection RST. the timeout is not the tcp handshake timeout its instead a wait timeout in the connect async code. so this could probably be improved.
+                        cannotLogin = true;
+                        msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
+                    }
                     else
                     {
                         msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
@@ -367,107 +409,9 @@ namespace AndriodApp1
 
                 MainActivity.AddLoggedInLayout(this.rootView);
 
-                //View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-                //View bttnTryTwo = this.rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-                //if (bttn == null && bttnTryTwo == null)
-                //{
-                //    //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
-                //    RelativeLayout relLayout =  SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, this.rootView as ViewGroup, false) as RelativeLayout;
-                //    relLayout.LayoutParameters = new ViewGroup.LayoutParams(this.rootView.LayoutParameters);
-                //    var action1 = new Action(() => {
-                //        (this.rootView as RelativeLayout).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, this.rootView as ViewGroup, false));
-                //    });
-                //    SoulSeekState.MainActivityRef.RunOnUiThread(action1);
-                //}
-
-
-
-
-
-                //Android.Support.Design.Widget.TabLayout.Tab tab = tabLayout.GetTabAt(0);
-                //tab.Select();
-                //Fragment frg = null;
-                //System.Type fragmentClass;
-                //fragmentClass = typeof(LoginFragment);
-
-
-                //    frg = (Android.Support.V4.App.Fragment)Activator.CreateInstance(fragmentClass);//.N();
-
-                //getFragmentManager()
-                //    .beginTransaction()
-                //    .replace(Resource.Layout.login, frg)
-                //    .commit();
-                //View x = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin,null);
-                //(this.rootView as ViewGroup).AddView(x);
-                //SoulSeekState.MainActivityRef.RecreateFragment(this);
-                //LayoutInflater inflater = (LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService);
-                //View rootView = inflater.Inflate(Resource.Layout.loggedin,null);
-
                 MainActivity.UpdateUIForLoggedIn(this.rootView, LogoutClick, cWelcome, cbttn, cLoading, Settings_Click);
 
 
-                //var action = new Action(() => {
-                //    //this is the case where it already has the loggedin fragment loaded.
-                //    Button bttn = null;
-                //    TextView welcome = null;
-                //    TextView loading = null;
-                //    EditText editText = null;
-                //    EditText editText2 = null;
-                //    TextView textView = null;
-                //    Button buttonLogin = null;
-                //    try
-                //    {
-                //        if(StaticHacks.RootView != null)
-                //        {
-                //             bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                //             welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                //             loading = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.loadingView);
-                //        }
-                //        else
-                //        {
-                //            bttn = this.rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                //            welcome = this.rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                //            loading = this.rootView.FindViewById<TextView>(Resource.Id.loadingView);
-                //            editText = this.rootView.FindViewById<EditText>(Resource.Id.editText);
-                //            editText2 = this.rootView.FindViewById<EditText>(Resource.Id.editText2);
-                //            textView = this.rootView.FindViewById<TextView>(Resource.Id.textView);
-                //            buttonLogin = this.rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                //        }
-                //    }
-                //    catch
-                //    {
-
-                //    }
-                //    if(welcome!=null)
-                //    {
-                //        welcome.Visibility = ViewStates.Visible;
-                //        bttn.Visibility = ViewStates.Visible;
-                //        Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn,90);
-                //        bttn.Click-= Bttn_Click1;
-                //        bttn.Click += Bttn_Click1;
-                //        loading.Visibility = ViewStates.Gone;
-                //        welcome.Text = "Welcome, " + SoulSeekState.Username;
-                //    }
-                //    else if(cWelcome != null)
-                //    {
-                //        //cWelcome.Visibility = ViewStates.Visible;
-                //        //cbttn.Visibility = ViewStates.Visible;
-                //        //cLoading.Visibility = ViewStates.Gone;
-                //    }
-                //    else
-                //    {
-                //        StaticHacks.UpdateUI = true;//if we arent ready rn then do it when we are..
-                //    }
-                //    if(editText != null)
-                //    {
-                //        editText.Visibility = ViewStates.Gone;
-                //        editText2.Visibility = ViewStates.Gone;
-                //        textView.Visibility = ViewStates.Gone;
-                //        buttonLogin.Visibility = ViewStates.Gone;
-                //    }
-
-                //});
-                //SoulSeekState.MainActivityRef.RunOnUiThread(action);
             }
             else
             {
@@ -508,9 +452,6 @@ namespace AndriodApp1
         {
             var pager = (Android.Support.V4.View.ViewPager)Activity.FindViewById(Resource.Id.pager);
 
-
-            EditText user = this.Activity.FindViewById<EditText>(Resource.Id.editText); //nullref
-            EditText pass = this.Activity.FindViewById<EditText>(Resource.Id.editText2);
             Task login = null;
             try
             {
@@ -520,16 +461,16 @@ namespace AndriodApp1
                 //MUST DO THIS ON A SEPARATE THREAD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 //ipaddr = System.Net.Dns.GetHostEntry("vps.slsknet.org").AddressList[0];
                 //Android.Net.DnsResolver.Instance.Query(null, "vps.slsknet.org",Android.Net.DnsResolverFlag.Empty,this.Context.MainExecutor,null,this);
-                if (user.Text == null || user.Text == string.Empty || pass.Text == null || pass.Text == string.Empty)
+                if (string.IsNullOrEmpty(this.usernameTextEdit.Text) || string.IsNullOrEmpty(this.passwordTextEdit.Text))
                 {
                     Toast.MakeText(this.Activity, Resource.String.no_empty_user_pass, ToastLength.Long).Show();
                     return;
                 }
-                login = SeekerApplication.ConnectAndPerformPostConnectTasks(user.Text, pass.Text);
+                login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
                 try
                 {
                     Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(user.WindowToken, 0);
+                    imm.HideSoftInputFromWindow(this.usernameTextEdit.WindowToken, 0);
                 }
                 catch (System.Exception)
                 {
@@ -570,8 +511,8 @@ namespace AndriodApp1
                 //View rootView = inflater.Inflate(Resource.Layout.loggedin,null);
                 MainActivity.AddLoggedInLayout(this.rootView); //i.e. if not already
                 MainActivity.UpdateUIForLoggingInLoading(this.rootView);
-                SoulSeekState.Username = user.Text;
-                SoulSeekState.Password = pass.Text;
+                SoulSeekState.Username = this.usernameTextEdit.Text;
+                SoulSeekState.Password = this.passwordTextEdit.Text;
                 StaticHacks.LoggingIn = true;
                 SoulSeekState.ManualResetEvent.Reset();
                 //if(login.IsCompleted)

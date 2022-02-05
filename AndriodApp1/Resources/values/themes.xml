@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<!--<style name="OutlinedRoundedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
+	</style>
 
+	<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="">
+		<item name="cornerFamily">rounded</item>
+		<item name="cornerSize">8dp</item>
+	</style>-->
 
 
 	<style name="DefaultLight" parent="AppTheme.NoActionBar">
@@ -20,6 +27,9 @@
 		<item name="cell_shape_end">@drawable/cell_shape_end_994f58c4</item>
 		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_994f58c4</item>
 		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_994f58c4</item>
+
+
+		<item name="rounded_input_edit">@drawable/rounded_text_input_background_light</item>
 
 
 
@@ -64,6 +74,7 @@
 
 		<!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_126291</item>
+		<item name="rounded_button">@drawable/rounded_button_126291</item>
 		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_126291</item>
 		<item name="rounded_top_purple">@drawable/rounded_top_purple_126291</item>
 
@@ -89,6 +100,7 @@
 		<item name="mainPurple">#B22525</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_B22525</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_B22525</item>
+		<item name="rounded_button">@drawable/rounded_button_B22525</item>
 		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_B22525</item>
 		<item name="rounded_top_purple">@drawable/rounded_top_purple_B22525</item>
 		<item name="whitePurpleForNavBar">#d57676</item>
@@ -117,6 +129,7 @@
 		<item name="mainPurple">#126291</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_126291</item>
+		<item name="rounded_button">@drawable/rounded_button_126291</item>
 		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_126291</item>
 		<item name="rounded_top_purple">@drawable/rounded_top_purple_126291</item>
 		<item name="colorAccent">#86b2cb</item>
@@ -143,6 +156,7 @@
 		<item name="mainPurple">#202124</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_202124</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_202124</item>
+		<item name="rounded_button">@drawable/rounded_button_202124</item>
 		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_202124</item>
 		<item name="rounded_top_purple">@drawable/rounded_top_purple_202124</item>
 		<item name="mainPurpleForNavBar">#202124</item>
@@ -174,6 +188,7 @@
 		<item name="mainPurple">#333333</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_333333</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_333333</item>
+		<item name="rounded_button">@drawable/rounded_button_333333</item>
 		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_333333</item>
 		<item name="rounded_top_purple">@drawable/rounded_top_purple_333333</item>
 		<item name="mainPurpleForNavBar">#333333</item>
@@ -225,6 +240,8 @@
 		<item name="cellbackColorDownloadDialog">#ff424242</item>
 		<item name="mainTextColor">#bcc1f7</item>
 		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_bcc1f7</item>
+
+		<item name="rounded_input_edit">@drawable/rounded_text_input_background_dark</item>
 
 
 		<item name="dialog_background">#ff424242</item>

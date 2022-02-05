@@ -82,15 +82,15 @@
             android:layout_height="wrap_content"
             android:id="@+id/buttonDownload"
             android:text="@string/download_folder"
-            android:background="?attr/mainPurple"
-            android:textColor="#ffffff"
+            style="@style/SeekerButtonStyle"
+            
                 android:textSize="13sp"
                 android:layout_weight="0.4"
             android:layout_marginLeft="20dp" 
-                      android:paddingLeft="10dp"
+                     
                 android:layout_gravity="fill_vertical"
                 android:layout_marginRight="10dp" 
-      android:paddingRight="10dp"
+     
             />
         <Button
             android:layout_width="match_parent"
@@ -99,14 +99,14 @@
             android:id="@+id/buttonDownloadSelected"
             android:text="@string/download_selected"
                 android:textSize="13sp"
-            android:background="?attr/mainPurple"
-            android:textColor="#ffffff"
+            style="@style/SeekerButtonStyle"
+            
             android:layout_weight="0.4"
                 android:layout_gravity="fill_vertical"
             android:layout_marginLeft="10dp" 
             android:layout_marginRight="20dp"
-            android:paddingLeft="10dp"
-       android:paddingRight="10dp"
+            
+       
                 
              />
             </LinearLayout>
@@ -123,14 +123,11 @@
                 android:foreground="@drawable/button"
                 android:text="@string/request_directories"
                 android:textSize="13sp"
-                android:background="?attr/mainPurple"
-                android:textColor="#ffffff"
+                style="@style/SeekerButtonStyle"
                 android:layout_weight="0.4"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="10dp"
-                android:paddingLeft="10dp"
                 android:layout_gravity="fill_vertical"
-                android:paddingRight="10dp"
                 android:layout_width="match_parent" 
             />
             <Button
@@ -140,13 +137,11 @@
                 android:foreground="@drawable/button"
                 android:layout_gravity="fill_vertical"
                 android:textSize="13sp"
-                android:background="?attr/mainPurple"
-                android:textColor="#ffffff"
+                style="@style/SeekerButtonStyle"
                 android:layout_weight="0.4"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="20dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
+
                 android:layout_width="match_parent" 
   
             />

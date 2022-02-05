@@ -43,8 +43,10 @@
 
 	<attr name="buttonStyle" format="reference" />
 	<attr name="rounded_bottom_left_purple" format="reference" />
+	<attr name="rounded_button" format="reference" />
 	<attr name="rounded_bottom_right_purple" format="reference" />
 	<attr name="rounded_top_purple" format="reference" />
+	<attr name="rounded_input_edit" format="reference" />
 
 
 
