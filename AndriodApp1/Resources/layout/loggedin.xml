@@ -1,11 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+
+    <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context="android.PageFragment"
+    android:layout_width="match_parent"
+    android:id="@+id/loggedInLoggingInLayout"
+    android:layout_height="match_parent">
+    <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="android.PageFragment"
-    android:id="@+id/relativeLayout1">
+    android:id="@+id/loggingInLayout">
+        >
+
+               <AndriodApp1.MaterialProgressBarPassThrough
+            android:id="@+id/loggingInLoadingCircle"
+            android:layout_marginTop="140dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+<!-- <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/loggingInLoadingCircle"
+            android:layout_marginTop="160dp"
+            android:textColor="?attr/normalTextColor"
+            android:text="Connecting to Server"
+            android:layout_centerHorizontal="true"
+            />-->
+
+
+                <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/connectingToServer"
+            android:layout_below="@id/loggingInLoadingCircle"
+            android:layout_marginTop="20dp"
+            android:textColor="?attr/normalTextColor"
+            android:text="Connecting to Server"
+            android:layout_centerHorizontal="true"
+            />
+                <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+                        android:layout_below="@id/connectingToServer"
+
+            android:id="@+id/pleaseWait"
+            android:textColor="?attr/normalTextColor"
+            android:text="Please Wait..."
+            android:layout_centerHorizontal="true"
+            />
+
+        </RelativeLayout>
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/loggedInLayout">
+        >
       <TextView
       android:layout_width = "wrap_content"
       android:layout_height = "wrap_content"
@@ -25,16 +78,7 @@
 style="@style/SeekerButtonStyle"
       android:id="@+id/buttonLogout"
       android:layout_below="@+id/userNameView" />
-    <TextView
-      android:layout_width = "wrap_content"
-      android:layout_height = "wrap_content"
-      android:text = "@string/connecting_to_server"
-      android:layout_marginTop = "100dp"
-      android:id = "@+id/loadingView"
-      android:layout_centerHorizontal = "true"
-      android:textColor = "?attr/mainTextColor"
-      android:textSize = "35dp" />
-    />
+       
       <Button
       android:layout_centerHorizontal="true"
       android:layout_width="wrap_content"
@@ -63,5 +107,5 @@ style="@style/SeekerButtonStyle"
       android:layout_alignParentBottom="true"
       android:id="@+id/settingsButton"
        />
-
 </RelativeLayout>
+</FrameLayout>

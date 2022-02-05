@@ -1,6 +1,16 @@
 <resources>
 
-    <!-- Base application theme. -->
+	<style name="OutlinedRoundedBox" parent="">
+		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
+	</style>
+
+	<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="Widget.Design.TextInputLayout">
+		<item name="cornerFamily">rounded</item>
+		<item name="cornerSize">8dp</item>
+	</style>
+
+
+	<!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -17,6 +27,7 @@
         <item name="mainPurple">#4f58c4</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_4f58c4</item>-->
         <item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_4f58c4</item>
+		<item name="rounded_button">@drawable/rounded_button_4f58c4</item>
         <item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_4f58c4</item>
         <item name="rounded_top_purple">@drawable/rounded_top_purple_4f58c4</item>
           <item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_bcc1f7</item>
@@ -40,12 +51,12 @@
 		<item name="colorAccent">@color/colorAccent</item>
 	</style>
 
-  <style name="SeekerButtonStyle">
-    <item name="android:textColor">#ffffff</item>
-    <item name="android:paddingLeft">10dp</item>
-    <item name="android:paddingRight">10dp</item>
-    <item name="android:background">?attr/mainPurple</item>
-  </style>
+	<style name="SeekerButtonStyle">
+		<item name="android:textColor">#ffffff</item>
+		<item name="android:paddingLeft">10dp</item>
+		<item name="android:paddingRight">10dp</item>
+		<item name="android:background">?attr/rounded_button</item>
+	</style>
 
       <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
     <item name="colorAccent">?attr/checkBoxColor</item>

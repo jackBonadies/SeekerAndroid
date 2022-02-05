@@ -40,6 +40,8 @@ using Soulseek;
 
 using log = Android.Util.Log;
 using SearchResponseExtensions;
+using Android.Content.Res;
+
 namespace AndriodApp1
 {
     class DownloadDialog : Android.Support.V4.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
@@ -164,7 +166,7 @@ namespace AndriodApp1
             return inflater.Inflate(Resource.Layout.downloaddialog,container); //container is parent
         }
 
-
+        private Button downloadSelectedButton = null;
         /// <summary>
         /// Called after on create view
         /// </summary>
@@ -187,8 +189,8 @@ namespace AndriodApp1
             dl.Click += DlAll_Click;
             Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
             cancel.Click += Cancel_Click;
-            Button dlSelected = view.FindViewById<Button>(Resource.Id.buttonDownloadSelected);
-            dlSelected.Click += DlSelected_Click;
+            downloadSelectedButton = view.FindViewById<Button>(Resource.Id.buttonDownloadSelected);
+            downloadSelectedButton.Click += DlSelected_Click;
             Button reqFiles = view.FindViewById<Button>(Resource.Id.buttonRequestDirectories);
             reqFiles.Click += ReqFiles_Click;
             //selectedPositions.Clear();
@@ -215,6 +217,7 @@ namespace AndriodApp1
             listView.ItemClick += ListView_ItemClick;
             listView.ChoiceMode = ChoiceMode.Multiple;
             UpdateListView();
+            SetDownloadSelectedButtonState();
         }
 
         private void UpdateListView()
@@ -1016,6 +1019,42 @@ namespace AndriodApp1
                 }
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Remove(e.Position);
+            }
+            SetDownloadSelectedButtonState();
+        }
+
+        private void SetDownloadSelectedButtonState()
+        {
+            //backgroundtintlist is api 21+ so lower than this, there is no disabled state change which is fine.
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            {
+                if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
+                {
+                    //get backed in disabled color.
+                    Color mainColor = SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainPurple);
+                    Color backgroundColor = SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback);
+                    int disableColor = Android.Support.V4.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
+
+                    int red = Color.GetRedComponent(disableColor);
+                    int green = Color.GetGreenComponent(disableColor);
+                    int blue = Color.GetBlueComponent(disableColor);
+
+                    int disableTextColor = Android.Support.V4.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
+
+                    int redtc = Color.GetRedComponent(disableTextColor);
+                    int greentc = Color.GetGreenComponent(disableTextColor);
+                    int bluetc = Color.GetBlueComponent(disableTextColor);
+
+                    downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.Argb(255, redtc, greentc, bluetc)));
+                    downloadSelectedButton.BackgroundTintList = ColorStateList.ValueOf(Color.Argb(255, red, green, blue));
+                    downloadSelectedButton.Clickable = false;
+                }
+                else
+                {
+                    downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.White));
+                    downloadSelectedButton.BackgroundTintList = null;
+                    downloadSelectedButton.Clickable = true;
+                }
             }
         }
 

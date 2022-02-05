@@ -8992,10 +8992,10 @@ namespace AndriodApp1
             if (!bttnIsAttached && !bttnTwoIsAttached && !SoulSeekState.currentlyLoggedIn)
             {
                 //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
-                RelativeLayout relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as RelativeLayout;
-                relLayout.LayoutParameters = new ViewGroup.LayoutParams(rootView.LayoutParameters);
+                //ViewGroup relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
+                //relLayout.LayoutParameters = new ViewGroup.LayoutParams(rootView.LayoutParameters);
                 var action1 = new Action(() => {
-                    (rootView as RelativeLayout).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false));
+                    (rootView as ViewGroup).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false));
                 });
                 if(OnUIthread())
                 {
@@ -9008,43 +9008,36 @@ namespace AndriodApp1
             }
         }
 
-        public static void UpdateUIForLoggedIn(View rootView=null, EventHandler BttnClick=null, View cWelcome=null, View cbttn=null, View cLoading=null, EventHandler SettingClick=null)
+        public static void UpdateUIForLoggedIn(View rootView=null, EventHandler BttnClick=null, View cWelcome=null, View cbttn=null, ViewGroup cLoading=null, EventHandler SettingClick=null)
         {
             var action = new Action(() => {
                 //this is the case where it already has the loggedin fragment loaded.
                 Button bttn = null;
                 TextView welcome = null;
-                TextView loading = null;
-                EditText editText = null;
-                EditText editText2 = null;
-                TextView textView = null;
-                Button buttonLogin = null;
+                ViewGroup loggingInLayout = null;
+                ViewGroup logInLayout = null;
+
                 Button settings = null;
-                View noAccount = null;
                 try
                 {
                     if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
                     {
                         bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loading = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.loadingView);
-                        editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.editText);
-                        editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.editText2);
-                        textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
-                        buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        noAccount = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
+                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+
+                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+
                         settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
                     }
                     else
                     {
                         bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loading = rootView.FindViewById<TextView>(Resource.Id.loadingView);
-                        editText = rootView.FindViewById<EditText>(Resource.Id.editText);
-                        editText2 = rootView.FindViewById<EditText>(Resource.Id.editText2);
-                        textView = rootView.FindViewById<TextView>(Resource.Id.textView);
-                        buttonLogin = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        noAccount = rootView.FindViewById(Resource.Id.noAccount);
+                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+
+                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+
                         settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                     }
                 }
@@ -9076,12 +9069,14 @@ namespace AndriodApp1
 
                     bttn.Visibility = ViewStates.Visible;
                     settings.Visibility = ViewStates.Visible;
+
+
                     settings.Click -= SettingClick;
                     settings.Click += SettingClick;
                     Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 90);
                     bttn.Click -= BttnClick;
                     bttn.Click += BttnClick;
-                    loading.Visibility = ViewStates.Gone;
+                    loggingInLayout.Visibility = ViewStates.Gone;
                     welcome.Text = "Welcome, " + SoulSeekState.Username;
                 }
                 else if (cWelcome != null)
@@ -9095,14 +9090,10 @@ namespace AndriodApp1
                 {
                     StaticHacks.UpdateUI = true;//if we arent ready rn then do it when we are..
                 }
-                if (editText != null)
+                if (logInLayout != null)
                 {
-                    editText.Visibility = ViewStates.Gone;
-                    editText2.Visibility = ViewStates.Gone;
-                    textView.Visibility = ViewStates.Gone;
-                    noAccount.Visibility = ViewStates.Gone;
-                    buttonLogin.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(buttonLogin, 0);
+                    logInLayout.Visibility = ViewStates.Gone;
+                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                 }
 
             });
@@ -9133,11 +9124,13 @@ namespace AndriodApp1
                 Button bttn = null;
                 TextView welcome = null;
                 TextView loading = null;
-                EditText editText = null;
-                EditText editText2 = null;
-                TextView textView = null;
+                //EditText editText = null;
+                //EditText editText2 = null;
+                //TextView textView = null;
+                ViewGroup loggingInLayout = null;
+                ViewGroup logInLayout = null;
                 Button buttonLogin = null;
-                View noAccountHelp = null;
+                //View noAccountHelp = null;
                 Button settings = null;
                 MainActivity.LogDebug("BackToLogInLayout");
                 try
@@ -9146,30 +9139,31 @@ namespace AndriodApp1
                     {
                         bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loading = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.loadingView);
+                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
 
                         //this is the case we have a bad SAVED user pass....
                         try
                         {
-                            editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.editText);
-                            editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.editText2);
-                            textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
+                            logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
+                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
                             buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
-                            if (editText == null)
+                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
+                            if (logInLayout == null)
                             {
                                 RelativeLayout relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false) as RelativeLayout;
                                 relLayout.LayoutParameters = new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
                                 //var action1 = new Action(() => {
-                                    (StaticHacks.RootView as RelativeLayout).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
+                                    (StaticHacks.RootView as ViewGroup).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
                                 //});
                             }
-                            editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.editText);
-                            editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.editText2);
-                            textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
+                            //editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etUsername);
+                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
+                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
                             settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
                             buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
+                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
+                            logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
                             buttonLogin.Click -= LogInClick;
                             buttonLogin.Click += LogInClick;
                         }
@@ -9183,12 +9177,9 @@ namespace AndriodApp1
                     {
                         bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loading = rootView.FindViewById<TextView>(Resource.Id.loadingView);
-                        editText = rootView.FindViewById<EditText>(Resource.Id.editText);
-                        editText2 = rootView.FindViewById<EditText>(Resource.Id.editText2);
-                        textView = rootView.FindViewById<TextView>(Resource.Id.textView);
+                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
                         buttonLogin = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        noAccountHelp = rootView.FindViewById(Resource.Id.noAccount);
                         settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                     }
                 }
@@ -9196,18 +9187,14 @@ namespace AndriodApp1
                 {
 
                 }
-                if (editText != null)
+                if (logInLayout != null)
                 {
-                    editText.Visibility = ViewStates.Visible;
-                    editText2.Visibility = ViewStates.Visible;
+                    logInLayout.Visibility = ViewStates.Visible;
                     if(!clearUserPass && !string.IsNullOrEmpty(SoulSeekState.Username))
                     {
-                        editText.Text = SoulSeekState.Username;
-                        editText2.Text = SoulSeekState.Password;
+                        logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = SoulSeekState.Username;
+                        logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SoulSeekState.Password;
                     }
-                    textView.Visibility = ViewStates.Visible;
-                    buttonLogin.Visibility = ViewStates.Visible;
-                    noAccountHelp.Visibility = ViewStates.Visible;
                     Android.Support.V4.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
                     
                     if(loading==null)
@@ -9217,18 +9204,18 @@ namespace AndriodApp1
                         {
                             bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                             welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loading = rootView.FindViewById<TextView>(Resource.Id.loadingView);
+                            loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                             settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                         }
                         if(loading==null && StaticHacks.RootView!=null)
                         {
                             bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                             welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loading = rootView.FindViewById<TextView>(Resource.Id.loadingView);
+                            loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                             settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                         }
                     }
-                    loading.Visibility = ViewStates.Gone; //can get nullref here!!! (at least before the .AddLoggedInLayout code..
+                    loggingInLayout.Visibility = ViewStates.Gone; //can get nullref here!!! (at least before the .AddLoggedInLayout code..
                     welcome.Visibility = ViewStates.Gone;
                     settings.Visibility = ViewStates.Gone;
                     bttn.Visibility = ViewStates.Gone;
@@ -9254,57 +9241,46 @@ namespace AndriodApp1
         /// <param name="rootView"></param>
         public static void UpdateUIForLoggingInLoading(View rootView = null)
         {
+            MainActivity.LogDebug("UpdateUIForLoggingInLoading");
             var action = new Action(() => {
             //this is the case where it already has the loggedin fragment loaded.
-            Button bttn = null;
+            Button logoutButton = null;
             TextView welcome = null;
-            TextView loading = null;
-            EditText editText = null;
-            EditText editText2 = null;
-            TextView textView = null;
-            Button buttonLogin = null;
-                View noAccount = null;
-                Button settings = null;
+            ViewGroup loggingInView = null;
+            ViewGroup logInLayout = null;
+            Button settingsButton = null;
             try
             {
                 if (StaticHacks.RootView != null)
                 {
-                    bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
+                    logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                    settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
                     welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loading = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.loadingView);
+                        loggingInView = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                 }
                 else
                 {
-                    bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
+                    logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                    settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                     welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                    loading = rootView.FindViewById<TextView>(Resource.Id.loadingView);
-                    editText = rootView.FindViewById<EditText>(Resource.Id.editText);
-                    editText2 = rootView.FindViewById<EditText>(Resource.Id.editText2);
-                    textView = rootView.FindViewById<TextView>(Resource.Id.textView);
-                    buttonLogin = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        noAccount = rootView.FindViewById(Resource.Id.noAccount);
+                        loggingInView = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+                    logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
                 }
             }
             catch
             {
 
             }
-            if (editText != null)
+            if (logInLayout != null)
             {
-                editText.Visibility = ViewStates.Gone;
-                editText2.Visibility = ViewStates.Gone;
-                textView.Visibility = ViewStates.Gone;
-                buttonLogin.Visibility = ViewStates.Gone;
-                    noAccount.Visibility = ViewStates.Gone;
-                Android.Support.V4.View.ViewCompat.SetTranslationZ(buttonLogin, 0);
-                loading.Visibility = ViewStates.Visible;
+                    logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
+                Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
+                    loggingInView.Visibility = ViewStates.Visible;
                 welcome.Visibility = ViewStates.Gone;
-                bttn.Visibility = ViewStates.Gone;
-                    settings.Visibility = ViewStates.Gone;
-                Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 0);
-                }
+                logoutButton.Visibility = ViewStates.Gone;
+                settingsButton.Visibility = ViewStates.Gone;
+                Android.Support.V4.View.ViewCompat.SetTranslationZ(logoutButton, 0);
+            }
 
         });
             if(OnUIthread())
@@ -9331,7 +9307,7 @@ namespace AndriodApp1
             atDirectory.CreateFile("nomedia/customnomedia",".nomedia");
         }
 
-        
+
 
 
 
@@ -13147,6 +13123,49 @@ namespace AndriodApp1
         }
     }
 
+
+    public class MaterialProgressBarPassThrough : LinearLayout
+    {
+        private bool disposed = false;
+        private bool init = false;
+        public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        {
+            //var c = new ContextThemeWrapper(context, Resource.Style.MaterialThemeForChip);
+            //LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through, this, true);
+        }
+        public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs) : base(context, attrs)
+        {
+            //if(init)
+            //{
+            //    return;
+            //}
+            //init = true;
+            MainActivity.LogDebug("MaterialProgressBarPassThrough disposed" + disposed);
+            var c = new ContextThemeWrapper(context, Resource.Style.MaterialThemeForChip);
+            LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through, this, true);
+        }
+
+        public static MaterialProgressBarPassThrough inflate(ViewGroup parent)
+        {
+            var c = new ContextThemeWrapper(parent.Context, Resource.Style.MaterialThemeForChip);
+            MaterialProgressBarPassThrough itemView = (MaterialProgressBarPassThrough)LayoutInflater.From(c).Inflate(Resource.Layout.material_progress_bar_pass_through_dummy, parent, false);
+
+            return itemView;
+        }
+
+        public MaterialProgressBarPassThrough(IntPtr handle, JniHandleOwnership transfer) : base(handle, transfer)
+        {
+        }
+        public MaterialProgressBarPassThrough(Context context) : this(context, null)
+        {
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            disposed = true;
+            base.Dispose(disposing);
+        }
+    }
 
     [Serializable]
     public class TreeNode<T> : IEnumerable<TreeNode<T>>
