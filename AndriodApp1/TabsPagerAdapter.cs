@@ -8264,7 +8264,7 @@ namespace AndriodApp1
                             Adapter.NotifyItemRemoved(pos);
                         }
                         //since all selected stuff is going away. its what Gmail action mode does.
-                        TransfersActionMode.Finish(); 
+                        TransfersActionMode.Finish(); //TransfersActionMode can be null!
                         break;
                     case Resource.Id.pause_selected_batch:
                         TransferItemManagerWrapped.CancelSelectedItems(false);

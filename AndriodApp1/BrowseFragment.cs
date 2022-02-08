@@ -1754,7 +1754,7 @@ namespace AndriodApp1
                     if(itemSelected.Node.Children.Count==0 && (itemSelected.Directory==null || itemSelected.Directory.FileCount==0 ))
                     {
                         //dont let them do this... if this happens then there is no way to get back up...
-                        Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty),ToastLength.Short);
+                        Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty),ToastLength.Short).Show();
                         return;
                     }
                     SaveScrollPosition();
@@ -1976,6 +1976,10 @@ namespace AndriodApp1
 
         public static List<PathItem> GetPathItems(List<DataItem> nonFilteredDataItemsForListView)
         {
+            if(nonFilteredDataItemsForListView.Count == 0)
+            {
+                return new List<PathItem>();
+            }
             List<PathItem> pathItemsList = new List<PathItem>();
             if(nonFilteredDataItemsForListView[0].IsDirectory())
             {

@@ -604,13 +604,35 @@ namespace AndriodApp1
             bool hideLocked = SoulSeekState.HideLockedResultsInBrowse;
             if (b.DirectoryCount==0&&b.LockedDirectoryCount!=0&&hideLocked)
             {
-                errorMsgToToast = SoulSeekState.MainActivityRef.GetString(Resource.String.browse_onlylocked);
+                errorMsgToToast = SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_onlylocked);
                 return null;
             }
             else if(b.DirectoryCount==0&&b.LockedDirectoryCount==0)
             {
-                errorMsgToToast = SoulSeekState.MainActivityRef.GetString(Resource.String.browse_none);
+                errorMsgToToast = SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_none);
                 return null;
+            }
+
+            //if the user is sharing only 1 empty directory, then show a message.
+            //previously we let it through, but if they are sharing just 1 empty dir, that becomes the root dir
+            //and it looks strange. if 2+ empty dirs the same problem does not occur.
+            if(hideLocked && b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
+            {
+                errorMsgToToast = "User, " + username + ", is sharing only an empty directory.";
+                return null;
+            }
+            else if(!hideLocked && (b.DirectoryCount + b.LockedDirectoryCount == 1)) //if just 1 dir total
+            {
+                if(b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
+                {
+                    errorMsgToToast = "User, " + username + ", is sharing only an empty directory.";
+                    return null;
+                }
+                else if(b.LockedDirectoryCount == 1 && b.LockedDirectories.First().FileCount == 0)
+                {
+                    errorMsgToToast = "User, " + username + ", is sharing only an empty directory.";
+                    return null;
+                }
             }
 
             TreeNode<Directory> rootNode = null;
@@ -767,7 +789,7 @@ namespace AndriodApp1
 
                 foreach (Tuple<Directory, bool> dInfo in dirInfoArray)
                 {
-                    if(prevDirName == string.Empty && !emptyRoot) //this means that you did not set anything. sometimes the root literally IS empty.. see BeerNecessities
+                    if(prevDirName == string.Empty && !emptyRoot) //this means that you did not set anything. sometimes the root literally IS empty..
                     {
                         rootNode = new TreeNode<Directory>(dInfo.Item1, dInfo.Item2);
                         curNode = rootNode;
