@@ -2627,9 +2627,10 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="isNightMode">This is for the SYSTEM</param>
         /// <returns></returns>
-        public static int GetThemeInChosenDayNightMode(bool isNightMode)
+        public static int GetThemeInChosenDayNightMode(bool isNightMode, Context c)
         {
-            if (SoulSeekState.ActiveActivityRef.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+            Context contextToUse = c == null ? SoulSeekState.ActiveActivityRef : c;
+            if (contextToUse.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
             {
                 if(isNightMode)
                 {

@@ -778,18 +778,18 @@ namespace AndriodApp1
             public string MessageText;
         }
 
-        private static Color GetYouTextColor(bool useNightColors)
+        private static Color GetYouTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use secondary color
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
             {
                 if (useNightColors)
                 {
-                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SoulSeekState.ActiveActivityRef.Theme);
                 }
                 else
                 {
-                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SoulSeekState.ActiveActivityRef.Theme);
                 }
             }
             else
@@ -805,42 +805,42 @@ namespace AndriodApp1
             }
         }
 
-        private static Color GetNiceAndroidBlueNotifColor(bool useNightColors)
+        private static Color GetNiceAndroidBlueNotifColor(bool useNightColors, Context contextToUse)
         {
-            var newTheme = SoulSeekState.ActiveActivityRef.Resources.NewTheme();
-            newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors), true);
-            return SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.android_default_notification_blue_color, newTheme);
+            var newTheme = contextToUse.Resources.NewTheme();
+            newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
+            return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_blue_color, newTheme);
         }
 
-        private static Color GetOtherTextColor(bool useNightColors)
+        private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
             if(Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
             {
                 if(useNightColors)
                 {
-                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SoulSeekState.ActiveActivityRef.Theme);
                 }
                 else
                 {
-                    return SoulSeekState.ActiveActivityRef.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SoulSeekState.ActiveActivityRef.Theme);
                 }
             }
             else
             {
                 //todo
-                var newTheme = SoulSeekState.ActiveActivityRef.Resources.NewTheme();
-                newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors), true);
-                return SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.android_default_notification_complementary_color, newTheme);
+                var newTheme = contextToUse.Resources.NewTheme();
+                newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
+                return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
             }
         }
 
-        private static Color GetActionTextColor(bool useNightColors)
+        private static Color GetActionTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
             {
-                return GetOtherTextColor(useNightColors);
+                return GetOtherTextColor(useNightColors, contextToUse);
             }
             else
             {
@@ -856,7 +856,7 @@ namespace AndriodApp1
             }
         }
 
-        public static Android.Text.SpannableStringBuilder GetSpannableForCollapsed(MessageNotifExtended messageNotifExtended, bool useNightColors)
+        public static Android.Text.SpannableStringBuilder GetSpannableForCollapsed(MessageNotifExtended messageNotifExtended, bool useNightColors, Context contextToUse)
         {
             Android.Text.SpannableStringBuilder ssb = new Android.Text.SpannableStringBuilder();
 
@@ -864,7 +864,7 @@ namespace AndriodApp1
             {
                 string title = "Messages with " + messageNotifExtended.Username;
                 var titleSpan = new Android.Text.SpannableString(title + " \n");
-                titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
+                titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors, contextToUse)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
                 titleSpan.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
 
                 ssb.Append(titleSpan);
@@ -881,11 +881,11 @@ namespace AndriodApp1
             Android.Text.Style.ForegroundColorSpan fcs = null;
             if(messageNotifExtended.IsOurMessage)
             {
-                fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors));
+                fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors, contextToUse));
             }
             else
             {
-                fcs = new Android.Text.Style.ForegroundColorSpan(GetOtherTextColor(useNightColors));
+                fcs = new Android.Text.Style.ForegroundColorSpan(GetOtherTextColor(useNightColors, contextToUse));
             }
             spannableString.SetSpan(fcs, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
 
@@ -903,7 +903,7 @@ namespace AndriodApp1
         }
 
 
-        public static Android.Text.SpannableStringBuilder GetSpannableForExpanded(List<MessageNotifExtended> messageNotifExtended, bool useNightColors)
+        public static Android.Text.SpannableStringBuilder GetSpannableForExpanded(List<MessageNotifExtended> messageNotifExtended, bool useNightColors, Context contextToUse)
         {
             var lastFive = messageNotifExtended.TakeLast(5); //not nearly enough room to display 8
             string lastUsername = null;
@@ -944,11 +944,11 @@ namespace AndriodApp1
                     Android.Text.Style.ForegroundColorSpan fcs = null;
                     if (msg.IsOurMessage)
                     {
-                        fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors)); //normal color text...
+                        fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors, contextToUse)); //normal color text...
                     }
                     else
                     {
-                        fcs = new Android.Text.Style.ForegroundColorSpan(GetOtherTextColor(useNightColors));
+                        fcs = new Android.Text.Style.ForegroundColorSpan(GetOtherTextColor(useNightColors, contextToUse));
                     }
                     spannableString.SetSpan(fcs, 0, uname.Length, Android.Text.SpanTypes.InclusiveInclusive);
 
@@ -983,17 +983,17 @@ namespace AndriodApp1
         /// Because for notification colors only the system matters!!
         /// </summary>
         /// <returns></returns>
-        public static bool GetIfSystemIsInNightMode()
+        public static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
             if(SoulSeekState.DayNightMode == (int)(Android.Support.V7.App.AppCompatDelegate.ModeNightFollowSystem))
             {
                 //if we follow the system then we can just return whether our app is in night mode.
-                return DownloadDialog.InNightMode(SoulSeekState.ActiveActivityRef);
+                return DownloadDialog.InNightMode(contextToUse);
             }
             else
             {
                 //if we do not follow the system we have to use the UI Mode Service
-                UiModeManager uiModeManager = (UiModeManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.UiModeService);//getSystemService(Context.UI_MODE_SERVICE);
+                UiModeManager uiModeManager = (UiModeManager)contextToUse.GetSystemService(Context.UiModeService);//getSystemService(Context.UI_MODE_SERVICE);
                 int mode = (int)(uiModeManager.NightMode);
                 if(mode == (int)UiNightMode.Yes)
                 {
@@ -1013,34 +1013,39 @@ namespace AndriodApp1
         public static string FromUserName = "FromThisUser";
         public static string ComingFromMessageTapped = "FromAMessage";
 
-        public static void ShowNotificationLogic(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureReason = "")
+        public static void ShowNotificationLogic(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureReason = "", Context broadcastContext = null)
         {
             try
             {
-                Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                Context contextToUse = broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext;
+                if(contextToUse == null)
+                {
+                    contextToUse = SeekerApplication.ApplicationContext;
+                }
+                Helpers.CreateNotificationChannel(contextToUse, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
 
 
-                Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
+                Intent notifIntent = new Intent(contextToUse, typeof(MessagesActivity));
                 notifIntent.AddFlags(ActivityFlags.SingleTop);
                 notifIntent.PutExtra(FromUserName, msg.Username); //so we can go to this user..
                 notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                 PendingIntent pendingIntent =
-                    PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                    PendingIntent.GetActivity(contextToUse, msg.Username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(contextToUse);
 
                 //no direct reply in <26 and so the actions are rather pointless..
                 if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
                 {
 
-                    bool systemIsInNightMode = GetIfSystemIsInNightMode();
+                    bool systemIsInNightMode = GetIfSystemIsInNightMode(contextToUse);
 
 
                     AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel("Send Message...").Build();
-                    Intent replayIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
+                    Intent replayIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     replayIntent.PutExtra("direct_reply_extra", true);
                     replayIntent.SetAction("seeker_direct_reply");
                     replayIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), replayIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, false)); //mutable, the end user needs to be able to mutate with direct replay action..
+                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), replayIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, false)); //mutable, the end user needs to be able to mutate with direct replay action..
                     NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.baseline_chat_bubble_white_24, "Reply", replyPendingIntent).SetAllowGeneratedReplies(false).AddRemoteInput(remoteInput).Build(); //TODO icon
 
 
@@ -1068,28 +1073,28 @@ namespace AndriodApp1
                     //}
 
                 
-                    RemoteViews notificationLayout = new RemoteViews(SoulSeekState.ActiveActivityRef.PackageName, Resource.Layout.simple_custom_notification);
-                    RemoteViews notificationLayoutExpanded = new RemoteViews(SoulSeekState.ActiveActivityRef.PackageName, Resource.Layout.simple_custom_notification);
+                    RemoteViews notificationLayout = new RemoteViews(contextToUse.PackageName, Resource.Layout.simple_custom_notification);
+                    RemoteViews notificationLayoutExpanded = new RemoteViews(contextToUse.PackageName, Resource.Layout.simple_custom_notification);
 
-                    notificationLayout.SetTextViewText(Resource.Id.textView1, GetSpannableForCollapsed(MessagesActivity.DirectReplyMessages[msg.Username].Last(), systemIsInNightMode));
-                    notificationLayoutExpanded.SetTextViewText(Resource.Id.textView1, GetSpannableForExpanded(MessagesActivity.DirectReplyMessages[msg.Username], systemIsInNightMode));
+                    notificationLayout.SetTextViewText(Resource.Id.textView1, GetSpannableForCollapsed(MessagesActivity.DirectReplyMessages[msg.Username].Last(), systemIsInNightMode, contextToUse));
+                    notificationLayoutExpanded.SetTextViewText(Resource.Id.textView1, GetSpannableForExpanded(MessagesActivity.DirectReplyMessages[msg.Username], systemIsInNightMode, contextToUse));
 
 
-                    Intent clearNotifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
+                    Intent clearNotifIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     clearNotifIntent.PutExtra("clear_notif_extra", true);
                     clearNotifIntent.SetAction("seeker_clear_notification");
                     clearNotifIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), clearNotifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), clearNotifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
 
 
 
-                    Intent markAsReadIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
+                    Intent markAsReadIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     markAsReadIntent.PutExtra("mark_as_read_extra", true);
                     markAsReadIntent.SetAction("seeker_mark_as_read");
 
 
                     markAsReadIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), markAsReadIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)); //else the new extras will not arrive...
+                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), markAsReadIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)); //else the new extras will not arrive...
 
                     string markAsRead = "Mark As Read";
                     //android messages app does "mark as read" even after you respond so I think it is fine..
@@ -1099,7 +1104,7 @@ namespace AndriodApp1
                     //}
 
                     //setColor ?? todo
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(SoulSeekState.ActiveActivityRef, CHANNEL_ID)
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(contextToUse, CHANNEL_ID)
                         .AddAction(Resource.Drawable.baseline_chat_bubble_white_24, markAsRead, markAsReadPendingIntent)
                         .AddAction(replyAction)
                         .SetStyle(new NotificationCompat.DecoratedCustomViewStyle())
@@ -1115,7 +1120,7 @@ namespace AndriodApp1
                     //if android 12+ let the system pick the color.  it will make it Android.Resource.Color.SystemAccent1100 if dark Android.Resource.Color.SystemAccent1600 otherwise.
                     if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.S) 
                     {
-                        builder.SetColor(GetNiceAndroidBlueNotifColor(systemIsInNightMode));
+                        builder.SetColor(GetNiceAndroidBlueNotifColor(systemIsInNightMode, contextToUse));
                     }
 
                     var notification = builder.Build();
@@ -1126,7 +1131,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
+                    Notification n = Helpers.CreateNotification(contextToUse, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
                     notificationManager.Notify(msg.Username.GetHashCode(), n);
                 }
             }
@@ -1137,10 +1142,10 @@ namespace AndriodApp1
 
         }
 
-        public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "")
+        public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "", Context broadcastContext = null)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                ShowNotificationLogic(msg,fromOurResponse, directReplyFailure, directReplayFailureMessage);
+            MessagesInnerFragment.BroadcastFriendlyRunOnUiThread(() => {
+                ShowNotificationLogic(msg,fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
             });
         }
 
@@ -1413,11 +1418,32 @@ namespace AndriodApp1
             base.OnSaveInstanceState(outState);
         }
 
-        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false)
+        public static void BroadcastFriendlyRunOnUiThread(Action action)
         {
+            if(SoulSeekState.ActiveActivityRef != null)
+            {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
+            }
+            else
+            {
+                new Handler(Looper.MainLooper).Post(action);
+            }
+        }
+
+        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
+        {
+            //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
+            //then soulseekclient will be good, but the activeActivityRef will be null. so use the broadcastContext.
+
+            Android.Content.Context contextToUse = broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext;
+
+            MainActivity.LogDebug("is soulseekclient null: " + (SoulSeekState.SoulseekClient == null).ToString());
+            MainActivity.LogDebug("is ActiveActivityRef null: " + (SoulSeekState.ActiveActivityRef == null).ToString());
+
+
             if(string.IsNullOrEmpty(msg.MessageText))
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
+                Toast.MakeText(contextToUse, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
                 if(fromDirectReplyAction)
                 {
                     MessageController.ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
@@ -1426,7 +1452,8 @@ namespace AndriodApp1
             }
             if (!SoulSeekState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
+                MainActivity.LogDebug("not currently logged in");
+                Toast.MakeText(contextToUse, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
                 if (fromDirectReplyAction)
                 {
                     MessageController.ShowNotification(msg, true, true, "Failure - Currently Logged Out.");
@@ -1435,11 +1462,13 @@ namespace AndriodApp1
             }
 
             Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+
+                MainActivity.LogDebug("our continue with action is occuring!...");
                 if (t.IsFaulted)
                 {
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                        BroadcastFriendlyRunOnUiThread(() => { Toast.MakeText(contextToUse, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
                     }
                     if (fromDirectReplyAction)
                     {
@@ -1447,17 +1476,19 @@ namespace AndriodApp1
                     }
                     throw new FaultPropagationException();
                 }
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
-                    SendMessageLogic(msg, fromDirectReplyAction);
+                BroadcastFriendlyRunOnUiThread(new Action(() => {
+                    SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
                 }));
             });
 
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
+                MainActivity.LogDebug("currently logged in but disconnected...");
+
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(contextToUse, out t))
                 {
                     return;
                 }
@@ -1465,8 +1496,9 @@ namespace AndriodApp1
             }
             else
             {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment"))
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
                 {
+                    MainActivity.LogDebug("on finish log in we will do it");
                     return;
                 }
                 else
@@ -1477,7 +1509,7 @@ namespace AndriodApp1
 
         }
 
-        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction) //you can start out with a message...
+        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Android.Content.Context broadcastContext = null) //you can start out with a message...
         {
             MainActivity.LogDebug("SendMessageLogic");
 
@@ -1500,11 +1532,11 @@ namespace AndriodApp1
                     MainActivity.LogDebug("faulted " + t.Exception.ToString());
                     MainActivity.LogDebug("faulted " + t.Exception.InnerException.Message.ToString());
                     msg.SentMsgStatus = SentStatus.Failed;
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_send_message, ToastLength.Long).Show();
+                    Toast.MakeText(broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext, Resource.String.failed_to_send_message, ToastLength.Long).Show(); //TODO
 
                     if (fromDirectReplyAction)
                     {
-                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Send Message.");
+                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Send Message.", broadcastContext);
                     }
                 }
                 else
@@ -1514,7 +1546,7 @@ namespace AndriodApp1
 
                     if (fromDirectReplyAction)
                     {
-                        MessageController.ShowNotification(msg, true, false);
+                        MessageController.ShowNotification(msg, true, false, string.Empty, broadcastContext);
                     }
                 }
                 MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
@@ -2367,7 +2399,7 @@ namespace AndriodApp1
             {
                 MessageController.UnreadUsernames.TryRemove(uname, out _);
 
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(context);
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.Cancel(uname.GetHashCode());
 
@@ -2385,7 +2417,7 @@ namespace AndriodApp1
                     string replyText = remoteInputBundle.GetString("key_text_result");
                     //Message msg = new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, replyText, false);
                     MainActivity.LogDebug("direct reply " + replyText + " " + uname);
-                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, DateTime.Now, DateTime.UtcNow, replyText, true, SentStatus.Pending), true);
+                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, DateTime.Now, DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
                     
                 }

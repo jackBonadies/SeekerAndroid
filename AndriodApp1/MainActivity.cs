@@ -8132,7 +8132,7 @@ namespace AndriodApp1
             MainActivity.LogFirebase(e.Message);
         }
 
-        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null)
+        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
@@ -8142,7 +8142,14 @@ namespace AndriodApp1
                     SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
                     if (msg != null)
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
+                        if(contextToUseForMessage==null)
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
+                        }
+                        else
+                        {
+                            Toast.MakeText(contextToUseForMessage, msg, ToastLength.Short).Show();
+                        }
                     }
                     return true;
                 }
