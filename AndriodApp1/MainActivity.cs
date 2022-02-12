@@ -4726,6 +4726,7 @@ namespace AndriodApp1
                 if (!Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
                 {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
+                    base.OnCreateContextMenu(menu, v, menuInfo);
                     return;
                 }
 
