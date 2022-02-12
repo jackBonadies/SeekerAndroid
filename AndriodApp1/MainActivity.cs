@@ -6621,6 +6621,77 @@ namespace AndriodApp1
             KeepAliveInactivityKillTimer.Stop();
         }
 
+        public static void SetUpSharing(Action uiUpdateAction = null)
+        {
+            Action setUpSharedFileCache = new Action(() => {
+                string errorMessage = string.Empty;
+                bool success = false;
+                LogDebug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
+                try
+                {
+                    DocumentFile docFile = null;
+                    if (SoulSeekState.PreOpenDocumentTree())
+                    {
+                        docFile = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path));
+                    }
+                    else
+                    {
+                        docFile = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri));
+                    }
+                    success = SoulSeekState.MainActivityRef.InitializeDatabase(docFile, true, false, out errorMessage);
+                }
+                catch (Exception e)
+                {
+                    LogDebug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
+                    SoulSeekState.UploadDataDirectoryUri = null;
+                    SetUnsetSharingBasedOnConditions(false);
+                    MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_sharing), ToastLength.Long).Show();
+                    }));
+                }
+
+                if (success && SoulSeekState.SharedFileCache != null && SoulSeekState.SharedFileCache.SuccessfullyInitialized)
+                {
+                    LogDebug("database full initialized.");
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing), ToastLength.Short).Show();
+                    }));
+                    try
+                    {
+                        //setup soulseek client with handlers if all conditions met
+                        SetUnsetSharingBasedOnConditions(false);
+                    }
+                    catch (Exception e)
+                    {
+                        MainActivity.LogFirebase("MainActivity error setting handlers: " + e.Message + "  " + e.StackTrace);
+                    }
+                }
+                else if (!success)
+                {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                    {
+                        if (string.IsNullOrEmpty(errorMessage))
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_sharing), ToastLength.Short).Show();
+                        }
+                        else
+                        {
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, errorMessage, ToastLength.Short).Show();
+                        }
+                    }));
+                }
+
+                if(uiUpdateAction!=null)
+                {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
+                }
+            });
+            System.Threading.ThreadPool.QueueUserWorkItem((object o) => { setUpSharedFileCache(); });
+        }
+
         private ISharedPreferences sharedPreferences;
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         protected override void OnCreate(Bundle savedInstanceState)
@@ -6870,71 +6941,9 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef = this;
 
             //if we have all the conditions to share, then set sharing up.
-            if (MeetsSharingConditions() && !SoulSeekState.IsParsing && (SoulSeekState.SharedFileCache == null || !SoulSeekState.SharedFileCache.SuccessfullyInitialized))
+            if (MeetsSharingConditions() && !SoulSeekState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
             {
-                Action setUpSharedFileCache = new Action(() => {
-                    string errorMessage = string.Empty;
-                    bool success = false;
-                    LogDebug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
-                    try
-                    {
-                        DocumentFile docFile = null;
-                        if(SoulSeekState.PreOpenDocumentTree())
-                        {
-                            docFile = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path));
-                        }
-                        else
-                        {
-                            docFile = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri));
-                        }
-                        success = SoulSeekState.MainActivityRef.InitializeDatabase(docFile, true, false, out errorMessage);
-                    }
-                    catch (Exception e)
-                    {   
-                        LogDebug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
-                        SoulSeekState.UploadDataDirectoryUri = null;
-                        SetUnsetSharingBasedOnConditions(false);
-                        MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
-                        this.RunOnUiThread(new Action(() =>
-                        {
-                            Toast.MakeText(this, this.GetString(Resource.String.error_sharing), ToastLength.Long).Show();
-                        }));
-                    }
-                    
-                    if(success && SoulSeekState.SharedFileCache != null && SoulSeekState.SharedFileCache.SuccessfullyInitialized)
-                    {
-                        LogDebug("database full initialized.");
-                        this.RunOnUiThread(new Action(() =>
-                        {
-                            Toast.MakeText(this, this.GetString(Resource.String.success_sharing), ToastLength.Short).Show();
-                        }));
-                        try
-                        {
-                            //setup soulseek client with handlers if all conditions met
-                            SetUnsetSharingBasedOnConditions(false);
-                        }
-                        catch(Exception e)
-                        {
-                            MainActivity.LogFirebase("MainActivity error setting handlers: " + e.Message + "  " + e.StackTrace);
-                        }
-                    }
-                    else if(!success)
-                    {
-                        this.RunOnUiThread(new Action(() =>
-                        {
-                            if(string.IsNullOrEmpty(errorMessage))
-                            {
-                                Toast.MakeText(this, this.GetString(Resource.String.error_sharing), ToastLength.Short).Show();
-                            }
-                            else
-                            {
-                                Toast.MakeText(this, errorMessage, ToastLength.Short).Show();
-                            }
-                        }));
-                    }
-                });
-                System.Threading.ThreadPool.QueueUserWorkItem((object o) => {setUpSharedFileCache(); });
-                
+                SetUpSharing();
             }
             //this.DeleteSharedPreferences("SoulSeekPrefs");
 
@@ -7983,13 +7992,36 @@ namespace AndriodApp1
             return (SoulSeekState.SharingOn && SoulSeekState.UploadDataDirectoryUri != null && SoulSeekState.UploadDataDirectoryUri != string.Empty) && !SoulSeekState.IsParsing;
         }
 
+        public static bool IsSharingSetUpSuccessfully()
+        {
+            if(SoulSeekState.SharedFileCache == null || !SoulSeekState.SharedFileCache.SuccessfullyInitialized)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public static Tuple<SharingIcons, string> GetSharingMessageAndIcon(out bool isParsing)
         {
             isParsing = false;
-            if (MeetsSharingConditions())
+            if (MeetsSharingConditions() && IsSharingSetUpSuccessfully())
             {
                 //try to parse this into a path: SoulSeekState.ShareDataDirectoryUri
                 return new Tuple<SharingIcons,string>(SharingIcons.On,SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
+            }
+            else if(MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
+            {
+                if(SoulSeekState.SharedFileCache == null)
+                {
+                    return new Tuple<SharingIcons, string>(SharingIcons.Off, "Not yet initialized.");
+                }
+                else
+                {
+                    return new Tuple<SharingIcons, string>(SharingIcons.Error, SoulSeekState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
+                }
             }
             else if(!SoulSeekState.SharingOn)
             {

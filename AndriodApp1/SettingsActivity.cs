@@ -1712,6 +1712,11 @@ namespace AndriodApp1
         {
             SoulSeekState.SharingOn = e.IsChecked;
             /*SoulSeekState.MainActivityRef.*/MainActivity.SetUnsetSharingBasedOnConditions(true);
+            if(MainActivity.MeetsSharingConditions() && !SoulSeekState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
+            {
+                //try to set up sharing...
+                MainActivity.SetUpSharing(UpdateShareImageView);
+            }
             UpdateShareImageView();
             UpdateSharingViewState();
             SetSharedFolderView();
