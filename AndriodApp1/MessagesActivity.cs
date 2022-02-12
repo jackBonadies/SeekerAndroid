@@ -1404,7 +1404,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case 0: //"Copy Text"
-                    Helpers.CopyTextToClipboard(this.Activity, MessagesInnerRecyclerAdapter.ContextMenuMessageData.MessageText);
+                    Helpers.CopyTextToClipboard(this.Activity, ChatroomInnerFragment.MessagesLongClickData.MessageText);
                     break;
                 default:
                     return base.OnContextItemSelected(item);
@@ -1802,7 +1802,6 @@ namespace AndriodApp1
 
     public class MessagesInnerRecyclerAdapter : RecyclerView.Adapter
     {
-        public static Message ContextMenuMessageData;
         private List<Message> localDataSet;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
@@ -1884,11 +1883,12 @@ namespace AndriodApp1
         {
             if(sender is MessageInnerViewSent msgSent)
             {
-                ContextMenuMessageData = msgSent.DataItem;
+                //data item cannot be null as that would have caused a nullref eariler on binding view.
+                ChatroomInnerFragment.MessagesLongClickData = msgSent.DataItem;
             }
             else if(sender is MessageInnerViewReceived msgRecv)
             {
-                ContextMenuMessageData = msgRecv.DataItem;
+                ChatroomInnerFragment.MessagesLongClickData = msgRecv.DataItem;
             }
             (sender as View).ShowContextMenu();
         }
@@ -1897,9 +1897,37 @@ namespace AndriodApp1
         {
             localDataSet = ti;
         }
+
+        public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        {
+            MainActivity.LogDebug("ShowSlskLinkContextMenu " + Helpers.ShowSlskLinkContextMenu);
+
+            //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
+            //in that case we still dont want to show anything.
+            if (menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
+            {
+                return;
+            }
+            else if(Helpers.ShowSlskLinkContextMenu)
+            {
+                //closing wont turn this off since its invalid parse, so turn it off here...
+                Helpers.ShowSlskLinkContextMenu = false;
+                return;
+            }
+
+            //this class is shared by both chatroom and messages......
+            if (v is MessageInnerViewSent msgSent)
+            {
+                ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewSent).DataItem;
+            }
+            else if (v is MessageInnerViewReceived msgReceived)
+            {
+                ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewReceived).DataItem;
+            }
+            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
+        }
+
     }
-
-
 
 
     public class MessageInnerViewSentHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
@@ -1924,18 +1952,10 @@ namespace AndriodApp1
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            //if this is the slsk link menu then we are done, dont add anything extra.
-            if(menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
-            {
-                return;
-            }
 
-            //this class is shared by both chatroom and messages......
-            if(v is MessageInnerViewSent msgSent)
-            {
-                ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewSent).DataItem;
-            }
-            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
+            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewSentHolder");
+
+            MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
     }
 
@@ -1961,13 +1981,14 @@ namespace AndriodApp1
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            if(Helpers.ShowSlskLinkContextMenu)
-            {
-                return;
-            }
-            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
+
+            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewReceivedHolder");
+
+            MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
     }
+
+
 
 
 

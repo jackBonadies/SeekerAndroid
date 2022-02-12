@@ -1151,13 +1151,23 @@ namespace AndriodApp1
     {
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            if(Helpers.ShowSlskLinkContextMenu)
+            MainActivity.LogDebug("ShowSlskLinkContextMenu " + Helpers.ShowSlskLinkContextMenu);
+
+            //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
+            //in that case we still dont want to show anything.
+            if (menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
             {
+                return;
+            }
+            else if (Helpers.ShowSlskLinkContextMenu)
+            {
+                //closing wont turn this off since its invalid parse, so turn it off here...
+                Helpers.ShowSlskLinkContextMenu = false;
                 return;
             }
 
             //its possible to get here without the AdapterLongClick depending on what part you hold down on the message.  I am not sure why...
-            if(v is GroupMessageInnerViewReceived)
+            if (v is GroupMessageInnerViewReceived)
             {
                 ChatroomInnerFragment.MessagesLongClickData = (v as GroupMessageInnerViewReceived).DataItem;
             }
