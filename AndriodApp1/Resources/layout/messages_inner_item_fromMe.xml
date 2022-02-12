@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginEnd="8dp"
-    android:layout_marginTop="16dp">
+    >
 
 
 
@@ -52,7 +52,7 @@
         android:textColor="#C0C0C0"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="@+id/card_gchat_message_me"
-        app:layout_constraintEnd_toStartOf="@+id/card_gchat_message_me" />
+        app:layout_constraintRight_toLeftOf="@+id/card_gchat_message_me" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
