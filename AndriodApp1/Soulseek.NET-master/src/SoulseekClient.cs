@@ -2925,7 +2925,7 @@ namespace Soulseek
 
                         // prepare a wait for the overall completion of the download
                         downloadCompleted = Waiter.WaitIndefinitely(download.WaitKey, cancellationToken);
-
+                        
                         // connect to the peer to retrieve the file; for these types of transfers, we must initiate the transfer connection.
                         download.Connection = await PeerConnectionManager
                             .GetTransferConnectionAsync(username, endpoint, transferRequestAcknowledgement.Token, cancellationToken)
@@ -3130,9 +3130,9 @@ namespace Soulseek
                 {
                     InvokeErrorLogHandler("The cancelled checking failed: " + e.Message);
                 }
-                Downloads.TryRemove(download.Token, out _); //all cancelled do eventually get here.  But sometimes something bad happens and they do not get removed for some reason...
+                bool removed = Downloads.TryRemove(download.Token, out _); //all cancelled do eventually get here.  But sometimes something bad happens and they do not get removed for some reason...
                                                             //also sometimes cancel all does work just fine and kills the service....
-                InvokeDebugLogHandler("Successfully removed? () " + download.Filename);
+                InvokeDebugLogHandler("Successfully removed? " + removed + "  " + download.Filename);
                 if (allCancelled)
                 {
                     InvokeDebugLogHandler("They are all cancelled");

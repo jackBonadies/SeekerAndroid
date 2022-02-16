@@ -160,7 +160,7 @@ namespace AndriodApp1
 
     public class LoginFragment : Fragment //, Android.Net.DnsResolver.ICallback //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
     {
-        private volatile View rootView;
+        public volatile View rootView;
         private Button cbttn;
         private TextView cWelcome;
         private ViewGroup cLoading;
@@ -200,6 +200,20 @@ namespace AndriodApp1
         private EditText passwordTextEdit = null;
 
 
+        public void SetUpLogInLayout()
+        {
+            loginButton = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
+            loginButton.Click += LogInClick;
+            usernameTextEdit = rootView.FindViewById<EditText>(Resource.Id.etUsername);
+            passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
+            usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
+            usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+            passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
+            passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton);
+        }
+
+
         //private bool firstTime = true;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -207,21 +221,12 @@ namespace AndriodApp1
             HasOptionsMenu = true;
             MainActivity.LogDebug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
-            if (MainActivity.IsLoggedIn())//you are not logged in if username or password is null
+            if (MainActivity.IsNotLoggedIn())//you are not logged in if username or password is null
             {
                 SoulSeekState.currentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
 
-
-                loginButton = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                loginButton.Click += LogInClick;
-                usernameTextEdit = rootView.FindViewById<EditText>(Resource.Id.etUsername);
-                passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
-                usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
-                usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
-                passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
-                passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
-                EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton);
+                SetUpLogInLayout();
 
                 //StaticHacks.RootView = this.rootView;
                 //firstTime = false;
@@ -353,11 +358,13 @@ namespace AndriodApp1
                         else if (t.Exception.InnerExceptions[0].Message.Contains("Connection refused"))
                         {
                             cannotLogin = true;
+                            clearUserPass = false;
                             msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
                         }
                         else
                         {
                             cannotLogin = true;
+                            clearUserPass = false;
                             msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login);
                             msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
 
@@ -367,12 +374,14 @@ namespace AndriodApp1
                     {
                         //this happens at work where slsk is banned. technically its due to connection RST. the timeout is not the tcp handshake timeout its instead a wait timeout in the connect async code. so this could probably be improved.
                         cannotLogin = true;
+                        clearUserPass = false;
                         msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
                     }
                     else
                     {
                         msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
                         cannotLogin = true;
+                        clearUserPass = false;
                         msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login);
                     }
                 }
@@ -392,10 +401,13 @@ namespace AndriodApp1
                     MainActivity.LogFirebase(msgToLog);
                 }
 
+                MainActivity.LogDebug("time to update layouts..");
                 MainActivity.AddLoggedInLayout(this.rootView);
                 MainActivity.BackToLogInLayout(this.rootView, LogInClick, clearUserPass);
             }
 
+
+            MainActivity.LogDebug("Login Status: " + cannotLogin);
             //SoulSeekState.ManualResetEvent.WaitOne();
 
             if (cannotLogin == false)
@@ -419,7 +431,7 @@ namespace AndriodApp1
                 {
                     string message = msg;
                     Toast.MakeText(SoulSeekState.MainActivityRef, msg, ToastLength.Long).Show();
-                    SoulSeekState.currentlyLoggedIn = false;
+                    SoulSeekState.currentlyLoggedIn = false; //this should maybe be removed???
                     SoulSeekState.Username = null;
                     SoulSeekState.Password = null;
                     //this.Activity.Recreate();
@@ -7643,7 +7655,7 @@ namespace AndriodApp1
                 //filename: item1.FullFilename,
                 //size: item1.Size,
                 //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, 1, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //maybe do 1 here since we are already retrying it manually
+                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //if paused do retry counter 0.
             }
             catch (DuplicateTransferException)
             {
