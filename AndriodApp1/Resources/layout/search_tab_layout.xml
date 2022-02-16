@@ -27,8 +27,8 @@
         android:layout_height="wrap_content"
             
         android:drawablePadding="6dp"
-            android:paddingLeft="30dp"
-            android:paddingRight="30dp"
+            android:paddingStart="30dp"
+            android:paddingEnd="30dp"
         android:id="@+id/createNewSearch"
         style="@style/SeekerButtonStyle"
 

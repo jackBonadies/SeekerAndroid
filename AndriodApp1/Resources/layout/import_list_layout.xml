@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Select Users to Add"
-        android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
         android:textSize="24sp"
         />
     <LinearLayout
@@ -26,13 +26,13 @@
         android:layout_height="0dp"
         android:id="@+id/recyclerViewImportList" />
         <Button
-        android:layout_gravity="right"
+        android:layout_gravity="end"
         android:text="Toggle All"
         android:foreground="@drawable/button"
         android:id="@+id/toggleAllButton"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
             android:layout_marginTop="4dp"
-            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginBottom="6dp"
         android:minHeight="34dp"
         style="@style/SeekerButtonStyle"
@@ -61,8 +61,8 @@
         android:id="@+id/alreadyPresentTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:layout_marginRight="6dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
             android:layout_marginBottom="6dp"
         android:text="Note: The following users are already present in X - a, b, c"
         />

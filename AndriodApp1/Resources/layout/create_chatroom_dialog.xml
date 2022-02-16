@@ -12,8 +12,8 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
 
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:hint="@string/create_chatroom_name"
         android:imeOptions="actionDone"
         android:inputType="text" />
@@ -23,9 +23,9 @@ android:theme="@style/checkBoxStyle"
         android:id="@+id/createChatroomPrivate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_gravity="right"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="20dp"
         android:text="@string/create_chatroom_private"
         />
 

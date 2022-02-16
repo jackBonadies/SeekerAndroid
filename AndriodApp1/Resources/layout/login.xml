@@ -100,8 +100,8 @@
 
       <Button
         
-               android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
+               android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
       android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
       android:layout_width="wrap_content"
@@ -114,7 +114,7 @@
       android:layout_below="@+id/passwordTextInputLayout" />
 
               <TextView
-        android:layout_marginLeft="6dp"
+        android:layout_marginStart="6dp"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="6dp"
         android:layout_alignParentBottom="true"

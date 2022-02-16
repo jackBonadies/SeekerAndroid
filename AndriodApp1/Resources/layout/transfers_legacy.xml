@@ -22,7 +22,7 @@
         android:layout_height="40dp"
         android:background="?attr/mainPurple"
         android:textColor="#ffffff"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:text="Options"
         android:id="@+id/transferOptions"
         />

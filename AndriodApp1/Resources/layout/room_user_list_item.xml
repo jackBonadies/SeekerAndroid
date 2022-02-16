@@ -18,8 +18,8 @@
 
                 android:layout_marginTop="3sp"
                 android:layout_marginBottom="3sp"
-                android:layout_marginLeft="2sp"
-                android:layout_marginRight="6sp"
+                android:layout_marginStart="2sp"
+                android:layout_marginEnd="6sp"
 
                 android:layout_width="16sp"
                 android:layout_height="16sp"

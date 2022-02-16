@@ -36,8 +36,8 @@
          android:layout_width="0dp"
          android:layout_height="match_parent"
          android:layout_weight = "1.5"
-                android:paddingLeft="2dp"
-        android:paddingRight="2dp"
+                android:paddingStart="2dp"
+        android:paddingEnd="2dp"
          android:background = "?attr/header_cell_shape_bottom"
         >
     <ProgressBar
@@ -45,8 +45,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"
         android:paddingTop = "5dp"
         android:paddingBottom = "5dp"
         

@@ -22,7 +22,7 @@
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingLeft="4dp"
+        android:paddingStart="4dp"
 
         android:textSize="14sp"
         android:textColor="?attr/normalTextColor"
@@ -51,7 +51,7 @@
                android:paddingTop="0dp"
                android:layout_marginTop="0dp"
         android:ellipsize = "end"
-        android:paddingLeft="5dp"
+        android:paddingStart="5dp"
         android:text = "15mb - 10:14 - 245kbps"
         android:singleLine = "true" />
 </LinearLayout>

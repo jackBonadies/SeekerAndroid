@@ -13,8 +13,8 @@
         
         android:popupBackground = "?attr/cellback"
         android:completionThreshold="0"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
     android:hint="@string/add_user"
     android:imeOptions="actionDone"
     android:inputType="text" />

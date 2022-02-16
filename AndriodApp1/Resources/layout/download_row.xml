@@ -20,7 +20,7 @@
         android:layout_height = "wrap_content"
         android:textSize="15sp"
         android:textColor="?attr/cellTextColor"
-        android:paddingLeft="5dp"
+        android:paddingStart="5dp"
         android:ellipsize="end"
         android:text = "1.5"
         android:singleLine = "false" />
@@ -34,7 +34,7 @@
         android:textColor="?attr/cellTextColorSubdued"
         
         android:ellipsize = "end"
-        android:paddingLeft="5dp"
+        android:paddingStart="5dp"
         android:text = "15mb - 10:14 - 245kbps"
         android:singleLine = "true" />
 </LinearLayout>
