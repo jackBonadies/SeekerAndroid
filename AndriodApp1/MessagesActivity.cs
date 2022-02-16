@@ -209,7 +209,7 @@ namespace AndriodApp1
 
         public void ShowEditTextMessageUserDialog()
         {
-            if(MainActivity.IsLoggedIn())
+            if(MainActivity.IsNotLoggedIn())
             {
                 Toast.MakeText(this, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
                 return;

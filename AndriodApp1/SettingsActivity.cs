@@ -943,7 +943,7 @@ namespace AndriodApp1
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if(MainActivity.IsLoggedIn())
+            if(MainActivity.IsNotLoggedIn())
             {
                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;

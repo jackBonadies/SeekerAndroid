@@ -53,6 +53,7 @@ using Android.Net.Wifi;
 using static Android.Provider.DocumentsContract;
 using Android.Util;
 using SearchResponseExtensions;
+using Android.Net;
 
 //using System.IO;
 //readme:
@@ -2284,7 +2285,109 @@ namespace AndriodApp1
         }
     }
 
+    /// <summary>
+    /// When we switch from wifi to data or vice versa, we want to try to continue our downloads and uploads seamlessly.
+    /// We try to detect this event (as a netinfo disconnect (from old network) and then netinfo connect (with new network)).
+    /// Then in the transfers failure we check if a recent* network handoff occured causing the remote connection to close
+    /// And if so we retry the transfer.  *recent is tough to determine since you can still read from the pipe for a bit of time
+    /// even if wifi is turned off.
+    /// </summary>
+    public static class NetworkHandoffDetector
+    {
+        public static bool NetworkSuccessfullyHandedOff = false;
+        private static DateTime DisconnectedTime = DateTime.MinValue;
+        private static DateTime NetworkHandOffTime = DateTime.MinValue;
+        public static void ProcessEvent(NetworkInfo netInfo)
+        {
+            if(netInfo == null)
+            {
 
+            }
+            else
+            {
+                if(netInfo.IsConnected)
+                {
+                    if( (DateTime.UtcNow - DisconnectedTime).TotalSeconds < 2.0) //in practice .2s or less..
+                    {
+                        MainActivity.LogDebug("total seconds..." + (DateTime.UtcNow - DisconnectedTime).TotalSeconds);
+                        NetworkHandOffTime = DateTime.UtcNow;
+                        NetworkSuccessfullyHandedOff = true;
+                    }
+                }
+                else
+                {
+                    NetworkSuccessfullyHandedOff = false;
+                    DisconnectedTime = DateTime.UtcNow;
+                }
+            }
+        }
+
+        public static bool HasHandoffOccuredRecently()
+        {
+            if(!NetworkSuccessfullyHandedOff)
+            {
+                return false;
+            }
+            else
+            {
+                MainActivity.LogDebug("total seconds..." + (DateTime.UtcNow - NetworkHandOffTime).TotalSeconds);
+                return (DateTime.UtcNow - NetworkHandOffTime).TotalSeconds < 30.0; //in practice we can keep reading from the stream for a while so 30s is reasonable.
+            }
+        }
+    }
+
+    public class ConnectionReceiver : BroadcastReceiver
+    {
+        public override void OnReceive(Context context, Intent intent)
+        {
+            NetworkInfo netInfo = intent?.GetParcelableExtra("networkInfo") as NetworkInfo; //this will say Wifi Disconnected, and then Mobile Connected. so just wait for the "Connected" one.
+            NetworkHandoffDetector.ProcessEvent(netInfo);
+
+
+            //these are just toasts letting us know the status of the network..
+            #if DEBUG 
+            string action = intent?.Action;
+            if (action != null && action == ConnectivityManager.ConnectivityAction/* && netInfo != null && netInfo.IsConnected*/)
+            {
+                ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
+                if(cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
+                {
+                    MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
+                    SeekerApplication.ShowToast("Is Connected", ToastLength.Long);
+                    NetworkInfo info = cm.GetNetworkInfo(ConnectivityType.Wifi);
+                    if (info.IsConnected)
+                    {
+                        SeekerApplication.ShowToast("Is Connected Wifi", ToastLength.Long);
+                    }
+                    info = cm.GetNetworkInfo(ConnectivityType.Mobile);
+                    if (info.IsConnected)
+                    {
+                        SeekerApplication.ShowToast("Is Connected Mobile", ToastLength.Long);
+                    }
+                }
+                else
+                {
+                    if(cm.ActiveNetworkInfo!=null)
+                    {
+                        MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
+                        SeekerApplication.ShowToast("Is Disconnected", ToastLength.Long);
+                    }
+                    else
+                    {
+                        MainActivity.LogDebug("info: Is Disconnected(null)");
+                        SeekerApplication.ShowToast("Is Disconnected (null)", ToastLength.Long);
+                    }
+                }
+            }
+            #endif
+        }
+
+        public static bool DoWeHaveInternet()
+        {
+            ConnectivityManager cm = (ConnectivityManager)(SoulSeekState.ActiveActivityRef.GetSystemService(Context.ConnectivityService));
+            return cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected;
+        }
+    }
 
 
 
@@ -2312,6 +2415,7 @@ namespace AndriodApp1
             //MainActivity.LogFirebase("testing release");
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
+            this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));
             var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
             SoulSeekState.SharedPreferences = sharedPrefs;
             RestoreSoulSeekState(sharedPrefs, this);
@@ -7588,6 +7692,7 @@ namespace AndriodApp1
                 {
                     item1.QueueLength = 0;
                     Android.Net.Uri incompleteUri = null;
+                    TransfersFragment.SetupCancellationToken(item1, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                     Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource);
                     task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0, item1.GetDirectoryLevel()) { TransferItemReference = item1 })));
                 }
@@ -8752,7 +8857,8 @@ namespace AndriodApp1
                             //retry download.
                             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                             Android.Net.Uri incompleteUri = null;
-                            Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
+                                TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
+                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
                             retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
                         }
                         catch (System.Exception e)
@@ -8773,6 +8879,8 @@ namespace AndriodApp1
                 }
                 else if (task.Status == TaskStatus.Faulted)
                 {
+                    bool retriable = false;
+                        bool resetRetryCount = false;
                     if (task.Exception.InnerException is System.TimeoutException)
                     {
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
@@ -8799,20 +8907,40 @@ namespace AndriodApp1
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                     {
+                            retriable= true;
                         //MainActivity.LogFirebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
                         LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                            if(NetworkHandoffDetector.HasHandoffOccuredRecently())
+                            {
+                                resetRetryCount = true;
+                            }
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
                     {
-                        //MainActivity.LogFirebase("Network Subsystem is Down");
-                        LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_down)); };
+                            //MainActivity.LogFirebase("Network Subsystem is Down");
+                           if(ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
+                           {
+                                LogDebug("we do have internet");
+                                action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                                retriable = true;
+                                if (NetworkHandoffDetector.HasHandoffOccuredRecently())
+                                {
+                                    resetRetryCount = true;
+                                }
+                            }
+                           else
+                            {
+                                action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_down)); };
+                            }
+                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                        
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
                     {
-                        //MainActivity.LogFirebase("Reported as failed by uploader");
-                        LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            retriable = true;
+                            //MainActivity.LogFirebase("Reported as failed by uploader");
+                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
                     }
                     else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect message connection"))
@@ -8823,10 +8951,11 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        //the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly") //this seems to be retry able
-                        //or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
-                        //or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
-                        if (task.Exception != null && task.Exception.InnerException != null)
+                            retriable = true;
+                            //the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly") //this seems to be retry able
+                            //or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
+                            //or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
+                            if (task.Exception != null && task.Exception.InnerException != null)
                         {
                             //I get a lot of null refs from task.Exception.InnerException.Message
                                 MainActivity.LogFirebase("Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
@@ -8865,39 +8994,28 @@ namespace AndriodApp1
                             MainActivity.LogFirebase("Unhandled task exception (little info): " + task.Exception.Message);
                             LogDebug("Unhandled task exception (little info):" + task.Exception.Message);
                         }
+                    }
 
 
-                        if(e.dlInfo.RetryCount==0 && SoulSeekState.AutoRetryDownload)
+                    if((resetRetryCount || e.dlInfo.RetryCount==0) && SoulSeekState.AutoRetryDownload && retriable)
+                    {
+                        MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
+                        try
                         {
-                            try
-                            {
-                                //retry download.
-                                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                                Android.Net.Uri incompleteUri = null;
+                            //retry download.
+                            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                            Android.Net.Uri incompleteUri = null;
+                                TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                                 Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
-                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 1, task.Exception, e.dlInfo.Depth))));
+                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth))));
+                                return; //i.e. dont toast anything just retry.
                             }
-                            catch(System.Exception e)
-                            {
-                                MainActivity.LogFirebase("retry creation failed: " + e.Message + e.StackTrace);
-                            }
-                            return;
-                        }
-                        else
+                        catch(System.Exception e)
                         {
-                                //string msgDebug1 = "unhandled exception info: " + task.Exception.Message + " " + task.Exception.StackTrace;
-                                //string msgDebug2 = "unhandled exception sub info: " + task.Exception.InnerException?.Message + " " + task.Exception.InnerException?.StackTrace;
-                                //MainActivity.LogFirebase(msgDebug1);
-                                //MainActivity.LogFirebase(msgDebug2);
-                                LogDebug("The task did not complete due to unhandled exception");
-                                if(action==null)
-                                {
-                                    //action = () => { ToastUI(msgDebug1); ToastUI(msgDebug2); };
-                                    action = () => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.error_unspecified)); };
-                                }
-                                SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
-                                return;
+                            MainActivity.LogFirebase("retry creation failed: " + e.Message + e.StackTrace);
+                                //if this happens at least log the normal message....
                         }
+                        
                     }
 
                     if(e.dlInfo.RetryCount==1 && e.dlInfo.PreviousFailureException!=null)
@@ -8907,10 +9025,16 @@ namespace AndriodApp1
 
                     //Action action2 = () => { ToastUI(task.Exception.ToString());};
                     //this.RunOnUiThread(action2);
+                    if (action == null)
+                    {
+                        //action = () => { ToastUI(msgDebug1); ToastUI(msgDebug2); };
+                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_unspecified)); };
+                    }
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
                     //System.Console.WriteLine(task.Exception.ToString());
                     return;
                 }
+                //failed downloads return before getting here...
 
                 if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                 {
@@ -9147,7 +9271,7 @@ namespace AndriodApp1
             }
         }
 
-        public static bool IsLoggedIn()
+        public static bool IsNotLoggedIn()
         {
             return (!SoulSeekState.currentlyLoggedIn) || SoulSeekState.Username == null || SoulSeekState.Password == null || SoulSeekState.Username == string.Empty;
         }
@@ -9177,6 +9301,7 @@ namespace AndriodApp1
                 {
                     if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
                     {
+                        MainActivity.LogDebug("StaticHacks.RootView != null");
                         bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
@@ -9191,7 +9316,7 @@ namespace AndriodApp1
                             //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
                             if (logInLayout == null)
                             {
-                                RelativeLayout relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false) as RelativeLayout;
+                                ViewGroup relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false) as ViewGroup;
                                 relLayout.LayoutParameters = new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
                                 //var action1 = new Action(() => {
                                     (StaticHacks.RootView as ViewGroup).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
@@ -9205,16 +9330,19 @@ namespace AndriodApp1
                             //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
                             logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
                             buttonLogin.Click -= LogInClick;
-                            buttonLogin.Click += LogInClick;
+                            (StaticHacks.LoginFragment as AndriodApp1.LoginFragment).rootView = StaticHacks.RootView;
+                            (StaticHacks.LoginFragment as AndriodApp1.LoginFragment).SetUpLogInLayout();
+                            //buttonLogin.Click += LogInClick;
                         }
-                        catch
+                        catch(Exception ex)
                         {
-
+                            MainActivity.LogDebug("BackToLogInLayout" + ex.Message);
                         }
 
                     }
                     else
                     {
+                        MainActivity.LogDebug("StaticHacks.RootView == null");
                         bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
@@ -9227,6 +9355,7 @@ namespace AndriodApp1
                 {
 
                 }
+                MainActivity.LogDebug("logInLayout is here? " + (logInLayout != null).ToString());
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Visible;
@@ -9247,12 +9376,12 @@ namespace AndriodApp1
                             loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                             settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                         }
-                        if(loading==null && StaticHacks.RootView!=null)
+                        if(rootView == null && loading == null && StaticHacks.RootView!=null)
                         {
-                            bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                            welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                            settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
+                            bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                            welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
+                            loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
+                            settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
                         }
                     }
                     loggingInLayout.Visibility = ViewStates.Gone; //can get nullref here!!! (at least before the .AddLoggedInLayout code..
@@ -10890,7 +11019,7 @@ namespace AndriodApp1
         public static bool AutoClearCompleteUploads = false;
         public static bool FreeUploadSlotsOnly = true;
         public static bool DisableDownloadToastNotification = false;
-        public static bool AutoRetryDownload = true;
+        public static bool AutoRetryDownload = false; //todo change back..
 
         public static bool HideLockedResultsInSearch = true;
         public static bool HideLockedResultsInBrowse = true;

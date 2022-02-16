@@ -78,7 +78,7 @@ namespace AndriodApp1
             _mContext = context;
             
             Java.IO.File[] externalRootDirs = context.GetExternalFilesDirs(null);
-            if(externalRootDirs.Count()>1) //this means user has SDCARD
+            if(externalRootDirs != null && externalRootDirs.Count()>1) //this means user has SDCARD
             {
                 //get root (I assume this is going to be /storage/ but just in case)
                 string[] folderNames = externalRootDirs[0].AbsolutePath.Split('/');
@@ -98,9 +98,13 @@ namespace AndriodApp1
                 _mSdcardDirectory = @"/" + rootFolder + @"/";
                 //this allows one to press '..' to go above the typical emulated root.
             }
-            else
+            else if(Environment.ExternalStorageDirectory != null)
             {
                 _mSdcardDirectory = Environment.ExternalStorageDirectory.AbsolutePath;
+            }
+            else
+            {
+                _mSdcardDirectory = "/"; //this is valid.
             }
             
             try
