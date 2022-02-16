@@ -19,7 +19,7 @@
         android:layout_width = "match_parent"
         android:layout_height = "match_parent"
         android:ellipsize = "end"
-        android:paddingLeft = "5dp"
+        android:paddingStart= "5dp"
 
 
         android:paddingTop = "3dp"
@@ -45,7 +45,7 @@
         android:background = "?attr/cell_shape_end"
         android:ellipsize = "end"
         android:paddingBottom = "5dp"
-        android:paddingLeft = "5dp"
+        android:paddingStart= "5dp"
         android:textColor="?attr/cellTextColor"
         android:text = "username  |  mp3(320kbs)  |  897kbsDummy"
         android:textSize="12sp"

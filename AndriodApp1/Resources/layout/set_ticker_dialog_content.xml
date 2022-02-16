@@ -11,8 +11,8 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:maxLines="3"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:hint="@string/type_chatroom_ticker_message"
             android:imeOptions="actionSend"
             android:inputType="text" />

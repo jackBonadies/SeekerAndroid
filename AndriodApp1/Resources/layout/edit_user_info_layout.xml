@@ -40,7 +40,7 @@
             android:orientation="vertical">
             <TextView
                 android:layout_marginTop="4dp"
-                android:layout_marginLeft="2dp"
+                android:layout_marginStart="2dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
@@ -52,8 +52,8 @@
                 android:minLines="3"
                 android:lines="12"
                 android:maxLines="12"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:textSize="16sp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
     />
 
             <TextView
-                android:layout_marginLeft="2dp"
+                android:layout_marginStart="2dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="22sp"
@@ -82,8 +82,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:text="@string/no_image_chosen"
                 android:id="@+id/user_info_picture_textview"
                 android:padding="6dp"
@@ -95,8 +95,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:orientation="horizontal">
                 <Button
                     android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
                     android:layout_weight="1"
                     android:id="@+id/buttonSelectImage"
                     android:text="@string/select_image"
-                    android:layout_marginRight="10dp"
+                    android:layout_marginEnd="10dp"
                     android:foreground="@drawable/button"
                     style="@style/SeekerButtonStyle"    
         />
@@ -112,7 +112,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
                     android:id="@+id/buttonClearImage"
                     android:foreground="@drawable/button"
                     style="@style/SeekerButtonStyle"

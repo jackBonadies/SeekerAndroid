@@ -5,8 +5,8 @@
     android:orientation="vertical"
     android:paddingTop="25dp"
     android:paddingBottom="20dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -62,8 +62,8 @@
         <TextView
         android:paddingBottom="2dp"
         android:paddingTop="2dp"
-        android:paddingRight="2dp"
-        android:paddingLeft="2dp"
+        android:paddingEnd="2dp"
+        android:paddingStart="2dp"
         android:textAllCaps="false"
         android:textStyle="bold"
         android:text="@string/search_result_style"

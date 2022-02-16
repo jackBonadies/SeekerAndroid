@@ -30,7 +30,7 @@
             android:layout_alignParentRight = "true"
             android:layout_alignParentEnd = "true" />
     <Button
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Submit"
@@ -44,7 +44,7 @@
         android:background="?attr/mainPurple"
         android:textColor="#ffffff"
         android:id="@+id/button2"
-        android:layout_alignRight="@id/searchHere"
+        android:layout_alignEnd="@id/searchHere"
         />
         </LinearLayout>
     <LinearLayout
