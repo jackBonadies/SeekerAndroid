@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="75" android:versionName="2.8.5" package="com.companyname.andriodapp1" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="76" android:versionName="2.8.6" package="com.companyname.andriodapp1" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="19" android:targetSdkVersion="31" />
-	<application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="true" android:theme="@style/AppTheme" android:name="com.companyname.andriodapp1.SeekerApplication">
+	<application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round" android:supportsRtl="false" android:theme="@style/AppTheme" android:name="com.companyname.andriodapp1.SeekerApplication">
 		<service android:name="com.companyname.andriodapp1.DownloadService" android:stopWithTask="true"></service>
 		<service android:name="com.companyname.andriodapp1.SeekerKeepAliveService" android:stopWithTask="true"></service>
 		<activity android:name="com.companyname.androidapp1.MainActivity" android:windowSoftInputMode="adjustPan"></activity>
