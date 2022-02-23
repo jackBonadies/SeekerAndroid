@@ -335,6 +335,17 @@ namespace AndriodApp1
                 Tuple<int, int> dimensions = null;
                 string mimeType = null;
                 loadedBitmap = LoadBitmapFromImage(out dimensions, out mimeType);
+                //loadedBitmap will be null if image cannot be decoded.
+                //remember, the picture is simply a byte array that another user sends you.
+                //  it can be literally anything (a gif - which actually decodes fine, a .svg - 
+                //  which doesnt, a .txt, etc.). Nicotine for example allows any file to be selected.
+                if(loadedBitmap == null)
+                {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
+                    string uname = userData != null ? userData.Username : "no user";
+                    MainActivity.LogFirebase("FAILURE TO DECODE USERS PICTURE " + uname);
+                    return;
+                }
                 int h = loadedBitmap.Height;
                 originalImageMimetype = mimeType;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(dimensions.Item1, dimensions.Item2);

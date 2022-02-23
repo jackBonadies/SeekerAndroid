@@ -266,11 +266,17 @@ namespace AndriodApp1
             rememberSearchHistory.CheckedChange += RememberSearchHistory_CheckedChange;
 
             Button clearRecentUserHistory = FindViewById<Button>(Resource.Id.clearRecentUsers);
-            clearRecentUserHistory.Click += ClearRecentUserHistory_Click; ;
+            clearRecentUserHistory.Click += ClearRecentUserHistory_Click;
 
             CheckBox rememberRecentUsers = FindViewById<CheckBox>(Resource.Id.rememberRecentUsers);
             rememberRecentUsers.Checked = SoulSeekState.ShowRecentUsers;
             rememberRecentUsers.CheckedChange += RememberRecentUsers_CheckedChange;
+
+
+            CheckBox enableDiagnostics = FindViewById<CheckBox>(Resource.Id.enableDiagnostics);
+            enableDiagnostics.Checked = SeekerApplication.LOG_DIAGNOSTICS;
+            enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
+
 
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
             positionNumberPairs.Add(new Tuple<int, int>(0,5));
@@ -727,6 +733,20 @@ namespace AndriodApp1
                 SoulSeekState.RecentUsersManager.SetRecentUserList(new List<string>());
             }
             SeekerApplication.SaveRecentUsers();
+        }
+
+        private void EnableDiagnostics_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            if(SeekerApplication.LOG_DIAGNOSTICS != e.IsChecked)
+            {
+                SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                    editor.PutBoolean(SoulSeekState.M_LOG_DIAGNOSTICS, SeekerApplication.LOG_DIAGNOSTICS);
+                    bool success = editor.Commit();
+                }
+            }
         }
 
         private void RememberRecentUsers_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)

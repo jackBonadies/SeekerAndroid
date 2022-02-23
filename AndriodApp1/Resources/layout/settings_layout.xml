@@ -1612,9 +1612,54 @@ android:theme="@style/checkBoxStyle"
 
 </LinearLayout>
 
-            
-            <Button
+
+                            <LinearLayout
                 android:layout_below="@id/privLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "2dp"
+                    android:layout_centerHorizontal="true"
+                    android:id="@+id/enableDiagnosticsLayout"
+                    android:orientation="horizontal"
+                    android:gravity="center_horizontal|fill_horizontal|center">
+
+                <CheckBox
+                
+                android:layout_below="@id/privLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="Enable Diagnostics"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="10dp"
+                android:layout_gravity="center"
+
+                android:theme="@style/checkBoxStyle"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/enableDiagnostics"
+                android:layout_marginBottom = "10dp"/>
+
+
+                <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        
+                        android:gravity="center_vertical"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginBottom = "2dp"
+                        
+                        android:id="@+id/moreInfoDiagnostics"
+                        app:srcCompat="@drawable/help_circle_outline"
+                        android:tint="?attr/mainTextColor"
+            />
+    </LinearLayout>
+
+            <Button
+                android:layout_below="@id/enableDiagnosticsLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/edit_your_user_info"
