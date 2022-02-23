@@ -457,7 +457,7 @@ namespace AndriodApp1
 
         public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
         {
-            
+
             if (username == string.Empty || username == null)
             {
                 Toast.MakeText(c, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
@@ -476,28 +476,34 @@ namespace AndriodApp1
                 return;
             }
 
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+                if (t.IsFaulted)
+                {
+                    //only show once for the original fault.
+                    MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
+                    if (!(t.Exception.InnerException is FaultPropagationException))
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                    }
+                    throw new FaultPropagationException();
+                }
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
+            });
+
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
+                MainActivity.LogDebug("CurrentlyLoggedInButDisconnectedState");
                 Task t;
                 if (!MainActivity.ShowMessageAndCreateReconnectTask(c, out t))
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-
-                        });
-                        return;
-                    }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{AddUserLogic(c,username,UIaction, massImportCase); });
-
-                }));
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
+            }
+            else if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "User will be added once login is complete."))
+            {
+                MainActivity.LogDebug("IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction");
+                return;
             }
             else
             {

@@ -300,6 +300,8 @@ namespace AndriodApp1
                 //    }
                 //}
                 //Console.WriteLine(arrayOfDir.ToString());
+                MainActivity.LogDebug($"RequestFilesLogic {username} completed");
+
                 if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
                 {
                     //timeout
@@ -311,9 +313,16 @@ namespace AndriodApp1
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
                     return;
                 }
+                else if(br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
+                {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, $"Cannot browse {username}, user is offline.", ToastLength.Short).Show(); });
+                    return;
+                }
                 else if (br.IsFaulted)
                 {
                     //shouldnt get here
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, $"Failed to browse {username} due to unspecified error.", ToastLength.Short).Show(); });
+                    return;
                 }
                 //TODO there is a case due to like button mashing or if you keep requesting idk. but its a SoulseekClient InnerException and it says peer disconnected unexpectedly and timeout.
 

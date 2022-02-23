@@ -750,7 +750,7 @@ namespace Soulseek.Network.Tcp
             ResetInactivityTime();
 
             var inputBuffer = new byte[Options.WriteBufferSize];
-            var totalBytesWritten = 0;
+            long totalBytesWritten = 0;
 
             try
             {

@@ -2340,7 +2340,7 @@ namespace AndriodApp1
     {
         public override void OnReceive(Context context, Intent intent)
         {
-            NetworkInfo netInfo = intent?.GetParcelableExtra("networkInfo") as NetworkInfo; //this will say Wifi Disconnected, and then Mobile Connected. so just wait for the "Connected" one.
+            NetworkInfo netInfo = intent?.GetParcelableExtra("networkInfo") as NetworkInfo; //this will say Wifi Disconnected, and then Mobile Connected. so just wait for the "Connected" one.            
             NetworkHandoffDetector.ProcessEvent(netInfo);
 
 
@@ -2400,6 +2400,7 @@ namespace AndriodApp1
         }
         
         public const bool AUTO_CONNECT_ON = true;
+        public static bool LOG_DIAGNOSTICS = false;
 
         public override void OnCreate()
         {
@@ -2500,7 +2501,11 @@ namespace AndriodApp1
             {
                 //need search response and enqueue download action...
                 //SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations,listenPort:SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler)); //Enable Listener is False.  Default is True.
+                SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations,listenPort:SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
+                if(LOG_DIAGNOSTICS)
+                {
+                    SoulSeekState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
+                }
                 SoulSeekState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SoulSeekState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
                 SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
@@ -2539,6 +2544,80 @@ namespace AndriodApp1
             //shouldnt we also connect??? TODO TODO
 
 
+        }
+
+        private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
+        {
+            string timestamp = e.Timestamp.ToString("[MM_dd-hh:mm:ss] ");
+            string body = null;
+            if (e.IncludesException)
+            {
+                body = e.Message + System.Environment.NewLine + e.Exception.Message + System.Environment.NewLine + e.Exception.StackTrace;
+            }
+            else
+            {
+                body = e.Message;
+            }
+            return timestamp + body;
+        }
+
+        public static void AppendMessageToDiagFile(string msg)
+        {
+            //add the timestamp..
+            AppendLineToDiagFile(CreateMessage(msg));
+        }
+
+        private static string CreateMessage(string line)
+        {
+            string timestamp = DateTime.UtcNow.ToString("[MM_dd-hh:mm:ss] ");
+            return timestamp + line;
+        }
+
+
+
+        private static void AppendLineToDiagFile(string line)
+        {
+            if(SoulSeekState.DiagnosticTextFile == null)
+            {
+                if(SoulSeekState.RootDocumentFile == null)
+                {
+                    return;
+                }
+                else
+                {
+                    SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
+                    if(SoulSeekState.DiagnosticTextFile == null)
+                    {
+                        SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.CreateFile("text/plain","seeker_diagnostics");
+                        if(SoulSeekState.DiagnosticTextFile == null)
+                        {
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if(SoulSeekState.DiagnosticStreamWriter == null)
+            {
+                System.IO.Stream outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(SoulSeekState.DiagnosticTextFile.Uri, "wa");
+                if(outputStream == null)
+                {
+                    return;
+                }
+                SoulSeekState.DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
+                if(SoulSeekState.DiagnosticStreamWriter==null)
+                {
+                    return;
+                }
+            }
+
+            SoulSeekState.DiagnosticStreamWriter.WriteLine(line);
+            SoulSeekState.DiagnosticStreamWriter.Flush();
+        }
+
+        public static void SoulseekClient_DiagnosticGenerated(object sender, Soulseek.Diagnostics.DiagnosticEventArgs e)
+        {
+            AppendLineToDiagFile(CreateMessage(e));
         }
 
         /// <summary>
@@ -3872,6 +3951,8 @@ namespace AndriodApp1
                 ChatroomActivity.ShowTickerView = sharedPreferences.GetBoolean(SoulSeekState.M_ShowTickerView, false);
                 ChatroomController.SortChatroomUsersBy = (ChatroomController.SortOrderChatroomUsers)(sharedPreferences.GetInt(SoulSeekState.M_RoomUserListSortOrder, 2)); //default is 2 = alphabetical..
                 ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(SoulSeekState.M_RoomUserListShowFriendsAtTop, false);
+
+                SeekerApplication.LOG_DIAGNOSTICS = sharedPreferences.GetBoolean(SoulSeekState.M_LOG_DIAGNOSTICS, false);
             }
         }
 
@@ -4972,14 +5053,24 @@ namespace AndriodApp1
         public static bool crashlyticsEnabled = true;
         public static void LogDebug(string msg)
         {
+            if(SeekerApplication.LOG_DIAGNOSTICS)
+            {
+                //write to file
+                SeekerApplication.AppendMessageToDiagFile(msg);
+            }
             #if ADB_LOGCAT
               log.Debug(logCatTag, msg);
             #endif
         }
         public static void LogFirebase(string msg)
         {
+            if (SeekerApplication.LOG_DIAGNOSTICS)
+            {
+                //write to file
+                SeekerApplication.AppendMessageToDiagFile(msg);
+            }
 #if !IzzySoft
-            if(crashlyticsEnabled)
+            if (crashlyticsEnabled)
             {
                 Firebase.Crashlytics.FirebaseCrashlytics.Instance.RecordException(new Java.Lang.Throwable(msg));
             }
@@ -4990,8 +5081,13 @@ namespace AndriodApp1
         }
         public static void LogInfoFirebase(string msg)
         {
+            if (SeekerApplication.LOG_DIAGNOSTICS)
+            {
+                //write to file
+                SeekerApplication.AppendMessageToDiagFile(msg);
+            }
 #if !IzzySoft
-            if(crashlyticsEnabled)
+            if (crashlyticsEnabled)
             {
                 Firebase.Crashlytics.FirebaseCrashlytics.Instance.Log(msg);
             }
@@ -8274,7 +8370,8 @@ namespace AndriodApp1
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
-                if (SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.Connecting) || SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggingIn))
+                //old: SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.Connecting) || SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggingIn). this is not good enough since you can still pass this if you are connected but not yet Logging In!
+                if (!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn)) 
                 {
                     //MainActivity.LogDebug("IsLoggingInTaskCurrentlyBeingPerformed: TRUE");
                     SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
@@ -11305,8 +11402,11 @@ namespace AndriodApp1
 
         public const string M_RoomUserListSortOrder = "Momento_RoomUserListSortOrder";
         public const string M_RoomUserListShowFriendsAtTop = "Momento_RoomUserListShowFriendsAtTop";
+        
         public const string M_ShowStatusesView = "Momento_ShowStatusesView";
         public const string M_ShowTickerView = "Momento_ShowTickerView";
+
+        public const string M_LOG_DIAGNOSTICS = "Momento_LOG_DIAGNOSTICS";
         //public const string M_UserListSortOrder = "Momento_UserListSortHistory";
 
 
@@ -11394,6 +11494,8 @@ namespace AndriodApp1
         public const string M_SmartFilter_CountsOrder = "Momento_SmartFilterCountsOrder";
         public const string M_SmartFilter_TypesOrder = "Momento_SmartFilterTypesOrder";
 
+        public static Android.Support.V4.Provider.DocumentFile DiagnosticTextFile = null;
+        public static System.IO.StreamWriter DiagnosticStreamWriter = null;
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
         public static Android.Support.V4.Provider.DocumentFile RootDocumentFile = null;
