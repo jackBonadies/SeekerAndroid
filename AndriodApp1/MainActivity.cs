@@ -88,22 +88,22 @@ namespace AndriodApp1
 
     public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivityLifecycleCallbacks
     {
-        public static bool HasAppEverStarted = false; 
+        public static bool HasAppEverStarted = false;
         //basically this is for the very first time the app gets started so that we 
         //can launch a foreground service while we are in the foreground...
         void Application.IActivityLifecycleCallbacks.OnActivityCreated(Activity activity, Bundle savedInstanceState)
         {
-            
+
         }
 
         void Application.IActivityLifecycleCallbacks.OnActivityDestroyed(Activity activity)
         {
-            
+
         }
 
         void Application.IActivityLifecycleCallbacks.OnActivityPaused(Activity activity)
         {
-            
+
         }
 
         void Application.IActivityLifecycleCallbacks.OnActivityResumed(Activity activity)
@@ -124,10 +124,10 @@ namespace AndriodApp1
                                     //its just that sometimes this almost gets like forced.... but not sure how to reproudce...
                     try
                     {
-                        if(activity is AppCompatActivity)
+                        if (activity is AppCompatActivity)
                         {
                             bool foreground = (activity as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
-                            if(foreground)
+                            if (foreground)
                             {
                                 MainActivity.LogFirebase("FOREGROUND seeker keep alive cannot be started: " + e.Message + e.StackTrace);
                             }
@@ -153,13 +153,13 @@ namespace AndriodApp1
 
         void Application.IActivityLifecycleCallbacks.OnActivitySaveInstanceState(Activity activity, Bundle outState)
         {
-            
+
         }
 
         void Application.IActivityLifecycleCallbacks.OnActivityStarted(Activity activity)
         {
             SoulSeekState.ActiveActivityRef = activity as FragmentActivity;
-            if(SoulSeekState.ActiveActivityRef==null)
+            if (SoulSeekState.ActiveActivityRef == null)
             {
                 MainActivity.LogFirebase("OnActivityStarted activity is null!");
             }
@@ -222,13 +222,13 @@ namespace AndriodApp1
         /// <param name="privUsers"></param>
         public void SetPrivilegedList(IReadOnlyCollection<string> privUsers)
         {
-            lock(PrivilegedUsersLock)
+            lock (PrivilegedUsersLock)
             {
                 PrivilegedUsers = privUsers;
-                if(SoulSeekState.Username!=null && SoulSeekState.Username != string.Empty)
+                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
                 {
                     IsPrivileged = CheckIfPrivileged(SoulSeekState.Username);
-                    if(IsPrivileged)
+                    if (IsPrivileged)
                     {
                         GetPrivilegesAPI(false);
                     }
@@ -245,11 +245,11 @@ namespace AndriodApp1
         private DateTime LastCheckTime = DateTime.MinValue;
         public int GetRemainingSeconds()
         {
-            if(SecondsRemainingAtLastCheck==0 || SecondsRemainingAtLastCheck == int.MinValue)
+            if (SecondsRemainingAtLastCheck == 0 || SecondsRemainingAtLastCheck == int.MinValue)
             {
                 return 0;
             }
-            else if(LastCheckTime==DateTime.MinValue)
+            else if (LastCheckTime == DateTime.MinValue)
             {
                 //shouldnt go here
                 return 0;
@@ -258,7 +258,7 @@ namespace AndriodApp1
             {
                 int secondsSinceLastCheck = (int)Math.Floor(LastCheckTime.Subtract(DateTime.UtcNow).TotalSeconds);
                 int remainingSeconds = SecondsRemainingAtLastCheck - secondsSinceLastCheck;
-                return Math.Max(remainingSeconds,0);
+                return Math.Max(remainingSeconds, 0);
             }
         }
 
@@ -268,14 +268,14 @@ namespace AndriodApp1
         /// <returns></returns>
         public int GetRemainingDays()
         {
-            return GetRemainingSeconds()/(24*3600);
+            return GetRemainingSeconds() / (24 * 3600);
         }
 
         public string GetPrivilegeStatus()
         {
-            if(SecondsRemainingAtLastCheck==0 || SecondsRemainingAtLastCheck==int.MinValue || GetRemainingSeconds()<=0)
+            if (SecondsRemainingAtLastCheck == 0 || SecondsRemainingAtLastCheck == int.MinValue || GetRemainingSeconds() <= 0)
             {
-                if(IsPrivileged)
+                if (IsPrivileged)
                 {
                     return SeekerApplication.GetString(Resource.String.yes); //this is if we are in the privileged list but our actual amount has not yet been returned.
                 }
@@ -287,19 +287,19 @@ namespace AndriodApp1
             else
             {
                 int seconds = GetRemainingSeconds();
-                if(seconds> 3600 * 24)
+                if (seconds > 3600 * 24)
                 {
                     int days = seconds / (3600 * 24);
-                    if(days==1)
+                    if (days == 1)
                     {
-                        return string.Format(SeekerApplication.GetString(Resource.String.day_left),days);
+                        return string.Format(SeekerApplication.GetString(Resource.String.day_left), days);
                     }
                     else
                     {
                         return string.Format(SeekerApplication.GetString(Resource.String.days_left), days);
                     }
                 }
-                else if(seconds > 3600)
+                else if (seconds > 3600)
                 {
                     int hours = seconds / 3600;
                     if (hours == 1)
@@ -342,12 +342,13 @@ namespace AndriodApp1
         private void GetPrivilegesLogic(bool feedback)
         {
             SoulSeekState.SoulseekClient.GetPrivilegesAsync().ContinueWith(new Action<Task<int>>
-                ((Task<int> t)=>{
-                    if(t.IsFaulted)
+                ((Task<int> t) =>
+                {
+                    if (t.IsFaulted)
                     {
-                        if(feedback)
+                        if (feedback)
                         {
-                            if(t.Exception.InnerException is TimeoutException)
+                            if (t.Exception.InnerException is TimeoutException)
                             {
                                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
                             }
@@ -362,18 +363,18 @@ namespace AndriodApp1
                     else
                     {
                         SecondsRemainingAtLastCheck = t.Result;
-                        if(t.Result>0)
+                        if (t.Result > 0)
                         {
                             IsPrivileged = true;
                         }
-                        else if(t.Result==0)
+                        else if (t.Result == 0)
                         {
                             IsPrivileged = false;
                         }
                         LastCheckTime = DateTime.UtcNow;
                         if (feedback)
                         {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) +  ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(),ToastLength.Long);
+                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) + ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(), ToastLength.Long);
                         }
                         PrivilegesChecked?.Invoke(null, new EventArgs());
                     }
@@ -420,7 +421,7 @@ namespace AndriodApp1
         {
             lock (PrivilegedUsersLock)
             {
-                if(PrivilegedUsers!=null)
+                if (PrivilegedUsers != null)
                 {
                     return PrivilegedUsers.Contains(username);
                 }
@@ -444,7 +445,7 @@ namespace AndriodApp1
 
         public static DateTime LastSetTime = DateTime.MinValue;
         public static int LastSetLifeTime = -1; //sec
-        public static int LastSetPort = -1; 
+        public static int LastSetPort = -1;
         public static string LastSetLocalIP = string.Empty;
 
         public static void SaveUpnpState()
@@ -464,7 +465,7 @@ namespace AndriodApp1
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                LastSetTime = new DateTime( SoulSeekState.SharedPreferences.GetLong(SoulSeekState.M_LastSetUpnpRuleTicks, 0) );
+                LastSetTime = new DateTime(SoulSeekState.SharedPreferences.GetLong(SoulSeekState.M_LastSetUpnpRuleTicks, 0));
                 LastSetLifeTime = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_LifetimeSeconds, -1);
                 LastSetPort = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_PortMapped, -1);
                 LastSetLocalIP = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_LastSetLocalIP, string.Empty);
@@ -475,7 +476,7 @@ namespace AndriodApp1
         {
             get
             {
-                if(instance==null)
+                if (instance == null)
                 {
                     instance = new UPnpManager();
                 }
@@ -490,7 +491,7 @@ namespace AndriodApp1
         private void CancelSearchAfterTime() //SSDP
         {
             int timeout = 7; //seconds.  our MX value is 3 seconds.
-            System.Timers.Timer finishSearchTimer = new System.Timers.Timer(timeout*1000);
+            System.Timers.Timer finishSearchTimer = new System.Timers.Timer(timeout * 1000);
             finishSearchTimer.AutoReset = false;
             finishSearchTimer.Elapsed += FinishSearchTimer_Elapsed;
             finishSearchTimer.Start();
@@ -504,39 +505,39 @@ namespace AndriodApp1
             SuccessIcon = 3
         }
 
-        public Tuple<ListeningIcon,string> GetIconAndMessage()
+        public Tuple<ListeningIcon, string> GetIconAndMessage()
         {
-            if(!SoulSeekState.ListenerUPnpEnabled)
+            if (!SoulSeekState.ListenerUPnpEnabled)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_off));
             }
-            else if(!SoulSeekState.ListenerEnabled)
+            else if (!SoulSeekState.ListenerEnabled)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.listener_off));
             }
-            else if(RunningStatus == UpnpRunningStatus.NeverStarted)
+            else if (RunningStatus == UpnpRunningStatus.NeverStarted)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_not_ran));
             }
-            else if(RunningStatus == UpnpRunningStatus.CurrentlyRunning)
+            else if (RunningStatus == UpnpRunningStatus.CurrentlyRunning)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.PendingIcon, Context.GetString(Resource.String.upnp_currently_running));
             }
-            else if(RunningStatus == UpnpRunningStatus.Finished)
+            else if (RunningStatus == UpnpRunningStatus.Finished)
             {
-                if(DiagStatus == UpnpDiagStatus.NoUpnpDevicesFound)
+                if (DiagStatus == UpnpDiagStatus.NoUpnpDevicesFound)
                 {
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.no_upnp_devices_found));
                 }
-                else if(DiagStatus == UpnpDiagStatus.WifiDisabled)
+                else if (DiagStatus == UpnpDiagStatus.WifiDisabled)
                 {
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.upnp_wifi_only));
                 }
-                else if(DiagStatus == UpnpDiagStatus.NoWifiConnection)
+                else if (DiagStatus == UpnpDiagStatus.NoWifiConnection)
                 {
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.upnp_no_wifi_conn));
                 }
-                else if(DiagStatus == UpnpDiagStatus.UpnpDeviceFoundButFailedToMap)
+                else if (DiagStatus == UpnpDiagStatus.UpnpDeviceFoundButFailedToMap)
                 {
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.failed_to_set));
                 }
@@ -554,7 +555,7 @@ namespace AndriodApp1
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
                 }
             }
-            else if(RunningStatus == UpnpRunningStatus.AlreadyMapped)
+            else if (RunningStatus == UpnpRunningStatus.AlreadyMapped)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.SuccessIcon, Context.GetString(Resource.String.upnp_last_success));
             }
@@ -576,36 +577,37 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("FinishSearchTimer_Elapsed " + ex.Message + ex.StackTrace);
             }
-            if(DevicesSuccessfullyMapped > 0)
+            if (DevicesSuccessfullyMapped > 0)
             {
                 DiagStatus = UpnpDiagStatus.Success;
             }
-            else if(DevicesSuccessfullyMapped==0 && DevicesFound > 0)
+            else if (DevicesSuccessfullyMapped == 0 && DevicesFound > 0)
             {
                 DiagStatus = UpnpDiagStatus.UpnpDeviceFoundButFailedToMap;
             }
-            else if(DevicesSuccessfullyMapped == 0 && DevicesFound == 0)
+            else if (DevicesSuccessfullyMapped == 0 && DevicesFound == 0)
             {
                 DiagStatus = UpnpDiagStatus.NoUpnpDevicesFound;
             }
-            if(Feedback)
+            if (Feedback)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                if(DiagStatus == UpnpDiagStatus.NoUpnpDevicesFound)
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.no_upnp_devices_found), ToastLength.Short).Show();
-                }
-                else if(DiagStatus == UpnpDiagStatus.UpnpDeviceFoundButFailedToMap)
-                {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.failed_to_set), ToastLength.Short).Show();
-                }
+                    if (DiagStatus == UpnpDiagStatus.NoUpnpDevicesFound)
+                    {
+                        Toast.MakeText(Context, Context.GetString(Resource.String.no_upnp_devices_found), ToastLength.Short).Show();
+                    }
+                    else if (DiagStatus == UpnpDiagStatus.UpnpDeviceFoundButFailedToMap)
+                    {
+                        Toast.MakeText(Context, Context.GetString(Resource.String.failed_to_set), ToastLength.Short).Show();
+                    }
                 });
             }
             Feedback = false;
             MainActivity.LogDebug("finished " + DiagStatus.ToString());
 
             SearchFinished?.Invoke(null, new EventArgs());
-            if(DiagStatus == UpnpDiagStatus.Success)
+            if (DiagStatus == UpnpDiagStatus.Success)
             {
                 //set up timer to run again...
                 RenewMapping();
@@ -623,13 +625,13 @@ namespace AndriodApp1
                     Feedback = false;
                     return;
                 }
-                if(LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SoulSeekState.ListenerPort && IsLocalIPsame())
+                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SoulSeekState.ListenerPort && IsLocalIPsame())
                 {
                     MainActivity.LogDebug("Renew Mapping Later... we already have a good one..");
                     RunningStatus = UpnpRunningStatus.AlreadyMapped;
-                    SearchFinished?.Invoke(null,new EventArgs());
+                    SearchFinished?.Invoke(null, new EventArgs());
                     Feedback = false;
-                    RenewMapping(); 
+                    RenewMapping();
                 }
                 else
                 {
@@ -637,7 +639,7 @@ namespace AndriodApp1
                     SearchAndSetMapping();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("SearchAndSetMappingIfRequired" + e.Message + e.StackTrace);
                 Feedback = false;
@@ -651,9 +653,9 @@ namespace AndriodApp1
             MainActivity.LogDebug("renewing mapping");
             try
             {
-                if(LastSetLifeTime!=-1 && LastSetPort != -1 && LastSetTime!=DateTime.MinValue)
+                if (LastSetLifeTime != -1 && LastSetPort != -1 && LastSetTime != DateTime.MinValue)
                 {
-                    if(RenewMappingTimer==null)
+                    if (RenewMappingTimer == null)
                     {
                         RenewMappingTimer = new System.Timers.Timer();
                         RenewMappingTimer.AutoReset = false;//since this function will get called again anyway.
@@ -663,7 +665,7 @@ namespace AndriodApp1
                     RenewMappingTimer.Start();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("RenewMapping" + e.Message + e.StackTrace);
             }
@@ -686,7 +688,7 @@ namespace AndriodApp1
                 }
                 return Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress) == LastSetLocalIP;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MainActivity.LogFirebase("IsLocalIPsame exception " + ex.Message + ex.StackTrace);
                 return false;
@@ -697,14 +699,14 @@ namespace AndriodApp1
         {
             try
             {
-                if(!SoulSeekState.ListenerEnabled || !SoulSeekState.ListenerUPnpEnabled)
+                if (!SoulSeekState.ListenerEnabled || !SoulSeekState.ListenerUPnpEnabled)
                 {
                     DiagStatus = UpnpDiagStatus.UpnpDisabled;
                     RunningStatus = UpnpRunningStatus.Finished;
                     SearchFinished?.Invoke(null, new EventArgs());
                     return;
                 }
-                if(Context==null)
+                if (Context == null)
                 {
                     DiagStatus = UpnpDiagStatus.ErrorUnspecified;
                     RunningStatus = UpnpRunningStatus.Finished;
@@ -719,7 +721,7 @@ namespace AndriodApp1
                     SearchFinished?.Invoke(null, new EventArgs());
                     return;
                 }
-                if(wm.ConnectionInfo.SupplicantState == SupplicantState.Disconnected || wm.ConnectionInfo.IpAddress == 0)
+                if (wm.ConnectionInfo.SupplicantState == SupplicantState.Disconnected || wm.ConnectionInfo.IpAddress == 0)
                 {
                     //wifi is disabled.
                     DiagStatus = UpnpDiagStatus.NoWifiConnection;
@@ -742,9 +744,9 @@ namespace AndriodApp1
 
                 CancelSearchAfterTime();
                 Mono.Nat.NatUtility.StartDiscovery(new Mono.Nat.NatProtocol[] { Mono.Nat.NatProtocol.Upnp });
-                
+
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 DiagStatus = UpnpDiagStatus.ErrorUnspecified;
                 MainActivity.LogFirebase("SearchAndSetMapping: " + e.Message + e.StackTrace);
@@ -764,7 +766,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogDebug("Device Found");
                 Interlocked.Increment(ref DevicesFound); //not sure if this will ever be greater than one....
-                if(DevicesFound>1)
+                if (DevicesFound > 1)
                 {
                     MainActivity.LogFirebase("more than 1 device found");
                 }
@@ -782,11 +784,11 @@ namespace AndriodApp1
                             return;
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         //the task can throw (in which case the task.Wait throws)
-                        
-                        if(ex.InnerException is Mono.Nat.MappingException && ex.InnerException.Message != null && ex.InnerException.Message.Contains("Error 725: OnlyPermanentLeasesSupported")) //happened on my tablet... connected to my other 192.168.1.1 router
+
+                        if (ex.InnerException is Mono.Nat.MappingException && ex.InnerException.Message != null && ex.InnerException.Message.Contains("Error 725: OnlyPermanentLeasesSupported")) //happened on my tablet... connected to my other 192.168.1.1 router
                         {
                             System.Threading.Tasks.Task<Mono.Nat.Mapping> t0 = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort, SoulSeekState.ListenerPort, 0, "Android Seeker"));
                             try
@@ -820,13 +822,13 @@ namespace AndriodApp1
                     try
                     {
                         bool timeOutGetMapping = !(t2.Wait(5000));
-                        if(timeOutGetMapping)
+                        if (timeOutGetMapping)
                         {
                             MainActivity.LogFirebase("GetSpecificMappingAsync timeout");
                             return;
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         //the task can throw (in which case the task.Wait throws)
                         MainActivity.LogFirebase("GetSpecificMappingAsync " + ex.Message + ex.StackTrace);
@@ -840,11 +842,11 @@ namespace AndriodApp1
 
                     //since we use the lifetime value to make decisions and schedule remapping we need to deal with very low values or 0.
                     //0 means indeterminate, but still may want to remap occasionally...
-                    if(LastSetLifeTime==0)
+                    if (LastSetLifeTime == 0)
                     {
                         LastSetLifeTime = 4 * 3600;
                     }
-                    else if(LastSetLifeTime < 2*3600)
+                    else if (LastSetLifeTime < 2 * 3600)
                     {
                         MainActivity.LogFirebase("less than 2 hours: " + LastSetLifeTime); //20 mins
                         LastSetLifeTime = 2 * 3600;
@@ -864,7 +866,7 @@ namespace AndriodApp1
                     MainActivity.LogFirebase("ip is not ours");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MainActivity.LogFirebase("NatUtility_DeviceFound " + ex.Message + ex.StackTrace);
             }
@@ -892,7 +894,7 @@ namespace AndriodApp1
     {
         public bool IsUpload()
         {
-            if(TransferItems.Count==0)
+            if (TransferItems.Count == 0)
             {
                 return false; //usually this is if we are in the process of clearing the folder....
             }
@@ -981,7 +983,7 @@ namespace AndriodApp1
                 totalBytes = totalFolderBytes;
                 bytesCompleted = folderBytesComplete;
                 //error "System.OverflowException: Value was either too large or too small for an Int32." can occur for example when totalFolderBytes is 0
-                if(totalFolderBytes==0)
+                if (totalFolderBytes == 0)
                 {
                     MainActivity.LogInfoFirebase("total folder bytes == 0");
                     return 100;
@@ -1006,10 +1008,10 @@ namespace AndriodApp1
                 {
                     if (ti.State == TransferStates.Queued)
                     {
-                        queueLen = Math.Min(ti.QueueLength,queueLen);
+                        queueLen = Math.Min(ti.QueueLength, queueLen);
                     }
                 }
-                if(queueLen==int.MaxValue)
+                if (queueLen == int.MaxValue)
                 {
                     return 0;
                 }
@@ -1028,7 +1030,7 @@ namespace AndriodApp1
                     if (ti.State == TransferStates.Queued)
                     {
                         queueLen = Math.Min(ti.QueueLength, queueLen);
-                        if(queueLen == ti.QueueLength)
+                        if (queueLen == ti.QueueLength)
                         {
                             curLowest = ti;
                         }
@@ -1061,14 +1063,14 @@ namespace AndriodApp1
                 foreach (TransferItem ti in TransferItems)
                 {
                     TransferStates state = ti.State;
-                    if(state==TransferStates.InProgress)
+                    if (state == TransferStates.InProgress)
                     {
                         isFailed = false;
                         return TransferStates.InProgress;
                     }
                     else
                     {
-                        if(ti.Failed)
+                        if (ti.Failed)
                         {
                             isFailed = true;
                         }
@@ -1081,15 +1083,15 @@ namespace AndriodApp1
                         {
                             folderState = state;
                         }
-                        else if((   state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut)   ) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if ((state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut)) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
                         {
                             folderState = state;
                         }
-                        else if(state.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if (state.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
                         {
                             folderState = state;
                         }
-                        else if(state.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if (state.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
                         {
                             folderState = state;
                         }
@@ -1107,7 +1109,7 @@ namespace AndriodApp1
         {
             TransferItems = new List<TransferItem>();
             Add(initialTransferItem);
-            if(folderName == null)
+            if (folderName == null)
             {
                 folderName = Helpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
             }
@@ -1127,7 +1129,7 @@ namespace AndriodApp1
         {
             lock (TransferItems)
             {
-                TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99;});
+                TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99; });
                 if (IsUpload())
                 {
                     TransferItems.RemoveAll((TransferItem i) => { return Helpers.IsUploadCompleteOrAborted(i.State); });
@@ -1159,7 +1161,7 @@ namespace AndriodApp1
 
         public void Add(TransferItem ti)
         {
-            lock(TransferItems)
+            lock (TransferItems)
             {
                 TransferItems.Add(ti);
             }
@@ -1205,7 +1207,7 @@ namespace AndriodApp1
                     PerformCleanupItem(state as TransferItem);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("PeformCleanup: " + e.Message + e.StackTrace);
             }
@@ -1249,7 +1251,7 @@ namespace AndriodApp1
 
         public static void PerfomCleanupItems(IEnumerable<TransferItem> tis)
         {
-            foreach(TransferItem ti in tis)
+            foreach (TransferItem ti in tis)
             {
                 PerformCleanupItem(ti);
             }
@@ -1264,7 +1266,7 @@ namespace AndriodApp1
             //    return;
             //}
             //api 21+
-            if((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
             {
                 DocumentFile parent = null;
                 Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);
@@ -1278,12 +1280,12 @@ namespace AndriodApp1
                 }
 
                 DocumentFile df = parent.FindFile(ti.Filename);
-                if(df==null || !df.Exists())
+                if (df == null || !df.Exists())
                 {
                     MainActivity.LogDebug("delete failed - null or not exist");
                     MainActivity.LogInfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SoulSeekState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
                 }
-                if(!df.Delete()) //nullref
+                if (!df.Delete()) //nullref
                 {
                     MainActivity.LogDebug("delete failed");
                 }
@@ -1292,7 +1294,7 @@ namespace AndriodApp1
             else
             {
                 Java.IO.File parent = new Java.IO.File(Android.Net.Uri.Parse(ti.IncompleteParentUri).Path);
-                Java.IO.File f = parent.ListFiles().First((file)=>file.Name == ti.Filename);
+                Java.IO.File f = parent.ListFiles().First((file) => file.Name == ti.Filename);
                 if (f == null || !f.Exists())
                 {
                     MainActivity.LogDebug("delete failed LEGACY - null or not exist");
@@ -1313,7 +1315,7 @@ namespace AndriodApp1
         public void RemoveAndCleanUp(TransferItem ti)
         {
             Remove(ti);
-            if(NeedsCleanUp(ti))
+            if (NeedsCleanUp(ti))
             {
                 CleanupEntry(ti);
             }
@@ -1331,7 +1333,7 @@ namespace AndriodApp1
 
         public void Remove(TransferItem ti)
         {
-            if(ti.IsUpload())
+            if (ti.IsUpload())
             {
                 Uploads.Remove(ti);
             }
@@ -1343,7 +1345,7 @@ namespace AndriodApp1
 
         public object GetUICurrentList()
         {
-            if(TransfersFragment.InUploadsMode)
+            if (TransfersFragment.InUploadsMode)
             {
                 return Uploads.GetUICurrentList();
             }
@@ -1367,11 +1369,11 @@ namespace AndriodApp1
 
         public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
         {
-            if(TransfersFragment.InUploadsMode && ti.IsUpload())
+            if (TransfersFragment.InUploadsMode && ti.IsUpload())
             {
                 return Uploads.GetUserIndexForTransferItem(ti);
             }
-            else if(!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
+            else if (!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
             {
                 return Downloads.GetUserIndexForTransferItem(ti);
             }
@@ -1383,7 +1385,7 @@ namespace AndriodApp1
 
         public ITransferItem GetItemAtUserIndex(int position)
         {
-            if(TransfersFragment.InUploadsMode)
+            if (TransfersFragment.InUploadsMode)
             {
                 return Uploads.GetItemAtUserIndex(position);
             }
@@ -1412,9 +1414,9 @@ namespace AndriodApp1
         public void RemoveAndCleanUpAtUserIndex(int position)
         {
             object objectRemoved = RemoveAtUserIndex(position);
-            if(objectRemoved is TransferItem ti)
+            if (objectRemoved is TransferItem ti)
             {
-                if(ti.InProcessing)
+                if (ti.InProcessing)
                 {
                     ti.CancelAndClearFlag = true;
                 }
@@ -1430,7 +1432,7 @@ namespace AndriodApp1
             {
                 List<TransferItem> tis = objectRemoved as List<TransferItem>;
                 IEnumerable<TransferItem> tisCleanUpOnComplete = tis.Where((item) => { return item.InProcessing; });
-                foreach(var item in tisCleanUpOnComplete)
+                foreach (var item in tisCleanUpOnComplete)
                 {
                     item.CancelAndClearFlag = true;
                 }
@@ -1550,9 +1552,9 @@ namespace AndriodApp1
 
         public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
         {
-            lock(AllTransferItems)
+            lock (AllTransferItems)
             {
-                return AllTransferItems.Where((item)=>item.Username==username).ToList();
+                return AllTransferItems.Where((item) => item.Username == username).ToList();
             }
         }
 
@@ -1563,17 +1565,17 @@ namespace AndriodApp1
         {
             //if(forDownload)
             //{
-                lock(AllTransferItems)
+            lock (AllTransferItems)
+            {
+                foreach (var ti in AllTransferItems)
                 {
-                    foreach (var ti in AllTransferItems)
+                    if (ti.State.HasFlag(TransferStates.InProgress))
                     {
-                        if (ti.State.HasFlag(TransferStates.InProgress))
-                        {
-                            ti.State = TransferStates.Cancelled;
-                            ti.RemainingTime = null;
-                        }
+                        ti.State = TransferStates.Cancelled;
+                        ti.RemainingTime = null;
                     }
                 }
+            }
             //}
         }
 
@@ -1631,7 +1633,7 @@ namespace AndriodApp1
         public List<Tuple<TransferItem, int>> GetListOfFailedFromFolder(FolderItem fi)
         {
             List<Tuple<TransferItem, int>> transferItemConditionList = new List<Tuple<TransferItem, int>>();
-            lock(fi.TransferItems)
+            lock (fi.TransferItems)
             {
                 for (int i = 0; i < fi.TransferItems.Count; i++)
                 {
@@ -1647,7 +1649,7 @@ namespace AndriodApp1
             return transferItemConditionList;
         }
 
-        public List<Tuple<TransferItem, int, int> > GetListOfFailed()
+        public List<Tuple<TransferItem, int, int>> GetListOfFailed()
         {
             List<Tuple<TransferItem, int, int>> transferItemConditionList = new List<Tuple<TransferItem, int, int>>();
             lock (AllTransferItems)
@@ -1715,15 +1717,15 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    List <TransferItem> transferItemsToRemove = new List<TransferItem>();
-                    lock(AllFolderItems[indexOfItem].TransferItems)
+                    List<TransferItem> transferItemsToRemove = new List<TransferItem>();
+                    lock (AllFolderItems[indexOfItem].TransferItems)
                     {
-                        foreach(var ti in AllFolderItems[indexOfItem].TransferItems)
+                        foreach (var ti in AllFolderItems[indexOfItem].TransferItems)
                         {
                             transferItemsToRemove.Add(ti);
                         }
                     }
-                    foreach(var ti in transferItemsToRemove)
+                    foreach (var ti in transferItemsToRemove)
                     {
                         Remove(ti);
                     }
@@ -1740,9 +1742,9 @@ namespace AndriodApp1
 
         public ITransferItem GetItemAtUserIndex(int indexOfItem)
         {
-            if(TransfersFragment.GroupByFolder)
+            if (TransfersFragment.GroupByFolder)
             {
-                if(TransfersFragment.GetCurrentlySelectedFolder() != null)
+                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
                     return TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem];
                 }
@@ -1777,7 +1779,7 @@ namespace AndriodApp1
                     {
                         foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
                     }
-                    return AllFolderItems.FindIndex((FolderItem fi) => {return fi.FolderName == foldername && fi.Username == ti.Username; });
+                    return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
             }
             else
@@ -1788,7 +1790,7 @@ namespace AndriodApp1
 
         public int GetIndexForFolderItem(FolderItem ti)
         {
-            lock(AllFolderItems)
+            lock (AllFolderItems)
             {
                 return AllFolderItems.IndexOf(ti);
             }
@@ -1821,12 +1823,12 @@ namespace AndriodApp1
             {
                 if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                 {
-                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems.FindIndex((ti)=>ti.FullFilename==fullfilename);
+                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems.FindIndex((ti) => ti.FullFilename == fullfilename);
                 }
                 else
                 {
                     TransferItem ti;
-                    lock(AllTransferItems)
+                    lock (AllTransferItems)
                     {
                         ti = AllTransferItems.Find((ti) => ti.FullFilename == fullfilename);
                     }
@@ -1870,7 +1872,7 @@ namespace AndriodApp1
 
         public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, out int indexOfItem)
         {
-            if (fullFileName == null || username==null)
+            if (fullFileName == null || username == null)
             {
                 indexOfItem = -1;
                 return null;
@@ -1892,7 +1894,7 @@ namespace AndriodApp1
 
         public bool Exists(string fullFilename, string username, long size)
         {
-            lock(AllTransferItems)
+            lock (AllTransferItems)
             {
                 return AllTransferItems.Exists((TransferItem ti) =>
                 {
@@ -1914,7 +1916,7 @@ namespace AndriodApp1
                            ti.Size == size &&
                            ti.Username == username
                        );
-                }).Any((item)=>item.InProcessing);
+                }).Any((item) => item.InProcessing);
             }
         }
 
@@ -1943,7 +1945,7 @@ namespace AndriodApp1
             lock (AllFolderItems)
             {
                 string foldername = string.Empty;
-                if(string.IsNullOrEmpty(ti.FolderName))
+                if (string.IsNullOrEmpty(ti.FolderName))
                 {
                     foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
                 }
@@ -1957,11 +1959,11 @@ namespace AndriodApp1
 
         private int GetMatchingFolderIndex(TransferItem ti)
         {
-            lock(AllFolderItems)
+            lock (AllFolderItems)
             {
-                for(int i=0;i<AllFolderItems.Count; i++)
+                for (int i = 0; i < AllFolderItems.Count; i++)
                 {
-                    if(AllFolderItems[i].HasTransferItem(ti))
+                    if (AllFolderItems[i].HasTransferItem(ti))
                     {
                         return i;
                     }
@@ -1977,10 +1979,10 @@ namespace AndriodApp1
         /// <returns></returns>
         public TransferItem AddIfNotExistAndReturnTransfer(TransferItem ti, out bool exists)
         {
-            lock(AllTransferItems)
+            lock (AllTransferItems)
             {
                 var linq = AllTransferItems.Where((existingTi) => { return existingTi.Username == ti.Username && existingTi.FullFilename == ti.FullFilename; });
-                if (linq.Count()>0)
+                if (linq.Count() > 0)
                 {
                     exists = true;
                     return linq.First();
@@ -1996,14 +1998,14 @@ namespace AndriodApp1
 
         public void Add(TransferItem ti)
         {
-            lock(AllTransferItems)
+            lock (AllTransferItems)
             {
                 AllTransferItems.Add(ti);
             }
-            lock(AllFolderItems)
+            lock (AllFolderItems)
             {
                 var matchingFolder = GetMatchingFolder(ti);
-                if(matchingFolder.Count()==0)
+                if (matchingFolder.Count() == 0)
                 {
                     AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
                 }
@@ -2020,14 +2022,14 @@ namespace AndriodApp1
             lock (AllTransferItems)
             {
                 AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
-                if(isUploads)
+                if (isUploads)
                 {
                     AllTransferItems.RemoveAll((TransferItem i) => { return Helpers.IsUploadCompleteOrAborted(i.State); });
                 }
             }
             lock (AllFolderItems)
             {
-                foreach(FolderItem f in AllFolderItems)
+                foreach (FolderItem f in AllFolderItems)
                 {
                     f.ClearAllComplete();
                 }
@@ -2039,10 +2041,10 @@ namespace AndriodApp1
         {
             lock (AllTransferItems)
             {
-                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99 && fi.Username == i.Username && GetFolderNameFromTransferItem(i)==fi.FolderName; });
+                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99 && fi.Username == i.Username && GetFolderNameFromTransferItem(i) == fi.FolderName; });
             }
             fi.ClearAllComplete();
-            if(fi.IsEmpty())
+            if (fi.IsEmpty())
             {
                 AllFolderItems.Remove(fi);
             }
@@ -2050,7 +2052,7 @@ namespace AndriodApp1
 
         private static string GetFolderNameFromTransferItem(TransferItem ti)
         {
-            if(string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
+            if (string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
             {
                 return Helpers.GetFolderNameFromFile(ti.FullFilename);
             }
@@ -2088,14 +2090,14 @@ namespace AndriodApp1
                 }
 
 
-                if(isFolderItems)
+                if (isFolderItems)
                 {
                     List<FolderItem> toClear = new List<FolderItem>();
                     foreach (int pos in TransfersFragment.BatchSelectedItems)
                     {
                         toClear.Add(GetItemAtUserIndex(pos) as FolderItem);
                     }
-                    foreach(FolderItem item in toClear)
+                    foreach (FolderItem item in toClear)
                     {
                         ClearAllFromFolderAndClean(item);
                     }
@@ -2133,7 +2135,7 @@ namespace AndriodApp1
 
         public void ClearAllFromFolder(FolderItem fi)
         {
-            foreach(TransferItem ti in fi.TransferItems)
+            foreach (TransferItem ti in fi.TransferItems)
             {
                 AllTransferItems.Remove(ti);
             }
@@ -2164,9 +2166,9 @@ namespace AndriodApp1
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
                     TransferItem ti = AllTransferItems[i];
-                    if(prepareForClear)
+                    if (prepareForClear)
                     {
-                        if(ti.InProcessing) //let continuation action clear this guy
+                        if (ti.InProcessing) //let continuation action clear this guy
                         {
                             ti.CancelAndClearFlag = true;
                         }
@@ -2192,7 +2194,7 @@ namespace AndriodApp1
                 for (int i = 0; i < TransfersFragment.BatchSelectedItems.Count; i++)
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-                    if(isFolderItems)
+                    if (isFolderItems)
                     {
                         FolderItem fi = this.GetItemAtUserIndex(TransfersFragment.BatchSelectedItems[i]) as FolderItem;
                         CancelFolder(fi, prepareForClear);
@@ -2223,13 +2225,13 @@ namespace AndriodApp1
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
                     var ti = fi.TransferItems[i];
-                    if(prepareForClear && ti.InProcessing)
+                    if (prepareForClear && ti.InProcessing)
                     {
                         ti.CancelAndClearFlag = true;
                     }
                     var key = TransfersFragment.ProduceCancellationTokenKey(ti);
                     TransfersFragment.CancellationTokens.TryGetValue(key, out CancellationTokenSource token);
-                    if(token!=null)
+                    if (token != null)
                     {
                         token.Cancel();
                         TransfersFragment.CancellationTokens.Remove(key, out _);
@@ -2259,7 +2261,7 @@ namespace AndriodApp1
                 {
                     var folderItem = matchingFolder.First();
                     folderItem.Remove(ti);
-                    if(folderItem.IsEmpty())
+                    if (folderItem.IsEmpty())
                     {
                         AllFolderItems.Remove(folderItem);
                     }
@@ -2274,9 +2276,9 @@ namespace AndriodApp1
         public List<string> GetInUseIncompleteFolderNames()
         {
             List<string> foldersToNotDelete = new List<string>();
-            lock(AllFolderItems)
+            lock (AllFolderItems)
             {
-                foreach(FolderItem fi in AllFolderItems)
+                foreach (FolderItem fi in AllFolderItems)
                 {
                     foldersToNotDelete.Add(Helpers.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
                 }
@@ -2299,15 +2301,15 @@ namespace AndriodApp1
         private static DateTime NetworkHandOffTime = DateTime.MinValue;
         public static void ProcessEvent(NetworkInfo netInfo)
         {
-            if(netInfo == null)
+            if (netInfo == null)
             {
 
             }
             else
             {
-                if(netInfo.IsConnected)
+                if (netInfo.IsConnected)
                 {
-                    if( (DateTime.UtcNow - DisconnectedTime).TotalSeconds < 2.0) //in practice .2s or less..
+                    if ((DateTime.UtcNow - DisconnectedTime).TotalSeconds < 2.0) //in practice .2s or less..
                     {
                         MainActivity.LogDebug("total seconds..." + (DateTime.UtcNow - DisconnectedTime).TotalSeconds);
                         NetworkHandOffTime = DateTime.UtcNow;
@@ -2324,7 +2326,7 @@ namespace AndriodApp1
 
         public static bool HasHandoffOccuredRecently()
         {
-            if(!NetworkSuccessfullyHandedOff)
+            if (!NetworkSuccessfullyHandedOff)
             {
                 return false;
             }
@@ -2345,12 +2347,12 @@ namespace AndriodApp1
 
 
             //these are just toasts letting us know the status of the network..
-            #if DEBUG 
+#if DEBUG
             string action = intent?.Action;
             if (action != null && action == ConnectivityManager.ConnectivityAction/* && netInfo != null && netInfo.IsConnected*/)
             {
                 ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
-                if(cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
+                if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
                 {
                     MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
                     SeekerApplication.ShowToast("Is Connected", ToastLength.Long);
@@ -2367,7 +2369,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if(cm.ActiveNetworkInfo!=null)
+                    if (cm.ActiveNetworkInfo != null)
                     {
                         MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
                         SeekerApplication.ShowToast("Is Disconnected", ToastLength.Long);
@@ -2379,7 +2381,7 @@ namespace AndriodApp1
                     }
                 }
             }
-            #endif
+#endif
         }
 
         public static bool DoWeHaveInternet()
@@ -2394,11 +2396,11 @@ namespace AndriodApp1
     [Application]
     public class SeekerApplication : Application
     {
-        public static Context ApplicationContext = null; 
+        public static Context ApplicationContext = null;
         public SeekerApplication(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
         {
         }
-        
+
         public const bool AUTO_CONNECT_ON = true;
         public static bool LOG_DIAGNOSTICS = false;
 
@@ -2406,13 +2408,13 @@ namespace AndriodApp1
         {
             base.OnCreate();
             ApplicationContext = this;
-            #if !IzzySoft
+#if !IzzySoft
             Firebase.FirebaseApp app = Firebase.FirebaseApp.InitializeApp(this);
-            if(app==null)
+            if (app == null)
             {
                 MainActivity.crashlyticsEnabled = false;
             }
-            #endif
+#endif
             //MainActivity.LogFirebase("testing release");
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
@@ -2489,7 +2491,7 @@ namespace AndriodApp1
 
             if (SeekerKeepAliveService.CpuKeepAlive_FullService == null)
             {
-                SeekerKeepAliveService.CpuKeepAlive_FullService = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial,"Seeker Keep Alive Service Cpu");
+                SeekerKeepAliveService.CpuKeepAlive_FullService = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Keep Alive Service Cpu");
             }
 
             if (SeekerKeepAliveService.WifiKeepAlive_FullService == null)
@@ -2501,8 +2503,8 @@ namespace AndriodApp1
             {
                 //need search response and enqueue download action...
                 //SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations,listenPort:SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
-                if(LOG_DIAGNOSTICS)
+                SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: SoulSeekState.AllowPrivateRoomInvitations, listenPort: SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
+                if (LOG_DIAGNOSTICS)
                 {
                     SoulSeekState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
                 }
@@ -2577,19 +2579,19 @@ namespace AndriodApp1
 
         private static void AppendLineToDiagFile(string line)
         {
-            if(SoulSeekState.DiagnosticTextFile == null)
+            if (SoulSeekState.DiagnosticTextFile == null)
             {
-                if(SoulSeekState.RootDocumentFile == null)
+                if (SoulSeekState.RootDocumentFile == null)
                 {
                     return;
                 }
                 else
                 {
                     SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
-                    if(SoulSeekState.DiagnosticTextFile == null)
+                    if (SoulSeekState.DiagnosticTextFile == null)
                     {
-                        SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.CreateFile("text/plain","seeker_diagnostics");
-                        if(SoulSeekState.DiagnosticTextFile == null)
+                        SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
+                        if (SoulSeekState.DiagnosticTextFile == null)
                         {
                             return;
                         }
@@ -2597,15 +2599,15 @@ namespace AndriodApp1
                 }
             }
 
-            if(SoulSeekState.DiagnosticStreamWriter == null)
+            if (SoulSeekState.DiagnosticStreamWriter == null)
             {
                 System.IO.Stream outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(SoulSeekState.DiagnosticTextFile.Uri, "wa");
-                if(outputStream == null)
+                if (outputStream == null)
                 {
                     return;
                 }
                 SoulSeekState.DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
-                if(SoulSeekState.DiagnosticStreamWriter==null)
+                if (SoulSeekState.DiagnosticStreamWriter == null)
                 {
                     return;
                 }
@@ -2630,7 +2632,7 @@ namespace AndriodApp1
         private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
         {
             MainActivity.LogDebug("disconnected");
-            lock(OurCurrentLoginTaskSyncObject)
+            lock (OurCurrentLoginTaskSyncObject)
             {
                 OurCurrentLoginTask = null;
             }
@@ -2664,7 +2666,7 @@ namespace AndriodApp1
         public static void ReleaseTransferLocksIfServicesComplete()
         {
             //if all transfers are done..
-            if(!SoulSeekState.UploadKeepAliveServiceRunning && !SoulSeekState.DownloadKeepAliveServiceRunning)
+            if (!SoulSeekState.UploadKeepAliveServiceRunning && !SoulSeekState.DownloadKeepAliveServiceRunning)
             {
                 if (MainActivity.CpuKeepAlive_Transfer != null)
                 {
@@ -2685,11 +2687,11 @@ namespace AndriodApp1
 
         public static bool IsShuttingDown(Intent intent)
         {
-            if(intent?.Action == null)
+            if (intent?.Action == null)
             {
                 return false;
             }
-            if(intent.Action == ACTION_SHUTDOWN)
+            if (intent.Action == ACTION_SHUTDOWN)
             {
                 return true;
             }
@@ -2704,7 +2706,7 @@ namespace AndriodApp1
 
         private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
-            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.AbortAllWasPressedDebouncer) < 750; 
+            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.AbortAllWasPressedDebouncer) < 750;
             if (e.Count == 0 || abortAll)
             {
                 UPLOAD_COUNT = -1;
@@ -2873,10 +2875,10 @@ namespace AndriodApp1
             }
 
             public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); 
+            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
 
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); 
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); 
+            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
+            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
             public static Task OurDownloadGoverner(double currentSpeed, string username, CancellationToken cts)
             {
                 try
@@ -3037,9 +3039,9 @@ namespace AndriodApp1
         {
             public ProgressUpdatedUI(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete, double _avgspeedBytes)
             {
-                ti=_ti;
-                wasFailed=_wasFailed;
-                fullRefresh=_fullRefresh;
+                ti = _ti;
+                wasFailed = _wasFailed;
+                fullRefresh = _fullRefresh;
                 percentComplete = _percentComplete;
                 avgspeedBytes = _avgspeedBytes;
             }
@@ -3068,7 +3070,7 @@ namespace AndriodApp1
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
             TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
-            if(relevantItem==null)
+            if (relevantItem == null)
             {
                 MainActivity.LogInfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
@@ -3077,11 +3079,11 @@ namespace AndriodApp1
             {
                 relevantItem.State = e.Transfer.State;
                 relevantItem.IncompleteParentUri = e.IncompleteParentUri;
-                if(!relevantItem.State.HasFlag(TransferStates.Requested))
+                if (!relevantItem.State.HasFlag(TransferStates.Requested))
                 {
                     relevantItem.InProcessing = true;
                 }
-                if(relevantItem.State.HasFlag(TransferStates.Succeeded))
+                if (relevantItem.State.HasFlag(TransferStates.Succeeded))
                 {
                     relevantItem.IncompleteParentUri = null; //not needed anymore.
                 }
@@ -3096,7 +3098,7 @@ namespace AndriodApp1
             if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
                 SeekerApplication.SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
-                if(relevantItem == null)
+                if (relevantItem == null)
                 {
                     return;
                 }
@@ -3110,7 +3112,7 @@ namespace AndriodApp1
                     return;
                 }
                 relevantItem.Queued = true;
-                if(!relevantItem.IsUpload())
+                if (!relevantItem.IsUpload())
                 {
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                     {
@@ -3147,13 +3149,13 @@ namespace AndriodApp1
                 {
                     //clear queued flag...
                     SeekerApplication.TransfersDownloadsCompleteStale = true;
-                    TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences,false,120);
+                    TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 120);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
                 else //if it does have state cancelled we still want to update UI! (assuming we arent also clearing it)
                 {
-                    if(!relevantItem.CancelAndClearFlag)
+                    if (!relevantItem.CancelAndClearFlag)
                     {
                         StateChangedForItem?.Invoke(null, relevantItem);
                     }
@@ -3161,11 +3163,11 @@ namespace AndriodApp1
             }
             else
             {
-                if(relevantItem == null && e.Transfer.State == TransferStates.Requested)
+                if (relevantItem == null && e.Transfer.State == TransferStates.Requested)
                 {
                     return; //TODO sometimes this can happen too fast.  this is okay thouugh bc it will soon go to another state.
                 }
-                if(relevantItem == null && e.Transfer.State == TransferStates.InProgress)
+                if (relevantItem == null && e.Transfer.State == TransferStates.InProgress)
                 {
                     //THIS SHOULD NOT HAPPEN now that the race condition is resolved....
                     MainActivity.LogFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
@@ -3198,7 +3200,7 @@ namespace AndriodApp1
             }
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
-            relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename,e.Transfer.Username, e.Transfer.Direction==TransferDirection.Upload, out _);
+            relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
             //relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
 
             if (relevantItem == null)
@@ -3217,10 +3219,11 @@ namespace AndriodApp1
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
 
                 // int indexRemoved = -1;
-                if ( ((SoulSeekState.AutoClearCompleteDownloads && !isUpload)||(SoulSeekState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001 ) //if 100% complete and autoclear //todo: autoclear on upload
+                if (((SoulSeekState.AutoClearCompleteDownloads && !isUpload) || (SoulSeekState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear //todo: autoclear on upload
                 {
 
-                    Action action = new Action(() => {
+                    Action action = new Action(() =>
+                    {
                         //int before = TransfersFragment.transferItems.Count;
                         TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
                         TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
@@ -3251,7 +3254,7 @@ namespace AndriodApp1
 
                 }
 
-                ProgressUpdated?.Invoke(null,new ProgressUpdatedUI(relevantItem,wasFailed,fullRefresh, percentComplete, e.Transfer.AverageSpeed));
+                ProgressUpdated?.Invoke(null, new ProgressUpdatedUI(relevantItem, wasFailed, fullRefresh, percentComplete, e.Transfer.AverageSpeed));
 
             }
         }
@@ -3260,10 +3263,10 @@ namespace AndriodApp1
         {
             try
             {
-                PackageInfo pInfo = SoulSeekState.ActiveActivityRef.PackageManager.GetPackageInfo(SoulSeekState.ActiveActivityRef.PackageName,0);
+                PackageInfo pInfo = SoulSeekState.ActiveActivityRef.PackageManager.GetPackageInfo(SoulSeekState.ActiveActivityRef.PackageName, 0);
                 return pInfo.VersionName;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("GetVersionString: " + e.Message);
                 return string.Empty;
@@ -3275,7 +3278,7 @@ namespace AndriodApp1
 
         public static Task<UserInfo> UserInfoResponseHandler(string uname, IPEndPoint ipEndPoint)
         {
-            if(IsUserInIgnoreList(uname))
+            if (IsUserInIgnoreList(uname))
             {
                 return Task.FromResult(new UserInfo(string.Empty, 0, 0, false));
             }
@@ -3284,7 +3287,7 @@ namespace AndriodApp1
             int uploadSlots = 1;
             int queueLength = 0;
             bool hasFreeSlots = true;
-            if(!SoulSeekState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
+            if (!SoulSeekState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
             {
                 uploadSlots = 0;
                 queueLength = 0;
@@ -3296,12 +3299,12 @@ namespace AndriodApp1
 
         private static byte[] GetUserInfoPicture()
         {
-            if(SoulSeekState.UserInfoPictureName == null || SoulSeekState.UserInfoPictureName==string.Empty)
+            if (SoulSeekState.UserInfoPictureName == null || SoulSeekState.UserInfoPictureName == string.Empty)
             {
                 return null;
             }
             Java.IO.File userInfoPicDir = new Java.IO.File(ApplicationContext.FilesDir, EditUserInfoActivity.USER_INFO_PIC_DIR);
-            if(!userInfoPicDir.Exists())
+            if (!userInfoPicDir.Exists())
             {
                 MainActivity.LogFirebase("!userInfoPicDir.Exists()");
                 return null;
@@ -3328,7 +3331,7 @@ namespace AndriodApp1
 
         private void SoulseekClient_ServerInfoReceived(object sender, ServerInfo e)
         {
-            if(e.WishlistInterval.HasValue)
+            if (e.WishlistInterval.HasValue)
             {
                 WishlistController.SearchIntervalMilliseconds = e.WishlistInterval.Value;
                 WishlistController.Initialize();
@@ -3351,18 +3354,18 @@ namespace AndriodApp1
         private void SoulseekClient_StateChanged(object sender, SoulseekClientStateChangedEventArgs e)
         {
             MainActivity.LogDebug("Prev: " + e.PreviousState.ToString() + " Next: " + e.State.ToString());
-            if(e.PreviousState.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Disconnecting))
+            if (e.PreviousState.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Disconnecting))
             {
                 if (e.Exception is KickedFromServerException)
                 {
                     MainActivity.LogDebug("Kicked Kicked Kicked");
-                    if(SoulSeekState.ActiveActivityRef!=null)
+                    if (SoulSeekState.ActiveActivityRef != null)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show();});
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show(); });
                     }
                     return; //DO NOT RETRY!!! or will do an infinite loop!
                 }
-                if(e.Exception is System.ObjectDisposedException)
+                if (e.Exception is System.ObjectDisposedException)
                 {
                     return; //DO NOT RETRY!!! we are shutting down
                 }
@@ -3372,7 +3375,7 @@ namespace AndriodApp1
                 //this is a "true" connected to disconnected
                 ChatroomController.ClearAndCacheJoined();
                 MainActivity.LogDebug("disconnected " + DateTime.UtcNow.ToString());
-                if(SoulSeekState.logoutClicked)
+                if (SoulSeekState.logoutClicked)
                 {
                     SoulSeekState.logoutClicked = false;
                 }
@@ -3396,13 +3399,14 @@ namespace AndriodApp1
             MainActivity.LogDebug("Listening State: " + SoulSeekState.SoulseekClient.GetListeningState());
             if (SoulSeekState.ListenerEnabled && !SoulSeekState.SoulseekClient.GetListeningState())
             {
-                if(SoulSeekState.ActiveActivityRef == null)
+                if (SoulSeekState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("SoulSeekState.ActiveActivityRef null SoulseekClient_LoggedIn");
                 }
                 else
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.port_already_in_use), ToastLength.Short).Show(); //todo is this supposed to be here...
                     });
                 }
@@ -3430,13 +3434,13 @@ namespace AndriodApp1
 
         public static void ShowToast(string msg, ToastLength toastLength)
         {
-            if(SoulSeekState.ActiveActivityRef==null)
+            if (SoulSeekState.ActiveActivityRef == null)
             {
                 MainActivity.LogDebug("cant show toast, active activity ref is null");
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread( () => { Toast.MakeText(SoulSeekState.ActiveActivityRef,msg, toastLength).Show(); } );
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, toastLength).Show(); });
             }
         }
 
@@ -3449,20 +3453,20 @@ namespace AndriodApp1
         public static void ReconnectExponentialBackOffThreadTask()
         {
             int MAX_TRIES = 6;
-            for(int i=0;i< MAX_TRIES; i++)
+            for (int i = 0; i < MAX_TRIES; i++)
             {
-                if(SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.currentlyLoggedIn) 
+                if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.currentlyLoggedIn)
                 {   //^SoulSeekState.currentlyLoggedIn is if we are supposed to be logged in. so if false then we logged ourselves out on purpose so do not try to reconnect
                     return; //our work here is done
                 }
-                if(i!= MAX_TRIES-1)
+                if (i != MAX_TRIES - 1)
                 {
-                    System.Threading.Thread.Sleep((int)(1000*Math.Pow((i+1),2)));
+                    System.Threading.Thread.Sleep((int)(1000 * Math.Pow((i + 1), 2)));
                 }
                 else
                 {
                     //do 2 mins for the last try..
-                    System.Threading.Thread.Sleep(1000*60*2);
+                    System.Threading.Thread.Sleep(1000 * 60 * 2);
                 }
                 try
                 {
@@ -3473,13 +3477,13 @@ namespace AndriodApp1
                     //and reconnecting means every single time, including toggling from wifi to data / vice versa.
                     Task t = ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
                     t.Wait();
-                    if(t.IsCompletedSuccessfully) 
+                    if (t.IsCompletedSuccessfully)
                     {
                         MainActivity.LogDebug("RETRY " + i + "SUCCEEDED");
                         return; //our work here is done
                     }
                 }
-                catch(Exception)
+                catch (Exception)
                 {
 
                 }
@@ -3492,7 +3496,7 @@ namespace AndriodApp1
         {
             if (SeekerApplication.AddToIgnoreList(username))
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.added_to_ignore),username), ToastLength.Short).Show();
+                Toast.MakeText(c, string.Format(c.GetString(Resource.String.added_to_ignore), username), ToastLength.Short).Show();
             }
             else
             {
@@ -3511,11 +3515,11 @@ namespace AndriodApp1
 
         public static void PerformPostConnectTasks(Task t)
         {
-            if(t.IsCompletedSuccessfully)
+            if (t.IsCompletedSuccessfully)
             {
                 try
                 {
-                    lock(SoulSeekState.UserList)
+                    lock (SoulSeekState.UserList)
                     {
                         foreach (UserListItem item in SoulSeekState.UserList)
                         {
@@ -3524,7 +3528,7 @@ namespace AndriodApp1
                         }
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     MainActivity.LogFirebase("PerformPostConnectTasks" + e.Message + e.StackTrace);
                 }
@@ -3560,9 +3564,9 @@ namespace AndriodApp1
                         MainActivity.UserListAddUser(t.Result, t.Result.Status);
                     }
                 }
-                else if(t.Exception?.InnerException is UserNotFoundException)
+                else if (t.Exception?.InnerException is UserNotFoundException)
                 {
-                    if(t.Exception.InnerException.Message.Contains("User ") && t.Exception.InnerException.Message.Contains("does not exist"))
+                    if (t.Exception.InnerException.Message.Contains("User ") && t.Exception.InnerException.Message.Contains("does not exist"))
                     {
                         string username = t.Exception.InnerException.Message.Split(null)[1];
                         if (MainActivity.UserListContainsUser(username))
@@ -3591,9 +3595,9 @@ namespace AndriodApp1
 
         public static void RecreateActivies()
         {
-            foreach(var weakRef in Activities)
+            foreach (var weakRef in Activities)
             {
-                if(weakRef.TryGetTarget(out var themeableActivity))
+                if (weakRef.TryGetTarget(out var themeableActivity))
                 {
                     themeableActivity.Recreate();
                 }
@@ -3625,7 +3629,7 @@ namespace AndriodApp1
             //typically its tough to add a user to ignore list from the UI if they are in the User List.
             //but for example if you ignore a user based on their message.
             //User List and Ignore List and mutually exclusive so if you ignore someone, they will be removed from user list.
-            if(MainActivity.UserListContainsUser(username))
+            if (MainActivity.UserListContainsUser(username))
             {
                 MainActivity.UserListRemoveUser(username);
             }
@@ -3787,7 +3791,7 @@ namespace AndriodApp1
             bool found = false;
             lock (SoulSeekState.UserList)
             {
-                
+
                 foreach (UserListItem item in SoulSeekState.UserList)
                 {
                     if (item.Username == username)
@@ -3814,10 +3818,10 @@ namespace AndriodApp1
             //if user was previously offline and now they are not offline, then do the notification.
             //note - this method does not get called when first adding users. which I think is ideal for notifications.
             //if not in our user list, then this is likely a result of GetUserInfo!, so dont do any of this..
-            if(found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline)))
+            if (found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline)))
             {
                 MainActivity.LogDebug("from offline to online " + username);
-                if(SoulSeekState.UserOnlineAlerts != null && SoulSeekState.UserOnlineAlerts.ContainsKey(username))
+                if (SoulSeekState.UserOnlineAlerts != null && SoulSeekState.UserOnlineAlerts.ContainsKey(username))
                 {
                     //show notification.
                     ShowNotificationForUserOnlineAlert(username);
@@ -3834,11 +3838,11 @@ namespace AndriodApp1
         {
             bool useDownloadDialogFragment = false;
             View v = null;
-            if(SoulSeekState.ActiveActivityRef is MainActivity mar)
+            if (SoulSeekState.ActiveActivityRef is MainActivity mar)
             {
-                var f = mar.SupportFragmentManager.FindFragmentByTag("tag_download_test"); 
+                var f = mar.SupportFragmentManager.FindFragmentByTag("tag_download_test");
                 //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
-                if(f != null && f.IsVisible)
+                if (f != null && f.IsVisible)
                 {
                     useDownloadDialogFragment = true;
                     v = f.View;
@@ -3856,7 +3860,8 @@ namespace AndriodApp1
         public const string FromUserOnlineAlert = "FromUserOnlineAlert";
         public static void ShowNotificationForUserOnlineAlert(string username)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 try
                 {
                     Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
@@ -3918,7 +3923,7 @@ namespace AndriodApp1
                 SoulSeekState.UploadDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_UploadDirectoryUri, "");
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
                 SoulSeekState.UserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
-                
+
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
                 SoulSeekState.IgnoreUserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
                 SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
@@ -3935,7 +3940,7 @@ namespace AndriodApp1
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
 
-                SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(SoulSeekState.M_LimitSimultaneousDownloads,false), sharedPreferences.GetInt(SoulSeekState.M_MaxSimultaneousLimit,1));
+                SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(SoulSeekState.M_LimitSimultaneousDownloads, false), sharedPreferences.GetInt(SoulSeekState.M_MaxSimultaneousLimit, 1));
 
                 //SearchTabHelper.RestoreStateFromSharedPreferencesLegacy();
 
@@ -3995,11 +4000,11 @@ namespace AndriodApp1
             }
         }
 
-        public static System.Collections.Concurrent.ConcurrentDictionary<string,string> RestoreUserNotesFromString(string base64userNotes)
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes)
         {
             if (base64userNotes == string.Empty)
             {
-                return new System.Collections.Concurrent.ConcurrentDictionary<string,string>();
+                return new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
             }
             using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64userNotes)))
             {
@@ -4068,17 +4073,17 @@ namespace AndriodApp1
             }
         }
 
-        public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser=false)
+        public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
         {
-            if(SoulSeekState.ShowRecentUsers)
+            if (SoulSeekState.ShowRecentUsers)
             {
-                if(forAddingUser)
+                if (forAddingUser)
                 {
                     //dont show people that we have already added...
                     var recents = SoulSeekState.RecentUsersManager.GetRecentUserList();
                     lock (SoulSeekState.UserList)
                     {
-                        foreach(var uli in SoulSeekState.UserList)
+                        foreach (var uli in SoulSeekState.UserList)
                         {
                             recents.Remove(uli.Username);
                         }
@@ -4125,9 +4130,9 @@ namespace AndriodApp1
             if (xmlRecentUsersList == string.Empty)
             {
                 int count = SoulSeekState.UserList?.Count ?? 0;
-                if(count>0)
+                if (count > 0)
                 {
-                    SoulSeekState.RecentUsersManager.SetRecentUserList(SoulSeekState.UserList.Select(uli=>uli.Username).ToList());
+                    SoulSeekState.RecentUsersManager.SetRecentUserList(SoulSeekState.UserList.Select(uli => uli.Username).ToList());
                 }
                 else
                 {
@@ -4212,8 +4217,8 @@ namespace AndriodApp1
         private static Soulseek.UserPresence DeduplicateStatus = Soulseek.UserPresence.Offline;
         private void SoulseekClient_UserStatusChanged_Deduplicator(object sender, UserStatusChangedEventArgs e)
         {
-            
-            if(DeduplicateUsername == e.Username && DeduplicateStatus == e.Status)
+
+            if (DeduplicateUsername == e.Username && DeduplicateStatus == e.Status)
             {
                 MainActivity.LogDebug($"throwing away {e.Username} status changed");
                 return;
@@ -4241,7 +4246,7 @@ namespace AndriodApp1
                 if (SoulSeekState.UserList != null)
                 {
                     bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
-                    if(found)
+                    if (found)
                     {
                         MainActivity.LogDebug("friend status changed " + e.Username);
                         SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
@@ -4266,15 +4271,15 @@ namespace AndriodApp1
 
         public bool Equals(SearchResponse s1, SearchResponse s2)
         {
-            if(s1.Username == s2.Username)
+            if (s1.Username == s2.Username)
             {
-                if(s1.Files.Count == s2.Files.Count)
+                if (s1.Files.Count == s2.Files.Count)
                 {
-                    if(s1.Files.Count == 0)
+                    if (s1.Files.Count == 0)
                     {
                         return s1.LockedFiles.First().Filename == s2.LockedFiles.First().Filename;
                     }
-                    if(s1.Files.First().Filename == s2.Files.First().Filename)
+                    if (s1.Files.First().Filename == s2.Files.First().Filename)
                     {
                         return true;
                     }
@@ -4287,7 +4292,7 @@ namespace AndriodApp1
 
         public int GetHashCode(SearchResponse s1)
         {
-            return s1.Username.GetHashCode() + s1.GetElementAtAdapterPosition(hideLockedResults,0).Filename.GetHashCode();
+            return s1.Username.GetHashCode() + s1.GetElementAtAdapterPosition(hideLockedResults, 0).Filename.GetHashCode();
         }
     }
 
@@ -4317,15 +4322,15 @@ namespace AndriodApp1
 
         private static System.Timers.Timer WishlistTimer = null;
         public static System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>> OldResultsToCompare = new System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>>();
-        private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new System.Collections.Concurrent.ConcurrentDictionary<int,int>();
+        private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new System.Collections.Concurrent.ConcurrentDictionary<int, int>();
 
         public static void Initialize() //we need the wishlist interval before we can init
         {
-            if(IsInitialized)
+            if (IsInitialized)
             {
                 return;
             }
-            if(searchIntervalMilliseconds == 0)
+            if (searchIntervalMilliseconds == 0)
             {
                 IsInitialized = true;
                 MainActivity.LogFirebase("Wishlist not allowed");
@@ -4340,7 +4345,7 @@ namespace AndriodApp1
             if (searchIntervalMilliseconds < 1000 * 60 * 2)
             {
                 MainActivity.LogFirebase("Wishlist interval is: " + searchIntervalMilliseconds);
-                searchIntervalMilliseconds = 2* 60 * 1000; //min of 2 mins...
+                searchIntervalMilliseconds = 2 * 60 * 1000; //min of 2 mins...
             }
 
 #if DEBUG
@@ -4364,14 +4369,15 @@ namespace AndriodApp1
             //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch)).ToList();
             OldResultsToCompare.TryRemove(id, out _); //save memory. wont always exist if the tab got deleted during the search.  exceptions thrown here dont crash anything tho.
             int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
-            
+
             if (newUniqueResults >= 1)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
                     try
                     {
                         string description = string.Empty;
-                        if(newUniqueResults>1)
+                        if (newUniqueResults > 1)
                         {
                             description = newUniqueResults + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.new_results);
                         }
@@ -4388,7 +4394,7 @@ namespace AndriodApp1
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
                             PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                        Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID,  SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
+                        Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
                         NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                         // notificationId is a unique int for each notification that you must define
                         notificationManager.Notify(lastTerm.GetHashCode(), n);
@@ -4405,10 +4411,10 @@ namespace AndriodApp1
 
         private static void WishlistTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            if(SearchTabHelper.SearchTabCollection!=null)
+            if (SearchTabHelper.SearchTabCollection != null)
             {
-                var wishlistPairs = SearchTabHelper.SearchTabCollection.Where(pair=>pair.Value.SearchTarget==SearchTarget.Wishlist);
-                if(wishlistPairs.Count()==0)
+                var wishlistPairs = SearchTabHelper.SearchTabCollection.Where(pair => pair.Value.SearchTarget == SearchTarget.Wishlist);
+                if (wishlistPairs.Count() == 0)
                 {
                     return;
                 }
@@ -4417,9 +4423,9 @@ namespace AndriodApp1
                     MainActivity.LogInfoFirebase("wishlist search ran " + searchIntervalMilliseconds);
                     DateTime oldest = DateTime.MaxValue;
                     int oldestId = int.MaxValue;
-                    foreach(var pair in wishlistPairs)
+                    foreach (var pair in wishlistPairs)
                     {
-                        if(pair.Value.LastRanTime < oldest)
+                        if (pair.Value.LastRanTime < oldest)
                         {
                             oldest = pair.Value.LastRanTime;
                             oldestId = pair.Key;
@@ -4457,7 +4463,7 @@ namespace AndriodApp1
                         MainActivity.LogDebug("now searching " + oldestId);
 #endif
                         //SearchTabHelper.SearchTabCollection[oldestId].CurrentlySearching = true;
-                        SearchFragment.SearchAPI((new CancellationTokenSource()).Token ,null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
+                        SearchFragment.SearchAPI((new CancellationTokenSource()).Token, null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
                     }
                     else
                     {
@@ -4536,7 +4542,7 @@ namespace AndriodApp1
             }
             else
             {
-                if(cnt == 1)
+                if (cnt == 1)
                 {
                     notification = CreateNotification(this, string.Format(SingularDownloadRemaining, 1));
                 }
@@ -4550,7 +4556,7 @@ namespace AndriodApp1
             {
                 SeekerApplication.AcquireTransferLocksAndResetTimer();
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
                 MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
             }
@@ -4562,7 +4568,7 @@ namespace AndriodApp1
             //.build();
             StartForeground(NOTIF_ID, notification);
             //runs indefinitely until stop.
-            
+
             return StartCommandResult.Sticky;
         }
 
@@ -4604,7 +4610,7 @@ namespace AndriodApp1
             //notifIntent.
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(FromTransferUploadString, 2);
-            
+
             PendingIntent pendingIntent =
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
@@ -4633,7 +4639,7 @@ namespace AndriodApp1
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            if(SeekerApplication.IsShuttingDown(intent))
+            if (SeekerApplication.IsShuttingDown(intent))
             {
                 this.StopSelf();
                 return StartCommandResult.NotSticky;
@@ -4783,7 +4789,7 @@ namespace AndriodApp1
                 CpuKeepAlive_FullService.Release();
                 MainActivity.LogInfoFirebase("CpuKeepAlive release");
             }
-            else if(CpuKeepAlive_FullService==null)
+            else if (CpuKeepAlive_FullService == null)
             {
                 MainActivity.LogFirebase("CpuKeepAlive is null");
             }
@@ -4796,15 +4802,15 @@ namespace AndriodApp1
                 WifiKeepAlive_FullService.Release();
                 MainActivity.LogInfoFirebase("WifiKeepAlive release");
             }
-            else if(WifiKeepAlive_FullService == null)
+            else if (WifiKeepAlive_FullService == null)
             {
                 MainActivity.LogFirebase("WifiKeepAlive is null");
             }
-            else if(!WifiKeepAlive_FullService.IsHeld)
+            else if (!WifiKeepAlive_FullService.IsHeld)
             {
                 MainActivity.LogFirebase("WifiKeepAlive not held");
             }
-            
+
             base.OnDestroy();
         }
 
@@ -4826,7 +4832,7 @@ namespace AndriodApp1
             MainActivity.LogInfoFirebase("shutting down");
 
             //stop all soulseek connection.
-            if(SoulSeekState.SoulseekClient != null)
+            if (SoulSeekState.SoulseekClient != null)
             {
                 //closes server socket, distributed connections, and peer connections. cancels searches, stops listener.
                 //this shutdown cleanly closes tcp connections. 
@@ -4875,7 +4881,7 @@ namespace AndriodApp1
         {
             base.OnDestroy();
             SeekerApplication.Activities.Remove(ourWeakRef);
-            if(SeekerApplication.Activities.Count==0)
+            if (SeekerApplication.Activities.Count == 0)
             {
                 MainActivity.LogDebug("----- On Destory ------ Last Activity ------");
                 TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, true);
@@ -4944,7 +4950,7 @@ namespace AndriodApp1
         //    DownloadFilesLogic(dirTask,null);
         //}
 
-        public static void DownloadFilesLogic(Task<Directory> dirTask, string _uname, string thisFileOnly=null)
+        public static void DownloadFilesLogic(Task<Directory> dirTask, string _uname, string thisFileOnly = null)
         {
             if (dirTask.IsFaulted)
             {
@@ -4962,7 +4968,7 @@ namespace AndriodApp1
             }
             else
             {
-                List< BrowseFragment.FullFileInfo > fullFileInfos = new List<BrowseFragment.FullFileInfo>();
+                List<BrowseFragment.FullFileInfo> fullFileInfos = new List<BrowseFragment.FullFileInfo>();
 
                 //the filenames for these files are NOT the fullname.
                 //the fullname is dirTask.Result.Name "\\" f.Filename
@@ -4976,7 +4982,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        if(fullFilename == thisFileOnly)
+                        if (fullFilename == thisFileOnly)
                         {
                             //add
                             fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size });
@@ -4986,9 +4992,9 @@ namespace AndriodApp1
                 }
 
 
-                if(fullFileInfos.Count==0)
+                if (fullFileInfos.Count == 0)
                 {
-                    if(thisFileOnly==null)
+                    if (thisFileOnly == null)
                     {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short).Show();
                     }
@@ -5011,13 +5017,14 @@ namespace AndriodApp1
             {
                 case FromSlskLinkBrowseAtLocation: //Browse At Location
                     Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
-                    Action<View> action = new Action<View>((v) => {
+                    Action<View> action = new Action<View>((v) =>
+                    {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
                         //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
-                    
+
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);
                     return true;
                 case FromSlskLinkCopyLink:
@@ -5026,7 +5033,7 @@ namespace AndriodApp1
                 case FromSlskLinkDownloadFiles:
                     Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
                     Action<Task<Directory>> ContAction = null;
-                    if(isFile)
+                    if (isFile)
                     {
                         ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, fullFilePath); };
                     }
@@ -5053,14 +5060,14 @@ namespace AndriodApp1
         public static bool crashlyticsEnabled = true;
         public static void LogDebug(string msg)
         {
-            if(SeekerApplication.LOG_DIAGNOSTICS)
+            if (SeekerApplication.LOG_DIAGNOSTICS)
             {
                 //write to file
                 SeekerApplication.AppendMessageToDiagFile(msg);
             }
-            #if ADB_LOGCAT
-              log.Debug(logCatTag, msg);
-            #endif
+#if ADB_LOGCAT
+            log.Debug(logCatTag, msg);
+#endif
         }
         public static void LogFirebase(string msg)
         {
@@ -5076,7 +5083,7 @@ namespace AndriodApp1
             }
 #endif
 #if ADB_LOGCAT
-                        log.Debug(logCatTag, msg);
+            log.Debug(logCatTag, msg);
 #endif
         }
         public static void LogInfoFirebase(string msg)
@@ -5093,7 +5100,7 @@ namespace AndriodApp1
             }
 #endif
 #if ADB_LOGCAT
-                        log.Debug(logCatTag, msg);
+            log.Debug(logCatTag, msg);
 #endif
         }
 
@@ -5113,7 +5120,7 @@ namespace AndriodApp1
             }
         }
 
-        public class ListenerKeyboard : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener 
+        public class ListenerKeyboard : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
         {   //oh so it just needs the Java.Lang.Object and then you can make it like a Java Anon Class where you only implement that one thing that you truly need
             //Since C# doesn't support anonymous classes
 
@@ -5140,19 +5147,19 @@ namespace AndriodApp1
                     return;
                 }
                 alreadyOpen = isShown;
-                KeyBoardVisibilityChanged?.Invoke(null,isShown);
+                KeyBoardVisibilityChanged?.Invoke(null, isShown);
                 //onKeyboardVisibilityListener.onVisibilityChanged(isShown);
             }
         }
 
-        public static EventHandler<bool> KeyBoardVisibilityChanged; 
-        
+        public static EventHandler<bool> KeyBoardVisibilityChanged;
+
 
         public void KeyboardChanged(object sender, bool isShown)
         {
-            if(isShown)
+            if (isShown)
             {
-                SoulSeekState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Animate().Alpha(0f).SetDuration(250).SetListener(new BottomNavigationViewAnimationListener()); 
+                SoulSeekState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Animate().Alpha(0f).SetDuration(250).SetListener(new BottomNavigationViewAnimationListener());
                 //it will be left at 0% opacity! even when unhiding it!
 
                 //SoulSeekState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Gone;
@@ -5170,7 +5177,7 @@ namespace AndriodApp1
         {
             public void OnAnimationCancel(Animator animation)
             {
-                
+
             }
 
             public void OnAnimationEnd(Animator animation)
@@ -5249,13 +5256,13 @@ namespace AndriodApp1
             //this creates problems.  we dont really need this anymore with the new "adjust nothing if edittext is at top" fix.
             //the only down side is on clicking the two filters there will be the nav bar.  but thats worth it since
             //this incorrectly hides navbar all the time and its very tough to get it back...
-        
+
 
             //View parentView = ((ViewGroup)this.FindViewById(Android.Resource.Id.Content)).GetChildAt(0);
             //KeyBoardVisibilityChanged -= KeyboardChanged;
             //KeyBoardVisibilityChanged += KeyboardChanged;
             //parentView.ViewTreeObserver.AddOnGlobalLayoutListener(new ListenerKeyboard(parentView));
-            
+
         }
         //           View parentView = ((ViewGroup)this.FindViewById(android.R.id.content)).GetChildAt(0);
         //            parentView.ViewTreeObserver.AddOnGlobalLayoutListener()
@@ -5369,13 +5376,13 @@ namespace AndriodApp1
             //so the presentablename should be FolderSelected/path to rest
             //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
             //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
-            Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int,int,int,int>>>();
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>();
             List<Android.Net.Uri> listOfDirectoryUris = new List<Android.Net.Uri>();
             //auxilaryDuplicatesList = new Dictionary<string, List<Tuple<string, string, long>>>();
             listOfDirectoryUris.Add(dir.Uri);
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
-            MainActivity.LogInfoFirebase("case " + dir.Uri.ToString() + " - - - - " + dir.Uri.LastPathSegment); 
+            MainActivity.LogInfoFirebase("case " + dir.Uri.ToString() + " - - - - " + dir.Uri.LastPathSegment);
             string lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
             string toStrip = string.Empty;
             //can be reproduced with pixel emulator API 28 (android 9). the last path segment for the downloads dir is "downloads" but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete" (note it is still a content scheme, raw: is the volume)
@@ -5394,11 +5401,11 @@ namespace AndriodApp1
                 if (lastPathSegment.Contains('\\'))
                 {
                     int stripIndex = lastPathSegment.LastIndexOf('\\');
-                    toStrip = lastPathSegment.Substring(0,stripIndex + 1);
+                    toStrip = lastPathSegment.Substring(0, stripIndex + 1);
                 }
-                else if(volName!=null && lastPathSegment.Contains(volName))
+                else if (volName != null && lastPathSegment.Contains(volName))
                 {
-                    if(lastPathSegment==volName)
+                    if (lastPathSegment == volName)
                     {
                         toStrip = null;
                     }
@@ -5415,10 +5422,10 @@ namespace AndriodApp1
             index = new Dictionary<int, string>();
             int indexNum = 0;
 
-            Dictionary<string, List<Tuple<string,int,int>>> allMediaStoreInfo = new Dictionary<string, List<Tuple<string, int, int>>>();
+            Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo = new Dictionary<string, List<Tuple<string, int, int>>>();
 
             bool hasAnyInfo = HasMediaStoreDurationColumn();
-            if(hasAnyInfo)
+            if (hasAnyInfo)
             {
                 bool hasBitRate = HasMediaStoreBitRateColumn();
                 string[] selectionColumns = null;
@@ -5427,7 +5434,7 @@ namespace AndriodApp1
                     selectionColumns = new string[] {
                         Android.Provider.MediaStore.IMediaColumns.Size,
                         Android.Provider.MediaStore.IMediaColumns.DisplayName,
-                        
+
                         Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
                                     Android.Provider.MediaStore.IMediaColumns.Duration,
                                     Android.Provider.MediaStore.IMediaColumns.Bitrate };
@@ -5445,12 +5452,12 @@ namespace AndriodApp1
                 //this is for if the chosen volume is not primary external
                 var volumeNames = MediaStore.GetExternalVolumeNames(SoulSeekState.ActiveActivityRef);
                 string chosenVolume = null;
-                if(volName!=null)
+                if (volName != null)
                 {
-                    string volToCompare = volName.Replace(":","");
+                    string volToCompare = volName.Replace(":", "");
                     foreach (string mediaStoreVolume in volumeNames)
                     {
-                        if(mediaStoreVolume.ToLower() == volToCompare.ToLower())
+                        if (mediaStoreVolume.ToLower() == volToCompare.ToLower())
                         {
                             chosenVolume = mediaStoreVolume;
                         }
@@ -5458,7 +5465,7 @@ namespace AndriodApp1
                 }
 
                 Android.Net.Uri mediaStoreUri = null;
-                if(!string.IsNullOrEmpty(chosenVolume))
+                if (!string.IsNullOrEmpty(chosenVolume))
                 {
                     mediaStoreUri = MediaStore.Audio.Media.GetContentUri(chosenVolume);
                 }
@@ -5473,10 +5480,10 @@ namespace AndriodApp1
                 {
                     mediaStoreInfo = SoulSeekState.ActiveActivityRef.ContentResolver.Query(mediaStoreUri, selectionColumns,
                         null, null, null);
-                    while(mediaStoreInfo.MoveToNext())
+                    while (mediaStoreInfo.MoveToNext())
                     {
                         string key = mediaStoreInfo.GetInt(0) + mediaStoreInfo.GetString(1);
-                        if(!allMediaStoreInfo.ContainsKey(key))
+                        if (!allMediaStoreInfo.ContainsKey(key))
                         {
                             var list = new List<Tuple<string, int, int>>();
                             list.Add(new Tuple<string, int, int>(mediaStoreInfo.GetString(2), mediaStoreInfo.GetInt(3), hasBitRate ? mediaStoreInfo.GetInt(4) : -1));
@@ -5488,7 +5495,7 @@ namespace AndriodApp1
                         }
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     MainActivity.LogFirebase("pre get all mediaStoreInfo: " + e.Message + e.StackTrace);
                 }
@@ -5539,19 +5546,19 @@ namespace AndriodApp1
             entireString = false;
             //if the first part of the path has a colon in it, then strip it.
             int endOfFirstPart = lastPathSegment.IndexOf('\\');
-            if(endOfFirstPart==-1)
+            if (endOfFirstPart == -1)
             {
                 endOfFirstPart = lastPathSegment.Length;
             }
-            int volumeIndex = lastPathSegment.Substring(0,endOfFirstPart).IndexOf(':');
-            if(volumeIndex==-1)
+            int volumeIndex = lastPathSegment.Substring(0, endOfFirstPart).IndexOf(':');
+            if (volumeIndex == -1)
             {
                 return null;
             }
             else
             {
                 string volumeName = lastPathSegment.Substring(0, volumeIndex + 1);
-                if(volumeName.Length == lastPathSegment.Length)
+                if (volumeName.Length == lastPathSegment.Length)
                 {   //special case where root is primary:.  in this case we return null which gets treated as "dont strip out anything"
                     entireString = true;
                     if (alwaysReturn)
@@ -5570,7 +5577,7 @@ namespace AndriodApp1
 
         private void traverseToGetDirectories(DocumentFile dir, List<Android.Net.Uri> dirUris)
         {
-            if(dir.IsDirectory)
+            if (dir.IsDirectory)
             {
                 DocumentFile[] files = dir.ListFiles(); //doesnt need to be sorted
                 for (int i = 0; i < files.Length; ++i)
@@ -5579,7 +5586,7 @@ namespace AndriodApp1
                     if (file.IsDirectory)
                     {
                         dirUris.Add(file.Uri);
-                        traverseToGetDirectories(file,dirUris);
+                        traverseToGetDirectories(file, dirUris);
                     }
                 }
             }
@@ -5658,7 +5665,7 @@ namespace AndriodApp1
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LogDebug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
                 LogFirebase("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
@@ -5675,7 +5682,7 @@ namespace AndriodApp1
                 {
                     //if (directoryPath.Length != volumePath.Length)
                     //{
-                        directoryPath = directoryPath.Substring(volumePath.Length);
+                    directoryPath = directoryPath.Substring(volumePath.Length);
                     //}
                 }
             }
@@ -5728,7 +5735,7 @@ namespace AndriodApp1
                     string fname = null;
                     string searchableName = null;
 
-                    if (dirFile.Uri.Authority== "com.android.providers.downloads.documents" && !f.Uri.Path.Contains(dirFile.Uri.Path))
+                    if (dirFile.Uri.Authority == "com.android.providers.downloads.documents" && !f.Uri.Path.Contains(dirFile.Uri.Path))
                     {
                         //msd, msf case
                         fname = f.Name;
@@ -5750,7 +5757,7 @@ namespace AndriodApp1
                     var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), f.Length(), System.IO.Path.GetExtension(f.Uri.Path));
                     files.Add(slskFile);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     LogDebug("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
                     LogFirebase("Parse error with " + f.Uri.Path + e.Message + e.StackTrace);
@@ -5759,13 +5766,13 @@ namespace AndriodApp1
             }
             Helpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
-            if(volumePath!=null)
+            if (volumePath != null)
             {
                 if (directoryPath.Substring(0, volumePath.Length) == volumePath)
                 {
                     //if(directoryPath.Length != volumePath.Length)
                     //{
-                        directoryPath = directoryPath.Substring(volumePath.Length);
+                    directoryPath = directoryPath.Substring(volumePath.Length);
                     //}
                 }
             }
@@ -5812,7 +5819,7 @@ namespace AndriodApp1
 
         public class CachedParseResults
         {
-            public Dictionary<string, Tuple<long, string, Tuple<int,int,int,int>>> keys = null;
+            public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> keys = null;
             public int direcotryCount = -1;
             public BrowseResponse browseResponse = null;
             public List<Tuple<string, string>> friendlyDirNameToUriMapping = null;
@@ -5824,13 +5831,13 @@ namespace AndriodApp1
         {
             try
             {
-                lock(SHARED_PREF_LOCK)
-                { 
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_CACHE_stringUriPairs, string.Empty);
-                editor.PutString(SoulSeekState.M_CACHE_browseResponse, string.Empty);
-                editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, string.Empty);
-                editor.PutString(SoulSeekState.M_CACHE_auxDupList, string.Empty);
+                lock (SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutString(SoulSeekState.M_CACHE_stringUriPairs, string.Empty);
+                    editor.PutString(SoulSeekState.M_CACHE_browseResponse, string.Empty);
+                    editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, string.Empty);
+                    editor.PutString(SoulSeekState.M_CACHE_auxDupList, string.Empty);
                     editor.PutString(SoulSeekState.M_CACHE_stringUriPairs_v2, string.Empty);
                     editor.PutString(SoulSeekState.M_CACHE_browseResponse_v2, string.Empty);
                     editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
@@ -5839,7 +5846,7 @@ namespace AndriodApp1
                     editor.Commit();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LogDebug("ClearParsedCacheResults " + e.Message + e.StackTrace);
                 LogFirebase("ClearParsedCacheResults " + e.Message + e.StackTrace);
@@ -5850,10 +5857,10 @@ namespace AndriodApp1
         {
             string s_stringUriPairs = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_stringUriPairs_v2, string.Empty);
             string s_BrowseResponse = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_browseResponse_v2, string.Empty);
-            string s_FriendlyDirNameMapping = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);       
-            string s_intHelperIndex = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_intHelperIndex_v2, string.Empty);       
-            string s_tokenIndex = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_tokenIndex_v2, string.Empty);       
-            if(s_intHelperIndex == string.Empty || s_tokenIndex == string.Empty || s_stringUriPairs == string.Empty|| s_BrowseResponse==string.Empty|| s_FriendlyDirNameMapping==string.Empty)
+            string s_FriendlyDirNameMapping = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
+            string s_intHelperIndex = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_intHelperIndex_v2, string.Empty);
+            string s_tokenIndex = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_tokenIndex_v2, string.Empty);
+            if (s_intHelperIndex == string.Empty || s_tokenIndex == string.Empty || s_stringUriPairs == string.Empty || s_BrowseResponse == string.Empty || s_FriendlyDirNameMapping == string.Empty)
             {
                 return null;
             }
@@ -5869,11 +5876,11 @@ namespace AndriodApp1
                     byte[] b_FriendlyDirNameMapping = Convert.FromBase64String(s_FriendlyDirNameMapping);
                     byte[] b_intHelperIndex = Convert.FromBase64String(s_intHelperIndex);
                     byte[] b_tokenIndex = Convert.FromBase64String(s_tokenIndex);
-                    using(System.IO.MemoryStream m_stringUriPairs = new System.IO.MemoryStream(b_stringUriPairs))
-                    using(System.IO.MemoryStream m_BrowseResponse = new System.IO.MemoryStream(b_BrowseResponse))
-                    using(System.IO.MemoryStream m_FriendlyDirNameMapping = new System.IO.MemoryStream(b_FriendlyDirNameMapping))
-                    using(System.IO.MemoryStream m_intHelperIndex = new System.IO.MemoryStream(b_intHelperIndex))
-                    using(System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
+                    using (System.IO.MemoryStream m_stringUriPairs = new System.IO.MemoryStream(b_stringUriPairs))
+                    using (System.IO.MemoryStream m_BrowseResponse = new System.IO.MemoryStream(b_BrowseResponse))
+                    using (System.IO.MemoryStream m_FriendlyDirNameMapping = new System.IO.MemoryStream(b_FriendlyDirNameMapping))
+                    using (System.IO.MemoryStream m_intHelperIndex = new System.IO.MemoryStream(b_intHelperIndex))
+                    using (System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
                     {
                         BinaryFormatter binaryFormatter = new BinaryFormatter();
                         CachedParseResults cachedParseResults = new CachedParseResults();
@@ -5885,7 +5892,7 @@ namespace AndriodApp1
                         cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
                         cachedParseResults.tokenIndex = binaryFormatter.Deserialize(m_tokenIndex) as Dictionary<string, List<int>>;
 
-                        if(cachedParseResults.keys==null || cachedParseResults.browseResponse == null || cachedParseResults.friendlyDirNameToUriMapping == null || cachedParseResults.helperIndex == null || cachedParseResults.tokenIndex==null)
+                        if (cachedParseResults.keys == null || cachedParseResults.browseResponse == null || cachedParseResults.friendlyDirNameToUriMapping == null || cachedParseResults.helperIndex == null || cachedParseResults.tokenIndex == null)
                         {
                             return null;
                         }
@@ -5897,7 +5904,7 @@ namespace AndriodApp1
                     }
 
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     LogDebug("error deserializing" + e.Message + e.StackTrace);
                     LogFirebase("error deserializing" + e.Message + e.StackTrace);
@@ -5963,7 +5970,7 @@ namespace AndriodApp1
         private bool IsLossless(string name)
         {
             string ext = System.IO.Path.GetExtension(name);
-            switch(ext)
+            switch (ext)
             {
                 case ".ape":
                 case ".flac":
@@ -6013,16 +6020,16 @@ namespace AndriodApp1
         /// <param name="allMediaInfoDict"></param>
         /// <param name="prevInfoToUse"></param>
         /// <returns></returns>
-        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string,List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> prevInfoToUse)
+        private Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> prevInfoToUse)
         {
             try
-            { 
-                if(prevInfoToUse!=null)
+            {
+                if (prevInfoToUse != null)
                 {
-                    if(prevInfoToUse.ContainsKey(presentableName))
+                    if (prevInfoToUse.ContainsKey(presentableName))
                     {
                         var tuple = prevInfoToUse[presentableName];
-                        if(tuple.Item1 == size) //this is the file...
+                        if (tuple.Item1 == size) //this is the file...
                         {
                             return tuple.Item3;
                         }
@@ -6030,7 +6037,7 @@ namespace AndriodApp1
                 }
                 //get media attributes...
                 bool supported = IsSupportedAudio(presentableName);
-                if(!supported)
+                if (!supported)
                 {
                     return null;
                 }
@@ -6047,16 +6054,16 @@ namespace AndriodApp1
                     //querying it every time was slow...
                     //so now we query it all ahead of time (with 1 query request) and put it in a dict.
                     string key = size + displayName;
-                    if(allMediaInfoDict.ContainsKey(key))
+                    if (allMediaInfoDict.ContainsKey(key))
                     {
                         string nameToSearchFor = presentableName.Replace('\\', '/');
                         bool found = true;
                         var listInfo = allMediaInfoDict[key];
                         Tuple<string, int, int> infoItem = null;
-                        if(listInfo.Count>1)
+                        if (listInfo.Count > 1)
                         {
                             found = false;
-                            foreach(var item in listInfo)
+                            foreach (var item in listInfo)
                             {
                                 if (item.Item1.Contains(nameToSearchFor))
                                 {
@@ -6081,7 +6088,7 @@ namespace AndriodApp1
                     }
                 }
 
-                if ((SoulSeekState.PerformDeepMetadataSearch && (bitrate==-1 || duration==-1) && size!=0 ))
+                if ((SoulSeekState.PerformDeepMetadataSearch && (bitrate == -1 || duration == -1) && size != 0))
                 {
                     try
                     {
@@ -6089,7 +6096,7 @@ namespace AndriodApp1
                         mediaMetadataRetriever.SetDataSource(SoulSeekState.ActiveActivityRef, childUri); //TODO: error file descriptor must not be null.
                         string? bitRateStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Bitrate);
                         string? durationStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
-                        if(HasMediaStoreDurationColumn())
+                        if (HasMediaStoreDurationColumn())
                         {
                             mediaMetadataRetriever.Close(); //added in api 29
                         }
@@ -6097,7 +6104,7 @@ namespace AndriodApp1
                         {
                             mediaMetadataRetriever.Release();
                         }
-                        
+
                         if (bitRateStr != null)
                         {
                             bitrate = int.Parse(bitRateStr);
@@ -6107,9 +6114,9 @@ namespace AndriodApp1
                             duration = int.Parse(durationStr) / 1000;
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
-                        MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SoulSeekState.ActiveActivityRef==null) + childUri?.ToString());
+                        MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SoulSeekState.ActiveActivityRef == null) + childUri?.ToString());
                     }
                 }
 
@@ -6118,9 +6125,9 @@ namespace AndriodApp1
                 //if its under 128kbps then lets just double check it..
                 //I did test .m4a vbr.  android meta data retriever handled it quite well.
                 //on api 19 the vbr being reported at 32000 is reported as 128000.... both obviously quite incorrect...
-                if(System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate>=0 && bitrate<=128000) && size != 0)
+                if (System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate >= 0 && bitrate <= 128000) && size != 0)
                 {
-                    if(SoulSeekState.PerformDeepMetadataSearch)
+                    if (SoulSeekState.PerformDeepMetadataSearch)
                     {
                         MicroTagReader.GetMp3Metadata(contentResolver, childUri, duration, size, out bitrate);
                     }
@@ -6141,11 +6148,11 @@ namespace AndriodApp1
                 //if uncompressed we can use this simple formula
                 if (uncompressed)
                 {
-                    if(bitrate!=-1)
+                    if (bitrate != -1)
                     {
                         //bitrate = 2 * sampleRate * depth
                         //so test pairs in order of precedence..
-                        if((bitrate) / (2 * 44100) == 16)
+                        if ((bitrate) / (2 * 44100) == 16)
                         {
                             sampleRate = 44100;
                             bitDepth = 16;
@@ -6167,13 +6174,13 @@ namespace AndriodApp1
                         }
                     }
                 }
-                if(duration==-1 && bitrate==-1 && bitDepth == -1 && sampleRate == -1)
+                if (duration == -1 && bitrate == -1 && bitDepth == -1 && sampleRate == -1)
                 {
                     return null;
                 }
-                return new Tuple<int, int, int, int>(duration, (lossless || bitrate==-1) ? -1 : (bitrate / 1000), bitDepth, sampleRate); //for lossless do not send bitrate!! no other client does that!!
+                return new Tuple<int, int, int, int>(duration, (lossless || bitrate == -1) ? -1 : (bitrate / 1000), bitDepth, sampleRate); //for lossless do not send bitrate!! no other client does that!!
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("get audio attr failed: " + e.Message + e.StackTrace);
                 return null;
@@ -6183,7 +6190,7 @@ namespace AndriodApp1
 
 
 
-        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string,Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, bool msdMsfCase, string msdMsfBuildParentName, ref int directoryCount, ref int indexNum)
+        public void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> previousFileInfoToUse, bool msdMsfCase, string msdMsfBuildParentName, ref int directoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
 
@@ -6191,12 +6198,12 @@ namespace AndriodApp1
 
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
             //Log.d(TAG, "node uri: ", childrenUri);
-            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize}, null, null, null);
+            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
             //c can be null... reasons are fairly opaque - if remote exception return null. if underlying content provider is null.
             if (c == null)
             {
                 //diagnostic code.
-                
+
                 //would a non /children uri work?
                 bool nonChildrenWorks = contentResolver.Query(rootUri, new string[] { Document.ColumnSize }, null, null, null) != null;
 
@@ -6206,7 +6213,7 @@ namespace AndriodApp1
                 //would list files work?
                 bool docFileLegacyWork = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentUri).Exists();
 
-                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " + listChildrenUri?.ToString() + "nonchildren: " + nonChildrenWorks + " activeContext: "+ wouldActiveWork + " legacyWork: " + docFileLegacyWork);
+                MainActivity.LogFirebase("cursor is null: parentDoc" + parentDoc + " list children uri: " + listChildrenUri?.ToString() + "nonchildren: " + nonChildrenWorks + " activeContext: " + wouldActiveWork + " legacyWork: " + docFileLegacyWork);
             }
 
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -6228,7 +6235,7 @@ namespace AndriodApp1
                     else
                     {
                         string presentableName = null;
-                        if(msdMsfCase)
+                        if (msdMsfCase)
                         {
                             presentableName = msdMsfBuildParentName + '\\' + name;
                         }
@@ -6236,11 +6243,11 @@ namespace AndriodApp1
                         {
                             presentableName = childUri.LastPathSegment.Replace('/', '\\');
 
-                            if (folderToStripForPresentableNames==null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                            if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
                             {
                                 if (volName != null && volName.Length != presentableName.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
                                 {
-                                    presentableName = presentableName.Substring(0,volName.Length) + '\\' + presentableName.Substring(volName.Length);
+                                    presentableName = presentableName.Substring(0, volName.Length) + '\\' + presentableName.Substring(volName.Length);
                                 }
                             }
                             else
@@ -6258,22 +6265,22 @@ namespace AndriodApp1
                             MainActivity.LogDebug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
                         }
 
-                        pairs.Add(presentableName,new Tuple<long, string, Tuple<int, int, int, int>>(size, childUri.ToString(),attributes)); //NEED TO STORE THEM HERE...
-                        index.Add(indexNum,presentableName); //throws on same key (the file in question ends with unicode EOT char (\u04)).
+                        pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>>(size, childUri.ToString(), attributes)); //NEED TO STORE THEM HERE...
+                        index.Add(indexNum, presentableName); //throws on same key (the file in question ends with unicode EOT char (\u04)).
                         indexNum++;
-                        if(indexNum % 50 == 0)
+                        if (indexNum % 50 == 0)
                         {
                             //update public status variable every so often
                             SoulSeekState.NumberParsed = indexNum;
                         }
-//                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
+                        //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
                         string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                               //for the brose response should only be the filename!!! 
-                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                               //bc we get a path that is:
-                                                                               //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
-                                                                               //not quite a full URI but it does add quite a bit..
+                                                                                                        //for the brose response should only be the filename!!! 
+                                                                                                        //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                                                        //bc we get a path that is:
+                                                                                                        //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                                                                                                        //not quite a full URI but it does add quite a bit..
 
                         //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
                         //{
@@ -6286,11 +6293,11 @@ namespace AndriodApp1
                 }
                 Helpers.SortSlskDirFiles(files);
                 string lastPathSegment = null;
-                if(msdMsfCase)
+                if (msdMsfCase)
                 {
                     lastPathSegment = msdMsfBuildParentName;
                 }
-                else if(isRootCase)
+                else if (isRootCase)
                 {
                     lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
                 }
@@ -6302,7 +6309,7 @@ namespace AndriodApp1
 
                 if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
                 {
-                    if(volName != null && volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
+                    if (volName != null && volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
                     {
                         directoryPath = directoryPath.Substring(0, volName.Length) + '\\' + directoryPath.Substring(volName.Length);
                     }
@@ -6329,7 +6336,7 @@ namespace AndriodApp1
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (var childDocFile in parentDocFile.ListFiles())
             {
-                if(childDocFile.IsDirectory)
+                if (childDocFile.IsDirectory)
                 {
                     directoryCount++;
                     traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, ref directoryCount, ref indexNum);
@@ -6351,7 +6358,7 @@ namespace AndriodApp1
                         MainActivity.LogDebug("fname: " + childDocFile.Name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
                     }
 
-                    pairs.Add(presentableName,new Tuple<long,string, Tuple<int, int, int, int>>(childDocFile.Length(), childDocFile.Uri.ToString(),null));
+                    pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>>(childDocFile.Length(), childDocFile.Uri.ToString(), null));
                     index.Add(indexNum, presentableName);
                     indexNum++;
                     if (indexNum % 50 == 0)
@@ -6378,7 +6385,7 @@ namespace AndriodApp1
             Helpers.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
-            if (folderToStripForPresentableNames != null) 
+            if (folderToStripForPresentableNames != null)
             {
                 directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
             }
@@ -6417,7 +6424,7 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public bool InitializeDatabase(DocumentFile dir,bool checkCache, bool rescan, out string errorMsg)
+        public bool InitializeDatabase(DocumentFile dir, bool checkCache, bool rescan, out string errorMsg)
         {
             errorMsg = string.Empty;
             bool success = false;
@@ -6429,12 +6436,12 @@ namespace AndriodApp1
                     cachedParseResults = GetCachedParseResults();
                 }
 
-                if(cachedParseResults==null)
+                if (cachedParseResults == null)
                 {
                     int directoryCount = 0;
                     System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                     s.Start();
-                    Dictionary<string, Tuple<long, string, Tuple< int,int,int,int>>> stringUriPairs = null;
+                    Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>> stringUriPairs = null;
                     BrowseResponse browseResponse = null;
                     List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
                     Dictionary<int, string> index = null;
@@ -6451,7 +6458,7 @@ namespace AndriodApp1
                     MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds", stringUriPairs.Keys.Count, s.ElapsedMilliseconds));
                     s.Reset();
                     s.Start();
-                    Dictionary<string,List<int>> tokenIndex = new Dictionary<string, List<int>>();
+                    Dictionary<string, List<int>> tokenIndex = new Dictionary<string, List<int>>();
                     var reversed = index.ToDictionary(x => x.Value, x => x.Key);
                     foreach (string presentableName in stringUriPairs.Keys)
                     {
@@ -6460,11 +6467,11 @@ namespace AndriodApp1
                         int code = reversed[presentableName];
                         foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
                         {
-                            if(token == string.Empty)
+                            if (token == string.Empty)
                             {
                                 continue;
                             }
-                            if(tokenIndex.ContainsKey(token))
+                            if (tokenIndex.ContainsKey(token))
                             {
                                 tokenIndex[token].Add(code);
                             }
@@ -6489,10 +6496,10 @@ namespace AndriodApp1
 
                     //put into cache.
                     using (System.IO.MemoryStream bResponsememoryStream = new System.IO.MemoryStream())
-                    using(System.IO.MemoryStream stringUrimemoryStream = new System.IO.MemoryStream())
-                    using(System.IO.MemoryStream friendlyDirNamememoryStream = new System.IO.MemoryStream())
-                    using(System.IO.MemoryStream intIndexStream = new System.IO.MemoryStream())
-                    using(System.IO.MemoryStream tokenIndexStream = new System.IO.MemoryStream())
+                    using (System.IO.MemoryStream stringUrimemoryStream = new System.IO.MemoryStream())
+                    using (System.IO.MemoryStream friendlyDirNamememoryStream = new System.IO.MemoryStream())
+                    using (System.IO.MemoryStream intIndexStream = new System.IO.MemoryStream())
+                    using (System.IO.MemoryStream tokenIndexStream = new System.IO.MemoryStream())
                     {
                         BinaryFormatter formatter = new BinaryFormatter();
                         formatter.Serialize(bResponsememoryStream, browseResponse);
@@ -6501,7 +6508,7 @@ namespace AndriodApp1
 
                         string bResponse = Convert.ToBase64String(bResponsememoryStream.ToArray());
 
-                        formatter.Serialize(stringUrimemoryStream,stringUriPairs);
+                        formatter.Serialize(stringUrimemoryStream, stringUriPairs);
                         string bstringUriPairs = Convert.ToBase64String(stringUrimemoryStream.ToArray());
 
                         MainActivity.LogDebug(string.Format("File Dictionary is {0} bytes", stringUrimemoryStream.Length));
@@ -6530,7 +6537,7 @@ namespace AndriodApp1
                             editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, bfriendlyDirName);
                             editor.PutString(SoulSeekState.M_CACHE_intHelperIndex_v2, bIntIndex);
                             editor.PutString(SoulSeekState.M_CACHE_tokenIndex_v2, bTokenIndex);
-                            editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri); 
+                            editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
                             //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
                             //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
                             editor.Commit();
@@ -6568,7 +6575,7 @@ namespace AndriodApp1
 
                     foreach (string search in searchTerms)
                     {
-                        if(tokenIndex.ContainsKey(search))
+                        if (tokenIndex.ContainsKey(search))
                         {
                             System.Console.WriteLine("true");
                         }
@@ -6628,21 +6635,21 @@ namespace AndriodApp1
                 SoulSeekState.FailedShareParse = false;
                 SoulSeekState.SharedFileCache.SuccessfullyInitialized = true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 errorMsg = "Unspecified Error";
-                if(e.GetType().FullName == "Java.Lang.SecurityException")
+                if (e.GetType().FullName == "Java.Lang.SecurityException")
                 {
                     errorMsg = "Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.";
                 }
-                success=false;
+                success = false;
                 LogDebug("Error parsing files: " + e.Message + e.StackTrace);
                 LogFirebase("Error parsing files: " + e.Message + e.StackTrace);
-                if(e.Message.Contains("An item with the same key"))
+                if (e.Message.Contains("An item with the same key"))
                 {
                     try
                     {
-                        LogFirebase("Possible encoding issue: " + ShowCodePoints(e.Message.Substring(e.Message.Length-7)));
+                        LogFirebase("Possible encoding issue: " + ShowCodePoints(e.Message.Substring(e.Message.Length - 7)));
                         errorMsg = "Possible Encoding Issue: " + e.Message + ". Please contact the developer";
                     }
                     catch
@@ -6653,12 +6660,12 @@ namespace AndriodApp1
             }
             finally
             {
-                if(!success)
+                if (!success)
                 {
                     SoulSeekState.UploadDataDirectoryUri = null;
                     SoulSeekState.FailedShareParse = true;
                     //if success if false then SoulSeekState.SharedFileCache might be null still causing a crash!
-                    if(SoulSeekState.SharedFileCache!=null)
+                    if (SoulSeekState.SharedFileCache != null)
                     {
                         SoulSeekState.SharedFileCache.SuccessfullyInitialized = false;
                     }
@@ -6672,7 +6679,7 @@ namespace AndriodApp1
         private static string ShowCodePoints(string str)
         {
             string codePointString = string.Empty;
-            foreach(char c in str)
+            foreach (char c in str)
             {
                 codePointString = codePointString + ($"_{ (int)c:x4}");
             }
@@ -6691,9 +6698,9 @@ namespace AndriodApp1
 
         private void SharedFileCache_Refreshed(object sender, (int Directories, int Files) e)
         {
-            if(SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+            if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
-                SoulSeekState.SoulseekClient.SetSharedCountsAsync(e.Directories,e.Files);
+                SoulSeekState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
             }
         }
 
@@ -6706,19 +6713,19 @@ namespace AndriodApp1
             {
                 if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
-                    if(MeetsSharingConditions() && SoulSeekState.SharedFileCache != null && SoulSeekState.SharedFileCache.SuccessfullyInitialized)
+                    if (MeetsSharingConditions() && SoulSeekState.SharedFileCache != null && SoulSeekState.SharedFileCache.SuccessfullyInitialized)
                     {
-                        MainActivity.LogDebug("Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.FileCount + " files" );
+                        MainActivity.LogDebug("Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.FileCount + " files");
                         SoulSeekState.SoulseekClient.SetSharedCountsAsync(SoulSeekState.SharedFileCache.DirectoryCount, SoulSeekState.SharedFileCache.FileCount);
                     }
                     else
                     {
                         MainActivity.LogDebug("Tell server we are sharing 0 dirs and 0 files");
-                        SoulSeekState.SoulseekClient.SetSharedCountsAsync(0,0);
+                        SoulSeekState.SoulseekClient.SetSharedCountsAsync(0, 0);
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogDebug("Failed to InformServerOfSharedFiles " + e.Message + e.StackTrace);
                 MainActivity.LogFirebase("Failed to InformServerOfSharedFiles " + e.Message + e.StackTrace);
@@ -6730,11 +6737,11 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string,long, string>> pairs, Dictionary<string,List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
+        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string, long, string>> pairs, Dictionary<string, List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
         {
             if (dir.Exists())
             {
-                DocumentFile[] files = dir.ListFiles(); 
+                DocumentFile[] files = dir.ListFiles();
                 for (int i = 0; i < files.Length; ++i)
                 {
                     DocumentFile file = files[i];
@@ -6752,21 +6759,21 @@ namespace AndriodApp1
                         //LogDebug(file.Uri.EncodedPath);  // /tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20Welcome%20To%20New%20York-Taylor%20Swift.mp3 
                         //LogDebug(file.Uri.LastPathSegment); // primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
 
-                        string fullPath = file.Uri.Path.ToString().Replace('/','\\');
+                        string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
                         string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
                         string searchableName = Helpers.GetFolderNameFromFile(fullPath) + @"\" + Helpers.GetFileNameFromFile(fullPath);
-                        if(isRootCase && (volName!=null))
+                        if (isRootCase && (volName != null))
                         {
-                            if(searchableName.Substring(0, volName.Length) == volName)
+                            if (searchableName.Substring(0, volName.Length) == volName)
                             {
-                                if(searchableName.Length != volName.Length) //i.e. if its just "primary:"
+                                if (searchableName.Length != volName.Length) //i.e. if its just "primary:"
                                 {
                                     searchableName = searchableName.Substring(volName.Length);
                                 }
                             }
                         }
-                        pairs.Add(new Tuple<string,string,long, string>(searchableName, file.Uri.ToString(), file.Length(), presentableName));
+                        pairs.Add(new Tuple<string, string, long, string>(searchableName, file.Uri.ToString(), file.Length(), presentableName));
                     }
                 }
             }
@@ -6814,7 +6821,7 @@ namespace AndriodApp1
             {
                 CpuKeepAlive_Transfer.Release();
             }
-            if(WifiKeepAlive_Transfer != null)
+            if (WifiKeepAlive_Transfer != null)
             {
                 WifiKeepAlive_Transfer.Release();
             }
@@ -6823,7 +6830,8 @@ namespace AndriodApp1
 
         public static void SetUpSharing(Action uiUpdateAction = null)
         {
-            Action setUpSharedFileCache = new Action(() => {
+            Action setUpSharedFileCache = new Action(() =>
+            {
                 string errorMessage = string.Empty;
                 bool success = false;
                 LogDebug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
@@ -6884,7 +6892,7 @@ namespace AndriodApp1
                     }));
                 }
 
-                if(uiUpdateAction!=null)
+                if (uiUpdateAction != null)
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                 }
@@ -6896,12 +6904,12 @@ namespace AndriodApp1
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            
+
             //basically if the Intent created the MainActivity, then we want to handle it (i.e. if from "Search Here")
             //however, if we say rotate the device or leave and come back to it (and the activity got destroyed in the mean time) then
             //it will re-handle the activity each time.  We can check if it is truly "new" by looking at the savedInstanceState.
             bool reborn = false;
-            if(savedInstanceState==null)
+            if (savedInstanceState == null)
             {
                 LogDebug("Main Activity On Create NEW");
             }
@@ -6914,18 +6922,18 @@ namespace AndriodApp1
 
             try
             {
-                if(CpuKeepAlive_Transfer==null)
+                if (CpuKeepAlive_Transfer == null)
                 {
                     CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
                     CpuKeepAlive_Transfer.SetReferenceCounted(false);
                 }
-                if(WifiKeepAlive_Transfer==null)
+                if (WifiKeepAlive_Transfer == null)
                 {
                     WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
                     WifiKeepAlive_Transfer.SetReferenceCounted(false);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 LogFirebase("error init keepalives: " + e.Message + e.StackTrace);
             }
@@ -6964,7 +6972,7 @@ namespace AndriodApp1
 
             System.Console.WriteLine("Testing.....");
 
-            sharedPreferences = this.GetSharedPreferences("SoulSeekPrefs",0);
+            sharedPreferences = this.GetSharedPreferences("SoulSeekPrefs", 0);
 
             if (TransfersFragment.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             {
@@ -6988,11 +6996,11 @@ namespace AndriodApp1
             //restoreSoulSeekState(savedInstanceState);
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
-            
+
             pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
             pager.PageSelected += Pager_PageSelected;
             TabsPagerAdapter adapter = new TabsPagerAdapter(SupportFragmentManager);
-            
+
             tabs.TabSelected += Tabs_TabSelected;
             pager.Adapter = adapter;
             pager.AddOnPageChangeListener(new OnPageChangeLister1());
@@ -7001,7 +7009,7 @@ namespace AndriodApp1
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
             //Intent = i;
-            if (Intent!=null)
+            if (Intent != null)
             {
                 //if(Intent.Flags == (ActivityFlags.LaunchedFromHistory | ActivityFlags.NewTask))
                 //{
@@ -7015,30 +7023,30 @@ namespace AndriodApp1
                 //}
 
 
-                if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1)==2)
+                if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
                 {
-                    pager.SetCurrentItem(2,false);
+                    pager.SetCurrentItem(2, false);
                 }
-                else if(Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1)==3)
+                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
                 {
-                    pager.SetCurrentItem(3,false);
+                    pager.SetCurrentItem(3, false);
                 }
-                else if(Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1)==1)
+                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
                 {
                     //var navigator = SoulSeekState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                     //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
                     //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
                     //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
-                    pager.SetCurrentItem(1,false);
+                    pager.SetCurrentItem(1, false);
                 }
-                else if(Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1)==1)
+                else if (Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1) == 1)
                 {
                     pager.SetCurrentItem(1, false);
                 }
-                else if(Intent.GetIntExtra(WishlistController.FromWishlistString,-1)== 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
+                else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
                 {
                     SoulSeekState.MainActivityRef = this; //set these early. they are needed
-                    SoulSeekState.ActiveActivityRef = this; 
+                    SoulSeekState.ActiveActivityRef = this;
 
                     MainActivity.LogInfoFirebase("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false).ToString());
                     MainActivity.LogInfoFirebase("from wishlist clicked");
@@ -7058,7 +7066,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            if(SearchFragment.Instance?.IsResumed ?? false) //!??! this logic is backwards...
+                            if (SearchFragment.Instance?.IsResumed ?? false) //!??! this logic is backwards...
                             {
                                 MainActivity.LogDebug("we are on the search page but we need to wait for OnResume search frag");
                                 goToSearchTab = tabID; //we read this we resume
@@ -7077,7 +7085,7 @@ namespace AndriodApp1
                         pager.SetCurrentItem(1, false);
                     }
                 }
-                else if ( ((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1)==2)  || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2 )) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
+                else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
                 {
                     HandleFromNotificationUploadIntent();
                 }
@@ -7086,7 +7094,7 @@ namespace AndriodApp1
                     MainActivity.LogInfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
                 }
-                else if(SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
+                else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
                 {
                     SoulSeekState.MainActivityRef = this;
                     SoulSeekState.ActiveActivityRef = this;
@@ -7116,17 +7124,17 @@ namespace AndriodApp1
                     SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
                     SearchDialog.IsFollowingLink = false;
                     pager.SetCurrentItem(1, false);
-                    if(SearchSendIntentHelper.TryParseIntent(Intent, out string searchTermFound))
+                    if (SearchSendIntentHelper.TryParseIntent(Intent, out string searchTermFound))
                     {
                         //we are done parsing the intent
                         SearchDialog.SearchTerm = searchTermFound;
                     }
-                    else if(SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
+                    else if (SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
                     {
                         SearchDialog.IsFollowingLink = true;
                     }
                     //close previous instance
-                    if(SearchDialog.Instance!=null)
+                    if (SearchDialog.Instance != null)
                     {
                         MainActivity.LogDebug("previous instance exists");
                         //SearchDialog.Instance.Dismiss(); //throws exception, cannot perform this action after onSaveInstanceState
@@ -7162,7 +7170,7 @@ namespace AndriodApp1
             //Android.Net.Wifi.WifiManager wm = this.GetSystemService(WifiService);
             //wm.
             //Mono.Nat.NatUtility.UnknownDeviceFound += NatUtility_DeviceFound;
-            
+
 
 
             SoulSeekState.SharedPreferences = sharedPreferences;
@@ -7175,18 +7183,18 @@ namespace AndriodApp1
 
             //WishlistController.SearchIntervalMilliseconds = 1000*30;
             //WishlistController.Initialize();
-            
+
             //#endif
 
 
             if (SoulSeekState.UseLegacyStorage())
             {
-                if(ContextCompat.CheckSelfPermission(this,Manifest.Permission.WriteExternalStorage)==Android.Content.PM.Permission.Denied)
+                if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
-                    ActivityCompat.RequestPermissions(this,new string[] {Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
+                    ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
                 //file picker with legacy case
-                if(SoulSeekState.SaveDataDirectoryUri!=null && SoulSeekState.SaveDataDirectoryUri.ToString() != "")
+                if (SoulSeekState.SaveDataDirectoryUri != null && SoulSeekState.SaveDataDirectoryUri.ToString() != "")
                 {
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri);
@@ -7200,7 +7208,7 @@ namespace AndriodApp1
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
                         if (SoulSeekState.PreOpenDocumentTree())
                         {
-                            canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite(); 
+                            canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
                         }
                         else
                         {
@@ -7234,7 +7242,7 @@ namespace AndriodApp1
                             LogFirebase("legacy DocumentFile.FromTreeUri failed with null URI");
                         }
                     }
-                    if(canWrite)
+                    if (canWrite)
                     {
                         if (SoulSeekState.PreOpenDocumentTree())
                         {
@@ -7247,7 +7255,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        MainActivity.LogFirebase("cannot write" + chosenUri?.ToString()??"null");
+                        MainActivity.LogFirebase("cannot write" + chosenUri?.ToString() ?? "null");
                     }
                 }
 
@@ -7321,7 +7329,7 @@ namespace AndriodApp1
             {
 
                 Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if(SoulSeekState.SaveDataDirectoryUri == null || SoulSeekState.SaveDataDirectoryUri.ToString() == "")
+                if (SoulSeekState.SaveDataDirectoryUri == null || SoulSeekState.SaveDataDirectoryUri.ToString() == "")
                 {
                     //try
                     //{
@@ -7358,18 +7366,18 @@ namespace AndriodApp1
                     //Caused by: java.lang.IllegalArgumentException: 
                     //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                     //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                    if(SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
+                    if (SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
                     {
                         canWrite = DocumentFile.FromFile(new Java.IO.File(res.Path)).CanWrite();
                     }
                     else
                     {
-                        canWrite = DocumentFile.FromTreeUri(this,res).CanWrite();
+                        canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    if(res!=null)
+                    if (res != null)
                     {
                         LogFirebase("DocumentFile.FromTreeUri failed with URI: " + res.ToString() + " " + e.Message);
                     }
@@ -7379,7 +7387,7 @@ namespace AndriodApp1
                     }
                 }
                 //if (DocumentFile.FromTreeUri(this, Uri.TryCreate("",UriKind.Absolute)))
-                if(!canWrite)
+                if (!canWrite)
                 {
 
                     var b = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -7396,9 +7404,9 @@ namespace AndriodApp1
                         {
                             this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
-                            if(ex.Message.Contains("No Activity found to handle Intent"))
+                            if (ex.Message.Contains("No Activity found to handle Intent"))
                             {
                                 Toast.MakeText(this, this.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
                             }
@@ -7434,7 +7442,7 @@ namespace AndriodApp1
                     manualSet = false;
                 }
 
-                if(manualSet)
+                if (manualSet)
                 {
                     bool canWriteIncomplete = false;
                     try
@@ -7464,7 +7472,7 @@ namespace AndriodApp1
                             LogFirebase("DocumentFile.FromTreeUri failed with incomplete null URI");
                         }
                     }
-                    if(canWriteIncomplete)
+                    if (canWriteIncomplete)
                     {
                         SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
                     }
@@ -7508,51 +7516,51 @@ namespace AndriodApp1
 
             //    DownloadDialog.CreateTree(br,false, null, null, "BeerNecessities",out _);
 
-                //if(b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
-                //{
-                //    errorMsgToToast = "User is only sharing locked directories";
-                //    return null;
-                //}
-                //else if(b.DirectoryCount==0&&b.LockedDirectoryCount==0)
-                //{
-                //    errorMsgToToast = "User is not sharing any directories";
-                //    return null;
-                //}
+            //if(b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
+            //{
+            //    errorMsgToToast = "User is only sharing locked directories";
+            //    return null;
+            //}
+            //else if(b.DirectoryCount==0&&b.LockedDirectoryCount==0)
+            //{
+            //    errorMsgToToast = "User is not sharing any directories";
+            //    return null;
+            //}
 
 
-                //setKeyboardVisibilityListener();
+            //setKeyboardVisibilityListener();
 
-                //OneTimeWorkRequest otwr = OneTimeWorkRequest.Builder.From<DownloadWorkerTest>().Build();
-                //WorkManager.GetInstance(this).Enqueue(otwr); //will this keep use alive for 30 mins....  FAILURE - does not keep alive connections.
-
-
-                //TEST CODE //TEST CODE
-                //SERVICE STARTED BUT THREAD IS STILL AN ACTIVITY THREAD: 36+ mins. :) - after killing it it went on for 20+ mins (ps -A shows it + you get notifications). after restarting device its gone :(
+            //OneTimeWorkRequest otwr = OneTimeWorkRequest.Builder.From<DownloadWorkerTest>().Build();
+            //WorkManager.GetInstance(this).Enqueue(otwr); //will this keep use alive for 30 mins....  FAILURE - does not keep alive connections.
 
 
-                //Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                //this.StartService(downloadServiceIntent);
+            //TEST CODE //TEST CODE
+            //SERVICE STARTED BUT THREAD IS STILL AN ACTIVITY THREAD: 36+ mins. :) - after killing it it went on for 20+ mins (ps -A shows it + you get notifications). after restarting device its gone :(
 
 
-                //In the non service case it still goes on for 19+ mins..  but after you kill it by swiping up then its gone (no more notifications and ps -A shows nothing)
-                //Thread t1 = new Thread(() => { 
-                //    while(true)
-                //    {
-                //        this.RunOnUiThread(() => {Toast.MakeText(this,"we are running",ToastLength.Long).Show(); });
-                //        System.Threading.Thread.Sleep(1000*30);
-                //    }
+            //Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
+            //this.StartService(downloadServiceIntent);
 
-                //    });
-                //t1.Start();
 
-                //END TEST
-                //AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
-                //string pkgname = this.ApplicationInfo.PackageName; //these all return com.companyname.androidapp1
-                //string pkgnameunique = this.PackageName;
-                //string pkgnameunique2 = Application.Context.PackageName;
+            //In the non service case it still goes on for 19+ mins..  but after you kill it by swiping up then its gone (no more notifications and ps -A shows nothing)
+            //Thread t1 = new Thread(() => { 
+            //    while(true)
+            //    {
+            //        this.RunOnUiThread(() => {Toast.MakeText(this,"we are running",ToastLength.Long).Show(); });
+            //        System.Threading.Thread.Sleep(1000*30);
+            //    }
 
-                // GetIncompleteStream(@"testdir\testdir1\testfname.mp3", out Android.Net.Uri int2);
-            }
+            //    });
+            //t1.Start();
+
+            //END TEST
+            //AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+            //string pkgname = this.ApplicationInfo.PackageName; //these all return com.companyname.androidapp1
+            //string pkgnameunique = this.PackageName;
+            //string pkgnameunique2 = Application.Context.PackageName;
+
+            // GetIncompleteStream(@"testdir\testdir1\testfname.mp3", out Android.Net.Uri int2);
+        }
 
         protected override void OnStart()
         {
@@ -7674,12 +7682,12 @@ namespace AndriodApp1
 
         private void AddMessage(PrivateMessageReceivedEventArgs messageEvent)
         {
-            
+
         }
 
         private void Navigator_ViewAttachedToWindow(object sender, View.ViewAttachedToWindowEventArgs e)
         {
-           // throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
 
         private void Navigator_NavigationItemSelected(object sender, BottomNavigationView.NavigationItemSelectedEventArgs e)
@@ -7700,26 +7708,26 @@ namespace AndriodApp1
                 Task t;
                 if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.MainActivityRef, out t))
                 {
-                        t.ContinueWith(new Action<Task>((Task t) =>
+                    t.ContinueWith(new Action<Task>((Task t) =>
+                    {
+                        if (t.IsFaulted)
                         {
-                            if (t.IsFaulted)
+                            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                if (SoulSeekState.MainActivityRef != null)
                                 {
-                                    if (SoulSeekState.MainActivityRef != null)
-                                    {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-                                    }
-                                    else
-                                    {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-                                    }
-                        
-                                });
-                                return;
-                            }
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueLogic(username, fullFileName, actionOnComplete); });
-                        }));
+                                    Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                }
+                                else
+                                {
+                                    Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                }
+
+                            });
+                            return;
+                        }
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueLogic(username, fullFileName, actionOnComplete); });
+                    }));
                 }
             }
             else
@@ -7728,7 +7736,7 @@ namespace AndriodApp1
             }
         }
 
-        private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, Func<TransferItem,object> actionOnComplete = null)
+        private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, Func<TransferItem, object> actionOnComplete = null)
         {
 
             Action<Task<int>> updateTask = new Action<Task<int>>(
@@ -7759,7 +7767,7 @@ namespace AndriodApp1
                                 relevantItem.QueueLength = 0;
                             }
                         }
-                        
+
                         if (actionOnComplete != null)
                         {
                             SoulSeekState.MainActivityRef?.RunOnUiThread(() => { actionOnComplete(relevantItem); });
@@ -7776,9 +7784,9 @@ namespace AndriodApp1
             Task<int> getDownloadPlace = null;
             try
             {
-                getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username,fullFileName);
+                getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName);
             }
-            catch(TransferNotFoundException)
+            catch (TransferNotFoundException)
             {
                 //it is not downloading... therefore retry the download...
                 TransferItem item1 = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
@@ -7790,7 +7798,7 @@ namespace AndriodApp1
                     Android.Net.Uri incompleteUri = null;
                     TransfersFragment.SetupCancellationToken(item1, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                     Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource);
-                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength,0, item1.GetDirectoryLevel()) { TransferItemReference = item1 })));
+                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -7817,7 +7825,7 @@ namespace AndriodApp1
                     getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName);
                     getDownloadPlace.ContinueWith(updateTask);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     LogFirebase("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
                 }
@@ -7826,7 +7834,7 @@ namespace AndriodApp1
 
 
             }
-            catch(System.Exception e)
+            catch (System.Exception e)
             {
                 //LogFirebase("GetDownloadPlaceInQueue" + e.Message);
                 return;
@@ -7874,9 +7882,9 @@ namespace AndriodApp1
                     //ClearTask - causes any existing task that would be associated with the activity 
                     // to be cleared before the activity is started. can only be used in conjunction with NewTask.
                     // basically it clears all activities in the current task.
-                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask); 
+                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
                     this.StartActivity(intent3);
-                    if((int)Android.OS.Build.VERSION.SdkInt < 21)
+                    if ((int)Android.OS.Build.VERSION.SdkInt < 21)
                     {
                         this.FinishAffinity();
                     }
@@ -7907,25 +7915,25 @@ namespace AndriodApp1
         }
 
 
-        public const string UPLOADS_CHANNEL_ID =  "upload channel ID";
+        public const string UPLOADS_CHANNEL_ID = "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
         public const string UPLOADS_NOTIF_EXTRA = "From Upload";
 
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
             string fileS = numFiles == 1 ? SoulSeekState.ActiveActivityRef.GetString(Resource.String.file) : SoulSeekState.ActiveActivityRef.GetString(Resource.String.files);
-            string titleText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.upload_f_string),numFiles, fileS, username);
+            string titleText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.upload_f_string), numFiles, fileS, username);
             string directoryString = string.Empty;
-            if(directories.Count==1)
+            if (directories.Count == 1)
             {
                 directoryString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.from_directory) + ": " + directories[0];
             }
             else
             {
                 directoryString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.from_directories) + ": " + directories[0];
-                for(int i=0;i<directories.Count;i++)
+                for (int i = 0; i < directories.Count; i++)
                 {
-                    if(i==0)
+                    if (i == 0)
                     {
                         continue;
                     }
@@ -8023,17 +8031,17 @@ namespace AndriodApp1
         /// <returns>true if user was already added</returns>
         public static bool UserListAddUser(UserData userData, UserPresence? status = null)
         {
-            lock(SoulSeekState.UserList)
+            lock (SoulSeekState.UserList)
             {
                 bool found = false;
-                foreach(UserListItem item in SoulSeekState.UserList)
+                foreach (UserListItem item in SoulSeekState.UserList)
                 {
-                    if(item.Username == userData.Username)
+                    if (item.Username == userData.Username)
                     {
                         found = true;
-                        if(userData!=null)
+                        if (userData != null)
                         {
-                            if(status!=null)
+                            if (status != null)
                             {
                                 var oldStatus = item.UserStatus;
                                 item.UserStatus = new UserStatus(status.Value, oldStatus?.IsPrivileged ?? false);
@@ -8051,9 +8059,9 @@ namespace AndriodApp1
                     //this is the normal case..
                     var item = new UserListItem(userData.Username);
                     item.UserData = userData;
-                    
+
                     //if added an ignored user, then unignore the user.  the two are mutually exclusive.....
-                    if(SeekerApplication.IsUserInIgnoreList(userData.Username))
+                    if (SeekerApplication.IsUserInIgnoreList(userData.Username))
                     {
                         SeekerApplication.RemoveFromIgnoreList(userData.Username);
                     }
@@ -8086,7 +8094,7 @@ namespace AndriodApp1
                         break;
                     }
                 }
-                if(itemToRemove==null)
+                if (itemToRemove == null)
                 {
                     return false;
                 }
@@ -8107,7 +8115,7 @@ namespace AndriodApp1
         /// <returns>A Task resolving an IEnumerable of Soulseek.Directory.</returns>
         private static Task<BrowseResponse> BrowseResponseResolver(string username, IPEndPoint endpoint)
         {
-            if(SeekerApplication.IsUserInIgnoreList(username))
+            if (SeekerApplication.IsUserInIgnoreList(username))
             {
                 return Task.FromResult(new BrowseResponse(Enumerable.Empty<Directory>()));
             }
@@ -8128,12 +8136,12 @@ namespace AndriodApp1
             //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
             Tuple<string, string> fullDirUri = SoulSeekState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault();
 
-            if(fullDirUri == null)
+            if (fullDirUri == null)
             {
                 //as fallback safety.  I dont think this will ever happen.....
                 fullDirUri = SoulSeekState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); }).FirstOrDefault();
             }
-            if(fullDirUri==null)
+            if (fullDirUri == null)
             {
                 //could not find...
             }
@@ -8148,13 +8156,13 @@ namespace AndriodApp1
             }
             //Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path
             var slskDir = SlskDirFromDocumentFile(fullDir, Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path, true, GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
-            slskDir = new Directory(directory,slskDir.Files);
+            slskDir = new Directory(directory, slskDir.Files);
             return Task.FromResult(slskDir);
         }
 
         public static void TurnOnSharing()
         {
-            SoulSeekState.SoulseekClient.Options.SetSharedHandlers(BrowseResponseResolver,SearchResponseResolver, DirectoryContentsResponseResolver, EnqueueDownloadAction);
+            SoulSeekState.SoulseekClient.Options.SetSharedHandlers(BrowseResponseResolver, SearchResponseResolver, DirectoryContentsResponseResolver, EnqueueDownloadAction);
         }
 
         public static void TurnOffSharing()
@@ -8167,13 +8175,13 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="informServerOfChangeIfThereIsAChange"></param>
         /// <param name="force">force if we are chaning the upload directory...</param>
-        public static void SetUnsetSharingBasedOnConditions(bool informServerOfChangeIfThereIsAChange, bool force=false)
+        public static void SetUnsetSharingBasedOnConditions(bool informServerOfChangeIfThereIsAChange, bool force = false)
         {
             bool wasShared = SoulSeekState.SoulseekClient.Options.SearchResponseResolver == null; //when settings gets recreated can get nullref here.
             if (MeetsSharingConditions())
             {
                 TurnOnSharing();
-                if(!wasShared||force)
+                if (!wasShared || force)
                 {
                     InformServerOfSharedFiles();
                 }
@@ -8195,7 +8203,7 @@ namespace AndriodApp1
 
         public static bool IsSharingSetUpSuccessfully()
         {
-            if(SoulSeekState.SharedFileCache == null || !SoulSeekState.SharedFileCache.SuccessfullyInitialized)
+            if (SoulSeekState.SharedFileCache == null || !SoulSeekState.SharedFileCache.SuccessfullyInitialized)
             {
                 return false;
             }
@@ -8211,11 +8219,11 @@ namespace AndriodApp1
             if (MeetsSharingConditions() && IsSharingSetUpSuccessfully())
             {
                 //try to parse this into a path: SoulSeekState.ShareDataDirectoryUri
-                return new Tuple<SharingIcons,string>(SharingIcons.On,SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
+                return new Tuple<SharingIcons, string>(SharingIcons.On, SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
             }
-            else if(MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
+            else if (MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
             {
-                if(SoulSeekState.SharedFileCache == null)
+                if (SoulSeekState.SharedFileCache == null)
                 {
                     return new Tuple<SharingIcons, string>(SharingIcons.Off, "Not yet initialized.");
                 }
@@ -8224,11 +8232,11 @@ namespace AndriodApp1
                     return new Tuple<SharingIcons, string>(SharingIcons.Error, SoulSeekState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
                 }
             }
-            else if(!SoulSeekState.SharingOn)
+            else if (!SoulSeekState.SharingOn)
             {
                 return new Tuple<SharingIcons, string>(SharingIcons.Off, SoulSeekState.ActiveActivityRef.GetString(Resource.String.sharing_off));
             }
-            else if(SoulSeekState.IsParsing)
+            else if (SoulSeekState.IsParsing)
             {
                 isParsing = true;
                 return new Tuple<SharingIcons, string>(SharingIcons.Error, SoulSeekState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
@@ -8249,19 +8257,20 @@ namespace AndriodApp1
 
         public void SetUpLoginContinueWith(Task t)
         {
-            if(t==null)
+            if (t == null)
             {
                 return;
             }
-            if(MeetsSharingConditions())
+            if (MeetsSharingConditions())
             {
-                
-                Action<Task> getAndSetLoggedInInfoAction = new Action<Task>((Task t) => { 
+
+                Action<Task> getAndSetLoggedInInfoAction = new Action<Task>((Task t) =>
+                {
                     //we want to 
                     //UpdateStatus ??
                     //inform server if we are sharing..
                     //get our upload speed..
-                    if(t.Status==TaskStatus.Faulted || t.IsFaulted || t.IsCanceled)
+                    if (t.Status == TaskStatus.Faulted || t.IsFaulted || t.IsCanceled)
                     {
                         return;
                     }
@@ -8315,11 +8324,11 @@ namespace AndriodApp1
                 {
                     relevant = BrowseFragment.Instance.BackButton();
                 }
-                else if(pager.CurrentItem == 2) //transfer tab
+                else if (pager.CurrentItem == 2) //transfer tab
                 {
-                    if(TransfersFragment.GetCurrentlySelectedFolder()!=null) 
+                    if (TransfersFragment.GetCurrentlySelectedFolder() != null)
                     {
-                        if(TransfersFragment.InUploadsMode)
+                        if (TransfersFragment.InUploadsMode)
                         {
                             TransfersFragment.CurrentlySelectedUploadFolder = null;
                         }
@@ -8337,12 +8346,12 @@ namespace AndriodApp1
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 //During Back Button: Attempt to invoke virtual method 'java.lang.Object android.content.Context.getSystemService(java.lang.String)' on a null object reference
                 MainActivity.LogFirebase("During Back Button: " + e.Message);
             }
-            if(!relevant)
+            if (!relevant)
             {
                 base.OnBackPressed();
             }
@@ -8355,9 +8364,9 @@ namespace AndriodApp1
 
         public static void SoulseekClient_ErrorLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
         {
-            if(e?.Message!=null)
+            if (e?.Message != null)
             {
-                if(e.Message.Contains("Operation timed out"))
+                if (e.Message.Contains("Operation timed out"))
                 {
                     //this happens to me all the time and it is literally fine
                     return;
@@ -8371,13 +8380,13 @@ namespace AndriodApp1
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
                 //old: SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.Connecting) || SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggingIn). this is not good enough since you can still pass this if you are connected but not yet Logging In!
-                if (!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn)) 
+                if (!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
                     //MainActivity.LogDebug("IsLoggingInTaskCurrentlyBeingPerformed: TRUE");
                     SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
                     if (msg != null)
                     {
-                        if(contextToUseForMessage==null)
+                        if (contextToUseForMessage == null)
                         {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
                         }
@@ -8398,19 +8407,20 @@ namespace AndriodApp1
 
         public static bool ShowMessageAndCreateReconnectTask(Context c, out Task connectTask)
         {
-            if(c==null)
+            if (c == null)
             {
                 c = SoulSeekState.MainActivityRef;
             }
-            if(Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) //tested..
+            if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) //tested..
             {
-                Toast tst = Toast.MakeText(c,c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
+                Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
                 tst.Show();
             }
             else
             {
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(
-                    () => {
+                    () =>
+                    {
                         Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
                         tst.Show();
                     });
@@ -8433,7 +8443,7 @@ namespace AndriodApp1
 
         public static bool CurrentlyLoggedInButDisconnectedState()
         {
-            return (SoulSeekState.currentlyLoggedIn && 
+            return (SoulSeekState.currentlyLoggedIn &&
                 (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
         }
 
@@ -8477,7 +8487,7 @@ namespace AndriodApp1
                 //SupportFragmentManager
                 SupportFragmentManager.BeginTransaction().Detach(f).Attach(f).CommitNow();
                 //supportFragmentManager.beginTransaction().detach(fragment).attach(fragment).commitNow()
-           }
+            }
         }
 
         /// <summary>
@@ -8497,7 +8507,7 @@ namespace AndriodApp1
             {
                 return defaultResponse;
             }
-            if(SeekerApplication.IsUserInIgnoreList(username))
+            if (SeekerApplication.IsUserInIgnoreList(username))
             {
                 return defaultResponse;
             }
@@ -8507,7 +8517,7 @@ namespace AndriodApp1
                 return defaultResponse;
             }
 
-            if(SoulSeekState.Username==null || SoulSeekState.Username == string.Empty || SoulSeekState.SharedFileCache==null)
+            if (SoulSeekState.Username == null || SoulSeekState.Username == string.Empty || SoulSeekState.SharedFileCache == null)
             {
                 return defaultResponse;
             }
@@ -8518,7 +8528,7 @@ namespace AndriodApp1
             {
                 //Console.WriteLine($"[SENDING SEARCH RESULTS]: {results.Count()} records to {username} for query {query.SearchText}");
                 int ourUploadSpeed = 1024 * 256;
-                if(SoulSeekState.UploadSpeed>0)
+                if (SoulSeekState.UploadSpeed > 0)
                 {
                     ourUploadSpeed = SoulSeekState.UploadSpeed;
                 }
@@ -8555,22 +8565,22 @@ namespace AndriodApp1
         /// <exception cref="Exception">Thrown on any other Exception other than a rejection.  A generic message will be passed to the remote user for security reasons.</exception>
         private static Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename)
         {
-            if(SeekerApplication.IsUserInIgnoreList(username))
+            if (SeekerApplication.IsUserInIgnoreList(username))
             {
                 return Task.CompletedTask;
             }
-            
+
             //if a user tries to download a file from our browseResponse then their filename will be
             //  "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3" 
             //so check if it contains the uploadDataDirectoryUri
             string keyFilename = filename;
-            string uploadDirfolderName = Helpers.GetFileNameFromFile(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path.Replace(@"/",@"\")); //this will actaully get the last folder name..
+            string uploadDirfolderName = Helpers.GetFileNameFromFile(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path.Replace(@"/", @"\")); //this will actaully get the last folder name..
             string volname = GetVolumeName(uploadDirfolderName, false, out bool entireString);
-            if(volname != null && uploadDirfolderName.IndexOf(volname)==0)
+            if (volname != null && uploadDirfolderName.IndexOf(volname) == 0)
             {
                 uploadDirfolderName = uploadDirfolderName.Substring(volname.Length);
             }
-            else if(entireString)
+            else if (entireString)
             {
                 uploadDirfolderName = string.Empty;
             }
@@ -8584,8 +8594,8 @@ namespace AndriodApp1
             //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<long, string, Tuple< int,int,int,int>> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
-            if (ourFileInfo==null)
+            Tuple<long, string, Tuple<int, int, int, int>> ourFileInfo = SoulSeekState.SharedFileCache.GetFullInfoFromSearchableName(keyFilename, filename, !entireString, volname, GetLastPathSegment, out errorMsg);//SoulSeekState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
+            if (ourFileInfo == null)
             {
                 LogFirebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
                 throw new DownloadEnqueueException($"File not found.");
@@ -8632,13 +8642,13 @@ namespace AndriodApp1
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
             transferItem = TransfersFragment.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
-            
+
             if (!exists) //else the state will simply be updated a bit later. 
             {
                 TransferAddedUINotify?.Invoke(null, transferItem);
             }
-                // accept all download requests, and begin the upload immediately.
-                // normally there would be an internal queue, and uploads would be handled separately.
+            // accept all download requests, and begin the upload immediately.
+            // normally there would be an internal queue, and uploads would be handled separately.
             Task.Run(async () =>
             {
                 CancellationTokenSource oldCts = null;
@@ -8650,15 +8660,15 @@ namespace AndriodApp1
                     TransfersFragment.SetupCancellationToken(transferItem, cts, out oldCts);
 
                     await SoulSeekState.SoulseekClient.UploadAsync(username, filename, transferItem.Size, stream, options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurUploadGoverner), cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
-                                                                                                                                                                //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
-                    
+                                                                                                                                                                                                                                               //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
+
                 }
                 catch (DuplicateTransferException dup) //not tested
                 {
-                    LogDebug("UPLOAD DUPL - " + dup.Message); 
+                    LogDebug("UPLOAD DUPL - " + dup.Message);
                     TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
                 }
-                catch(DuplicateTokenException dup)
+                catch (DuplicateTokenException dup)
                 {
                     LogDebug("UPLOAD DUPL - " + dup.Message);
                     TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
@@ -8677,23 +8687,24 @@ namespace AndriodApp1
             base.OnActivityResult(requestCode, resultCode, data);
             if (NEW_WRITE_EXTERNAL == requestCode)
             {
-                if(resultCode == Result.Ok)
+                if (resultCode == Result.Ok)
                 {
                     var x = data.Data;
-                    SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this,data.Data);
+                    SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                     SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
-                    this.ContentResolver.TakePersistableUriPermission(data.Data,ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                 }
                 else
                 {
-                    Action showDirectoryButton = new Action(() => {
+                    Action showDirectoryButton = new Action(() =>
+                    {
                         ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
                         AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
-                        if(!SoulSeekState.currentlyLoggedIn)
+                        if (!SoulSeekState.currentlyLoggedIn)
                         {
                             MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
                         }
-                        if(StaticHacks.LoginFragment.View == null)//this can happen...
+                        if (StaticHacks.LoginFragment.View == null)//this can happen...
                         {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
                             ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings));
                             LogFirebase("StaticHacks.LoginFragment.View is null");
@@ -8703,11 +8714,11 @@ namespace AndriodApp1
                         Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
                         if (bttn != null)
                         {
-                                bttn.Visibility = ViewStates.Visible;
-                                bttn.Click += MustSelectDirectoryClick;
+                            bttn.Visibility = ViewStates.Visible;
+                            bttn.Click += MustSelectDirectoryClick;
                         }
                     });
-                    if(OnUIthread())
+                    if (OnUIthread())
                     {
                         showDirectoryButton();
                     }
@@ -8719,7 +8730,7 @@ namespace AndriodApp1
                     //throw new Exception("Seeker requires access to a directory where it can store files.");
                 }
             }
-            else if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
+            else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
             {
                 if (resultCode == Result.Ok)
                 {
@@ -8728,7 +8739,8 @@ namespace AndriodApp1
                     SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     //hide the button
-                    Action hideButton = new Action(() => {
+                    Action hideButton = new Action(() =>
+                    {
                         //ToastUI("Must select a directory to place downloads. This will be needed to place downloaded files.");
                         Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
                         bttn.Visibility = ViewStates.Gone;
@@ -8745,7 +8757,8 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Action reiterate = new Action(() => {
+                    Action reiterate = new Action(() =>
+                    {
                         ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
                         //Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
                         //bttn.Visibility = ViewStates.Visible;
@@ -8763,9 +8776,9 @@ namespace AndriodApp1
                     //throw new Exception("Seeker requires access to a directory where it can store files.");
                 }
             }
-            else if(SETTINGS_EXTERNAL == requestCode)
+            else if (SETTINGS_EXTERNAL == requestCode)
             {
-                if(resultCode == Result.Ok)
+                if (resultCode == Result.Ok)
                 {
                     //get settings and set our things.
                 }
@@ -8810,7 +8823,7 @@ namespace AndriodApp1
             {
                 this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (ex.Message.Contains("No Activity found to handle Intent"))
                 {
@@ -8935,89 +8948,89 @@ namespace AndriodApp1
             {
                 try
                 {
-                Action action = null;
-                if (task.IsCanceled)
-                {
-                    MainActivity.LogDebug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.TaskWasCancelledToastDebouncer).ToString());
-                    if((DateTimeOffset.Now.ToUnixTimeMilliseconds()-SoulSeekState.TaskWasCancelledToastDebouncer)>1000)
+                    Action action = null;
+                    if (task.IsCanceled)
                     {
-                        SoulSeekState.TaskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                        //action = () => { ToastUI("The task was cancelled."); };
-                        //this.RunOnUiThread(action);
-                    }
-
-                    if(e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
-                    {
-                        e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
-                        try
+                        MainActivity.LogDebug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.TaskWasCancelledToastDebouncer).ToString());
+                        if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.TaskWasCancelledToastDebouncer) > 1000)
                         {
-                            //retry download.
-                            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                            Android.Net.Uri incompleteUri = null;
+                            SoulSeekState.TaskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            //action = () => { ToastUI("The task was cancelled."); };
+                            //this.RunOnUiThread(action);
+                        }
+
+                        if (e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
+                        {
+                            e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
+                            try
+                            {
+                                //retry download.
+                                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                                Android.Net.Uri incompleteUri = null;
                                 TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                                 Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
-                            retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
+                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
+                            }
+                            catch (System.Exception e)
+                            {
+                                MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                            }
                         }
-                        catch (System.Exception e)
+
+                        if (e.dlInfo.TransferItemReference.CancelAndClearFlag)
                         {
-                            MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                            MainActivity.LogDebug("continue with cleanup activity: " + e.dlInfo.fullFilename);
+                            e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
+                            e.dlInfo.TransferItemReference.InProcessing = false;
+                            TransferItemManagerWrapper.PerformCleanupItem(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
                         }
-                    }
 
-                    if(e.dlInfo.TransferItemReference.CancelAndClearFlag)
+                        return;
+                    }
+                    else if (task.Status == TaskStatus.Faulted)
                     {
-                        MainActivity.LogDebug("continue with cleanup activity: " + e.dlInfo.fullFilename);
-                        e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
-                        e.dlInfo.TransferItemReference.InProcessing = false;
-                        TransferItemManagerWrapper.PerformCleanupItem(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
-                    }
-
-                    return;
-                }
-                else if (task.Status == TaskStatus.Faulted)
-                {
-                    bool retriable = false;
+                        bool retriable = false;
                         bool resetRetryCount = false;
-                    if (task.Exception.InnerException is System.TimeoutException)
-                    {
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
-                    }
-                    else if (task.Exception.InnerException is Soulseek.TransferRejectedException) //derived class of TransferException...
-                    {
-                        //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
-                        action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected),"_2_"); }; //needed
-                    }
-                    else if (task.Exception.InnerException is Soulseek.TransferException)
-                    {
-                        action = () => { ToastUIWithDebouncer(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer),e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
-                    }
-                    else if (task.Exception.InnerException is Soulseek.UserOfflineException)
-                    {
-                        action = () => { ToastUIWithDebouncer(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
-                    }
-                    else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
-                            task.Exception.InnerException.Message != null &&
-                            task.Exception.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
-                    {
-                        LogDebug("Task Exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
-                    }
-                    else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
-                    {
-                            retriable= true;
-                        //MainActivity.LogFirebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
-                        LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
-                            if(NetworkHandoffDetector.HasHandoffOccuredRecently())
+                        if (task.Exception.InnerException is System.TimeoutException)
+                        {
+                            action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
+                        }
+                        else if (task.Exception.InnerException is Soulseek.TransferRejectedException) //derived class of TransferException...
+                        {
+                            //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
+                            action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
+                        }
+                        else if (task.Exception.InnerException is Soulseek.TransferException)
+                        {
+                            action = () => { ToastUIWithDebouncer(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
+                        }
+                        else if (task.Exception.InnerException is Soulseek.UserOfflineException)
+                        {
+                            action = () => { ToastUIWithDebouncer(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
+                        }
+                        else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
+                                task.Exception.InnerException.Message != null &&
+                                task.Exception.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
+                        {
+                            LogDebug("Task Exception: " + task.Exception.InnerException.Message);
+                            action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
+                        }
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
+                        {
+                            retriable = true;
+                            //MainActivity.LogFirebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
+                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                            if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                             {
                                 resetRetryCount = true;
                             }
-                    }
-                    else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
-                    {
+                        }
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
+                        {
                             //MainActivity.LogFirebase("Network Subsystem is Down");
-                           if(ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
-                           {
+                            if (ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
+                            {
                                 LogDebug("we do have internet");
                                 action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
                                 retriable = true;
@@ -9026,140 +9039,140 @@ namespace AndriodApp1
                                     resetRetryCount = true;
                                 }
                             }
-                           else
+                            else
                             {
                                 action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_down)); };
                             }
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        
-                    }
-                    else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
-                    {
+
+                        }
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
+                        {
                             retriable = true;
                             //MainActivity.LogFirebase("Reported as failed by uploader");
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
-                    }
-                    else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect message connection"))
-                    {
-                        //MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
-                        LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                        action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
-                    }
-                    else
-                    {
+                            action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
+                        }
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect message connection"))
+                        {
+                            //MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
+                            LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
+                        }
+                        else
+                        {
                             retriable = true;
                             //the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly") //this seems to be retry able
                             //or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
                             //or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
                             if (task.Exception != null && task.Exception.InnerException != null)
-                        {
-                            //I get a lot of null refs from task.Exception.InnerException.Message
+                            {
+                                //I get a lot of null refs from task.Exception.InnerException.Message
                                 MainActivity.LogFirebase("Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
                                 LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            if(task.Exception.InnerException.InnerException != null)
-                            {
-                                //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                if(task.Exception.InnerException.InnerException.Message.Contains("Failed to establish a direct or indirect transfer connection"))
+                                if (task.Exception.InnerException.InnerException != null)
                                 {
-                                    //skip this case
-                                }
-                                else
-                                {
-                                    MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
-                                }
-
-                                if(task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)"))
-                                {
-                                    action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
-                                }
-
-                                //this is to help with the collection was modified
-                                if (task.Exception.InnerException.InnerException.InnerException != null)
-                                {
-                                    MainActivity.LogInfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
-                                    var innerInner = task.Exception.InnerException.InnerException.InnerException;
                                     //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    MainActivity.LogFirebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
-                                    //this is to help with the collection was modified
-                                }
+                                    if (task.Exception.InnerException.InnerException.Message.Contains("Failed to establish a direct or indirect transfer connection"))
+                                    {
+                                        //skip this case
+                                    }
+                                    else
+                                    {
+                                        MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                    }
 
+                                    if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)"))
+                                    {
+                                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                    }
+
+                                    //this is to help with the collection was modified
+                                    if (task.Exception.InnerException.InnerException.InnerException != null)
+                                    {
+                                        MainActivity.LogInfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                        var innerInner = task.Exception.InnerException.InnerException.InnerException;
+                                        //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
+                                        MainActivity.LogFirebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
+                                        //this is to help with the collection was modified
+                                    }
+
+                                }
+                            }
+                            else if (task.Exception != null)
+                            {
+                                MainActivity.LogFirebase("Unhandled task exception (little info): " + task.Exception.Message);
+                                LogDebug("Unhandled task exception (little info):" + task.Exception.Message);
                             }
                         }
-                        else if(task.Exception != null)
-                        {
-                            MainActivity.LogFirebase("Unhandled task exception (little info): " + task.Exception.Message);
-                            LogDebug("Unhandled task exception (little info):" + task.Exception.Message);
-                        }
-                    }
 
 
-                    if((resetRetryCount || e.dlInfo.RetryCount==0) && SoulSeekState.AutoRetryDownload && retriable)
-                    {
-                        MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
-                        try
+                        if ((resetRetryCount || e.dlInfo.RetryCount == 0) && SoulSeekState.AutoRetryDownload && retriable)
                         {
-                            //retry download.
-                            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                            Android.Net.Uri incompleteUri = null;
+                            MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
+                            try
+                            {
+                                //retry download.
+                                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                                Android.Net.Uri incompleteUri = null;
                                 TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                                 Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
                                 retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth))));
                                 return; //i.e. dont toast anything just retry.
                             }
-                        catch(System.Exception e)
-                        {
-                            MainActivity.LogFirebase("retry creation failed: " + e.Message + e.StackTrace);
+                            catch (System.Exception e)
+                            {
+                                MainActivity.LogFirebase("retry creation failed: " + e.Message + e.StackTrace);
                                 //if this happens at least log the normal message....
+                            }
+
                         }
-                        
-                    }
 
-                    if(e.dlInfo.RetryCount==1 && e.dlInfo.PreviousFailureException!=null)
+                        if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
+                        {
+                            LogFirebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
+                        }
+
+                        //Action action2 = () => { ToastUI(task.Exception.ToString());};
+                        //this.RunOnUiThread(action2);
+                        if (action == null)
+                        {
+                            //action = () => { ToastUI(msgDebug1); ToastUI(msgDebug2); };
+                            action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_unspecified)); };
+                        }
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
+                        //System.Console.WriteLine(task.Exception.ToString());
+                        return;
+                    }
+                    //failed downloads return before getting here...
+
+                    if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                     {
-                        LogFirebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
+                        LogFirebase("auto retry succeeded: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
                     }
 
-                    //Action action2 = () => { ToastUI(task.Exception.ToString());};
-                    //this.RunOnUiThread(action2);
-                    if (action == null)
+                    if (!SoulSeekState.DisableDownloadToastNotification)
                     {
-                        //action = () => { ToastUI(msgDebug1); ToastUI(msgDebug2); };
-                        action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_unspecified)); };
+                        action = () => { ToastUI(Helpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " finished downloading"); };
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
-                    //System.Console.WriteLine(task.Exception.ToString());
-                    return;
-                }
-                //failed downloads return before getting here...
-
-                if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
-                {
-                    LogFirebase("auto retry succeeded: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
-                }
-
-                if (!SoulSeekState.DisableDownloadToastNotification)
-                {
-                    action = () => { ToastUI(Helpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " finished downloading"); };
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
-                }
-                string finalUri = string.Empty;
-                if(task is Task<byte[]> tbyte)
-                {
-                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, out finalUri);
-                    SaveFileToMediaStore(path);
-                }
-                else if(task is Task<Tuple<string, string>> tString)
-                {
-                    //move file...
-                    string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, out finalUri);
-                    SaveFileToMediaStore(path);
-                }
-                else
-                {
-                    LogFirebase("Very bad. Task is not the right type.....");
-                }
-                e.dlInfo.TransferItemReference.FinalUri = finalUri;
+                    string finalUri = string.Empty;
+                    if (task is Task<byte[]> tbyte)
+                    {
+                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, out finalUri);
+                        SaveFileToMediaStore(path);
+                    }
+                    else if (task is Task<Tuple<string, string>> tString)
+                    {
+                        //move file...
+                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, out finalUri);
+                        SaveFileToMediaStore(path);
+                    }
+                    else
+                    {
+                        LogFirebase("Very bad. Task is not the right type.....");
+                    }
+                    e.dlInfo.TransferItemReference.FinalUri = finalUri;
                 }
                 finally
                 {
@@ -9189,16 +9202,18 @@ namespace AndriodApp1
         /// <param name="msgToToast"></param>
         /// <param name="caseOrCode"></param>
         /// <param name="usernameIfApplicable"></param>
-        private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable="")
+        private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "")
         {
             long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             //if it does not exist then updatedTime will be curTime.  If it does exist but is older than a second then updated time will also be curTime.  In those two cases, show the toast.
-            long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode+usernameIfApplicable, curTime, (key, oldValue) => { 
-                
+            long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime, (key, oldValue) =>
+            {
+
                 MainActivity.LogDebug("key exists: " + (curTime - oldValue).ToString());
-                
-                return ((curTime - oldValue)<1000) ? oldValue : curTime; });
-            if(updatedTime == curTime)
+
+                return ((curTime - oldValue) < 1000) ? oldValue : curTime;
+            });
+            if (updatedTime == curTime)
             {
                 ToastUI(msgToToast);
             }
@@ -9221,7 +9236,7 @@ namespace AndriodApp1
         /// <returns></returns>
         public static bool OnUIthread()
         {
-            if(Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.M) //23
+            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.M) //23
             {
                 return Looper.MainLooper.IsCurrentThread;
             }
@@ -9235,17 +9250,17 @@ namespace AndriodApp1
         /// 
         /// </summary>
         /// <param name="rootView"></param>
-        public static void AddLoggedInLayout(View rootView=null)
+        public static void AddLoggedInLayout(View rootView = null)
         {
             View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
             View bttnTryTwo = rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
             bool bttnIsAttached = false;
             bool bttnTwoIsAttached = false;
-            if(bttn != null && bttn.IsAttachedToWindow)
+            if (bttn != null && bttn.IsAttachedToWindow)
             {
                 bttnIsAttached = true;
             }
-            if(bttnTryTwo != null && bttnTryTwo.IsAttachedToWindow)
+            if (bttnTryTwo != null && bttnTryTwo.IsAttachedToWindow)
             {
                 bttnTwoIsAttached = true;
             }
@@ -9255,10 +9270,11 @@ namespace AndriodApp1
                 //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
                 //ViewGroup relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
                 //relLayout.LayoutParameters = new ViewGroup.LayoutParams(rootView.LayoutParameters);
-                var action1 = new Action(() => {
+                var action1 = new Action(() =>
+                {
                     (rootView as ViewGroup).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false));
                 });
-                if(OnUIthread())
+                if (OnUIthread())
                 {
                     action1();
                 }
@@ -9269,9 +9285,10 @@ namespace AndriodApp1
             }
         }
 
-        public static void UpdateUIForLoggedIn(View rootView=null, EventHandler BttnClick=null, View cWelcome=null, View cbttn=null, ViewGroup cLoading=null, EventHandler SettingClick=null)
+        public static void UpdateUIForLoggedIn(View rootView = null, EventHandler BttnClick = null, View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler SettingClick = null)
         {
-            var action = new Action(() => {
+            var action = new Action(() =>
+            {
                 //this is the case where it already has the loggedin fragment loaded.
                 Button bttn = null;
                 TextView welcome = null;
@@ -9310,7 +9327,7 @@ namespace AndriodApp1
                 {
                     //meanwhile: rootView.FindViewById<TextView>(Resource.Id.userNameView).  so I dont think that the welcome here is the right one.. I dont think it exists.
                     //try checking properties such as isAttachedToWindow, getWindowVisiblity etx...
-                    welcome.Visibility = ViewStates.Visible; 
+                    welcome.Visibility = ViewStates.Visible;
 
                     bool isShown = welcome.IsShown;
                     bool isAttachedToWindow = welcome.IsAttachedToWindow;
@@ -9358,7 +9375,7 @@ namespace AndriodApp1
                 }
 
             });
-            if(OnUIthread())
+            if (OnUIthread())
             {
                 action();
             }
@@ -9380,7 +9397,8 @@ namespace AndriodApp1
         /// <param name="rootView"></param>
         public static void BackToLogInLayout(View rootView, EventHandler LogInClick, bool clearUserPass = true)
         {
-            var action = new Action(() => {
+            var action = new Action(() =>
+            {
                 //this is the case where it already has the loggedin fragment loaded.
                 Button bttn = null;
                 TextView welcome = null;
@@ -9416,7 +9434,7 @@ namespace AndriodApp1
                                 ViewGroup relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false) as ViewGroup;
                                 relLayout.LayoutParameters = new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
                                 //var action1 = new Action(() => {
-                                    (StaticHacks.RootView as ViewGroup).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
+                                (StaticHacks.RootView as ViewGroup).AddView(SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
                                 //});
                             }
                             //editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etUsername);
@@ -9431,7 +9449,7 @@ namespace AndriodApp1
                             (StaticHacks.LoginFragment as AndriodApp1.LoginFragment).SetUpLogInLayout();
                             //buttonLogin.Click += LogInClick;
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             MainActivity.LogDebug("BackToLogInLayout" + ex.Message);
                         }
@@ -9456,24 +9474,24 @@ namespace AndriodApp1
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Visible;
-                    if(!clearUserPass && !string.IsNullOrEmpty(SoulSeekState.Username))
+                    if (!clearUserPass && !string.IsNullOrEmpty(SoulSeekState.Username))
                     {
                         logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = SoulSeekState.Username;
                         logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SoulSeekState.Password;
                     }
                     Android.Support.V4.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
-                    
-                    if(loading==null)
+
+                    if (loading == null)
                     {
                         MainActivity.AddLoggedInLayout(rootView);
-                        if(rootView!=null)
+                        if (rootView != null)
                         {
                             bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
                             welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
                             loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                             settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
                         }
-                        if(rootView == null && loading == null && StaticHacks.RootView!=null)
+                        if (rootView == null && loading == null && StaticHacks.RootView != null)
                         {
                             bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                             welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
@@ -9508,48 +9526,51 @@ namespace AndriodApp1
         public static void UpdateUIForLoggingInLoading(View rootView = null)
         {
             MainActivity.LogDebug("UpdateUIForLoggingInLoading");
-            var action = new Action(() => {
-            //this is the case where it already has the loggedin fragment loaded.
-            Button logoutButton = null;
-            TextView welcome = null;
-            ViewGroup loggingInView = null;
-            ViewGroup logInLayout = null;
-            Button settingsButton = null;
-            try
+            var action = new Action(() =>
             {
-                if (StaticHacks.RootView != null)
+                //this is the case where it already has the loggedin fragment loaded.
+                Button logoutButton = null;
+                TextView welcome = null;
+                ViewGroup loggingInView = null;
+                ViewGroup logInLayout = null;
+                Button settingsButton = null;
+                try
                 {
-                    logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
+                    if (StaticHacks.RootView != null)
+                    {
+                        logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                        settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
+                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInView = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                }
-                else
-                {
-                    logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                    settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
+                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+
+                    }
+                    else
+                    {
+                        logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
+                        settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
+                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
                         loggingInView = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                    logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
+                    }
                 }
-            }
-            catch
-            {
+                catch
+                {
 
-            }
-            if (logInLayout != null)
-            {
+                }
+                if (logInLayout != null)
+                {
                     logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
-                Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
+                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                     loggingInView.Visibility = ViewStates.Visible;
-                welcome.Visibility = ViewStates.Gone;
-                logoutButton.Visibility = ViewStates.Gone;
-                settingsButton.Visibility = ViewStates.Gone;
-                Android.Support.V4.View.ViewCompat.SetTranslationZ(logoutButton, 0);
-            }
+                    welcome.Visibility = ViewStates.Gone;
+                    logoutButton.Visibility = ViewStates.Gone;
+                    settingsButton.Visibility = ViewStates.Gone;
+                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logoutButton, 0);
+                }
 
-        });
-            if(OnUIthread())
+            });
+            if (OnUIthread())
             {
                 action();
             }
@@ -9570,7 +9591,7 @@ namespace AndriodApp1
 
         private static void CreateNoMediaFile(DocumentFile atDirectory)
         {
-            atDirectory.CreateFile("nomedia/customnomedia",".nomedia");
+            atDirectory.CreateFile("nomedia/customnomedia", ".nomedia");
         }
 
 
@@ -9613,7 +9634,7 @@ namespace AndriodApp1
                     string rootdir = string.Empty;
                     //if (SoulSeekState.RootDocumentFile==null)
                     //{
-                        rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                    rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
                     //}
                     //else
                     //{
@@ -9627,10 +9648,10 @@ namespace AndriodApp1
                     }
                     //string rootdir = GetExternalFilesDir(Android.OS.Environment.DirectoryMusic)
                     string incompleteDirString = rootdir + @"/Soulseek Incomplete/";
-                    lock(lock_toplevel_ifexist_create)
+                    lock (lock_toplevel_ifexist_create)
                     {
                         incompleteDir = new Java.IO.File(incompleteDirString);
-                        if(!incompleteDir.Exists())
+                        if (!incompleteDir.Exists())
                         {
                             //make it and add nomedia...
                             incompleteDir.Mkdirs();
@@ -9640,9 +9661,9 @@ namespace AndriodApp1
 
                     string fullDir = rootdir + @"/Soulseek Incomplete/" + Helpers.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
                     musicDir = new Java.IO.File(fullDir);
-                    lock(lock_album_ifexist_create)
+                    lock (lock_album_ifexist_create)
                     {
-                        if(!musicDir.Exists())
+                        if (!musicDir.Exists())
                         {
                             musicDir.Mkdirs();
                             CreateNoMediaFileLegacy(fullDir);
@@ -9684,8 +9705,8 @@ namespace AndriodApp1
                 //MainActivity.LogDebug("rootDocumentFileIsNull: " + rootDocumentFileIsNull);
                 try
                 {
-                    if(useDownloadDir)
-                    { 
+                    if (useDownloadDir)
+                    {
                         rootdir = SoulSeekState.RootDocumentFile;
                         MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
                     }
@@ -9695,7 +9716,7 @@ namespace AndriodApp1
                         rootdir = DocumentFile.FromFile(appPrivateExternal);
                         MainActivity.LogDebug("using temp incomplete dir");
                     }
-                    else if(useCustomDir)
+                    else if (useCustomDir)
                     {
                         rootdir = SoulSeekState.RootIncompleteDocumentFile;
                         MainActivity.LogDebug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
@@ -9712,7 +9733,7 @@ namespace AndriodApp1
                         //dont know how to create self
                         //rootdir.CreateDirectory();
                     }
-                    else if(!rootdir.CanWrite())
+                    else if (!rootdir.CanWrite())
                     {
                         diagRootDirExistsAndCanWrite = false;
                         LogFirebase("rootdir (nonnull) exists but cant write: " + rootdir.Uri);
@@ -9734,13 +9755,13 @@ namespace AndriodApp1
                         {
                             slskDir1 = rootdir.CreateDirectory("Soulseek Incomplete");
                             //slskDir1 = rootdir.FindFile("Soulseek Incomplete");
-                            if(slskDir1==null)
+                            if (slskDir1 == null)
                             {
                                 string diagMessage = CheckPermissions(rootdir.Uri);
                                 LogFirebase("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
                                 LogInfoFirebase("slskDir1 is null" + rootdir.Uri + "parent: " + diagMessage);
                             }
-                            else if(!slskDir1.Exists())
+                            else if (!slskDir1.Exists())
                             {
                                 LogFirebase("slskDir1 does not exist" + rootdir.Uri);
                             }
@@ -9773,23 +9794,23 @@ namespace AndriodApp1
                         {
                             folderDir1 = slskDir1.CreateDirectory(album_folder_name);
                             //folderDir1 = slskDir1.FindFile(album_folder_name); //if it does not exist you then have to get it again!!
-                            if(folderDir1==null)
+                            if (folderDir1 == null)
                             {
                                 string rootUri = string.Empty;
-                                if(SoulSeekState.RootDocumentFile!=null)
+                                if (SoulSeekState.RootDocumentFile != null)
                                 {
                                     rootUri = SoulSeekState.RootDocumentFile.Uri.ToString();
                                 }
                                 bool slskDirExistsWriteable = false;
-                                if(slskDir1!=null)
+                                if (slskDir1 != null)
                                 {
                                     slskDirExistsWriteable = slskDir1.Exists() && slskDir1.CanWrite();
                                 }
                                 string diagMessage = CheckPermissions(slskDir1.Uri);
                                 LogInfoFirebase("folderDir1 is null:" + album_folder_name + "root: " + rootUri + "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " + diagMessage);
-                                LogFirebase("folderDir1 is null:" + album_folder_name + "root: "  + rootUri + "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " + diagMessage);
+                                LogFirebase("folderDir1 is null:" + album_folder_name + "root: " + rootUri + "slskDirExistsWriteable" + slskDirExistsWriteable + "slskDir: " + diagMessage);
                             }
-                            else if(!folderDir1.Exists())
+                            else if (!folderDir1.Exists())
                             {
                                 LogFirebase("folderDir1 does not exist:" + album_folder_name);
                             }
@@ -9835,12 +9856,12 @@ namespace AndriodApp1
                 {
                     partialLength = potentialFile.Length();
                     incompleteUri = potentialFile.Uri;
-                    stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri,"wa");
+                    stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wa");
                 }
                 else
                 {
                     partialLength = 0;
-                    DocumentFile mFile = Helpers.CreateMediaFile(folderDir1,name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
+                    DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri;
                     stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
@@ -9866,9 +9887,9 @@ namespace AndriodApp1
         /// <returns></returns>
         private static string CheckPermissions(Android.Net.Uri folder)
         {
-            if(SoulSeekState.ActiveActivityRef!=null)
+            if (SoulSeekState.ActiveActivityRef != null)
             {
-                var cursor = SoulSeekState.ActiveActivityRef.ContentResolver.Query(folder, new string[] {DocumentsContract.Document.ColumnFlags },null,null,null);
+                var cursor = SoulSeekState.ActiveActivityRef.ContentResolver.Query(folder, new string[] { DocumentsContract.Document.ColumnFlags }, null, null, null);
                 int flags = 0;
                 if (cursor.MoveToFirst())
                 {
@@ -9877,11 +9898,11 @@ namespace AndriodApp1
                 cursor.Close();
                 bool canWrite = (flags & (int)DocumentContractFlags.SupportsWrite) != 0;
                 bool canDirCreate = (flags & (int)DocumentContractFlags.DirSupportsCreate) != 0;
-                if(canWrite && canDirCreate)
+                if (canWrite && canDirCreate)
                 {
                     return "Can Write and DirSupportsCreate";
                 }
-                else if(canWrite)
+                else if (canWrite)
                 {
                     return "Can Write and not DirSupportsCreate";
                 }
@@ -9905,35 +9926,35 @@ namespace AndriodApp1
         private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, int depth, out string finalUri)
         {
             string name = Helpers.GetFileNameFromFile(fullfilename);
-            string dir  = Helpers.GetFolderNameFromFile(fullfilename, depth);
+            string dir = Helpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
-            if(memoryMode && (bytes == null || bytes.Length==0))
+            if (memoryMode && (bytes == null || bytes.Length == 0))
             {
                 LogFirebase("EMPTY or NULL BYTE ARRAY in mem mode");
             }
 
-            if(!memoryMode && uriOfIncomplete == null)
+            if (!memoryMode && uriOfIncomplete == null)
             {
                 LogFirebase("no URI in file mode");
             }
             finalUri = string.Empty;
-            if(SoulSeekState.UseLegacyStorage() && 
+            if (SoulSeekState.UseLegacyStorage() &&
                 (SoulSeekState.RootDocumentFile == null && !SettingsActivity.UseIncompleteManualFolder())) //if the user didnt select a complete OR incomplete directory. i.e. pure java files.  
             {
 
                 //this method works just fine if coming from a temp dir.  just not a open doc tree dir.
 
-                string rootdir=string.Empty;
+                string rootdir = string.Empty;
                 //if (SoulSeekState.SaveDataDirectoryUri ==null || SoulSeekState.SaveDataDirectoryUri == string.Empty)
                 //{
-                    rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
                 //}
                 //else
                 //{
                 //    rootdir = SoulSeekState.SaveDataDirectoryUri;
                 //}
-                if(!(new Java.IO.File(rootdir)).Exists())
+                if (!(new Java.IO.File(rootdir)).Exists())
                 {
                     (new Java.IO.File(rootdir)).Mkdirs();
                 }
@@ -9943,7 +9964,7 @@ namespace AndriodApp1
                 {
                     intermediateFolder = @"/Soulseek Complete/";
                 }
-                if(SoulSeekState.CreateUsernameSubfolders)
+                if (SoulSeekState.CreateUsernameSubfolders)
                 {
                     intermediateFolder = intermediateFolder + username + @"/"; //TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
                 }
@@ -9963,14 +9984,14 @@ namespace AndriodApp1
                 {
                     Java.IO.File inFile = new Java.IO.File(uriOfIncomplete.Path);
                     Java.IO.File inDir = new Java.IO.File(parentUriOfIncomplete.Path);
-                    MoveFile(new FileInputStream(inFile),stream, inFile, inDir);
+                    MoveFile(new FileInputStream(inFile), stream, inFile, inDir);
                 }
             }
             else
             {
                 bool useLegacyDocFileToJavaFileOverride = false;
                 DocumentFile legacyRootDir = null;
-                if(SoulSeekState.UseLegacyStorage() && SoulSeekState.RootDocumentFile == null && SettingsActivity.UseIncompleteManualFolder())
+                if (SoulSeekState.UseLegacyStorage() && SoulSeekState.RootDocumentFile == null && SettingsActivity.UseIncompleteManualFolder())
                 {
                     //this means that even though rootfile is null, manual folder is set and is a docfile.
                     //so we must wrap the default root doc file.
@@ -10040,18 +10061,18 @@ namespace AndriodApp1
                     if (SoulSeekState.CreateCompleteAndIncompleteFolders)
                     {
                         slskDir1 = rootdir.FindFile("Soulseek Complete"); //does Soulseek Complete folder exist
-                        if(slskDir1 == null || !slskDir1.Exists())
+                        if (slskDir1 == null || !slskDir1.Exists())
                         {
                             slskDir1 = rootdir.CreateDirectory("Soulseek Complete");
                             LogDebug("Creating Soulseek Complete");
                             diagDidWeCreateSoulSeekDir = true;
                         }
 
-                        if(slskDir1 == null)
+                        if (slskDir1 == null)
                         {
                             diagSlskDirExistsAfterCreation = false;
                         }
-                        else if(!slskDir1.Exists())
+                        else if (!slskDir1.Exists())
                         {
                             diagSlskDirExistsAfterCreation = false;
                         }
@@ -10070,7 +10091,7 @@ namespace AndriodApp1
                         if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
                         {
                             tempUsernameDir1 = slskDir1.CreateDirectory(username);
-                            LogDebug(string.Format("Creating {0} dir",username));
+                            LogDebug(string.Format("Creating {0} dir", username));
                             diagDidWeCreateUsernameDir = true;
                         }
 
@@ -10089,15 +10110,15 @@ namespace AndriodApp1
                         slskDir1 = tempUsernameDir1;
                     }
 
-                    if(depth==1)
+                    if (depth == 1)
                     {
                         folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
-                        if(folderDir1 == null || !folderDir1.Exists())
+                        if (folderDir1 == null || !folderDir1.Exists())
                         {
                             LogDebug("Creating " + dir);
                             folderDir1 = slskDir1.CreateDirectory(dir);
                         }
-                        if(folderDir1== null || !folderDir1.Exists())
+                        if (folderDir1 == null || !folderDir1.Exists())
                         {
                             LogFirebase("folderDir is null or does not exists");
                         }
@@ -10127,18 +10148,18 @@ namespace AndriodApp1
                     }
                     //folderDir1 = slskDir1.FindFile(dir); //if it does not exist you then have to get it again!!
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     MainActivity.LogFirebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + SoulSeekState.CreateUsernameSubfolders);
                 }
 
-                if(rootdir == null && !SoulSeekState.UseLegacyStorage())
+                if (rootdir == null && !SoulSeekState.UseLegacyStorage())
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{ ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
                 }
 
                 //BACKUP IF FOLDER DIR IS NULL
-                if(folderDir1 == null)
+                if (folderDir1 == null)
                 {
                     folderDir1 = rootdir; //use the root instead..
                 }
@@ -10147,7 +10168,7 @@ namespace AndriodApp1
 
                 //Java.IO.File musicFile = new Java.IO.File(filePath);
                 //FileOutputStream stream = new FileOutputStream(mFile);
-                if(memoryMode)
+                if (memoryMode)
                 {
                     DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
@@ -10160,10 +10181,10 @@ namespace AndriodApp1
 
                     //106ms for 32mb
                     Android.Net.Uri uri = null;
-                    if(SoulSeekState.PreMoveDocument() ||
+                    if (SoulSeekState.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
                         (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                        Helpers.CompleteIncompleteDifferentVolume()) 
+                        Helpers.CompleteIncompleteDifferentVolume())
                     {
                         try
                         {
@@ -10171,13 +10192,13 @@ namespace AndriodApp1
                             uri = mFile.Uri;
                             finalUri = mFile.Uri.ToString();
                             System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                            MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete),stream,uriOfIncomplete, parentUriOfIncomplete);
+                            MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR pre" + e.Message);
                             SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
-                            MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path); 
+                            MainActivity.LogDebug(e.Message + " " + uriOfIncomplete.Path);
                         }
                     }
                     else
@@ -10195,7 +10216,7 @@ namespace AndriodApp1
                             DeleteParentIfEmpty(DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentUriOfIncomplete));
                             //"/tree/primary:musictemp/document/primary:music2/J when two different uri trees the uri returned from move document is a mismash of the two... even tho it actually moves it correctly.
                             //folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
-                            if(SettingsActivity.UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
+                            if (SettingsActivity.UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
                             {
                                 uri = folderDir1.FindFile(realName).Uri; //dont use name!!! in my case the name was .m4a but the actual file was .mp3!!
                             }
@@ -10217,7 +10238,7 @@ namespace AndriodApp1
 
                                     SeekerApplication.ShowToast(string.Format("File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.", realName, uri.LastPathSegment.ToString()), ToastLength.Long);
                                 }
-                                catch(Exception e2)
+                                catch (Exception e2)
                                 {
                                     MainActivity.LogFirebase("CRITICAL FILESYSTEM ERROR errorhandling " + e2.Message);
                                 }
@@ -10225,7 +10246,7 @@ namespace AndriodApp1
                             }
                             else
                             {
-                                if(uri==null) //this means doc file failed (else it would be after)
+                                if (uri == null) //this means doc file failed (else it would be after)
                                 {
                                     MainActivity.LogInfoFirebase("uri==null");
                                     //lets try with the non MoveDocument way.
@@ -10233,12 +10254,12 @@ namespace AndriodApp1
                                     //  the user is on api <29.  they start downloading an album.  then while its downloading they set the download directory.  the manual one will be file:\\ but the end location will be content:\\
                                     try
                                     {
-                                        
+
                                         DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
                                         uri = mFile.Uri;
                                         finalUri = mFile.Uri.ToString();
                                         MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri + " parent: " + parentUriOfIncomplete);
-//                                        MainActivity.LogInfoFirebase("using temp: " + 
+                                        //                                        MainActivity.LogInfoFirebase("using temp: " + 
                                         System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                                         MoveFile(SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
                                     }
@@ -10276,10 +10297,10 @@ namespace AndriodApp1
 
                     //stopwatch.Stop();
                     //LogDebug("DocumentsContract.MoveDocument took: " + stopwatch.ElapsedMilliseconds);
-                    
+
                 }
             }
-            
+
             return filePath;
         }
 
@@ -10295,16 +10316,16 @@ namespace AndriodApp1
             to.Flush();
             to.Close();
 
-            if(SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
+            if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
             {
                 try
                 {
-                    if(!(new Java.IO.File(toDelete.Path)).Delete())
+                    if (!(new Java.IO.File(toDelete.Path)).Delete())
                     {
                         LogFirebase("Java.IO.File.Delete() failed to delete");
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     LogFirebase("Java.IO.File.Delete() threw" + e.Message + e.StackTrace);
                 }
@@ -10312,7 +10333,7 @@ namespace AndriodApp1
             else
             {
                 DocumentFile df = DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, toDelete); //this returns a file that doesnt exist with file ://
-                
+
                 if (!df.Delete()) //on API 19 this seems to always fail..
                 {
                     LogFirebase("df.Delete() failed to delete");
@@ -10333,7 +10354,7 @@ namespace AndriodApp1
 
         public static void DeleteParentIfEmpty(DocumentFile parent)
         {
-            if(parent==null)
+            if (parent == null)
             {
                 MainActivity.LogFirebase("null parent");
                 return;
@@ -10359,9 +10380,9 @@ namespace AndriodApp1
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                if(ex.Message.Contains("Index was outside"))
+                if (ex.Message.Contains("Index was outside"))
                 {
                     //race condition between checking length of ListFiles() and indexing [0] (twice)
                 }
@@ -10371,7 +10392,7 @@ namespace AndriodApp1
                 }
             }
         }
-        
+
 
         public static void DeleteParentIfEmpty(Java.IO.File parent)
         {
@@ -10400,7 +10421,7 @@ namespace AndriodApp1
             from.Close();
             to.Flush();
             to.Close();
-            if(!toDelete.Delete())
+            if (!toDelete.Delete())
             {
                 LogFirebase("LEGACY df.Delete() failed to delete ()");
             }
@@ -10460,39 +10481,39 @@ namespace AndriodApp1
             lock (SHARED_PREF_LOCK)
             {
                 var editor = sharedPreferences.Edit();
-            editor.PutBoolean(SoulSeekState.M_CurrentlyLoggedIn, SoulSeekState.currentlyLoggedIn);
-            editor.PutString(SoulSeekState.M_Username, SoulSeekState.Username);
-            editor.PutString(SoulSeekState.M_Password, SoulSeekState.Password);
-            editor.PutString(SoulSeekState.M_SaveDataDirectoryUri,SoulSeekState.SaveDataDirectoryUri);
-            editor.PutInt(SoulSeekState.M_NumberSearchResults,SoulSeekState.NumberSearchResults);
-            editor.PutInt(SoulSeekState.M_DayNightMode,SoulSeekState.DayNightMode);
-            editor.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
-            editor.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
-            editor.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
-            editor.PutBoolean(SoulSeekState.M_RememberUserHistory, SoulSeekState.ShowRecentUsers);
-            editor.PutBoolean(SoulSeekState.M_TransfersShowSizes, SoulSeekState.TransferViewShowSizes);
-            editor.PutBoolean(SoulSeekState.M_TransfersShowSpeed, SoulSeekState.TransferViewShowSpeed);
-            editor.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
-            editor.PutBoolean(SoulSeekState.M_HideLockedSearch, SoulSeekState.HideLockedResultsInSearch);
-            editor.PutBoolean(SoulSeekState.M_HideLockedBrowse, SoulSeekState.HideLockedResultsInBrowse);
-            editor.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
-            editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
-            editor.PutBoolean(SoulSeekState.M_MemoryBackedDownload, SoulSeekState.MemoryBackedDownload);
-            editor.PutInt(SoulSeekState.M_SearchResultStyle,(int)(SearchFragment.SearchResultStyle));
-            editor.PutBoolean(SoulSeekState.M_DisableToastNotifications, SoulSeekState.DisableDownloadToastNotification);
-            editor.PutInt(SoulSeekState.M_UploadSpeed, SoulSeekState.UploadSpeed);
-            //editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
-            editor.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
-            editor.PutBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, SoulSeekState.AllowPrivateRoomInvitations);
+                editor.PutBoolean(SoulSeekState.M_CurrentlyLoggedIn, SoulSeekState.currentlyLoggedIn);
+                editor.PutString(SoulSeekState.M_Username, SoulSeekState.Username);
+                editor.PutString(SoulSeekState.M_Password, SoulSeekState.Password);
+                editor.PutString(SoulSeekState.M_SaveDataDirectoryUri, SoulSeekState.SaveDataDirectoryUri);
+                editor.PutInt(SoulSeekState.M_NumberSearchResults, SoulSeekState.NumberSearchResults);
+                editor.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
+                editor.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
+                editor.PutBoolean(SoulSeekState.M_AutoClearCompleteUploads, SoulSeekState.AutoClearCompleteUploads);
+                editor.PutBoolean(SoulSeekState.M_RememberSearchHistory, SoulSeekState.RememberSearchHistory);
+                editor.PutBoolean(SoulSeekState.M_RememberUserHistory, SoulSeekState.ShowRecentUsers);
+                editor.PutBoolean(SoulSeekState.M_TransfersShowSizes, SoulSeekState.TransferViewShowSizes);
+                editor.PutBoolean(SoulSeekState.M_TransfersShowSpeed, SoulSeekState.TransferViewShowSpeed);
+                editor.PutBoolean(SoulSeekState.M_OnlyFreeUploadSlots, SoulSeekState.FreeUploadSlotsOnly);
+                editor.PutBoolean(SoulSeekState.M_HideLockedSearch, SoulSeekState.HideLockedResultsInSearch);
+                editor.PutBoolean(SoulSeekState.M_HideLockedBrowse, SoulSeekState.HideLockedResultsInBrowse);
+                editor.PutBoolean(SoulSeekState.M_FilterSticky, SearchFragment.FilterSticky);
+                editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
+                editor.PutBoolean(SoulSeekState.M_MemoryBackedDownload, SoulSeekState.MemoryBackedDownload);
+                editor.PutInt(SoulSeekState.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
+                editor.PutBoolean(SoulSeekState.M_DisableToastNotifications, SoulSeekState.DisableDownloadToastNotification);
+                editor.PutInt(SoulSeekState.M_UploadSpeed, SoulSeekState.UploadSpeed);
+                //editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
+                editor.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
+                editor.PutBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, SoulSeekState.AllowPrivateRoomInvitations);
 
-            if(SoulSeekState.UserList!=null)
-            {
-                editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
-            }
+                if (SoulSeekState.UserList != null)
+                {
+                    editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
+                }
 
-               
 
-            //editor.Apply();
+
+                //editor.Apply();
                 editor.Commit();
             }
         }
@@ -10500,9 +10521,9 @@ namespace AndriodApp1
         protected override void OnSaveInstanceState(Bundle outState)
         {
             base.OnSaveInstanceState(outState);
-            outState.PutBoolean(SoulSeekState.M_CurrentlyLoggedIn,SoulSeekState.currentlyLoggedIn);
+            outState.PutBoolean(SoulSeekState.M_CurrentlyLoggedIn, SoulSeekState.currentlyLoggedIn);
             outState.PutString(SoulSeekState.M_Username, SoulSeekState.Username);
-            outState.PutString(SoulSeekState.M_Password,SoulSeekState.Password);
+            outState.PutString(SoulSeekState.M_Password, SoulSeekState.Password);
             outState.PutString(SoulSeekState.M_SaveDataDirectoryUri, SoulSeekState.SaveDataDirectoryUri);
             outState.PutInt(SoulSeekState.M_NumberSearchResults, SoulSeekState.NumberSearchResults);
             outState.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
@@ -10522,27 +10543,27 @@ namespace AndriodApp1
             //outState.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
             outState.PutBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, SoulSeekState.AllowPrivateRoomInvitations);
             outState.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
-            if(SoulSeekState.UserList != null)
+            if (SoulSeekState.UserList != null)
             {
                 outState.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
             }
-            
+
         }
 
         private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs e)
         {
             System.Console.WriteLine(e.Tab.Position);
-            if(e.Tab.Position != 1) //i.e. if we are not the search tab
+            if (e.Tab.Position != 1) //i.e. if we are not the search tab
             {
-            try
-            {
-                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)this.GetSystemService(Context.InputMethodService);
-                imm.HideSoftInputFromWindow((sender as View).WindowToken, 0);
-            }
-            catch
-            {
-                //not worth throwing over
-            }
+                try
+                {
+                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)this.GetSystemService(Context.InputMethodService);
+                    imm.HideSoftInputFromWindow((sender as View).WindowToken, 0);
+                }
+                catch
+                {
+                    //not worth throwing over
+                }
             }
         }
         public static int goToSearchTab = int.MaxValue;
@@ -10555,7 +10576,7 @@ namespace AndriodApp1
                 TransfersFragment.TransfersActionMode.Finish();
             }
             //in addition each fragment is responsible for expanding their menu...
-            if (e.Position==0)
+            if (e.Position == 0)
             {
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                 this.SupportActionBar.SetHomeButtonEnabled(false);
@@ -10565,7 +10586,7 @@ namespace AndriodApp1
                 this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
                 this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
             }
-            if(e.Position==1) //search
+            if (e.Position == 1) //search
             {
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                 this.SupportActionBar.SetHomeButtonEnabled(false);
@@ -10587,13 +10608,13 @@ namespace AndriodApp1
                 SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
                 //this.SupportActionBar.CustomView.FindViewById<View>(Resource.Id.searchHere).FocusChange += MainActivity_FocusChange;
                 this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
-                if(goToSearchTab != int.MaxValue)
+                if (goToSearchTab != int.MaxValue)
                 {
                     //if(SearchFragment.Instance == null)
                     //{
                     //    MainActivity.LogDebug("Search Frag Instance is Null");
                     //}
-                    if (SearchFragment.Instance?.Activity==null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
+                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
                     {
                         //let onresume go to the search tab..
                         MainActivity.LogDebug("Delay Go To Wishlist Search Fragment for OnResume");
@@ -10602,12 +10623,12 @@ namespace AndriodApp1
                     {
                         //can we do this now??? or should we pass this down to the search fragment for when it gets created...  maybe we should put this in a like "OnResume"
                         MainActivity.LogDebug("Do Go To Wishlist in page selected");
-                        SearchFragment.Instance.GoToTab(goToSearchTab, false, true); 
+                        SearchFragment.Instance.GoToTab(goToSearchTab, false, true);
                         goToSearchTab = int.MaxValue;
                     }
                 }
             }
-            else if(e.Position==2)
+            else if (e.Position == 2)
             {
 
 
@@ -10619,14 +10640,14 @@ namespace AndriodApp1
 
                 this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
             }
-            else if(e.Position==3)
+            else if (e.Position == 3)
             {
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                 this.SupportActionBar.SetHomeButtonEnabled(false);
 
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                if(string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
+                if (string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
                 }
@@ -10640,7 +10661,7 @@ namespace AndriodApp1
 
         public void SetTransferSupportActionBarState()
         {
-            if(TransfersFragment.InUploadsMode)
+            if (TransfersFragment.InUploadsMode)
             {
                 if (TransfersFragment.CurrentlySelectedUploadFolder == null)
                 {
@@ -10685,7 +10706,7 @@ namespace AndriodApp1
             //var task1 = client.SearchAsync(SearchQuery.FromText("Danse Manatee"));
             //task1.Wait();
             //IEnumerable<SearchResponse> responses = task1.Result;
-            
+
 
         }
 
@@ -10778,7 +10799,7 @@ namespace AndriodApp1
 
         public bool OnNavigationItemSelected(IMenuItem item)
         {
-            switch(item.ItemId)
+            switch (item.ItemId)
             {
                 case Resource.Id.navigation_home:
                     pager.CurrentItem = 0;
@@ -10819,11 +10840,11 @@ namespace AndriodApp1
         public Android.Net.Uri IncompleteLocation = null; //used in the file backed case..
         public TransferItem TransferItemReference = null; //reference to the associated transfer item that we create based on this dl info. we use this to store the complete uri for later playback option.
         public int Depth = 1;
-        public DownloadInfo(string usr, string file, long size,Task task, CancellationTokenSource token, int queueLength, int retryCount, int depth)
+        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount, int depth)
         {
-            username = usr; fullFilename = file; downloadTask = task;Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; Depth = depth;
+            username = usr; fullFilename = file; downloadTask = task; Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; Depth = depth;
         }
-        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount,  Exception previousFailureException, int depth)
+        public DownloadInfo(string usr, string file, long size, Task task, CancellationTokenSource token, int queueLength, int retryCount, Exception previousFailureException, int depth)
         {
             username = usr; fullFilename = file; downloadTask = task; Size = size; CancellationTokenSource = token; QueueLength = queueLength; RetryCount = retryCount; PreviousFailureException = previousFailureException; Depth = depth;
         }
@@ -10847,18 +10868,18 @@ namespace AndriodApp1
         {
             lock (RequestedUserList)
             {
-                return RequestedUserList.Where((userListItem) => {return userListItem.Username==uname; }).FirstOrDefault();
+                return RequestedUserList.Where((userListItem) => { return userListItem.Username == uname; }).FirstOrDefault();
             }
         }
 
         private static bool ContainsUserInfo(string uname)
         {
             var uinfo = GetInfoForUser(uname);
-            if(uinfo==null)
+            if (uinfo == null)
             {
                 return false;
             }
-            if(uinfo.UserInfo==null || uinfo.UserData==null)
+            if (uinfo.UserInfo == null || uinfo.UserData == null)
             {
                 return false;
             }
@@ -10879,7 +10900,7 @@ namespace AndriodApp1
             }
 
             //if we already have the username, then just do it
-            if(ContainsUserInfo(uname))
+            if (ContainsUserInfo(uname))
             {
                 //just do it.....
                 LaunchUserInfoView(uname);
@@ -10895,13 +10916,15 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
                     if (t.IsFaulted)
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                    {
                         RequestUserInfoLogic(uname);
                     }));
                 }));
@@ -10923,22 +10946,24 @@ namespace AndriodApp1
             SoulSeekState.SoulseekClient.GetUserInfoAsync(uname).ContinueWith(new Action<Task<UserInfo>>(
                 (Task<UserInfo> userInfoTask) =>
                 {
-                    if(userInfoTask.IsCompletedSuccessfully)
+                    if (userInfoTask.IsCompletedSuccessfully)
                     {
-                        if(!AddIfRequestedUser(uname, null, null, userInfoTask.Result))
+                        if (!AddIfRequestedUser(uname, null, null, userInfoTask.Result))
                         {
                             MainActivity.LogFirebase("requested user info logic yet could not find in list!!");
                             //HANDLE ERROR TODO
                         }
                         else
                         {
-                            Action<View> action = new Action<View>((View v) => {
+                            Action<View> action = new Action<View>((View v) =>
+                            {
                                 LaunchUserInfoView(uname);
                             });
 
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread( () => { 
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
                                 //show snackbar (for active activity, active content view) so they can go to it... TODO
-                                Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_received),uname), Snackbar.LengthLong).SetAction(Resource.String.view, action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+                                Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_received), uname), Snackbar.LengthLong).SetAction(Resource.String.view, action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
                                 (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                                 sb.Show();
                             });
@@ -10948,21 +10973,24 @@ namespace AndriodApp1
                     {
                         Exception e = userInfoTask.Exception;
 
-                        if(e.InnerException is SoulseekClientException && e.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
+                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
                         {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_failed_conn), uname),ToastLength.Long).Show();
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_failed_conn), uname), ToastLength.Long).Show();
                             });
                         }
-                        else if(e.InnerException is UserOfflineException)
+                        else if (e.InnerException is UserOfflineException)
                         {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
                                 Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_failed_offline), uname), ToastLength.Long).Show();
                             });
                         }
-                        else if(e.InnerException is TimeoutException)
+                        else if (e.InnerException is TimeoutException)
                         {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
                                 Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.user_info_failed_timeout), uname), ToastLength.Long).Show();
                             });
                         }
@@ -10976,7 +11004,7 @@ namespace AndriodApp1
                         //toast timed out for user x, etc... user X is offline etc.
                     }
                 }
-                
+
                 ));
         }
 
@@ -11014,11 +11042,11 @@ namespace AndriodApp1
                             MainActivity.LogDebug("Requested server UserStatus received");
                             item.UserStatus = userStatus;
                         }
-                        if(userInfo != null)
+                        if (userInfo != null)
                         {
                             MainActivity.LogDebug("Requested peer UserInfo received");
                             item.UserInfo = userInfo;
-                            if(userInfo.HasPicture)
+                            if (userInfo.HasPicture)
                             {
                                 MainActivity.LogDebug("peer has pic");
                                 lock (picturesStoredUsersLock)
@@ -11039,7 +11067,7 @@ namespace AndriodApp1
                 {
                     //this is normal
                 }
-                if(removeOldestPic)
+                if (removeOldestPic)
                 {
                     MainActivity.LogInfoFirebase("Remove oldest picture");
                     lock (picturesStoredUsersLock)
@@ -11049,13 +11077,13 @@ namespace AndriodApp1
                     }
                     //lock (RequestedUserList)
                     //{
-                        foreach (UserListItem item in RequestedUserList)
+                    foreach (UserListItem item in RequestedUserList)
+                    {
+                        if (item.Username == uname)
                         {
-                            if (item.Username == uname)
-                            {
-                                item.UserInfo = null;
-                            }
+                            item.UserInfo = null;
                         }
+                    }
                     //}
                 }
             }
@@ -11088,9 +11116,9 @@ namespace AndriodApp1
 
         public void AddUserToTop(string user, bool andSave)
         {
-            lock(recentUserLock)
+            lock (recentUserLock)
             {
-                if(recentUsers.Contains(user))
+                if (recentUsers.Contains(user))
                 {
                     recentUsers.Remove(user);
                 }
@@ -11141,7 +11169,7 @@ namespace AndriodApp1
         public static String SaveDataDirectoryUri = null;
         public static String UploadDataDirectoryUri = null;
         public static String ManualIncompleteDataDirectoryUri = null;
-        
+
         public static bool SpeedLimitDownloadOn = false;
         public static bool SpeedLimitUploadOn = false;
         public static int SpeedLimitDownloadBytesSec = 4 * 1024 * 1024;//1048576;
@@ -11180,7 +11208,7 @@ namespace AndriodApp1
         public static List<UserListItem> IgnoreUserList = new List<UserListItem>();
         public static List<UserListItem> UserList = new List<UserListItem>();
         public static RecentUserManager RecentUsersManager = null;
-        public static System.Collections.Concurrent.ConcurrentDictionary<string,string> UserNotes = null;
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, string> UserNotes = null;
         /// <summary>
         /// There is no concurrent hashset so concurrent dictionary is used. the value is pointless so its only 1 byte.
         /// </summary>
@@ -11226,8 +11254,8 @@ namespace AndriodApp1
             public int FileTypesOrder;
             public List<ChipType> GetEnabledOrder()
             {
-                List<Tuple<ChipType,int>> tuples = new List<Tuple<ChipType, int>>();
-                if(KeywordsEnabled)
+                List<Tuple<ChipType, int>> tuples = new List<Tuple<ChipType, int>>();
+                if (KeywordsEnabled)
                 {
                     tuples.Add(new Tuple<ChipType, int>(ChipType.Keyword, KeywordsOrder));
                 }
@@ -11239,8 +11267,8 @@ namespace AndriodApp1
                 {
                     tuples.Add(new Tuple<ChipType, int>(ChipType.FileType, FileTypesOrder));
                 }
-                tuples.Sort((t1, t2)=>t1.Item2.CompareTo(t2.Item2));
-                return tuples.Select(t1=>t1.Item1).ToList();
+                tuples.Sort((t1, t2) => t1.Item2.CompareTo(t2.Item2));
+                return tuples.Select(t1 => t1.Item1).ToList();
             }
 
             public List<ConfigureChipItems> GetAdapterItems()
@@ -11250,16 +11278,16 @@ namespace AndriodApp1
                 tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.FileCount), NumFilesOrder, NumFilesEnabled));
                 tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.FileType), FileTypesOrder, FileTypesEnabled));
                 tuples.Sort((t1, t2) => t1.Item2.CompareTo(t2.Item2));
-                return tuples.Select(t1=>new ConfigureChipItems() {Name = t1.Item1, Enabled = t1.Item3 }).ToList();
+                return tuples.Select(t1 => new ConfigureChipItems() { Name = t1.Item1, Enabled = t1.Item3 }).ToList();
             }
 
             public void FromAdapterItems(List<ConfigureChipItems> chipItems)
             {
-                for(int i=0; i<chipItems.Count; i++)
+                for (int i = 0; i < chipItems.Count; i++)
                 {
                     ChipType ct = GetEnumFromName(chipItems[i].Name);
                     bool enabled = chipItems[i].Enabled;
-                    switch(ct)
+                    switch (ct)
                     {
                         case ChipType.Keyword:
                             SoulSeekState.SmartFilterOptions.KeywordsEnabled = enabled;
@@ -11335,7 +11363,7 @@ namespace AndriodApp1
 
         public static void ClearSearchHistoryInvoke()
         {
-            ClearSearchHistory?.Invoke(null,null);
+            ClearSearchHistory?.Invoke(null, null);
         }
 
 
@@ -11344,7 +11372,7 @@ namespace AndriodApp1
         /// <summary>
         /// Occurs after we set up the DownloadAdded transfer item.
         /// </summary>
-        
+
         public static event EventHandler<EventArgs> ClearSearchHistory;
         public static List<DownloadInfo> downloadInfoList;
         /// <summary>
@@ -11377,7 +11405,7 @@ namespace AndriodApp1
         }
 
         public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); //previously this was on the loginfragment but
-                   //it would get recreated every time so there were lost instances with threads waiting forever....
+                                                                                       //it would get recreated every time so there were lost instances with threads waiting forever....
 
         //public static void OnDownloadAdded(DownloadInfo dlInfo)
         //{
@@ -11402,7 +11430,7 @@ namespace AndriodApp1
 
         public const string M_RoomUserListSortOrder = "Momento_RoomUserListSortOrder";
         public const string M_RoomUserListShowFriendsAtTop = "Momento_RoomUserListShowFriendsAtTop";
-        
+
         public const string M_ShowStatusesView = "Momento_ShowStatusesView";
         public const string M_ShowTickerView = "Momento_ShowTickerView";
 
@@ -11483,7 +11511,7 @@ namespace AndriodApp1
 
         public const string M_ManualIncompleteDirectoryUri = "Momento_ManualIncompleteDirectoryUri";
         public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
-        public const string M_CreateCompleteAndIncompleteFolders= "Momento_CreateCompleteIncomplete";
+        public const string M_CreateCompleteAndIncompleteFolders = "Momento_CreateCompleteIncomplete";
         public const string M_AdditionalUsernameSubdirectories = "Momento_M_AdditionalUsernameSubdirectories";
 
 
@@ -11502,7 +11530,7 @@ namespace AndriodApp1
         public static Android.Support.V4.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
         public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
         {
-            BrowseResponseReceived(null,new BrowseResponseEvent(origBR,rootTree, fromUsername, startingLocation));
+            BrowseResponseReceived(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
         }
         public static void ClearOnBrowseResponseReceivedEventsFromTarget(object target)
         {
@@ -11537,17 +11565,17 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="context"></param>
 
-        public ViewPagerFixed(Context context) :base(context)
+        public ViewPagerFixed(Context context) : base(context)
         {
 
         }
 
-        public ViewPagerFixed(Context context, Android.Util.IAttributeSet attrs) : base(context,attrs)
+        public ViewPagerFixed(Context context, Android.Util.IAttributeSet attrs) : base(context, attrs)
         {
 
         }
 
-        public ViewPagerFixed(IntPtr intPtr,JniHandleOwnership handle) : base(intPtr,handle)
+        public ViewPagerFixed(IntPtr intPtr, JniHandleOwnership handle) : base(intPtr, handle)
         {
 
         }
@@ -11560,7 +11588,7 @@ namespace AndriodApp1
             }
             catch (Exception)
             {
-                
+
             }
             return false;
         }
@@ -11573,7 +11601,7 @@ namespace AndriodApp1
             }
             catch (Exception)
             {
-                
+
             }
             return false;
         }
@@ -11585,7 +11613,7 @@ namespace AndriodApp1
         public BrowseResponse OriginalBrowseResponse;
         public string Username;
         public string StartingLocation;
-        public BrowseResponseEvent(BrowseResponse origBR,TreeNode<Directory> t, string u, string startingLocation)
+        public BrowseResponseEvent(BrowseResponse origBR, TreeNode<Directory> t, string u, string startingLocation)
         {
             OriginalBrowseResponse = origBR;
             Username = u;
@@ -11617,12 +11645,12 @@ namespace AndriodApp1
         /// <param name="files"></param>
         public static void SortSlskDirFiles(List<Soulseek.File> files)
         {
-            files.Sort((x,y)=>x.Filename.CompareTo(y.Filename));
+            files.Sort((x, y) => x.Filename.CompareTo(y.Filename));
         }
 
         public static bool CompleteIncompleteDifferentVolume()
         {
-            if(SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootIncompleteDocumentFile != null && SoulSeekState.RootDocumentFile != null)
+            if (SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootIncompleteDocumentFile != null && SoulSeekState.RootDocumentFile != null)
             {
                 //if(!SoulSeekState.UseLegacyStorage())
                 //{
@@ -11636,7 +11664,7 @@ namespace AndriodApp1
 
                 //    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, out _);
                 //    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
-                    
+
                 //    return uuid1 != uuid2;
                 //}
                 //else
@@ -11644,20 +11672,20 @@ namespace AndriodApp1
                 try
                 {
                     string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
-                    if(everything)
+                    if (everything)
                     {
                         volume1 = SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
                     }
                     string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
-                    if(everything)
+                    if (everything)
                     {
                         volume2 = SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
                     }
                     return volume1 != volume2;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SoulSeekState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " +  SoulSeekState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
+                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SoulSeekState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SoulSeekState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
                     return false;
                 }
                 //}
@@ -11671,31 +11699,31 @@ namespace AndriodApp1
         public static string GenerateIncompleteFolderName(string username, string fullFileName, int depth)
         {
             string albumFolderName = null;
-            if (depth==1)
+            if (depth == 1)
             {
                 albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
             }
             else
             {
                 albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
-                albumFolderName = albumFolderName.Replace('\\','_');
+                albumFolderName = albumFolderName.Replace('\\', '_');
             }
             string incompleteFolderName = username + "_" + albumFolderName;
             //Path.GetInvalidPathChars() doesnt seem like enough bc I still get failures on ''' and '&'
-            foreach (char c in System.IO.Path.GetInvalidPathChars().Union(new []{'&','\''}))
+            foreach (char c in System.IO.Path.GetInvalidPathChars().Union(new[] { '&', '\'' }))
             {
-                incompleteFolderName = incompleteFolderName.Replace(c,'_');
+                incompleteFolderName = incompleteFolderName.Replace(c, '_');
             }
             return incompleteFolderName;
         }
 
         public static bool IsFileUri(string uriString)
         {
-            if(uriString.StartsWith("file:"))
+            if (uriString.StartsWith("file:"))
             {
                 return true;
             }
-            else if(uriString.StartsWith("content:"))
+            else if (uriString.StartsWith("content:"))
             {
                 return false;
             }
@@ -11713,7 +11741,7 @@ namespace AndriodApp1
             {
                 cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
@@ -11747,7 +11775,7 @@ namespace AndriodApp1
             {
                 return false;
             }
-            if(msg.StartsWith(@"/me "))
+            if (msg.StartsWith(@"/me "))
             {
                 specialMessageType = SpecialMessageType.SlashMe;
                 return true;
@@ -11785,7 +11813,7 @@ namespace AndriodApp1
                     }
                 }
             }
-            if(specialMessageType.HasFlag(SpecialMessageType.SlskLink))
+            if (specialMessageType.HasFlag(SpecialMessageType.SlskLink))
             {
                 var matches = SlskLinkRegex.Matches(msgText);
                 //add in our spans.
@@ -11808,7 +11836,7 @@ namespace AndriodApp1
             if (IsSpecialMessage(msg, out SpecialMessageType specialMessageType))
             {
                 //if slash me dont include other special links, too excessive.
-                if(specialMessageType == SpecialMessageType.SlashMe)
+                if (specialMessageType == SpecialMessageType.SlashMe)
                 {
                     //"/me goes to the store"
                     //"goes to the store" + style
@@ -11829,7 +11857,7 @@ namespace AndriodApp1
         public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             string title = null;
-            if(SoulSeekState.UserNotes.ContainsKey(username))
+            if (SoulSeekState.UserNotes.ContainsKey(username))
             {
                 title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note);
             }
@@ -11837,7 +11865,7 @@ namespace AndriodApp1
             {
                 title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note);
             }
-            if(i!=-1)
+            if (i != -1)
             {
                 menu.Add(i, j, k, title);
             }
@@ -11922,7 +11950,7 @@ namespace AndriodApp1
         public static void SetMenuTitles(IMenu menu, string username)
         {
             var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
-            SetAddRemoveTitle(menuItem,username);
+            SetAddRemoveTitle(menuItem, username);
             menuItem = menu.FindItem(Resource.Id.action_add_user);
             SetAddRemoveTitle(menuItem, username);
             menuItem = menu.FindItem(Resource.Id.addUser);
@@ -11937,7 +11965,7 @@ namespace AndriodApp1
             string title = null;
             if (!MainActivity.UserListContainsUser(username))
             {
-                if(full_title)
+                if (full_title)
                 {
                     title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list);
                 }
@@ -11995,9 +12023,9 @@ namespace AndriodApp1
 
         public static void AddGivePrivilegesIfApplicable(IMenu menu, int indexToUse)
         {
-            if(PrivilegesManager.Instance.GetRemainingDays()>=1)
+            if (PrivilegesManager.Instance.GetRemainingDays() >= 1)
             {
-                if(indexToUse==-1)
+                if (indexToUse == -1)
                 {
                     menu.Add(Resource.String.give_privileges);
                 }
@@ -12010,9 +12038,9 @@ namespace AndriodApp1
 
         public static PendingIntentFlags AppendMutabilityIfApplicable(PendingIntentFlags existingFlags, bool immutable)
         {
-            if((int)Android.OS.Build.VERSION.SdkInt >= 23)
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
             {
-                if(immutable)
+                if (immutable)
                 {
                     return existingFlags | PendingIntentFlags.Immutable;
                 }
@@ -12032,25 +12060,25 @@ namespace AndriodApp1
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
         /// <returns></returns>
-        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote=null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored=null, Action uiUpdateSetResetOnlineAlert = null)
+        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote = null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored = null, Action uiUpdateSetResetOnlineAlert = null)
         {
-            if(activity==null)
+            if (activity == null)
             {
                 activity = SoulSeekState.ActiveActivityRef;
             }
-            if(contextMenuTitle == activity.GetString(Resource.String.ignore_user))
+            if (contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
                 SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
                 return true;
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
+            else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
             {
                 SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
                 return true;
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.msg_user))
+            else if (contextMenuTitle == activity.GetString(Resource.String.msg_user))
             {
                 Intent intentMsg = new Intent(activity, typeof(MessagesActivity));
                 intentMsg.AddFlags(ActivityFlags.SingleTop);
@@ -12059,7 +12087,7 @@ namespace AndriodApp1
                 activity.StartActivity(intentMsg);
                 return true;
             }
-            else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) || 
+            else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.add_user))
             {
                 UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
@@ -12086,7 +12114,8 @@ namespace AndriodApp1
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.browse_user))
             {
-                Action<View> action = new Action<View>((v) => {
+                Action<View> action = new Action<View>((v) =>
+                {
                     Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                     intent.AddFlags(ActivityFlags.SingleTop); //??
@@ -12096,34 +12125,34 @@ namespace AndriodApp1
                 DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
                 return true;
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.get_user_info))
+            else if (contextMenuTitle == activity.GetString(Resource.String.get_user_info))
             {
                 RequestedUserInfoHelper.RequestUserInfoApi(usernameInQuestion);
                 return true;
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.give_privileges))
+            else if (contextMenuTitle == activity.GetString(Resource.String.give_privileges))
             {
                 ShowGivePrilegesDialog(usernameInQuestion);
                 return true;
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.edit_note) ||
+            else if (contextMenuTitle == activity.GetString(Resource.String.edit_note) ||
                     contextMenuTitle == activity.GetString(Resource.String.add_note))
             {
                 ShowEditAddNoteDialog(usernameInQuestion, uiUpdateActionNote);
                 return true;
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
+            else if (contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
             {
                 SoulSeekState.UserOnlineAlerts[usernameInQuestion] = 0;
                 Helpers.SaveOnlineAlerts();
                 uiUpdateSetResetOnlineAlert();
             }
-            else if(contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
+            else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
             {
                 SoulSeekState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
                 Helpers.SaveOnlineAlerts();
                 uiUpdateSetResetOnlineAlert();
-                
+
             }
             return false;
         }
@@ -12132,12 +12161,12 @@ namespace AndriodApp1
         {
             if (Helpers.IsSpecialMessage(msg.MessageText, out SpecialMessageType specialMessageType))
             {
-                if(specialMessageType.HasFlag(SpecialMessageType.SlashMe))
+                if (specialMessageType.HasFlag(SpecialMessageType.SlashMe))
                 {
                     viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
                 }
-                else if(specialMessageType.HasFlag(SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SpecialMessageType.SlskLink))
+                else if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SpecialMessageType.SlskLink))
                 {
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
                     Helpers.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
@@ -12205,15 +12234,15 @@ namespace AndriodApp1
         //  are both extensionless....
         public static DocumentFile CreateMediaFile(DocumentFile parent, string name)
         {
-            if(Helpers.GetMimeTypeFromFilename(name) == M4A_MIME)
+            if (Helpers.GetMimeTypeFromFilename(name) == M4A_MIME)
             {
                 return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .m4a extension for us..
             }
-            else if(Helpers.GetMimeTypeFromFilename(name) == APE_MIME)
+            else if (Helpers.GetMimeTypeFromFilename(name) == APE_MIME)
             {
                 return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .ape extension for us..
             }
-            else if(Helpers.GetMimeTypeFromFilename(name)==null)
+            else if (Helpers.GetMimeTypeFromFilename(name) == null)
             {
                 //a null mimetype is fine, it just defaults to application/octet-stream
                 return parent.CreateFile(null, name); //we use just name since it will not add the extension for us..
@@ -12256,7 +12285,7 @@ namespace AndriodApp1
             string mimeType = @"audio/mpeg"; //default
             if (ext != null && ext != string.Empty)
             {
-                switch(ext)
+                switch (ext)
                 {
                     case ".ape":
                         mimeType = APE_MIME;
@@ -12286,7 +12315,7 @@ namespace AndriodApp1
                 if (e.Message.ToLower().Contains("no activity found to handle"))
                 {
                     MainActivity.LogFirebase("viewUri: " + e.Message + httpUri.ToString());
-                    SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()),ToastLength.Long);
+                    SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
                 }
             }
         }
@@ -12310,7 +12339,7 @@ namespace AndriodApp1
 
                     string lastPathSegmentChild = dfs[0].Uri.LastPathSegment.Replace('/', '\\');
                     //last path segment child will be "raw:/storage/emulated/0/Download/Soulseek Incomplete" for the reasonable case and "msd:24" for the bad case
-                    if(lastPathSegmentChild.Contains("\\"))
+                    if (lastPathSegmentChild.Contains("\\"))
                     {
                         return Helpers.GetAllButLast(lastPathSegmentChild);
                     }
@@ -12362,7 +12391,7 @@ namespace AndriodApp1
         {
             try
             {
-                if(linkStringToParse.EndsWith('/'))
+                if (linkStringToParse.EndsWith('/'))
                 {
                     isFile = false;
                 }
@@ -12373,9 +12402,9 @@ namespace AndriodApp1
 
                 linkStringToParse = linkStringToParse.Substring(7);
                 linkStringToParse = Android.Net.Uri.Decode(linkStringToParse);
-                username = linkStringToParse.Substring(0,linkStringToParse.IndexOf('/'));
-                fullFilePath = linkStringToParse.Substring(linkStringToParse.IndexOf('/') + 1).TrimEnd('/').Replace('/','\\');
-                if(isFile)
+                username = linkStringToParse.Substring(0, linkStringToParse.IndexOf('/'));
+                fullFilePath = linkStringToParse.Substring(linkStringToParse.IndexOf('/') + 1).TrimEnd('/').Replace('/', '\\');
+                if (isFile)
                 {
                     dirPath = Helpers.GetDirectoryRequestFolderName(fullFilePath);
                 }
@@ -12384,11 +12413,11 @@ namespace AndriodApp1
                     dirPath = fullFilePath;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("failure to parse: " + linkStringToParse);
-                username=dirPath=fullFilePath=null;
-                isFile=false;
+                username = dirPath = fullFilePath = null;
+                isFile = false;
                 return false;
             }
             return true;
@@ -12396,12 +12425,12 @@ namespace AndriodApp1
 
         public static string CreateSlskLink(bool isDirectory, string fullFileOrFolderName, string username)
         {
-            string link = username + "/" + fullFileOrFolderName.Replace("\\","/");
-            if(isDirectory)
+            string link = username + "/" + fullFileOrFolderName.Replace("\\", "/");
+            if (isDirectory)
             {
                 link = link + "/";
             }
-            return "slsk://" + Android.Net.Uri.Encode(link,"/");
+            return "slsk://" + Android.Net.Uri.Encode(link, "/");
         }
 
         private static string GetLockedFileName(SearchResponse item)
@@ -12423,11 +12452,11 @@ namespace AndriodApp1
         /// <returns></returns>
         public static string GetFolderNameForSearchResult(SearchResponse item)
         {
-            if(item.FileCount>0)
+            if (item.FileCount > 0)
             {
                 return Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
             }
-            else if(item.LockedFileCount>0)
+            else if (item.LockedFileCount > 0)
             {
                 return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFolderNameFromFile(GetLockedFileName(item));
             }
@@ -12437,7 +12466,7 @@ namespace AndriodApp1
             }
         }
 
-        public static string GetFolderNameFromFile(string filename, int levels=1)
+        public static string GetFolderNameFromFile(string filename, int levels = 1)
         {
             try
             {
@@ -12462,7 +12491,7 @@ namespace AndriodApp1
                     }
                 }
                 return filename.Substring(index + 1, firstIndex - index - 1);
-            }           
+            }
             catch
             {
                 return "";
@@ -12486,13 +12515,13 @@ namespace AndriodApp1
 
         public static string GetTransferSpeedString(double bytesPerSecond)
         {
-            if(bytesPerSecond > 1048576) //more than 1MB
+            if (bytesPerSecond > 1048576) //more than 1MB
             {
                 return string.Format("{0:F1}mbs", bytesPerSecond / 1048576.0);
             }
             else
             {
-                return string.Format("{0:F1}kbs", bytesPerSecond/1024.0);
+                return string.Format("{0:F1}kbs", bytesPerSecond / 1024.0);
             }
         }
 
@@ -12527,7 +12556,7 @@ namespace AndriodApp1
             if (SoulSeekState.HideLockedResultsInSearch)
             {
                 numFiles = searchResponse.FileCount;
-                totalBytes = searchResponse.Files.Sum(f=>f.Size);
+                totalBytes = searchResponse.Files.Sum(f => f.Size);
             }
             else
             {
@@ -12538,7 +12567,7 @@ namespace AndriodApp1
             //if total bytes greater than 1GB 
             string sizeString = GetHumanReadableSize(totalBytes);
 
-            var filesWithLength = searchResponse.Files.Where(f=>f.Length.HasValue);
+            var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
             if (!SoulSeekState.HideLockedResultsInSearch)
             {
                 filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
@@ -12549,9 +12578,9 @@ namespace AndriodApp1
                 //translate length into human readable
                 timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value));
             }
-            if(timeString == null)
+            if (timeString == null)
             {
-                return string.Format("{0} files • {1}",numFiles, sizeString);
+                return string.Format("{0} files • {1}", numFiles, sizeString);
             }
             else
             {
@@ -12563,19 +12592,19 @@ namespace AndriodApp1
 
         public static string GetSizeLengthAttrString(Soulseek.File f)
         {
-            
+
             string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
             string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : null;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
-            if(attrString == null && lengthString == null)
+            if (attrString == null && lengthString == null)
             {
                 return sizeString;
             }
-            else if(attrString == null)
+            else if (attrString == null)
             {
                 return String.Format("{0} • {1}", sizeString, lengthString);
             }
-            else if(lengthString == null)
+            else if (lengthString == null)
             {
                 return String.Format("{0} • {1}", sizeString, attrString);
             }
@@ -12647,17 +12676,17 @@ namespace AndriodApp1
             int sec = totalSeconds % 60;
             int minutes = (totalSeconds % 3600) / 60;
             int hours = (totalSeconds / 3600);
-            if(minutes==0 && hours == 0 && sec == 0)
+            if (minutes == 0 && hours == 0 && sec == 0)
             {
                 return null;
             }
-            else if(minutes==0 && hours == 0)
+            else if (minutes == 0 && hours == 0)
             {
-                return string.Format("{0}s",sec);
+                return string.Format("{0}s", sec);
             }
             else if (hours == 0)
             {
-                return string.Format("{0}m{1}s",minutes,sec);
+                return string.Format("{0}m{1}s", minutes, sec);
             }
             else
             {
@@ -12674,22 +12703,22 @@ namespace AndriodApp1
         /// <returns></returns>
         public static bool IsChildDirString(string possibleChild, string possibleParent, bool rootCase)
         {
-            if(rootCase)
+            if (rootCase)
             {
-                if(possibleChild.LastIndexOf("\\")==-1 && possibleParent.LastIndexOf("\\") == -1)
+                if (possibleChild.LastIndexOf("\\") == -1 && possibleParent.LastIndexOf("\\") == -1)
                 {
-                    if(possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
+                    if (possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
                     {
                         return possibleChild.Contains(possibleParent);
                     }
-                    else if(possibleChild.Equals(possibleParent))
+                    else if (possibleChild.Equals(possibleParent))
                     {
                         return true; //else the primary:music case fails.
                     }
                 }
             }
             int pathSep = possibleChild.LastIndexOf("\\");
-            if(pathSep==-1)
+            if (pathSep == -1)
             {
                 return false;
             }
@@ -12757,7 +12786,7 @@ namespace AndriodApp1
         }
 
 
-        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce=true, bool forForegroundService = false)
+        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce = true, bool forForegroundService = false)
         {
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
@@ -12798,19 +12827,19 @@ namespace AndriodApp1
         public static bool GivePrilegesAPI(string username, string numDays)
         {
             int numDaysInt = int.MinValue;
-            if(!int.TryParse(numDays,out numDaysInt))
+            if (!int.TryParse(numDays, out numDaysInt))
             {
                 MainActivity.ToastUI(Resource.String.error_days_entered_no_parse);
                 return false;
             }
-            if(numDaysInt<=0)
+            if (numDaysInt <= 0)
             {
                 MainActivity.ToastUI(Resource.String.error_days_entered_not_positive);
                 return false;
             }
-            if(PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
+            if (PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
             {
-                MainActivity.ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days),numDaysInt));
+                MainActivity.ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
                 return false;
             }
             if (!SoulSeekState.currentlyLoggedIn)
@@ -12851,9 +12880,10 @@ namespace AndriodApp1
 
         private static void GivePrivilegesLogic(string username, int numDaysInt)
         {
-            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.sending__),ToastLength.Short);
-            SoulSeekState.SoulseekClient.GrantUserPrivilegesAsync(username,numDaysInt).ContinueWith(new Action<Task>
-                ((Task t) => {
+            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
+            SoulSeekState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
+                ((Task t) =>
+                {
                     if (t.IsFaulted)
                     {
                         if (t.Exception.InnerException is TimeoutException)
@@ -12870,9 +12900,9 @@ namespace AndriodApp1
                     else
                     {
                         //now there is a chance the user does not exist or something happens.  in which case our days will be incorrect...
-                        PrivilegesManager.Instance.SubtractDays(numDaysInt); 
-                       
-                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt,username), ToastLength.Long);
+                        PrivilegesManager.Instance.SubtractDays(numDaysInt);
+
+                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
 
                         //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
                         //in the rare case that it fails they do get a message so they can figure it out
@@ -12880,7 +12910,7 @@ namespace AndriodApp1
                 }));
         }
 
-        public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction=null)
+        public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction = null)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.note_title), username));
@@ -12890,7 +12920,7 @@ namespace AndriodApp1
 
             string existingNote = null;
             SoulSeekState.UserNotes.TryGetValue(username, out existingNote);
-            if(existingNote!=null)
+            if (existingNote != null)
             {
                 input.Text = existingNote;
             }
@@ -12910,12 +12940,12 @@ namespace AndriodApp1
                 if (addedOrRemoved)
                 {
                     //either we cleared an existing note or added a new note
-                    if(!wasEmpty && isEmpty)
+                    if (!wasEmpty && isEmpty)
                     {
                         //we removed the note
                         SoulSeekState.UserNotes.TryRemove(username, out _);
                         SaveUserNotes();
-                        
+
                     }
                     else
                     {
@@ -12923,20 +12953,20 @@ namespace AndriodApp1
                         SoulSeekState.UserNotes[username] = newText;
                         SaveUserNotes();
                     }
-                    if(uiUpdateAction!=null)
+                    if (uiUpdateAction != null)
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                     }
 
                 }
-                else if(isEmpty && wasEmpty)
+                else if (isEmpty && wasEmpty)
                 {
                     //nothing was there and nothing is there now
                     return;
                 }
                 else //something was there and is there now
                 {
-                    if(newText == existingNote)
+                    if (newText == existingNote)
                     {
                         return;
                     }
@@ -12947,7 +12977,7 @@ namespace AndriodApp1
                         SaveUserNotes();
                     }
                 }
-                
+
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
             {
@@ -12998,7 +13028,7 @@ namespace AndriodApp1
             {
                 //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
                 //you cannot input '.' or negative even with physical keyboard, etc.
-                GivePrilegesAPI(username,input.Text);
+                GivePrilegesAPI(username, input.Text);
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
             {
@@ -13501,14 +13531,14 @@ namespace SearchResponseExtensions
 
         public static Soulseek.File GetElementAtAdapterPosition(this SearchResponse searchResponse, bool hideLocked, int position)
         {
-            if(hideLocked)
+            if (hideLocked)
             {
                 return searchResponse.Files.ElementAt(position);
             }
             else
             {
                 //we always do Files, then LockedFiles
-                if(position >= searchResponse.Files.Count)
+                if (position >= searchResponse.Files.Count)
                 {
                     return searchResponse.LockedFiles.ElementAt(position - searchResponse.Files.Count);
                 }
@@ -13516,9 +13546,9 @@ namespace SearchResponseExtensions
                 {
                     return searchResponse.Files.ElementAt(position);
                 }
-                
+
             }
-            
+
         }
     }
 }
@@ -13534,9 +13564,9 @@ public static class TestClient
         await Task.Delay(2).ConfigureAwait(false);
         var responseBag = new System.Collections.Concurrent.ConcurrentBag<SearchResponse>();
         Random r = new Random();
-        int x = r.Next(0,3);
+        int x = r.Next(0, 3);
         int maxSleep = 100;
-        switch(x)
+        switch (x)
         {
             case 0:
                 maxSleep = 1; //v fast case
@@ -13558,7 +13588,7 @@ public static class TestClient
             }
             //1 in 15 chance of being locked
             bool locked = false;
-            if(r.Next(0, 15) == 0)
+            if (r.Next(0, 15) == 0)
             {
                 locked = true;
             }
