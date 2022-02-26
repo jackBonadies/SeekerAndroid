@@ -2504,10 +2504,7 @@ namespace AndriodApp1
                 //need search response and enqueue download action...
                 //SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
                 SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: SoulSeekState.AllowPrivateRoomInvitations, listenPort: SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
-                if (LOG_DIAGNOSTICS)
-                {
-                    SoulSeekState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
-                }
+                SetDiagnosticState(LOG_DIAGNOSTICS);
                 SoulSeekState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SoulSeekState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
                 SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
@@ -2548,6 +2545,27 @@ namespace AndriodApp1
 
         }
 
+        public static void SetDiagnosticState(bool log_diagnostics)
+        {
+            if (log_diagnostics)
+            {
+                SoulSeekState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
+                AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
+            }
+            else
+            {
+                SoulSeekState.SoulseekClient.DiagnosticGenerated -= SoulseekClient_DiagnosticGenerated;
+                AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
+            }
+        }
+
+        private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
+        {
+            //by default e.Handled == false. and this does go on to crash the process (which is good imo, I only want this for logging purposes).
+            MainActivity.LogDebug(e.Exception.Message);
+            MainActivity.LogDebug(e.Exception.StackTrace);
+        }
+
         private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
         {
             string timestamp = e.Timestamp.ToString("[MM_dd-hh:mm:ss] ");
@@ -2576,16 +2594,14 @@ namespace AndriodApp1
         }
 
 
-
+        private static bool diagnosticFilesystemErrorShown = false; //so that we only show it once.
         private static void AppendLineToDiagFile(string line)
         {
+            try
+            {
             if (SoulSeekState.DiagnosticTextFile == null)
             {
-                if (SoulSeekState.RootDocumentFile == null)
-                {
-                    return;
-                }
-                else
+                if(SoulSeekState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
                 {
                     SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
                     if (SoulSeekState.DiagnosticTextFile == null)
@@ -2597,11 +2613,54 @@ namespace AndriodApp1
                         }
                     }
                 }
+                else if(SoulSeekState.UseLegacyStorage()) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+                {
+                    //when the directory is unset.
+                    string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                    if (!string.IsNullOrEmpty(SoulSeekState.SaveDataDirectoryUri))
+                    {
+                        fullPath = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri).Path;
+                    }
+                    
+                    var containingDir = new Java.IO.File(fullPath);
+
+                    var javaDiagFile = new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt");
+                    DocumentFile rootDir = DocumentFile.FromFile(new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt"));
+                        //DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, Android.Net.Uri.Parse(new Java.IO.File(fullPath).ToURI().ToString()));
+                    //SoulSeekState.DiagnosticTextFile = rootDir;//.FindFile("seeker_diagnostics.txt");
+                    if (!javaDiagFile.Exists())
+                    {
+                        if(containingDir.CanWrite())
+                        {
+                            bool success = javaDiagFile.CreateNewFile();
+                            if(success)
+                            {
+                                SoulSeekState.DiagnosticTextFile = rootDir;
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        SoulSeekState.DiagnosticTextFile = rootDir;
+                    }
+                }
+                else //if api >29 and they did not set it. nothing we can do.
+                {
+                    return;
+                }
             }
 
             if (SoulSeekState.DiagnosticStreamWriter == null)
             {
-                System.IO.Stream outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(SoulSeekState.DiagnosticTextFile.Uri, "wa");
+                System.IO.Stream outputStream = SeekerApplication.ApplicationContext.ContentResolver.OpenOutputStream(SoulSeekState.DiagnosticTextFile.Uri, "wa");
                 if (outputStream == null)
                 {
                     return;
@@ -2615,6 +2674,16 @@ namespace AndriodApp1
 
             SoulSeekState.DiagnosticStreamWriter.WriteLine(line);
             SoulSeekState.DiagnosticStreamWriter.Flush();
+            }
+            catch(Exception ex)
+            {
+                if(!diagnosticFilesystemErrorShown)
+                {
+                    MainActivity.LogFirebase("failed to write to diagnostic file " + ex.Message + ex.StackTrace);
+                    Toast.MakeText(SeekerApplication.ApplicationContext, "Failed to write to diagnostic file.", ToastLength.Long);
+                    diagnosticFilesystemErrorShown = true;
+                }
+            }
         }
 
         public static void SoulseekClient_DiagnosticGenerated(object sender, Soulseek.Diagnostics.DiagnosticEventArgs e)

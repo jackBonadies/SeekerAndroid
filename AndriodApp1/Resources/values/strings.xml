@@ -637,5 +637,10 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 		This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
 	</string>
 
+	<string name="diagnostics_more_info">
+		This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
+		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.
+	</string>
+
 
 </resources>

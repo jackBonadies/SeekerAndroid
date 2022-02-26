@@ -252,6 +252,9 @@ namespace AndriodApp1
             ImageView memoryFileDownloadSwitchIcon = FindViewById<ImageView>(Resource.Id.memoryFileDownloadSwitchIcon);
             memoryFileDownloadSwitchIcon.Click += MemoryFileDownloadSwitchIcon_Click;
 
+            ImageView moreInfoDiagnostics = FindViewById<ImageView>(Resource.Id.moreInfoDiagnostics);
+            moreInfoDiagnostics.Click += MoreInfoDiagnostics_Click;
+
             //Button closeButton = FindViewById<Button>(Resource.Id.closeSettings);
             //closeButton.Click += CloseButton_Click;
 
@@ -524,6 +527,13 @@ namespace AndriodApp1
 
         }
 
+        private void MoreInfoDiagnostics_Click(object sender, EventArgs e)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var diag = builder.SetMessage(Resource.String.diagnostics_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            diag.Show();
+        }
+
         private void MoreInfoConcurrent_Click(object sender, EventArgs e)
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -740,6 +750,8 @@ namespace AndriodApp1
             if(SeekerApplication.LOG_DIAGNOSTICS != e.IsChecked)
             {
                 SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
+                //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
+                SeekerApplication.SetDiagnosticState(SeekerApplication.LOG_DIAGNOSTICS);
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
                     var editor = SoulSeekState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
