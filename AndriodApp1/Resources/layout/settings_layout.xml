@@ -751,10 +751,29 @@ android:theme="@style/checkBoxStyle"
 
             </LinearLayout>
 
+                        <CheckBox
+
+                android:theme="@style/checkBoxStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/memoryFileDownloadSwitch"
+                android:text="Automatically Set Status to Away on Inactivity"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/autoSetAwayStatus"
+                android:layout_marginBottom = "10dp"/>
+
+
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/memoryFileDownloadSwitch"
+                android:layout_below="@id/autoSetAwayStatus"
                 android:layout_marginTop = "2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/nightModeOptionLayout"
@@ -1459,7 +1478,7 @@ android:theme="@style/checkBoxStyle"
 android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Limit concurrent downloads"
+                        android:text="Limit Concurrent Downloads"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
