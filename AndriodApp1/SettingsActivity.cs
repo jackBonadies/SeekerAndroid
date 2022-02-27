@@ -241,6 +241,10 @@ namespace AndriodApp1
             allowPrivateRoomInvitations.Checked = SoulSeekState.AllowPrivateRoomInvitations;
             allowPrivateRoomInvitations.CheckedChange += AllowPrivateRoomInvitations_CheckedChange;
 
+            CheckBox autoSetAwayStatusOnInactivity = FindViewById<CheckBox>(Resource.Id.autoSetAwayStatus);
+            autoSetAwayStatusOnInactivity.Checked = SoulSeekState.AutoAwayOnInactivity;
+            autoSetAwayStatusOnInactivity.CheckedChange += AutoSetAwayStatusOnInactivity_CheckedChange;
+
             CheckBox disableDownloadNotification = FindViewById<CheckBox>(Resource.Id.disableToastNotificationOnDownload);
             disableDownloadNotification.Checked = SoulSeekState.DisableDownloadToastNotification;
             disableDownloadNotification.CheckedChange += DisableDownloadNotification_CheckedChange;
@@ -525,6 +529,21 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void AutoSetAwayStatusOnInactivity_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            bool changed = SoulSeekState.AutoAwayOnInactivity != e.IsChecked;
+            SoulSeekState.AutoAwayOnInactivity = e.IsChecked;
+            if(changed)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, SoulSeekState.AutoAwayOnInactivity);
+                    bool success = editor.Commit();
+                }
+            }
         }
 
         private void MoreInfoDiagnostics_Click(object sender, EventArgs e)

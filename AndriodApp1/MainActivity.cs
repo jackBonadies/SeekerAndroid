@@ -64,28 +64,6 @@ using Android.Net;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace AndriodApp1
 {
-
-    //public class DownloadWorkerTest : Worker
-    //{
-    //    public DownloadWorkerTest(Context context, WorkerParameters workerParameters) : base(context, workerParameters)
-    //    {
-
-    //    }
-    //    //runs on background thread provided by workmanager.
-    //    public override Result DoWork()
-    //    {
-    //        var taxReturn = CalculateTaxes();
-    //        System.Threading.Thread.Sleep(1000*60*30);
-    //        Android.Util.Log.Debug("CalculatorWorker", $"Your Tax Return is: {taxReturn}");
-    //        return Result.InvokeSuccess();
-    //    }
-
-    //    public double CalculateTaxes()
-    //    {
-    //        return 2000;
-    //    }
-    //}
-
     public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivityLifecycleCallbacks
     {
         public static bool HasAppEverStarted = false;
@@ -165,16 +143,79 @@ namespace AndriodApp1
             }
             DiagLastStarted = activity.GetType().Name.ToString();
             MainActivity.LogDebug("OnActivityStarted " + DiagLastStarted);
+
+            NumberOfActiveActivities++;
+            //we are just coming back alive.
+            if(NumberOfActiveActivities==1)
+            {
+                MainActivity.LogDebug("We are back!");
+                if (AutoAwayTimer != null)
+                {
+                    AutoAwayTimer.Stop();
+                }
+            }
+
+            if(SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending)
+            {
+                SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
+            }
+
+            if (SoulSeekState.OurCurrentStatusIsAway)
+            {
+                MainActivity.LogDebug("Our current status is away, lets set it back to online!");
+                //set back to online
+                MainActivity.SetStatusApi(false);
+            }
         }
 
         void Application.IActivityLifecycleCallbacks.OnActivityStopped(Activity activity)
         {
             DiagLastStopped = activity.GetType().Name.ToString();
             MainActivity.LogDebug("OnActivityStopped " + DiagLastStopped);
+
+            NumberOfActiveActivities--;
+            //if this is 0 then app is in background, or screen is locked, user at homescreen, other app in front, etc.
+            if(NumberOfActiveActivities == 0 && SoulSeekState.AutoAwayOnInactivity)
+            {
+                MainActivity.LogDebug("We are away!");
+                if (AutoAwayTimer == null)
+                {
+                    AutoAwayTimer = new System.Timers.Timer(1000 * 20);
+                    AutoAwayTimer.AutoReset = false; //raise event just once.
+                    AutoAwayTimer.Elapsed += AutoAwayTimer_Elapsed;
+                }
+                AutoAwayTimer.Start();
+            }
+        }
+
+        private void AutoAwayTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            MainActivity.LogDebug("We were away for the interval specified.  time to set status to away.");
+            //if(!SoulSeekState.currentlyLoggedIn)
+            //{
+            //    //if we are not supposed to be logged in then do nothing.
+            //    return;
+            //}
+            //else if(!SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
+            //{
+            //    //if we are currently disconnected then do nothing.
+            //    //TODO - if we disconnect will the server set our offline status for us???
+            //    return;
+            //}
+            //else
+            //{
+                MainActivity.SetStatusApi(true);
+            //}
         }
 
         public volatile static string DiagLastStarted = string.Empty;
         public volatile static string DiagLastStopped = string.Empty;
+
+
+        public static int NumberOfActiveActivities = 0;
+        public static System.Timers.Timer AutoAwayTimer = null;
+        
+
     }
 
     public enum UpnpDiagStatus
@@ -3596,6 +3637,37 @@ namespace AndriodApp1
                             SoulSeekState.SoulseekClient.AddUserAsync(item.Username).ContinueWith(UpdateUserInfo);
                         }
                     }
+
+                    //this is if we wanted to change the status earlier but could not. note that when we first login, our status is Online by default.
+                    //so no need to change it to online.
+                    if(SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.OnlinePending)
+                    {
+                        //we just did this by logging in...
+                        MainActivity.LogDebug("online was pending");
+                        SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
+                    }
+                    else if(((SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending || SoulSeekState.OurCurrentStatusIsAway)))
+                    {
+                        MainActivity.LogDebug("a change to away was pending / our status is away. lets set it now");
+
+                        if(SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending)
+                        {
+                            MainActivity.LogDebug("pending that is....");
+                        }
+                        else
+                        {
+                            MainActivity.LogDebug("current that is...");
+                        }
+                        
+                        if(ForegroundLifecycleTracker.NumberOfActiveActivities != 0)
+                        {
+                            MainActivity.LogDebug("There is a hole in our logic!!! the pendingstatus and/or current status should not be away!!!");
+                        }
+                        else
+                        {
+                            MainActivity.SetStatusApi(true);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
@@ -4006,6 +4078,8 @@ namespace AndriodApp1
 
                 SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
                 SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
+
+                SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
 
@@ -8516,6 +8590,43 @@ namespace AndriodApp1
                 (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
         }
 
+        public static void SetStatusApi(bool away)
+        {
+            if(IsNotLoggedIn())
+            {
+                return;
+            }
+            if(!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                //dont log in just for this.
+                //but if we later connect while still in the background, it may be best to set a flag.
+                //do it when we log in... since we could not set it now...
+                SoulSeekState.PendingStatusChangeToAwayOnline = away ? SoulSeekState.PendingStatusChange.AwayPending : SoulSeekState.PendingStatusChange.OnlinePending;
+                return;
+            }
+            try
+            {
+                SoulSeekState.SoulseekClient.SetStatusAsync(away ? UserPresence.Away : UserPresence.Online).ContinueWith((Task t)=>
+                {
+                    if(t.IsCompletedSuccessfully)
+                    {
+                        SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
+                        SoulSeekState.OurCurrentStatusIsAway = away;
+                        string statusString = away ? "away" : "online";
+                        MainActivity.LogDebug($"We successfully changed our status to {statusString}");
+                    }
+                    else
+                    {
+                        MainActivity.LogDebug("SetStatusApi FAILED " + t.Exception?.Message);
+                    }
+                });
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogDebug("SetStatusApi FAILED " + e.Message + e.StackTrace);
+            }
+        }
+
         private void UpdateForScreenSize()
         {
             if (!SoulSeekState.IsLowDpi()) return;
@@ -11259,6 +11370,21 @@ namespace AndriodApp1
         public static int UploadSpeed = -1; //bytes
         public static bool FailedShareParse = false;
         private static bool isParsing = false;
+
+        public static bool OurCurrentStatusIsAway = false; //bool because it can only be online or away. we set this after we successfully change the status.
+        //NOTE: 
+        //If we end the connection abruptly (i.e. airplane mode, kill app, turn phone off) then our status will not be changed to offline. (at least after waiting for 20 mins, not sure when it would have)
+        //  only if we close the tcp connection properly (FIN, ACK) (i.e. menu > Shut Down) does the server update our status properly to offline.
+        //The server does not remember your old status.  So if you log in again after setting your status to away, then your status will be online.  You must set it to away again if desired.
+        //There is some weirdness where we only get "GetStatus" (7) messages when we go from online to away.  Otherwise, we dont get anything.  So its not reliable for determining what our status is.
+        public enum PendingStatusChange
+        {
+            NothingPending = 0,
+            AwayPending = 1,
+            OnlinePending = 2,
+        }
+        public static PendingStatusChange PendingStatusChangeToAwayOnline = PendingStatusChange.NothingPending;
+
         public static bool IsParsing
         {
             get
@@ -11296,6 +11422,8 @@ namespace AndriodApp1
         public static bool OverrideDefaultIncompleteLocations = false;
 
         public static bool PerformDeepMetadataSearch = true;
+
+        public static bool AutoAwayOnInactivity = false;
 
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
 
@@ -11492,6 +11620,8 @@ namespace AndriodApp1
         public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
+
+        public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";

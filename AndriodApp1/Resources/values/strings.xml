@@ -75,8 +75,7 @@ File Count: {4}
 Directory Count: {5}"</string>
   <string name="add_user">Add User</string>
   <string name="empty_browse_directory">
-  This tab is used to browse a user\'s directory tree.\n\n
-  To get started perform a search in the search tab.</string>
+  This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.</string>
   <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
      <string name="quick_info">Quick Info</string>
