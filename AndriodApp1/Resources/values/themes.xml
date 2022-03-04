@@ -67,6 +67,7 @@
 
 	<style name="DefaultLight_Blue" parent="DefaultLight">
 		<item name="mainPurple">#126291</item>
+		<item name="mainPurpleStatusBar">#10496b</item>
 
 
 		<item name="seeker_notification_other_person_color">#47B2A4</item>
@@ -98,6 +99,7 @@
 
 	<style name="DefaultLight_Red" parent="DefaultLight">
 		<item name="mainPurple">#B22525</item>
+		<item name="mainPurpleStatusBar">#7B0000</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_B22525</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_B22525</item>
 		<item name="rounded_button">@drawable/rounded_button_B22525</item>
@@ -127,6 +129,7 @@
 
 	<style name="DefaultDark_Blue" parent="DefaultDark">
 		<item name="mainPurple">#126291</item>
+		<item name="mainPurpleStatusBar">#10496b</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_126291</item>
 		<item name="rounded_button">@drawable/rounded_button_126291</item>
@@ -154,6 +157,7 @@
 
 	<style name="DefaultDark_Grey" parent="DefaultDark">
 		<item name="mainPurple">#202124</item>
+		<item name="mainPurpleStatusBar">#000000</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_202124</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_202124</item>
 		<item name="rounded_button">@drawable/rounded_button_202124</item>
@@ -186,6 +190,8 @@
 
 	<style name="Amoled_Grey" parent="Amoled">
 		<item name="mainPurple">#333333</item>
+		<item name="mainPurpleStatusBar">#0c0c0c</item>
+
 		<!--<item name="buttonStyle">@drawable/buttonStyle_333333</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_333333</item>
 		<item name="rounded_button">@drawable/rounded_button_333333</item>

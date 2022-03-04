@@ -180,7 +180,7 @@ namespace AndriodApp1
                 MainActivity.LogDebug("We are away!");
                 if (AutoAwayTimer == null)
                 {
-                    AutoAwayTimer = new System.Timers.Timer(1000 * 20);
+                    AutoAwayTimer = new System.Timers.Timer(1000 * 60 * 5); //5 mins
                     AutoAwayTimer.AutoReset = false; //raise event just once.
                     AutoAwayTimer.Elapsed += AutoAwayTimer_Elapsed;
                 }
