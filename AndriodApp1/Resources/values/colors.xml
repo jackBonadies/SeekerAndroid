@@ -24,7 +24,7 @@
 
 	<color name="offline">#F7636A</color>
 	<color name="away">#FFCD87</color>
-	<color name="online">#FFEC82</color>
+	<color name="online">#89B38F</color>
 	<color name="queueColor">#F7636A</color>
   <color name="hardErrorRed">#cc0000</color>
   <color name="colorButtonText">#437eab</color>
