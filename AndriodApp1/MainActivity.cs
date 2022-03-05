@@ -1086,7 +1086,7 @@ namespace AndriodApp1
         /// Get the overall state of the folder.
         /// </summary>
         /// <returns></returns>
-        public TransferStates GetState(out bool isFailed)
+        public TransferStates GetState(out bool isFailed, out bool anyOffline)
         {
             //top priority - In Progress
             //if ANY are InProgress then this is considered in progress
@@ -1097,6 +1097,7 @@ namespace AndriodApp1
             //if not then its Succeeded.
 
             isFailed = false;
+            anyOffline = false;
             //if not then none...
             lock (TransferItems)
             {
@@ -1114,6 +1115,10 @@ namespace AndriodApp1
                         if (ti.Failed)
                         {
                             isFailed = true;
+                            if(ti.State.HasFlag(TransferStates.UserOffline))
+                            {
+                                anyOffline = true;
+                            }
                         }
                         //do priority
                         if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
@@ -1601,11 +1606,11 @@ namespace AndriodApp1
 
         /// <summary>
         /// transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
+        /// add users where failure occured due to them being offline to dict so we can efficiently check it in response
+        /// to status changed events AND we can AddUser to get their status updates.
         /// </summary>
         public void OnRelaunch()
-        {
-            //if(forDownload)
-            //{
+        {            
             lock (AllTransferItems)
             {
                 foreach (var ti in AllTransferItems)
@@ -1615,9 +1620,13 @@ namespace AndriodApp1
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;
                     }
+
+                    if(ti.State.HasFlag(TransferStates.UserOffline))
+                    {
+                        TransfersFragment.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
+                    }
                 }
             }
-            //}
         }
 
         public List<Tuple<TransferItem, int>> GetListOfPausedFromFolder(FolderItem fi)
@@ -1716,6 +1725,30 @@ namespace AndriodApp1
                             transferItemConditionList.Add(new Tuple<TransferItem, int, int>(AllTransferItems[i], i, folderIndex));
                         }
 
+                    }
+                }
+            }
+            return transferItemConditionList;
+        }
+
+        public List<TransferItem> GetTransferItemsFromUser(string username, bool failedOnly, bool failedAndOfflineOnly)
+        {
+            List<TransferItem> transferItemConditionList = new List<TransferItem>();
+            lock (AllTransferItems)
+            {
+                foreach(var item in AllTransferItems)
+                {
+                    if(item.Username==username)
+                    {
+                        if(failedAndOfflineOnly && !item.State.HasFlag(TransferStates.UserOffline))
+                        {
+                            continue;
+                        }
+                        if(failedOnly && !item.Failed)
+                        {
+                            continue;
+                        }
+                        transferItemConditionList.Add(item);
                     }
                 }
             }
@@ -3179,6 +3212,13 @@ namespace AndriodApp1
             }
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
+
+            if(!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
+            {
+                //user offline.
+                TransfersFragment.AddToUserOffline(e.Transfer.Username);
+            }
+
             TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
             if (relevantItem == null)
             {
@@ -3638,6 +3678,15 @@ namespace AndriodApp1
                         }
                     }
 
+                    lock(TransfersFragment.UsersWhereDownloadFailedDueToOffline)
+                    {
+                        foreach (string userDownloadOffline in TransfersFragment.UsersWhereDownloadFailedDueToOffline.Keys)
+                        {
+                            MainActivity.LogDebug("adding user (due to a download we wanted from them when they were offline): " + userDownloadOffline);
+                            SoulSeekState.SoulseekClient.AddUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
+                        }
+                    }
+
                     //this is if we wanted to change the status earlier but could not. note that when we first login, our status is Online by default.
                     //so no need to change it to online.
                     if(SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.OnlinePending)
@@ -3691,6 +3740,22 @@ namespace AndriodApp1
             }
         }
 
+        /// <summary>
+        /// UserStatusChanged will not get called until an actual change. hence this call..
+        /// </summary>
+        /// <param name="t"></param>
+        private static void UpdateUserOfflineDownload(Task<UserData> t)
+        {
+            if(t.IsCompletedSuccessfully)
+            {
+                ProcessPotentialUserOfflineChangedEvent(t.Result.Username, t.Result.Status);
+            }
+        }
+
+        /// <summary>
+        /// UserStatusChanged will not get called until an actual change. hence this call..
+        /// </summary>
+        /// <param name="t"></param>
         private static void UpdateUserInfo(Task<UserData> t)
         {
             try
@@ -3704,6 +3769,8 @@ namespace AndriodApp1
                     {
                         MainActivity.UserListAddUser(t.Result, t.Result.Status);
                     }
+
+
                 }
                 else if (t.Exception?.InnerException is UserNotFoundException)
                 {
@@ -3950,11 +4017,6 @@ namespace AndriodApp1
                         break;
                     }
                 }
-                if (!found)
-                {
-                    //hopefully someone we later removed (since no RemoveUser command...)
-                    //but also it could be users people added on a different client so maybe we want them???
-                }
             }
             //if user was previously offline and now they are not offline, then do the notification.
             //note - this method does not get called when first adding users. which I think is ideal for notifications.
@@ -3970,7 +4032,7 @@ namespace AndriodApp1
             }
             else
             {
-                MainActivity.LogDebug("NOT from offline to online " + username);
+                MainActivity.LogDebug("NOT from offline to online (or not in user list)" + username);
             }
             return found;
         }
@@ -4101,6 +4163,14 @@ namespace AndriodApp1
                 ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(SoulSeekState.M_RoomUserListShowFriendsAtTop, false);
 
                 SeekerApplication.LOG_DIAGNOSTICS = sharedPreferences.GetBoolean(SoulSeekState.M_LOG_DIAGNOSTICS, false);
+
+
+                if (TransfersFragment.TransferItemManagerDL == null)
+                {
+                    TransfersFragment.RestoreDownloadTransferItems(sharedPreferences);
+                    TransfersFragment.RestoreUploadTransferItems(sharedPreferences);
+                    TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
+                }
             }
         }
 
@@ -4375,6 +4445,43 @@ namespace AndriodApp1
             }
         }
 
+        public static void ProcessPotentialUserOfflineChangedEvent(string username, UserPresence status)
+        {
+            if (status != UserPresence.Offline)
+            {
+                bool autoRetryWhenUserComesBackOnline = true;
+                if (autoRetryWhenUserComesBackOnline)
+                {
+                    if (TransfersFragment.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
+                    {
+                        MainActivity.LogDebug("the user came back who we previously dl from " + username);
+                        //retry all failed downloads from them..
+                        List<TransferItem> items = TransfersFragment.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
+                        if (items.Count == 0)
+                        {
+                            //no offline, then remove this user.
+                            lock (TransfersFragment.UsersWhereDownloadFailedDueToOffline)
+                            {
+                                TransfersFragment.UsersWhereDownloadFailedDueToOffline.Remove(username);
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                TransfersFragment.DownloadRetryAllConditionLogic(false, false, null, true, items);
+                            }
+                            catch(Exception e)
+                            {
+                                MainActivity.LogDebug("ProcessPotentialUserOfflineChangedEvent" + e.Message);
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
 
         public static EventHandler<string> UserStatusChangedUIEvent;
         private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
@@ -4395,6 +4502,8 @@ namespace AndriodApp1
                         SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
                     }
                 }
+
+                ProcessPotentialUserOfflineChangedEvent(e.Username, e.Status);
             }
 
         }
@@ -5100,13 +5209,28 @@ namespace AndriodApp1
                 //failed to follow link..
                 if (dirTask.Exception?.InnerException?.Message != null)
                 {
+                    string msgToToast = string.Empty;
                     if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Request timed out", ToastLength.Short).Show();
+                        msgToToast = "Failed to Add Download - Request timed out";
+                    }
+                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect"))
+                    {
+                        msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
+                    }
+                    else if(dirTask.Exception.InnerException is Soulseek.UserOfflineException)
+                    {
+                        msgToToast = $"Failed to Add Download - User {_uname} is offline";
+                    }
+                    else
+                    {
+                        msgToToast = "Failed to follow link";
                     }
                     MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
+                    });
                 }
-                Toast.MakeText(SoulSeekState.MainActivityRef, "Failed to follow link", ToastLength.Short).Show();
                 MainActivity.LogDebug("DirectoryReceivedContAction faulted");
             }
             else
@@ -7116,15 +7240,6 @@ namespace AndriodApp1
             System.Console.WriteLine("Testing.....");
 
             sharedPreferences = this.GetSharedPreferences("SoulSeekPrefs", 0);
-
-            if (TransfersFragment.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
-            {
-                TransfersFragment.RestoreDownloadTransferItems(sharedPreferences);
-                TransfersFragment.RestoreUploadTransferItems(sharedPreferences);
-                TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
-            }
-
-
 
             //if (uiModeManager.NightMode == UiModeManager.ModeNightYes)
             //{
