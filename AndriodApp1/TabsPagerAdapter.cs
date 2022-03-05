@@ -5835,7 +5835,7 @@ namespace AndriodApp1
             InnerTransferItem = item;
             FolderItem folderItem = item as FolderItem;
             viewFoldername.Text = folderItem.GetDisplayFolderName();
-            var state = folderItem.GetState(out bool isFailed);
+            var state = folderItem.GetState(out bool isFailed, out _);
 
             
             TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload(), true);
@@ -6492,6 +6492,38 @@ namespace AndriodApp1
     {
         private View rootView = null;
 
+        /// <summary>
+        /// We add these to this dict so we can (1) AddUser to get their statuses and (2) efficiently check them when
+        /// we get user status changed events.
+        /// This dict may contain a greater number of users than strictly necessary.  as it is just used to save time, 
+        /// and having additional users here will not cause any issues.  (i.e. in case where other user was offline then the 
+        /// user cleared that download, no harm as it will check and see there are no downloads to retry and just remove user)
+        /// </summary>
+        public static Dictionary<string, byte> UsersWhereDownloadFailedDueToOffline = new Dictionary<string, byte>();
+        public static void AddToUserOffline(string username)
+        {
+            if(UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
+            {
+                return;
+            }
+            else
+            {
+                lock (TransfersFragment.UsersWhereDownloadFailedDueToOffline)
+                {
+                    UsersWhereDownloadFailedDueToOffline[username] = 0x0;
+                }
+                try
+                {
+                    SoulSeekState.SoulseekClient.AddUserAsync(username);
+                }
+                catch(System.Exception)
+                {
+                    // noop
+                    // if user is not logged in then next time they log in the user will be added...
+                }
+            }
+        }
+
         public static TransferItemManager TransferItemManagerDL; //for downloads
         public static TransferItemManager TransferItemManagerUploads; //for uploads
         public static TransferItemManagerWrapper TransferItemManagerWrapped;
@@ -6898,7 +6930,7 @@ namespace AndriodApp1
 
         private RecyclerView.LayoutManager recycleLayoutManager;
         private RecyclerView recyclerViewTransferItems;
-        private TransferAdapterRecyclerVersion recyclerTransferAdapter;
+        public TransferAdapterRecyclerVersion recyclerTransferAdapter;
 
         public override void OnDestroy()
         {
@@ -6966,7 +6998,7 @@ namespace AndriodApp1
 
         public static void RestoreDownloadTransferItems(ISharedPreferences sharedPreferences)
         {
-            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_TransferList_v2, string.Empty); //TODO !!! replace
+            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_TransferList_v2, string.Empty);
             if (transferListv2 == string.Empty)
             {
                 RestoreDownloadTransferItemsLegacy(sharedPreferences);
@@ -7023,6 +7055,11 @@ namespace AndriodApp1
                 {
                     ti.State = TransferStates.Cancelled;
                     ti.RemainingTime = null;
+                }
+
+                if (ti.State.HasFlag(TransferStates.UserOffline))
+                {
+                    TransfersFragment.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
                 }
             }
         }
@@ -7104,12 +7141,12 @@ namespace AndriodApp1
             //transferOptions.Click += TransferOptions_Click;
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
             sharedPreferences = SoulSeekState.SharedPreferences;
-            if (TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
-            {
-                RestoreDownloadTransferItems(sharedPreferences);
-                RestoreUploadTransferItems(sharedPreferences);
-                TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
-            }
+            //if (TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
+            //{
+            //    RestoreDownloadTransferItems(sharedPreferences);
+            //    RestoreUploadTransferItems(sharedPreferences);
+            //    TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
+            //}
 
             SetNoTransfersMessage();
 
@@ -7475,7 +7512,7 @@ namespace AndriodApp1
         }
 
 
-        private void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis=null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
+        public static void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis=null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
         {
             IEnumerable<TransferItem> transferItemConditionList = new List<TransferItem>();
             if(batchSelectedOnly)
@@ -7527,7 +7564,7 @@ namespace AndriodApp1
                 }
                 catch (System.Exception error)
                 {
-                    Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
+                    Action a = new Action(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
                     if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                     {
 
@@ -7538,7 +7575,7 @@ namespace AndriodApp1
                     }
                     if (!exceptionShown)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(a);
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(a);
                         exceptionShown = true;
                     }
                     return; //otherwise null ref with task!
@@ -7579,14 +7616,20 @@ namespace AndriodApp1
                 foreach(int i in indicesToUpdate)
                 {
                     MainActivity.LogDebug($"updating {i}");
-                    recyclerTransferAdapter?.NotifyItemChanged(i);
+                    if(StaticHacks.TransfersFrag != null)
+                    {
+                        StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
+                    }
                 }
 
 
             });
             lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
             { //also can update this to do a partial refresh...
-                refreshListView(refreshOnlySelected);
+                if (StaticHacks.TransfersFrag != null)
+                {
+                    StaticHacks.TransfersFrag.refreshListView(refreshOnlySelected);
+                }
             }
         }
 
@@ -8635,7 +8678,7 @@ namespace AndriodApp1
 
         }
 
-        private void refreshListView(Action specificRefreshAction = null)
+        public void refreshListView(Action specificRefreshAction = null)
         {
             //creating the TransferAdapter can cause a Collection was Modified error due to transferItems.
             //maybe a better way to do this is .ToList().... rather than locking...
@@ -8925,6 +8968,7 @@ namespace AndriodApp1
                 TransferStates folderItemState = TransferStates.None;
                 bool isTransferItem = false;
                 bool anyFailed = false;
+                //bool anyOffline = false;
                 bool isUpload = false;
                 if (tvh?.InnerTransferItem is TransferItem tvhi)
                 {
@@ -8935,7 +8979,7 @@ namespace AndriodApp1
                 else if (tvh?.InnerTransferItem is FolderItem tvhf)
                 {
                     fi = tvhf;
-                    folderItemState = fi.GetState(out anyFailed);
+                    folderItemState = fi.GetState(out anyFailed, out _);
                     isUpload = fi.IsUpload();
                 }
                 //else
@@ -9122,6 +9166,25 @@ namespace AndriodApp1
                 }
                 //finally batch selection mode
                 menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, "Batch Select");
+
+                //if (!isUpload)
+                //{
+                //    if (isTransferItem)
+                //    {
+                //        if(ti.State.HasFlag(TransferStates.UserOffline))
+                //        {
+
+                //        }
+                //    }
+                //    else
+                //    {
+                //        if(anyOffline)
+                //        {
+                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Do Not Auto-Retry When User Goes Back Online");
+                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Auto-Retry When User Goes Back Online");
+                //        }
+                //    }
+                //}
             }
 
         }
