@@ -253,6 +253,11 @@ namespace AndriodApp1
             memoryFileDownloadSwitchCheckBox.Checked = !SoulSeekState.MemoryBackedDownload;
             memoryFileDownloadSwitchCheckBox.CheckedChange += MemoryFileDownloadSwitchCheckBox_CheckedChange;
 
+
+            CheckBox autoRetryBackOnline = FindViewById<CheckBox>(Resource.Id.autoRetryBackOnline);
+            autoRetryBackOnline.Checked = SoulSeekState.AutoRetryBackOnline;
+            autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange; 
+
             ImageView memoryFileDownloadSwitchIcon = FindViewById<ImageView>(Resource.Id.memoryFileDownloadSwitchIcon);
             memoryFileDownloadSwitchIcon.Click += MemoryFileDownloadSwitchIcon_Click;
 
@@ -529,6 +534,21 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void AutoRetryBackOnline_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            bool changed = SoulSeekState.AutoRetryBackOnline != e.IsChecked;
+            SoulSeekState.AutoRetryBackOnline = e.IsChecked;
+            if (changed)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutBoolean(SoulSeekState.M_AutoRetryBackOnline, SoulSeekState.AutoRetryBackOnline);
+                    bool success = editor.Commit();
+                }
+            }
         }
 
         private void AutoSetAwayStatusOnInactivity_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
