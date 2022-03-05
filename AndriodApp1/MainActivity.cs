@@ -4142,6 +4142,7 @@ namespace AndriodApp1
                 SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
                 SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
+                SoulSeekState.AutoRetryBackOnline = sharedPreferences.GetBoolean(SoulSeekState.M_AutoRetryBackOnline, true);
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
 
@@ -4449,8 +4450,7 @@ namespace AndriodApp1
         {
             if (status != UserPresence.Offline)
             {
-                bool autoRetryWhenUserComesBackOnline = true;
-                if (autoRetryWhenUserComesBackOnline)
+                if (SoulSeekState.AutoRetryBackOnline)
                 {
                     if (TransfersFragment.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
                     {
@@ -11448,6 +11448,7 @@ namespace AndriodApp1
         public static bool TransferViewShowSpeed = false;
 
         public static bool MemoryBackedDownload = false;
+        public static bool AutoRetryBackOnline = true; //this is for downloads that fail with the condition "User is Offline"
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
         public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;
@@ -11737,6 +11738,7 @@ namespace AndriodApp1
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
 
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
+        public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";

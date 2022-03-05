@@ -751,13 +751,31 @@ android:theme="@style/checkBoxStyle"
 
             </LinearLayout>
 
-                        <CheckBox
+                <CheckBox
 
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/memoryFileDownloadSwitch"
+                android:text="Auto-Retry Failed Downloads When User Goes Back Online"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/autoRetryBackOnline"
+                android:layout_marginBottom = "10dp"/>
+
+
+                        <CheckBox
+
+                android:theme="@style/checkBoxStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/autoRetryBackOnline"
                 android:text="Automatically Set Status to Away on Inactivity"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
