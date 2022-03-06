@@ -2501,57 +2501,7 @@ namespace AndriodApp1
 
             SoulSeekState.OffsetFromUtcCached = DateTime.Now.Subtract(DateTime.UtcNow);
 
-            //Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri);
-            //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, chosenUri);
-            //var df = SoulSeekState.RootDocumentFile.FindFile("saved_tabs");
-            //var strm =this.ContentResolver.OpenInputStream(df.Uri);
-            //Dictionary<int, SavedStateSearchTab> savedStates = new Dictionary<int, SavedStateSearchTab>();
-            //List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
-            //foreach (int tabIndex in tabsToSave)
-            //{
-            //    savedStates.Add(tabIndex, SavedStateSearchTab.GetSavedStateFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
-            //}
-            //string stringToSave = string.Empty;
-            //using (System.IO.MemoryStream savedStateStream = new System.IO.MemoryStream())
-            //{
-            //    BinaryFormatter formatter = new BinaryFormatter();
-            //    var sw = System.Diagnostics.Stopwatch.StartNew();
-            //    sw.Start();
-            //    formatter.Serialize(savedStateStream, savedStates);
-            //    sw.Stop();
-
-            //    stringToSave = Convert.ToBase64String(savedStateStream.ToArray());
-
-            //    MainActivity.LogDebug($"serialize length: {stringToSave.Length} sw.EllapsedMilliseconds: {sw.ElapsedMilliseconds} ms");
-
-
-            //    sw = System.Diagnostics.Stopwatch.StartNew();
-            //    savedStateStream.Position = 0;
-            //    System.IO.MemoryStream s1 = new System.IO.MemoryStream();
-            //    sw.Start();
-            //    foreach(var searchTab in savedStates.Values)
-            //    {
-            //        foreach(SearchResponse s in searchTab.searchResponses)
-            //        {
-            //            ////exactly the same speed.
-            //            var b = s.ToByteArray();
-            //            s1.Write(b,0,b.Length);
-            //        }
-            //    }
-            //    sw.Stop();
-
-            //    MainActivity.LogDebug($"custom {sw.ElapsedMilliseconds} ms");
-
-            //    sw = System.Diagnostics.Stopwatch.StartNew();
-            //    savedStateStream.Position=0;
-            //    sw.Start();
-            //    var savedStateDict1 = formatter.Deserialize(savedStateStream) as Dictionary<int, SavedStateSearchTab>;
-            //    sw.Stop();
-            //    MainActivity.LogDebug($"deserialize length: {stringToSave.Length} sw.EllapsedMilliseconds: {sw.ElapsedMilliseconds} ms");
-            //}
-
-
-            //return;
+ 
 
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
             //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
@@ -2687,7 +2637,7 @@ namespace AndriodApp1
                         }
                     }
                 }
-                else if(SoulSeekState.UseLegacyStorage()) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+                else if(SoulSeekState.UseLegacyStorage() || !SoulSeekState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
                 {
                     //when the directory is unset.
                     string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
@@ -4095,6 +4045,7 @@ namespace AndriodApp1
                 SoulSeekState.Username = sharedPreferences.GetString(SoulSeekState.M_Username, "");
                 SoulSeekState.Password = sharedPreferences.GetString(SoulSeekState.M_Password, "");
                 SoulSeekState.SaveDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_SaveDataDirectoryUri, "");
+                SoulSeekState.SaveDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(SoulSeekState.M_SaveDataDirectoryUriIsFromTree, true);
                 SoulSeekState.NumberSearchResults = sharedPreferences.GetInt(SoulSeekState.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
                 SoulSeekState.DayNightMode = sharedPreferences.GetInt(SoulSeekState.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
                 SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(SoulSeekState.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
@@ -4124,6 +4075,7 @@ namespace AndriodApp1
                 SearchFragment.SetSearchResultStyle(sharedPreferences.GetInt(SoulSeekState.M_SearchResultStyle, 1));
                 SoulSeekState.UploadSpeed = sharedPreferences.GetInt(SoulSeekState.M_UploadSpeed, -1);
                 SoulSeekState.UploadDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_UploadDirectoryUri, "");
+                SoulSeekState.UploadDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(SoulSeekState.M_UploadDirectoryUriIsFromTree, true);
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
                 SoulSeekState.UserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
 
@@ -6048,41 +6000,6 @@ namespace AndriodApp1
             return slskDir;
         }
 
-        ///// <summary>
-        ///// Here you want a flattened list of directories.  Directories should have full paths.  Each dir has files only.
-        ///// </summary>
-        ///// <param name="dir"></param>
-        ///// <returns></returns>
-        //private BrowseResponse ParseSharedDirectoryForBrowseResponse(DocumentFile dir, ref List<Tuple<string,string>> friendlyDirNameToUriMapping)
-        //{
-        //    List<Android.Net.Uri> dirUris = new List<Android.Net.Uri>();
-        //    dirUris.Add(dir.Uri);
-        //    traverseToGetDirectories(dir, dirUris);
-        //    var rootDirUris = GetRootDirs(dir);
-        //    rootDirUris.Add(dir.Uri.ToString());
-        //    string volname = GetVolumeName(dir.Uri.LastPathSegment, true, out _); //?>?>?>
-        //    List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
-        //    foreach(Android.Net.Uri dirUri in dirUris)
-        //    {
-        //        DocumentFile dirFile = null;
-        //        if(SoulSeekState.PreOpenDocumentTree())
-        //        {
-        //            dirFile = DocumentFile.FromFile(new Java.IO.File(dirUri.Path));
-        //        }
-        //        else
-        //        {
-        //            dirFile = DocumentFile.FromTreeUri(this,dirUri); //will return null or not exists for API below 21.
-        //        }
-        //        if(dir.Name==null)
-        //        {
-        //            MainActivity.LogInfoFirebase("dirname is null " + dir.Uri?.ToString() ?? "dirUriIsNull");
-        //        }
-        //        var slskDir = SlskDirFromDocumentFile(dirFile, dir.Name, false, volname);
-        //        friendlyDirNameToUriMapping.Add(new Tuple<string, string>(slskDir.Name, dirFile.Uri.ToString()));
-        //        allDirs.Add(slskDir);
-        //    }
-        //    return new BrowseResponse(allDirs,null);
-        //}
 
         public class CachedParseResults
         {
@@ -6712,13 +6629,13 @@ namespace AndriodApp1
                     BrowseResponse browseResponse = null;
                     List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
                     Dictionary<int, string> index = null;
-                    if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
+                    if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.UploadDataDirectoryUriIsFromTree)
                     {
-                        stringUriPairs = ParseSharedDirectoryFastDocContract(dir, rescan ? SoulSeekState.SharedFileCache.FullInfo : null, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
+                        stringUriPairs = ParseSharedDirectoryLegacy(dir, rescan ? SoulSeekState.SharedFileCache.FullInfo : null, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
                     }
                     else
                     {
-                        stringUriPairs = ParseSharedDirectoryLegacy(dir, rescan ? SoulSeekState.SharedFileCache.FullInfo : null, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
+                        stringUriPairs = ParseSharedDirectoryFastDocContract(dir, rescan ? SoulSeekState.SharedFileCache.FullInfo : null, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index);
                     }
                     SoulSeekState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
                     s.Stop();
@@ -6805,6 +6722,7 @@ namespace AndriodApp1
                             editor.PutString(SoulSeekState.M_CACHE_intHelperIndex_v2, bIntIndex);
                             editor.PutString(SoulSeekState.M_CACHE_tokenIndex_v2, bTokenIndex);
                             editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
+                            editor.PutBoolean(SoulSeekState.M_UploadDirectoryUriIsFromTree, SoulSeekState.UploadDataDirectoryUriIsFromTree);
                             //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
                             //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
                             editor.Commit();
@@ -6930,6 +6848,7 @@ namespace AndriodApp1
                 if (!success)
                 {
                     SoulSeekState.UploadDataDirectoryUri = null;
+                    SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
                     SoulSeekState.FailedShareParse = true;
                     //if success if false then SoulSeekState.SharedFileCache might be null still causing a crash!
                     if (SoulSeekState.SharedFileCache != null)
@@ -7076,6 +6995,10 @@ namespace AndriodApp1
         private int WRITE_EXTERNAL = 9999;
         private int NEW_WRITE_EXTERNAL = 0x428;
         private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
+        private int NEW_WRITE_EXTERNAL_VIA_LEGACY = 0x42A;
+        private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY = 0x42B;
+        private int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
+        private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private Android.Support.V4.View.ViewPager pager = null;
 
         public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
@@ -7105,7 +7028,7 @@ namespace AndriodApp1
                 try
                 {
                     DocumentFile docFile = null;
-                    if (SoulSeekState.PreOpenDocumentTree())
+                    if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.UploadDataDirectoryUriIsFromTree)
                     {
                         docFile = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path));
                     }
@@ -7119,6 +7042,7 @@ namespace AndriodApp1
                 {
                     LogDebug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
                     SoulSeekState.UploadDataDirectoryUri = null;
+                    SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
                     SetUnsetSharingBasedOnConditions(false);
                     MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
@@ -7452,7 +7376,7 @@ namespace AndriodApp1
                     ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
                 //file picker with legacy case
-                if (SoulSeekState.SaveDataDirectoryUri != null && SoulSeekState.SaveDataDirectoryUri.ToString() != "")
+                if (!string.IsNullOrEmpty(SoulSeekState.SaveDataDirectoryUri))
                 {
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri);
@@ -7464,7 +7388,7 @@ namespace AndriodApp1
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SoulSeekState.PreOpenDocumentTree())
+                        if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.SaveDataDirectoryUriIsFromTree)
                         {
                             canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
                         }
@@ -7480,10 +7404,7 @@ namespace AndriodApp1
                             //    string content1 = item1.Uri.Path;
                             //}
 
-                            //DocumentFile diagF = DocumentFile.FromTreeUri(this, chosenUri);
-                            //var files = diagF.ListFiles();
-                            //int cnt = files.Count();
-                            //bool exists = DocumentFile.FromTreeUri(this, chosenUri).Exists();  
+
                             canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
                         }
                     }
@@ -7518,7 +7439,7 @@ namespace AndriodApp1
                 }
 
                 //now for incomplete
-                if (SoulSeekState.ManualIncompleteDataDirectoryUri != null && SoulSeekState.ManualIncompleteDataDirectoryUri.ToString() != "")
+                if (!string.IsNullOrEmpty(SoulSeekState.ManualIncompleteDataDirectoryUri))
                 {
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     Android.Net.Uri chosenIncompleteUri = Android.Net.Uri.Parse(SoulSeekState.ManualIncompleteDataDirectoryUri);
@@ -7530,7 +7451,7 @@ namespace AndriodApp1
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SoulSeekState.PreOpenDocumentTree())
+                        if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path)).CanWrite();
                         }
@@ -7546,10 +7467,7 @@ namespace AndriodApp1
                             //    string content1 = item1.Uri.Path;
                             //}
 
-                            //DocumentFile diagF = DocumentFile.FromTreeUri(this, chosenUri);
-                            //var files = diagF.ListFiles();
-                            //int cnt = files.Count();
-                            //bool exists = DocumentFile.FromTreeUri(this, chosenUri).Exists();  
+
                             canWrite = DocumentFile.FromTreeUri(this, chosenIncompleteUri).CanWrite();
                         }
                     }
@@ -7587,7 +7505,7 @@ namespace AndriodApp1
             {
 
                 Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if (SoulSeekState.SaveDataDirectoryUri == null || SoulSeekState.SaveDataDirectoryUri.ToString() == "")
+                if (string.IsNullOrEmpty(SoulSeekState.SaveDataDirectoryUri))
                 {
                     //try
                     //{
@@ -7624,7 +7542,7 @@ namespace AndriodApp1
                     //Caused by: java.lang.IllegalArgumentException: 
                     //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                     //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                    if (SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
+                    if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.SaveDataDirectoryUriIsFromTree) //this will never get hit..
                     {
                         canWrite = DocumentFile.FromFile(new Java.IO.File(res.Path)).CanWrite();
                     }
@@ -7666,7 +7584,7 @@ namespace AndriodApp1
                         {
                             if (ex.Message.Contains("No Activity found to handle Intent"))
                             {
-                                Toast.MakeText(this, this.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                                FallbackFileSelectionEntry(false);
                             }
                             else
                             {
@@ -7683,13 +7601,20 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
+                    if(SoulSeekState.SaveDataDirectoryUriIsFromTree)
+                    {
+                        SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
+                    }
+                    else
+                    {
+                        SoulSeekState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(res.Path));
+                    }
                 }
 
                 bool manualSet = false;
                 //for incomplete case
                 Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if (SoulSeekState.ManualIncompleteDataDirectoryUri != null && SoulSeekState.ManualIncompleteDataDirectoryUri.ToString() != "")
+                if (!string.IsNullOrEmpty(SoulSeekState.ManualIncompleteDataDirectoryUri))
                 {
                     manualSet = true;
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
@@ -7710,7 +7635,7 @@ namespace AndriodApp1
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SoulSeekState.PreOpenDocumentTree()) //this will never get hit..
+                        if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
                         }
@@ -7732,7 +7657,14 @@ namespace AndriodApp1
                     }
                     if (canWriteIncomplete)
                     {
-                        SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                        if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        {
+                            SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
+                        }
+                        else
+                        {
+                            SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                        }
                     }
                 }
 
@@ -7761,7 +7693,7 @@ namespace AndriodApp1
 
             //    //logging code for unit tests / diagnostic..
             //    var root = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef , Android.Net.Uri.Parse( SoulSeekState.SaveDataDirectoryUri) );
-            //    DocumentFile f = root.FindFile("BeerNecessities" + "_dir_response");
+            //    DocumentFile f = root.FindFile("" + "_dir_response");
 
             //    System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenInputStream(f.Uri);
             //    BrowseResponse br = null;
@@ -7769,10 +7701,10 @@ namespace AndriodApp1
             //    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
             //    br = formatter.Deserialize(stream) as BrowseResponse;
 
-            ////var br = SoulSeekState.SoulseekClient.BrowseAsync("mzawk");
+            ////var br = SoulSeekState.SoulseekClient.BrowseAsync("");
             ////br.Wait();
 
-            //    DownloadDialog.CreateTree(br,false, null, null, "BeerNecessities",out _);
+            //    DownloadDialog.CreateTree(br,false, null, null, "",out _);
 
             //if(b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
             //{
@@ -7818,6 +7750,27 @@ namespace AndriodApp1
             //string pkgnameunique2 = Application.Context.PackageName;
 
             // GetIncompleteStream(@"testdir\testdir1\testfname.mp3", out Android.Net.Uri int2);
+        }
+
+        public void FallbackFileSelection(int requestCode)
+        {
+            //Create FolderOpenDialog
+            SimpleFileDialog fileDialog = new SimpleFileDialog(SoulSeekState.ActiveActivityRef, SimpleFileDialog.FileSelectionMode.FolderChoose);
+            fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath).ContinueWith(
+                (Task<string> t) => {
+                    if (t.Result == null || t.Result == string.Empty)
+                    {
+                        this.OnActivityResult(requestCode, Result.Canceled, new Intent());
+                        return;
+                    }
+                    else
+                    {
+                        var intent = new Intent();
+                        DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result));
+                        intent.SetData(f.Uri);
+                        this.OnActivityResult(requestCode, Result.Ok, intent);
+                    }
+                });
         }
 
         protected override void OnStart()
@@ -8172,6 +8125,20 @@ namespace AndriodApp1
             return base.OnOptionsItemSelected(item);
         }
 
+        public static void ShowSimpleAlertDialog(Context c, int messageResourceString, int actionResourceString)
+        {
+
+            void OnCloseClick(object sender, DialogClickEventArgs e)
+            {
+                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+            }
+
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme);
+            //var diag = builder.SetMessage(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
+            diag.Show();
+        }
+
 
         public const string UPLOADS_CHANNEL_ID = "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
@@ -8404,7 +8371,7 @@ namespace AndriodApp1
                 //could not find...
             }
             DocumentFile fullDir = null;
-            if (SoulSeekState.PreOpenDocumentTree())
+            if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.UploadDataDirectoryUriIsFromTree)
             {
                 fullDir = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(fullDirUri.Item2).Path));
             }
@@ -8866,7 +8833,7 @@ namespace AndriodApp1
             }
 
             //if a user tries to download a file from our browseResponse then their filename will be
-            //  "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3" 
+            //  "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\y\\x\\09 Between Songs 4.mp3" 
             //so check if it contains the uploadDataDirectoryUri
             string keyFilename = filename;
             string uploadDirfolderName = Helpers.GetFileNameFromFile(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).Path.Replace(@"/", @"\")); //this will actaully get the last folder name..
@@ -8897,7 +8864,7 @@ namespace AndriodApp1
             }
 
             DocumentFile ourFile = null;
-            if (SoulSeekState.PreOpenDocumentTree())
+            if (SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.UploadDataDirectoryUriIsFromTree)
             {
                 ourFile = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(ourFileInfo.Item2).Path));
             }
@@ -8980,39 +8947,77 @@ namespace AndriodApp1
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
-            if (NEW_WRITE_EXTERNAL == requestCode)
+
+            if (NEW_WRITE_EXTERNAL == requestCode || NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode || NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
             {
+                Action showDirectoryButton = new Action(() =>
+                {
+                    ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                    AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
+                    if (!SoulSeekState.currentlyLoggedIn)
+                    {
+                        MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
+                    }
+                    if (StaticHacks.LoginFragment.View == null)//this can happen...
+                    {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
+                        ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings));
+                        LogFirebase("StaticHacks.LoginFragment.View is null");
+                        return;
+                    }
+                    Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
+                    Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
+                    if (bttn != null)
+                    {
+                        bttn.Visibility = ViewStates.Visible;
+                        bttn.Click += MustSelectDirectoryClick;
+                    }
+                });
+
+                if(NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
+                {
+                    //the resultCode will always be Cancelled for this since you have to back out of it.
+                    //so instead we check Android.OS.Environment.IsExternalStorageManager
+                    if(Android.OS.Environment.IsExternalStorageManager)
+                    {
+                        //phase 2 - actually pick a file.
+                        FallbackFileSelection(NEW_WRITE_EXTERNAL_VIA_LEGACY);
+                        return;
+                    }
+                    else
+                    {
+                        if (OnUIthread())
+                        {
+                            showDirectoryButton();
+                        }
+                        else
+                        {
+                            RunOnUiThread(showDirectoryButton);
+                        }
+                        return;
+                    }
+                }
+
+
                 if (resultCode == Result.Ok)
                 {
-                    var x = data.Data;
-                    SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    if(NEW_WRITE_EXTERNAL == requestCode)
+                    {
+                        var x = data.Data;
+                        SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                        SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
+                        SoulSeekState.SaveDataDirectoryUriIsFromTree = true;
+                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    }
+                    else if(NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
+                    {
+                        SoulSeekState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
+                        SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
+                        SoulSeekState.SaveDataDirectoryUriIsFromTree = false;
+                    }
                 }
                 else
                 {
-                    Action showDirectoryButton = new Action(() =>
-                    {
-                        ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
-                        AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
-                        if (!SoulSeekState.currentlyLoggedIn)
-                        {
-                            MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
-                        }
-                        if (StaticHacks.LoginFragment.View == null)//this can happen...
-                        {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
-                            ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings));
-                            LogFirebase("StaticHacks.LoginFragment.View is null");
-                            return;
-                        }
-                        Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                        Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
-                        if (bttn != null)
-                        {
-                            bttn.Visibility = ViewStates.Visible;
-                            bttn.Click += MustSelectDirectoryClick;
-                        }
-                    });
+
                     if (OnUIthread())
                     {
                         showDirectoryButton();
@@ -9025,22 +9030,67 @@ namespace AndriodApp1
                     //throw new Exception("Seeker requires access to a directory where it can store files.");
                 }
             }
-            else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
+            else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode || 
+                MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode || 
+                MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
             {
+
+                Action reiterate = new Action(() =>
+                {
+                    ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                });
+
+                Action hideButton = new Action(() =>
+                {
+                    //ToastUI("Must select a directory to place downloads. This will be needed to place downloaded files.");
+                    Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
+                    bttn.Visibility = ViewStates.Gone;
+                    //bttn.Click += MustSelectDirectoryClick;
+                });
+
+                if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
+                {
+                    //the resultCode will always be Cancelled for this since you have to back out of it.
+                    //so instead we check Android.OS.Environment.IsExternalStorageManager
+                    if (Android.OS.Environment.IsExternalStorageManager)
+                    {
+                        //phase 2 - actually pick a file.
+                        FallbackFileSelection(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY);
+                        return;
+                    }
+                    else
+                    {
+                        if (OnUIthread())
+                        {
+                            reiterate();
+                        }
+                        else
+                        {
+                            RunOnUiThread(reiterate);
+                        }
+                        return;
+                    }
+                }
+
+
                 if (resultCode == Result.Ok)
                 {
-                    var x = data.Data;
-                    SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
-                    //hide the button
-                    Action hideButton = new Action(() =>
+                    if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        //ToastUI("Must select a directory to place downloads. This will be needed to place downloaded files.");
-                        Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                        bttn.Visibility = ViewStates.Gone;
-                        //bttn.Click += MustSelectDirectoryClick;
-                    });
+                        SoulSeekState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
+                        SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
+                        SoulSeekState.SaveDataDirectoryUriIsFromTree = false;
+                    }
+                    else if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
+                    {
+                        SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                        SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
+                        SoulSeekState.SaveDataDirectoryUriIsFromTree = true;
+                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    }
+
+                    //hide the button
+
                     if (OnUIthread())
                     {
                         hideButton();
@@ -9052,13 +9102,6 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Action reiterate = new Action(() =>
-                    {
-                        ToastUI(SoulSeekState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
-                        //Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                        //bttn.Visibility = ViewStates.Visible;
-                        //bttn.Click += MustSelectDirectoryClick;
-                    });
                     if (OnUIthread())
                     {
                         reiterate();
@@ -9094,7 +9137,7 @@ namespace AndriodApp1
             var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
             intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
             Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-            if (SoulSeekState.SaveDataDirectoryUri == null || SoulSeekState.SaveDataDirectoryUri.ToString() == "")
+            if (string.IsNullOrEmpty(SoulSeekState.SaveDataDirectoryUri))
             {
                 //try
                 //{
@@ -9116,18 +9159,64 @@ namespace AndriodApp1
             intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
             try
             {
-                this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
+                //this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
+                if(1==1)
+                {
+                    throw new Exception("No Activity found to handle Intent");
+                }
+                
             }
             catch (Exception ex)
             {
                 if (ex.Message.Contains("No Activity found to handle Intent"))
                 {
-                    Toast.MakeText(this, SoulSeekState.MainActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                    FallbackFileSelectionEntry(true);
                 }
                 else
                 {
                     throw ex;
                 }
+            }
+        }
+
+        private void FallbackFileSelectionEntry(bool mustSelectDirectoryButton)
+        {
+            bool hasManageAllFilesManisfestPermission = false;
+
+#if IzzySoft
+            hasManageAllFilesManisfestPermission = true;
+#endif
+
+            if (SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
+            {
+                Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
+                Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
+                allFilesPermission.SetData(packageUri);
+                this.StartActivityForResult(allFilesPermission, mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen : NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen);
+            }
+            else if(Android.OS.Environment.IsExternalStorageManager || (!SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles()))
+            {
+                FallbackFileSelection(mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY : NEW_WRITE_EXTERNAL_VIA_LEGACY);
+            }
+            else
+            {
+
+
+                if(SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                {
+                    ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
+                }
+                else
+                {
+                    Toast.MakeText(this, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                }
+
+
+                //Note:
+                //If your app targets Android 12 (API level 31) or higher, its toast is limited to two lines of text and shows the application icon next to the text.
+                //Be aware that the line length of this text varies by screen size, so it's good to make the text as short as possible.
+                //on Pixel 5 emulator this limit is around 78 characters.
+                //^It must BOTH target Android 12 AND be running on Android 12^
             }
         }
 
@@ -10479,7 +10568,7 @@ namespace AndriodApp1
                     if (SoulSeekState.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
                         (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                        Helpers.CompleteIncompleteDifferentVolume())
+                        Helpers.CompleteIncompleteDifferentVolume() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree || !SoulSeekState.SaveDataDirectoryUriIsFromTree)
                     {
                         try
                         {
@@ -10780,6 +10869,7 @@ namespace AndriodApp1
                 editor.PutString(SoulSeekState.M_Username, SoulSeekState.Username);
                 editor.PutString(SoulSeekState.M_Password, SoulSeekState.Password);
                 editor.PutString(SoulSeekState.M_SaveDataDirectoryUri, SoulSeekState.SaveDataDirectoryUri);
+                editor.PutBoolean(SoulSeekState.M_SaveDataDirectoryUriIsFromTree, SoulSeekState.SaveDataDirectoryUriIsFromTree);
                 editor.PutInt(SoulSeekState.M_NumberSearchResults, SoulSeekState.NumberSearchResults);
                 editor.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
                 editor.PutBoolean(SoulSeekState.M_AutoClearComplete, SoulSeekState.AutoClearCompleteDownloads);
@@ -10819,6 +10909,7 @@ namespace AndriodApp1
             outState.PutBoolean(SoulSeekState.M_CurrentlyLoggedIn, SoulSeekState.currentlyLoggedIn);
             outState.PutString(SoulSeekState.M_Username, SoulSeekState.Username);
             outState.PutString(SoulSeekState.M_Password, SoulSeekState.Password);
+            outState.PutBoolean(SoulSeekState.M_SaveDataDirectoryUriIsFromTree, SoulSeekState.SaveDataDirectoryUriIsFromTree);
             outState.PutString(SoulSeekState.M_SaveDataDirectoryUri, SoulSeekState.SaveDataDirectoryUri);
             outState.PutInt(SoulSeekState.M_NumberSearchResults, SoulSeekState.NumberSearchResults);
             outState.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
@@ -11462,9 +11553,14 @@ namespace AndriodApp1
         public static bool AllowPrivateRoomInvitations = false;
         public static bool StartServiceOnStartup = true;
         public static bool IsStartUpServiceCurrentlyRunning = false;
+
         public static String SaveDataDirectoryUri = null;
+        public static bool SaveDataDirectoryUriIsFromTree = true;
+
         public static String UploadDataDirectoryUri = null;
+        public static bool UploadDataDirectoryUriIsFromTree = true;
         public static String ManualIncompleteDataDirectoryUri = null;
+        public static bool ManualIncompleteDataDirectoryUriIsFromTree = true;
 
         public static bool SpeedLimitDownloadOn = false;
         public static bool SpeedLimitUploadOn = false;
@@ -11695,7 +11791,11 @@ namespace AndriodApp1
         public static ISharedPreferences SharedPreferences;
         public static volatile MainActivity MainActivityRef;
 
-
+        public static bool RequiresEitherOpenDocumentTreeOrManageAllFiles()
+        {
+            //29 does has the requestExternalStorage workaround.
+            return Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.R;
+        }
 
         public static bool UseLegacyStorage()
         {
@@ -11755,6 +11855,7 @@ namespace AndriodApp1
 
 
         public const string M_SaveDataDirectoryUri = "Momento_SaveDataDirectoryUri";
+        public const string M_SaveDataDirectoryUriIsFromTree = "Momento_SaveDataDirectoryUriIsFromTree";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
         public const string M_NightVarient = "Momento_NightModeVarient";
@@ -11786,6 +11887,7 @@ namespace AndriodApp1
 
         public const string M_UploadSpeed = "Momento_UploadSpeed";
         public const string M_UploadDirectoryUri = "Momento_UploadDirectoryUri";
+        public const string M_UploadDirectoryUriIsFromTree = "Momento_UploadDirectoryUriIsFromTree";
         public const string M_SharingOn = "Momento_SharingOn";
 
         public const string M_PortMapped = "Momento_PortMapped";
@@ -11826,6 +11928,7 @@ namespace AndriodApp1
         public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts";
 
         public const string M_ManualIncompleteDirectoryUri = "Momento_ManualIncompleteDirectoryUri";
+        public const string M_ManualIncompleteDirectoryUriIsFromTree = "Momento_ManualIncompleteDirectoryUriIsFromTree";
         public const string M_UseManualIncompleteDirectoryUri = "Momento_UseManualIncompleteDirectoryUri";
         public const string M_CreateCompleteAndIncompleteFolders = "Momento_CreateCompleteIncomplete";
         public const string M_AdditionalUsernameSubdirectories = "Momento_M_AdditionalUsernameSubdirectories";
