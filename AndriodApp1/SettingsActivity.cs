@@ -41,16 +41,19 @@ namespace AndriodApp1
     [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class SettingsActivity : ThemeableActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
     {
-        private int CHANGE_WRITE_EXTERNAL = 0x909;
-        private int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
-        
-        private int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL = 0x911;
-        private int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY = 0x912;
+        private const int CHANGE_WRITE_EXTERNAL = 0x909;
+        private const int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
+        private const int CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x930; //+32
 
-        private int READ_EXTERNAL_FOR_MEDIA_STORE = 1182021;
+        private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL = 0x911;
+        private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY = 0x912;
+        private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x932;
 
-        private int CHANGE_INCOMPLETE_EXTERNAL = 0x913;
-        private int CHANGE_INCOMPLETE_EXTERNAL_LEGACY = 0x914;
+        private const int READ_EXTERNAL_FOR_MEDIA_STORE = 1182021;
+
+        private const int CHANGE_INCOMPLETE_EXTERNAL = 0x913;
+        private const int CHANGE_INCOMPLETE_EXTERNAL_LEGACY = 0x914;
+        private const int CHANGE_INCOMPLETE_EXTERNAL_LEGACY_Settings = 0x934;
 
         private List<Tuple<int,int>> positionNumberPairs = new List<Tuple<int, int>>();
         private CheckBox allowPrivateRoomInvitations;
@@ -822,7 +825,7 @@ namespace AndriodApp1
             //for rescan=true, we use the previous parse to get metadata if there is a match...
             //so that we do not have to read the file again to get things like bitrate, samples, etc.
             //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
-            if(SoulSeekState.PreOpenDocumentTree())
+            if(SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.UploadDataDirectoryUriIsFromTree)
             {
                 SuccessfulUploadExternalCallback(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri), -1, true, true);
             }
@@ -2150,7 +2153,7 @@ namespace AndriodApp1
             ShowDirSettings(SoulSeekState.ManualIncompleteDataDirectoryUri, DirectoryType.Incomplete);
         }
 
-        private void UseApiBelow21Method(int requestCode)
+        private void UseInternalFilePicker(int requestCode)
         {
             //Create FolderOpenDialog
             SimpleFileDialog fileDialog = new SimpleFileDialog(this, SimpleFileDialog.FileSelectionMode.FolderChoose);
@@ -2235,19 +2238,12 @@ namespace AndriodApp1
                 {
                     if (e.Message.ToLower().Contains("no activity found to handle"))
                     {
-                        if(Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop)
-                        {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.error_no_file_manager, ToastLength.Long).Show();
-                        }
-                        else //API 19 and 20 will always fail with that error message... therefore use our internal method...
-                        {
-                            UseApiBelow21Method(requestCode);
-                        }
-
+                        FallbackFileSelectionEntry(requestCode);
                     }
                     else
                     {
                         MainActivity.LogFirebase("showDirSettings: " + e.Message + e.StackTrace);
+                        throw e;
                     }
                 }
         }
@@ -2279,23 +2275,78 @@ namespace AndriodApp1
                 }
                 catch(Exception e)
                 {
-                    if(e.Message.ToLower().Contains("no activity found to handle"))
+                    if (e.Message.ToLower().Contains("no activity found to handle"))
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.error_no_file_manager, ToastLength.Long).Show();
+                        FallbackFileSelectionEntry(requestCode);
                     }
                     else
                     {
                         MainActivity.LogFirebase("showDirSettings: " + e.Message + e.StackTrace);
+                        throw e;
                     }
                 }
             }
         }
+
+        private int ConvertRequestCodeIntoLegacyVersion(int requestCodeNotLegacy)
+        {
+            switch(requestCodeNotLegacy)
+            {
+                case UPLOAD_DIR_CHANGE_WRITE_EXTERNAL:
+                    return UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY;
+                case CHANGE_INCOMPLETE_EXTERNAL:
+                    return CHANGE_INCOMPLETE_EXTERNAL_LEGACY;
+                case CHANGE_WRITE_EXTERNAL:
+                    return CHANGE_WRITE_EXTERNAL_LEGACY;
+                default:
+                    return requestCodeNotLegacy;
+            }
+        }
+
+
+        private void FallbackFileSelectionEntry(int requestCode)
+        {
+            requestCode = ConvertRequestCodeIntoLegacyVersion(requestCode);
+
+            bool hasManageAllFilesManisfestPermission = false;
+
+#if IzzySoft
+            hasManageAllFilesManisfestPermission = true;
+#endif
+
+            if (SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
+            {
+                Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
+                Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
+                allFilesPermission.SetData(packageUri);
+                this.StartActivityForResult(allFilesPermission, requestCode + 32);
+            }
+            else if (Android.OS.Environment.IsExternalStorageManager || (!SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles()))
+            {
+                UseInternalFilePicker(requestCode);
+            }
+            else
+            {
+                //show error message...
+                if (SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                {
+                    MainActivity.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
+                }
+                else
+                {
+                    Toast.MakeText(this, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                }
+            }
+        }
+
+
 
         private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromSubApi21=false)
         {
             var x = uri;
             //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
             SoulSeekState.SaveDataDirectoryUri = uri.ToString();
+            SoulSeekState.SaveDataDirectoryUriIsFromTree = fromSubApi21;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
             DocumentFile docFile = null;
             if (fromSubApi21)
@@ -2319,14 +2370,15 @@ namespace AndriodApp1
             return !UseIncompleteManualFolder() && !SoulSeekState.CreateCompleteAndIncompleteFolders;
         }
 
-        private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromSubApi21 = false)
+        private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
             var x = uri;
             //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
             SoulSeekState.ManualIncompleteDataDirectoryUri = uri.ToString();
+            SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree = !fromLegacyPicker;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
             DocumentFile docFile = null;
-            if (fromSubApi21)
+            if (fromLegacyPicker)
             {
                 docFile = DocumentFile.FromFile(new Java.IO.File(uri.Path));
             }
@@ -2343,7 +2395,7 @@ namespace AndriodApp1
         }
 
 
-        private void SuccessfulUploadExternalCallback(Android.Net.Uri uri, int requestCode, bool fromSubApi21 = false, bool rescan = false)
+        private void SuccessfulUploadExternalCallback(Android.Net.Uri uri, int requestCode, bool fromLegacyPicker = false, bool rescan = false)
         {
             Action parseDatabaseAndUpdateUI = new Action(() => {
                 try
@@ -2363,7 +2415,8 @@ namespace AndriodApp1
                     try
                     {
                         SoulSeekState.UploadDataDirectoryUri = uri.ToString();
-                        success = SoulSeekState.MainActivityRef.InitializeDatabase(fromSubApi21 ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, rescan, out string errorMessage);
+                        SoulSeekState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
+                        success = SoulSeekState.MainActivityRef.InitializeDatabase(fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, rescan, out string errorMessage);
                         if(!success)
                         {
                             throw new Exception("Failed to parse shared files: " + errorMessage);
@@ -2374,6 +2427,7 @@ namespace AndriodApp1
                     {
                         SoulSeekState.IsParsing = false;
                         SoulSeekState.UploadDataDirectoryUri = null;
+                        SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
                         SoulSeekState.MainActivityRef.ClearParsedCacheResults();
                         MainActivity.SetUnsetSharingBasedOnConditions(true);
                         MainActivity.LogFirebase("error parsing: " + e.Message + "  " + e.StackTrace);
@@ -2386,6 +2440,7 @@ namespace AndriodApp1
                         return;
                     }
                     SoulSeekState.UploadDataDirectoryUri = uri.ToString();
+                    SoulSeekState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
                     if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode && !rescan)
                     {
                         this.ContentResolver.TakePersistableUriPermission(uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
@@ -2440,6 +2495,22 @@ namespace AndriodApp1
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
+
+            //if from manage external settings
+            if(CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32 || CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode - 32 || UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32)
+            {
+                if (Android.OS.Environment.IsExternalStorageManager)
+                {
+                    //phase 2 - actually pick a file.
+                    UseInternalFilePicker(requestCode-32);
+                }
+                else
+                {
+                    Toast.MakeText(this, "Cannot set directory without proper permissions", ToastLength.Long).Show();
+                }
+            }
+
+
             if (CHANGE_WRITE_EXTERNAL == requestCode)
             {
                 if(resultCode == Result.Ok)
@@ -2447,6 +2518,7 @@ namespace AndriodApp1
                     var x = data.Data;
                     SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                     SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
+                    SoulSeekState.SaveDataDirectoryUriIsFromTree = true;
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission| ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action( ()=>
                     {
@@ -2472,6 +2544,7 @@ namespace AndriodApp1
                     var x = data.Data;
                     SoulSeekState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                     SoulSeekState.ManualIncompleteDataDirectoryUri = data.Data.ToString();
+                    SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree = true;
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
@@ -2517,6 +2590,7 @@ namespace AndriodApp1
                 SoulSeekState.OverrideDefaultIncompleteLocations = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_UseManualIncompleteDirectoryUri, false);
                 SoulSeekState.CreateUsernameSubfolders = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_AdditionalUsernameSubdirectories, false);
                 SoulSeekState.ManualIncompleteDataDirectoryUri = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_ManualIncompleteDirectoryUri, string.Empty);
+                SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_ManualIncompleteDirectoryUriIsFromTree, true);
             }
         }
 
@@ -2529,6 +2603,7 @@ namespace AndriodApp1
                 editor.PutBoolean(SoulSeekState.M_UseManualIncompleteDirectoryUri, SoulSeekState.OverrideDefaultIncompleteLocations);
                 editor.PutBoolean(SoulSeekState.M_AdditionalUsernameSubdirectories, SoulSeekState.CreateUsernameSubfolders);
                 editor.PutString(SoulSeekState.M_ManualIncompleteDirectoryUri, SoulSeekState.ManualIncompleteDataDirectoryUri);
+                editor.PutBoolean(SoulSeekState.M_ManualIncompleteDirectoryUriIsFromTree, SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree);
                 bool success = editor.Commit();
             }
         }
@@ -2550,6 +2625,7 @@ namespace AndriodApp1
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
                 editor.PutString(SoulSeekState.M_ManualIncompleteDirectoryUri, SoulSeekState.ManualIncompleteDataDirectoryUri);
+                editor.PutBoolean(SoulSeekState.M_ManualIncompleteDirectoryUriIsFromTree, SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree);
                 bool success = editor.Commit();
             }
         }
