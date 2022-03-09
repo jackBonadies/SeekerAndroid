@@ -4115,7 +4115,7 @@ namespace AndriodApp1
                     Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                    notifIntent.PutExtra(FromFolderAlert, true);
+                    notifIntent.PutExtra(FromFolderAlert, 2);
                     notifIntent.PutExtra(FromFolderAlertUsername, username);
                     notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
                     PendingIntent pendingIntent =
@@ -7361,6 +7361,10 @@ namespace AndriodApp1
                 {
                     pager.SetCurrentItem(2, false);
                 }
+                else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+                {
+                    pager.SetCurrentItem(2, false);
+                }
                 else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
                 {
                     pager.SetCurrentItem(3, false);
@@ -7999,6 +8003,10 @@ namespace AndriodApp1
                 pager.SetCurrentItem(1, false);
             }
             else if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
+            {
+                pager.SetCurrentItem(2, false);
+            }
+            else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
             {
                 pager.SetCurrentItem(2, false);
             }
