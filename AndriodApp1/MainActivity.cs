@@ -4165,7 +4165,7 @@ namespace AndriodApp1
                 SoulSeekState.SpeedLimitUploadBytesSec = sharedPreferences.GetInt(SoulSeekState.M_UploadSpeedLimitBytes, 4 * 1024 * 1024);
                 SoulSeekState.SpeedLimitDownloadBytesSec = sharedPreferences.GetInt(SoulSeekState.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
 
-                SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, false);
+                SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, true);
                 SoulSeekState.MemoryBackedDownload = sharedPreferences.GetBoolean(SoulSeekState.M_MemoryBackedDownload, false);
                 SearchFragment.FilterSticky = sharedPreferences.GetBoolean(SoulSeekState.M_FilterSticky, false);
                 SearchFragment.FilterStickyString = sharedPreferences.GetString(SoulSeekState.M_FilterStickyString, string.Empty);
@@ -4192,6 +4192,8 @@ namespace AndriodApp1
 
                 SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
                 SoulSeekState.AutoRetryBackOnline = sharedPreferences.GetBoolean(SoulSeekState.M_AutoRetryBackOnline, true);
+
+                SoulSeekState.NotifyOnFolderCompleted = sharedPreferences.GetBoolean(SoulSeekState.M_NotifyFolderComplete, true);
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
 
@@ -11763,7 +11765,7 @@ namespace AndriodApp1
         public static bool NotifyOnFolderCompleted = true;
 
         public static bool FreeUploadSlotsOnly = true;
-        public static bool DisableDownloadToastNotification = false;
+        public static bool DisableDownloadToastNotification = true;
         public static bool AutoRetryDownload = false; //todo change back..
 
         public static bool HideLockedResultsInSearch = true;
@@ -12076,6 +12078,7 @@ namespace AndriodApp1
 
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
         public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";
+        public const string M_NotifyFolderComplete = "Momento_NotifyFolderComplete";
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";

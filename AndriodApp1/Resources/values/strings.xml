@@ -176,7 +176,8 @@ Directory Count: {5}"</string>
   <string name="start_service_on_startup">Start Service on Startup</string>
   <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
 
-  <string name="disable_bottom_notifs_complete">Disable Bottom Notifications on Download Completed</string>
+  <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
+  <string name="show_notifs_on_folder_complete">Show Notifications for Folder Completed</string>
   <string name="remember_search_history">Remember Search History</string>
   <string name="clear_search_history">Clear Search History</string>
   <string name="file_backed_downloads">File Backed Downloads</string>

@@ -248,9 +248,13 @@ namespace AndriodApp1
             autoSetAwayStatusOnInactivity.Checked = SoulSeekState.AutoAwayOnInactivity;
             autoSetAwayStatusOnInactivity.CheckedChange += AutoSetAwayStatusOnInactivity_CheckedChange;
 
-            CheckBox disableDownloadNotification = FindViewById<CheckBox>(Resource.Id.disableToastNotificationOnDownload);
-            disableDownloadNotification.Checked = SoulSeekState.DisableDownloadToastNotification;
-            disableDownloadNotification.CheckedChange += DisableDownloadNotification_CheckedChange;
+            CheckBox showDownloadNotification = FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload);
+            showDownloadNotification.Checked = !SoulSeekState.DisableDownloadToastNotification;
+            showDownloadNotification.CheckedChange += ShowDownloadNotification_CheckedChange;
+
+            CheckBox showFolderDownloadNotification = FindViewById<CheckBox>(Resource.Id.showNotificationOnFolderDownload);
+            showFolderDownloadNotification.Checked = SoulSeekState.NotifyOnFolderCompleted;
+            showFolderDownloadNotification.CheckedChange += ShowFolderDownloadNotification_CheckedChange;
 
             CheckBox memoryFileDownloadSwitchCheckBox = FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox);
             memoryFileDownloadSwitchCheckBox.Checked = !SoulSeekState.MemoryBackedDownload;
@@ -537,6 +541,21 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
 
+        }
+
+        private void ShowFolderDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            bool changed = SoulSeekState.NotifyOnFolderCompleted != e.IsChecked;
+            SoulSeekState.NotifyOnFolderCompleted = e.IsChecked;
+            if (changed)
+            {
+                lock (MainActivity.SHARED_PREF_LOCK)
+                {
+                    var editor = SoulSeekState.SharedPreferences.Edit();
+                    editor.PutBoolean(SoulSeekState.M_NotifyFolderComplete, SoulSeekState.NotifyOnFolderCompleted);
+                    bool success = editor.Commit();
+                }
+            }
         }
 
         private void AutoRetryBackOnline_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -1715,9 +1734,9 @@ namespace AndriodApp1
             SetIncompleteFolderView();
         }
 
-        private void DisableDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        private void ShowDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SoulSeekState.DisableDownloadToastNotification = e.IsChecked;
+            SoulSeekState.DisableDownloadToastNotification = !e.IsChecked;
         }
 
         private void FreeUploadSlotsOnly_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -2105,7 +2124,7 @@ namespace AndriodApp1
             SoulSeekState.ShowRecentUsers = true;
             SoulSeekState.SharingOn = false;
             SoulSeekState.FreeUploadSlotsOnly = true;
-            SoulSeekState.DisableDownloadToastNotification = false;
+            SoulSeekState.DisableDownloadToastNotification = true;
             SoulSeekState.MemoryBackedDownload = false;
             SoulSeekState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
             SoulSeekState.HideLockedResultsInBrowse = true;
@@ -2118,7 +2137,7 @@ namespace AndriodApp1
             (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SoulSeekState.FreeUploadSlotsOnly;
             (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SoulSeekState.HideLockedResultsInBrowse;
             (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SoulSeekState.HideLockedResultsInSearch;
-            (FindViewById<CheckBox>(Resource.Id.disableToastNotificationOnDownload) as CheckBox).Checked = SoulSeekState.DisableDownloadToastNotification;
+            (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SoulSeekState.DisableDownloadToastNotification;
             (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SoulSeekState.MemoryBackedDownload;
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
             SetSpinnerPosition(searchNumSpinner);

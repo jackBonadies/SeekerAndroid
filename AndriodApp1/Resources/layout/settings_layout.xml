@@ -607,28 +607,46 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/autoClearCompleteUploads"
                 android:layout_marginBottom = "10dp"/>
 
-            <CheckBox
+                        <CheckBox
 
 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/autoClearCompleteUploads"
-                android:text="@string/disable_bottom_notifs_complete"
+                android:text="@string/show_notifs_on_folder_complete"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginTop = "10dp"
-                android:id="@+id/disableToastNotificationOnDownload"
+                android:id="@+id/showNotificationOnFolderDownload"
+                android:layout_marginBottom = "10dp"/>
+
+
+            <CheckBox
+
+android:theme="@style/checkBoxStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/showNotificationOnFolderDownload"
+                android:text="@string/show_bottom_notifs_complete"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="10dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop = "10dp"
+                android:id="@+id/showToastNotificationOnDownload"
                 android:layout_marginBottom = "10dp"/>
 
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/disableToastNotificationOnDownload"
+                android:layout_below="@id/showToastNotificationOnDownload"
                 android:layout_marginTop = "10dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/searchHistoryLayout"
