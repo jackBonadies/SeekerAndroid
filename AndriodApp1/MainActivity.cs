@@ -1731,6 +1731,25 @@ namespace AndriodApp1
             return transferItemConditionList;
         }
 
+        public List<TransferItem> GetListOfCondition(TransferStates state)
+        {
+            List<TransferItem> transferItemConditionList = new List<TransferItem>();
+            lock (AllTransferItems)
+            {
+                for (int i = 0; i < AllTransferItems.Count; i++)
+                {
+                    var item = AllTransferItems[i];
+
+                    if (item.State.HasFlag(state))
+                    {
+                        transferItemConditionList.Add(item);
+                    }
+
+                }
+            }
+            return transferItemConditionList;
+        }
+
         public List<TransferItem> GetTransferItemsFromUser(string username, bool failedOnly, bool failedAndOfflineOnly)
         {
             List<TransferItem> transferItemConditionList = new List<TransferItem>();
@@ -2012,6 +2031,39 @@ namespace AndriodApp1
                 }
             }
             return null;
+        }
+
+        public bool IsFolderNowComplete(TransferItem ti, bool noSingleItemFolders = false) //!!!!! no single item logic will not work with AutoClearComplete
+        {
+            if(ti==null)
+            {
+                MainActivity.LogDebug("IsFolderNowComplete: transferitem is null");
+                return false;
+            }
+            else
+            {
+                FolderItem folder = null;
+                lock (AllFolderItems)
+                {
+                    folder = GetMatchingFolder(ti).FirstOrDefault();
+                }
+                if(folder == null)
+                {
+                    MainActivity.LogDebug("IsFolderNowComplete: folder is null");
+                    return false;
+                }
+                lock(folder.TransferItems)
+                {
+                    foreach(TransferItem item in folder.TransferItems)
+                    {
+                        if(!item.State.HasFlag(TransferStates.Succeeded))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         private IEnumerable<FolderItem> GetMatchingFolder(TransferItem ti)
@@ -3217,12 +3269,12 @@ namespace AndriodApp1
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                     {
                         //nothing to do, bc its already set..
-                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, false, null, null);
                     }
                     else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
                     {
                         //GET QUEUE LENGTH AND UPDATE...
-                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
+                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, false, null, null);
                     }
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
@@ -3258,6 +3310,17 @@ namespace AndriodApp1
                     if (!relevantItem.CancelAndClearFlag)
                     {
                         StateChangedForItem?.Invoke(null, relevantItem);
+                    }
+                }
+
+                if(e.Transfer.State.HasFlag(TransferStates.Succeeded))
+                {
+                    if(SoulSeekState.NotifyOnFolderCompleted && !isUpload)
+                    {
+                        if(TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
+                        {
+                            ShowNotificationForCompletedFolder(relevantItem.FolderName, relevantItem.Username);
+                        }
                     }
                 }
             }
@@ -3667,6 +3730,8 @@ namespace AndriodApp1
                             MainActivity.SetStatusApi(true);
                         }
                     }
+
+                    TransfersController.InitializeService();
                 }
                 catch (Exception e)
                 {
@@ -4031,6 +4096,38 @@ namespace AndriodApp1
                 catch (System.Exception e)
                 {
                     MainActivity.LogFirebase("ShowNotificationForUserOnlineAlert failed: " + e.Message + e.StackTrace);
+                }
+            });
+        }
+
+
+        public const string CHANNEL_ID_FOLDER_ALERT = "Folder Finished Downloading Alerts ID";
+        public const string CHANNEL_NAME_FOLDER_ALERT = "Folder Finished Downloading Alerts";
+        public const string FromFolderAlert = "FromFolderAlert";
+        public const string FromFolderAlertUsername = "FromFolderAlertUsername";
+        public const string FromFolderAlertFoldername = "FromFolderAlertFoldername";
+        public static void ShowNotificationForCompletedFolder(string foldername, string username)
+        {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
+                try
+                {
+                    Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
+                    Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
+                    notifIntent.PutExtra(FromFolderAlert, true);
+                    notifIntent.PutExtra(FromFolderAlertUsername, username);
+                    notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
+                    PendingIntent pendingIntent =
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, "Folder Finished Downloading", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                    // notificationId is a unique int for each notification that you must define
+                    notificationManager.Notify((foldername + username).GetHashCode(), n);
+                }
+                catch (System.Exception e)
+                {
+                    MainActivity.LogFirebase("ShowNotificationForCompletedFolder failed: " + e.Message + e.StackTrace);
                 }
             });
         }
@@ -4502,6 +4599,61 @@ namespace AndriodApp1
 
     public class FaultPropagationException : System.Exception
     {
+    }
+
+    public class TransfersController
+    {
+        private static System.Timers.Timer TransfersTimer = null;
+        public static bool IsInitialized = false;
+#if DEBUG
+        private const int transfersInterval = 2 * 60 * 1000; //2 mins, faster for testing..
+#else
+        private const int transfersInterval = 5 * 60 * 1000;
+
+#endif
+
+        public static void InitializeService()
+        {
+            //we run this once after our first login.
+
+            if (IsInitialized)
+            {
+                return;
+            }
+
+            if(SoulSeekState.AutoRequeueDownloadsAtStartup)
+            {
+                var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
+                if (queuedTransfers.Count > 0)
+                {
+                    MainActivity.LogDebug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
+                    MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
+                }
+            }
+
+            MainActivity.LogDebug("TransfersController InitializeService");
+            TransfersTimer = new System.Timers.Timer(transfersInterval);
+            TransfersTimer.AutoReset = true;
+            TransfersTimer.Elapsed += TransfersTimer_Elapsed;
+            TransfersTimer.Start();
+            IsInitialized = true;
+        }
+
+        private static void TransfersTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            MainActivity.LogDebug("TransfersTimerElapsed");
+            if(MainActivity.IsNotLoggedIn())
+            {
+                return;
+            }
+            var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
+            if(queuedTransfers.Count > 0)
+            {
+                MainActivity.LogDebug("TransfersTimerElapsed - Lets get position of queued transfers...");
+                MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
+            }
+
+        }
     }
 
     public class WishlistController
@@ -7911,43 +8063,82 @@ namespace AndriodApp1
             //throw new NotImplementedException();
         }
 
-        public static void GetDownloadPlaceInQueue(string username, string fullFileName, Func<TransferItem, object> actionOnComplete = null)
+        public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
 
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.MainActivityRef, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
                 {
                     t.ContinueWith(new Action<Task>((Task t) =>
                     {
                         if (t.IsFaulted)
                         {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
-                            {
-                                if (SoulSeekState.MainActivityRef != null)
-                                {
-                                    Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-                                }
-                                else
-                                {
-                                    Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-                                }
-
-                            });
+                            //if(!silent) //always silent..
+                            //{
+                            //    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            //    {
+                            //        if (SoulSeekState.ActiveActivityRef != null)
+                            //        {
+                            //            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                            //        }
+                            //    });
+                            //}
                             return;
                         }
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueLogic(username, fullFileName, actionOnComplete); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded); });
                     }));
                 }
             }
             else
             {
-                GetDownloadPlaceInQueueLogic(username, fullFileName, actionOnComplete);
+                GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded);
             }
         }
 
-        private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, Func<TransferItem, object> actionOnComplete = null)
+
+        public static void GetDownloadPlaceInQueueBatchLogic(List<TransferItem> transferItems, bool addIfNotAdded, Func<TransferItem, object> actionOnComplete = null)
+        {
+            foreach(TransferItem transferItem in transferItems)
+            {
+                GetDownloadPlaceInQueueLogic(transferItem.Username, transferItem.FullFilename, addIfNotAdded, true, transferItem, null);
+            }
+        }
+
+
+        public static void GetDownloadPlaceInQueue(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
+        {
+
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
+                {
+                    t.ContinueWith(new Action<Task>((Task t) =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
+                                if (SoulSeekState.ActiveActivityRef != null)
+                                {
+                                    Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                }
+                            });
+                            return;
+                        }
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete); });
+                    }));
+                }
+            }
+            else
+            {
+                GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete);
+            }
+        }
+
+        private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
         {
 
             Action<Task<int>> updateTask = new Action<Task<int>>(
@@ -7955,37 +8146,56 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
+                        LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString()); //show toast "user is offline"
                     }
                     else
                     {
+                        bool queuePositionChanged = false;
+
                         //update the transferItem array
-                        TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
-                        if (relevantItem == null)
+                        if(transferItemInQuestion == null)
+                        {
+                            transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                        }
+                        if (transferItemInQuestion == null)
                         {
                             return;
                         }
                         else
                         {
+                            queuePositionChanged = transferItemInQuestion.QueueLength != t.Result;
+
                             if (t.Result > 0)
                             {
-                                relevantItem.Queued = true;
-                                relevantItem.QueueLength = t.Result;
+                                transferItemInQuestion.Queued = true;
+                                transferItemInQuestion.QueueLength = t.Result;
                             }
                             else
                             {
-                                relevantItem.Queued = false;
-                                relevantItem.QueueLength = 0;
+                                transferItemInQuestion.Queued = false;
+                                transferItemInQuestion.QueueLength = 0;
+                            }
+
+                            if(queuePositionChanged)
+                            {
+                                MainActivity.LogDebug($"Queue Position of {fullFileName} has changed to {t.Result}");
+                            }
+                            else
+                            {
+                                MainActivity.LogDebug($"Queue Position of {fullFileName} is still {t.Result}");
                             }
                         }
 
                         if (actionOnComplete != null)
                         {
-                            SoulSeekState.MainActivityRef?.RunOnUiThread(() => { actionOnComplete(relevantItem); });
+                            SoulSeekState.MainActivityRef?.RunOnUiThread(() => { actionOnComplete(transferItemInQuestion); });
                         }
                         else
                         {
-                            TransferItemQueueUpdated?.Invoke(null, relevantItem);
+                            if(queuePositionChanged)
+                            {
+                                TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
+                            }
                         }
 
                     }
@@ -7999,49 +8209,62 @@ namespace AndriodApp1
             }
             catch (TransferNotFoundException)
             {
-                //it is not downloading... therefore retry the download...
-                TransferItem item1 = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
-                //TransferItem item1 = transferItems[info.Position];  
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                try
+                if(addIfNotAdded)
                 {
-                    item1.QueueLength = 0;
-                    Android.Net.Uri incompleteUri = null;
-                    TransfersFragment.SetupCancellationToken(item1, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                    Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource);
-                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 })));
-                }
-                catch (DuplicateTransferException)
-                {
-                    //happens due to button mashing...
+                    //it is not downloading... therefore retry the download...
+                    if(transferItemInQuestion==null)
+                    {
+                        transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                    }
+                    //TransferItem item1 = transferItems[info.Position];  
+                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                    try
+                    {
+                        transferItemInQuestion.QueueLength = 0;
+                        Android.Net.Uri incompleteUri = null;
+                        TransfersFragment.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
+                        Task task = DownloadDialog.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource);
+                        task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, task, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion })));
+                    }
+                    catch (DuplicateTransferException)
+                    {
+                        //happens due to button mashing...
+                        return;
+                    }
+                    catch (System.Exception error)
+                    {
+                        Action a = new Action(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                        if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
+                        {
+
+                        }
+                        else
+                        {
+                            MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
+                        }
+                        if(!silent)
+                        {
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(a);
+                        }
+                        return; //otherwise null ref with task!
+                    }
+                    //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
+                    try
+                    {
+                        getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName);
+                        getDownloadPlace.ContinueWith(updateTask);
+                    }
+                    catch (Exception e)
+                    {
+                        LogFirebase("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
+                    }
                     return;
                 }
-                catch (System.Exception error)
+                else
                 {
-                    Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
-                    if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
-                    {
-
-                    }
-                    else
-                    {
-                        MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
-                    }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(a);
-                    return; //otherwise null ref with task!
+                    MainActivity.LogDebug("Transfer Item we are trying to get queue position of is not currently being downloaded.");
+                    return;
                 }
-                //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
-                try
-                {
-                    getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName);
-                    getDownloadPlace.ContinueWith(updateTask);
-                }
-                catch (Exception e)
-                {
-                    LogFirebase("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
-                }
-                return;
-
 
 
             }
@@ -11528,6 +11751,9 @@ namespace AndriodApp1
         public static bool currentlyLoggedIn = false;
         public static bool AutoClearCompleteDownloads = false;
         public static bool AutoClearCompleteUploads = false;
+
+        public static bool NotifyOnFolderCompleted = true;
+
         public static bool FreeUploadSlotsOnly = true;
         public static bool DisableDownloadToastNotification = false;
         public static bool AutoRetryDownload = false; //todo change back..
@@ -11539,7 +11765,10 @@ namespace AndriodApp1
         public static bool TransferViewShowSpeed = false;
 
         public static bool MemoryBackedDownload = false;
-        public static bool AutoRetryBackOnline = true; //this is for downloads that fail with the condition "User is Offline"
+        public static bool AutoRetryBackOnline = true; //this is for downloads that fail with the condition "User is Offline". this will also autodownload when we first log in as well.
+
+        public static bool AutoRequeueDownloadsAtStartup = true;
+
         public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
         public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;

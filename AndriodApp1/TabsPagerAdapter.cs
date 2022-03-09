@@ -8435,13 +8435,17 @@ namespace AndriodApp1
                 return null;
             });
 
-            MainActivity.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, actionOnComplete);
+            MainActivity.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
         }
 
         public void UpdateQueueState(string fullFilename) //Add this to the event handlers so that when downloads are added they have their queue position.
         {
             try
             {
+                if(InUploadsMode)
+                {
+                    return;
+                }
                 int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename);
                 MainActivity.LogDebug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
                 MainActivity.LogDebug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
