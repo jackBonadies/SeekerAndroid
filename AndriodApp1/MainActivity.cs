@@ -10704,12 +10704,15 @@ namespace AndriodApp1
                     if (SoulSeekState.CreateUsernameSubfolders)
                     {
                         DocumentFile tempUsernameDir1 = null;
-                        tempUsernameDir1 = slskDir1.FindFile(username); //does username folder exist
-                        if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
+                        lock (string.Intern("IfNotExistCreateAtomic_1"))
                         {
-                            tempUsernameDir1 = slskDir1.CreateDirectory(username);
-                            LogDebug(string.Format("Creating {0} dir", username));
-                            diagDidWeCreateUsernameDir = true;
+                            tempUsernameDir1 = slskDir1.FindFile(username); //does username folder exist
+                            if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
+                            {
+                                tempUsernameDir1 = slskDir1.CreateDirectory(username);
+                                LogDebug(string.Format("Creating {0} dir", username));
+                                diagDidWeCreateUsernameDir = true;
+                            }
                         }
 
                         if (tempUsernameDir1 == null)
@@ -10729,15 +10732,18 @@ namespace AndriodApp1
 
                     if (depth == 1)
                     {
-                        folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
-                        if (folderDir1 == null || !folderDir1.Exists())
+                        lock(string.Intern("IfNotExistCreateAtomic_2"))
                         {
-                            LogDebug("Creating " + dir);
-                            folderDir1 = slskDir1.CreateDirectory(dir);
-                        }
-                        if (folderDir1 == null || !folderDir1.Exists())
-                        {
-                            LogFirebase("folderDir is null or does not exists");
+                            folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
+                            if (folderDir1 == null || !folderDir1.Exists())
+                            {
+                                LogDebug("Creating " + dir);
+                                folderDir1 = slskDir1.CreateDirectory(dir);
+                            }
+                            if (folderDir1 == null || !folderDir1.Exists())
+                            {
+                                LogFirebase("folderDir is null or does not exists");
+                            }
                         }
                     }
                     else
@@ -10749,15 +10755,18 @@ namespace AndriodApp1
                         {
                             var parts = dir.Split('\\');
                             string singleDir = parts[parts.Length - _depth];
-                            folderDirNext = folderDir1.FindFile(singleDir); //does the folder we want to save to exist
-                            if (folderDirNext == null || !folderDirNext.Exists())
+                            lock (string.Intern("IfNotExistCreateAtomic_3"))
                             {
-                                LogDebug("Creating " + dir);
-                                folderDirNext = folderDir1.CreateDirectory(singleDir);
-                            }
-                            if (folderDirNext == null || !folderDirNext.Exists())
-                            {
-                                LogFirebase("folderDir is null or does not exists, depth" + _depth);
+                                folderDirNext = folderDir1.FindFile(singleDir); //does the folder we want to save to exist
+                                if (folderDirNext == null || !folderDirNext.Exists())
+                                {
+                                    LogDebug("Creating " + dir);
+                                    folderDirNext = folderDir1.CreateDirectory(singleDir);
+                                }
+                                if (folderDirNext == null || !folderDirNext.Exists())
+                                {
+                                    LogFirebase("folderDir is null or does not exists, depth" + _depth);
+                                }
                             }
                             folderDir1 = folderDirNext;
                             _depth--;
@@ -10853,7 +10862,19 @@ namespace AndriodApp1
                                     string realName = df.Name;
                                     uri = folderDir1.FindFile(realName).Uri;
 
-                                    SeekerApplication.ShowToast(string.Format("File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.", realName, uri.LastPathSegment.ToString()), ToastLength.Long);
+                                    if(folderDir1.Uri == parentUriOfIncomplete)
+                                    {
+                                        //case where SDCARD was full - all files were 0 bytes, folders could not be created, documenttree.CreateDirectory() returns null.
+                                        //no errors until you tried to move it. then you would get "alreay exists" since (if Create Complete and Incomplete folders is checked and 
+                                        //the incomplete dir isnt changed) then the destination is the same as the incomplete file (since the incomplete and complete folders
+                                        //couldnt be created.  This error is misleading though so do a more generic error.
+                                        SeekerApplication.ShowToast($"Filesystem Error for file {realName}.", ToastLength.Long);
+                                        LogDebug("complete and incomplete locations are the same");
+                                    }
+                                    else
+                                    {
+                                        SeekerApplication.ShowToast(string.Format("File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.", realName, uri.LastPathSegment.ToString()), ToastLength.Long);
+                                    }
                                 }
                                 catch (Exception e2)
                                 {
