@@ -4196,6 +4196,7 @@ namespace AndriodApp1
                 SoulSeekState.NotifyOnFolderCompleted = sharedPreferences.GetBoolean(SoulSeekState.M_NotifyFolderComplete, true);
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
+                SoulSeekState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(sharedPreferences.GetInt(SoulSeekState.M_DefaultSearchResultSortAlgorithm, 0));
 
                 SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(SoulSeekState.M_LimitSimultaneousDownloads, false), sharedPreferences.GetInt(SoulSeekState.M_MaxSimultaneousLimit, 1));
 
@@ -7762,6 +7763,17 @@ namespace AndriodApp1
                     if(SoulSeekState.SaveDataDirectoryUriIsFromTree)
                     {
                         SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
+
+                        ////works fine on pixel 2, samsung. on main ui thread or background thread.
+                        //System.Threading.ThreadPool.QueueUserWorkItem((object o) => {
+                        //var docFile1 = SoulSeekState.RootDocumentFile.CreateDirectory("test_dir_3");
+                        //    System.Threading.ThreadPool.QueueUserWorkItem((object o2) => {
+                        //        var docFile2 = SoulSeekState.RootDocumentFile.FindFile("test_dir_3");
+                        //        MainActivity.LogFirebase("test");
+                        //    });
+                            
+                        //});
+                        
                     }
                     else
                     {
@@ -11814,6 +11826,8 @@ namespace AndriodApp1
         public static bool StartServiceOnStartup = true;
         public static bool IsStartUpServiceCurrentlyRunning = false;
 
+        public static SearchResultSorting DefaultSearchResultSortAlgorithm = SearchResultSorting.Available;
+
         public static String SaveDataDirectoryUri = null;
         public static bool SaveDataDirectoryUriIsFromTree = true;
 
@@ -12095,6 +12109,8 @@ namespace AndriodApp1
         public const string M_Messages = "Momento_Messages";
         public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
+
+        public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
 
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";

@@ -25,7 +25,12 @@ android:iconifiedByDefault="true"
   <item android:id="@+id/action_change_result_style"
    android:title="@string/change_result_style"
    app:showAsAction="never"/>
-  <item android:id="@+id/action_add_to_wishlist"
+
+	<item android:id="@+id/action_sort_results_by"
+  android:title="@string/sort_results_by"
+  app:showAsAction="never"/>
+
+	<item android:id="@+id/action_add_to_wishlist"
 android:title="@string/add_to_wish"
 app:showAsAction="never"/>
   <!--<item android:id="@+id/action_view_search_tabs"

@@ -592,6 +592,11 @@ namespace AndriodApp1
 
     public class SearchResultComparableWishlist : SearchResultComparable
     {
+        public SearchResultComparableWishlist(SearchResultSorting _searchResultSorting) : base(_searchResultSorting)
+        {
+
+        }
+
         public override int Compare(SearchResponse x, SearchResponse y)
         {
             if (x.Username == y.Username)
@@ -619,71 +624,141 @@ namespace AndriodApp1
 
     public class SearchResultComparable : IComparer<SearchResponse>
     {
+        private readonly SearchResultSorting searchResultSorting;
+        public SearchResultComparable(SearchResultSorting _searchResultSorting)
+        {
+            searchResultSorting = _searchResultSorting;
+        }
+
         public virtual int Compare(SearchResponse x, SearchResponse y)
         {
-            //highest precedence. locked files.
-            //so if any of the search responses have 0 unlocked files, they are considered the worst.
-            if ((x.FileCount != 0 && y.FileCount == 0) || (x.FileCount == 0 && y.FileCount != 0))
+            if(searchResultSorting == SearchResultSorting.Available)
             {
-                if (y.FileCount == 0)
+                //highest precedence. locked files.
+                //so if any of the search responses have 0 unlocked files, they are considered the worst.
+                if ((x.FileCount != 0 && y.FileCount == 0) || (x.FileCount == 0 && y.FileCount != 0))
                 {
-                    //x is better
-                    return -1;
+                    if (y.FileCount == 0)
+                    {
+                        //x is better
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
                 }
-                else
+                //next highest - free upload slots. for now just they are free or not.
+                if ((x.FreeUploadSlots == 0 && y.FreeUploadSlots != 0) || (x.FreeUploadSlots != 0 && y.FreeUploadSlots == 0))
                 {
-                    return 1;
+                    if (x.FreeUploadSlots == 0)
+                    {
+                        //x is worse
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
                 }
+                //next highest - queue length
+                if (x.QueueLength != y.QueueLength)
+                {
+                    if (x.QueueLength > y.QueueLength)
+                    {
+                        //x is worse
+                        return 1;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                //next speed (MOST should fall here, from my testing at least).
+                if (x.UploadSpeed != y.UploadSpeed)
+                {
+                    if (x.UploadSpeed > y.UploadSpeed)
+                    {
+                        //x is better
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+                //VERY FEW, should go here
+                if (x.Files.Count != 0 && y.Files.Count != 0)
+                {
+                    return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
+                }
+                if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
+                {
+                    return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
+                }
+                return 0;
             }
-            //next highest - free upload slots. for now just they are free or not.
-            if ((x.FreeUploadSlots == 0 && y.FreeUploadSlots != 0) || (x.FreeUploadSlots != 0 && y.FreeUploadSlots == 0))
+            else if(searchResultSorting == SearchResultSorting.Fastest)
             {
-                if (x.FreeUploadSlots == 0)
+                //for fastest, only speed matters. if they pick this then even locked files are in the running.
+                if (x.UploadSpeed != y.UploadSpeed)
                 {
-                    //x is worse
-                    return 1;
+                    if (x.UploadSpeed > y.UploadSpeed)
+                    {
+                        //x is better
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
                 }
-                else
+                if (x.Files.Count != 0 && y.Files.Count != 0)
                 {
-                    return -1;
+                    return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
                 }
+                if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
+                {
+                    return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
+                }
+                return 0;
             }
-            //next highest - queue length
-            if (x.QueueLength != y.QueueLength)
+            else if(searchResultSorting == SearchResultSorting.FolderAlphabetical)
             {
-                if (x.QueueLength > y.QueueLength)
+                if (x.Files.Count != 0 && y.Files.Count != 0)
                 {
-                    //x is worse
-                    return 1;
+                    string xFolder = Helpers.GetFolderNameFromFile(x.Files.First().Filename);
+                    string yFolder = Helpers.GetFolderNameFromFile(y.Files.First().Filename);
+                    int ret = xFolder.CompareTo(yFolder);
+                    if(ret != 0)
+                    {
+                        return ret;
+                    }
                 }
-                else
+                if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
                 {
-                    return -1;
+                    string xLockedFolder = Helpers.GetFolderNameFromFile(x.Files.First().Filename);
+                    string yLockedFolder = Helpers.GetFolderNameFromFile(y.Files.First().Filename);
+                    int lockedret = xLockedFolder.CompareTo(yLockedFolder);
+                    if (lockedret != 0)
+                    {
+                        return lockedret;
+                    }
                 }
+
+                //if its a tie (which is probably pretty common)
+                //both username and foldername cant be same, so we are safe doing this..
+                int userRet = x.Username.CompareTo(y.Username);
+                if (userRet != 0)
+                {
+                    return userRet;
+                }
+                return 0;
             }
-            //next speed (MOST should fall here, from my testing at least).
-            if (x.UploadSpeed != y.UploadSpeed)
+            else
             {
-                if (x.UploadSpeed > y.UploadSpeed)
-                {
-                    //x is better
-                    return -1;
-                }
-                else
-                {
-                    return 1;
-                }
+                throw new System.Exception("Unknown sorting algorithm");
             }
-            //VERY FEW, should go here
-            if (x.Files.Count != 0 && y.Files.Count != 0)
-            {
-                return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
-            }
-            if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
-            {
-                return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
-            }
-            return 0;
         }
     }
 
@@ -729,10 +804,19 @@ namespace AndriodApp1
         Wishlist = 1
     }
 
+    public enum SearchResultSorting
+    {
+        Available = 0,
+        Fastest = 1,
+        FolderAlphabetical = 2,
+    }
+
     public class SearchTab
     {
         public List<SearchResponse> SearchResponses = new List<SearchResponse>();
-        public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable());
+        public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(SoulSeekState.DefaultSearchResultSortAlgorithm));
+        public SearchResultSorting SortHelperSorting = SoulSeekState.DefaultSearchResultSortAlgorithm;
+        public object SortHelperLockObject = new object();
         public bool FilteredResults = false;
         public bool FilterSticky = false;
         public string FilterString = string.Empty;
@@ -764,9 +848,9 @@ namespace AndriodApp1
         {
             SearchTab clone = new SearchTab();
             clone.SearchResponses = this.SearchResponses.ToList();
-            SortedDictionary<SearchResponse, object> cloned = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
+            SortedDictionary<SearchResponse, object> cloned = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(clone.SortHelperSorting));
             //without lock, extremely easy to reproduce "collection was modified" exception if creating wishlist tab while searching.
-            lock(SortHelper)
+            lock(this.SortHelperLockObject) //lock the sort helper we are copying from
             {
                 foreach (var entry in SortHelper)
                 {
@@ -839,8 +923,8 @@ namespace AndriodApp1
                 searchTab.FilterString = SearchFragment.FilterStickyString;
                 SearchFragment.ParseFilterString(searchTab);
             }
-            searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
-            if(responses != null)
+            searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
+            if (responses != null)
             {
                 foreach (SearchResponse resp in searchTab.SearchResponses)
                 {
@@ -923,7 +1007,7 @@ namespace AndriodApp1
                 searchTab.FilterString = SearchFragment.FilterStickyString;
                 SearchFragment.ParseFilterString(searchTab);
             }
-            searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist());
+            searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
             foreach (SearchResponse resp in searchTab.SearchResponses)
             {
                 if (!searchTab.SortHelper.ContainsKey(resp))
@@ -1381,6 +1465,18 @@ namespace AndriodApp1
             }
         }
 
+        public static SearchResultSorting SortHelperSorting
+        {
+            get
+            {
+                return SearchTabCollection[CurrentTab].SortHelperSorting;
+            }
+            set
+            {
+                SearchTabCollection[CurrentTab].SortHelperSorting = value;
+            }
+        }
+
         public static int LastSearchResponseCount //static so when the fragment gets remade we can use it
         {
             get
@@ -1398,12 +1494,14 @@ namespace AndriodApp1
             get
             {
                 return SearchTabCollection[CurrentTab].SearchResponses;
+
             }
             set
             {
                 SearchTabCollection[CurrentTab].SearchResponses = value;
             }
         }
+
         public static SortedDictionary<SearchResponse, object> SortHelper
         {
             get
@@ -1415,6 +1513,18 @@ namespace AndriodApp1
                 SearchTabCollection[CurrentTab].SortHelper = value;
             }
         }
+
+        /// <summary>
+        /// Locking on the SortHelper is not enough, since it gets replaced if user changes the sort algorithm
+        /// </summary>
+        public static object SortHelperLockObject
+        {
+            get
+            {
+                return SearchTabCollection[CurrentTab].SortHelperLockObject;
+            }
+        }
+
         public static bool FilteredResults
         {
             get
@@ -1961,6 +2071,9 @@ namespace AndriodApp1
                         return true;
                     }
                     ShowChangeTargetDialog();
+                    return true;
+                case Resource.Id.action_sort_results_by:
+                    ShowChangeSortOrderDialog();
                     return true;
                 case Resource.Id.action_search:
                     if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
@@ -2876,6 +2989,133 @@ namespace AndriodApp1
                 }
             }
         }
+
+        public void ShowChangeSortOrderDialog()
+        {
+            Context toUse = this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef;
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+            builder.SetTitle(Resource.String.sort_results_by_);
+            View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeresultsortorder, this.rootView as ViewGroup, false); //TODO replace rootView with ActiveActivity.GetContent()
+
+            AndroidX.AppCompat.Widget.AppCompatRadioButton sortAvailability = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.availability);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton sortSpeed = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.speed);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton sortFolderNameAlpha = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.folderNameAlpha);
+            CheckBox checkBoxSetAsDefault = viewInflated.FindViewById<CheckBox>(Resource.Id.setAsDefault);
+            switch (SearchTabHelper.SortHelperSorting)
+            {
+                case SearchResultSorting.Available:
+                    sortAvailability.Checked = true;
+                    break;
+                case SearchResultSorting.Fastest:
+                    sortSpeed.Checked = true;
+                    break;
+                case SearchResultSorting.FolderAlphabetical:
+                    sortFolderNameAlpha.Checked = true;
+                    break;
+            }
+
+            sortAvailability.Click += SortAvailabilityClick;
+            sortSpeed.Click += SortSpeedClick;
+            sortFolderNameAlpha.Click += SortFoldernameAlphaClick;
+
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> positiveButtonEventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                //if cancelled via back button we dont go here
+                
+                if(checkBoxSetAsDefault.Checked)
+                {
+                    var old = SoulSeekState.DefaultSearchResultSortAlgorithm;
+                    SoulSeekState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
+                    if(old != SoulSeekState.DefaultSearchResultSortAlgorithm)
+                    {
+                        lock (MainActivity.SHARED_PREF_LOCK)
+                        {
+                            var editor = SoulSeekState.SharedPreferences.Edit();
+                            editor.PutInt(SoulSeekState.M_DefaultSearchResultSortAlgorithm, (int)SoulSeekState.DefaultSearchResultSortAlgorithm);
+                            editor.Commit();
+                        }
+                    }
+                }
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    dialogInstance.Dismiss();
+                }
+            });
+
+            builder.SetPositiveButton(Resource.String.okay, positiveButtonEventHandler);
+            dialogInstance = builder.Create();
+            dialogInstance.Show();
+        }
+        private void SortAvailabilityClick(object sender, EventArgs e)
+        {
+            UpdateSortAvailability(SearchResultSorting.Available);
+        }
+
+        private void SortSpeedClick(object sender, EventArgs e)
+        {
+            UpdateSortAvailability(SearchResultSorting.Fastest);
+        }
+
+        private void SortFoldernameAlphaClick(object sender, EventArgs e)
+        {
+            UpdateSortAvailability(SearchResultSorting.FolderAlphabetical);
+        }
+
+        private void UpdateSortAvailability(SearchResultSorting searchResultSorting)
+        {
+            if(SearchTabHelper.SortHelperSorting != searchResultSorting)
+            {
+                lock (SearchTabHelper.SortHelperLockObject) //this is also always going to be on the UI thread. so we have that guaranteeing safety. 
+                {
+                    SearchTabHelper.SortHelperSorting = searchResultSorting;
+                    SearchTabHelper.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting));
+
+                    //put all the search responses into the new sort helper
+                    if(SearchTabHelper.SearchResponses!=null)
+                    {
+                        foreach(var searchResponse in SearchTabHelper.SearchResponses)
+                        {
+                            if (!SearchTabHelper.SortHelper.ContainsKey(searchResponse))
+                            {
+                                SearchTabHelper.SortHelper.Add(searchResponse, null);
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+
+                    //now that they are sorted, replace them.
+                    SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
+
+                    if(SearchTabHelper.FilteredResults)
+                    {
+                        UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                        recyclerSearchAdapter.NotifyDataSetChanged();
+                    }
+                    else
+                    {
+                        SearchTabHelper.UI_SearchResponses.Clear();
+                        SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
+                        recyclerSearchAdapter.NotifyDataSetChanged();
+                    }
+
+                    
+
+                }
+            }
+        }
+
+
+
+
 
         private AutoCompleteTextView chooseUserInput = null;
         private EditText customRoomName = null;
@@ -4128,7 +4368,7 @@ namespace AndriodApp1
             //{
 
 
-            lock (SearchTabHelper.SortHelper)
+            lock (SearchTabHelper.SearchTabCollection[fromTab].SortHelperLockObject) //lock object for the sort helper in question. this used to be the current tab one. I think thats wrong.
             {
                 Tuple<bool, List<SearchResponse>> splitResponses = SplitMultiDirResponse(resp);
                 try
@@ -4473,8 +4713,8 @@ namespace AndriodApp1
                     //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
                     oldList?.Clear();
                 }
-                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
-                //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
+                //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
@@ -4488,7 +4728,8 @@ namespace AndriodApp1
 
                    if (t.IsCanceled)
                    {
-                        //then the user pressed the button so we dont need to change it back...
+                       //then the user pressed the button so we dont need to change it back...
+                       //GetSearchFragment().GetTransitionDrawable().ResetTransition(); //this does it immediately.
                     }
                    else
                    {
