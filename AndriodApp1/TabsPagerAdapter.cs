@@ -4713,8 +4713,8 @@ namespace AndriodApp1
                     //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
                     oldList?.Clear();
                 }
-                //t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
-                t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
+                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
