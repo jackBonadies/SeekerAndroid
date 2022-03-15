@@ -1333,7 +1333,8 @@ namespace AndriodApp1
                 //just skip the item
                 byte[] itemBytes = new byte[itemLen];
                 stream.Read(itemBytes, 0, itemLen);
-                string itemValue = System.Text.Encoding.ASCII.GetString(itemBytes);
+                //the first 128 chars in utf8 and ascii are the same. so all valid ascii text is valid utf8 text.
+                string itemValue = System.Text.Encoding.UTF8.GetString(itemBytes);
                 items.Add(new Tuple<int, string>(key, itemValue));
             }
             return items;
@@ -1360,7 +1361,6 @@ namespace AndriodApp1
                 //just skip the item
                 byte[] itemBytes = new byte[itemLen];
                 stream.Read(itemBytes, 0, itemLen);
-                //string itemValue = System.Text.Encoding.ASCII.GetString(itemBytes);
                 items.Add(new Tuple<int, byte[]>(key, itemBytes));
             }
             return items;
@@ -1381,8 +1381,7 @@ namespace AndriodApp1
                 //just skip the item
                 byte[] itemBytes = new byte[itemLen];
                 stream.Read(itemBytes, 0, itemLen);
-                //string itemValue = System.Text.Encoding.ASCII.GetString(itemBytes);
-                string itemValue = System.Text.Encoding.ASCII.GetString(itemBytes);
+                string itemValue = System.Text.Encoding.UTF8.GetString(itemBytes);
 #if DEBUG
                 if (items.ContainsKey(key))
                 {
@@ -1418,7 +1417,6 @@ namespace AndriodApp1
             }
             stream.Seek(24, SeekOrigin.Current);
             stream.Read(buffer, 0, 12);
-            //var size = Convert.ToInt64(Encoding.ASCII.GetString(buffer, 0, 12).Trim('\0', ' '), 8);
 
             stream.Seek(376L, SeekOrigin.Current);
         }
@@ -1827,7 +1825,7 @@ namespace AndriodApp1
             stream.Read(tableNameBytes, 0, tableNameBytes.Length);
 
 
-            string tableName = System.Text.Encoding.ASCII.GetString(tableNameBytes);
+            string tableName = System.Text.Encoding.UTF8.GetString(tableNameBytes); //ascii works fine, but just in case.
 
             System.Console.WriteLine(tableName);
 
