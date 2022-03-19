@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="@dimen/abc_action_bar_content_inset_material"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <CheckBox
+        android:id="@+id/lockedUserlistOnly"
+        android:text="Locked (Only User List can Download)"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+        <CheckBox
+        android:id="@+id/hiddenUserlistOnly"
+        android:text="Hidden (Only User List can View)"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+            <CheckBox
+        android:id="@+id/overrideFolderName"
+        android:text="Override Folder Name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+            <EditText
+            android:id="@+id/customFolderNameEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+        android:layout_marginTop="0dp"
+            android:layout_marginStart="30dp"
+        android:enabled="false"
+        android:alpha=".5"
+            android:textSize="16dp"
+            android:hint="Custom Folder Name"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+</LinearLayout>

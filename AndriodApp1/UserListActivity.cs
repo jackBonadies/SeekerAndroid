@@ -494,7 +494,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogDebug("CurrentlyLoggedInButDisconnectedState");
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(c, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(c, false, out t))
                 {
                     return;
                 }

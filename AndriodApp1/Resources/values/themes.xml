@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 	<!--<style name="OutlinedRoundedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
 	</style>
@@ -11,6 +11,11 @@
 
 
 	<style name="DefaultLight" parent="AppTheme.NoActionBar">
+
+		<!--looks fine in light case-->
+		<item name="android:navigationBarColor" tools:targetApi="21">#FF000000</item>
+
+
 
 		<item name="normalTextColor">#000000</item>
 		<item name="normalTextColorNonTinted">#000000</item>
@@ -219,6 +224,10 @@
 	</style>
 
 	<style name="DefaultDark" parent="AppTheme.NoActionBar">
+
+		<!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
+			I assume this is because other apps were setting it, and we werent. so remedy this here.-->
+		<item name="android:navigationBarColor" tools:targetApi="21">#FF000000</item>
 
 		<item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
 		<item name="floating_action_bar_to_bottom_background">#202020</item>

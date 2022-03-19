@@ -14,6 +14,6 @@
 
         void Fill();
 
-        IEnumerable<Soulseek.File> Search(SearchQuery query);
+        IEnumerable<Soulseek.File> Search(SearchQuery query, string username, out IEnumerable<Soulseek.File> lockedFiles);
     }
 }

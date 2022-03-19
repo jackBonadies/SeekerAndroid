@@ -33,8 +33,10 @@ using System.Text;
 using Google.Android.Material.Snackbar;
 using System.Threading.Tasks;
 using Android.Content.PM;
-using Android.Support.V7.Widget;
-using Android.Support.V7.Widget.Helper;
+//using Android.Support.V7.Widget;
+//using Android.Support.V7.Widget.Helper;
+using Android.Util;
+using AndroidX.RecyclerView.Widget;
 
 namespace AndriodApp1
 {
@@ -45,8 +47,8 @@ namespace AndriodApp1
         private const int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
         private const int CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x930; //+32
 
-        private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL = 0x911;
-        private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY = 0x912;
+        private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL = 0x911;
+        private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY = 0x912;
         private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x932;
 
         private const int READ_EXTERNAL_FOR_MEDIA_STORE = 1182021;
@@ -84,6 +86,7 @@ namespace AndriodApp1
             UPnpManager.Instance.SearchStarted += UpnpSearchStarted;
             UPnpManager.Instance.DeviceSuccessfullyMapped += UpnpDeviceMapped;
             PrivilegesManager.Instance.PrivilegesChecked += PrivilegesChecked;
+            SettingsActivity.UploadDirectoryChanged += DirectoryViewsChanged;
 
             //when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
             this.UpdateDirectoryViews();
@@ -91,6 +94,13 @@ namespace AndriodApp1
             //however with the api<21 it is not paused and so an event is needed.
             SoulSeekState.DirectoryUpdatedEvent += DirectoryUpdated;
 
+        }
+
+        public void DirectoryViewsChanged(object sender, EventArgs e)
+        {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                recyclerViewFoldersAdapter?.NotifyDataSetChanged();
+            });
         }
 
         private void PrivilegesChecked(object sender, EventArgs e)
@@ -146,6 +156,7 @@ namespace AndriodApp1
             UPnpManager.Instance.DeviceSuccessfullyMapped -= UpnpDeviceMapped;
             PrivilegesManager.Instance.PrivilegesChecked -= PrivilegesChecked;
             SoulSeekState.DirectoryUpdatedEvent -= DirectoryUpdated;
+            SettingsActivity.UploadDirectoryChanged -= DirectoryViewsChanged;
             SettingsActivity.SaveAdditionalDirectorySettingsToSharedPreferences();
             base.OnPause();
         }
@@ -185,7 +196,14 @@ namespace AndriodApp1
         private CheckBox concurrentDlCheckbox;
 
 
-        Button sharedFolderButton;
+        Button addFolderButton;
+        Button clearAllFoldersButton;
+
+        TextView noSharedFoldersView;
+        RecyclerView recyclerViewFolders;
+        LinearLayoutManager recyclerViewFoldersLayoutManager;
+        ReyclerUploadsAdapter recyclerViewFoldersAdapter;
+
         Button browseSelfButton;
         Button rescanSharesButton;
 
@@ -194,6 +212,154 @@ namespace AndriodApp1
 
         CheckBox useUPnPCheckBox;
         CheckBox showSmartFilters;
+
+
+        public class ReyclerUploadsAdapter : RecyclerView.Adapter
+        {
+            public List<UploadDirectoryInfo> localDataSet;
+            public override int ItemCount => localDataSet.Count;
+            private int position = -1;
+            public SettingsActivity settingsActivity;
+            public ReyclerUploadsAdapter(SettingsActivity activity, List<UploadDirectoryInfo> ti)
+            {
+                this.settingsActivity = activity;
+                localDataSet = ti;
+            }
+
+            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+            {
+                (holder as RecyclerViewFolderHolder).folderView.setItem(localDataSet[position]);
+            }
+
+            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
+            {
+                RecyclerViewFolderView view = RecyclerViewFolderView.inflate(parent);
+                view.setupChildren();
+                view.SettingsActivity = this.settingsActivity;
+                (view as View).Click += view.FolderClick;
+                (view as View).LongClick += view.FolderLongClick;
+                return new RecyclerViewFolderHolder(view as View);
+            }
+
+            public void setPosition(int position)
+            {
+                this.position = position;
+            }
+        }
+        private static UploadDirectoryInfo ContextMenuItem = null;
+        public class RecyclerViewFolderHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+        {
+            public RecyclerViewFolderView folderView;
+
+
+            public RecyclerViewFolderHolder(View view) : base(view)
+            {
+                folderView = (RecyclerViewFolderView)view;
+                folderView.ViewHolder = this;
+                folderView.SetOnCreateContextMenuListener(this);
+            }
+
+            public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+            {
+                RecyclerViewFolderView folderRowView = v as RecyclerViewFolderView;
+                ContextMenuItem = folderRowView.BoundItem;
+                if (ContextMenuItem.HasError())
+                {
+                    menu.Add(0, 1, 0, "View Error Options");
+                }
+                else
+                {
+                    menu.Add(0, 1, 0, "View Folder Options");
+                }
+                menu.Add(0, 2, 1, "Remove");
+            }
+        }
+        public class RecyclerViewFolderView : RelativeLayout
+        {
+            public UploadDirectoryInfo BoundItem;
+
+            public RecyclerViewFolderHolder ViewHolder;
+            public SettingsActivity SettingsActivity = null;
+            public TextView viewFolderName;
+            public ImageView viewFolderStatus;
+
+            public RecyclerViewFolderView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
+                setupChildren();
+            }
+            public RecyclerViewFolderView(Context context, IAttributeSet attrs) : base(context, attrs)
+            {
+                LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
+                setupChildren();
+            }
+
+            public void FolderLongClick(object sender, View.LongClickEventArgs e)
+            {
+
+                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.AdapterPosition);
+                (sender as View).ShowContextMenu();
+            }
+
+            public void FolderClick(object sender, EventArgs e)
+            {
+
+                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.AdapterPosition);
+                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).settingsActivity.ShowDialogForUploadDir((sender as RecyclerViewFolderView).ViewHolder.folderView.BoundItem);
+            }
+
+            public static RecyclerViewFolderView inflate(ViewGroup parent)
+            {
+                RecyclerViewFolderView itemView = (RecyclerViewFolderView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.upload_folder_row_dummy, parent, false);
+                return itemView;
+            }
+
+            public void setupChildren()
+            {
+                viewFolderName = FindViewById<TextView>(Resource.Id.uploadFolderName);
+                viewFolderStatus = FindViewById<ImageView>(Resource.Id.uploadFolderStatus);
+               
+            }
+
+            public void setItem(UploadDirectoryInfo item)
+            {
+                this.Clickable = SoulSeekState.SharingOn;
+                this.LongClickable = SoulSeekState.SharingOn;
+
+                BoundItem = item;
+                if(string.IsNullOrEmpty(item.DisplayNameOverride))
+                {
+                    viewFolderName.Text = item.GetLastPathSegment();
+                }
+                else
+                {
+                    viewFolderName.Text = item.GetLastPathSegment() + $" ({item.DisplayNameOverride})";
+                }
+
+                if(item.HasError())
+                {
+                    viewFolderStatus.Visibility = ViewStates.Visible;
+                    viewFolderStatus.SetImageResource(Resource.Drawable.alert_circle_outline);
+                }
+                else if(item.IsHidden)
+                {
+                    viewFolderStatus.Visibility = ViewStates.Visible;
+                    viewFolderStatus.SetImageResource(Resource.Drawable.hidden_lock_question);
+                }
+                else if(item.IsLocked)
+                {
+                    viewFolderStatus.Visibility = ViewStates.Visible;
+                    viewFolderStatus.SetImageResource(Resource.Drawable.lock_icon);
+                }
+                else
+                {
+                    viewFolderStatus.Visibility = ViewStates.Gone;
+                }
+            }
+        }
+
+
+
 
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -213,8 +379,13 @@ namespace AndriodApp1
             myToolbar.Title = this.GetString(Resource.String.settings);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-            
 
+
+            Button chbox = this.FindViewById<Button>(Resource.Id.addUploadDirectory);
+
+            var progBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
+            progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor),Android.Graphics.PorterDuff.Mode.SrcIn);
+            progBar.Click += ImageView_Click;
             Intent intent = Intent; //intent that started this activity
             //this.SaveDataDirectoryUri = intent.GetStringExtra("SaveDataDirectoryUri");
             Button changeDirSettings = FindViewById<Button>(Resource.Id.changeDirSettings);
@@ -352,9 +523,24 @@ namespace AndriodApp1
             imageView.Click += ImageView_Click;
             UpdateShareImageView();
 
-            sharedFolderButton = FindViewById<Button>(Resource.Id.setSharedFolder);
-            sharedFolderButton.Click += ChangeUploadDirectory;
-            currentSharedFolderView = FindViewById<TextView>(Resource.Id.sharedFolderPath);
+            addFolderButton = FindViewById<Button>(Resource.Id.addUploadDirectory);
+            addFolderButton.Click += AddUploadDirectory;
+            clearAllFoldersButton = FindViewById<Button>(Resource.Id.clearAllDirectories);
+            clearAllFoldersButton.Click += ClearAllFoldersButton_Click;
+
+            noSharedFoldersView = FindViewById<TextView>(Resource.Id.noSharedFolders);
+            recyclerViewFolders = FindViewById<RecyclerView>(Resource.Id.uploadFoldersRecyclerView);
+
+            recyclerViewFoldersAdapter = new ReyclerUploadsAdapter(this, UploadDirectoryManager.UploadDirectories);
+
+            var llm = new LinearLayoutManager(this);
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewFolders.Context,
+                llm.Orientation);
+            recyclerViewFolders.AddItemDecoration(dividerItemDecoration);
+
+            recyclerViewFolders.SetLayoutManager(llm);
+            recyclerViewFolders.SetAdapter(recyclerViewFoldersAdapter);
+
 
             CheckBox shareCheckBox = FindViewById<CheckBox>(Resource.Id.enableSharing);
             shareCheckBox.Checked = SoulSeekState.SharingOn;
@@ -371,6 +557,7 @@ namespace AndriodApp1
 
             browseSelfButton = FindViewById<Button>(Resource.Id.browseSelfButton);
             browseSelfButton.Click += BrowseSelfButton_Click;
+            browseSelfButton.LongClick += BrowseSelfButton_LongClick;
 
             rescanSharesButton = FindViewById<Button>(Resource.Id.rescanShares);
             rescanSharesButton.Click += RescanSharesButton_Click;
@@ -543,6 +730,37 @@ namespace AndriodApp1
 
         }
 
+        private void ClearAllFoldersButton_Click(object sender, EventArgs e)
+        {
+            if(UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
+            {
+                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                var diag = builder.SetMessage($"Are you sure you want to clear all {UploadDirectoryManager.UploadDirectories.Count} directories from list?")
+                    .SetPositiveButton("Yes", (object sender, DialogClickEventArgs e) => {
+                        this.ClearAllFolders();
+                        this.OnCloseClick(sender, e);
+                    })
+                    .SetNegativeButton("No", OnCloseClick)
+                    .Create();
+                diag.Show();
+            }
+            else
+            {
+                this.ClearAllFolders();
+            }
+        }
+
+        private void ClearAllFolders()
+        {
+            UploadDirectoryManager.UploadDirectories.Clear();
+            UploadDirectoryManager.SaveToSharedPreferences(SoulSeekState.SharedPreferences);
+            this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
+            SetSharedFolderView();
+            SoulSeekState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
+            MainActivity.SharedFileCache_Refreshed(null, (0, 0));
+
+        }
+
         private void ShowFolderDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             bool changed = SoulSeekState.NotifyOnFolderCompleted != e.IsChecked;
@@ -704,19 +922,19 @@ namespace AndriodApp1
             builder.SetTitle("Configure Smart Filters");
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
-            RecyclerView recyclerViewFiltersConfig = (RecyclerView)viewInflated.FindViewById<RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
+            Android.Support.V7.Widget.RecyclerView recyclerViewFiltersConfig = (Android.Support.V7.Widget.RecyclerView)viewInflated.FindViewById<Android.Support.V7.Widget.RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
             builder.SetView(viewInflated);
 
-            
+
 
             RecyclerListAdapter adapter = new RecyclerListAdapter(this, null, SoulSeekState.SmartFilterOptions.GetAdapterItems());
 
             recyclerViewFiltersConfig.HasFixedSize = (true);
             recyclerViewFiltersConfig.SetAdapter(adapter);
-            recyclerViewFiltersConfig.SetLayoutManager(new LinearLayoutManager(this));
+            recyclerViewFiltersConfig.SetLayoutManager(new Android.Support.V7.Widget.LinearLayoutManager(this));
 
-            ItemTouchHelper.Callback callback = new DragDropItemTouchHelper(adapter);
-            var mItemTouchHelper = new ItemTouchHelper(callback);
+            Android.Support.V7.Widget.Helper.ItemTouchHelper.Callback callback = new DragDropItemTouchHelper(adapter);
+            var mItemTouchHelper = new Android.Support.V7.Widget.Helper.ItemTouchHelper(callback);
             mItemTouchHelper.AttachToRecyclerView(recyclerViewFiltersConfig);
             adapter.ItemTouchHelper = mItemTouchHelper;
 
@@ -829,28 +1047,16 @@ namespace AndriodApp1
 
         private void RescanSharesButton_Click(object sender, EventArgs e)
         {
-            if(SoulSeekState.IsParsing)
-            {
-                Toast.MakeText(this, "Already parsing", ToastLength.Long).Show();
-                return;
-            }
-            if(string.IsNullOrEmpty(SoulSeekState.UploadDataDirectoryUri))
-            {
-                Toast.MakeText(this, "Directory not set", ToastLength.Long).Show();
-                return;
-            }
-            Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
-
             //for rescan=true, we use the previous parse to get metadata if there is a match...
             //so that we do not have to read the file again to get things like bitrate, samples, etc.
             //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
-            if(SoulSeekState.PreOpenDocumentTree() || !SoulSeekState.UploadDataDirectoryUriIsFromTree)
+            if(SoulSeekState.PreOpenDocumentTree())
             {
-                SuccessfulUploadExternalCallback(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri), -1, true, true);
+                Rescan(null, -1, true, true);
             }
             else
             {
-                SuccessfulUploadExternalCallback(Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri), -1, false, true);
+                Rescan(null, -1, false, true);
             }
         }
 
@@ -919,27 +1125,6 @@ namespace AndriodApp1
             }
         }
 
-        private static string GetFriendlySharedDirectoryName()
-        {
-            if (!SoulSeekState.SharingOn)
-            {
-                return "Not Sharing";
-            }
-            else if (SoulSeekState.IsParsing)
-            {
-                return "Parsing...";
-            }
-            else if(SoulSeekState.UploadDataDirectoryUri == null || SoulSeekState.UploadDataDirectoryUri == string.Empty)
-            {
-                return "Not Set";
-            }
-            else
-            {
-                return Android.Net.Uri.Parse(SoulSeekState.UploadDataDirectoryUri).LastPathSegment;
-            }
-        }
-
-
 
         private void SetIncompleteDirectoryState()
         {
@@ -950,6 +1135,7 @@ namespace AndriodApp1
                 incompleteFolderViewLayout.Alpha = 1.0f;
                 changeIncompleteDirectory.Alpha = 1.0f;
                 changeIncompleteDirectory.Clickable = true;
+                recyclerViewFolders.Clickable = true;
             }
             else
             {
@@ -958,6 +1144,7 @@ namespace AndriodApp1
                 incompleteFolderViewLayout.Alpha = 0.5f;
                 changeIncompleteDirectory.Alpha = 0.5f;
                 changeIncompleteDirectory.Clickable = false;
+                recyclerViewFolders.Clickable = false;
             }
         }
 
@@ -977,9 +1164,20 @@ namespace AndriodApp1
 
         private void SetSharedFolderView()
         {
-            string friendlyName = Helpers.AvoidLineBreaks(GetFriendlySharedDirectoryName());
-            currentSharedFolderView.Text = friendlyName;
-            Helpers.SetToolTipText(currentSharedFolderView, friendlyName);
+            if(UploadDirectoryManager.UploadDirectories.Count==0)
+            {
+                this.noSharedFoldersView.Visibility = ViewStates.Visible;
+                this.recyclerViewFolders.Visibility = ViewStates.Gone;
+                this.clearAllFoldersButton.Enabled = false;
+                this.clearAllFoldersButton.Alpha = 0.5f;
+            }
+            else
+            {
+                this.noSharedFoldersView.Visibility = ViewStates.Gone;
+                this.recyclerViewFolders.Visibility = ViewStates.Visible;
+                this.clearAllFoldersButton.Enabled = true;
+                this.clearAllFoldersButton.Alpha = 1.0f;
+            }
         }
 
 
@@ -1533,26 +1731,61 @@ namespace AndriodApp1
         public const string FromBrowseSelf = "FromBrowseSelf";
         private void BrowseSelfButton_Click(object sender, EventArgs e)
         {
-            if(!SoulSeekState.SharingOn || SoulSeekState.SharedFileCache == null)
+            BrowseSelf(false, false);
+        }
+
+        private void BrowseSelfButton_LongClick(object sender, View.LongClickEventArgs e)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var diag = builder.SetMessage("Browse Public Shares or User List shares?")
+                .SetPositiveButton("Public", (object sender, DialogClickEventArgs e) => { BrowseSelf(true, false); OnCloseClick(sender, e); })
+                .SetNegativeButton("User List", (object sender, DialogClickEventArgs e) => { BrowseSelf(false, true); OnCloseClick(sender, e); })
+                .Create();
+            diag.Show();
+        }
+
+        private void BrowseSelf(bool forcePublic, bool forceFriend)
+        {
+            if (!SoulSeekState.SharingOn || SoulSeekState.SharedFileCache == null || UploadDirectoryManager.UploadDirectories.Count == 0)
             {
                 Toast.MakeText(this, Resource.String.not_sharing, ToastLength.Short).Show();
                 return;
             }
-            if(!SoulSeekState.SharedFileCache.SuccessfullyInitialized || SoulSeekState.SharedFileCache.BrowseResponse == null)
+            if (SoulSeekState.IsParsing)
+            {
+                Toast.MakeText(this, "Wait for parsing to complete.", ToastLength.Short).Show();
+                return;
+            }
+            if (!SoulSeekState.SharedFileCache.SuccessfullyInitialized || SoulSeekState.SharedFileCache.GetBrowseResponseForUser(SoulSeekState.Username) == null)
             {
                 Toast.MakeText(this, Resource.String.failed_to_parse_shares_post, ToastLength.Short).Show();
                 return;
             }
             string errorMsgToToast = string.Empty;
-            TreeNode<Soulseek.Directory> tree = DownloadDialog.CreateTree(SoulSeekState.SharedFileCache.BrowseResponse, false, null, null, SoulSeekState.Username, out errorMsgToToast);
-            if(errorMsgToToast!=null && errorMsgToToast!=string.Empty)
+
+            Soulseek.BrowseResponse browseResponseToShow = null;
+            if (forcePublic)
+            {
+                browseResponseToShow = SoulSeekState.SharedFileCache.GetBrowseResponseForUser(null);
+            }
+            else if(forceFriend)
+            {
+                browseResponseToShow = SoulSeekState.SharedFileCache.GetBrowseResponseForUser(null, true);
+            }
+            else
+            {
+                browseResponseToShow = SoulSeekState.SharedFileCache.GetBrowseResponseForUser(SoulSeekState.Username);
+            }
+
+            TreeNode<Soulseek.Directory> tree = DownloadDialog.CreateTree(browseResponseToShow, false, null, null, SoulSeekState.Username, out errorMsgToToast);
+            if (errorMsgToToast != null && errorMsgToToast != string.Empty)
             {
                 Toast.MakeText(this, errorMsgToToast, ToastLength.Short).Show();
                 return;
             }
             if (tree != null)
             {
-                SoulSeekState.OnBrowseResponseReceived(SoulSeekState.SharedFileCache.BrowseResponse, tree, SoulSeekState.Username, null);
+                SoulSeekState.OnBrowseResponseReceived(SoulSeekState.SharedFileCache.GetBrowseResponseForUser(SoulSeekState.Username), tree, SoulSeekState.Username, null);
             }
 
             Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
@@ -1636,7 +1869,7 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1758,13 +1991,10 @@ namespace AndriodApp1
 
         private void UpdateShareImageView()
         {
-            if(SoulSeekState.MainActivityRef==null)
-            {
-                MainActivity.LogFirebase("UpdateShareImageView MainActivityRef==null");//this caused a fatal crash.. back when GetSharingMessageAndIcon() was not static....
-            }
             Tuple<SharingIcons,string> info = MainActivity.GetSharingMessageAndIcon(out bool isParsing);
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
-            if(imageView==null) return;
+            ProgressBar progressBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
+            if(imageView==null || progressBar == null) return;
             string toolTip = info.Item2;
             int numParsed = SoulSeekState.NumberParsed;
             if (isParsing && numParsed != 0)
@@ -1781,10 +2011,12 @@ namespace AndriodApp1
             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
             {
                 imageView.TooltipText = toolTip; //api26+ otherwise crash...
+                progressBar.TooltipText = toolTip;
             }
             else
             {
                 AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(imageView, toolTip);
+                AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(progressBar, toolTip);
             }
             switch(info.Item1)
             {
@@ -1794,12 +2026,46 @@ namespace AndriodApp1
                 case SharingIcons.Error:
                     imageView.SetImageResource(Resource.Drawable.ic_error_outline_white_24dp);
                     break;
+                case SharingIcons.CurrentlyParsing:
+                    imageView.SetImageResource(Resource.Drawable.exclamation_thick);
+                    break;
                 case SharingIcons.Off:
                     imageView.SetImageResource(Resource.Drawable.ic_sharing_off_black_24dp);
                     break;
             }
             
+            switch(info.Item1)
+            {
+                case SharingIcons.CurrentlyParsing:
+                    progressBar.Visibility = ViewStates.Visible;
+                    break;
+                default:
+                    progressBar.Visibility = ViewStates.Invisible;
+                    break;
+            }
         }
+
+        public override bool OnContextItemSelected(IMenuItem item)
+        {
+            if(item.ItemId == 1) //options
+            {
+                ShowDialogForUploadDir(ContextMenuItem);
+            }
+            else if(item.ItemId == 2) //remove
+            {
+                RemoveUploadDirFolder(ContextMenuItem);
+            }
+            return true;
+        }
+
+        private void RemoveUploadDirFolder(UploadDirectoryInfo uploadDirInfo)
+        {
+            UploadDirectoryManager.UploadDirectories.Remove(uploadDirInfo);
+            this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
+            SetSharedFolderView();
+            Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+        }
+
 
         private void ShareCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
@@ -1813,6 +2079,7 @@ namespace AndriodApp1
             UpdateShareImageView();
             UpdateSharingViewState();
             SetSharedFolderView();
+            this.recyclerViewFoldersAdapter?.NotifyDataSetChanged(); //so that the views rebind as unclickable.
         }
 
         private void UpdateSharingViewState()
@@ -1825,8 +2092,10 @@ namespace AndriodApp1
                 sharingSubLayout1.Alpha = 1.0f;
                 sharingSubLayout2.Enabled = true;
                 sharingSubLayout2.Alpha = 1.0f;
-                sharedFolderButton.Clickable = true;
+                addFolderButton.Clickable = true;
+                clearAllFoldersButton.Clickable = true;
                 browseSelfButton.Clickable = true;
+                browseSelfButton.LongClickable = true;
                 rescanSharesButton.Clickable = true;
             }
             else
@@ -1835,8 +2104,10 @@ namespace AndriodApp1
                 sharingSubLayout1.Alpha = 0.5f;
                 sharingSubLayout2.Enabled = false;
                 sharingSubLayout2.Alpha = 0.5f;
-                sharedFolderButton.Clickable = false;
+                addFolderButton.Clickable = false;
+                clearAllFoldersButton.Clickable = false;
                 browseSelfButton.Clickable = false;
+                browseSelfButton.LongClickable = false;
                 rescanSharesButton.Clickable = false;
             }
         }
@@ -1931,7 +2202,7 @@ namespace AndriodApp1
         private void ImageView_Click(object sender, EventArgs e)
         {
             UpdateShareImageView();
-            (sender as ImageView).PerformLongClick();
+            (sender as View).PerformLongClick();
         }
 
 
@@ -2155,15 +2426,17 @@ namespace AndriodApp1
             ShowDirSettings(SoulSeekState.SaveDataDirectoryUri,DirectoryType.Download);
         }
 
-        private void ChangeUploadDirectory(object sender, EventArgs e)
+        private void AddUploadDirectory(object sender, EventArgs e)
         {
-            if (Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied) //you dont have this on api >= 29 because you never requested it, but it is NECESSARY to read media store
+            //you dont have this on api >= 29 because you never requested it, but it is NECESSARY to read media store
+            if (Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied) 
             {
+                //if they deny the permission twice and are on api >= 30, then it will auto deny (behavior is the same as if they manually clicked deny).
                 Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
             }
             else
             {
-                ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+                ShowDirSettings(null, DirectoryType.Upload);
             }
         }
 
@@ -2209,9 +2482,9 @@ namespace AndriodApp1
                         {
                             this.SuccessfulWriteExternalLegacyCallback(uri, true);
                         }
-                        else if(requestCode == UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY)
+                        else if(requestCode == UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY)
                         {
-                            this.SuccessfulUploadExternalCallback(uri, requestCode, true);
+                            this.Rescan(uri, requestCode, true);
                         }
                         else if(requestCode == CHANGE_INCOMPLETE_EXTERNAL_LEGACY)
                         {
@@ -2231,7 +2504,7 @@ namespace AndriodApp1
             if (SoulSeekState.UseLegacyStorage())
             {
                 var legacyIntent = new Intent(Intent.ActionOpenDocumentTree);
-                if (startingDirectory != null && startingDirectory != string.Empty)
+                if (!string.IsNullOrEmpty(startingDirectory))
                 {
                     Android.Net.Uri res = Android.Net.Uri.Parse(startingDirectory);
                     legacyIntent.PutExtra(DocumentsContract.ExtraInitialUri, res);
@@ -2243,7 +2516,7 @@ namespace AndriodApp1
                 }
                 else if (directoryType == DirectoryType.Upload)
                 {
-                    requestCode = UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY;
+                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY;
                 }
                 else if (directoryType == DirectoryType.Incomplete)
                 {
@@ -2265,13 +2538,13 @@ namespace AndriodApp1
                         throw e;
                     }
                 }
-        }
+            }
             else
             {
                 var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
                 var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
                 intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
-                if (startingDirectory != null && startingDirectory != string.Empty)
+                if (!string.IsNullOrEmpty(startingDirectory))
                 {
                     Android.Net.Uri res = Android.Net.Uri.Parse(startingDirectory);
                     intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
@@ -2282,7 +2555,7 @@ namespace AndriodApp1
                 }
                 else if(directoryType == DirectoryType.Upload)
                 {
-                    requestCode = UPLOAD_DIR_CHANGE_WRITE_EXTERNAL;
+                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL;
                 }
                 else if(directoryType == DirectoryType.Incomplete)
                 {
@@ -2311,8 +2584,8 @@ namespace AndriodApp1
         {
             switch(requestCodeNotLegacy)
             {
-                case UPLOAD_DIR_CHANGE_WRITE_EXTERNAL:
-                    return UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY;
+                case UPLOAD_DIR_ADD_WRITE_EXTERNAL:
+                    return UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY;
                 case CHANGE_INCOMPLETE_EXTERNAL:
                     return CHANGE_INCOMPLETE_EXTERNAL_LEGACY;
                 case CHANGE_WRITE_EXTERNAL:
@@ -2413,90 +2686,333 @@ namespace AndriodApp1
             }));
         }
 
-
-        private void SuccessfulUploadExternalCallback(Android.Net.Uri uri, int requestCode, bool fromLegacyPicker = false, bool rescan = false)
+        public void ShowDialogForUploadDir(UploadDirectoryInfo uploadInfo)
         {
-            Action parseDatabaseAndUpdateUI = new Action(() => {
-                try
+            if(uploadInfo.HasError())
+            {
+                ShowUploadDirectoryErrorDialog(uploadInfo);
+            }
+            else
+            {
+                ShowUploadDirectoryOptionsDialog(uploadInfo);
+            }
+        }
+
+        public void ShowUploadDirectoryErrorDialog(UploadDirectoryInfo uploadInfo)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            builder.SetTitle("Folder Error");
+            string diagMessage = $"Error for folder: {uploadInfo.GetLastPathSegment()}" + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
+            var diag = builder.SetMessage(diagMessage)
+                .SetNeutralButton("Remove Folder", (object sender, DialogClickEventArgs e) => {
+                    this.RemoveUploadDirFolder(uploadInfo);
+                    this.OnCloseClick(sender, e);
+                })
+                .SetPositiveButton("Reselect", (object sender, DialogClickEventArgs e) => {
+                    this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload);
+                    this.OnCloseClick(sender, e);
+                })
+                .SetNegativeButton("Cancel", OnCloseClick)
+                .Create();
+            diag.Show();
+        }
+
+        public void ShowUploadDirectoryOptionsDialog(UploadDirectoryInfo uploadDirInfo)
+        {
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+            builder.SetTitle("Upload Folder Options");
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.upload_folder_options, this.FindViewById<ViewGroup>(Android.Resource.Id.Content) as ViewGroup, false);
+            EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(Resource.Id.customFolderNameEditText);
+            CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(Resource.Id.overrideFolderName);
+            CheckBox hiddenCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.hiddenUserlistOnly);
+            CheckBox lockedCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.lockedUserlistOnly);
+            overrideFolderName.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) => {
+                if(e.IsChecked)
                 {
-                    int prevFiles = -1;
-                    bool success = false;
-                    SoulSeekState.IsParsing = true;
-                    if(rescan && SoulSeekState.SharedFileCache != null)
+                    custromFolderNameEditText.Enabled = true;
+                    custromFolderNameEditText.Alpha = 1.0f;
+                }
+                else
+                {
+                    custromFolderNameEditText.Enabled = false;
+                    custromFolderNameEditText.Alpha = 0.5f;
+                }
+
+
+                };
+            if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+            {
+                custromFolderNameEditText.Text = uploadDirInfo.DisplayNameOverride;
+                overrideFolderName.Checked = true;
+            }
+            else
+            {
+                overrideFolderName.Checked = false;
+            }
+            hiddenCheck.Checked = uploadDirInfo.IsHidden;
+            lockedCheck.Checked = uploadDirInfo.IsLocked;
+
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandlerOkay = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                //the okay case.
+
+
+                //any changed?
+
+                bool hiddenChanged = uploadDirInfo.IsHidden != hiddenCheck.Checked;
+                bool lockedChanged = uploadDirInfo.IsLocked != lockedCheck.Checked;
+                bool overrideNameChanged = 
+                    (string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
+                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride));
+
+                uploadDirInfo.IsHidden = hiddenCheck.Checked;
+                uploadDirInfo.IsLocked = lockedCheck.Checked;
+                string displayNameOld = uploadDirInfo.DisplayNameOverride;
+
+                if (overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text))
+                {
+                    if(uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text)
                     {
-                        prevFiles = SoulSeekState.SharedFileCache.FileCount;
+                        //make sure that we CAN change it.
+                        uploadDirInfo.DisplayNameOverride = custromFolderNameEditText.Text;
+                        if(!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        {
+                            uploadDirInfo.DisplayNameOverride = displayNameOld;
+                            Toast.MakeText(this, "Cannot change name. Not unique.", ToastLength.Long).Show();
+                            overrideNameChanged = false; //we prevented it
+                        }
                     }
+                }
+                else
+                {
+                    if(!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+                    {
+                        //make sure that we CAN change it.
+                        uploadDirInfo.DisplayNameOverride = null;
+                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        {
+                            uploadDirInfo.DisplayNameOverride = displayNameOld;
+                            Toast.MakeText(this, "Cannot change name. Not unique.", ToastLength.Long).Show();
+                            overrideNameChanged = false; //we prevented it
+                        }
+                    }
+                }
+
+                this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
+                if(hiddenChanged || lockedChanged || overrideNameChanged)
+                {
+                    MainActivity.LogDebug("things changed re: folder options..");
+                    Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+                }
+
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+
+                }
+            });
+
+            builder.SetPositiveButton(Resource.String.okay, eventHandlerOkay);
+            var diag = builder.Create();
+            diag.Show();
+        }
+
+        public static EventHandler<EventArgs> UploadDirectoryChanged;
+        public static volatile bool MoreChangesHaveBeenMadeSoRescanWhenDone = false;
+        public static volatile List<Android.Net.Uri> NewlyAddedUrisWeHaveToAddAfter = new List<Android.Net.Uri>();
+
+        public void ParseDatabaseAndUpdateUI(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false)
+        {
+
+            if (rescanClicked)
+            {
+                if (SoulSeekState.IsParsing)
+                {
                     this.RunOnUiThread(new Action(() =>
                     {
-                        UpdateShareImageView(); //for is parsing..
-                        SetSharedFolderView();
+                        Toast.MakeText(this, "Already parsing", ToastLength.Long).Show();
                     }));
-                    try
+                    return;
+                }
+                if (UploadDirectoryManager.UploadDirectories.Count == 0)
+                {
+                    this.RunOnUiThread(new Action(() =>
                     {
-                        SoulSeekState.UploadDataDirectoryUri = uri.ToString();
-                        SoulSeekState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
-                        success = SoulSeekState.MainActivityRef.InitializeDatabase(fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(uri.Path)) : DocumentFile.FromTreeUri(this, uri), false, rescan, out string errorMessage);
-                        if(!success)
-                        {
-                            throw new Exception("Failed to parse shared files: " + errorMessage);
-                        }
-                        SoulSeekState.IsParsing = false;
+                        Toast.MakeText(this, "Directory not set", ToastLength.Long).Show();
+                    }));
+                    return;
+                }
+            }
+
+            if (rescanClicked || newlyAddedUriIfApplicable != null)
+            {
+                this.RunOnUiThread(new Action(() =>
+                {
+                    Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
+                }));
+            }
+
+            UploadDirectoryInfo newlyAddedDirectory = null;
+            if (newlyAddedUriIfApplicable != null)
+            {
+                newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null);
+                newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
+                if (UploadDirectoryManager.UploadDirectories.Where(up => up.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
+                {
+                    //error!!
+                    this.RunOnUiThread(new Action(() =>
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Error: Directory Already Added.",ToastLength.Long).Show();
+                    }));
+                    return;
+                    //throw new Exception("Directory is already added!");
+                }
+                UploadDirectoryManager.UploadDirectories.Add(newlyAddedDirectory);
+            }
+
+            UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+            if (UploadDirectoryManager.AreAllFailed())
+            {
+                throw new MainActivity.DirectoryAccessFailure("All Failed");
+            }
+
+            if (newlyAddedDirectory != null)
+            {
+                bool isUnqiue = UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(newlyAddedDirectory, true);
+                if (!isUnqiue)
+                {
+                    MainActivity.LogDebug("Root name was not unique. Updated it to be unique.");
+                }
+                UploadDirectoryChanged?.Invoke(null, new EventArgs());
+            }
+
+
+            if (SoulSeekState.IsParsing)
+            {
+                MainActivity.LogDebug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
+                MoreChangesHaveBeenMadeSoRescanWhenDone = true;
+                return;
+            }
+
+            try
+            {
+                MainActivity.LogDebug("Parsing now......");
+
+                SoulSeekState.IsParsing = true;
+                int prevFiles = -1;
+                bool success = false;
+                if (rescanClicked && SoulSeekState.SharedFileCache != null)
+                {
+                    prevFiles = SoulSeekState.SharedFileCache.FileCount;
+                }
+                this.RunOnUiThread(new Action(() =>
+                {
+                    UpdateShareImageView(); //for is parsing..
+                    SetSharedFolderView();
+                }));
+                try
+                {
+
+                    success = MainActivity.InitializeDatabase(null, false, out string errorMessage);
+                    if (!success)
+                    {
+                        throw new Exception("Failed to parse shared files: " + errorMessage);
                     }
-                    catch (Exception e)
+                    SoulSeekState.IsParsing = false;
+                }
+                catch (Exception e)
+                {
+                    SoulSeekState.IsParsing = false;
+                    //SoulSeekState.UploadDataDirectoryUri = null;
+                    //SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
+                    MainActivity.ClearParsedCacheResults();
+                    MainActivity.SetUnsetSharingBasedOnConditions(true);
+                    if (!(e is MainActivity.DirectoryAccessFailure))
                     {
-                        SoulSeekState.IsParsing = false;
-                        SoulSeekState.UploadDataDirectoryUri = null;
-                        SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
-                        SoulSeekState.MainActivityRef.ClearParsedCacheResults();
-                        MainActivity.SetUnsetSharingBasedOnConditions(true);
                         MainActivity.LogFirebase("error parsing: " + e.Message + "  " + e.StackTrace);
-                        this.RunOnUiThread(new Action(() =>
-                        {
-                            UpdateShareImageView();
-                            SetSharedFolderView();
-                            Toast.MakeText(this, e.Message, ToastLength.Long).Show();
-                        }));
-                        return;
                     }
-                    SoulSeekState.UploadDataDirectoryUri = uri.ToString();
-                    SoulSeekState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
-                    if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode && !rescan)
-                    {
-                        this.ContentResolver.TakePersistableUriPermission(uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
-                    }
-                    //setup soulseek client with handlers if all conditions met
-                    MainActivity.SetUnsetSharingBasedOnConditions(true, true);
                     this.RunOnUiThread(new Action(() =>
                     {
                         UpdateShareImageView();
                         SetSharedFolderView();
-                        int dirs = SoulSeekState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
-                        int files = SoulSeekState.SharedFileCache.FileCount;
-                        string msg = string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum), dirs, files);
-                        if(rescan) //tack on additional message if applicable..
+                        if (!(e is MainActivity.DirectoryAccessFailure))
                         {
-                            int diff = files - prevFiles;
-                            if(diff > 0)
+                            Toast.MakeText(this, e.Message, ToastLength.Long).Show();
+                        }
+                        else
+                        {
+                            Toast.MakeText(this, "Failed getting access to directory", ToastLength.Long).Show(); //TODO get error from UploadManager..
+                        }
+
+                    }));
+                    UploadDirectoryChanged?.Invoke(null, new EventArgs());
+                    return;
+                }
+                //SoulSeekState.UploadDataDirectoryUri = uri.ToString();
+                //SoulSeekState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
+                if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode && newlyAddedUriIfApplicable != null)
+                {
+                    this.ContentResolver.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                }
+                //setup soulseek client with handlers if all conditions met
+                MainActivity.SetUnsetSharingBasedOnConditions(true, true);
+                this.RunOnUiThread(new Action(() =>
+                {
+                    UpdateShareImageView();
+                    SetSharedFolderView();
+                    int dirs = SoulSeekState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
+                    int files = SoulSeekState.SharedFileCache.FileCount;
+                    string msg = string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum), dirs, files);
+                    if (rescanClicked) //tack on additional message if applicable..
+                    {
+                        int diff = files - prevFiles;
+                        if (diff > 0)
+                        {
+                            if (diff > 1)
                             {
-                                if(diff > 1)
-                                {
-                                    msg = msg + String.Format(" {0} additional files since last scan.",diff);
-                                }
-                                else
-                                {
-                                    msg = msg + " 1 additional file since last scan.";
-                                }
+                                msg = msg + String.Format(" {0} additional files since last scan.", diff);
+                            }
+                            else
+                            {
+                                msg = msg + " 1 additional file since last scan.";
                             }
                         }
-                        Toast.MakeText(this, msg, ToastLength.Long).Show();
-                    }));
-                }
-                finally
+                    }
+                    Toast.MakeText(this, msg, ToastLength.Long).Show();
+                }));
+            }
+            finally
+            {
+                SoulSeekState.IsParsing = false;
+                if(MoreChangesHaveBeenMadeSoRescanWhenDone)
                 {
-                    SoulSeekState.IsParsing = false;
+                    MainActivity.LogDebug("okay now lets pick up our new changes");
+                    MoreChangesHaveBeenMadeSoRescanWhenDone = false;
+                    ParseDatabaseAndUpdateUI(null, requestCode, fromLegacyPicker, false);
                 }
+            }
+        }
+
+
+        /// <summary>
+        /// We always use the previous metadata info if its there. so we always kind of "rescan"
+        /// </summary>
+        /// <param name="newlyAddedUriIfApplicable"></param>
+        /// <param name="requestCode"></param>
+        /// <param name="fromLegacyPicker"></param>
+        /// <param name="rescanClicked"></param>
+        private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false)
+        {
+            Action parseDatabaseAndUpdateUiAction = new Action(() => {
+                ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked);
             });
-            System.Threading.ThreadPool.QueueUserWorkItem((object o) => { parseDatabaseAndUpdateUI(); });
+
+            System.Threading.ThreadPool.QueueUserWorkItem((object o) => { parseDatabaseAndUpdateUiAction(); });
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
@@ -2504,9 +3020,14 @@ namespace AndriodApp1
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             if (READ_EXTERNAL_FOR_MEDIA_STORE == requestCode)
             {
-                if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                if (grantResults.Length > 0 && grantResults[0] == Permission.Granted) //still let them do it. important for auto-deny case.
                 {
-                    ShowDirSettings(SoulSeekState.UploadDataDirectoryUri, DirectoryType.Upload);
+                    ShowDirSettings(null, DirectoryType.Upload);
+                }
+                else
+                {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "No access to media store. Parsing will be unoptimized.",ToastLength.Short).Show();
+                    ShowDirSettings(null, DirectoryType.Upload);
                 }
             }
         }
@@ -2516,7 +3037,7 @@ namespace AndriodApp1
             base.OnActivityResult(requestCode, resultCode, data);
 
             //if from manage external settings
-            if(CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32 || CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode - 32 || UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32)
+            if(CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32 || CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode - 32 || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode - 32)
             {
                 if (Android.OS.Environment.IsExternalStorageManager)
                 {
@@ -2582,7 +3103,7 @@ namespace AndriodApp1
             }
 
 
-            if (UPLOAD_DIR_CHANGE_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY==requestCode)
+            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY==requestCode)
             {
                 if(resultCode != Result.Ok)
                 {
@@ -2592,9 +3113,7 @@ namespace AndriodApp1
                 //make sure you can parse the files before setting the directory..
 
                 //this takes 5+ seconds in Debug mode (with 20-30 albums) which means that this MUST be done on a separate thread..
-                Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
-
-                SuccessfulUploadExternalCallback(data.Data, requestCode, false);
+                Rescan(data.Data, requestCode, false);
 
             }
 
