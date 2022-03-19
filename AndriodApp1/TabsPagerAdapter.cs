@@ -370,7 +370,8 @@ namespace AndriodApp1
 
                         }
                     }
-                    else if (t.Exception.InnerExceptions[0].Message != null && t.Exception.InnerExceptions[0].Message.Contains("wait timed out")) 
+                    else if (t.Exception.InnerExceptions[0].Message != null && 
+                        (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || (t.Exception.InnerExceptions[0].Message.ToLower().Contains("operation timed out"))))
                     {
                         //this happens at work where slsk is banned. technically its due to connection RST. the timeout is not the tcp handshake timeout its instead a wait timeout in the connect async code. so this could probably be improved.
                         cannotLogin = true;
@@ -4734,7 +4735,7 @@ namespace AndriodApp1
                    else
                    {
 
-                       SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                       SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                        {
                            try
                            {
@@ -4766,7 +4767,7 @@ namespace AndriodApp1
                    }
                    if ((!t.IsCanceled) && t.Result.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
-                       SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                       SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                        {
                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();
                        }));
@@ -4809,7 +4810,7 @@ namespace AndriodApp1
 #endif
                             List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
                            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
-                           SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                           SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                            {
                                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                                SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -4873,15 +4874,15 @@ namespace AndriodApp1
             }
             catch (ArgumentNullException ane)
             {
-                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
-                    string errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_search_text);
+                    string errorMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_search_text);
                     if (fromWishlist)
                     {
-                        errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_wish_text);
+                        errorMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
 
-                    Toast.MakeText(SoulSeekState.MainActivityRef, errorMsg, ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
@@ -4895,16 +4896,16 @@ namespace AndriodApp1
             }
             catch (ArgumentException ae)
             {
-                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     string errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_search_text);
                     if (fromWishlist)
                     {
-                        errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_wish_text);
+                        errorMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
-                    Toast.MakeText(SoulSeekState.MainActivityRef, errorMsg, ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
                         transitionDrawable.ResetTransition();
@@ -4922,12 +4923,12 @@ namespace AndriodApp1
             catch (System.Exception ue)
             {
 
-                SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
 
-                    Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
                     MainActivity.LogFirebase("tabpageradapter searchclick: " + ue.Message);
 
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
@@ -4971,12 +4972,12 @@ namespace AndriodApp1
                 ClearFocusSearchEditText();
                 MainActivity.LogDebug("Search_Click");
             }
-            #if !DEBUG
+            //#if !DEBUG
             if (!SoulSeekState.currentlyLoggedIn)
             {
                 if (!fromWishlist)
                 {
-                    Toast tst = Toast.MakeText(SearchFragment.Instance.context, Resource.String.must_be_logged_to_search, ToastLength.Long);
+                    Toast tst = Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_to_search, ToastLength.Long);
                     tst.Show();
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
                     transitionDrawable.ResetTransition();
@@ -4988,12 +4989,13 @@ namespace AndriodApp1
             }
             else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
-                if (fromWishlist)
-                {
-                    return;
-                }
+                //re-connect if from wishlist as well. just do it quietly.
+                //if (fromWishlist)
+                //{
+                //    return;
+                //}
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SearchFragment.Instance.context, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, fromWishlist, out t))
                 {
                     return;
                 }
@@ -5001,25 +5003,26 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                        if(!fromWishlist)
                         {
-           
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-           
-                        });
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            });
+                        }
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
            
                 }));
             }
             else
             {
-            #endif
-            SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
-            #if !DEBUG
+            //#endif
+                SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
+            //#if !DEBUG
             }
-            #endif
+            //#endif
         }
     }
 
@@ -5387,7 +5390,7 @@ namespace AndriodApp1
     //        else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
     //        {
     //            Task t;
-    //            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+    //            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
     //            {
     //                return;
     //            }
@@ -7053,7 +7056,7 @@ namespace AndriodApp1
                     if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                     {
                         Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                         {
                             return base.OnContextItemSelected(item);
                         }
@@ -7123,7 +7126,7 @@ namespace AndriodApp1
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }
@@ -8046,7 +8049,7 @@ namespace AndriodApp1
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -8272,7 +8275,7 @@ namespace AndriodApp1
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -8316,7 +8319,7 @@ namespace AndriodApp1
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }

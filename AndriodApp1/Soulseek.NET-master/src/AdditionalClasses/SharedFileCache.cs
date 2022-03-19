@@ -11,9 +11,15 @@
     using System.Linq;
     using System.Threading;
 
+    public interface IUserListChecker
+    {
+        public bool IsInUserList(string user);
+    }
 
     public static class CommonHelpers
     {
+        public static IUserListChecker UserListChecker;
+
         //this is a cache for localized strings accessed in tight loops...
         private static string strings_kbs;
         public static string STRINGS_KBS
@@ -53,18 +59,12 @@
     /// </summary>
     public class SharedFileCache : ISharedFileCache
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="SharedFileCache"/> class.
-        /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="ttl"></param>
-        public SharedFileCache(string directory, long ttl)
-        {
-            //Directory = directory;
-            //TTL = ttl;
-        }
+        
 
-        public SharedFileCache(Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>>> fullInfo, int direcotryCount, BrowseResponse browseResponse, List<Tuple<string, string>> friendlyDirNameToUriMapping, Dictionary<string,List<int>> tokenIndex, Dictionary<int,string> helperIndex)
+        public SharedFileCache(Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>, bool, bool>> fullInfo, 
+            int direcotryCount, BrowseResponse browseResponse, List<Tuple<string, string>> friendlyDirNameToUriMapping, 
+            Dictionary<string,List<int>> tokenIndex, Dictionary<int,string> helperIndex, List<Soulseek.Directory> hiddenDirectories,
+            int _nonHiddenFileCountForServer)
         {
             FullInfo = fullInfo; //this is the full info, i.e. keys and and their corresponding URI and length
             DirectoryCount = direcotryCount;
@@ -72,8 +72,19 @@
             FriendlyDirNameToUriMapping = friendlyDirNameToUriMapping;
             TokenIndex = tokenIndex;
             HelperIndex = helperIndex;
-
+            BrowseResponseHiddenPortion = hiddenDirectories;
             SuccessfullyInitialized = false;
+            nonHiddenFileCountForServer = _nonHiddenFileCountForServer;
+        }
+        private int nonHiddenFileCountForServer = -1;
+        public int GetNonHiddenFileCountForServer()
+        {
+            return nonHiddenFileCountForServer;
+        }
+
+        public static SharedFileCache GetEmptySharedFileCache()
+        {
+            return new SharedFileCache(new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>(), 0, null, new List<Tuple<string, string>>(), new Dictionary<string, List<int>>(), new Dictionary<int, string>(), new List<Soulseek.Directory>(), 0);
         }
 
         /// <summary>
@@ -86,10 +97,10 @@
         /// 
         /// </param>
         /// <returns></returns>
-        public Tuple<long, string, Tuple<int, int, int, int>> GetFullInfoFromSearchableName(string keyFilename, string fullPath, bool toStripVolumeName, string volumeName, Func<string,string> GetLastEncoded, out string errorMessage)
+        public Tuple<long, string, Tuple<int, int, int, int>, bool, bool> GetFullInfoFromSearchableName(string keyFilename, out string errorMessage)
         {
             //Tuple<string, string, long> ourFileInfo = FullInfo.Where((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault();
-            Tuple<long, string, Tuple<int, int, int, int>> ourFileInfo = FullInfo[keyFilename];
+            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = FullInfo[keyFilename];
             if(ourFileInfo==null)
             {
                 errorMessage = "ourFileInfo 1 is null keyFilename is: " + keyFilename + "FullInfo.Count" + FullInfo.Count;
@@ -162,18 +173,61 @@
             return input.Replace(".", "").Replace(",", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("[", "").Replace("]", "");
         }
 
-        public List<Soulseek.File> GetSlskFilesFromMatches(IEnumerable<int> matches)
+        public IEnumerable<Soulseek.File> GetSlskFilesFromMatches(IEnumerable<int> matches, string uname, out IEnumerable<Soulseek.File> lockedFiles)
         {
             IEnumerable<string> presentableNames = matches.Select(match=> HelperIndex[match]);
-
-
+            bool? inUserList = null;
+            lockedFiles = new List<Soulseek.File>();
             List<Soulseek.File> response = new List<Soulseek.File>();
             foreach (var fName in presentableNames)
             {
                 var fullInfoFile = FullInfo[fName];
+                
+                //should we skip it
+                if(fullInfoFile.Item5)
+                {
+                    if(!inUserList.HasValue)
+                    {
+                        inUserList = CommonHelpers.UserListChecker.IsInUserList(uname);
+                    }
+                    if(!inUserList.Value)
+                    {
+                        continue;
+                    }
+                }
+
                 Soulseek.File f = new Soulseek.File(1, fName, fullInfoFile.Item1, System.IO.Path.GetExtension(fName), GetFileAttributesFromTuple(fullInfoFile.Item3));
-                response.Add(f);
+                if (fullInfoFile.Item4)
+                {
+                    (lockedFiles as List<Soulseek.File>).Add(f);
+                }
+                else
+                {
+                    response.Add(f);
+                }
             }
+
+            //if any hidden files. I suppose its faster to just do this up front.. an extra bit per each boolean per file. 1 million shared files = 250kB is okay if it means less processing power used
+            //if(anyLockedPaths)
+            //{
+            //    for(int i = response.Count - 1; i >= 0; i--)
+            //    {
+            //        foreach(string lockedPath in LockedPathsPresentablePaths)
+            //        {
+            //            if(response[i].Filename.StartsWith($"{lockedPath}\\"))
+            //            {
+            //                lockedFiles = lockedFiles.Append(response[i]);
+            //                response.RemoveAt(i);
+            //                continue;
+            //            }
+            //        }
+            //    }
+            //}
+
+            //if any non visible files
+
+
+
             return response;
         }
 
@@ -181,8 +235,23 @@
         Dictionary<int,string> HelperIndex {get;}
         public event EventHandler<(int Directories, int Files)> Refreshed;
         public bool SuccessfullyInitialized { get;set;}
-        public BrowseResponse BrowseResponse { get;}
-        public Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>>> FullInfo {get; }
+        private BrowseResponse BrowseResponse;
+        private List<Soulseek.Directory> BrowseResponseHiddenPortion = null; //considered locked.
+        public BrowseResponse GetBrowseResponseForUser(string user, bool force = false)
+        {
+            if(!force && (BrowseResponseHiddenPortion == null || BrowseResponse == null || BrowseResponseHiddenPortion.Count == 0 || string.IsNullOrEmpty(user) || !CommonHelpers.UserListChecker.IsInUserList(user)))
+            {
+                return BrowseResponse;
+            }
+            else
+            {
+                List<Soulseek.Directory> AllLockedDirs = BrowseResponse.LockedDirectories.ToList();
+                AllLockedDirs.AddRange(BrowseResponseHiddenPortion);
+                return new BrowseResponse(BrowseResponse.Directories, AllLockedDirs);
+            }
+        }
+
+        public Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>, bool, bool>> FullInfo {get; }
         public int DirectoryCount = -1;
         public int FileCount
         {
@@ -243,9 +312,9 @@
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public IEnumerable<Soulseek.File> Search(SearchQuery query)
+        public IEnumerable<Soulseek.File> Search(SearchQuery query, string uname, out IEnumerable<Soulseek.File> lockedFiles)
         {
-            return QueryTable(query.Terms, query.Exclusions);
+            return QueryTable(query.Terms, query.Exclusions, uname, out lockedFiles);
         }
 
         private void CreateTable()
@@ -270,10 +339,11 @@
         //}
 #pragma warning restore S1144 // Unused private types or members should be removed
 
-        private IEnumerable<Soulseek.File> QueryTable(IReadOnlyCollection<string> includeTerms, IReadOnlyCollection<string> excludeTerms)
+        private IEnumerable<Soulseek.File> QueryTable(IReadOnlyCollection<string> includeTerms, IReadOnlyCollection<string> excludeTerms, string uname, out IEnumerable<Soulseek.File> lockedFiles)
         {
             if(FileCount == 0)
             {
+                lockedFiles = Enumerable.Empty<Soulseek.File>();
                 return Enumerable.Empty<Soulseek.File>();
             }
             // sanitize the query string. there's probably more to it than this.
@@ -299,6 +369,7 @@
                     }
                     if (!TokenIndex.ContainsKey(includeTermAgnostic))
                     {
+                        lockedFiles = Enumerable.Empty<Soulseek.File>();
                         return Enumerable.Empty<Soulseek.File>();
                     }
                     else
@@ -313,6 +384,7 @@
                             matches = matches.Intersect(nextTermMatches);
                             if(!matches.Any())
                             {
+                                lockedFiles = Enumerable.Empty<Soulseek.File>();
                                 return Enumerable.Empty<Soulseek.File>();
                             }
                         }
@@ -321,6 +393,7 @@
 
                 if(matches==null || !matches.Any())
                 {
+                    lockedFiles = Enumerable.Empty<Soulseek.File>();
                     return Enumerable.Empty<Soulseek.File>();
                 }
 
@@ -335,15 +408,17 @@
 
                 if (!matches.Any())
                 {
+                    lockedFiles = Enumerable.Empty<Soulseek.File>();
                     return Enumerable.Empty<Soulseek.File>();
                 }
 
-                return GetSlskFilesFromMatches(matches);//results.Select(r => Files[r.Replace("''", "'")]);
+                return GetSlskFilesFromMatches(matches, uname, out lockedFiles);//results.Select(r => Files[r.Replace("''", "'")]);
             }
             catch (Exception ex)
             {
                 // temporary error trap to refine substitution rules
                 Console.WriteLine($"[MALFORMED QUERY]: {""} ({ex.Message})");
+                lockedFiles = Enumerable.Empty<Soulseek.File>();
                 return Enumerable.Empty<Soulseek.File>();
             }
             finally

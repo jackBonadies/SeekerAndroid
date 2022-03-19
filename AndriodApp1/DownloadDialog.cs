@@ -405,7 +405,7 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task conTask;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out conTask))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out conTask))
                 {
                     return;
                 }
@@ -456,7 +456,7 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -995,7 +995,7 @@ namespace AndriodApp1
             if(MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }
@@ -1102,7 +1102,7 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }

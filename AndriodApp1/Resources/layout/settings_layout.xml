@@ -39,7 +39,7 @@
             android:padding="4dip"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-                        <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop = "10dp"
@@ -49,299 +49,283 @@
                 android:orientation="vertical">
 
                 <TableLayout
-            android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                               
-                              android:layout_centerHorizontal="true"
-                android:gravity="center_horizontal"
-                                android:id="@+id/dlChangeDirectoryLayout"
-        android:shrinkColumns="0">
-
-                        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-
-
-
-                                            <LinearLayout
-                android:layout_width="wrap_content"
-                        android:layout_marginEnd="10dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
-                            android:layout_marginStart="10dp"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/directoryLayout"
-                android:orientation="vertical">
-
-                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:layout_gravity="center_horizontal"
-                    android:text="Current Download Folder: "
-                            android:textColor="?attr/normalTextColor"
-                    android:textSize="12dp"
-                    />
-
-                               <TextView
-                            android:layout_gravity="center_horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="folderPathDummy"
-                            android:layout_marginBottom="4dp"
-                     android:id="@+id/completeFolderPath"
-                                android:maxLines="2"
-                                android:ellipsize="end"
-                                android:inputType="none"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp"
-                            android:background="?the_rounded_corner_background_drawable"
-                            android:textColor="?attr/normalTextColor"
                     
-                    />
-
-
-
-                     </LinearLayout>
-
-            <Button
-                android:layout_centerHorizontal="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Change"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
-                style="@style/SeekerButtonStyle"
-                android:foreground="@drawable/button"
-                android:id="@+id/changeDirSettings"
-       />
-                </TableRow>
-
-                    </TableLayout>
-
-
-                            <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="Create Soulseek Complete and Soulseek Incomplete Directories"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="10dp"
-                android:layout_gravity="center"
-
-android:theme="@style/checkBoxStyle"
-                android:layout_marginTop = "10dp"
-                android:id="@+id/createCompleteAndIncompleteDirectories"
-                android:layout_marginBottom = "10dp"/>
-
-                                            <CheckBox
-
-android:theme="@style/checkBoxStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:text="Create Username Subfolders"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="10dp"
-                android:layout_gravity="center"
-                android:layout_marginTop = "10dp"
-                android:id="@+id/createUsernameSubfolders"
-                android:layout_marginBottom = "10dp"/>
-
-
-
-
-                           <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="6dp"
-                    
-                    android:layout_marginEnd="10dp"
-                android:id="@+id/incompleteFolderLayout"
-                android:background="@drawable/border_group_box"
-                android:orientation="vertical"
-                >
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
-                    android:layout_marginBottom = "2dp"
-                        
                     android:layout_centerHorizontal="true"
-                    android:id="@+id/incompleteFolderSubLayout"
-                    android:orientation="horizontal"
-                    android:gravity="center_horizontal|fill_horizontal|center">
-                    <CheckBox
+                    android:gravity="center_horizontal"
+                    android:id="@+id/dlChangeDirectoryLayout"
+                    android:shrinkColumns="0">
 
-android:theme="@style/checkBoxStyle"
+                    <TableRow
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Manually Set Incomplete Folder"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "4dp"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:id="@+id/manuallySetIncomplete"
-       />
+                        android:gravity="center">
 
 
-<!--                                        <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
-                        
-                        android:id="@+id/moreInfoButton"
-                        app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="?attr/mainTextColor"
-            />-->
 
 
-                </LinearLayout>
-
-                <TableLayout
-            android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                                android:layout_marginTop = "10dp"
-                              android:layout_centerHorizontal="true"
-                android:gravity="center_horizontal"
-                                android:id="@+id/incompleteSublayout2"
-        android:shrinkColumns="0">
-
-                        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-                        
-                                            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop = "2dp"
-                                                android:layout_marginBottom = "10dp"
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop = "10dp"
+                            android:layout_marginBottom = "10dp"
                             android:layout_marginStart="10dp"
-                                
-                android:layout_centerHorizontal="true"
-                android:id="@+id/incompleteDirectoryLayout"
-                android:orientation="vertical">
+                            android:layout_centerHorizontal="true"
+                            android:id="@+id/directoryLayout"
+                            android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                    android:text="Current Incomplete Folder:"
-                            android:textColor="?attr/normalTextColor"
-                    android:textSize="12dp"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
                                 android:layout_marginBottom="4dp"
+                                android:layout_gravity="center_horizontal"
+                                android:text="Current Download Folder: "
+                                android:textColor="?attr/normalTextColor"
+                                android:textSize="12dp"
                     />
 
-                               <TextView
-                            android:layout_gravity="center_horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="incompleteFolderPathDummy"
-                                android:id="@+id/incompleteFolderPath"
-                            android:layout_marginBottom="4dp"
+                            <TextView
+                                android:layout_gravity="center_horizontal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="folderPathDummy"
+                                android:layout_marginBottom="4dp"
+                                android:id="@+id/completeFolderPath"
                                 android:maxLines="2"
                                 android:ellipsize="end"
                                 android:inputType="none"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp"
-                            android:background="?the_rounded_corner_background_drawable"
-                            android:textColor="?attr/normalTextColor"
+                                android:paddingTop="2dp"
+                                android:paddingBottom="2dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp"
+                                android:background="?the_rounded_corner_background_drawable"
+                                android:textColor="?attr/normalTextColor"
                     
                     />
 
-                     </LinearLayout>
 
-            <Button
-                android:layout_centerHorizontal="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Change"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
-                style="@style/SeekerButtonStyle"
-                android:foreground="@drawable/button"
-                android:id="@+id/changeIncompleteDirSettings"
+
+                        </LinearLayout>
+
+                        <Button
+                            android:layout_centerHorizontal="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Change"
+                            android:paddingTop="4dp"
+                            android:paddingBottom="4dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginTop = "10dp"
+                            android:layout_marginBottom = "10dp"
+                            style="@style/SeekerButtonStyle"
+                            android:foreground="@drawable/button"
+                            android:id="@+id/changeDirSettings"
        />
+                    </TableRow>
 
-                </TableRow>
                 </TableLayout>
-                                    <LinearLayout
+
+
+                <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "0dp"
-                         android:layout_gravity="center"
-                    android:layout_marginBottom = "12dp"
-                    android:id="@+id/clearIncompleteSubLayout"
-                    android:orientation="horizontal"
+                    android:layout_centerHorizontal="true"
+                    android:text="Create Soulseek Complete and Soulseek Incomplete Directories"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="10dp"
+                    android:layout_gravity="center"
+                    
+                    android:theme="@style/checkBoxStyle"
+                    android:layout_marginTop = "10dp"
+                    android:id="@+id/createCompleteAndIncompleteDirectories"
+                    android:layout_marginBottom = "10dp"/>
+
+                <CheckBox
+                    
+                    android:theme="@style/checkBoxStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="Create Username Subfolders"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="10dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop = "10dp"
+                    android:id="@+id/createUsernameSubfolders"
+                    android:layout_marginBottom = "10dp"/>
+
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    
+                    android:layout_marginEnd="10dp"
+                    android:id="@+id/incompleteFolderLayout"
+                    android:background="@drawable/border_group_box"
+                    android:orientation="vertical"
+                >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop = "2dp"
+                        android:layout_marginBottom = "2dp"
+                        
+                        android:layout_centerHorizontal="true"
+                        android:id="@+id/incompleteFolderSubLayout"
+                        android:orientation="horizontal"
+                        android:gravity="center_horizontal|fill_horizontal|center">
+                        <CheckBox
+                            
+                            android:theme="@style/checkBoxStyle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Manually Set Incomplete Folder"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginTop = "10dp"
+                            android:layout_marginBottom = "4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="10dp"
+                            android:id="@+id/manuallySetIncomplete"
+       />
+
+
+                    </LinearLayout>
+
+                    <TableLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop = "10dp"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center_horizontal"
+                        android:id="@+id/incompleteSublayout2"
+                        android:shrinkColumns="0">
+
+                        <TableRow
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center">
+
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop = "2dp"
+                                android:layout_marginBottom = "10dp"
+                                android:layout_marginStart="10dp"
+                                
+                                android:layout_centerHorizontal="true"
+                                android:id="@+id/incompleteDirectoryLayout"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:text="Current Incomplete Folder:"
+                                    android:textColor="?attr/normalTextColor"
+                                    android:textSize="12dp"
+                                    android:layout_marginBottom="4dp"
+                    />
+
+                                <TextView
+                                    android:layout_gravity="center_horizontal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="incompleteFolderPathDummy"
+                                    android:id="@+id/incompleteFolderPath"
+                                    android:layout_marginBottom="4dp"
+                                    android:maxLines="2"
+                                    android:ellipsize="end"
+                                    android:inputType="none"
+                                    android:paddingTop="2dp"
+                                    android:paddingBottom="2dp"
+                                    android:paddingStart="4dp"
+                                    android:paddingEnd="4dp"
+                                    android:background="?the_rounded_corner_background_drawable"
+                                    android:textColor="?attr/normalTextColor"
+                    
+                    />
+
+                            </LinearLayout>
+
+                            <Button
+                                android:layout_centerHorizontal="true"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Change"
+                                android:paddingTop="4dp"
+                                android:paddingBottom="4dp"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_marginTop = "10dp"
+                                android:layout_marginBottom = "10dp"
+                                style="@style/SeekerButtonStyle"
+                                android:foreground="@drawable/button"
+                                android:id="@+id/changeIncompleteDirSettings"
+       />
+
+                        </TableRow>
+                    </TableLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop = "0dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom = "12dp"
+                        android:id="@+id/clearIncompleteSubLayout"
+                        android:orientation="horizontal"
                    >
-            <Button
-                android:layout_centerHorizontal="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Clear Folder"
+                        <Button
+                            android:layout_centerHorizontal="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Clear Folder"
                             android:minHeight="16dp"
-                    android:textSize="12dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
-                    android:paddingStart="7dp"
+                            android:textSize="12dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:paddingStart="7dp"
                             android:gravity="center_vertical"
-                    android:paddingEnd="7dp"
+                            android:paddingEnd="7dp"
                             android:textAllCaps="false"
                             android:layout_marginTop = "6dp"
                             android:layout_marginBottom = "6dp"
-                style="@style/SeekerButtonStyle"
-                android:foreground="@drawable/button"
-                android:id="@+id/clearIncompleteFolder"
+                            style="@style/SeekerButtonStyle"
+                            android:foreground="@drawable/button"
+                            android:id="@+id/clearIncompleteFolder"
        />
 
 
-                                       <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "6dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginBottom = "6dp"
-                        android:id="@+id/moreInfoButtonClearIncomplete"
-                        app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="?attr/mainTextColor"
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginTop = "6dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginBottom = "6dp"
+                            android:id="@+id/moreInfoButtonClearIncomplete"
+                            app:srcCompat="@drawable/help_circle_outline"
+                            android:tint="?attr/mainTextColor"
             />
 
 
-                </LinearLayout>
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -394,7 +378,7 @@ android:theme="@style/checkBoxStyle"
         />
             </LinearLayout>
 
-                        <LinearLayout
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/searchResLayout"
@@ -403,24 +387,24 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/smartFilterLayout"
                 android:orientation="horizontal">
 
-             <CheckBox
+                <CheckBox
+                    
+                    android:theme="@style/checkBoxStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@+id/smartFilterLayout"
+                    android:text="Show Smart Filters"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop = "10dp"
+                    android:id="@+id/smartFilterEnable"
+                    android:layout_marginBottom = "10dp"/>
 
-android:theme="@style/checkBoxStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_below="@+id/smartFilterLayout"
-                android:text="Show Smart Filters"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="10dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
-                android:id="@+id/smartFilterEnable"
-                android:layout_marginBottom = "10dp"/>
-
-                                <Button
+                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Configure"
@@ -440,11 +424,11 @@ android:theme="@style/checkBoxStyle"
         />
 
 
-                </LinearLayout>
+            </LinearLayout>
 
             <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -460,10 +444,10 @@ android:theme="@style/checkBoxStyle"
                 android:layout_marginBottom = "10dp"/>
 
 
-            
-            <CheckBox
 
-android:theme="@style/checkBoxStyle"
+            <CheckBox
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -479,10 +463,10 @@ android:theme="@style/checkBoxStyle"
                 android:layout_marginBottom = "10dp"/>
 
 
-            
-            <CheckBox
 
-android:theme="@style/checkBoxStyle"
+            <CheckBox
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -510,8 +494,8 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/keepAliveLayout"
                 android:orientation="horizontal">
                 <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                    
+                    android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/start_service_on_startup"
@@ -548,7 +532,7 @@ android:theme="@style/checkBoxStyle"
                     android:layout_marginBottom = "0dp"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-
+                    
                     android:layout_gravity="center_vertical"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:id="@+id/helpServiceOnStartup"
@@ -558,8 +542,8 @@ android:theme="@style/checkBoxStyle"
             </LinearLayout>
 
             <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -574,8 +558,8 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/allowPrivateRoomInvitations"
                 android:layout_marginBottom = "10dp"/>
             <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -590,9 +574,9 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/autoClearComplete"
                 android:layout_marginBottom = "10dp"/>
 
-                        <CheckBox
-
-android:theme="@style/checkBoxStyle"
+            <CheckBox
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -607,9 +591,9 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/autoClearCompleteUploads"
                 android:layout_marginBottom = "10dp"/>
 
-                        <CheckBox
-
-android:theme="@style/checkBoxStyle"
+            <CheckBox
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -626,8 +610,8 @@ android:theme="@style/checkBoxStyle"
 
 
             <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
@@ -652,8 +636,7 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/searchHistoryLayout"
                 android:orientation="horizontal">
                 <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                    android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/remember_search_history"
@@ -686,7 +669,7 @@ android:theme="@style/checkBoxStyle"
         />
             </LinearLayout>
 
-                        <LinearLayout
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/searchHistoryLayout"
@@ -695,8 +678,7 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/recentUserHistoryLayout"
                 android:orientation="horizontal">
                 <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                    android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Remember Recent Users"
@@ -739,8 +721,7 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/memoryFileDownloadSwitch"
                 android:orientation="horizontal">
                 <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                    android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_backed_downloads"
@@ -759,7 +740,6 @@ android:theme="@style/checkBoxStyle"
                     android:layout_marginBottom = "0dp"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-  
                     android:layout_gravity="center_vertical"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:id="@+id/memoryFileDownloadSwitchIcon"
@@ -769,8 +749,7 @@ android:theme="@style/checkBoxStyle"
 
             </LinearLayout>
 
-                <CheckBox
-
+            <CheckBox
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -787,8 +766,7 @@ android:theme="@style/checkBoxStyle"
                 android:layout_marginBottom = "10dp"/>
 
 
-                        <CheckBox
-
+            <CheckBox
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -934,14 +912,13 @@ android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop = "2dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginBottom = "10dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/sharingLayout"
                     android:orientation="horizontal"
                     android:gravity="center_horizontal|fill_horizontal|center">
                     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                        android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/enable_sharing"
@@ -956,15 +933,13 @@ android:theme="@style/checkBoxStyle"
        />
 
 
-                                        <ImageView
+                    <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "2dp"
-                        
                         android:id="@+id/moreInfoButton"
                         app:srcCompat="@drawable/help_circle_outline"
                         android:tint="?attr/mainTextColor"
@@ -978,92 +953,89 @@ android:theme="@style/checkBoxStyle"
 
                 </LinearLayout>
 
-                                <TableLayout
-            android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                               
-                              android:layout_centerHorizontal="true"
-                android:gravity="center_horizontal"
-                                android:id="@+id/dlChangeSharedDirectoryLayout"
-        android:shrinkColumns="0">
-
-                        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center">
 
 
+                        <LinearLayout
+                            android:orientation="vertical"
+                    android:layout_marginStart= "48dp"
+                    android:layout_marginTop= "12dp"
+                    android:layout_marginEnd= "16dp"
+                    android:layout_marginBottom="2dp"
+                    android:padding="6dp"
+                    android:background="?attr/rounded_input_edit"
+                            android:layout_width="match_parent"
+                    android:id="@+id/dlChangeSharedDirectoryLayout"
+                            android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/noSharedFolders"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:textColor="?attr/normalTextColor"
+                        android:text="No Shared Folders. Tap 'Add' to get started."
+                        android:layout_marginBottom="6dp"
+                        android:background="?attr/the_rounded_corner_dialog_background_drawable"
+                        />
+
+                            <androidx.recyclerview.widget.RecyclerView
+                        
+                        android:background="?attr/the_rounded_corner_dialog_background_drawable"
+                        android:layout_marginBottom="6dp"
+                                android:id="@+id/uploadFoldersRecyclerView"
+                                android:minHeight="20dp"
+                        android:visibility="gone"
+                        android:paddingBottom="6dp"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+                            </androidx.recyclerview.widget.RecyclerView>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <Button
+                                         android:minHeight="16dp"
+                                                    android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                            
+                            
+                                    android:id="@+id/addUploadDirectory"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="3"
+                                    android:layout_marginEnd="4dp"
+                            android:textAllCaps="false"
+                                    android:foreground="@drawable/button"
+                                    style="@style/SeekerButtonStyle"
+                                    android:text="Add" />
+
+                                <Button
+                            
+                                                                     android:minHeight="16dp"
+                                                    android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
+                            android:textAllCaps="false"
+                            
+                                    android:id="@+id/clearAllDirectories"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:foreground="@drawable/button"
+                                    style="@style/SeekerButtonStyle"
+                                    android:text="Clear" />
+                            </LinearLayout>
+                        </LinearLayout>
 
 
-                                            <LinearLayout
-                android:layout_width="wrap_content"
-                        android:layout_marginEnd="10dp"
-                android:layout_height="wrap_content"
-                
-                android:layout_marginBottom = "10dp"
-                android:layout_marginTop= "10dp"
-                            android:layout_marginStart="10dp"
-                android:layout_centerHorizontal="true"
-                android:id="@+id/sharingSubLayout1"
-                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:layout_gravity="center_horizontal"
-                    android:text="Current Shared Folder: "
-                            android:textColor="?attr/normalTextColor"
-                    android:textSize="12dp"
-                    />
-
-                               <TextView
-                            android:layout_gravity="center_horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="folderPathDummy"
-                            android:layout_marginBottom="4dp"
-                     android:id="@+id/sharedFolderPath"
-                                android:maxLines="2"
-                                android:ellipsize="end"
-                                android:inputType="none"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp"
-                            android:background="?the_rounded_corner_background_drawable"
-                            android:textColor="?attr/normalTextColor"
-                    
-                    />
-
-
-
-                     </LinearLayout>
-
-            <Button
-                android:layout_centerHorizontal="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Change"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginTop= "10dp"
-                android:layout_marginBottom = "10dp"
-                style="@style/SeekerButtonStyle"
-                android:foreground="@drawable/button"
-                android:id="@+id/setSharedFolder"
-       />
-                </TableRow>
-
-                    </TableLayout>
 
 
                 <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop = "8dp"
                     android:layout_marginBottom = "10dp"
                     android:layout_marginStart= "32dp"
                     android:gravity="center_horizontal"
@@ -1071,21 +1043,37 @@ android:theme="@style/checkBoxStyle"
                     android:id="@+id/sharingSubLayout2"
                     android:orientation="horizontal">
 
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginTop = "6dp"
+                        android:layout_marginBottom = "10dp"
+                        android:layout_height="wrap_content">
+                        <ProgressBar
+                            android:id="@+id/progressBarSharedStatus"
+                            android:indeterminate="true"
+                            android:progressTint="?attr/mainTextColor"
+                            android:layout_width="wrap_content"
+                            android:layout_gravity="center"
+                            android:scaleX=".8"
+                            android:scaleY=".8"
 
+                            android:layout_height="wrap_content"/>
                     <ImageView
                         android:layout_centerHorizontal="true"
-                        android:layout_marginTop = "2dp"
+                        
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginBottom = "10dp"
+                        
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
+                        android:layout_gravity="center"
                         app:srcCompat="@drawable/ic_filter_list_black_32dp"
                         android:id="@+id/sharedStatus"
                         android:tint="?attr/mainTextColor"
                 />
-                                        <Button
+                        </FrameLayout>
+                    <Button
                         android:layout_centerHorizontal="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1101,7 +1089,7 @@ android:theme="@style/checkBoxStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "2dp"
+                        android:layout_marginTop = "6dp"
                         android:layout_marginEnd="6dp"
                         android:layout_marginBottom = "10dp"
                         android:id="@+id/rescanShares"
@@ -1123,7 +1111,7 @@ android:theme="@style/checkBoxStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "2dp"
+                        android:layout_marginTop = "6dp"
                         android:layout_marginEnd="6dp"
                         android:layout_marginBottom = "10dp"
                         android:id="@+id/browseSelfButton"
@@ -1152,8 +1140,7 @@ android:theme="@style/checkBoxStyle"
                     android:id="@+id/listeningRow1"
                     android:orientation="horizontal">
                     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                        android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/enable_listening"
@@ -1170,12 +1157,10 @@ android:theme="@style/checkBoxStyle"
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "10dp"
-                        
                         android:id="@+id/listeningHelp"
                         app:srcCompat="@drawable/help_circle_outline"
                         android:tint="?attr/mainTextColor"
@@ -1211,7 +1196,6 @@ android:theme="@style/checkBoxStyle"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:textAllCaps="false"
-                        
                         android:layout_gravity="center_vertical"
                         android:minHeight="16dp"
                         android:layout_marginEnd="10dp"
@@ -1234,7 +1218,6 @@ android:theme="@style/checkBoxStyle"
                         android:textSize="12dp"
                         android:paddingTop="8dp"
                         android:layout_gravity="center_vertical"
-                        
                         android:paddingBottom="8dp"
                         android:textAllCaps="false"
                         android:minHeight="16dp"
@@ -1255,7 +1238,6 @@ android:theme="@style/checkBoxStyle"
                     android:id="@+id/listeningRow3"
                     android:orientation="horizontal">
                     <CheckBox
-
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1270,13 +1252,10 @@ android:theme="@style/checkBoxStyle"
                         android:id="@+id/useUPnPCheckBox"
             />
                     <ImageView
-                        
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "10dp"
-                        
-                        
                         android:layout_width="26dp"
                         android:layout_height="26dp"
                         android:id="@+id/UPnPStatus"
@@ -1289,7 +1268,7 @@ android:theme="@style/checkBoxStyle"
 
 
 
-                       <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -1305,8 +1284,7 @@ android:theme="@style/checkBoxStyle"
                     android:id="@+id/dlSpeedRow1"
                     android:orientation="horizontal">
                     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                        android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Limit Download Speed"
@@ -1320,7 +1298,7 @@ android:theme="@style/checkBoxStyle"
                         android:paddingEnd="10dp"
                         android:id="@+id/enable_dl_speed_limits"
             />
-<!--                    <ImageView
+                    <!--                    <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         
@@ -1365,7 +1343,6 @@ android:theme="@style/checkBoxStyle"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:textAllCaps="false"
-                        
                         android:layout_gravity="center_vertical"
                         android:minHeight="16dp"
                         android:layout_marginEnd="10dp"
@@ -1374,14 +1351,14 @@ android:theme="@style/checkBoxStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
             />
-                                    <Spinner
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0.4"
-                    android:id="@+id/dlPerTransfer"
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0.4"
+                        android:id="@+id/dlPerTransfer"
         />
 
                 </LinearLayout>
@@ -1391,7 +1368,7 @@ android:theme="@style/checkBoxStyle"
 
 
 
-                                   <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -1407,8 +1384,7 @@ android:theme="@style/checkBoxStyle"
                     android:id="@+id/ulSpeedRow1"
                     android:orientation="horizontal">
                     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                        android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Limit Upload Speed"
@@ -1422,7 +1398,7 @@ android:theme="@style/checkBoxStyle"
                         android:paddingEnd="10dp"
                         android:id="@+id/enable_ul_speed_limits"
             />
-<!--                    <ImageView
+                    <!--                    <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         
@@ -1467,7 +1443,6 @@ android:theme="@style/checkBoxStyle"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:textAllCaps="false"
-                        
                         android:layout_gravity="center_vertical"
                         android:minHeight="16dp"
                         android:layout_marginEnd="10dp"
@@ -1476,21 +1451,21 @@ android:theme="@style/checkBoxStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
             />
-                                    <Spinner
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0.4"
-                    android:id="@+id/ulPerTransfer"
+                    <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0.4"
+                        android:id="@+id/ulPerTransfer"
         />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-           <LinearLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
@@ -1510,8 +1485,7 @@ android:theme="@style/checkBoxStyle"
                     android:orientation="horizontal"
                     android:gravity="center_horizontal|fill_horizontal|center">
                     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+                        android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Limit Concurrent Downloads"
@@ -1526,21 +1500,19 @@ android:theme="@style/checkBoxStyle"
        />
 
 
-                                        <ImageView
+                    <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "2dp"
-                        
                         android:id="@+id/moreInfoConcurrent"
                         app:srcCompat="@drawable/help_circle_outline"
                         android:tint="?attr/mainTextColor"
             />
-</LinearLayout>
-                                <LinearLayout
+                </LinearLayout>
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop = "12dp"
@@ -1571,7 +1543,6 @@ android:theme="@style/checkBoxStyle"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:textAllCaps="false"
-                        
                         android:layout_gravity="center_vertical"
                         android:minHeight="16dp"
                         android:layout_marginEnd="10dp"
@@ -1580,138 +1551,126 @@ android:theme="@style/checkBoxStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
             />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
 
             <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/limitConcurrentDownloadsLayout"
                 android:id="@+id/privLayout"
-    android:layout_height="wrap_content">
+                android:layout_height="wrap_content">
 
- <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Privileges: STATUSDUMMY"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
-                        android:textColor="?attr/normalTextColorNonTinted"
-                        android:paddingStart="4dp"
-                        android:paddingEnd="10dp"
-                        android:id="@+id/privStatusView"
-     />
-
-    <Button
-                    
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Get"
-                        android:id="@+id/getPriv"
-                        android:textSize="12dp"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:textAllCaps="false"
-                        
-                        android:layout_gravity="center_vertical"
-                        android:minHeight="16dp"
-                        android:layout_marginEnd="10dp"
-                        android:foreground="@drawable/button"
-                        style="@style/SeekerButtonStyle"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="2dp"
-                   
-        />
-
-    <Button
-                    
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Check"
-                        android:id="@+id/checkPriv"
-                        android:textSize="12dp"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:textAllCaps="false"
-                        
-                        android:layout_gravity="center_vertical"
-                        android:minHeight="16dp"
-                        android:layout_marginEnd="10dp"
-                        android:foreground="@drawable/button"
-                        style="@style/SeekerButtonStyle"
-                        android:paddingStart="2dp"
-                        android:paddingEnd="2dp"
-                   
-        />
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
-                        
-                        android:id="@+id/privHelp"
-                        app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="?attr/mainTextColor"
-            />
-
-</LinearLayout>
-
-
-                            <LinearLayout
-                android:layout_below="@id/privLayout"
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
-                    android:layout_marginBottom = "2dp"
-                    android:layout_centerHorizontal="true"
-                    android:id="@+id/enableDiagnosticsLayout"
-                    android:orientation="horizontal"
-                    android:gravity="center_horizontal|fill_horizontal|center">
+                    android:text="Privileges: STATUSDUMMY"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:textColor="?attr/normalTextColorNonTinted"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="10dp"
+                    android:id="@+id/privStatusView"
+     />
 
-                <CheckBox
-                
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Get"
+                    android:id="@+id/getPriv"
+                    android:textSize="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textAllCaps="false"
+                    android:layout_gravity="center_vertical"
+                    android:minHeight="16dp"
+                    android:layout_marginEnd="10dp"
+                    android:foreground="@drawable/button"
+                    style="@style/SeekerButtonStyle"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                   
+        />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Check"
+                    android:id="@+id/checkPriv"
+                    android:textSize="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:textAllCaps="false"
+                    android:layout_gravity="center_vertical"
+                    android:minHeight="16dp"
+                    android:layout_marginEnd="10dp"
+                    android:foreground="@drawable/button"
+                    style="@style/SeekerButtonStyle"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                   
+        />
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop = "10dp"
+                    android:layout_marginBottom = "10dp"
+                    android:id="@+id/privHelp"
+                    app:srcCompat="@drawable/help_circle_outline"
+                    android:tint="?attr/mainTextColor"
+            />
+
+            </LinearLayout>
+
+
+            <LinearLayout
                 android:layout_below="@id/privLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop = "2dp"
+                android:layout_marginBottom = "2dp"
                 android:layout_centerHorizontal="true"
-                android:text="Enable Diagnostics"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:paddingStart="4dp"
-                android:paddingEnd="10dp"
-                android:layout_gravity="center"
+                android:id="@+id/enableDiagnosticsLayout"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal|fill_horizontal|center">
 
-                android:theme="@style/checkBoxStyle"
-                android:layout_marginTop = "10dp"
-                android:id="@+id/enableDiagnostics"
-                android:layout_marginBottom = "10dp"/>
+                <CheckBox
+                    android:layout_below="@id/privLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="Enable Diagnostics"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="10dp"
+                    android:layout_gravity="center"
+                    android:theme="@style/checkBoxStyle"
+                    android:layout_marginTop = "10dp"
+                    android:id="@+id/enableDiagnostics"
+                    android:layout_marginBottom = "10dp"/>
 
 
                 <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "2dp"
-                        android:layout_marginBottom = "2dp"
-                        
-                        android:id="@+id/moreInfoDiagnostics"
-                        app:srcCompat="@drawable/help_circle_outline"
-                        android:tint="?attr/mainTextColor"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginBottom = "2dp"
+                    android:id="@+id/moreInfoDiagnostics"
+                    app:srcCompat="@drawable/help_circle_outline"
+                    android:tint="?attr/mainTextColor"
             />
-    </LinearLayout>
+            </LinearLayout>
 
             <Button
                 android:layout_below="@id/enableDiagnosticsLayout"
@@ -1729,7 +1688,7 @@ android:theme="@style/checkBoxStyle"
                 android:id="@+id/editUserInfoButton"
        />
 
-                        <Button
+            <Button
                 android:layout_below="@id/editUserInfoButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

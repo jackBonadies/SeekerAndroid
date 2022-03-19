@@ -1488,7 +1488,7 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(contextToUse, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
                 {
                     return;
                 }

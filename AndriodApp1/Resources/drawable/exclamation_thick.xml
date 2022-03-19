@@ -1,0 +1,8 @@
+<!-- drawable/exclamation_thick.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:width="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:fillColor="#000" android:pathData="M10 3H14V14H10V3M10 21V17H14V21H10Z" />
+</vector>
