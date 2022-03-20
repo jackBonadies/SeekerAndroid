@@ -9602,7 +9602,7 @@ namespace AndriodApp1
                 {
                     //the resultCode will always be Cancelled for this since you have to back out of it.
                     //so instead we check Android.OS.Environment.IsExternalStorageManager
-                    if(Android.OS.Environment.IsExternalStorageManager)
+                    if(SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                     {
                         //phase 2 - actually pick a file.
                         FallbackFileSelection(NEW_WRITE_EXTERNAL_VIA_LEGACY);
@@ -9677,7 +9677,7 @@ namespace AndriodApp1
                 {
                     //the resultCode will always be Cancelled for this since you have to back out of it.
                     //so instead we check Android.OS.Environment.IsExternalStorageManager
-                    if (Android.OS.Environment.IsExternalStorageManager)
+                    if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                     {
                         //phase 2 - actually pick a file.
                         FallbackFileSelection(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY);
@@ -9819,7 +9819,7 @@ namespace AndriodApp1
                 allFilesPermission.SetData(packageUri);
                 this.StartActivityForResult(allFilesPermission, mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen : NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen);
             }
-            else if(Android.OS.Environment.IsExternalStorageManager || (!SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles()))
+            else if(SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
             {
                 FallbackFileSelection(mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY : NEW_WRITE_EXTERNAL_VIA_LEGACY);
             }
@@ -12440,6 +12440,11 @@ namespace AndriodApp1
             return UploadDirectories.Any(dir => dir.HasError());
         }
 
+        /// <summary>
+        /// I think this should just return "external" (TODO - implement and test)
+        /// https://developer.android.google.cn/reference/android/provider/MediaStore#VOLUME_EXTERNAL
+        /// </summary>
+        /// <returns></returns>
         public static HashSet<string> GetInterestedVolNames()
         {
             HashSet<string> interestedVolnames = new HashSet<string>();
@@ -12457,7 +12462,12 @@ namespace AndriodApp1
                         string volName = MainActivity.GetVolumeName(lastPathSegment, true, out _);
 
                         //this is for if the chosen volume is not primary external
-                        var volumeNames = MediaStore.GetExternalVolumeNames(SoulSeekState.ActiveActivityRef);
+                        if((int)Android.OS.Build.VERSION.SdkInt < 29)
+                        {
+                            interestedVolnames.Add("external");
+                            return interestedVolnames;
+                        }
+                        var volumeNames = MediaStore.GetExternalVolumeNames(SoulSeekState.ActiveActivityRef); //added in 29
                         string chosenVolume = null;
                         if (volName != null)
                         {

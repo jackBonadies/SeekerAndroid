@@ -2622,6 +2622,17 @@ namespace AndriodApp1
             }
         }
 
+        public static bool DoWeHaveProperPermissionsForInternalFilePicker()
+        {
+            if(SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles())
+            {
+                return Android.OS.Environment.IsExternalStorageManager;
+            }
+            else
+            {
+                return true; //since in this case its ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied. which we already request if user does not have it since its needed to download.
+            }
+        }
 
         private void FallbackFileSelectionEntry(int requestCode)
         {
@@ -2640,8 +2651,7 @@ namespace AndriodApp1
                 allFilesPermission.SetData(packageUri);
                 this.StartActivityForResult(allFilesPermission, requestCode + 32);
             } 
-            else if ((!SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles()) || 
-                Android.OS.Environment.IsExternalStorageManager)  //isExternalStorageManager added in API30, but RequiresEitherOpenDocumentTreeOrManageAllFiles protects against that being called on pre 30 devices.
+            else if (DoWeHaveProperPermissionsForInternalFilePicker())  //isExternalStorageManager added in API30, but RequiresEitherOpenDocumentTreeOrManageAllFiles protects against that being called on pre 30 devices.
             {
                 UseInternalFilePicker(requestCode);
             }
@@ -3085,7 +3095,7 @@ namespace AndriodApp1
             //if from manage external settings
             if(CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32 || CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode - 32 || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode - 32)
             {
-                if (Android.OS.Environment.IsExternalStorageManager)
+                if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                 {
                     //phase 2 - actually pick a file.
                     UseInternalFilePicker(requestCode-32);
