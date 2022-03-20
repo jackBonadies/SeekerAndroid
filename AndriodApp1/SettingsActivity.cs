@@ -48,8 +48,12 @@ namespace AndriodApp1
         private const int CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x930; //+32
 
         private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL = 0x911;
+        private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case = 0x834;
         private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY = 0x912;
+        private const int UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case = 0x835;
         private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x932;
+        private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY_Settings_Reselect_Case = 0x855;
+
 
         private const int READ_EXTERNAL_FOR_MEDIA_STORE = 1182021;
 
@@ -2060,10 +2064,17 @@ namespace AndriodApp1
 
         private void RemoveUploadDirFolder(UploadDirectoryInfo uploadDirInfo)
         {
-            UploadDirectoryManager.UploadDirectories.Remove(uploadDirInfo);
-            this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
-            SetSharedFolderView();
-            Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+            if(UploadDirectoryManager.UploadDirectories.Count == 1)
+            {
+                this.ClearAllFolders(); //since now we have 0 this will just properly clear everything.
+            }
+            else
+            {
+                UploadDirectoryManager.UploadDirectories.Remove(uploadDirInfo);
+                this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
+                SetSharedFolderView();
+                Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+            }
         }
 
 
@@ -2498,7 +2509,7 @@ namespace AndriodApp1
 
 
 
-        private void ShowDirSettings(string startingDirectory, DirectoryType directoryType)
+        private void ShowDirSettings(string startingDirectory, DirectoryType directoryType, bool errorReselectCase = false)
         {
             int requestCode = -1;
             if (SoulSeekState.UseLegacyStorage())
@@ -2516,7 +2527,14 @@ namespace AndriodApp1
                 }
                 else if (directoryType == DirectoryType.Upload)
                 {
-                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY;
+                    if(errorReselectCase)
+                    {
+                        requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case;
+                    }
+                    else
+                    {
+                        requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY;
+                    }
                 }
                 else if (directoryType == DirectoryType.Incomplete)
                 {
@@ -2555,7 +2573,14 @@ namespace AndriodApp1
                 }
                 else if(directoryType == DirectoryType.Upload)
                 {
-                    requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL;
+                    if (errorReselectCase)
+                    {
+                        requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case;
+                    }
+                    else
+                    {
+                        requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL;
+                    }
                 }
                 else if(directoryType == DirectoryType.Incomplete)
                 {
@@ -2590,6 +2615,8 @@ namespace AndriodApp1
                     return CHANGE_INCOMPLETE_EXTERNAL_LEGACY;
                 case CHANGE_WRITE_EXTERNAL:
                     return CHANGE_WRITE_EXTERNAL_LEGACY;
+                case UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case:
+                    return UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case;
                 default:
                     return requestCodeNotLegacy;
             }
@@ -2612,8 +2639,9 @@ namespace AndriodApp1
                 Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
                 allFilesPermission.SetData(packageUri);
                 this.StartActivityForResult(allFilesPermission, requestCode + 32);
-            }
-            else if (Android.OS.Environment.IsExternalStorageManager || (!SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles()))
+            } 
+            else if ((!SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles()) || 
+                Android.OS.Environment.IsExternalStorageManager)  //isExternalStorageManager added in API30, but RequiresEitherOpenDocumentTreeOrManageAllFiles protects against that being called on pre 30 devices.
             {
                 UseInternalFilePicker(requestCode);
             }
@@ -2697,22 +2725,23 @@ namespace AndriodApp1
                 ShowUploadDirectoryOptionsDialog(uploadInfo);
             }
         }
-
+        private static UploadDirectoryInfo UploadDirToReplaceOnReselect = null;
         public void ShowUploadDirectoryErrorDialog(UploadDirectoryInfo uploadInfo)
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle("Folder Error");
             string diagMessage = $"Error for folder: {uploadInfo.GetLastPathSegment()}" + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
-                .SetNeutralButton("Remove Folder", (object sender, DialogClickEventArgs e) => {
+                .SetNegativeButton("Remove Folder", (object sender, DialogClickEventArgs e) => { //puts it slightly right
                     this.RemoveUploadDirFolder(uploadInfo);
                     this.OnCloseClick(sender, e);
                 })
-                .SetPositiveButton("Reselect", (object sender, DialogClickEventArgs e) => {
-                    this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload);
+                .SetPositiveButton("Reselect", (object sender, DialogClickEventArgs e) => { //puts it rightmost
+                    UploadDirToReplaceOnReselect = uploadInfo;
+                    this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
                     this.OnCloseClick(sender, e);
                 })
-                .SetNegativeButton("Cancel", OnCloseClick)
+                .SetNeutralButton("Cancel", OnCloseClick) //puts it leftmost
                 .Create();
             diag.Show();
         }
@@ -2765,7 +2794,8 @@ namespace AndriodApp1
                 bool lockedChanged = uploadDirInfo.IsLocked != lockedCheck.Checked;
                 bool overrideNameChanged = 
                     (string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
-                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride));
+                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride)) ||
+                    (overrideFolderName.Checked && uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text);
 
                 uploadDirInfo.IsHidden = hiddenCheck.Checked;
                 uploadDirInfo.IsLocked = lockedCheck.Checked;
@@ -2826,7 +2856,7 @@ namespace AndriodApp1
         public static volatile bool MoreChangesHaveBeenMadeSoRescanWhenDone = false;
         public static volatile List<Android.Net.Uri> NewlyAddedUrisWeHaveToAddAfter = new List<Android.Net.Uri>();
 
-        public void ParseDatabaseAndUpdateUI(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false)
+        public void ParseDatabaseAndUpdateUI(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false, bool reselectCase = false)
         {
 
             if (rescanClicked)
@@ -2857,11 +2887,26 @@ namespace AndriodApp1
                 }));
             }
 
+
+
             UploadDirectoryInfo newlyAddedDirectory = null;
             if (newlyAddedUriIfApplicable != null)
             {
-                newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null);
-                newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
+                //RESELECT CASE
+                if (reselectCase)
+                {
+                    newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, UploadDirToReplaceOnReselect.IsLocked, UploadDirToReplaceOnReselect.IsHidden, UploadDirToReplaceOnReselect.DisplayNameOverride);
+                    newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
+                    UploadDirectoryManager.UploadDirectories.Remove(UploadDirToReplaceOnReselect);
+                }
+                else
+                {
+                    newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null);
+                    newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
+                }
+
+
+
                 if (UploadDirectoryManager.UploadDirectories.Where(up => up.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
                 {
                     //error!!
@@ -2872,6 +2917,7 @@ namespace AndriodApp1
                     return;
                     //throw new Exception("Directory is already added!");
                 }
+
                 UploadDirectoryManager.UploadDirectories.Add(newlyAddedDirectory);
             }
 
@@ -2955,7 +3001,7 @@ namespace AndriodApp1
                 }
                 //SoulSeekState.UploadDataDirectoryUri = uri.ToString();
                 //SoulSeekState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
-                if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode && newlyAddedUriIfApplicable != null)
+                if ((UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode) && newlyAddedUriIfApplicable != null)
                 {
                     this.ContentResolver.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                 }
@@ -3006,10 +3052,10 @@ namespace AndriodApp1
         /// <param name="requestCode"></param>
         /// <param name="fromLegacyPicker"></param>
         /// <param name="rescanClicked"></param>
-        private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false)
+        private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false, bool reselectCase = false)
         {
             Action parseDatabaseAndUpdateUiAction = new Action(() => {
-                ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked);
+                ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked, reselectCase);
             });
 
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { parseDatabaseAndUpdateUiAction(); });
@@ -3103,17 +3149,25 @@ namespace AndriodApp1
             }
 
 
-            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY==requestCode)
+            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || 
+                UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode ||
+                UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode ||
+                UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode)
             {
                 if(resultCode != Result.Ok)
                 {
                     return;
                 }
 
+                bool reselectCase = false;
+                if(UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode)
+                {
+                    reselectCase = true;
+                }
                 //make sure you can parse the files before setting the directory..
 
                 //this takes 5+ seconds in Debug mode (with 20-30 albums) which means that this MUST be done on a separate thread..
-                Rescan(data.Data, requestCode, false);
+                Rescan(data.Data, requestCode, false, false, reselectCase);
 
             }
 

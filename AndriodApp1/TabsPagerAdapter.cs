@@ -6414,7 +6414,14 @@ namespace AndriodApp1
             }
             else if(isFolder && state.HasFlag(TransferStates.Rejected)) //if is folder we put the extra info here, else we put it in the additional status TextView
             {
-                viewStatus.SetText(Resource.String.failed_denied);
+                if (isUpload)
+                {
+                    viewStatus.Text = "Cancelled"; //if the user on the other end cancelled / paused / removed it.
+                }
+                else
+                {
+                    viewStatus.SetText(Resource.String.failed_denied);
+                }
             }
             else if (isFolder && state.HasFlag(TransferStates.UserOffline))
             {
@@ -6508,7 +6515,14 @@ namespace AndriodApp1
             }
             else if(item is TransferItem && state.HasFlag(TransferStates.Rejected))
             {
-                viewStatusAdditionalInfo.Text = "Denied";
+                if(item.IsUpload())
+                {
+                    viewStatusAdditionalInfo.Text = "Cancelled";
+                }
+                else
+                {
+                    viewStatusAdditionalInfo.Text = "Denied";
+                }
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
             {
