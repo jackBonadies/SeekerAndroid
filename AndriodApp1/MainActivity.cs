@@ -6031,7 +6031,10 @@ namespace AndriodApp1
                 DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
                 GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, previousFileInfoToUse, ref directoryCount, ref indexNum);
+                traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs, 
+                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, 
+                    previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null, 
+                    ref directoryCount, ref indexNum);
             }
 
             br = new BrowseResponse(allDirs, allLockedDirs);
@@ -6355,12 +6358,12 @@ namespace AndriodApp1
                     byte[] b_FriendlyDirNameMapping = Convert.FromBase64String(s_FriendlyDirNameMapping);
                     byte[] b_intHelperIndex = Convert.FromBase64String(s_intHelperIndex);
                     byte[] b_tokenIndex = Convert.FromBase64String(s_tokenIndex);
-                    byte[] b_BrowseResponse_hiddenPortion = Convert.FromBase64String(s_BrowseResponse_hiddenPortion);
+                    
                     using (System.IO.MemoryStream m_stringUriPairs = new System.IO.MemoryStream(b_stringUriPairs))
                     using (System.IO.MemoryStream m_BrowseResponse = new System.IO.MemoryStream(b_BrowseResponse))
                     using (System.IO.MemoryStream m_FriendlyDirNameMapping = new System.IO.MemoryStream(b_FriendlyDirNameMapping))
                     using (System.IO.MemoryStream m_intHelperIndex = new System.IO.MemoryStream(b_intHelperIndex))
-                    using (System.IO.MemoryStream m_BrowseResponse_hiddenPortion = new System.IO.MemoryStream(b_BrowseResponse_hiddenPortion))
+                    
                     using (System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
                     {
                         BinaryFormatter binaryFormatter = new BinaryFormatter();
@@ -6401,7 +6404,22 @@ namespace AndriodApp1
 
                         
                         cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
-                        cachedParseResults.browseResponseHiddenPortion = binaryFormatter.Deserialize(m_BrowseResponse_hiddenPortion) as List<Soulseek.Directory>;
+
+
+                        if(!string.IsNullOrEmpty(s_BrowseResponse_hiddenPortion))
+                        {
+                            byte[] b_BrowseResponse_hiddenPortion = Convert.FromBase64String(s_BrowseResponse_hiddenPortion);
+                            using (System.IO.MemoryStream m_BrowseResponse_hiddenPortion = new System.IO.MemoryStream(b_BrowseResponse_hiddenPortion))
+                            {
+                                cachedParseResults.browseResponseHiddenPortion = binaryFormatter.Deserialize(m_BrowseResponse_hiddenPortion) as List<Soulseek.Directory>;
+                            }
+                        }
+                        else
+                        {
+                            cachedParseResults.browseResponseHiddenPortion = null;
+                        }
+
+                        
                         cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
                         cachedParseResults.direcotryCount = cachedParseResults.browseResponse.DirectoryCount;
                         cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
@@ -6911,7 +6929,9 @@ namespace AndriodApp1
 
         public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase, 
             List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, 
-            string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int totalDirectoryCount, ref int indexNum)
+            string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, 
+            bool overrideCase, string msdMsfOrOverrideBuildParentName,
+            ref int totalDirectoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -6920,7 +6940,9 @@ namespace AndriodApp1
                 if (childDocFile.IsDirectory)
                 {
                     totalDirectoryCount++;
-                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs, dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, ref totalDirectoryCount, ref indexNum);
+                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs, 
+                        dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, overrideCase,
+                        overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, ref totalDirectoryCount, ref indexNum);
                 }
                 else
                 {
@@ -6928,7 +6950,11 @@ namespace AndriodApp1
                     //".android_secure" so just the filename whereas Path is more similar to last part segment:
                     //"/storage/sdcard/.android_secure"
                     string presentableName = childDocFile.Uri.Path.Replace('/', '\\');
-                    if (folderToStripForPresentableNames != null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
+                    if(overrideCase)
+                    {
+                        presentableName = msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name;
+                    }
+                    else if (folderToStripForPresentableNames != null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
                     {
                         presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
                     }
@@ -6966,7 +6992,7 @@ namespace AndriodApp1
             Helpers.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
-            if (folderToStripForPresentableNames != null)
+            if (!overrideCase && folderToStripForPresentableNames != null)
             {
                 directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
             }
