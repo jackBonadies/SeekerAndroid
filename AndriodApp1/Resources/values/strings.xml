@@ -643,7 +643,7 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.
 	</string>
 
-	<string name="folder_X_from_user_Y_finished">Folder \"{0}\" from \"{1}\" successfully completed.</string>
+	<string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
 
 	<string name="sort_results_by">Sort By</string>
 	<string name="sort_results_by_">Sort By:</string>

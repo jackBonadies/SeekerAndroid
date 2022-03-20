@@ -6650,7 +6650,21 @@ namespace AndriodApp1
                     }
                     catch (Exception e)
                     {
-                        MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SoulSeekState.ActiveActivityRef == null) + childUri?.ToString());
+                        //ape and aiff always fail with built in metadata retreiver.
+                        if(System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
+                        {
+                            MicroTagReader.GetApeMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
+                        }
+                        else if (System.IO.Path.GetExtension(presentableName).ToLower() == ".aiff")
+                        {
+                            MicroTagReader.GetAiffMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
+                        }
+
+                        //if still not fixed
+                        if(sampleRate==-1 || duration == -1 || bitDepth == -1)
+                        {
+                            MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SoulSeekState.ActiveActivityRef == null) + childUri?.ToString());
+                        }
                     }
                 }
 
@@ -14857,6 +14871,190 @@ namespace AndriodApp1
             catch (Exception e)
             {
                 MainActivity.LogFirebase("getMp3Metadata: " + e.Message + e.StackTrace);
+            }
+            finally
+            {
+                if (fileStream != null)
+                {
+                    fileStream.Close();
+                }
+            }
+        }
+
+        public static void GetAiffMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth, out int durationSeconds)
+        {
+            sampleRate = -1;
+            bitDepth = -1;
+            durationSeconds = -1;
+            System.IO.Stream fileStream = null;
+            try
+            {
+                fileStream = contentResolver.OpenInputStream(uri); byte[] buffer = new byte[4];
+                fileStream.Read(buffer, 0, 4); //FORM
+
+                if (System.Text.Encoding.ASCII.GetString(buffer) != "FORM")
+                {
+                    throw new Exception("malformed FORM");
+                }
+
+
+                fileStream.Read(buffer, 0, 4); //filesize UINT.
+                Array.Reverse(buffer, 0, buffer.Length); //big endian
+                uint fileSize = System.BitConverter.ToUInt32(buffer);
+
+                fileStream.Read(buffer, 0, 4); //AIFF
+                if (System.Text.Encoding.ASCII.GetString(buffer) != "AIFF")
+                {
+                    throw new Exception("malformed AIFF");
+                }
+
+
+                long comm_chunk = long.MinValue;
+                long cur_position = fileStream.Position;
+                while (cur_position < fileSize)
+                {
+                    // Read 4-byte chunk name
+                    fileStream.Read(buffer, 0, 4);
+
+                    if (System.Text.Encoding.ASCII.GetString(buffer) == "COMM")
+                    {
+                        comm_chunk = fileStream.Position - 4;
+                        break;
+                    }
+
+                    // chunk size
+                    fileStream.Read(buffer, 0, 4);
+                    Array.Reverse(buffer, 0, buffer.Length); //big endian
+                    uint chunkSize = System.BitConverter.ToUInt32(buffer);
+                    if (chunkSize % 2 != 0)
+                    {
+                        chunkSize++;
+                    }
+                    fileStream.Seek(chunkSize, System.IO.SeekOrigin.Current);
+                    cur_position = fileStream.Position;
+
+                    //if (chunkHeader == chunkName)
+                    //{
+                    //	// We found a matching chunk, return the position
+                    //	// of the header start
+                    //	return Tell - 4;
+                    //}
+                    //else
+                    //{
+                    //	// This chunk is not the one we are looking for
+                    //	// Continue the search, seeking over the chunk
+                    //	uint chunkSize = ReadBlock(4).ToUInt();
+                    //	// Seek forward "chunkSize" bytes
+                    //	Seek(chunkSize, System.IO.SeekOrigin.Current);
+                    //}
+                }
+
+                if (comm_chunk == long.MinValue)
+                {
+                    throw new Exception("couldnt find comm block");
+                }
+
+                fileStream.Seek(comm_chunk, System.IO.SeekOrigin.Begin);
+                byte[] comm_buffer = new byte[26];
+                fileStream.Read(comm_buffer, 0, 26);
+
+                uint totalFrames = System.BitConverter.ToUInt32(comm_buffer.Skip(10).Take(4).Reverse().ToArray());
+                ushort bits_per_sample = System.BitConverter.ToUInt16(comm_buffer.Skip(14).Take(2).Reverse().ToArray());
+                double sample_rate = ToExtendedPrecision(comm_buffer.Skip(16).Take(10).ToArray());
+                int seconds = (int)(totalFrames / sample_rate);
+                sampleRate = (int)sample_rate;
+                bitDepth = (int)bits_per_sample;
+                durationSeconds = seconds;
+            }
+            catch (Exception e)
+            {
+                MainActivity.LogFirebase("GetAiffMetadata: " + e.Message + e.StackTrace);
+            }
+            finally
+            {
+                if (fileStream != null)
+                {
+                    fileStream.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// From taglib-sharp:
+        ///    Converts the first 10 bytes of the current instance to an IEEE
+        ///    754 80-bit extended precision floating point number, expressed
+        ///    as a <see cref="double"/>.
+        /// </summary>
+        /// <returns>
+        ///    A <see cref="double"/> value containing the value read from the
+        ///    current instance.
+        /// </returns>
+        private static double ToExtendedPrecision(byte[] bytesToConvert)
+        {
+            int exponent = ((bytesToConvert[0] & 0x7F) << 8) | bytesToConvert[1];
+            ulong hiMantissa = ((ulong)bytesToConvert[2] << 24)
+                               | ((ulong)bytesToConvert[3] << 16)
+                               | ((ulong)bytesToConvert[4] << 8)
+                               | bytesToConvert[5];
+            ulong loMantissa = ((ulong)bytesToConvert[6] << 24)
+                               | ((ulong)bytesToConvert[7] << 16)
+                               | ((ulong)bytesToConvert[8] << 8)
+                               | bytesToConvert[9];
+
+            double f;
+            if (exponent == 0 && hiMantissa == 0 && loMantissa == 0)
+            {
+                f = 0;
+            }
+            else
+            {
+                if (exponent == 0x7FFF)
+                {
+                    f = double.PositiveInfinity;
+                }
+                else
+                {
+                    exponent -= 16383;
+                    f = hiMantissa * Math.Pow(2, exponent -= 31);
+                    f += loMantissa * Math.Pow(2, exponent -= 32);
+                }
+            }
+
+            return (bytesToConvert[0] & 0x80) != 0 ? -f : f;
+        }
+
+        public static void GetApeMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth, out int durationSeconds)
+        {
+            sampleRate = -1;
+            bitDepth = -1;
+            durationSeconds = -1;
+            System.IO.Stream fileStream = null;
+            try
+            {
+                fileStream = contentResolver.OpenInputStream(uri);
+                byte[] a = new byte[76];
+                fileStream.Read(a, 0, 76); //ape header
+                if((System.Text.Encoding.ASCII.GetString(a.Take(4).ToArray())!="MAC "))
+                {
+                    throw new Exception("MAC  not present");
+                }
+
+                byte[] b = a.Skip(68).Take(2).ToArray();
+                bitDepth = (int)System.BitConverter.ToUInt16(b);
+                byte[] c = a.Skip(72).Take(4).ToArray();
+                sampleRate = (int)System.BitConverter.ToUInt32(c);
+                byte[] d = a.Skip(64).Take(4).ToArray();
+                uint total_frames = System.BitConverter.ToUInt32(d);
+                uint blocks_per_frame = System.BitConverter.ToUInt32(a.Skip(56).Take(4).ToArray());
+                uint final_frame_blocks = System.BitConverter.ToUInt32(a.Skip(60).Take(4).ToArray());
+
+                durationSeconds = (int)(((total_frames - 1) *
+                     blocks_per_frame + final_frame_blocks) /
+                    (double)sampleRate);
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("GetApeMetadata: " + e.Message + e.StackTrace);
             }
             finally
             {
