@@ -6416,7 +6416,7 @@ namespace AndriodApp1
             {
                 if (isUpload)
                 {
-                    viewStatus.Text = "Cancelled"; //if the user on the other end cancelled / paused / removed it.
+                    viewStatus.Text = "Failed - Cancelled"; //if the user on the other end cancelled / paused / removed it.
                 }
                 else
                 {
@@ -6523,6 +6523,10 @@ namespace AndriodApp1
                 {
                     viewStatusAdditionalInfo.Text = "Denied";
                 }
+            }
+            else if (item is TransferItem && state.HasFlag(TransferStates.TimedOut))
+            {
+                viewStatusAdditionalInfo.Text = "Timed Out";
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
             {
