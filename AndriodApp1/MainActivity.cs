@@ -6992,7 +6992,11 @@ namespace AndriodApp1
             Helpers.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
-            if (!overrideCase && folderToStripForPresentableNames != null)
+            if(overrideCase)
+            {
+                directoryPath = msdMsfOrOverrideBuildParentName;
+            }
+            else if (folderToStripForPresentableNames != null)
             {
                 directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
             }
