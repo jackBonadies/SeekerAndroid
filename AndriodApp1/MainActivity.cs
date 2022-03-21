@@ -5865,7 +5865,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    MainActivity.LogFirebase("contains neither: " + lastPathSegment);
+                    MainActivity.LogFirebase("contains neither: " + lastPathSegment); //Download (on Android 9 emu)
                 }
             }
 
@@ -14265,7 +14265,7 @@ namespace AndriodApp1
                 //fails in possibleChild="Music (1)\\test" possibleParent="Music" case
                 //return possibleChild.Substring(0, pathSep).Contains(possibleParent);
                 
-                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\") || possibleChild.Substring(0, pathSep) == possibleParent;
+                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\") || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
 
 
                 //{

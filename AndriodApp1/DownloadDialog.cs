@@ -577,7 +577,8 @@ namespace AndriodApp1
         public static TreeNode<Directory> CreateTree(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, out string errorMsgToToast)
         {
             //logging code for unit tests / diagnostic.. //TODO comment out always
-            //var root = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef , Android.Net.Uri.Parse( SoulSeekState.SaveDataDirectoryUri) );
+            //#if DEBUG
+            //var root = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, Android.Net.Uri.Parse( SoulSeekState.SaveDataDirectoryUri) );
             //DocumentFile exists = root.FindFile(username + "_dir_response");
             ////save:
             //if(exists==null || !exists.Exists())
@@ -598,6 +599,7 @@ namespace AndriodApp1
             //        stream.Close();
             //    }
             //}
+            //endif
             //load
             //string username_to_load = "Cyborg_Master";
             //exists = root.FindFile(username_to_load + "_dir_response");
@@ -821,6 +823,13 @@ namespace AndriodApp1
                     { //go up one OR more than one
                         prevNodeDebug = new TreeNode<Directory>(curNode.Data, dInfo.Item2);
                         curNode = curNode.Parent; //This is not good if the first node is not the root...
+
+
+                        //if(dInfo==null || dInfo.Item1 == null || curNode == null || curNode.Data == null)
+                        //{
+
+                        //}
+
                         while(!Helpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
                         {
                             if(curNode.Parent==null)
