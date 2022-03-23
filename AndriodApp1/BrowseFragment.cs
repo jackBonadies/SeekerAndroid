@@ -27,6 +27,7 @@ using Android.Views;
 using Android.Widget;
 using Google.Android.Material.Snackbar;
 using Soulseek;
+using Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
