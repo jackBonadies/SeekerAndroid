@@ -33,6 +33,7 @@ using Android.Support.V4.View;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Common;
 using Java.IO;
 using System;
 using System.Collections;
@@ -2758,7 +2759,7 @@ namespace AndriodApp1
             {
                 if(!diagnosticFilesystemErrorShown)
                 {
-                    MainActivity.LogFirebase("failed to write to diagnostic file " + ex.Message + ex.StackTrace);
+                    MainActivity.LogFirebase("failed to write to diagnostic file " + ex.Message + line + ex.StackTrace);
                     Toast.MakeText(SeekerApplication.ApplicationContext, "Failed to write to diagnostic file.", ToastLength.Long);
                     diagnosticFilesystemErrorShown = true;
                 }
@@ -8532,7 +8533,26 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString()); //show toast "user is offline"
+                        if(t.Exception?.InnerException is Soulseek.UserOfflineException uoe)
+                        {
+                            if(!silent)
+                            {
+                                //TODO TODO show toast BUT make sure to debounce it, so if getting position on a folder to only do it once.
+                                //show toast "user is offline"
+                            }
+                        }
+                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains("failed to establish direct or indirect"))
+                        {
+                            if (!silent)
+                            {
+                                //TODO TODO show toast BUT make sure to debounce it, so if getting position on a folder to only do it once.
+                                //show toast "user is offline"
+                            }
+                        }
+                        else
+                        {
+                            LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString()); 
+                        }
                     }
                     else
                     {
@@ -14233,55 +14253,7 @@ namespace AndriodApp1
         }
 
 
-        /// <summary>
-        /// Replaces d.Name.Contains(prevDirName) which fails for Mu, Music
-        /// </summary>
-        /// <param name="possibleChild"></param>
-        /// <param name="possibleParent"></param>
-        /// <returns></returns>
-        public static bool IsChildDirString(string possibleChild, string possibleParent, bool rootCase)
-        {
-            if (rootCase)
-            {
-                if (possibleChild.LastIndexOf("\\") == -1 && possibleParent.LastIndexOf("\\") == -1)
-                {
-                    if (possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
-                    {
-                        return possibleChild.Contains(possibleParent);
-                    }
-                    else if (possibleChild.Equals(possibleParent))
-                    {
-                        return true; //else the primary:music case fails.
-                    }
-                }
-            }
-            int pathSep = possibleChild.LastIndexOf("\\");
-            if (pathSep == -1)
-            {
-                return false;
-            }
-            else
-            {
-                //fails in possibleChild="Music (1)\\test" possibleParent="Music" case
-                //return possibleChild.Substring(0, pathSep).Contains(possibleParent);
-                
-                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\") || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
 
-
-                //{
-                //    return true;
-                //}
-                //else
-                //{
-                //    //special case. since primary: is a parent of primary:Music
-                //    if(possibleParent.LastIndexOf("\\")==-1 && possibleParent.IndexOf(':')==(possibleParent.Length-1))
-                //    {
-                //        return true;
-                //    }
-                //    return false;
-                //}
-            }
-        }
 
         /// <summary>
         /// Get all BUT the filename
@@ -15192,41 +15164,6 @@ namespace AndriodApp1
         {
             disposed = true;
             base.Dispose(disposing);
-        }
-    }
-
-    [Serializable]
-    public class TreeNode<T> : IEnumerable<TreeNode<T>>
-    {
-        public T Data;
-        public bool IsFilteredOut = false;
-        public bool IsLocked = false;
-        public TreeNode<T> Parent;
-        public ICollection<TreeNode<T>> Children;
-
-        public TreeNode(T data, bool isLocked)
-        {
-            this.Data = data;
-            this.Children = new LinkedList<TreeNode<T>>();
-            this.IsLocked = isLocked;
-        }
-
-
-        public TreeNode<T> AddChild(T child, bool isChildLocked)
-        {
-            TreeNode<T> childNode = new TreeNode<T>(child, isChildLocked) { Parent = this };
-            this.Children.Add(childNode);
-            return childNode;
-        }
-
-        public IEnumerator<TreeNode<T>> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return null;
         }
     }
 

@@ -307,6 +307,10 @@
     <!-- <Project>{b97e7fac-6174-458f-b59b-3e91d5cf4dc3}</Project> -->
     <!-- <Name>Mono.Nat</Name> -->
     <!-- </ProjectReference> -->
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{26f55920-8ae4-4ff9-bad5-fcc3347541ad}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="Mono.Nat-master\Mono.Nat\Mono.Nat.csproj">
       <Project>{eaf87e32-ae91-4b40-aa16-f3f37f2ddfc9}</Project>
       <Name>Mono.Nat</Name>
