@@ -1053,10 +1053,6 @@ namespace AndriodApp1
                         queueLen = Math.Min(ti.QueueLength, queueLen);
                     }
                 }
-                if (queueLen == int.MaxValue)
-                {
-                    return 0;
-                }
                 return queueLen;
             }
         }
@@ -3267,7 +3263,6 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                relevantItem.Queued = true;
                 if (!relevantItem.IsUpload())
                 {
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
@@ -3290,8 +3285,7 @@ namespace AndriodApp1
                     return;
                 }
                 //clear queued flag...
-                relevantItem.Queued = false;
-                relevantItem.QueueLength = 0;
+                relevantItem.QueueLength = int.MaxValue;
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed))
@@ -5328,7 +5322,7 @@ namespace AndriodApp1
                     {
                         msgToToast = "Failed to Add Download - Request timed out";
                     }
-                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect"))
+                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                     {
                         msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
                     }
@@ -8533,26 +8527,64 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
+                        bool transitionToNextState = false;
+                        Soulseek.TransferStates state = TransferStates.Errored;
                         if(t.Exception?.InnerException is Soulseek.UserOfflineException uoe)
                         {
-                            if(!silent)
-                            {
-                                //TODO TODO show toast BUT make sure to debounce it, so if getting position on a folder to only do it once.
-                                //show toast "user is offline"
-                            }
-                        }
-                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains("failed to establish direct or indirect"))
-                        {
+                            //Nicotine always immediately transitions from queued to user offline the second the user goes offline. We dont do it immediately but on next check.
+                            //for QT you always are in "Queued" no matter what.
+                            transitionToNextState = true;
+                            state = TransferStates.Errored | TransferStates.UserOffline;
                             if (!silent)
                             {
-                                //TODO TODO show toast BUT make sure to debounce it, so if getting position on a folder to only do it once.
-                                //show toast "user is offline"
+                                ToastUIWithDebouncer($"User {username} is offline", "_6_", username);
+                            }
+                        }
+                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                        {
+                            //Nicotine transitions from Queued to Cannot Connect IF you pause and resume. Otherwise you stay in Queued. Here if someone explicitly retries (i.e. silent = false) then we will transition states.
+                            // otherwise, its okay, lets just stay in Queued.
+                            //for QT you always are in "Queued" no matter what.
+                            transitionToNextState = !silent;
+                            state = TransferStates.Errored | TransferStates.CannotConnect;
+                            if (!silent)
+                            {
+                                ToastUIWithDebouncer($"Cannot connect to user {username}", "_7_", username);
+                            }
+                        }
+                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException is System.TimeoutException)
+                        {
+                            transitionToNextState = false; //they may just not be sending queue position messages.  that is okay, we can still connect to them just fine for download time.
+                            if (!silent)
+                            {
+                                ToastUIWithDebouncer($"Timeout getting queue position from {username}", "_8_", username, 6);
                             }
                         }
                         else
                         {
-                            LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString()); 
+                            if (!silent)
+                            {
+                                ToastUIWithDebouncer($"Error getting queue position from {username}", "_9_", username);
+                            }
+                            LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
+                        // there is no good way to transition to the next state. its more complicated. we need a good way to cancel the download.
+                        //if(transitionToNextState)
+                        //{
+                        //    //update the transferItem array
+                        //    if (transferItemInQuestion == null)
+                        //    {
+                        //        transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                        //    }
+
+                        //    if (transferItemInQuestion == null)
+                        //    {
+                        //        return;
+                        //    }
+
+                        //    transferItemInQuestion.State = state;
+                        //    TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
+                        //}
                     }
                     else
                     {
@@ -8563,6 +8595,7 @@ namespace AndriodApp1
                         {
                             transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                         }
+
                         if (transferItemInQuestion == null)
                         {
                             return;
@@ -8571,15 +8604,13 @@ namespace AndriodApp1
                         {
                             queuePositionChanged = transferItemInQuestion.QueueLength != t.Result;
 
-                            if (t.Result > 0)
+                            if (t.Result >= 0)
                             {
-                                transferItemInQuestion.Queued = true;
                                 transferItemInQuestion.QueueLength = t.Result;
                             }
                             else
                             {
-                                transferItemInQuestion.Queued = false;
-                                transferItemInQuestion.QueueLength = 0;
+                                transferItemInQuestion.QueueLength = int.MaxValue;
                             }
 
                             if(queuePositionChanged)
@@ -8594,7 +8625,7 @@ namespace AndriodApp1
 
                         if (actionOnComplete != null)
                         {
-                            SoulSeekState.MainActivityRef?.RunOnUiThread(() => { actionOnComplete(transferItemInQuestion); });
+                            SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { actionOnComplete(transferItemInQuestion); });
                         }
                         else
                         {
@@ -8626,7 +8657,7 @@ namespace AndriodApp1
                     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                     try
                     {
-                        transferItemInQuestion.QueueLength = 0;
+                        transferItemInQuestion.QueueLength = int.MaxValue;
                         Android.Net.Uri incompleteUri = null;
                         TransfersFragment.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                         Task task = DownloadDialog.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource);
@@ -10039,7 +10070,7 @@ namespace AndriodApp1
                         }
                         else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                                 task.Exception.InnerException.Message != null &&
-                                task.Exception.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
+                                task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             LogDebug("Task Exception: " + task.Exception.InnerException.Message);
                             action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
@@ -10082,7 +10113,7 @@ namespace AndriodApp1
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect message connection"))
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             //MainActivity.LogFirebase("failed to establish a direct or indirect message connection");
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
@@ -10102,7 +10133,7 @@ namespace AndriodApp1
                                 if (task.Exception.InnerException.InnerException != null)
                                 {
                                     //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    if (task.Exception.InnerException.InnerException.Message.Contains("Failed to establish a direct or indirect transfer connection"))
+                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                                     {
                                         //skip this case
                                     }
@@ -10231,18 +10262,28 @@ namespace AndriodApp1
         /// <param name="msgToToast"></param>
         /// <param name="caseOrCode"></param>
         /// <param name="usernameIfApplicable"></param>
-        private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "")
+        /// <param name="seconds">might be useful to increase this if something has a lot of variance even if requested at the same time, like a timeout.</param>
+        private static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "", int seconds = 1)
         {
             long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             //if it does not exist then updatedTime will be curTime.  If it does exist but is older than a second then updated time will also be curTime.  In those two cases, show the toast.
+            MainActivity.LogDebug("curtime " + curTime);
+            bool stale = false;
             long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime, (key, oldValue) =>
             {
 
                 MainActivity.LogDebug("key exists: " + (curTime - oldValue).ToString());
 
-                return ((curTime - oldValue) < 1000) ? oldValue : curTime;
+                stale = (curTime - oldValue) < (seconds * 1000);
+                if (stale)
+                {
+                    MainActivity.LogDebug("stale");
+                }
+
+                return stale ? oldValue : curTime;
             });
-            if (updatedTime == curTime)
+            MainActivity.LogDebug("updatedTime " + updatedTime);
+            if (!stale)
             {
                 ToastUI(msgToToast);
             }
@@ -10251,12 +10292,32 @@ namespace AndriodApp1
 
         public static void ToastUI(string msg)
         {
-            Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Long).Show();
+            if(OnUIthread())
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Long).Show();
+            }
+            else
+            {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Long).Show();
+                });
+            }
         }
 
         public static void ToastUI_short(string msg)
         {
-            Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
+            if (OnUIthread())
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
+            }
+            else
+            {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
+                    });
+            }
         }
 
         /// <summary>
@@ -12025,7 +12086,7 @@ namespace AndriodApp1
                     {
                         Exception e = userInfoTask.Exception;
 
-                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.Contains("Failed to establish a direct or indirect message connection"))
+                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                             {

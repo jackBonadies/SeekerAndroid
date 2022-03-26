@@ -1615,7 +1615,7 @@ namespace AndriodApp1
                 foreach (FullFileInfo file in files)
                 {
 
-                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, 0, file.Depth, queuePaused, out bool transferExists);
+                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, out bool transferExists);
                     if(!transferExists)
                     {
                         allExist = false;
