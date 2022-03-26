@@ -383,6 +383,8 @@ namespace Soulseek
             DebugLogHandler?.Invoke(null, new ErrorLogEventArgs(msg));
         }
 
+        public const string FailedToEstablishDirectOrIndirectStringLower = "failed to establish a direct or indirect";
+
         public static event EventHandler<ErrorLogEventArgs> ErrorLogHandler;
         public static event EventHandler<ErrorLogEventArgs> DebugLogHandler;
 
@@ -3071,6 +3073,11 @@ namespace Soulseek
                     {
                         download.State = TransferStates.Errored | TransferStates.UserOffline;
                         throw;
+                    }
+
+                    if (ex is ConnectionException && !string.IsNullOrEmpty(ex.Message) && ex.Message.ToLower().Contains(FailedToEstablishDirectOrIndirectStringLower))
+                    {
+                        download.State = TransferStates.Errored | TransferStates.CannotConnect;
                     }
 
                     throw new SoulseekClientException($"Failed to download file {filename} from user {username}: {ex.Message}", ex);

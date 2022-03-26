@@ -59,6 +59,20 @@ namespace Common
             }
         }
 
+        private static TreeNode<Directory> AddChildNode(TreeNode<Directory> curNode, Tuple<Directory, bool> dInfo, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude)
+        {
+            if (!filter)
+            {
+                return curNode.AddChild(dInfo.Item1, dInfo.Item2); //add child and now curNode points to the next guy
+            }
+            else
+            {
+                var nextNode = curNode.AddChild(FilterDirectory(dInfo.Item1, wordsToAvoid, wordsToInclude), dInfo.Item2);
+                nextNode.IsFilteredOut = true;
+                return nextNode;
+            }
+        }
+
         public static TreeNode<Directory> CreateTreeCore(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, bool hideLocked)
         {
 
@@ -223,15 +237,13 @@ namespace Common
                 }
                 else if (Helpers.IsChildDirString(dInfo.Item1.Name, prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
                 {
-                    if (!filter)
-                    {
-                        curNode = curNode.AddChild(dInfo.Item1, dInfo.Item2); //add child and now curNode points to the next guy
-                    }
-                    else
-                    {
-                        curNode = curNode.AddChild(FilterDirectory(dInfo.Item1, wordsToAvoid, wordsToInclude), dInfo.Item2);
-                        curNode.IsFilteredOut = true;
-                    }
+                    //uncomment these lines for the Nicotine way of handling QT trees
+                    //if(curNode.Data.Name == "" && curNode?.Parent == null && dInfo.Item1.Name.Contains('\\')) //QT double directory case. 
+                    //{   //sometimes the dir is just '//' not sure how that happens since even if you put files into root, it is still proper.
+                    //    Directory rootSubDirectory = new Directory(dInfo.Item1.Name.Substring(0, dInfo.Item1.Name.IndexOf('\\')));
+                    //    curNode = AddChildNode(curNode, new Tuple<Directory,bool>(rootSubDirectory, dInfo.Item2), filter, wordsToAvoid, wordsToInclude);
+                    //}
+                    curNode = AddChildNode(curNode, dInfo, filter, wordsToAvoid, wordsToInclude);
                     prevDirName = dInfo.Item1.Name;
                 }
                 else
@@ -253,15 +265,13 @@ namespace Common
                         }
                         curNode = curNode.Parent; // may have to go up more than one
                     }
-                    if (!filter)
-                    {
-                        curNode = curNode.AddChild(dInfo.Item1, dInfo.Item2); //add child and now curNode points to the next guy
-                    }
-                    else
-                    {
-                        curNode = curNode.AddChild(FilterDirectory(dInfo.Item1, wordsToAvoid, wordsToInclude), dInfo.Item2);
-                        curNode.IsFilteredOut = true;
-                    }
+                    //uncomment these lines for the Nicotine way of handling QT trees
+                    //if (curNode.Data.Name == "" && curNode?.Parent == null && dInfo.Item1.Name.Contains('\\')) //QT double directory case.
+                    //{
+                    //    Directory rootSubDirectory = new Directory(dInfo.Item1.Name.Substring(0, dInfo.Item1.Name.IndexOf('\\')));
+                    //    curNode = AddChildNode(curNode, new Tuple<Directory, bool>(rootSubDirectory, dInfo.Item2), filter, wordsToAvoid, wordsToInclude);
+                    //}
+                    curNode = AddChildNode(curNode, dInfo, filter, wordsToAvoid, wordsToInclude);
                     prevDirName = dInfo.Item1.Name;
                 }
             }

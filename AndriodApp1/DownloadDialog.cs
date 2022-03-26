@@ -309,7 +309,7 @@ namespace AndriodApp1
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
                     return;
                 }
-                else if(br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains("failed to establish a direct or indirect"))
+                else if(br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
                     return;
@@ -323,6 +323,7 @@ namespace AndriodApp1
                 {
                     //shouldnt get here
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, $"Failed to browse {username} due to unspecified error.", ToastLength.Short).Show(); });
+                    MainActivity.LogFirebase("browse response faulted: " + username + br.Exception?.Message);
                     return;
                 }
                 //TODO there is a case due to like button mashing or if you keep requesting idk. but its a SoulseekClient InnerException and it says peer disconnected unexpectedly and timeout.
@@ -489,7 +490,7 @@ namespace AndriodApp1
             //if(exists==null || !exists.Exists())
             //{
             //    DocumentFile f = root.CreateFile(@"custom\binary",username + "_dir_response");
-            
+
             //    System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
             //    //Java.IO.File musicFile = new Java.IO.File(filePath);
             //    //FileOutputStream stream = new FileOutputStream(mFile);
@@ -497,9 +498,9 @@ namespace AndriodApp1
             //    {
             //        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
             //        formatter.Serialize(userListStream, b);
-            
+
             //    //write to binary..
-            
+
             //        stream.Write(userListStream.ToArray());
             //        stream.Close();
             //    }

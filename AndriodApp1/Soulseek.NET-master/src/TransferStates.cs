@@ -88,5 +88,10 @@ namespace Soulseek
         ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
         /// </summary>
         UserOffline = 1024,
+
+        /// <summary>
+        ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
+        /// </summary>
+        CannotConnect = 2048,
     }
 }

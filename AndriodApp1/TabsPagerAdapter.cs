@@ -5915,8 +5915,7 @@ namespace AndriodApp1
         public long Size;
         
         public bool isUpload;
-        public bool Queued = false;
-        private int queuelength = 0;
+        private int queuelength = int.MaxValue;
         public bool CancelAndRetryFlag = false;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public double AvgSpeed = 0;
@@ -5933,14 +5932,6 @@ namespace AndriodApp1
             set
             {
                 queuelength = value;
-                if (value == 0)
-                {
-                    Queued = false;
-                }
-                else
-                {
-                    Queued = true;
-                }
             }
         }
         public string FinalUri = string.Empty; //final uri of downloaded item
@@ -5948,6 +5939,18 @@ namespace AndriodApp1
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public CancellationTokenSource CancellationTokenSource = null;
     }
+
+
+    /**
+    Notes on Queue Position:
+    The default queue position should be int.MaxValue (which we display as not known) not 0.  
+    This is the case on QT where we download from an offline user, 
+      or in general when we are queued by a user that does not send a queue position (slskd?).
+    Both QT and Nicotine display it as "Queued" and then without a queue position (rather than queue position of 0).
+
+    If we are downloading from a user with queue and they then go offline, the QT behavior is to still show "Queued" (nothing changes),
+      the nicotine behavior is to change it to "User Logged Off".  I think nicotine behavior is more descriptive and helpful.
+    **/
 
     public interface ITransferItemView
     {
@@ -6427,6 +6430,11 @@ namespace AndriodApp1
             {
                 viewStatus.SetText(Resource.String.failed_user_offline);
             }
+            else if (isFolder && state.HasFlag(TransferStates.CannotConnect))
+            {
+                viewStatus.Text = "Failed - Cannot Connect"; 
+                //"cannot connect" is too long for average screen. but the root problem needs to be fixed (for folder combine two TextView into one with padding???? TODO)
+            }
             else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
             {
                 viewStatus.SetText(Resource.String.failed);
@@ -6511,9 +6519,17 @@ namespace AndriodApp1
             }
             else if (state.HasFlag(TransferStates.Queued) && !(item.IsUpload()))
             {
-                viewStatusAdditionalInfo.Text = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_), item.GetQueueLength().ToString());
+                int queueLen = item.GetQueueLength();
+                if(queueLen == int.MaxValue) //i.e. unknown
+                {
+                    viewStatusAdditionalInfo.Text = string.Empty;
+                }
+                else
+                {
+                    viewStatusAdditionalInfo.Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                }
             }
-            else if(item is TransferItem && state.HasFlag(TransferStates.Rejected))
+            else if (item is TransferItem && state.HasFlag(TransferStates.Rejected))
             {
                 if(item.IsUpload())
                 {
@@ -6531,6 +6547,10 @@ namespace AndriodApp1
             else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
             {
                 viewStatusAdditionalInfo.Text = "User is Offline";
+            }
+            else if (item is TransferItem && state.HasFlag(TransferStates.CannotConnect))
+            {
+                viewStatusAdditionalInfo.Text = "Cannot Connect";
             }
             else
             {
@@ -7987,7 +8007,7 @@ namespace AndriodApp1
         private void ClearTransferForRetry(TransferItem item1, int position)
         {
             item1.Progress = 0; //no longer red... some good user feedback
-            item1.QueueLength = 0; //let the State Changed update this for us...
+            item1.QueueLength = int.MaxValue; //let the State Changed update this for us...
             item1.Failed = false;
             var refreshOnlySelected = new Action(() =>
             {
@@ -8677,7 +8697,14 @@ namespace AndriodApp1
                 {
                     if (queueLenOld == t.QueueLength) //always true bc its a reference...
                     {
-                        Toast.MakeText(SoulSeekState.MainActivityRef, string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
+                        if(queueLenOld == int.MaxValue)
+                        {
+                            Toast.MakeText(SoulSeekState.MainActivityRef, "Position in queue is unknown.", ToastLength.Short).Show();
+                        }
+                        else
+                        { 
+                            Toast.MakeText(SoulSeekState.MainActivityRef, string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
+                        }
                     }
                     else
                     {
@@ -8880,7 +8907,15 @@ namespace AndriodApp1
                     }
                     else if (relevantItem.State.HasFlag(TransferStates.Queued) && !(relevantItem.IsUpload()))
                     {
-                        v.GetAdditionalStatusInfoView().Text = string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_), v.InnerTransferItem.GetQueueLength().ToString());
+                        int queueLen = v.InnerTransferItem.GetQueueLength();
+                        if(queueLen == int.MaxValue) //unknown
+                        {
+                            v.GetAdditionalStatusInfoView().Text = "";
+                        }
+                        else
+                        {
+                            v.GetAdditionalStatusInfoView().Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                        }
                     }
                     else
                     {
