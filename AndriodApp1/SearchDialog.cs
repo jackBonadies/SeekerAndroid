@@ -148,7 +148,20 @@ namespace AndriodApp1
             string artistname = string.Empty;
             bool isFollowingLink = false;
             var regex = new System.Text.RegularExpressions.Regex(@"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)");
-            var matched = regex.Match(searchIntent.GetStringExtra(Intent.ExtraText));
+            string extraText = searchIntent.GetStringExtra(Intent.ExtraText);
+            if (extraText == null)
+            {
+                if(searchIntent.Extras == null || searchIntent.Extras.KeySet() == null)
+                {
+                    MainActivity.LogFirebase("extras is null");
+                }
+                else
+                {
+                    string keyset = String.Join(' ',searchIntent.Extras.KeySet());
+                    MainActivity.LogFirebase("extras keyset is " + keyset);
+                }
+            }
+            var matched = regex.Match(extraText);
             bool containsLink = matched.Success;
             if (containsLink && ToLookUp(matched.Captures[0].Value))
             {
