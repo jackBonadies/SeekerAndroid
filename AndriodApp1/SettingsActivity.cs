@@ -98,6 +98,7 @@ namespace AndriodApp1
 
             //however with the api<21 it is not paused and so an event is needed.
             SoulSeekState.DirectoryUpdatedEvent += DirectoryUpdated;
+            SoulSeekState.SharingStatusChangedEvent += SharingStatusUpdated;
 
         }
 
@@ -105,6 +106,13 @@ namespace AndriodApp1
         {
             SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                 recyclerViewFoldersAdapter?.NotifyDataSetChanged();
+            });
+        }
+
+        private void SharingStatusUpdated(object sender, EventArgs e)
+        {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                UpdateShareImageView();
             });
         }
 
@@ -162,6 +170,7 @@ namespace AndriodApp1
             PrivilegesManager.Instance.PrivilegesChecked -= PrivilegesChecked;
             SoulSeekState.DirectoryUpdatedEvent -= DirectoryUpdated;
             SettingsActivity.UploadDirectoryChanged -= DirectoryViewsChanged;
+            SoulSeekState.SharingStatusChangedEvent -= SharingStatusUpdated;
             SettingsActivity.SaveAdditionalDirectorySettingsToSharedPreferences();
             base.OnPause();
         }
@@ -551,6 +560,10 @@ namespace AndriodApp1
             shareCheckBox.Checked = SoulSeekState.SharingOn;
             shareCheckBox.CheckedChange += ShareCheckBox_CheckedChange;
 
+            CheckBox unmeteredConnectionsOnlyCheckBox = FindViewById<CheckBox>(Resource.Id.shareOnlyOnUnmetered);
+            unmeteredConnectionsOnlyCheckBox.Checked = !SoulSeekState.AllowUploadsOnMetered;
+            unmeteredConnectionsOnlyCheckBox.CheckedChange += UnmeteredConnectionsOnlyCheckBox_CheckedChange;
+
             ImageView moreInfoButton = FindViewById<ImageView>(Resource.Id.moreInfoButton);
             moreInfoButton.Click += MoreInfoButton_Click;
 
@@ -732,7 +745,48 @@ namespace AndriodApp1
             Button configSmartFilters = FindViewById<Button>(Resource.Id.configureSmartFilters);
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
+            UpdateLayoutParametersForScreenSize();
+        }
 
+        private void UpdateLayoutParametersForScreenSize()
+        {
+            try
+            {
+                if(this.Resources.DisplayMetrics.WidthPixels < 400) //320 is MDPI
+                {
+                    (concurrentDlSublayout as LinearLayout).Orientation = Orientation.Vertical;
+                    (concurrentDlSublayout as LinearLayout).SetGravity(GravityFlags.Center);
+                    ((LinearLayout.LayoutParams)concurrentDlButton.LayoutParameters).Gravity = GravityFlags.Center;
+                }
+                else
+                {
+                    (concurrentDlSublayout as LinearLayout).Orientation = Orientation.Horizontal;
+                    (concurrentDlSublayout as LinearLayout).SetGravity(GravityFlags.CenterVertical);
+                    ((LinearLayout.LayoutParams)concurrentDlButton.LayoutParameters).Gravity = GravityFlags.CenterVertical;
+                }
+            }
+            catch(Exception ex)
+            {
+                MainActivity.LogFirebase("Unable to tweak layout " + ex);
+            }
+        }
+
+        private void UnmeteredConnectionsOnlyCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            bool oldState = MainActivity.MeetsCurrentSharingConditions();
+            SoulSeekState.AllowUploadsOnMetered = !e.IsChecked;
+            bool newState = MainActivity.MeetsCurrentSharingConditions();
+            if(oldState != newState)
+            {
+                MainActivity.SetUnsetSharingBasedOnConditions(true);
+                UpdateShareImageView();
+            }
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                editor.PutBoolean(SoulSeekState.M_AllowUploadsOnMetered, SoulSeekState.AllowUploadsOnMetered);
+                editor.Commit();
+            }
         }
 
         private void ClearAllFoldersButton_Click(object sender, EventArgs e)
@@ -2037,6 +2091,9 @@ namespace AndriodApp1
                 case SharingIcons.Off:
                     imageView.SetImageResource(Resource.Drawable.ic_sharing_off_black_24dp);
                     break;
+                case SharingIcons.OffDueToNetwork:
+                    imageView.SetImageResource(Resource.Drawable.network_strength_off_outline);
+                    break;
             }
             
             switch(info.Item1)
@@ -2177,6 +2234,7 @@ namespace AndriodApp1
                 changeDlSpeed.Clickable = true;
                 dlLimitPerTransfer.Alpha = 1.0f;
                 dlLimitPerTransfer.Clickable = true;
+                dlLimitPerTransfer.Enabled = true;
             }
             else
             {
@@ -2187,6 +2245,7 @@ namespace AndriodApp1
                 changeDlSpeed.Clickable = false;
                 dlLimitPerTransfer.Alpha = 0.5f;
                 dlLimitPerTransfer.Clickable = false;
+                dlLimitPerTransfer.Enabled = false;
             }
 
             if (SoulSeekState.SpeedLimitUploadOn)
@@ -2198,6 +2257,7 @@ namespace AndriodApp1
                 changeUlSpeed.Clickable = true;
                 ulLimitPerTransfer.Alpha = 1.0f;
                 ulLimitPerTransfer.Clickable = true;
+                ulLimitPerTransfer.Enabled = true;
             }
             else
             {
@@ -2208,6 +2268,7 @@ namespace AndriodApp1
                 changeUlSpeed.Clickable = false;
                 ulLimitPerTransfer.Alpha = 0.5f;
                 ulLimitPerTransfer.Clickable = false;
+                ulLimitPerTransfer.Enabled = false;
             }
         }
 

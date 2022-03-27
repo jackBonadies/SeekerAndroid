@@ -851,7 +851,15 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            MainActivity.LogFirebase("CreatePortMapAsync " + ex.Message + ex.StackTrace);
+                            //common errors are:
+                            //Error ConflictInMappingEntry: ConflictInMappingEntry
+                            //Error 403: Not Available Action
+                            //Unexpected error sending a message to the device
+                            //Error 714: NoSuchEntryInArray
+                            //Error ActionFailed: Action Failed
+                            //InvalidArgs
+
+                            MainActivity.LogDebug("CreatePortMapAsync " + ex.Message + ex.StackTrace);
                             return;
                         }
                     }
@@ -2468,13 +2476,24 @@ namespace AndriodApp1
             NetworkInfo netInfo = intent?.GetParcelableExtra("networkInfo") as NetworkInfo; //this will say Wifi Disconnected, and then Mobile Connected. so just wait for the "Connected" one.            
             NetworkHandoffDetector.ProcessEvent(netInfo);
 
-
+            MainActivity.LogDebug("ConnectionReceiver.OnReceive");
             //these are just toasts letting us know the status of the network..
-#if DEBUG
+
             string action = intent?.Action;
-            if (action != null && action == ConnectivityManager.ConnectivityAction/* && netInfo != null && netInfo.IsConnected*/)
+            if (action != null && action == ConnectivityManager.ConnectivityAction)
             {
+                bool changed = SeekerApplication.SetNetworkState(context);
+                if(changed)
+                {
+                    MainActivity.LogDebug("metered state changed.. lets set up our handlers and inform server..");
+                    MainActivity.SetUnsetSharingBasedOnConditions(true);
+                    SoulSeekState.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
+                }
+
+#if DEBUG
+
                 ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
+
                 if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
                 {
                     MainActivity.LogDebug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
@@ -2503,8 +2522,12 @@ namespace AndriodApp1
                         SeekerApplication.ShowToast("Is Disconnected (null)", ToastLength.Long);
                     }
                 }
-            }
+
 #endif
+
+
+            }
+
         }
 
         public static bool DoWeHaveInternet()
@@ -2572,6 +2595,8 @@ namespace AndriodApp1
                 SeekerKeepAliveService.WifiKeepAlive_FullService = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
             }
 
+            SeekerApplication.SetNetworkState(this);
+
             if (SoulSeekState.SoulseekClient == null)
             {
                 //need search response and enqueue download action...
@@ -2618,6 +2643,44 @@ namespace AndriodApp1
 
             //shouldnt we also connect??? TODO TODO
 
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns>true if changed</returns>
+        public static bool SetNetworkState(Context context)
+        {
+            ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
+            if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
+            {
+                bool oldState = SoulSeekState.CurrentConnectionIsUnmetered;
+                SoulSeekState.CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
+                MainActivity.LogDebug("SetNetworkState is metered " + !SoulSeekState.CurrentConnectionIsUnmetered);
+                return oldState != SoulSeekState.CurrentConnectionIsUnmetered;
+            }
+            return false;
+        }
+
+        private static bool IsUnmetered(Context context, ConnectivityManager cm)
+        {
+
+            if (!AndroidX.Core.Net.ConnectivityManagerCompat.IsActiveNetworkMetered(cm)) //api 16
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+            //the below can fail if on VPN
+            //var capabilities = cm.GetNetworkCapabilities(cm.ActiveNetwork);
+            //cm.GetNetworkCapabilities(cm.ActiveNetwork).HasCapability(NetCapability.NotMetered);
+            //AndroidX.Core.Net.ConnectivityManagerCompat.IsActiveNetworkMetered(cm);
+            //bool isUnmetered = (capabilities != null && capabilities.HasCapability(NetCapability.NotMetered)) ||
 
         }
 
@@ -3729,6 +3792,17 @@ namespace AndriodApp1
                         }
                     }
 
+                    //if the number of directories is stale (meaning it changing when we werent logged in and so we could not update the server)
+                    //and we have not yet attempted to set up sharing (since after we attempt to set up sharing we will notify the server)
+                    //then tell the server here.
+                    //this makes it so that we tell the server once when Seeker first launches, and when things change, but not every time
+                    //we log in.
+                    if(SoulSeekState.NumberOfSharedDirectoriesIsStale && SoulSeekState.AttemptedToSetUpSharing)
+                    {
+                        MainActivity.LogDebug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
+                        MainActivity.InformServerOfSharedFiles();
+                    }
+
                     TransfersController.InitializeService();
                 }
                 catch (Exception e)
@@ -4195,6 +4269,7 @@ namespace AndriodApp1
                 SoulSeekState.AutoRetryBackOnline = sharedPreferences.GetBoolean(SoulSeekState.M_AutoRetryBackOnline, true);
 
                 SoulSeekState.NotifyOnFolderCompleted = sharedPreferences.GetBoolean(SoulSeekState.M_NotifyFolderComplete, true);
+                SoulSeekState.AllowUploadsOnMetered = sharedPreferences.GetBoolean(SoulSeekState.M_AllowUploadsOnMetered, true);
 
                 UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
                 SoulSeekState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(sharedPreferences.GetInt(SoulSeekState.M_DefaultSearchResultSortAlgorithm, 0));
@@ -7338,6 +7413,11 @@ namespace AndriodApp1
                         //just in case
                     }
                 }
+
+                if(errorMsg == "Unspecified Error")
+                {
+                    MainActivity.LogFirebase("Error Parsing Files Unspecified Error" + e.Message + e.StackTrace);
+                }
             }
             finally
             {
@@ -7388,6 +7468,11 @@ namespace AndriodApp1
             if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 SoulSeekState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
+                SoulSeekState.NumberOfSharedDirectoriesIsStale = false;
+            }
+            else
+            {
+                SoulSeekState.NumberOfSharedDirectoriesIsStale = true;
             }
         }
 
@@ -7401,7 +7486,7 @@ namespace AndriodApp1
             {
                 if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
-                    if (MeetsSharingConditions() && SoulSeekState.SharedFileCache != null && SoulSeekState.SharedFileCache.SuccessfullyInitialized)
+                    if (MeetsCurrentSharingConditions())
                     {
                         MainActivity.LogDebug("Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
                         SoulSeekState.SoulseekClient.SetSharedCountsAsync(SoulSeekState.SharedFileCache.DirectoryCount, 
@@ -7412,6 +7497,19 @@ namespace AndriodApp1
                         MainActivity.LogDebug("Tell server we are sharing 0 dirs and 0 files");
                         SoulSeekState.SoulseekClient.SetSharedCountsAsync(0, 0);
                     }
+                    SoulSeekState.NumberOfSharedDirectoriesIsStale = false;
+                }
+                else
+                {
+                    if (MeetsCurrentSharingConditions())
+                    {
+                        MainActivity.LogDebug("We need to Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
+                    }
+                    else
+                    {
+                        MainActivity.LogDebug("We need to Tell server we are sharing 0 dirs and 0 files on next log in");
+                    }
+                    SoulSeekState.NumberOfSharedDirectoriesIsStale = true;
                 }
             }
             catch (Exception e)
@@ -7546,7 +7644,7 @@ namespace AndriodApp1
                     LogDebug("Error setting up sharedFileCache for 1st time." + e.Message + e.StackTrace);
                     //SoulSeekState.UploadDataDirectoryUri = null;
                     //SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
-                    SetUnsetSharingBasedOnConditions(false);
+                    SetUnsetSharingBasedOnConditions(false, true);
                     if(!(e is DirectoryAccessFailure))
                     {
                         MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
@@ -7593,6 +7691,7 @@ namespace AndriodApp1
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                 }
+                SoulSeekState.AttemptedToSetUpSharing = true;
             });
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { setUpSharedFileCache(); });
         }
@@ -7853,6 +7952,13 @@ namespace AndriodApp1
             {
                 SetUpSharing();
             }
+            else if (SoulSeekState.NumberOfSharedDirectoriesIsStale)
+            {
+                InformServerOfSharedFiles();
+                SoulSeekState.AttemptedToSetUpSharing = true;
+            }
+            
+
             //this.DeleteSharedPreferences("SoulSeekPrefs");
 
             //Mono.Nat.NatUtility.DeviceFound += NatUtility_DeviceFound; //error bad message parsePAL_UPNP_SOAP_E_INVALID_ARGS. was able to look at all the current wifi port mappings however :)
@@ -9062,12 +9168,13 @@ namespace AndriodApp1
         /// <param name="force">force if we are chaning the upload directory...</param>
         public static void SetUnsetSharingBasedOnConditions(bool informServerOfChangeIfThereIsAChange, bool force = false)
         {
-            bool wasShared = SoulSeekState.SoulseekClient.Options.SearchResponseResolver == null; //when settings gets recreated can get nullref here.
-            if (MeetsSharingConditions())
+            bool wasShared = SoulSeekState.SoulseekClient.Options.SearchResponseResolver != null; //when settings gets recreated can get nullref here.
+            if (MeetsCurrentSharingConditions())
             {
                 TurnOnSharing();
                 if (!wasShared || force)
                 {
+                    MainActivity.LogDebug("sharing state changed to ON");
                     InformServerOfSharedFiles();
                 }
             }
@@ -9076,14 +9183,28 @@ namespace AndriodApp1
                 TurnOffSharing();
                 if (wasShared)
                 {
+                    MainActivity.LogDebug("sharing state changed to OFF");
                     InformServerOfSharedFiles();
                 }
             }
         }
 
+        /// <summary>
+        /// Has set things up properly and has sharing on.
+        /// </summary>
+        /// <returns></returns>
         public static bool MeetsSharingConditions()
         {
             return SoulSeekState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SoulSeekState.IsParsing && !UploadDirectoryManager.AreAllFailed();
+        }
+
+        /// <summary>
+        /// Has set things up properly and has sharing on + their network settings currently allow it.
+        /// </summary>
+        /// <returns></returns>
+        public static bool MeetsCurrentSharingConditions()
+        {
+            return MeetsSharingConditions() && SoulSeekState.IsNetworkPermitting();
         }
 
         public static bool IsSharingSetUpSuccessfully()
@@ -9104,7 +9225,14 @@ namespace AndriodApp1
             if (MeetsSharingConditions() && IsSharingSetUpSuccessfully())
             {
                 //try to parse this into a path: SoulSeekState.ShareDataDirectoryUri
-                return new Tuple<SharingIcons, string>(SharingIcons.On, SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
+                if(MeetsCurrentSharingConditions())
+                {
+                    return new Tuple<SharingIcons, string>(SharingIcons.On, SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
+                }
+                else
+                {
+                    return new Tuple<SharingIcons, string>(SharingIcons.OffDueToNetwork, "Sharing disabled on metered connection");
+                }
             }
             else if (MeetsSharingConditions() && !IsSharingSetUpSuccessfully())
             {
@@ -10128,7 +10256,7 @@ namespace AndriodApp1
                             if (task.Exception != null && task.Exception.InnerException != null)
                             {
                                 //I get a lot of null refs from task.Exception.InnerException.Message
-                                MainActivity.LogFirebase("Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                MainActivity.LogFirebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
                                 LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
                                 if (task.Exception.InnerException.InnerException != null)
                                 {
@@ -12746,10 +12874,19 @@ namespace AndriodApp1
         public static bool StartServiceOnStartup = true;
         public static bool IsStartUpServiceCurrentlyRunning = false;
 
+        public static bool AllowUploadsOnMetered = true;
+        public static bool CurrentConnectionIsUnmetered = true;
+        public static bool IsNetworkPermitting()
+        {
+            return AllowUploadsOnMetered || CurrentConnectionIsUnmetered;
+        }
+
         public static SearchResultSorting DefaultSearchResultSortAlgorithm = SearchResultSorting.Available;
 
         public static String SaveDataDirectoryUri = null;
         public static bool SaveDataDirectoryUriIsFromTree = true;
+
+
 
 
         public static String ManualIncompleteDataDirectoryUri = null;
@@ -12775,6 +12912,9 @@ namespace AndriodApp1
         public static int UploadSpeed = -1; //bytes
         public static bool FailedShareParse = false;
         private static volatile bool isParsing = false;
+
+        public static bool NumberOfSharedDirectoriesIsStale = true;
+        public static bool AttemptedToSetUpSharing = false;
 
         public static bool OurCurrentStatusIsAway = false; //bool because it can only be online or away. we set this after we successfully change the status.
         //NOTE: 
@@ -12831,6 +12971,7 @@ namespace AndriodApp1
         public static bool AutoAwayOnInactivity = false;
 
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
+        public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
         /// <summary>
         /// This is only for showing toasts.  The logic is as follows.  If we showed a cancelled toast 
@@ -13035,6 +13176,8 @@ namespace AndriodApp1
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
         public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";
         public const string M_NotifyFolderComplete = "Momento_NotifyFolderComplete";
+
+        public const string M_AllowUploadsOnMetered = "Momento_AllowUploadsOnMetered";
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";
@@ -13960,7 +14103,16 @@ namespace AndriodApp1
                     //last path segment child will be "raw:/storage/emulated/0/Download/Soulseek Incomplete" for the reasonable case and "msd:24" for the bad case
                     if (lastPathSegmentChild.Contains("\\"))
                     {
-                        return Helpers.GetAllButLast(lastPathSegmentChild);
+                        if(lastPathSegmentChild.StartsWith("raw:")) //scheme says "content" even though it starts with "raw:"
+                        {
+                            MainActivity.LogInfoFirebase("soft msdcase (raw:) : " + lastPathSegmentChild); //should be raw: provider
+                            msdCase = true;
+                            return String.Empty;
+                        }
+                        else
+                        {
+                            return Helpers.GetAllButLast(lastPathSegmentChild);
+                        }
                     }
                     else
                     {
@@ -15234,6 +15386,7 @@ namespace AndriodApp1
         Error = 1,
         On = 2,
         CurrentlyParsing = 3,
+        OffDueToNetwork = 4,
     }
 
 
