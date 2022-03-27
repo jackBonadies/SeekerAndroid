@@ -738,8 +738,8 @@ namespace AndriodApp1
                 }
                 if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
                 {
-                    string xLockedFolder = Helpers.GetFolderNameFromFile(x.Files.First().Filename);
-                    string yLockedFolder = Helpers.GetFolderNameFromFile(y.Files.First().Filename);
+                    string xLockedFolder = Helpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
+                    string yLockedFolder = Helpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
                     int lockedret = xLockedFolder.CompareTo(yLockedFolder);
                     if (lockedret != 0)
                     {
