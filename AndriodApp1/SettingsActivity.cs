@@ -1417,6 +1417,11 @@ namespace AndriodApp1
                 DocumentFile rootdir = null;
                 if (useDownloadDir)
                 {
+                    if(SoulSeekState.RootDocumentFile==null)
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Error: The Download Directory is not properly set.", ToastLength.Long).Show();
+                        return;
+                    }
                     rootdir = SoulSeekState.RootDocumentFile;
                     MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
                 }
