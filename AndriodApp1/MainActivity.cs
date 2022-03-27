@@ -2266,9 +2266,12 @@ namespace AndriodApp1
 
         public void ClearAllFromFolder(FolderItem fi)
         {
-            foreach (TransferItem ti in fi.TransferItems)
+            lock(AllTransferItems)
             {
-                AllTransferItems.Remove(ti);
+                foreach (TransferItem ti in fi.TransferItems)
+                {
+                    AllTransferItems.Remove(ti);
+                }
             }
             fi.TransferItems.Clear();
             AllFolderItems.Remove(fi);
@@ -2281,9 +2284,12 @@ namespace AndriodApp1
             {
                 TransferItemManagerWrapper.CleanupEntry(tisNeedingCleanup);
             }
-            foreach (TransferItem ti in fi.TransferItems)
+            lock(AllTransferItems)
             {
-                AllTransferItems.Remove(ti);
+                foreach (TransferItem ti in fi.TransferItems)
+                {
+                    AllTransferItems.Remove(ti);
+                }
             }
             fi.TransferItems.Clear();
             AllFolderItems.Remove(fi);
