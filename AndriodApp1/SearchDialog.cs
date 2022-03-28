@@ -173,6 +173,7 @@ namespace AndriodApp1
                     //https://www.whatismybrowser.com/detect/what-is-my-user-agent
                     //User Agent: Dalvik/2.1.0 (Linux; U; Android 11; Pixel 2 Build/RP1A.201005.004.A1)
                     bool failed = false;
+                    string urlstring = String.Empty;
                     try
                     {
                         Java.Net.URL url = new Java.Net.URL(matched.Captures[0].Value);
@@ -180,7 +181,7 @@ namespace AndriodApp1
                         urlConnection.SetRequestProperty("Accept-Language", "en"); //tested with de. returned german for spotify..
                         var stream = (urlConnection.InputStream);
                         string fullString = new System.IO.StreamReader(stream).ReadToEnd();
-                        string urlstring = matched.Captures[0].Value;
+                        urlstring = matched.Captures[0].Value;
                         if (urlstring.Contains("://www.soundhound.com") || urlstring.Contains("://soundhound.com"))
                         {
                             string track_name = "\"track_name\":";
@@ -208,7 +209,7 @@ namespace AndriodApp1
                             int artist_display_name_end_index = fullString.IndexOf(end_string, artist_display_name_start_index);
                             trackname = fullString.Substring(track_name_start_index, track_end_index - track_name_start_index - 1);
                             artistname = fullString.Substring(artist_display_name_start_index, artist_display_name_end_index - artist_display_name_start_index);
-                            trackname = AndriodApp1.HTMLUtilities.unescapeHtml(trackname); //"Los Barrachos (I Don&#39;t Have Any Hope Left, But the Weather is Nice)"
+                            trackname = AndriodApp1.HTMLUtilities.unescapeHtml(trackname); //"(I Don&#39;t)"
                             artistname = AndriodApp1.HTMLUtilities.unescapeHtml(artistname);
                         }
                         //else if (urlstring.Contains("://soundcloud"))
@@ -218,7 +219,7 @@ namespace AndriodApp1
                     }
                     catch (Exception ex)
                     {
-                        MainActivity.LogFirebase("error following link: " + ex.Message + " " + ex.StackTrace);
+                        MainActivity.LogFirebase("error following link: " + urlstring + ex.Message + " " + ex.StackTrace);
                         failed = true;
                     }
 

@@ -2661,7 +2661,7 @@ namespace AndriodApp1
         {
             ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
 
-            if(cm == null)
+            if(cm == null) //null if class is not a supported system service.
             {
                 return false;
             }
