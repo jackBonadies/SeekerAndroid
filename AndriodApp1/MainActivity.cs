@@ -2660,6 +2660,12 @@ namespace AndriodApp1
         public static bool SetNetworkState(Context context)
         {
             ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
+
+            if(cm == null)
+            {
+                return false;
+            }
+
             if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
             {
                 bool oldState = SoulSeekState.CurrentConnectionIsUnmetered;
@@ -7490,7 +7496,7 @@ namespace AndriodApp1
         {
             try
             {
-                if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+                if (SoulSeekState.SoulseekClient != null && SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
                 {
                     if (MeetsCurrentSharingConditions())
                     {
@@ -10259,30 +10265,45 @@ namespace AndriodApp1
                             //the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly") //this seems to be retry able
                             //or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
                             //or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
+                            bool unknownException = true;
                             if (task.Exception != null && task.Exception.InnerException != null)
                             {
                                 //I get a lot of null refs from task.Exception.InnerException.Message
-                                MainActivity.LogFirebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+
+                                
                                 LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                                if (task.Exception.InnerException.InnerException != null)
+                                if(task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
                                 {
-                                    //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
-                                    {
-                                        //skip this case
-                                    }
-                                    else
-                                    {
-                                        MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
-                                    }
+                                    action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                    unknownException = false;
+                                }
+
+
+
+                                if (task.Exception.InnerException.InnerException != null && unknownException)
+                                {
 
                                     if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)"))
                                     {
                                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                        unknownException = false;
                                     }
 
+                                    //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
+                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                                    {
+                                        unknownException = false;
+                                    }
+                                    
+                                    if(unknownException)
+                                    {
+                                        MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                    }
+
+
+
                                     //this is to help with the collection was modified
-                                    if (task.Exception.InnerException.InnerException.InnerException != null)
+                                    if (task.Exception.InnerException.InnerException.InnerException != null && unknownException)
                                     {
                                         MainActivity.LogInfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
                                         var innerInner = task.Exception.InnerException.InnerException.InnerException;
@@ -10290,10 +10311,14 @@ namespace AndriodApp1
                                         MainActivity.LogFirebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
                                         //this is to help with the collection was modified
                                     }
+                                }
 
+                                if (unknownException)
+                                {
+                                    MainActivity.LogFirebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
                                 }
                             }
-                            else if (task.Exception != null)
+                            else if (task.Exception != null && unknownException)
                             {
                                 MainActivity.LogFirebase("Unhandled task exception (little info): " + task.Exception.Message);
                                 LogDebug("Unhandled task exception (little info):" + task.Exception.Message);
