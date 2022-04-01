@@ -862,7 +862,7 @@ namespace AndriodApp1
 
             if (messageNotifExtended.IsSpecialMessage)
             {
-                string title = "Messages with " + messageNotifExtended.Username;
+                string title = String.Format(SeekerApplication.GetString(Resource.String.MessagesWithUser), messageNotifExtended.Username);
                 var titleSpan = new Android.Text.SpannableString(title + " \n");
                 titleSpan.SetSpan(new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors, contextToUse)), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
                 titleSpan.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), 0, title.Length, Android.Text.SpanTypes.InclusiveInclusive);
@@ -875,7 +875,7 @@ namespace AndriodApp1
                 return ssb;
             }
 
-            string uname = messageNotifExtended.IsOurMessage ? "You" : messageNotifExtended.Username;
+            string uname = messageNotifExtended.IsOurMessage ? SeekerApplication.GetString(Resource.String.You) : messageNotifExtended.Username;
             var spannableString = new Android.Text.SpannableString(uname + " ");
 
             Android.Text.Style.ForegroundColorSpan fcs = null;
@@ -934,7 +934,7 @@ namespace AndriodApp1
                         continue;
                     }
                 }
-                string uname = msg.IsOurMessage ? "You" : msg.Username;
+                string uname = msg.IsOurMessage ? SeekerApplication.GetString(Resource.String.You) : msg.Username;
                 if (lastUsername != uname)
                 {
                     //add header
@@ -1040,7 +1040,7 @@ namespace AndriodApp1
                     bool systemIsInNightMode = GetIfSystemIsInNightMode(contextToUse);
 
 
-                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel("Send Message...").Build();
+                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel(SeekerApplication.GetString(Resource.String.sendmessage_)).Build();
                     Intent replayIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     replayIntent.PutExtra("direct_reply_extra", true);
                     replayIntent.SetAction("seeker_direct_reply");
@@ -1698,8 +1698,15 @@ namespace AndriodApp1
             if(MessagesActivity.FromDeleteMessage)
             {
                 MessagesActivity.FromDeleteMessage = false;
-                Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong).SetAction("Undo", ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true)).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), 
+                        string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), 
+                        MessagesActivity.DELETED_USERNAME), 
+                        Snackbar.LengthLong)
+                    .SetAction(Resource.String.undo, ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true))
+                    .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+
+                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView)
+                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
                 sb.Show();
             }
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
@@ -2173,7 +2180,10 @@ namespace AndriodApp1
             MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out MessagesActivity.DELETED_DATA);
             MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
 
-            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong).SetAction("Undo", GetSnackBarAction(this.adapter, false)).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), 
+                MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong)
+                .SetAction(Resource.String.undo, GetSnackBarAction(this.adapter, false))
+                .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
             (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
             sb.Show();
         }

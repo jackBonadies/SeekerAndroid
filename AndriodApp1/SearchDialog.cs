@@ -51,7 +51,7 @@ namespace AndriodApp1
                 string mainText = intent.GetStringExtra(Intent.ExtraText);
                 string subject = intent.GetStringExtra(Intent.ExtraSubject);
                 //music match
-                //"I got the #lyrics for \"Maud Gone\" by Car Seat Headrest on Musixmatch https://www.musixmatch.com/lyrics/Car-Seat-Headrest/Maud-Gone?utm_source=application&utm_campaign=api&utm_medium=musixmatch-android%3A552993462"
+                //"I got the #lyrics for \"song\" by artist on Musixmatch https://www.musixmatch.com/lyrics/Car-Seat-Headrest/Maud-Gone?utm_source=application&utm_campaign=api&utm_medium=musixmatch-android%3A552993462"
                 if (!string.IsNullOrEmpty(mainText) && mainText.Contains("://www.musixmatch.com/"))
                 {
                     string lyric = "/lyrics/";
@@ -243,7 +243,7 @@ namespace AndriodApp1
                 });
                 t.Start();
                 //soundhound has
-                //"track_name":"Maud Gone","artist_display_name":"Car Seat Headrest" (both curl and java.net.url
+                //"track_name":"x","artist_display_name":"x" (both curl and java.net.url
                 //shazam is useless
                 //spotify has 
                 //<title>Oh! Starving - song by Car Seat Headrest | Spotify</title>
@@ -420,7 +420,6 @@ namespace AndriodApp1
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
-            //Dialog.SetTitle("File Info"); //is this needed in any way??
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
 
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);

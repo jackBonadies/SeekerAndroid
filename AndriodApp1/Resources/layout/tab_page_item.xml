@@ -25,7 +25,7 @@
         android:textSize="18sp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="test animal collectiveDUMMY"
+        android:text="test artistsongDUMMY"
         />
     <TextView
         android:id="@+id/resultsText"

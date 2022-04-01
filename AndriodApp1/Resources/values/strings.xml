@@ -152,7 +152,8 @@ Directory Count: {5}"</string>
   <string name="login">Login</string>
   <string name="password">Password</string>
   <string name="submit">Submit</string>
-  <string name="connecting_to_server">Connecting to server,\nPlease Wait...</string>
+  <string name="ConnectingToServer">Connecting to Server</string>
+  <string name="PleaseWait_">Please Wait...</string>
   <string name="choose_a_download_folder">Select Download Folder</string>
   <string name="settings">Settings</string>
 
@@ -648,5 +649,193 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="sort_results_by">Sort By</string>
 	<string name="sort_results_by_">Sort By:</string>
 
+	<string name="next">Next</string>
+	<string name="prev">Prev</string>
+	<string name="finish">Finish</string>
+
+
+	<string name="Uploads">Uploads</string>
+	<string name="Downloads">Downloads</string>
+	<string name="You">You</string>
+
+	<string name="sendmessage_">Send Message...</string>
+
+	<string name="Availability">Availability</string>
+	<string name="Speed">Speed</string>
+	<string name="FolderName">Folder Name</string>
+	<string name="SetAsDefault">Set as Default</string>
+	<string name="Change">Change</string>
+	<string name="Get">Get</string>
+	<string name="Check">Check</string>
+	<string name="Keywords">Keywords</string>
+	<string name="Configure">Configure</string>
+
+
+	<string name="ViewErrorOptions">View Error Options</string>
+	<string name="ViewFolderOptions">View Folder Options</string>
+	<string name="Remove">Remove</string>
+	<string name="Reselect">Reselect</string>
+	<string name="RemoveFolder">Remove Folder</string>
+	<string name="FolderError">Folder Error</string>
+	<string name="ErrorForFolder">Error for folder: </string>
+
+	<string name="AreYouSureClearAllDirectories">Are you sure you want to clear all {0} directories from list?</string>
+	<string name="ErrorDownloadDirNotProperlySet">Error: The Download Directory is not properly set.</string>
+
+
+	<string name="CopySelectedURLs">Copy Selected URLs</string>
+	<string name="CopySelectedURL">Copy Selected URL</string>
+	<string name="CopyURL">Copy URL</string>
+	<string name="CopyFolderURL">Copy Folder URL</string>
+	<string name="LinkCopied">Link Copied</string>
+	<string name="LinksCopied">Links Copied</string>
+	<string name="ShowFolderInfo">Show Folder Info</string>
+
+
+	<string name="NothingToCopy">Nothing to Copy</string>
+	<string name="ThisFolderContainsSubfolders">This Folder contains Subfolders</string>
+	<string name="QueuedForDownload">Queued for Download</string>
+	<string name="QueueFolderAsPaused">Queued Folder as Paused</string>
+
+	<!--meaning duration of song / songs-->
+	<string name="Length">Length</string>
+
+	<string name="NumFiles">Num Files</string>
+	<string name="NumSubfolders">Num Subfolders</string>
+
+
+	<string name="HideTickerView">Hide Ticker View</string>
+	<string name="ShowTickerView">Show Ticker View</string>
+	<string name="HideStatusView">Hide Status View</string>
+	<string name="ShowStatusView">Show Status View</string>
+
+	<string name="theUserJoined">joined</string>
+	<string name="theUserLeft">left</string>
+	<string name="theUserWentAway">went away</string>
+	<string name="theUserCameBack">came back</string>
+
+	<string name="messageWillSendOnReConnect">Message will send on connection re-establishment</string>
+
+	<string name="SortUsersBy">Sort Users By</string>
+	<string name="FilterUsers">Filter Users...</string>
+
+	<string name="Total_">Total:</string>
+
+	<string name="CannotBrowseUsernameOffline">Cannot browse {0}, user is offline.</string>
+	<string name="FailedToBrowseUsernameUnspecifiedError">Failed to browse {0} due to unspecified error.</string>
+	<string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
+
+	<string name="DownloadIsQueued">Download is Queued</string>
+
+	<string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
+	<string name="ImportWizard">Import Wizard</string>
+	<string name="Import">Import</string>
+	<string name="SuccessfullyParsed">Successfully Parsed! Tap Next to Proceed</string>
+	<string name="FailedToParseContactDev">Failed to Parse File. Please ensure file is valid. Contact developer for more help.</string>
+	<string name="FailedToParseReasonContactDev">Failed to Parse File. {0}. Contact developer for more help.</string>
+
+	<string name="NoSuitableFileManager">No suitable file manager found</string>
+	<string name="SuccessfullyImported">Successfully imported client data</string>
+
+	<string name="SelectUserNotes">Select the following user notes to add</string>
+	<string name="FolderFinishedDownloading">Folder Finished Downloading</string>
+	<string name="FinishedDownloading">finished downloading</string>
+	<string name="PermissionsIssueShared">Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.</string>
+
+	<string name="UserXIsOffline">User {0} is offline</string>
+	<string name="CannotConnectUserX">Cannot connect to user {0}</string>
+	<string name="TimeoutQueueUserX">Timeout getting queue position from {0}</string>
+
+
+	<string name="PermissionErrorShared">Permission Error, cannot write (Please reselect).</string>
+	<string name="FolderNoExistShared">Folder does not exist.</string>
+	<string name="UnknownErrorShared">Unknown Error. See dev.</string>
+	<string name="MessagesWithUser">Messages with {0}</string>
+
+	<string name="DateAddedAsc">Date Added (Asc)</string>
+	<string name="DateAddedDesc">Date Added (Desc)</string>
+	<string name="Name">Name</string>
+	<string name="OnlineStatus">Online Status</string>
+
+	<string name="NoUsersFound">No Users Found</string>
+	<string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
+	<string name="CurrentDownloadFolder_">Current Download Folder: </string>
+	<string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete Directories</string>
+	<string name="CreateUsernameSubfolders">Create Username Subfolders</string>
+	<string name="ShowSmartFilters">Show Smart Filters</string>
+	<string name="ShowPrivateLockedSearch">Show Private (Locked) Files in Search Results</string>
+	<string name="ShowPrivateLockedBrowse">Show Private (Locked) Files in Browse Response</string>
+	<string name="RememberRecent">Remember Recent Users</string>
+	<string name="ClearRecentUsers">Clear Recent Users</string>
+	<string name="AutoRetryFailedOfflineOnline">Auto-Retry Failed Downloads When User Goes Back Online</string>
+	<string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
+	<string name="DayVarient_">Day Varient: </string>
+	<string name="NightVarient_">Night Varient: </string>
+	<string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
+	<string name="RescanShares">Rescan Shares</string>
+	<string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
+	<string name="LimitDownloadSpeed">Limit Download Speed</string>
+	<string name="LimitUploadSpeed">Limit Upload Speed</string>
+	<string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>
+	<string name="EnableDiagnostics">Enable Diagnostics</string>
+	<string name="ImportExternalClientData">Import external client data</string>
+	<string name="LockedUserListOnly">Locked (Only User List can Download)</string>
+	<string name="HiddenUserListOnly">Hidden (Only User List can View)</string>
+	<string name="OverrideFolderName">Override Folder Name</string>
+	<string name="CustomFolderName">Custom Folder Name</string>
+	<string name="QueueSelectedAsPaused">Queue Selected as Paused</string>
+
+	<string name="UserOptions">User Options</string>
+	<string name="Options">Options</string>
+	<string name="Save">Save</string>
+	<string name="SortOrder">Sort Order</string>
+
+
+	<string name="ClearAllCompleteAndAborted">Clear all Complete and Aborted</string>
+	<string name="AbortAll">Abort All</string>
+
+
+	<string name="BatchSelect">Batch Select</string>
+	<string name="ShowSize">Show Size</string>
+	<string name="ShowSpeed">Show Speed</string>
+
+	<string name="ResumeSelected">Resume Selected</string>
+	<string name="PauseSelected">Pause Selected</string>
+	<string name="RetryFailed">Retry Failed</string>
+	<string name="InvertSelection">Invert Selection</string>
+	<string name="SelectAll">Select All</string>
+	<string name="MaxConcurrentIs">Max # of Concurrent Downloads: </string>
+
+	<string name="PerTransfer">Per Transfer</string>
+	<string name="Global">Global</string>
+	<string name="ConfigureSmartFilters">Configure Smart Filters</string>
+	<string name="NotSet">Not Set</string>
+	<string name="AppLocalStorage">App Local Storage</string>
+	<string name="NotInUse">Not in Use</string>
+
+	<string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
+	<string name="NoEligibleToClear">No eligible items to clear</string>
+	<string name="ChangeDownloadSpeed">Change Download Speed (kb/s):</string>
+	<string name="ChangeUploadSpeed">Change Upload Speed (kb/s):</string>
+	<string name="EnterSpeed">Enter Speed in Kb/s</string>
+	<string name="EnterMaxDownloadSimultaneously">Enter Max to Download Simultaneously</string>
+
+	<string name="BrowseWhich">Browse Public Shares or User List shares?</string>
+	<string name="WaitForParsing">Wait for parsing to complete.</string>
+
+	<string name="finishingUp">finishing up</string>
+	<string name="XFilesParsed">{0} files parsed</string>
+	<string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
+	<string name="UploadFolderOptions">Upload Folder Options</string>
+	<string name="CannotChangeNameNotUnique">Cannot change name. Not unique.</string>
+	<string name="AlreadyParsing">Already parsing</string>
+	<string name="DirectoryNotSet">Directory not set</string>
+	<string name="FailedGettingAccess">Failed getting access to directory</string>
+	<string name="AdditionalFiles">{0} additional files since last scan.</string>
+	<string name="OneAdditionalFile">1 additional file since last scan.</string>
+	<string name="NoMediaStore">No access to media store. Parsing will be unoptimized.</string>
+	<string name="NoPermissionsForDir">Cannot set directory without proper permissions</string>
+	<string name="No">No</string>
+	
 
 </resources>

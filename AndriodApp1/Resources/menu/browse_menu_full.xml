@@ -31,7 +31,7 @@ android:iconifiedByDefault="false"
 
 
 	<item android:id="@+id/userOptions"
-	 android:title="User Options" >
+	 android:title="@string/UserOptions" >
 
 		<menu>
 
@@ -64,37 +64,37 @@ android:iconifiedByDefault="false"
  	</item>
 
 	 	<item android:id="@+id/moreOptions"
-	 android:title="More Options" >
+	 android:title="@string/more_options" >
 
 	 		<menu>
 
 				<item android:id="@+id/action_queue_folder_paused"
-	android:title="Queue Folder as Paused"
+	android:title="@string/QueueFolderAsPaused"
 	app:showAsAction="never"
 	android:iconifiedByDefault="false"
 	 />
 
 
 	 				<item android:id="@+id/action_queue_selected_paused"
-	android:title="Queue Selected as Paused"
+	android:title="@string/QueueSelectedAsPaused"
 	app:showAsAction="never"
 	android:iconifiedByDefault="false"
 	 />
 
 	  <item android:id="@+id/action_show_folder_info"
-	android:title="Show Folder Info"
+	android:title="@string/ShowFolderInfo"
 	app:showAsAction="never"
 	android:iconifiedByDefault="false"
 	 />
 
 				<item android:id="@+id/action_copy_folder_url"
-		  android:title="Copy Folder URL"
+		  android:title="@string/CopyFolderURL"
 		  app:showAsAction="never"
 		  android:iconifiedByDefault="false"
 	 />
 
 				<item android:id="@+id/action_copy_selected_url"
-	  android:title="Copy Selected URL"
+	  android:title="@string/CopySelectedURL"
 	  app:showAsAction="never"
 	  android:iconifiedByDefault="false"
 	 />

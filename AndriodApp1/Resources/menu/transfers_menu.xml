@@ -20,13 +20,13 @@ android:icon="@drawable/folder_swap_outline"
  />
 
   <item android:id="@+id/action_clear_all_complete_and_aborted"
-android:title="Clear all Complete and Aborted"
+android:title="@string/ClearAllCompleteAndAborted"
 app:showAsAction="never"
 android:iconifiedByDefault="false"
  />
 
   <item android:id="@+id/action_abort_all"
-android:title="Abort All"
+android:title="@string/AbortAll"
 app:showAsAction="never"
 android:iconifiedByDefault="false"
  />
@@ -62,22 +62,22 @@ android:iconifiedByDefault="false"
  />
 
 	<item android:id="@+id/batch_select"
-  android:title="Batch Select"
+  android:title="@string/BatchSelect"
   app:showAsAction="never"
   android:iconifiedByDefault="false"
  />
 
 	<item android:id="@+id/styleOptions"
-	 android:title="Options" >
+	 android:title="@string/Options" >
 
 		<menu>
 			<item android:id="@+id/action_show_size"
-	   android:title="Show Size"
+	   android:title="@string/ShowSize"
 	   app:showAsAction="never"
 	   android:iconifiedByDefault="false"
 	 />
 			<item android:id="@+id/action_show_speed"
-		  android:title="Show Speed"
+		  android:title="@string/ShowSpeed"
 		  app:showAsAction="never"
 		  android:iconifiedByDefault="false"
  />

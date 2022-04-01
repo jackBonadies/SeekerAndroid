@@ -3890,7 +3890,7 @@ namespace AndriodApp1
             try
             {
                 //this.rootView.FindViewById<TextView>(Resource.Id.searchesQueue).SetTextSize(ComplexUnitType.Dip,8);
-                this.rootView.FindViewById<TextView>(Resource.Id.searchesKbs).SetTextSize(ComplexUnitType.Sp, 8);
+                //this.rootView.FindViewById<TextView>(Resource.Id.searchesKbs).SetTextSize(ComplexUnitType.Sp, 8);
             }
             catch
             {

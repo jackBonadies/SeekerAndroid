@@ -414,12 +414,10 @@ namespace AndriodApp1
             int totalCount = responses.Count();
             for(int i=0; i < totalCount; i++)
             {
-                //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
                 string fline = Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                 //fline = fline.Replace(" - ", " ");
                 //fline = fline.Replace(", ", " ");
-                //fline = fline.Replace("Weyes Blood", "");
                 if (fline.StartsWith(" - "))
                 {
                     fline = fline.Substring(3);
@@ -511,7 +509,6 @@ namespace AndriodApp1
 
                 //fline = fline.Replace(" - ", " ");
                 //fline = fline.Replace(", ", " ");
-                //fline = fline.Replace("Weyes Blood", "");
                 if (fline.StartsWith(" - "))
                 {
                     fline = fline.Substring(3);

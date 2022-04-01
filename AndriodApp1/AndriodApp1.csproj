@@ -360,18 +360,6 @@
     <AndroidResource Include="Resources\drawable\ic_stat_soulseekicontransparent.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\transfers_legacy.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-      <SubType>Designer</SubType>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\layout\searches_legacy.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-      <SubType>Designer</SubType>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
     <AndroidResource Include="Resources\drawable\header_cell_shape_w_top.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
@@ -1451,11 +1439,6 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\upload_folder_options.xml">
-      <SubType>Designer</SubType>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\layout\upload_multiple_dir_layout.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

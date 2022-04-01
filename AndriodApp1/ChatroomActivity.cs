@@ -345,20 +345,20 @@ namespace AndriodApp1
 
                 if(ChatroomActivity.ShowTickerView)
                 {
-                    menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle("Hide Ticker View");
+                    menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle(Resource.String.HideTickerView);
                 }
                 else
                 {
-                    menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle("Show Ticker View");
+                    menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle(Resource.String.ShowTickerView);
                 }
 
                 if(ChatroomActivity.ShowStatusesView)
                 {
-                    menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle("Hide Status View");
+                    menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle(Resource.String.HideStatusView);
                 }
                 else
                 {
-                    menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle("Show Status View");
+                    menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle(Resource.String.ShowStatusView);
                 }
             }
             return true;
@@ -947,16 +947,16 @@ namespace AndriodApp1
             switch (data.StatusType)
             {
                 case ChatroomController.StatusMessageType.Joined:
-                    statusMessage = "{0} {1} joined";
+                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserJoined);
                     break;
                 case ChatroomController.StatusMessageType.Left:
-                    statusMessage = "{0} {1} left";
+                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserLeft);
                     break;
                 case ChatroomController.StatusMessageType.WentAway:
-                    statusMessage = "{0} {1} went away";
+                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserWentAway);
                     break;
                 case ChatroomController.StatusMessageType.CameBack:
-                    statusMessage = "{0} {1} came back";
+                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserCameBack);
                     break;
             }
             userStatus.Text = string.Format(statusMessage, timePrefix, data.Username);
@@ -2080,7 +2080,7 @@ namespace AndriodApp1
             }
             else
             {
-                if(MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment")) 
+                if(MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect))) 
                 {
                     return;
                 }
@@ -4535,7 +4535,7 @@ namespace AndriodApp1
         public static void ShowSortRoomUserListDialog()
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle("Sort Users By");
+            builder.SetTitle(Resource.String.SortUsersBy);
 
             View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.change_sort_room_user_list_dialog, SoulSeekState.ActiveActivityRef.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
 
@@ -4637,8 +4637,6 @@ namespace AndriodApp1
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
 
-            //Dialog.SetTitle("File Info"); //is this needed in any way??
-
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);
             this.Dialog.SetTitle(OurRoomName);
 
@@ -4649,7 +4647,7 @@ namespace AndriodApp1
             toolbar.SetOnMenuItemClickListener(tmicl);
             toolbar.InflateMenu(Resource.Menu.room_user_dialog_menu);
             toolbar.Title = OurRoomName;
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryHint = "Filter Users...";
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
             (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryTextChange += RoomUserListDialog_QueryTextChange;
             (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
 
@@ -5210,8 +5208,6 @@ namespace AndriodApp1
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
-
-            //Dialog.SetTitle("File Info"); //is this needed in any way??
 
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);
             this.Dialog.SetTitle(OurRoomName);

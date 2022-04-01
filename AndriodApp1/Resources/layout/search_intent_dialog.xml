@@ -73,7 +73,7 @@ android:background="?attr/rounded_bottom_left_purple"
             style="@style/SeekerButtonStyle"
 
 
-            android:text="Cancel" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/searchButton"
@@ -85,6 +85,6 @@ android:background="?attr/rounded_bottom_left_purple"
             style="@style/SeekerButtonStyle"
 
 android:background="?attr/rounded_bottom_right_purple"
-            android:text="Search" />
+            android:text="@string/searches_tab2" />
     </LinearLayout>
 </LinearLayout>

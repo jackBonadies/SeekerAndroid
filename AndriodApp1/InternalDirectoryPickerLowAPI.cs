@@ -341,7 +341,7 @@ namespace AndriodApp1
                 newDirButton.Click += (sender, args) =>
                 {
                     EditText input = new EditText(_mContext);
-                    new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme).SetTitle("New Folder Name").SetView(input).SetPositiveButton("OK", (o, eventArgs) =>
+                    new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme).SetTitle("New Folder Name").SetView(input).SetPositiveButton(SeekerApplication.GetString(Resource.String.okay), (o, eventArgs) =>
                     {
                         String newDirName = input.Text;
                         // Create new directory
@@ -355,7 +355,7 @@ namespace AndriodApp1
                         {
                             Toast.MakeText(_mContext, "Failed to create '" + newDirName + "' folder", ToastLength.Short).Show();
                         }
-                    }).SetNegativeButton("Cancel", (o, eventArgs) => { }).Show();
+                    }).SetNegativeButton(SeekerApplication.GetString(Resource.String.cancel), (o, eventArgs) => { }).Show();
                 };
                 titleLayout1.AddView(newDirButton);
             }

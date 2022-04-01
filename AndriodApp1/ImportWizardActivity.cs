@@ -83,7 +83,7 @@ namespace AndriodApp1
             strip1.setCurrentPage(pager.CurrentItem);
 
             Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.setting_toolbar);
-            myToolbar.Title = "Import Wizard";
+            myToolbar.Title = SeekerApplication.GetString(Resource.String.ImportWizard);
             SetButtonText(pager.CurrentItem);
         }
 
@@ -146,7 +146,7 @@ namespace AndriodApp1
                                     {
                                         StartPageFragment.Instance.PostImportLoad(); 
                                         SetButtonText(this.pager.CurrentItem);
-                                        Toast.MakeText(this, "Successfully Parsed! Tap Next to Proceed", ToastLength.Long).Show();
+                                        Toast.MakeText(this, Resource.String.SuccessfullyParsed, ToastLength.Long).Show();
                                     }
                                     else
                                     {
@@ -154,11 +154,11 @@ namespace AndriodApp1
                                         SetButtonText(this.pager.CurrentItem);
                                         if(t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
                                         {
-                                            Toast.MakeText(this, String.Format("Failed to Parse File. {0}. Contact developer for more help.",npe.MessageToToast), ToastLength.Long).Show();
+                                            Toast.MakeText(this, String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev),npe.MessageToToast), ToastLength.Long).Show();
                                         }
                                         else
                                         {
-                                            Toast.MakeText(this, "Failed to Parse File. Please ensure file is valid. Contact developer for more help.", ToastLength.Long).Show();
+                                            Toast.MakeText(this, Resource.String.FailedToParseContactDev, ToastLength.Long).Show();
                                         }
                                         MainActivity.LogFirebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
                                     }
@@ -198,7 +198,7 @@ namespace AndriodApp1
                 catch (Android.Content.ActivityNotFoundException)
                 {
                     //toast nothing can handle
-                    Toast.MakeText(this, "No suitable file manager found", ToastLength.Long).Show();
+                    Toast.MakeText(this, Resource.String.NoSuitableFileManager, ToastLength.Long).Show();
                 }
             }
         }
@@ -236,7 +236,7 @@ namespace AndriodApp1
                     //finish
                     selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, selectedImportedData.Value.IgnoredBanned, ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems(), selectedImportedData.Value.UserNotes);
                     ImportSelectedData(selectedImportedData.Value);
-                    Toast.MakeText(this, "Successfully imported client data", ToastLength.Long).Show();
+                    Toast.MakeText(this, Resource.String.SuccessfullyImported, ToastLength.Long).Show();
                     MemoryCleanup();
                     this.Finish();
                     break;
@@ -338,16 +338,16 @@ namespace AndriodApp1
             switch (position)
             {
                 case 0:
-                    prevButton.Text = "Cancel";
-                    nextButton.Text = "Next";
+                    prevButton.Text = SeekerApplication.GetString(Resource.String.cancel);
+                    nextButton.Text = SeekerApplication.GetString(Resource.String.next);
                     break;
                 case 4:
-                    prevButton.Text = "Prev";
-                    nextButton.Text = "Finish";
+                    prevButton.Text = SeekerApplication.GetString(Resource.String.prev);
+                    nextButton.Text = SeekerApplication.GetString(Resource.String.finish);
                     break;
                 default:
-                    prevButton.Text = "Prev";
-                    nextButton.Text = "Next";
+                    prevButton.Text = SeekerApplication.GetString(Resource.String.prev);
+                    nextButton.Text = SeekerApplication.GetString(Resource.String.next);
                     break;
             }
         }
@@ -811,7 +811,7 @@ namespace AndriodApp1
                     }
                     break;
                 case ImportListType.UserNotes:
-                    selectTheFollowing.Text = "Select the following user notes to add";
+                    selectTheFollowing.Text = SeekerApplication.GetString(Resource.String.SelectUserNotes);
                     if (data.UserNotes == null || data.UserNotes.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;

@@ -73,8 +73,8 @@ namespace AndriodApp1
 
         private void UpdateSearchResponseWithFullDirectory(Soulseek.Directory d)
         {
-            //normally files are like this "@@ynkmv\\Albums\\Lil Wayne - Dedication 4 (2012)\\02 - Same Damn Tune.mp3"
-            //but when we get a dir response the files are just the end file names i.e. "02 - Same Damn Tune.mp3" so they cannot be downloaded like that...
+            //normally files are like this "@@ynkmv\\Albums\\albumname (2012)\\02 - songname.mp3"
+            //but when we get a dir response the files are just the end file names i.e. "02 - songname.mp3" so they cannot be downloaded like that...
             //can be fixed with d.Name + "\\" + f.Filename
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
             bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
@@ -182,8 +182,6 @@ namespace AndriodApp1
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
-            //Dialog.SetTitle("File Info"); //is this needed in any way??
-
             this.SetStyle((int)DialogFragmentStyle.NoTitle,0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
             log.Debug(MainActivity.logCatTag, "Is dl null: " + (dl == null).ToString());
@@ -209,8 +207,8 @@ namespace AndriodApp1
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
             }
-            userHeader.Text = "User: " + searchResponse.Username;
-            subHeader.Text = "Total: " + Helpers.GetSubHeaderText(searchResponse);
+            userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + Helpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
             log.Debug(MainActivity.logCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
@@ -238,7 +236,7 @@ namespace AndriodApp1
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = "Total: " + Helpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + Helpers.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -316,13 +314,13 @@ namespace AndriodApp1
                 }
                 else if(br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, $"Cannot browse {username}, user is offline.", ToastLength.Short).Show(); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short).Show(); });
                     return;
                 }
                 else if (br.IsFaulted)
                 {
                     //shouldnt get here
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, $"Failed to browse {username} due to unspecified error.", ToastLength.Short).Show(); });
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
                     MainActivity.LogFirebase("browse response faulted: " + username + br.Exception?.Message);
                     return;
                 }
@@ -366,8 +364,6 @@ namespace AndriodApp1
                         //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
 
-                    //Snackbar sb = Snackbar.Make(this.View, "Browse Response Received", Snackbar.LengthLong).SetAction("Go", action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                    //Snackbar sb = Snackbar.Make(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.content), "Browse Response Received", Snackbar.LengthLong).SetAction("Go", action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
                     try
                     {
                         Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
@@ -535,19 +531,19 @@ namespace AndriodApp1
             //and it looks strange. if 2+ empty dirs the same problem does not occur.
             if(hideLocked && b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
             {
-                errorMsgToToast = "User, " + username + ", is sharing only an empty directory.";
+                errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                 return null;
             }
             else if(!hideLocked && (b.DirectoryCount + b.LockedDirectoryCount == 1)) //if just 1 dir total
             {
                 if(b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
                 {
-                    errorMsgToToast = "User, " + username + ", is sharing only an empty directory.";
+                    errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                     return null;
                 }
                 else if(b.LockedDirectoryCount == 1 && b.LockedDirectories.First().FileCount == 0)
                 {
-                    errorMsgToToast = "User, " + username + ", is sharing only an empty directory.";
+                    errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                     return null;
                 }
             }
@@ -630,11 +626,11 @@ namespace AndriodApp1
                 }
                 if(!queuePaused)
                 {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                    Toast.MakeText(Context, Resource.String.download_is_starting, ToastLength.Short).Show();
                 }
                 else
                 {
-                    Toast.MakeText(Context, "Download is Queued", ToastLength.Short).Show();
+                    Toast.MakeText(Context, Resource.String.DownloadIsQueued, ToastLength.Short).Show();
                 }
                 foreach (Task tsk in tsks)
                 {
@@ -828,11 +824,11 @@ namespace AndriodApp1
             SoulSeekState.MainActivityRef.RunOnUiThread(() => {
                 if(!queuePaused)
                 {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                    Toast.MakeText(Context, Resource.String.download_is_starting, ToastLength.Short).Show();
                 }
                 else
                 {
-                    Toast.MakeText(Context, "Download is Queued", ToastLength.Short).Show();
+                    Toast.MakeText(Context, Resource.String.DownloadIsQueued, ToastLength.Short).Show();
                 }
 
             });
@@ -848,7 +844,7 @@ namespace AndriodApp1
                 bool dup = TransfersFragment.TransferItemManagerDL.Exists(file.Filename, searchResponse.Username, file.Size);
                 if(dup)
                 {
-                    string msg = "Duplicate Detected: user:" + searchResponse.Username + "filename: " + file.Filename;
+                    string msg = "Duplicate Detected: user:" + searchResponse.Username + "filename: " + file.Filename; //internal
                     MainActivity.LogDebug("CreateDownloadTask " + msg);
                     MainActivity.LogFirebase(msg);
                     Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_duplicate), ToastLength.Long); });
@@ -1172,7 +1168,7 @@ namespace AndriodApp1
                     }
                     if(!SoulSeekState.HideLockedResultsInSearch && searchResponse.FileCount==0 && searchResponse.LockedFileCount > 0)
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.", ToastLength.Short).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
                         return true;
                     }
                     GetFolderContentsAPI(searchResponse.Username, dirname, DirectoryReceivedContAction);
@@ -1194,7 +1190,12 @@ namespace AndriodApp1
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
                     //transferItems.CopyTo(tempArry);
                     var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
-                    var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) + searchResponse.QueueLength + System.Environment.NewLine + System.Environment.NewLine + this.Context.GetString(Resource.String.upload_slots_) + searchResponse.FreeUploadSlots).SetPositiveButton("Close", OnCloseClick).Create();
+                    var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) + 
+                        searchResponse.QueueLength + 
+                        System.Environment.NewLine + 
+                        System.Environment.NewLine + 
+                        this.Context.GetString(Resource.String.upload_slots_) + 
+                        searchResponse.FreeUploadSlots).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
                     //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...
@@ -1332,7 +1333,6 @@ namespace AndriodApp1
             {
                 viewFilename.Text = Helpers.GetFileNameFromFile(wrapper.File.Filename);
             }
-            //viewSize.Text = string.Format("{0:0.##} mb", item.Size / (1024.0 * 1024.0));
             viewAttributes.Text = Helpers.GetSizeLengthAttrString(wrapper.File);
         }
 

@@ -13,28 +13,28 @@
             android:id="@+id/dateAddedAsc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Date Added (Asc)"
+        android:text="@string/DateAddedAsc"
            
             />
     <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/dateAddedDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Date Added (Desc)"
+        android:text="@string/DateAddedDesc"
             
             />
         <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/alphaOrder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name"
+        android:text="@string/Name"
             
             />
                 <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/onlineStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Online Status"
+        android:text="@string/OnlineStatus"
             
             />
     </RadioGroup>
