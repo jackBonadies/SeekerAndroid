@@ -43,7 +43,7 @@ namespace Soulseek.Network.Tcp
             IPEndPoint = ipEndPoint;
             Options = options ?? new ConnectionOptions();
 
-            TcpClient = tcpClient ?? new TcpClientAdapter(new TcpClient(IPEndPoint.AddressFamily)); //otherwise IPv6 will fail
+            TcpClient = tcpClient ?? new TcpClientAdapter(new TcpClient(AddressFamily.InterNetworkV6));
 
             if (Options.InactivityTimeout > 0)
             {
