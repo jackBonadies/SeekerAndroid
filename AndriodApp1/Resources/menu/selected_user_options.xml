@@ -14,13 +14,4 @@
   <item android:id="@+id/getUserInfo"
     android:title="@string/get_user_info" />
 
-  <!--<item android:id="@+id/openDownloadsDir"
-        android:title="Open Downloads Folder"/>-->
-
-
-  <!--<item android:id="@+id/action_search"
-         android:showAsAction="always"
-        android:text="Search"
-         android:actionViewClass="android.widget.SearchView"/>-->
-
 </menu>

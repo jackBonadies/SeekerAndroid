@@ -20,15 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-<!-- <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/loggingInLoadingCircle"
-            android:layout_marginTop="160dp"
-            android:textColor="?attr/normalTextColor"
-            android:text="Connecting to Server"
-            android:layout_centerHorizontal="true"
-            />-->
+
 
 
                 <TextView
@@ -38,7 +30,7 @@
             android:layout_below="@id/loggingInLoadingCircle"
             android:layout_marginTop="20dp"
             android:textColor="?attr/normalTextColor"
-            android:text="Connecting to Server"
+            android:text="@string/ConnectingToServer"
             android:layout_centerHorizontal="true"
             />
                 <TextView
@@ -49,7 +41,7 @@
 
             android:id="@+id/pleaseWait"
             android:textColor="?attr/normalTextColor"
-            android:text="Please Wait..."
+            android:text="@string/PleaseWait_"
             android:layout_centerHorizontal="true"
             />
 

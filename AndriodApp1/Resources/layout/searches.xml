@@ -119,27 +119,7 @@
 android:layout_marginTop="0dp"
           android:layout_width="32dp"
           android:layout_height="wrap_content"/>
-<!--            <EditText
-                android:id="@+id/filterText2"
-                android:singleLine="true"
-                android:focusable = "true"
-                android:imeOptions="actionDone"
-                android:textColorHighlight = "?attr/mainTextColor"
-                android:textColorHint = "?attr/mainTextColor"
-                android:hint="Filter Results Here"
-                android:layout_weight="2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-            <Button
-                style="@style/SeekerButtonStyle"
-                android:layout_alignRight="@id/filterText"
-                android:text="Clear"
-                android:layout_weight=".5"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:minWidth="0dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>-->
+
         </LinearLayout>
     </RelativeLayout>
 <!--    <Button

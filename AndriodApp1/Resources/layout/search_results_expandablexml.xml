@@ -10,54 +10,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<!--        <TextView
-        android:text="Expandable: Expanded"
-        android:textSize="22sp"
-        android:textColor="?attr/mainTextColor"
-    android:layout_width="match_parent"
-        android:paddingBottom="2dp"
-        android:paddingTop="2dp"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-    android:layout_height="wrap_content"
-    />
-
-        <TextView
-        android:paddingBottom="2dp"
-        android:paddingTop="2dp"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-        android:text="Expandable: Collapsed"
-        android:textSize="22sp"
-        android:textColor="?attr/mainTextColor"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    />
-
-        <TextView
-        android:paddingBottom="2dp"
-        android:paddingTop="2dp"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-        android:text="Medium"
-        android:textSize="22sp"
-        android:textColor="?attr/mainTextColor"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    />
-
-    <TextView
-        android:paddingBottom="2dp"
-        android:paddingTop="2dp"
-        android:paddingRight="10dp"
-        android:paddingLeft="10dp"
-        
-        android:text="Minimal"
-        android:textSize="22sp"
-        android:textColor="?attr/mainTextColor"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    />-->
 
         <TextView
         android:paddingBottom="2dp"

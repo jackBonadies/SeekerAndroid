@@ -3,7 +3,7 @@
 xmlns:app="http://schemas.android.com/apk/res-auto">
 
 	<item android:id="@+id/action_cancel_and_clear_all_batch"
-  android:title="Cancel and Clear All"
+  android:title="@string/cancel_and_clear_all"
   app:showAsAction="always"
   android:iconifiedByDefault="true"
   android:icon="@drawable/trash_can_outline"
@@ -12,14 +12,14 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
 	<item android:id="@+id/resume_selected_batch"
-  android:title="Resume Selected"
+  android:title="@string/ResumeSelected"
   app:showAsAction="never"
   android:showAsAction="never"
   android:iconifiedByDefault="false"
  />
 
 	<item android:id="@+id/pause_selected_batch"
-  android:title="Pause Selected"
+  android:title="@string/PauseSelected"
   app:showAsAction="never"
   android:showAsAction="never"
   android:iconifiedByDefault="false"
@@ -27,21 +27,21 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
 	<item android:id="@+id/retry_all_failed_batch"
-	android:title="Retry Failed"
+	android:title="@string/RetryFailed"
 app:showAsAction="never"
 android:showAsAction="never"
 	android:iconifiedByDefault="false"
  />
 
 	<item android:id="@+id/invert_selection"
-	android:title="Invert Selection"
+	android:title="@string/InvertSelection"
 app:showAsAction="never"
 android:showAsAction="never"
 	android:iconifiedByDefault="false"
  />
 
 	<item android:id="@+id/select_all"
-	android:title="Select All"
+	android:title="@string/SelectAll"
 app:showAsAction="never"
 android:showAsAction="never"
 	android:iconifiedByDefault="false"

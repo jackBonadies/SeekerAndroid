@@ -15,25 +15,6 @@
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:id="@+id/relativeLayout1">
-<!--        <Button
-        android:layout_alignParentLeft="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Download Files"
-        style="@style/SeekerButtonStyle"
-        android:foreground="@drawable/button"
-        android:id="@+id/dlFiles"
-        />
-    <Button
-        android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:foreground="@drawable/button"
-        android:text="Up Directory"
-        android:id="@+id/button2"
-        android:layout_alignRight="@id/dlFiles"
-        style="@style/SeekerButtonStyle"
-        />-->
 
             <androidx.recyclerview.widget.RecyclerView
                 android:background="?attr/mainPurple"

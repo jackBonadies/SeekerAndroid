@@ -32,7 +32,7 @@ android:theme="@style/checkBoxStyle"
     android:textColor="?attr/normalTextColorNonTinted"
         android:layout_margin="0dp"
         android:visibility="visible"
-            android:text="Keywords"
+            android:text="@string/Keywords"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
         />

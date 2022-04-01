@@ -81,7 +81,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="4dp"
                                 android:layout_gravity="center_horizontal"
-                                android:text="Current Download Folder: "
+                                android:text="@string/CurrentDownloadFolder_"
                                 android:textColor="?attr/normalTextColor"
                                 android:textSize="12dp"
                     />
@@ -113,7 +113,7 @@
                             android:layout_centerHorizontal="true"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Change"
+                            android:text="@string/Change"
                             android:paddingTop="4dp"
                             android:paddingBottom="4dp"
                             android:layout_marginStart="10dp"
@@ -133,7 +133,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:text="Create Soulseek Complete and Soulseek Incomplete Directories"
+                    android:text="@string/CreateCompleteAndIncomplete"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:paddingStart="4dp"
@@ -151,7 +151,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:text="Create Username Subfolders"
+                    android:text="@string/CreateUsernameSubfolders"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:paddingStart="4dp"
@@ -267,7 +267,7 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Change"
+                                android:text="@string/Change"
                                 android:paddingTop="4dp"
                                 android:paddingBottom="4dp"
                                 android:layout_marginStart="10dp"
@@ -394,7 +394,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_below="@+id/smartFilterLayout"
-                    android:text="Show Smart Filters"
+                    android:text="@string/ShowSmartFilters"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:paddingStart="4dp"
@@ -407,7 +407,7 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Configure"
+                    android:text="@string/Configure"
                     android:textSize="12dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"
@@ -452,7 +452,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/freeUploadSlots"
-                android:text="Show Private (Locked) Files in Search Results"
+                android:text="@string/ShowPrivateLockedSearch"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:paddingStart="4dp"
@@ -471,7 +471,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/showLockedInSearch"
-                android:text="Show Private (Locked) Files in Browse Response"
+                android:text="@string/ShowPrivateLockedBrowse"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:paddingStart="4dp"
@@ -681,7 +681,7 @@
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Remember Recent Users"
+                    android:text="@string/RememberRecent"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginTop = "10dp"
@@ -694,7 +694,7 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Clear Recent Users"
+                    android:text="@string/ClearRecentUsers"
                     android:layout_gravity="center_vertical"
                     android:textSize="12dp"
                     android:paddingTop="6dp"
@@ -755,7 +755,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/memoryFileDownloadSwitch"
-                android:text="Auto-Retry Failed Downloads When User Goes Back Online"
+                android:text="@string/AutoRetryFailedOfflineOnline"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:paddingStart="4dp"
@@ -772,7 +772,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/autoRetryBackOnline"
-                android:text="Automatically Set Status to Away on Inactivity"
+                android:text="@string/AwayOnInactivity"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:paddingStart="4dp"
@@ -834,7 +834,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Day Varient: "
+                    android:text="@string/DayVarient_"
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
@@ -871,7 +871,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Night Varient: "
+                    android:text="@string/NightVarient_"
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
@@ -973,7 +973,7 @@
                         android:layout_height="wrap_content"
                         android:padding="12dp"
                         android:textColor="?attr/normalTextColor"
-                        android:text="No Shared Folders. Tap 'Add' to get started."
+                        android:text="@string/NoSharedAdd"
                         android:layout_marginBottom="6dp"
                         android:background="?attr/the_rounded_corner_dialog_background_drawable"
                         />
@@ -1024,7 +1024,7 @@
                                     android:layout_marginStart="4dp"
                                     android:foreground="@drawable/button"
                                     style="@style/SeekerButtonStyle"
-                                    android:text="Clear" />
+                                    android:text="@string/clear" />
                             </LinearLayout>
                         </LinearLayout>
 
@@ -1077,7 +1077,7 @@
                         android:layout_centerHorizontal="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Rescan Shares"
+                        android:text="@string/RescanShares"
                         android:textSize="12dp"
                         android:layout_marginStart="16dp"
                         android:paddingTop="8dp"
@@ -1129,7 +1129,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@+id/sharingLayoutParent"
-                android:text="Pause Sharing if on Metered (Mobile) Connection"
+                android:text="@string/PauseSharingIfMetered"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:paddingStart="4dp"
@@ -1302,7 +1302,7 @@
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Limit Download Speed"
+                        android:text="@string/LimitDownloadSpeed"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
@@ -1352,7 +1352,7 @@
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Change"
+                        android:text="@string/Change"
                         android:id="@+id/changeDlSpeed"
                         android:textSize="12dp"
                         android:paddingTop="8dp"
@@ -1402,7 +1402,7 @@
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Limit Upload Speed"
+                        android:text="@string/LimitUploadSpeed"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
@@ -1452,7 +1452,7 @@
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Change"
+                        android:text="@string/Change"
                         android:id="@+id/changeUlSpeed"
                         android:textSize="12dp"
                         android:paddingTop="8dp"
@@ -1503,7 +1503,7 @@
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Limit Concurrent Downloads"
+                        android:text="@string/LimitConcurrentDownloads"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
@@ -1552,7 +1552,7 @@
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Change"
+                        android:text="@string/Change"
                         android:id="@+id/changeConcurrentDownloads"
                         android:textSize="12dp"
                         android:paddingTop="8dp"
@@ -1596,7 +1596,7 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Get"
+                    android:text="@string/Get"
                     android:id="@+id/getPriv"
                     android:textSize="12dp"
                     android:paddingTop="8dp"
@@ -1615,7 +1615,7 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Check"
+                    android:text="@string/Check"
                     android:id="@+id/checkPriv"
                     android:textSize="12dp"
                     android:paddingTop="8dp"
@@ -1662,7 +1662,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:text="Enable Diagnostics"
+                    android:text="@string/EnableDiagnostics"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:paddingStart="4dp"
@@ -1707,7 +1707,7 @@
                 android:layout_below="@id/editUserInfoButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Import external client data"
+                android:text="@string/ImportExternalClientData"
                 android:layout_marginStart="10dp"
                 android:foreground="@drawable/button"
                 style="@style/SeekerButtonStyle"
@@ -1741,44 +1741,5 @@
         </RelativeLayout>
 
     </ScrollView>
-    <!--            <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop = "60dp"
-            android:layout_marginBottom = "10dp"
-            android:orientation="horizontal">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Restore Defaults"
-                android:layout_marginLeft="10dp"
-                android:foreground="@drawable/button"
-                android:layout_marginRight="10dp"
-                android:layout_weight="0.2"
-                android:layout_marginTop = "60dp"
-style="@style/SeekerButtonStyle"
-                
-                android:id="@+id/restoreDefaults"
-       />
--->
-    <!--            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Close"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:foreground="@drawable/button"
-                android:layout_marginTop = "60dp"
-                android:layout_weight="0.6"
-style="@style/SeekerButtonStyle"
-                
-                android:id="@+id/closeSettings"
-       />-->
-    <!--
-
- 
-
-        </LinearLayout>-->
 
 </RelativeLayout>

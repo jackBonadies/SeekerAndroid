@@ -192,11 +192,11 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(true);
                     if(numSelected > 1)
                     {
-                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle("Copy Selected URLs");
+                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURLs);
                     }
                     else
                     {
-                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle("Copy Selected URL");
+                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURL);
                     }
                 }
             }
@@ -246,7 +246,7 @@ namespace AndriodApp1
                     string fullDirName = dataItemsForListView[0].Node.Data.Name;
                     string slskLink = Helpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
                     Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef,"Link Copied",ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef,Resource.String.LinkCopied, ToastLength.Short).Show();
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
@@ -570,7 +570,6 @@ namespace AndriodApp1
         {
             //if the fragment was never created then this.Context will be null
             SoulSeekState.MainActivityRef.RunOnUiThread(() => {
-                //Toast.MakeText(SoulSeekState.MainActivityRef, "Browse Response Received", ToastLength.Short).Show();
 
                 lock (dataItemsForListView)
                 {
@@ -1081,11 +1080,11 @@ namespace AndriodApp1
         {
             if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
             {
-                Toast.MakeText(this.Context, "Nothing to Copy", ToastLength.Long).Show();
+                Toast.MakeText(this.Context, Resource.String.NothingToCopy, ToastLength.Long).Show();
             }
             else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
             {
-                Toast.MakeText(this.Context, "Nothing Selected", ToastLength.Long).Show();
+                Toast.MakeText(this.Context, Resource.String.nothing_selected, ToastLength.Long).Show();
             }
             else
             {
@@ -1144,11 +1143,11 @@ namespace AndriodApp1
                 Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, linkToCopy);
                 if((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
                 {
-                    Toast.MakeText(this.Context, "Links Copied", ToastLength.Short).Show();
+                    Toast.MakeText(this.Context, Resource.String.LinksCopied, ToastLength.Short).Show();
                 }
                 else
                 {
-                    Toast.MakeText(this.Context, "Link Copied", ToastLength.Short).Show();
+                    Toast.MakeText(this.Context, Resource.String.LinkCopied, ToastLength.Short).Show();
                 }
             }
 
@@ -1340,7 +1339,7 @@ namespace AndriodApp1
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-                builder.SetTitle("This Folder contains Subfolders");
+                builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
                 string topLevelStr = string.Empty;
                 if (toplevelItems == 1)
@@ -1636,11 +1635,11 @@ namespace AndriodApp1
                     toast1 = new Action(() => {
                         if(queuePaused)
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Queued for Download", ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.QueuedForDownload, ToastLength.Short).Show();
                         }
                         else
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.download_is_starting, ToastLength.Short).Show();
                         }
                         
                     });
@@ -2021,10 +2020,10 @@ namespace AndriodApp1
         public const int UNIQUE_BROWSE_GROUP_ID = 304;
         public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 0, 0, "Download Folder");
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 1, 1, "Queue Folder as Paused");
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 2, 2, "Show Folder Info");
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 3, 3, "Copy URL");
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 0, 0, Resource.String.download_folder);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 1, 1, Resource.String.QueueFolderAsPaused);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 2, 2, Resource.String.ShowFolderInfo);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, 3, 3, Resource.String.CopyURL);
             base.OnCreateContextMenu(menu, v, menuInfo);
         }
 
@@ -2050,7 +2049,7 @@ namespace AndriodApp1
                         //bool isDir = itemSelected.IsDirectory();
                         string slskLink = Helpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
                         Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Link Copied", ToastLength.Short).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
                         return true;
                 }
             }
@@ -2059,11 +2058,13 @@ namespace AndriodApp1
 
         public void ShowFolderSummaryDialog(FolderSummary folderSummary)
         {
-            string lengthTime = folderSummary.LengthSeconds == 0 ? "Length: -" : string.Format("Length: {0}", Helpers.GetHumanReadableTime(folderSummary.LengthSeconds));
-            string sizeString = string.Format("Size: {0}", Helpers.GetHumanReadableSize(folderSummary.SizeBytes));
+            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", Helpers.GetHumanReadableTime(folderSummary.LengthSeconds));
+            string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
+                
+            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", Helpers.GetHumanReadableSize(folderSummary.SizeBytes));
 
-            string numFilesString = string.Format("Num Files: {0}", folderSummary.NumFiles);
-            string numSubFoldersString = string.Format("Num Subfolders: {0}", folderSummary.NumSubFolders);
+            string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
+            string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
 
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
 
@@ -2072,7 +2073,16 @@ namespace AndriodApp1
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var diag = builder.SetMessage(numFilesString + System.Environment.NewLine + System.Environment.NewLine + numSubFoldersString + System.Environment.NewLine + System.Environment.NewLine + sizeString + System.Environment.NewLine + System.Environment.NewLine + lengthTime).SetPositiveButton("Close", OnCloseClick).Create();
+            var diag = builder.SetMessage(numFilesString + 
+                System.Environment.NewLine + 
+                System.Environment.NewLine + 
+                numSubFoldersString + 
+                System.Environment.NewLine + 
+                System.Environment.NewLine + 
+                sizeString + 
+                System.Environment.NewLine + 
+                System.Environment.NewLine + 
+                lengthTime).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }

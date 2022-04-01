@@ -279,13 +279,13 @@ namespace AndriodApp1
                 ContextMenuItem = folderRowView.BoundItem;
                 if (ContextMenuItem.HasError())
                 {
-                    menu.Add(0, 1, 0, "View Error Options");
+                    menu.Add(0, 1, 0, Resource.String.ViewErrorOptions);
                 }
                 else
                 {
-                    menu.Add(0, 1, 0, "View Folder Options");
+                    menu.Add(0, 1, 0, Resource.String.ViewFolderOptions);
                 }
-                menu.Add(0, 2, 1, "Remove");
+                menu.Add(0, 2, 1, Resource.String.Remove);
             }
         }
         public class RecyclerViewFolderView : RelativeLayout
@@ -628,13 +628,13 @@ namespace AndriodApp1
 
             concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
             concurrentDlButton.Click += ConcurrentDlBottom_Click;
-            concurrentDlLabel.Text = $"Max # of Concurrent Downloads: {Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent}";
+            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
             
 
             UpdateConcurrentDownloadLimitsState();
 
-            String[] dlOptions = new String[]{ "Per Transfer", "Global" };
+            String[] dlOptions = new String[]{ SeekerApplication.GetString(Resource.String.PerTransfer), SeekerApplication.GetString(Resource.String.Global) };
             ArrayAdapter<String> dlOptionsStrings = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dlOptions);
             dlLimitPerTransfer.Adapter = dlOptionsStrings;
             SetSpinnerPositionSpeed(dlLimitPerTransfer, false);
@@ -794,12 +794,12 @@ namespace AndriodApp1
             if(UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
             {
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-                var diag = builder.SetMessage($"Are you sure you want to clear all {UploadDirectoryManager.UploadDirectories.Count} directories from list?")
-                    .SetPositiveButton("Yes", (object sender, DialogClickEventArgs e) => {
+                var diag = builder.SetMessage(String.Format(SeekerApplication.GetString(Resource.String.AreYouSureClearAllDirectories), UploadDirectoryManager.UploadDirectories.Count))
+                    .SetPositiveButton(Resource.String.yes, (object sender, DialogClickEventArgs e) => {
                         this.ClearAllFolders();
                         this.OnCloseClick(sender, e);
                     })
-                    .SetNegativeButton("No", OnCloseClick)
+                    .SetNegativeButton(Resource.String.No, OnCloseClick)
                     .Create();
                 diag.Show();
             }
@@ -978,7 +978,7 @@ namespace AndriodApp1
         {
             MainActivity.LogInfoFirebase("ConfigSmartFilters_Click");
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-            builder.SetTitle("Configure Smart Filters");
+            builder.SetTitle(Resource.String.ConfigureSmartFilters);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
             Android.Support.V7.Widget.RecyclerView recyclerViewFiltersConfig = (Android.Support.V7.Widget.RecyclerView)viewInflated.FindViewById<Android.Support.V7.Widget.RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
@@ -1132,7 +1132,7 @@ namespace AndriodApp1
                 else
                 {
                     //if not set and not legacy storage, then that is bad.  user must set it.
-                    return "Not Set";
+                    return SeekerApplication.GetString(Resource.String.NotSet);
                 }
             }
             else
@@ -1150,7 +1150,7 @@ namespace AndriodApp1
         {
             if(SoulSeekState.MemoryBackedDownload)
             {
-                return "Not in Use";
+                return SeekerApplication.GetString(Resource.String.NotInUse);
             }
             if(SoulSeekState.OverrideDefaultIncompleteLocations && SoulSeekState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
             {
@@ -1160,7 +1160,7 @@ namespace AndriodApp1
             {
                 if(!SoulSeekState.CreateCompleteAndIncompleteFolders)
                 {
-                    return "App Local Storage";
+                    return SeekerApplication.GetString(Resource.String.AppLocalStorage);
                 }
                 //if not override then its whatever the download directory is...
                 if (SoulSeekState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
@@ -1174,7 +1174,7 @@ namespace AndriodApp1
                     else
                     {
                         //if not set and not legacy storage, then that is bad.  user must set it.
-                        return "Not Set";
+                        return SeekerApplication.GetString(Resource.String.NotSet);
                     }
                 }
                 else
@@ -1419,7 +1419,7 @@ namespace AndriodApp1
                 {
                     if(SoulSeekState.RootDocumentFile==null)
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Error: The Download Directory is not properly set.", ToastLength.Long).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.ErrorDownloadDirNotProperlySet, ToastLength.Long).Show();
                         return;
                     }
                     rootdir = SoulSeekState.RootDocumentFile;
@@ -1442,11 +1442,11 @@ namespace AndriodApp1
 
             if (!folderExists)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Incomplete Folder is empty", ToastLength.Long).Show();
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.IncompleteFolderEmpty, ToastLength.Long).Show();
             }
             else if (folderExists && folderCount == 0)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, "No eligible items to clear", ToastLength.Long).Show();
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.NoEligibleToClear), ToastLength.Long).Show();
             }
             else
             {
@@ -1551,30 +1551,30 @@ namespace AndriodApp1
             }
             else if (changeDialogType == ChangeDialogType.ChangeDL)
             {
-                builder.SetTitle("Change Download Speed (kb/s):");
+                builder.SetTitle(Resource.String.ChangeDownloadSpeed);
             }
             else if(changeDialogType == ChangeDialogType.ChangeUL)
             {
-                builder.SetTitle("Change Upload Speed (kb/s):");
+                builder.SetTitle(Resource.String.ChangeUploadSpeed);
             }
             else if(changeDialogType == ChangeDialogType.ConcurrentDL)
             {
-                builder.SetTitle("Max # of Concurrent Downloads:");
+                builder.SetTitle(Resource.String.MaxConcurrentIs);
             }
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_port, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosePortEditText);
             if (changeDialogType == ChangeDialogType.ChangeDL)
             {
-                input.Hint = "Enter Speed in Kb/s";
+                input.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
             }
             else if (changeDialogType == ChangeDialogType.ChangeUL)
             {
-                input.Hint = "Enter Speed in Kb/s";
+                input.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
             }
             else if (changeDialogType == ChangeDialogType.ConcurrentDL)
             {
-                input.Hint = "Enter Max to Download Simultaneously";
+                input.Hint = SeekerApplication.GetString(Resource.String.EnterMaxDownloadSimultaneously);
             }
             builder.SetView(viewInflated);
 
@@ -1643,7 +1643,7 @@ namespace AndriodApp1
                     }
 
                     Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent = concurrentDL;
-                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = $"Max # of Concurrent Downloads: {Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent}";
+                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
                     SaveMaxConcurrentDownloadsSettings();
                     changeDialog.Dismiss();
@@ -1801,9 +1801,9 @@ namespace AndriodApp1
         private void BrowseSelfButton_LongClick(object sender, View.LongClickEventArgs e)
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-            var diag = builder.SetMessage("Browse Public Shares or User List shares?")
-                .SetPositiveButton("Public", (object sender, DialogClickEventArgs e) => { BrowseSelf(true, false); OnCloseClick(sender, e); })
-                .SetNegativeButton("User List", (object sender, DialogClickEventArgs e) => { BrowseSelf(false, true); OnCloseClick(sender, e); })
+            var diag = builder.SetMessage(Resource.String.BrowseWhich)
+                .SetPositiveButton(Resource.String.public_room, (object sender, DialogClickEventArgs e) => { BrowseSelf(true, false); OnCloseClick(sender, e); })
+                .SetNegativeButton(Resource.String.target_user_list, (object sender, DialogClickEventArgs e) => { BrowseSelf(false, true); OnCloseClick(sender, e); })
                 .Create();
             diag.Show();
         }
@@ -1817,7 +1817,7 @@ namespace AndriodApp1
             }
             if (SoulSeekState.IsParsing)
             {
-                Toast.MakeText(this, "Wait for parsing to complete.", ToastLength.Short).Show();
+                Toast.MakeText(this, Resource.String.WaitForParsing, ToastLength.Short).Show();
                 return;
             }
             if (!SoulSeekState.SharedFileCache.SuccessfullyInitialized || SoulSeekState.SharedFileCache.GetBrowseResponseForUser(SoulSeekState.Username) == null)
@@ -2065,11 +2065,11 @@ namespace AndriodApp1
             {
                 if(numParsed==int.MaxValue) //our signal we are finishing up (i.e. creating token index)
                 {
-                    toolTip = toolTip + " (finishing up)";
+                    toolTip = toolTip + $" ({SeekerApplication.GetString(Resource.String.finishingUp)})";
                 }
                 else
                 {
-                    toolTip = toolTip + String.Format(" ({0} files parsed)", numParsed);
+                    toolTip = toolTip + String.Format( $" ({SeekerApplication.GetString(Resource.String.XFilesParsed)})", numParsed);
                 }
             }
             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
@@ -2806,19 +2806,19 @@ namespace AndriodApp1
         public void ShowUploadDirectoryErrorDialog(UploadDirectoryInfo uploadInfo)
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle("Folder Error");
-            string diagMessage = $"Error for folder: {uploadInfo.GetLastPathSegment()}" + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
+            builder.SetTitle(Resource.String.FolderError);
+            string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
-                .SetNegativeButton("Remove Folder", (object sender, DialogClickEventArgs e) => { //puts it slightly right
+                .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) => { //puts it slightly right
                     this.RemoveUploadDirFolder(uploadInfo);
                     this.OnCloseClick(sender, e);
                 })
-                .SetPositiveButton("Reselect", (object sender, DialogClickEventArgs e) => { //puts it rightmost
+                .SetPositiveButton(Resource.String.Reselect, (object sender, DialogClickEventArgs e) => { //puts it rightmost
                     UploadDirToReplaceOnReselect = uploadInfo;
                     this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
                     this.OnCloseClick(sender, e);
                 })
-                .SetNeutralButton("Cancel", OnCloseClick) //puts it leftmost
+                .SetNeutralButton(Resource.String.cancel, OnCloseClick) //puts it leftmost
                 .Create();
             diag.Show();
         }
@@ -2826,7 +2826,7 @@ namespace AndriodApp1
         public void ShowUploadDirectoryOptionsDialog(UploadDirectoryInfo uploadDirInfo)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
-            builder.SetTitle("Upload Folder Options");
+            builder.SetTitle(Resource.String.UploadFolderOptions);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.upload_folder_options, this.FindViewById<ViewGroup>(Android.Resource.Id.Content) as ViewGroup, false);
             EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(Resource.Id.customFolderNameEditText);
             CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(Resource.Id.overrideFolderName);
@@ -2887,7 +2887,7 @@ namespace AndriodApp1
                         if(!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
                         {
                             uploadDirInfo.DisplayNameOverride = displayNameOld;
-                            Toast.MakeText(this, "Cannot change name. Not unique.", ToastLength.Long).Show();
+                            Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
                             overrideNameChanged = false; //we prevented it
                         }
                     }
@@ -2901,7 +2901,7 @@ namespace AndriodApp1
                         if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
                         {
                             uploadDirInfo.DisplayNameOverride = displayNameOld;
-                            Toast.MakeText(this, "Cannot change name. Not unique.", ToastLength.Long).Show();
+                            Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
                             overrideNameChanged = false; //we prevented it
                         }
                     }
@@ -2942,7 +2942,7 @@ namespace AndriodApp1
                 {
                     this.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(this, "Already parsing", ToastLength.Long).Show();
+                        Toast.MakeText(this, Resource.String.AlreadyParsing, ToastLength.Long).Show();
                     }));
                     return;
                 }
@@ -2950,7 +2950,7 @@ namespace AndriodApp1
                 {
                     this.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(this, "Directory not set", ToastLength.Long).Show();
+                        Toast.MakeText(this, Resource.String.DirectoryNotSet, ToastLength.Long).Show();
                     }));
                     return;
                 }
@@ -2989,7 +2989,7 @@ namespace AndriodApp1
                     //error!!
                     this.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Error: Directory Already Added.",ToastLength.Long).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.ErrorAlreadyAdded , ToastLength.Long).Show();
                     }));
                     return;
                     //throw new Exception("Directory is already added!");
@@ -3069,7 +3069,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            Toast.MakeText(this, "Failed getting access to directory", ToastLength.Long).Show(); //TODO get error from UploadManager..
+                            Toast.MakeText(this, Resource.String.FailedGettingAccess, ToastLength.Long).Show(); //TODO get error from UploadManager..
                         }
 
                     }));
@@ -3098,11 +3098,11 @@ namespace AndriodApp1
                         {
                             if (diff > 1)
                             {
-                                msg = msg + String.Format(" {0} additional files since last scan.", diff);
+                                msg = msg + String.Format(" " + SeekerApplication.GetString(Resource.String.AdditionalFiles), diff);
                             }
                             else
                             {
-                                msg = msg + " 1 additional file since last scan.";
+                                msg = msg + " " + SeekerApplication.GetString(Resource.String.OneAdditionalFile);
                             }
                         }
                     }
@@ -3149,7 +3149,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "No access to media store. Parsing will be unoptimized.",ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.NoMediaStore , ToastLength.Short).Show();
                     ShowDirSettings(null, DirectoryType.Upload);
                 }
             }
@@ -3169,7 +3169,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Toast.MakeText(this, "Cannot set directory without proper permissions", ToastLength.Long).Show();
+                    Toast.MakeText(this, Resource.String.NoPermissionsForDir, ToastLength.Long).Show();
                 }
             }
 

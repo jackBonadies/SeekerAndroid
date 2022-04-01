@@ -3690,7 +3690,7 @@ namespace AndriodApp1
 
         public static string GetString(int resId)
         {
-            return SoulSeekState.ActiveActivityRef.GetString(resId);
+            return SeekerApplication.ApplicationContext.GetString(resId);
         }
 
 
@@ -4212,7 +4212,7 @@ namespace AndriodApp1
                     notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
                     PendingIntent pendingIntent =
                         PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, "Folder Finished Downloading", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
+                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify((foldername + username).GetHashCode(), n);
@@ -6965,7 +6965,7 @@ namespace AndriodApp1
                                                                                                         //for the brose response should only be the filename!!! 
                                                                                                         //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                         //bc we get a path that is:
-                                                                                                        //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                                                                                                        //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
                                                                                                         //not quite a full URI but it does add quite a bit..
 
                         //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
@@ -7081,7 +7081,7 @@ namespace AndriodApp1
                                                                                                     //for the brose response should only be the filename!!! 
                                                                                                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                     //bc we get a path that is:
-                                                                                                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                                                                                                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
                                                                                                     //not quite a full URI but it does add quite a bit..
 
                     //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
@@ -7406,7 +7406,7 @@ namespace AndriodApp1
                 errorMsg = "Unspecified Error";
                 if (e.GetType().FullName == "Java.Lang.SecurityException" || e is Java.Lang.SecurityException)
                 {
-                    errorMsg = "Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.";
+                    errorMsg = SeekerApplication.GetString(Resource.String.PermissionsIssueShared);
                 }
                 success = false;
                 LogDebug("Error parsing files: " + e.Message + e.StackTrace);
@@ -7508,9 +7508,16 @@ namespace AndriodApp1
                 {
                     if (MeetsCurrentSharingConditions())
                     {
-                        MainActivity.LogDebug("Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
-                        SoulSeekState.SoulseekClient.SetSharedCountsAsync(SoulSeekState.SharedFileCache.DirectoryCount, 
-                            SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() != -1 ? SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() : SoulSeekState.SharedFileCache.FileCount);
+                        if(SoulSeekState.SharedFileCache != null)
+                        {
+                            MainActivity.LogDebug("Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
+                            SoulSeekState.SoulseekClient.SetSharedCountsAsync(SoulSeekState.SharedFileCache.DirectoryCount, 
+                                SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() != -1 ? SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() : SoulSeekState.SharedFileCache.FileCount);
+                        }
+                        else
+                        {
+                            MainActivity.LogDebug("We would tell server but we are not successfully set up yet.");
+                        }
                     }
                     else
                     {
@@ -7523,7 +7530,14 @@ namespace AndriodApp1
                 {
                     if (MeetsCurrentSharingConditions())
                     {
-                        MainActivity.LogDebug("We need to Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
+                        if(SoulSeekState.SharedFileCache!=null)
+                        {
+                            MainActivity.LogDebug("We need to Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
+                        }
+                        else
+                        {
+                            MainActivity.LogDebug("we meet sharing conditions but our shared file cache is not successfully set up");
+                        }
                     }
                     else
                     {
@@ -8248,16 +8262,6 @@ namespace AndriodApp1
                     if(SoulSeekState.SaveDataDirectoryUriIsFromTree)
                     {
                         SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
-
-                        ////works fine on pixel 2, samsung. on main ui thread or background thread.
-                        //System.Threading.ThreadPool.QueueUserWorkItem((object o) => {
-                        //var docFile1 = SoulSeekState.RootDocumentFile.CreateDirectory("test_dir_3");
-                        //    System.Threading.ThreadPool.QueueUserWorkItem((object o2) => {
-                        //        var docFile2 = SoulSeekState.RootDocumentFile.FindFile("test_dir_3");
-                        //        MainActivity.LogFirebase("test");
-                        //    });
-                            
-                        //});
                         
                     }
                     else
@@ -8663,7 +8667,7 @@ namespace AndriodApp1
                             state = TransferStates.Errored | TransferStates.UserOffline;
                             if (!silent)
                             {
-                                ToastUIWithDebouncer($"User {username} is offline", "_6_", username);
+                                ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.UserXIsOffline), username), "_6_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
@@ -8675,7 +8679,7 @@ namespace AndriodApp1
                             state = TransferStates.Errored | TransferStates.CannotConnect;
                             if (!silent)
                             {
-                                ToastUIWithDebouncer($"Cannot connect to user {username}", "_7_", username);
+                                ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.CannotConnectUserX), username), "_7_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException is System.TimeoutException)
@@ -8683,7 +8687,7 @@ namespace AndriodApp1
                             transitionToNextState = false; //they may just not be sending queue position messages.  that is okay, we can still connect to them just fine for download time.
                             if (!silent)
                             {
-                                ToastUIWithDebouncer($"Timeout getting queue position from {username}", "_8_", username, 6);
+                                ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.TimeoutQueueUserX), username), "_8_", username, 6);
                             }
                         }
                         else
@@ -9515,7 +9519,7 @@ namespace AndriodApp1
                     {
                         SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
                         SoulSeekState.OurCurrentStatusIsAway = away;
-                        string statusString = away ? "away" : "online";
+                        string statusString = away ? "away" : "online"; //not user facing
                         MainActivity.LogDebug($"We successfully changed our status to {statusString}");
                     }
                     else
@@ -10163,8 +10167,6 @@ namespace AndriodApp1
                         if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.TaskWasCancelledToastDebouncer) > 1000)
                         {
                             SoulSeekState.TaskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                            //action = () => { ToastUI("The task was cancelled."); };
-                            //this.RunOnUiThread(action);
                         }
 
                         if (e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
@@ -10380,7 +10382,7 @@ namespace AndriodApp1
 
                     if (!SoulSeekState.DisableDownloadToastNotification)
                     {
-                        action = () => { ToastUI(Helpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " finished downloading"); };
+                        action = () => { ToastUI(Helpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
@@ -11945,7 +11947,7 @@ namespace AndriodApp1
             {
                 if (TransfersFragment.CurrentlySelectedUploadFolder == null)
                 {
-                    this.SupportActionBar.Title = "Uploads";
+                    this.SupportActionBar.Title = SeekerApplication.GetString(Resource.String.Uploads);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
@@ -11960,7 +11962,7 @@ namespace AndriodApp1
             {
                 if (TransfersFragment.CurrentlySelectedDLFolder == null)
                 {
-                    this.SupportActionBar.Title = "Downloads";
+                    this.SupportActionBar.Title = SeekerApplication.GetString(Resource.String.Downloads);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
@@ -12538,11 +12540,11 @@ namespace AndriodApp1
             switch(errorCode)
             {
                 case UploadDirectoryError.CannotWrite:
-                    return "Permission Error, cannot write (Please reselect).";
+                    return SeekerApplication.GetString(Resource.String.PermissionErrorShared);
                 case UploadDirectoryError.DoesNotExist:
-                    return "Folder does not exist.";
+                    return SeekerApplication.GetString(Resource.String.FolderNoExistShared);
                 case UploadDirectoryError.Unknown:
-                    return "Unknown Error. See dev.";
+                    return SeekerApplication.GetString(Resource.String.UnknownErrorShared);
                 case UploadDirectoryError.NoError:
                 default:
                     return "No Error.";
@@ -12752,7 +12754,7 @@ namespace AndriodApp1
         {
             //TESTING 
             //UploadDirectories = new List<UploadDirectoryInfo>();
-            //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20Gone%2C%20They've%20Vanished/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20Gone%2C%20They've%20Vanished", true, true, false, null));
+            //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20Gone%2C%20They've%20Vanished", true, true, false, null));
             ////UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/primary%3AMusic/document/primary%3AMusic", true, false, false, null));
             //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
             //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2FMusic1/document/864A-C3E8%3AMusic%2FMusic1", true, false, false, null));

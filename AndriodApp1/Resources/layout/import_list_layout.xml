@@ -43,7 +43,7 @@
         android:id="@+id/noneFound"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No Users Found"
+        android:text="@string/NoUsersFound"
         android:layout_marginTop="28dp"
         android:gravity="center_horizontal"
         android:textSize="20dp"
@@ -64,7 +64,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:layout_marginBottom="6dp"
-        android:text="Note: The following users are already present in X - a, b, c"
+        android:text="Note: The following users are already present in X - a, b, c dummy"
         />
     </LinearLayout>
 

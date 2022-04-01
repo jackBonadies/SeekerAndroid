@@ -33,8 +33,6 @@ android:iconifiedByDefault="true"
 	<item android:id="@+id/action_add_to_wishlist"
 android:title="@string/add_to_wish"
 app:showAsAction="never"/>
-  <!--<item android:id="@+id/action_view_search_tabs"
-   android:title="View Search Tabs"
-   app:showAsAction="never"/>-->
+
 
 </menu>

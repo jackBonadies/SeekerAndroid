@@ -2,16 +2,7 @@
 
 xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <!--<item android:id="@+id/action_search"
-       android:title="@string/action_settings"
-       android:icon="@android:drawable/ic_menu_search"
-       app:showAsAction="ifRoom|collapseActionView"
-       android:layout_width="match_parent"
-       android:iconifiedByDefault="false"
-       app:actionViewClass="android.support.v7.widget.SearchView" />-->
 
-
-  <!-- "Mark Favorite", should appear as action button if possible -->
   <item
       android:id="@+id/view_user_list_action"
       android:icon="@drawable/baseline_add_white_24"
@@ -68,27 +59,23 @@ android:title="@string/give_up_membership"
 app:showAsAction="never"/>
 
 	<item android:id="@+id/chatStyleOptions"
-	 android:title="Options" >
+	 android:title="@string/Options" >
 
 		<menu>
 
 			<item
 		  android:id="@+id/hide_show_ticker_action"
-		  android:title="Hide Ticker View"
+		  android:title="@string/HideTickerView"
           android:iconifiedByDefault="false"
 		  app:showAsAction="never"/>
 
 			<item
 		  android:id="@+id/hide_show_user_status_action"
-		  android:title="Hide Status View"
+		  android:title="@string/HideStatusView"
           android:iconifiedByDefault="false"
 		  app:showAsAction="never"/>
 		</menu>
 	</item>
-  <!-- Settings, should always be in the overflow -->
-  <!--
-  <item android:id="@+id/action_settings"
-        android:title="@string/abc_menu_enter_shortcut_label"
-        app:showAsAction="always"/>-->
+
 
 </menu>

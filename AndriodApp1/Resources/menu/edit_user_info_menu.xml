@@ -6,7 +6,7 @@
   <item
       android:id="@+id/save_user_action"
       android:icon="@drawable/content_save_outline"
-      android:title="Save"
+      android:title="@string/Save"
       app:showAsAction="always"/>
 
   <item
@@ -16,26 +16,3 @@
  app:showAsAction="never"/>
   
 </menu>
-
-<!-- Code to implement into Activity:
-
-Android.Widget.SearchView searchView;
-public override bool OnCreateOptionsMenu(IMenu menu)
-{
-  this.MenuInflater.Inflate(Resource.Menu.edit_user_info_menu, menu);
-
-  var searchItem = menu.FindItem(Resource.Id.action_search);
-
-  searchView = searchItem.ActionProvider.JavaCast<Android.Widget.SearchView>();
-
-  searchView.QueryTextSubmit += (sender, args) =>
-  {
-    Toast.MakeText(this, "You searched: " + args.Query, ToastLength.Short).Show();
-
-  };
-
-
-  return base.OnCreateOptionsMenu(menu);
-}
-
--->

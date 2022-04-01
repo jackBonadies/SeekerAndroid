@@ -13,28 +13,28 @@
             android:id="@id/availability"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Availability"
+        android:text="@string/Availability"
            
             />
     <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Speed"
+        android:text="@string/Speed"
             
             />
         <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/folderNameAlpha"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Folder Name"
+        android:text="@string/FolderName"
             
             />
   </RadioGroup>
     <CheckBox
         android:layout_marginTop="10dp"
         android:id="@+id/setAsDefault"
-        android:text="Set as Default"
+        android:text="@string/SetAsDefault"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 </LinearLayout>
