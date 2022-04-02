@@ -6,7 +6,7 @@ This work uses the [Soulseek.NET](https://github.com/jpdillingham/Soulseek.NET) 
 
 - The Soulseek server, which makes this app possible, relies on donations. Donate: [here](https://www.slsknet.org/donate.php)
 
-- Please help translate: [here](https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137)
+- Please help translate: [here](https://crowdin.com/project/seeker)
 
 - Official release is through Google Play store: [here](https://play.google.com/store/apps/details?id=com.companyname.andriodapp1&hl=en_US&gl=US)
 
