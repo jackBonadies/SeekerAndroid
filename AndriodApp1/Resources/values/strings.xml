@@ -22,26 +22,21 @@
   <string name="wishlist_search">Wishlist Search</string>
 
   <string name="no_account">Don\'t have an account?  Simply enter a unique username and one will be created for you.</string>
-  <string name="memory_file_backed">
-Note: File backed downloads will save partial download results in a folder called \"Soulseek Incomplete\" and move them to complete once they are finished downloading.
+  <string name="memory_file_backed">Note: File backed downloads will save partial download results in a folder called \"Soulseek Incomplete\" and move them to complete once they are finished downloading.
 \n\nThis allows (1) the ability to pause and resume downloads where you left off (2) the ability to download large files without getting out of memory errors (and less RAM intensive in general).
 \n\nTurning this off, the partial download results are stored in memory until they are finished then they are saved to disk.</string>
-  <string name="keep_alive_service">
-This service allows Seeker to run in the background.
+  <string name="keep_alive_service">This service allows Seeker to run in the background.
 \n\nThis is necessary to respond to search requests (if sharing), receive chat messages, and receive wishlist results while in the background.
 \n\nIt is not needed for downloading or uploading in background (there is already a service for that which will always run).
 \n\nThe only downside is that this can use up more battery. In which case one can turn it off by default and only run it as needed.</string>
-  <string name="listening">
-This setting allows Seeker to accept incoming connections, so that we can connect to clients without open ports.
+  <string name="listening">This setting allows Seeker to accept incoming connections, so that we can connect to clients without open ports.
 \n\nWhat this means in practice is that as long as we are successfully listening (indicated via \"Check Status\") we will recieve more search results, be able to download from more people, upload to more people, etc.
 \n\nSeeker will attempt to automatically forward ports via UPnP (this is what the official desktop client does).  If you are NOT on Wifi it will not work, if you are on a VPN please search how to port forward for your specific VPN, if your router is not UPnP enabled then you must manually forward port.</string>
 
-<string name="sharing_dialog">
-A few things to note about sharing files.  When an upload directory is first set, the app has to read through the files and parse them in a way that is easy for subsequent searches and browse requests.  This can take up to a few minutes.  Make sure that the files that you are sharing do not have any private or sensitive information in them (basically use the same judgement you would for the official soulseek client).
+<string name="sharing_dialog">A few things to note about sharing files.  When an upload directory is first set, the app has to read through the files and parse them in a way that is easy for subsequent searches and browse requests.  This can take up to a few minutes.  Make sure that the files that you are sharing do not have any private or sensitive information in them (basically use the same judgement you would for the official soulseek client).
 </string>
 
-<string name="privileges_more_info">
-Privileges allow one to support the Soulseek creator (Nir) and the central server which this app depends on.
+<string name="privileges_more_info">Privileges allow one to support the Soulseek creator (Nir) and the central server which this app depends on.
 \n\nIt also allows one to get queued ahead of non privileged users in the download queue.
 \n\nNote: any donations do not go to the creator of this unofficial android client, Seeker. I do not currently accept donations.
 </string>
@@ -74,8 +69,7 @@ Upload Speed: {3}
 File Count: {4}
 Directory Count: {5}"</string>
   <string name="add_user">Add User</string>
-  <string name="empty_browse_directory">
-  This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.</string>
+  <string name="empty_browse_directory">This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.</string>
   <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
      <string name="quick_info">Quick Info</string>
@@ -593,7 +587,7 @@ Directory Count: {5}"</string>
   <string name="about_body">
 <![CDATA[
 Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
-<br><br>Please help translate Seeker <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">here</a>.
+<br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
 <br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
 <br><br>Version: {0}.
 ]]>
@@ -631,12 +625,10 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="failed_denied">Failed - Denied</string>
 
 
-	<string name="concurrent_dialog">
-		Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
+	<string name="concurrent_dialog">Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
 	</string>
 
-	<string name="clear_incomplete_dialog">
-		This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
+	<string name="clear_incomplete_dialog">This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
 	</string>
 
 	<string name="diagnostics_more_info">
@@ -741,6 +733,7 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="FolderFinishedDownloading">Folder Finished Downloading</string>
 	<string name="FinishedDownloading">finished downloading</string>
 	<string name="PermissionsIssueShared">Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.</string>
+	<string name="SharedFolderIssuesAllFailed">Issue accessing shared folders. Tap folders for more info.</string>
 
 	<string name="UserXIsOffline">User {0} is offline</string>
 	<string name="CannotConnectUserX">Cannot connect to user {0}</string>
@@ -837,5 +830,9 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="NoPermissionsForDir">Cannot set directory without proper permissions</string>
 	<string name="No">No</string>
 	
+	<string name="MustBeLoggedInToImport">Must be logged in and connected to import data.</string>
+	<string name="MustBeLoggedInToRetryDL">Must be logged in and connected to retry download.</string>
+
+	<string name="FailedDownloadDirectoryNotSet">Failed: Download directory not properly set.</string>
 
 </resources>

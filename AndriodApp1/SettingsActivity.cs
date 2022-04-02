@@ -1058,7 +1058,7 @@ namespace AndriodApp1
         {
             if(!SoulSeekState.currentlyLoggedIn || !SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
             {
-                Toast.MakeText(this, "Must be logged in and connected to import data.", ToastLength.Long).Show();
+                Toast.MakeText(this, Resource.String.MustBeLoggedInToImport, ToastLength.Long).Show();
                 return;
             }
             Intent intent = new Intent(this, typeof(ImportWizardActivity));
@@ -2110,6 +2110,9 @@ namespace AndriodApp1
                     progressBar.Visibility = ViewStates.Invisible;
                     break;
             }
+
+            //in case new errors to update.
+            this.recyclerViewFoldersAdapter?.NotifyDataSetChanged();
         }
 
         public override bool OnContextItemSelected(IMenuItem item)
@@ -3132,7 +3135,21 @@ namespace AndriodApp1
         private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false, bool reselectCase = false)
         {
             Action parseDatabaseAndUpdateUiAction = new Action(() => {
-                ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked, reselectCase);
+                try
+                {
+                    ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked, reselectCase);
+                }
+                catch(MainActivity.DirectoryAccessFailure)
+                {
+                    if(rescanClicked)
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {Toast.MakeText(this, Resource.String.SharedFolderIssuesAllFailed, ToastLength.Long).Show(); });
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             });
 
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { parseDatabaseAndUpdateUiAction(); });

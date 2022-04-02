@@ -4696,6 +4696,10 @@ namespace AndriodApp1
         }
     }
 
+    public class DownloadDirectoryNotSetException : System.Exception
+    {
+    }
+
     public class FaultPropagationException : System.Exception
     {
     }
@@ -10183,7 +10187,19 @@ namespace AndriodApp1
                             }
                             catch (System.Exception e)
                             {
-                                MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                                //disconnected error
+                                if(e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
+                                {
+                                    action = () => { ToastUIWithDebouncer(SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL), "_16_"); };
+                                }
+                                else
+                                {
+                                    MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                                }
+                                if(action != null)
+                                {
+                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
+                                }
                             }
                         }
 
@@ -10204,6 +10220,10 @@ namespace AndriodApp1
                         if (task.Exception.InnerException is System.TimeoutException)
                         {
                             action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
+                        }
+                        else if(task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
+                        {
+                            action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException) //derived class of TransferException...
                         {
@@ -10961,6 +10981,12 @@ namespace AndriodApp1
                 bool diagDidWeCreateSoulSeekDir = false;
                 bool diagSlskDirExistsAfterCreation = false;
                 bool rootDocumentFileIsNull = SoulSeekState.RootDocumentFile == null;
+
+                if(rootDocumentFileIsNull)
+                {
+                    throw new DownloadDirectoryNotSetException();
+                }
+
                 //MainActivity.LogDebug("rootDocumentFileIsNull: " + rootDocumentFileIsNull);
                 try
                 {
