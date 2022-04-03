@@ -3351,12 +3351,12 @@ namespace AndriodApp1
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                     {
                         //nothing to do, bc its already set..
-                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, false, null, null);
+                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, null, null);
                     }
                     else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
                     {
                         //GET QUEUE LENGTH AND UPDATE...
-                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, false, null, null);
+                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, null, null);
                     }
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
@@ -7003,6 +7003,10 @@ namespace AndriodApp1
                     {
                         if (volName != null && volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
                         {
+                            if(volName.Length > directoryPath.Length)
+                            {
+                                MainActivity.LogFirebase("volName > directoryPath" + volName + " -- " + directoryPath + " -- " + isRootCase);
+                            }
                             directoryPath = directoryPath.Substring(0, volName.Length) + '\\' + directoryPath.Substring(volName.Length);
                         }
                     }
@@ -7179,10 +7183,15 @@ namespace AndriodApp1
                     List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
                     List<Soulseek.Directory> hiddenDirectories = null;
                     Dictionary<int, string> index = null;
-                    
+
 
                     //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
 
+                    UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                    if (UploadDirectoryManager.AreAllFailed())
+                    {
+                        throw new DirectoryAccessFailure("All Failed");
+                    }
                     if (SoulSeekState.PreOpenDocumentTree() || UploadDirectoryManager.AreAnyFromLegacy())
                     {
                         stringUriPairs = ParseSharedDirectoryLegacy(null, SoulSeekState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index, out hiddenDirectories);
@@ -7407,7 +7416,8 @@ namespace AndriodApp1
             }
             catch (Exception e)
             {
-                errorMsg = "Unspecified Error";
+                string defaultUnspecified = "Shared Folder Error - Unspecified Error";
+                errorMsg = defaultUnspecified;
                 if (e.GetType().FullName == "Java.Lang.SecurityException" || e is Java.Lang.SecurityException)
                 {
                     errorMsg = SeekerApplication.GetString(Resource.String.PermissionsIssueShared);
@@ -7438,7 +7448,7 @@ namespace AndriodApp1
                     }
                 }
 
-                if(errorMsg == "Unspecified Error")
+                if(errorMsg == defaultUnspecified)
                 {
                     MainActivity.LogFirebase("Error Parsing Files Unspecified Error" + e.Message + e.StackTrace);
                 }
@@ -7578,10 +7588,10 @@ namespace AndriodApp1
                     else
                     {
                         // do something here with the file
-                        //LogDebug(file.Uri.ToString()); //encoded string representation //content://com.android.externalstorage.documents/tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20Welcome%20To%20New%20York-Taylor%20Swift.mp3
-                        //LogDebug(file.Uri.Path.ToString()); //gets decoded path // /tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
-                        //LogDebug(Android.Net.Uri.Decode(file.Uri.ToString())); // content://com.android.externalstorage.documents/tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
-                        //LogDebug(file.Uri.EncodedPath);  // /tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20Welcome%20To%20New%20York-Taylor%20Swift.mp3 
+                        //LogDebug(file.Uri.ToString()); //encoded string representation //content://com.android.externalstorage.documents/tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20x.mp3
+                        //LogDebug(file.Uri.Path.ToString()); //gets decoded path // /tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181x.mp3
+                        //LogDebug(Android.Net.Uri.Decode(file.Uri.ToString())); // content://com.android.externalstorage.documents/tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181x.mp3
+                        //LogDebug(file.Uri.EncodedPath);  // /tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20x.mp3 
                         //LogDebug(file.Uri.LastPathSegment); // primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
 
                         string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
@@ -7980,7 +7990,7 @@ namespace AndriodApp1
 
             //UploadDirectoryManager.UploadDirectories = new List<UploadDirectoryInfo>();
             //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20Gone%2C%20They've%20Vanished/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20Gone%2C%20They've%20Vanished", true, true, false, null));
+            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20x/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirix", true, true, false, null));
             //UploadDirectoryManager.//UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/primary%3AMusic/document/primary%3AMusic", true, false, false, null));
             //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
 
@@ -12780,7 +12790,7 @@ namespace AndriodApp1
         {
             //TESTING 
             //UploadDirectories = new List<UploadDirectoryInfo>();
-            //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20They're%20Gone%2C%20They've%20Vanished", true, true, false, null));
+            //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20x%20/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20x", true, true, false, null));
             ////UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/primary%3AMusic/document/primary%3AMusic", true, false, false, null));
             //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
             //UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2FMusic1/document/864A-C3E8%3AMusic%2FMusic1", true, false, false, null));

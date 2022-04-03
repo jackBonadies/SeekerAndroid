@@ -13,6 +13,8 @@
 	<attr name="dialog_background" format="color" />
 	<attr name="normalTextColorNonTinted" format="color" />
 	<attr name="mainPurple" format="color" />
+	<attr name="swipeToRefreshProgress" format="color" />
+	<attr name="swipeToRefreshBackground" format="color" />
 	<attr name="mainPurpleStatusBar" format="color" />
 	<attr name="whitePurpleForNavBar" format="color" />
 	<attr name="slskAccent" format="color" />

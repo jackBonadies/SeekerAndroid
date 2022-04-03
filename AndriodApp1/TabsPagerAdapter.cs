@@ -4719,7 +4719,7 @@ namespace AndriodApp1
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
-               {
+                {
                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
 
                    if (!t.IsCompletedSuccessfully && t.Exception != null)
@@ -8881,7 +8881,7 @@ namespace AndriodApp1
                     if(v.GetShowProgressSize())
                     {
                         (v.GetProgressSizeTextView() as ProgressSizeTextView).Progress = prog;
-                        TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), prog, completedBytes);
+                        TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), prog, totalBytes);
                     }
 
                     TimeSpan? timeRemaining = null;

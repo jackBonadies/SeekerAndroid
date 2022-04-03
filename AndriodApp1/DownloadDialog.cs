@@ -167,7 +167,23 @@ namespace AndriodApp1
             return inflater.Inflate(Resource.Layout.downloaddialog,container); //container is parent
         }
 
+        private class OnRefreshListenerGetFolder : Java.Lang.Object, AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout.IOnRefreshListener
+        {
+            private DownloadDialog diagParent;
+
+            public OnRefreshListenerGetFolder(DownloadDialog _diagParent)
+            {
+                diagParent = _diagParent;
+            }
+
+            public void OnRefresh()
+            {
+                diagParent.GetFolderContents();
+            }
+        }
+
         private Button downloadSelectedButton = null;
+        private AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout swipeRefreshLayout = null;
         /// <summary>
         /// Called after on create view
         /// </summary>
@@ -196,7 +212,10 @@ namespace AndriodApp1
             TextView userHeader = view.FindViewById<TextView>(Resource.Id.userHeader);
             TextView subHeader = view.FindViewById<TextView>(Resource.Id.userHeaderSub);
 
-
+            swipeRefreshLayout = view.FindViewById<AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout>(Resource.Id.swipeToRefreshLayout);
+            swipeRefreshLayout.SetProgressBackgroundColorSchemeColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.swipeToRefreshBackground).ToArgb());
+            swipeRefreshLayout.SetColorSchemeColors(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.swipeToRefreshProgress).ToArgb());
+            swipeRefreshLayout.SetOnRefreshListener(new OnRefreshListenerGetFolder(this));
 
             ViewGroup headerLayout = view.FindViewById<ViewGroup>(Resource.Id.header1);
             
@@ -1128,6 +1147,12 @@ namespace AndriodApp1
                 return;
             }
             SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+
+                if(this.swipeRefreshLayout != null)
+                {
+                    this.swipeRefreshLayout.Refreshing = false;
+                }
+
                 if (this.View == null)
                 {
                     return;
@@ -1157,6 +1182,7 @@ namespace AndriodApp1
                     this.UpdateSearchResponseWithFullDirectory(dirTask.Result);
                     this.UpdateListView();
                     this.UpdateSubHeader();
+                    
                     //this.customAdapter = new DownloadCustomAdapter(Context, dirTask.Result.Files.ToList());
                     //this.customAdapter.Owner = this;
                     //listView.Adapter = (customAdapter);
@@ -1166,23 +1192,28 @@ namespace AndriodApp1
             });
         }
 
+        public void GetFolderContents()
+        {
+            string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0).Filename);
+            if (dirname == string.Empty)
+            {
+                MainActivity.LogFirebase("The dirname is empty!!");
+                return;
+            }
+            if (!SoulSeekState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+            {
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
+                return;
+            }
+            GetFolderContentsAPI(searchResponse.Username, dirname, DirectoryReceivedContAction);
+        }
+
         public bool OnMenuItemClick(IMenuItem item)
         {
             switch (item.ItemId)
             {
                 case Resource.Id.getFolderContents:
-                    string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0).Filename);
-                    if(dirname==string.Empty)
-                    {
-                        MainActivity.LogFirebase("The dirname is empty!!");
-                        return true;
-                    }
-                    if(!SoulSeekState.HideLockedResultsInSearch && searchResponse.FileCount==0 && searchResponse.LockedFileCount > 0)
-                    {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
-                        return true;
-                    }
-                    GetFolderContentsAPI(searchResponse.Username, dirname, DirectoryReceivedContAction);
+                    GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
                     string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);
