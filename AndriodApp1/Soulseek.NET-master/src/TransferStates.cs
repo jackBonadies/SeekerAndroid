@@ -93,5 +93,10 @@ namespace Soulseek
         ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
         /// </summary>
         CannotConnect = 2048,
+
+        /// <summary>
+        ///     Fallen from Queue.  This is when a transfer that was queued gets cancelled due to user being offline, or no longer able to connect.
+        /// </summary>
+        FallenFromQueue = 4096,
     }
 }

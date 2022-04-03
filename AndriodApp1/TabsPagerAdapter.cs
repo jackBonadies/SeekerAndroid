@@ -6321,7 +6321,10 @@ namespace AndriodApp1
             }
             else
             {
-
+                //i.e. None, can be due to uploading 0 byte files. or for transfers that never got initialized.
+                //     dont leave this as is bc it will display "3 files remaining and Current: filename..." always.
+                currentFile.Visibility = ViewStates.Gone;
+                filesLongStatus.Text = string.Format("{0} files remaining", fi.TransferItems.Count);
             }
 
         }
@@ -6453,7 +6456,10 @@ namespace AndriodApp1
             }
             else
             {
-
+                //these views are recycled, so NEVER dont set them.
+                //otherwise they will be whatever the view they recycled was.
+                //so they may end up being Failed, Completed, etc.
+                viewStatus.Text = "None";
             }
         }
 
@@ -7871,40 +7877,51 @@ namespace AndriodApp1
 
             var refreshOnlySelected = new Action(() =>
             {
-                HashSet<int> indicesToUpdate = new HashSet<int>();
-                foreach(TransferItem ti in transferItemConditionList)
-                {
-                    int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti);
-                    if(pos==-1)
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(  
+                    () =>
                     {
-                        MainActivity.LogDebug("pos == -1!!");
-                        continue;
-                    }
-                    
-                    if(indicesToUpdate.Contains(pos))
-                    {
-                        //this is for if we are in a folder.  since previously we would update a folder of 10 items, 10 times which looked quite glitchy...
-                        MainActivity.LogDebug($"skipping same pos {pos}");
-                    }
-                    else
-                    {
-                        indicesToUpdate.Add(pos);
-                    }
-                }
-                if (InUploadsMode)
-                {
-                    return;
-                }
-                foreach(int i in indicesToUpdate)
-                {
-                    MainActivity.LogDebug($"updating {i}");
-                    if(StaticHacks.TransfersFrag != null)
-                    {
-                        StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
-                    }
-                }
+
+                        //previously this was not always on the UI thread (i.e. when called due to
+                        // a user we previously downloaded from going back online) when this happened
+                        // not only did the recycleview break weirdly, but the whole main activity
+                        // (the login screen, search screen, action bar, browse screen).
+
+                        HashSet<int> indicesToUpdate = new HashSet<int>();
+                        foreach (TransferItem ti in transferItemConditionList)
+                        {
+                            int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti);
+                            if (pos == -1)
+                            {
+                                MainActivity.LogDebug("pos == -1!!");
+                                continue;
+                            }
+
+                            if (indicesToUpdate.Contains(pos))
+                            {
+                                //this is for if we are in a folder.  since previously we would update a folder of 10 items, 10 times which looked quite glitchy...
+                                MainActivity.LogDebug($"skipping same pos {pos}");
+                            }
+                            else
+                            {
+                                indicesToUpdate.Add(pos);
+                            }
+                        }
+                        if (InUploadsMode)
+                        {
+                            return;
+                        }
+                        foreach (int i in indicesToUpdate)
+                        {
+                            MainActivity.LogDebug($"updating {i}");
+                            if (StaticHacks.TransfersFrag != null)
+                            {
+                                StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
+                            }
+                        }
 
 
+
+                    });
             });
             lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
             { //also can update this to do a partial refresh...
