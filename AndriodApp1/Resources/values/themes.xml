@@ -72,6 +72,8 @@
 
 	<style name="DefaultLight_Blue" parent="DefaultLight">
 		<item name="mainPurple">#126291</item>
+		<item name="swipeToRefreshProgress">#126291</item>
+
 		<item name="mainPurpleStatusBar">#10496b</item>
 
 
@@ -104,6 +106,7 @@
 
 	<style name="DefaultLight_Red" parent="DefaultLight">
 		<item name="mainPurple">#B22525</item>
+		<item name="swipeToRefreshProgress">#B22525</item>
 		<item name="mainPurpleStatusBar">#7B0000</item>
 		<!--<item name="buttonStyle">@drawable/buttonStyle_B22525</item>-->
 		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_B22525</item>
@@ -281,7 +284,7 @@
 
 		<item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
 		<item name="floating_action_bar_to_bottom_background">#303030</item>
-
+		<item name="swipeToRefreshBackground">#ff343434</item>
 		<item name="expandIconColor">#ffffffff</item>
 		<item name="normalTextColor">#bcc1f7</item>
 		<item name="normalTextColorNonTinted">#FFFFFF</item>

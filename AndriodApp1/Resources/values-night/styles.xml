@@ -26,6 +26,8 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="mainPurple">#4f58c4</item>
+        <item name="swipeToRefreshProgress">#ffffffff</item>
+		<item name="swipeToRefreshBackground">#ff585858</item>
 		<item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
 
 

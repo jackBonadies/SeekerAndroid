@@ -160,6 +160,7 @@ namespace AndriodApp1
                     string keyset = String.Join(' ',searchIntent.Extras.KeySet());
                     MainActivity.LogFirebase("extras keyset is " + keyset);
                 }
+                return false; //bc empty.
             }
             var matched = regex.Match(extraText);
             bool containsLink = matched.Success;
