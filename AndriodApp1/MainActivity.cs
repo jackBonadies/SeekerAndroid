@@ -3312,7 +3312,18 @@ namespace AndriodApp1
             //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
             if (relevantItem != null)
             {
-                relevantItem.State = e.Transfer.State;
+                //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
+                if(e.Transfer.State.HasFlag(TransferStates.Cancelled) && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
+                {
+                    MainActivity.LogDebug("fallen from queue");
+                    //the state is good as is.  do not add cancelled to it, since we used cancelled to mean "user cancelled" i.e. paused.
+                    relevantItem.Failed = true;
+                    relevantItem.Progress = 100;
+                }
+                else
+                {
+                    relevantItem.State = e.Transfer.State;
+                }
                 relevantItem.IncompleteParentUri = e.IncompleteParentUri;
                 if (!relevantItem.State.HasFlag(TransferStates.Requested))
                 {
@@ -8678,7 +8689,7 @@ namespace AndriodApp1
                             //Nicotine always immediately transitions from queued to user offline the second the user goes offline. We dont do it immediately but on next check.
                             //for QT you always are in "Queued" no matter what.
                             transitionToNextState = true;
-                            state = TransferStates.Errored | TransferStates.UserOffline;
+                            state = TransferStates.Errored | TransferStates.UserOffline | TransferStates.FallenFromQueue;
                             if (!silent)
                             {
                                 ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.UserXIsOffline), username), "_6_", username);
@@ -8690,7 +8701,7 @@ namespace AndriodApp1
                             // otherwise, its okay, lets just stay in Queued.
                             //for QT you always are in "Queued" no matter what.
                             transitionToNextState = !silent;
-                            state = TransferStates.Errored | TransferStates.CannotConnect;
+                            state = TransferStates.Errored | TransferStates.CannotConnect | TransferStates.FallenFromQueue;
                             if (!silent)
                             {
                                 ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.CannotConnectUserX), username), "_7_", username);
@@ -8712,23 +8723,32 @@ namespace AndriodApp1
                             }
                             LogFirebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
-                        // there is no good way to transition to the next state. its more complicated. we need a good way to cancel the download.
-                        //if(transitionToNextState)
-                        //{
-                        //    //update the transferItem array
-                        //    if (transferItemInQuestion == null)
-                        //    {
-                        //        transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
-                        //    }
 
-                        //    if (transferItemInQuestion == null)
-                        //    {
-                        //        return;
-                        //    }
+                        // 
+                        if(transitionToNextState)
+                        {
+                            //update the transferItem array
+                            if (transferItemInQuestion == null)
+                            {
+                                transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                            }
 
-                        //    transferItemInQuestion.State = state;
-                        //    TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
-                        //}
+                            if (transferItemInQuestion == null)
+                            {
+                                return;
+                            }
+                            try
+                            {
+                                transferItemInQuestion.CancellationTokenSource.Cancel();
+                            }
+                            catch(Exception err)
+                            {
+                                MainActivity.LogFirebase("cancellation token src issue: " + err.Message);
+                            }
+                            transferItemInQuestion.State = state;
+                            //let the Cancel() update it.
+                            //TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
+                        }
                     }
                     else
                     {
