@@ -8715,6 +8715,15 @@ namespace AndriodApp1
                                 ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.TimeoutQueueUserX), username), "_8_", username, 6);
                             }
                         }
+                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
+                        {
+                            //can be server connection (get user endpoint) or peer connection.
+                            transitionToNextState = false;
+                            if (!silent)
+                            {
+                                ToastUIWithDebouncer(string.Format("Failed to get queue position for {0}: Connection was unexpectedly closed.", username), "_9_", username, 6);
+                            }
+                        }
                         else
                         {
                             if (!silent)
