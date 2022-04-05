@@ -93,8 +93,8 @@ Directory Count: {5}"</string>
 
   <string name="chatroom_disconnected">We disconnected...</string>
   <!--Where placeholder {0} is time -->
-  <string name="chatroom_disconnected_at">We disconnected at {0}</string>
-  <string name="chatroom_reconnected_at">We reconnected at {0}</string>
+  <string name="chatroom_disconnected_at">We disconnected: {0}</string>
+  <string name="chatroom_reconnected_at">We reconnected: {0}</string>
   <string name="chatroom_loading_ticker">Loading current ticker...</string>
   <string name="chatroom_enter_message">Enter Message</string>
   <string name="send_message">Send</string>

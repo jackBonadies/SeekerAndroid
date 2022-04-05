@@ -2727,7 +2727,15 @@ namespace Soulseek
                     var parentSpeedRatioWait = Waiter.Wait<int>(new WaitKey(MessageCode.Server.ParentSpeedRatio), cancellationToken: combinedCts.Token);
                     var wishlistIntervalWait = Waiter.Wait<int>(new WaitKey(MessageCode.Server.WishlistInterval), cancellationToken: combinedCts.Token);
 
-                    await ServerConnection.WriteAsync(new LoginRequest(username, password), cancellationToken).ConfigureAwait(false);
+                    // concatenate the login request with the set listen port command to prevent a race condition where remote users
+                    // are notified of the login but the listen port is not yet set, resulting in the server reporting a port of 0 if
+                    // the notified users attempt to connect (e.g. to re-request uploads). this is still possible, but much less likely.
+                    // the server will not accept a listen port command prior to login.
+                    var loginBytes = new LoginRequest(username, password).ToByteArray()
+                        .Concat(new SetListenPortCommand(Options.ListenPort).ToByteArray())
+                        .ToArray();
+
+                    await ServerConnection.WriteAsync(loginBytes, cancellationToken).ConfigureAwait(false);
 
                     var response = await loginWait.ConfigureAwait(false);
 
