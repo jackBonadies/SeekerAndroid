@@ -93,10 +93,9 @@ namespace AndriodApp1
                 case Resource.Id.browseUsersFiles:
                     //do browse thing...
                     Action<View> action = new Action<View>((v) => {
-                        Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
+                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
                     DownloadDialog.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
@@ -105,7 +104,7 @@ namespace AndriodApp1
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
                     return true;

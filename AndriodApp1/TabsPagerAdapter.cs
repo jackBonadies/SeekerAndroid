@@ -1962,7 +1962,7 @@ namespace AndriodApp1
 
                     if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
                     {
-                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.search_tab_error, ToastLength.Long).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.search_tab_error, ToastLength.Long).Show();
                         SearchTabHelper.CurrentTab = lastTab;
                         fromTab = lastTab;
                         return;
@@ -4584,8 +4584,8 @@ namespace AndriodApp1
                 }
 
                 MainActivity.LogFirebase(msg + " showEditDialog" + e.Message);
-                Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, "Error, please try again: " + msg, ToastLength.Long); });
-                SoulSeekState.MainActivityRef.RunOnUiThread(a);
+                Action a = new Action(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, "Error, please try again: " + msg, ToastLength.Long).Show(); });
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(a);
             }
         }
 
@@ -7108,7 +7108,7 @@ namespace AndriodApp1
                         {
                             if (t.IsFaulted)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                                 {
                                     if (Context != null)
                                     {
@@ -7116,7 +7116,7 @@ namespace AndriodApp1
                                     }
                                     else
                                     {
-                                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                     }
 
                                 });
@@ -7124,7 +7124,7 @@ namespace AndriodApp1
                             }
                             if (CurrentlySelectedDLFolder == null)
                             {
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
+                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
                             }
                             else
                             {
@@ -8068,21 +8068,11 @@ namespace AndriodApp1
                 }
 
                 int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
-                //MainActivity.LogDebug($"position: {position} ti name: {ti.GetDisplayName()}");
-                //try
-                //{
-                //    ti = TransferItemManagerWrapped.GetItemAtUserIndex(position); //UI
-                //}
-                //catch (ArgumentOutOfRangeException)
-                //{
-                //    //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                //    Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
-                //    return base.OnContextItemSelected(item);
-                //}
+
                 
                 if(position == -1)
                 {
-                    Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                     return base.OnContextItemSelected(item);
                 }
 
@@ -8112,7 +8102,7 @@ namespace AndriodApp1
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                                     {
                                         if (Context != null)
                                         {
@@ -8120,13 +8110,13 @@ namespace AndriodApp1
                                         }
                                         else
                                         {
-                                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                         }
 
                                     });
                                     return;
                                 }
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
+                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
                             }));
                         }
                         else
@@ -8155,7 +8145,7 @@ namespace AndriodApp1
                             catch (ArgumentOutOfRangeException)
                             {
                                 //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                                Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                                 return base.OnContextItemSelected(item);
                             }
                             recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
@@ -8173,7 +8163,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         if (tItem is TransferItem tti)
@@ -8224,7 +8214,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
 
@@ -8256,7 +8246,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         try
@@ -8338,7 +8328,7 @@ namespace AndriodApp1
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                                     {
                                         if (Context != null)
                                         {
@@ -8346,13 +8336,13 @@ namespace AndriodApp1
                                         }
                                         else
                                         {
-                                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                         }
 
                                     });
                                     return;
                                 }
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
+                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
                             }));
                         }
                         else
@@ -8382,7 +8372,7 @@ namespace AndriodApp1
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                                     {
                                         if (Context != null)
                                         {
@@ -8390,13 +8380,13 @@ namespace AndriodApp1
                                         }
                                         else
                                         {
-                                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                         }
 
                                     });
                                     return;
                                 }
-                                SoulSeekState.MainActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
+                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
                             }));
                         }
                         else
@@ -8414,7 +8404,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.MainActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         TransferItem uploadToCancel = tItem as TransferItem;
@@ -8698,7 +8688,6 @@ namespace AndriodApp1
                     this.Adapter.NotifyItemChanged(i);
                 }
 
-                //SoulSeekState.MainActivityRef.SupportActionBar.Show();
             }
 
         }
@@ -8716,11 +8705,11 @@ namespace AndriodApp1
                     {
                         if(queueLenOld == int.MaxValue)
                         {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, "Position in queue is unknown.", ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Position in queue is unknown.", ToastLength.Short).Show();
                         }
                         else
                         { 
-                            Toast.MakeText(SoulSeekState.MainActivityRef, string.Format(SoulSeekState.MainActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
                         }
                     }
                     else
@@ -8768,83 +8757,6 @@ namespace AndriodApp1
             }
         }
 
-        //private void SoulseekClient_UI_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
-        //{
-
-        //    if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut))
-        //    {
-
-        //        //this gets called regardless of UI lifecycle, so I am guessing that this.transferItems is null....
-        //        //maybe better to make static and independent... bc you should still be able to update an item as failed even if UI is disposed
-        //        //if(transferItems==null)
-        //        //{
-        //        //    MainActivity.LogFirebase(("transferItems is null" + " SoulseekClient_TransferStateChanged"));
-        //        //    return;
-        //        //} 
-        //        if (relevantItem == null)
-        //        {
-        //            return;
-        //        }
-        //        else
-        //        {
-        //            relevantItem.Failed = true;
-        //            Action action = new Action(()=>{refreshListViewSpecificItem(indexOfItem); });
-        //            SoulSeekState.MainActivityRef.RunOnUiThread(action);
-        //            //Activity.RunOnUiThread(action); //this is probably the cause of the nullref.  since Activity is null whenever Context is null i.e. onDeattach or not yet attached..
-        //        }
-        //    }
-        //    else if(e.Transfer.State.HasFlag(TransferStates.Queued))
-        //    {
-        //        //if (relevantItem == null)
-        //        //{
-        //        //    return;
-        //        //}
-        //        //relevantItem.Queued = true;
-        //        //if(relevantItem.QueueLength!=0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
-        //        //{
-        //        //    //nothing to do, bc its already set..
-        //        //    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, null);
-        //        //}
-        //        //else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
-        //        //{
-        //        //    //GET QUEUE LENGTH AND UPDATE...
-        //        //    MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename,null);
-        //        //}
-        //        Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-        //        SoulSeekState.MainActivityRef.RunOnUiThread(action);
-        //    }
-        //    else if(e.Transfer.State.HasFlag(TransferStates.Initializing))
-        //    {
-        //        if (relevantItem == null)
-        //        {
-        //            return;
-        //        }
-        //        //clear queued flag...
-        //        relevantItem.Queued = false;
-        //        relevantItem.QueueLength = 0;
-        //        Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-        //        SoulSeekState.MainActivityRef.RunOnUiThread(action);
-        //    }
-        //    else if(e.Transfer.State.HasFlag(TransferStates.Completed))
-        //    {
-        //        if (relevantItem == null)
-        //        {
-        //            return;
-        //        }
-        //        if(!e.Transfer.State.HasFlag(TransferStates.Cancelled))
-        //        {
-        //            //clear queued flag...
-        //            relevantItem.Progress = 100;
-        //            Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-        //            SoulSeekState.MainActivityRef.RunOnUiThread(action);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        Action action = new Action(() => { refreshListViewSpecificItem(indexOfItem); });
-        //        SoulSeekState.MainActivityRef.RunOnUiThread(action);
-        //    }
-        //}
 
 
 
@@ -9008,11 +8920,9 @@ namespace AndriodApp1
                     MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
                 }
-                //customAdapter = new TransferAdapter(SoulSeekState.MainActivityRef, transferItems);
             }
             else
             {
-                //customAdapter = new TransferAdapter(Context, transferItems);
             }
             if (this.noTransfers == null)
             {
@@ -9153,9 +9063,6 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-                    //pop.Inflate(Resource.Menu.download_diag_options);
-                    //pop.Show();
                     setSelectedItem((sender as ITransferItemView).InnerTransferItem);
                     (sender as View).ShowContextMenu();
                 }

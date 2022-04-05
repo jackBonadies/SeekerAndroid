@@ -1678,7 +1678,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById<ViewGroup>(Android.Resource.Id.Content).WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -1925,7 +1925,7 @@ namespace AndriodApp1
             bool requiresConnection = allowPrivateInvites.HasValue;
             if (!SoulSeekState.currentlyLoggedIn && requiresConnection) //note: you CAN in fact change listening and port without being logged in...
             {
-                Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.must_be_logged_to_toggle_priv_invites, ToastLength.Short).Show();
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_to_toggle_priv_invites, ToastLength.Short).Show();
                 return;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
@@ -2147,7 +2147,7 @@ namespace AndriodApp1
         private void ShareCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             SoulSeekState.SharingOn = e.IsChecked;
-            /*SoulSeekState.MainActivityRef.*/MainActivity.SetUnsetSharingBasedOnConditions(true);
+            MainActivity.SetUnsetSharingBasedOnConditions(true);
             if(MainActivity.MeetsSharingConditions() && !SoulSeekState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
             {
                 //try to set up sharing...
