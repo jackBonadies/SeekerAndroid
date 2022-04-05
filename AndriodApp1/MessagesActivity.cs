@@ -130,16 +130,15 @@ namespace AndriodApp1
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = MessagesInnerFragment.Username;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.action_browse_files:
                     Action<View> action = new Action<View>((v) => {
-                        Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(MainActivity));
+                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
                     DownloadDialog.RequestFilesApi(MessagesInnerFragment.Username, snackView, action, null);
@@ -1838,19 +1837,6 @@ namespace AndriodApp1
             return this.position;
         }
 
-        //public override void OnViewRecycled(Java.Lang.Object holder)
-        //{
-        //    base.OnViewRecycled(holder);
-        //}
-
-        //private void MessageOverviewClick(object sender, EventArgs e)
-        //{
-        //    //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-        //    //pop.Inflate(Resource.Menu.download_diag_options);
-        //    //pop.Show();
-        //    setPosition((sender as MessageOverviewView).ViewHolder.AdapterPosition);
-        //    MessagesActivity.ChangeFragment((sender as MessageOverviewView).View);
-        //}
         public override int GetItemViewType(int position)
         {
             if(localDataSet[position].FromMe)
@@ -2245,16 +2231,9 @@ namespace AndriodApp1
             return this.position;
         }
 
-        //public override void OnViewRecycled(Java.Lang.Object holder)
-        //{
-        //    base.OnViewRecycled(holder);
-        //}
 
         private void MessageOverviewClick(object sender, EventArgs e)
         {
-            //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-            //pop.Inflate(Resource.Menu.download_diag_options);
-            //pop.Show();
             setPosition((sender as MessageOverviewView).ViewHolder.AdapterPosition);
             MessagesActivity.MessagesActivityRef.ChangeToInnerFragment(localDataSet[position]);
         }

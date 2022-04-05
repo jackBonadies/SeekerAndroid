@@ -599,26 +599,26 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if (SoulSeekState.MainActivityRef == null)
+                if (SoulSeekState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("invite WindowManagerBadTokenException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("invite WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
-                if (SoulSeekState.MainActivityRef == null)
+                if (SoulSeekState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("invite Exception null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
@@ -709,7 +709,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -735,26 +735,26 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if (SoulSeekState.MainActivityRef == null)
+                if (SoulSeekState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("ticker WindowManagerBadTokenException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("ticker WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
-                if (SoulSeekState.MainActivityRef == null)
+                if (SoulSeekState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("tickerException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("tickerException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
@@ -829,30 +829,6 @@ namespace AndriodApp1
                 }
             });
 
-            //System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            //{
-            //    if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-            //        e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-            //        e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-            //        e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
-            //    {
-            //        MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-            //        //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-            //        //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-            //        //overriding this, the keyboard fails to go down by default for some reason.....
-            //        try
-            //        {
-            //            Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
-            //            imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-            //        }
-            //        catch (System.Exception ex)
-            //        {
-            //        }
-            //        //Do the Browse Logic...
-            //        eventHandler(sender, null);
-            //    }
-            //};
-
             //input.EditorAction += editorAction;
             chatNameInput.FocusChange += Input_FocusChange;
 
@@ -898,7 +874,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                SoulSeekState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
             catch (System.Exception err)
             {
@@ -1062,19 +1038,6 @@ namespace AndriodApp1
             return this.position;
         }
 
-        //public override void OnViewRecycled(Java.Lang.Object holder)
-        //{
-        //    base.OnViewRecycled(holder);
-        //}
-
-        //private void MessageOverviewClick(object sender, EventArgs e)
-        //{
-        //    //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-        //    //pop.Inflate(Resource.Menu.download_diag_options);
-        //    //pop.Show();
-        //    setPosition((sender as MessageOverviewView).ViewHolder.AdapterPosition);
-        //    MessagesActivity.ChangeFragment((sender as MessageOverviewView).View);
-        //}
         public override int GetItemViewType(int position)
         {
             if (localDataSet[position].FromMe)
@@ -1122,10 +1085,6 @@ namespace AndriodApp1
 
         private void ChatroomReceivedAdapter_LongClick(object sender, View.LongClickEventArgs e)
         {
-            //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-            //pop.Inflate(Resource.Menu.download_diag_options);
-            //pop.Show();
-            //setPosition((sender as RoomUserItemView).ViewHolder.AdapterPosition);
             if(sender is GroupMessageInnerViewReceived recv)
             {
                 ChatroomInnerFragment.MessagesLongClickData = recv.DataItem;
@@ -2180,15 +2139,27 @@ namespace AndriodApp1
         private void HookUpOverviewEventHandlers(bool binding)
         {
             ChatroomController.RoomNowHasUnreadMessages -= OnRoomNowHasUnreadMessages;
+            ChatroomController.JoinedRoomsHaveUpdated -= OnJoinedRoomsHaveUpdated;
             if (binding)
             {
                 ChatroomController.RoomNowHasUnreadMessages += OnRoomNowHasUnreadMessages;
+                ChatroomController.JoinedRoomsHaveUpdated += OnJoinedRoomsHaveUpdated;
             }
         }
 
         public void OnRoomNowHasUnreadMessages(object sender, string room)
         {
             SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
+        }
+
+        public void OnJoinedRoomsHaveUpdated(object sender, EventArgs e)
+        {
+            //separate Joined and JoinedAndConnected lists instead?
+            //MainActivity.LogDebug("OnJoinedRoomsHaveUpdated");
+            //ChatroomController.RoomListParsed = ChatroomController.GetParsedList(ChatroomController.RoomList); //reparse this for our newly joined rooms.
+            //internalList = ChatroomController.RoomList;
+            //internalListParsed = ChatroomController.RoomListParsed;
+            //this.UpdateChatroomList();
         }
 
         public override void OnResume()
@@ -2237,7 +2208,7 @@ namespace AndriodApp1
             MainActivity.LogDebug("update chatroom list");
             var filteredRoomList = FilterRoomList(internalListParsed);
             var activity = this.Activity != null ? this.Activity : ChatroomActivity.ChatroomActivityRef;
-            activity.RunOnUiThread(new Action(() => {
+            activity?.RunOnUiThread(new Action(() => {
                 recyclerAdapter = new ChatroomOverviewRecyclerAdapter(filteredRoomList); //this depends tightly on MessageController... since these are just strings..
                 chatroomsListLoadingView.Visibility = ViewStates.Gone;
                 recyclerViewOverview.SetAdapter(recyclerAdapter);
@@ -2280,7 +2251,7 @@ namespace AndriodApp1
                 recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(internalListParsed)); //this depends tightly on MessageController... since these are just strings..
                 recyclerViewOverview.SetAdapter(recyclerAdapter);
                 recyclerAdapter.NotifyDataSetChanged();
-                MainActivity.LogDebug("on chatroom attach");
+                MainActivity.LogDebug("on chatroom overview attach");
                 ChatroomController.RoomListReceived -= OnChatListReceived;
                 ChatroomController.RoomListReceived += OnChatListReceived;
             }
@@ -2290,8 +2261,6 @@ namespace AndriodApp1
         //public override void OnDetach()
         //{
         //    MainActivity.LogDebug("chat overview OnDetach -- nulling");
-
-        //    HookUpOverviewEventHandlers(false);
         //    base.OnDetach();
         //}
     }
@@ -2369,6 +2338,7 @@ namespace AndriodApp1
         public static EventHandler<Soulseek.RoomTickerRemovedEventArgs> RoomTickerRemoved;
         public static EventHandler<string> RoomMembershipRemoved;
         public static EventHandler<string> RoomNowHasUnreadMessages;
+        public static EventHandler<EventArgs> JoinedRoomsHaveUpdated;
 
         public static bool IsInitialized;
         public static int MAX_MESSAGES_PER_ROOM = 100;
@@ -3080,7 +3050,8 @@ namespace AndriodApp1
                     JoinedRoomMessages[roomName].Dequeue();
                 }
             }
-            if(ChatroomController.currentlyInsideRoomName != roomName)
+            if(ChatroomController.currentlyInsideRoomName != roomName 
+                && msg.SpecialCode == SpecialMessageCode.None) //i.e. do not set to unread if just disconnect or reconnect messages.
             {
                 if(!UnreadRooms.ContainsKey(roomName))
                 {
@@ -3345,10 +3316,10 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.MainActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
                 }));
             }
             else
@@ -3389,6 +3360,10 @@ namespace AndriodApp1
             });
         }
 
+        public static void UpdateJoinedRooms()
+        {
+            JoinedRoomsHaveUpdated?.Invoke(null, new EventArgs());
+        }
 
         public static void CreateRoomApi(string roomName, bool isPrivate, bool feedback)
         {
@@ -3873,12 +3848,14 @@ namespace AndriodApp1
                 }
                 else
                 {
+                    bool isChanged = false;
                     if(task is Task<Soulseek.RoomData> taskRoomData)
                     {
                         //add to joined list and save joined list...
                         if(!JoinedRoomNames.Contains(roomName))
                         {
                             JoinedRoomNames.Add(roomName);
+                            isChanged = true;
                             //TODO: SAVE
                         }
                         //we will be part of the room data!!! we also get this AFTER we get the user joined event for ourself.
@@ -3903,6 +3880,7 @@ namespace AndriodApp1
                                     AutoJoinRoomNames.Remove(roomName);
                                     SaveAutoJoinRoomsToSharedPrefs();
                                 }
+                                isChanged = true;
                                 //TODO: SAVE
                             }
                         }
@@ -3910,6 +3888,12 @@ namespace AndriodApp1
                     if(refreshViewAfter)
                     {
                         ChatroomController.GetRoomListApi(false);
+                    }
+                    else if(isChanged)
+                    {
+                        //this one will just update the existing list 
+                        // marking the now joined rooms as such.
+                        ChatroomController.UpdateJoinedRooms();
                     }
                 }
             });
@@ -4250,16 +4234,19 @@ namespace AndriodApp1
             if(ChatroomController.UnreadRooms.ContainsKey(roomInfo.Name))
             {
                 unreadImageView.Visibility = ViewStates.Visible;
-                viewRoomName.SetTypeface(viewRoomName.Typeface, TypefaceStyle.Bold);
-                viewUsersInRoom.SetTypeface(viewUsersInRoom.Typeface, TypefaceStyle.Bold);
+                viewRoomName.SetTypeface(null, TypefaceStyle.Bold);
+                viewUsersInRoom.SetTypeface(null, TypefaceStyle.Bold);
                 viewRoomName.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
                 viewUsersInRoom.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
             }
             else
             {
                 unreadImageView.Visibility = ViewStates.Gone;
-                viewRoomName.SetTypeface(viewRoomName.Typeface, TypefaceStyle.Normal);
-                viewUsersInRoom.SetTypeface(viewUsersInRoom.Typeface, TypefaceStyle.Normal);
+
+                // previously we did "viewRoomName.Typeface" instead of "null"
+                // this had side effects due to reusing views. the bold would stay!
+                viewRoomName.SetTypeface(null, TypefaceStyle.Normal);
+                viewUsersInRoom.SetTypeface(null, TypefaceStyle.Normal);
                 viewRoomName.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
                 viewUsersInRoom.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
             }
@@ -4821,7 +4808,6 @@ namespace AndriodApp1
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
                     View snackView = this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom);
                     DownloadDialog.RequestFilesApi(userdata.Username, snackView, action, null);
@@ -4895,21 +4881,6 @@ namespace AndriodApp1
             return this.position;
         }
 
-        //public override void OnViewRecycled(Java.Lang.Object holder)
-        //{
-        //    base.OnViewRecycled(holder);
-        //}
-
-        //private void MessageOverviewClick(object sender, EventArgs e)
-        //{
-        //    //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-        //    //pop.Inflate(Resource.Menu.download_diag_options);
-        //    //pop.Show();
-        //    setPosition((sender as MessageOverviewView).ViewHolder.AdapterPosition);
-        //    MessagesActivity.ChangeFragment((sender as MessageOverviewView).View);
-        //}
-
-
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
@@ -4932,10 +4903,6 @@ namespace AndriodApp1
 
         private void RoomUserListRecyclerAdapter_LongClick(object sender, View.LongClickEventArgs e)
         {
-            //var pop = new PopupMenu(SoulSeekState.MainActivityRef,(sender as TransferItemView),GravityFlags.Right);//anchor to sender
-            //pop.Inflate(Resource.Menu.download_diag_options);
-            //pop.Show();
-            //setPosition((sender as RoomUserItemView).ViewHolder.AdapterPosition);
 
             RoomUserListDialog.longClickedUserData = (sender as RoomUserItemView).DataItem;
 
