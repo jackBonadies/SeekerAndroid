@@ -2194,6 +2194,7 @@ namespace AndriodApp1
             MainActivity.LogDebug("overview on resume");
             MainActivity.LogDebug("hook up chat overview event handlers ");
             HookUpOverviewEventHandlers(true);
+            recyclerAdapter?.NotifyDataSetChanged();
             base.OnResume();
         }
 
