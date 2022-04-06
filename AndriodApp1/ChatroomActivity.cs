@@ -2139,12 +2139,28 @@ namespace AndriodApp1
         private void HookUpOverviewEventHandlers(bool binding)
         {
             ChatroomController.RoomNowHasUnreadMessages -= OnRoomNowHasUnreadMessages;
+            ChatroomController.CurrentlyJoinedRoomHasUpdated -= OnCurrentConnectedChanged;
+            ChatroomController.CurrentlyJoinedRoomsCleared -= OnCurrentConnectedCleared;
             ChatroomController.JoinedRoomsHaveUpdated -= OnJoinedRoomsHaveUpdated;
             if (binding)
             {
                 ChatroomController.RoomNowHasUnreadMessages += OnRoomNowHasUnreadMessages;
+                ChatroomController.CurrentlyJoinedRoomHasUpdated += OnCurrentConnectedChanged;
+                ChatroomController.CurrentlyJoinedRoomsCleared += OnCurrentConnectedCleared;
                 ChatroomController.JoinedRoomsHaveUpdated += OnJoinedRoomsHaveUpdated;
             }
+        }
+
+        /// <summary>
+        /// This is due to log out.
+        /// In which case grey out the joined rooms.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="rooms"></param>
+        public void OnCurrentConnectedCleared(object sender, List<string> rooms)
+        {
+            MainActivity.LogDebug("OnCurrentConnectedCleared");
+            SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusesChanged(rooms); });
         }
 
         public void OnRoomNowHasUnreadMessages(object sender, string room)
@@ -2152,14 +2168,25 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
         }
 
+        /// <summary>
+        /// This is when we re-connect and successfully send server join message.
+        /// We ungrey if we were previously greyed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="room"></param>
+        public void OnCurrentConnectedChanged(object sender, string room)
+        {
+            MainActivity.LogDebug("OnCurrentConnectedChanged");
+            SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
+        }
+
         public void OnJoinedRoomsHaveUpdated(object sender, EventArgs e)
         {
-            //separate Joined and JoinedAndConnected lists instead?
-            //MainActivity.LogDebug("OnJoinedRoomsHaveUpdated");
-            //ChatroomController.RoomListParsed = ChatroomController.GetParsedList(ChatroomController.RoomList); //reparse this for our newly joined rooms.
-            //internalList = ChatroomController.RoomList;
-            //internalListParsed = ChatroomController.RoomListParsed;
-            //this.UpdateChatroomList();
+            MainActivity.LogDebug("OnJoinedRoomsHaveUpdated");
+            ChatroomController.RoomListParsed = ChatroomController.GetParsedList(ChatroomController.RoomList); //reparse this for our newly joined rooms.
+            internalList = ChatroomController.RoomList;
+            internalListParsed = ChatroomController.RoomListParsed;
+            this.UpdateChatroomList();
         }
 
         public override void OnResume()
@@ -2338,12 +2365,18 @@ namespace AndriodApp1
         public static EventHandler<Soulseek.RoomTickerRemovedEventArgs> RoomTickerRemoved;
         public static EventHandler<string> RoomMembershipRemoved;
         public static EventHandler<string> RoomNowHasUnreadMessages;
+        public static EventHandler<string> CurrentlyJoinedRoomHasUpdated;
+        public static EventHandler<List<string>> CurrentlyJoinedRoomsCleared;
         public static EventHandler<EventArgs> JoinedRoomsHaveUpdated;
+
 
         public static bool IsInitialized;
         public static int MAX_MESSAGES_PER_ROOM = 100;
-        
-        public static List<string> JoinedRoomNames = null; //!!these are ones we are currently joined!! so autojoins after we actually join them and joined but that are not set to autojoin...
+
+        //these are the rooms that we are currnetly joined and connected to.  These clear on disconnect and get readded.  These will always be a subset of JoinedRoomNames.
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> CurrentlyJoinedRoomNames = null;
+
+        public static List<string> JoinedRoomNames = null; //these are the ones that the user joined.
         public static List<string> AutoJoinRoomNames = null; //we automatically join these at startup.  if all goes well then JoinedRoomNames should contain all of these...
 
         public static List<string> NotifyRoomNames = null; //!!these are ones we are currently joined!! so autojoins after we actually join them and joined but that are not set to autojoin...
@@ -2382,6 +2415,12 @@ namespace AndriodApp1
         public static bool SortByPopular = true;
 
         private static bool FirstConnect = true;
+
+        public static void UpdateForCurrentChanged(string roomName)
+        {
+            CurrentlyJoinedRoomHasUpdated?.Invoke(null,roomName);
+        }
+
         private static void SetConnectionLapsedMessage(bool reconnect)
         {
             if(reconnect && FirstConnect)
@@ -2390,19 +2429,21 @@ namespace AndriodApp1
                 return;
             }
 
-            if(PrevJoined==null|| PrevJoined.Count==0)
+            if(JoinedRoomNames==null|| JoinedRoomNames.Count==0)
             {
                 //nothing we need to do...
             }
             else
             {
                 SpecialMessageCode code = reconnect ? SpecialMessageCode.Reconnect : SpecialMessageCode.Disconnect;
-                foreach (string room in PrevJoined)
+                List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
+                foreach (string room in noLongerConnectedRooms) 
                 {
                     Message m = new Message(DateTime.Now, DateTime.UtcNow, code);
                     ChatroomController.AddMessage(room, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs( room, m ));
                 }
+                ChatroomController.NoLongerCurrentlyConnected(noLongerConnectedRooms);
             }
         }
 
@@ -2899,7 +2940,8 @@ namespace AndriodApp1
             SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
 
             JoinedRoomTickers = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Soulseek.RoomTicker>>();
-            JoinedRoomNames = new List<string>(); 
+            JoinedRoomNames = new List<string>();
+            CurrentlyJoinedRoomNames = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
             JoinedRoomData = new System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomData>();
 
             IsInitialized = true;
@@ -3001,6 +3043,7 @@ namespace AndriodApp1
             if (JoinedRoomNames.Contains(e))
             {
                 JoinedRoomNames.Remove(e);
+                CurrentlyJoinedRoomNames.TryRemove(e, out _);
                 JoinedRoomData.Remove(e, out _); //that way when we go to inner, we wont think we have already joined...
                 if (AutoJoinRoomNames != null && AutoJoinRoomNames.Contains(e))
                 {
@@ -3195,19 +3238,14 @@ namespace AndriodApp1
             RoomTickerListReceived?.Invoke(null, e);
         }
         public static string StartingState = null; //this is if we get killed in the inner fragment.
-        public static List<string> PrevJoined = null;
         public static void ClearAndCacheJoined()
         {
-            if(JoinedRoomNames==null || JoinedRoomNames.Count == 0)
+            if(CurrentlyJoinedRoomNames == null || CurrentlyJoinedRoomNames.Count == 0)
             {
                 return;
             }
-            PrevJoined = new List<string>();
-            foreach (string joined in JoinedRoomNames)
-            {
-                PrevJoined.Add(joined);
-            }
-            JoinedRoomNames.Clear();
+
+            CurrentlyJoinedRoomNames.Clear();
             SetConnectionLapsedMessage(false);
         }
 
@@ -3216,6 +3254,8 @@ namespace AndriodApp1
         {
             GetRoomListApi();
             ChatroomController.SetConnectionLapsedMessage(true);
+            //techncially we should only do the AutoJoinRoomNames the first time.
+            //otherwise they will be part of Joined.
             if (AutoJoinRoomNames != null && AutoJoinRoomNames.Count > 0)
             {
                 foreach (string roomName in AutoJoinRoomNames)
@@ -3223,13 +3263,17 @@ namespace AndriodApp1
                     JoinRoomApi(roomName, true, false, false, true);
                 }
             }
-            if (PrevJoined != null && PrevJoined.Count > 0) //if connect and reconnect
+
+            //if connect and reconnect, this will always need to be done..
+            if (JoinedRoomNames != null && JoinedRoomNames.Count > 0) 
             {
-                foreach (string roomName in PrevJoined)
+                foreach (string roomName in JoinedRoomNames)
                 {
-                    JoinRoomApi(roomName, true, false, false, false);
+                    if(!CurrentlyJoinedRoomNames.ContainsKey(roomName)) //just in case.
+                    {
+                        JoinRoomApi(roomName, true, false, false, false);
+                    }
                 }
-                PrevJoined.Clear();
             }
 
             //if we got killed.
@@ -3242,6 +3286,18 @@ namespace AndriodApp1
 
             AttemptedToJoinAutoJoins = true;
         }
+
+
+        /// <summary>
+        /// When we get logged out.
+        /// </summary>
+        /// <param name="prevJoinedRooms"></param>
+        public static void NoLongerCurrentlyConnected(List<string> prevJoinedRooms)
+        {
+            ChatroomController.CurrentlyJoinedRoomsCleared?.Invoke(null, prevJoinedRooms);
+        }
+
+
 
         public const string CHANNEL_ID = "Chatroom Messages ID";
         public const string CHANNEL_NAME = "Chatroom Messages";
@@ -3575,6 +3631,10 @@ namespace AndriodApp1
                         JoinedRoomNames.Add(roomName);
                         //TODO: SAVE
                     }
+                    if(!CurrentlyJoinedRoomNames.ContainsKey(roomName))
+                    {
+                        CurrentlyJoinedRoomNames.TryAdd(roomName, (byte)0x0);
+                    }
                     JoinedRoomData[roomName] = task.Result;
                     GetRoomListApi();
                     
@@ -3848,15 +3908,21 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    bool isChanged = false;
+                    bool isJoinedChanged = false;
+                    bool isCurrentChanged = false;
                     if(task is Task<Soulseek.RoomData> taskRoomData)
                     {
                         //add to joined list and save joined list...
                         if(!JoinedRoomNames.Contains(roomName))
                         {
                             JoinedRoomNames.Add(roomName);
-                            isChanged = true;
+                            isJoinedChanged = true;
                             //TODO: SAVE
+                        }
+                        if(!CurrentlyJoinedRoomNames.ContainsKey(roomName))
+                        {
+                            CurrentlyJoinedRoomNames.TryAdd(roomName, (byte)0x0);
+                            isCurrentChanged = true;
                         }
                         //we will be part of the room data!!! we also get this AFTER we get the user joined event for ourself.
                         JoinedRoomData[roomName] = taskRoomData.Result;
@@ -3870,33 +3936,52 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            //add to joined list and save joined list...
-                            if (JoinedRoomNames.Contains(roomName))
-                            {
-                                JoinedRoomNames.Remove(roomName);
-                                JoinedRoomData.Remove(roomName,out _); //that way when we go to inner, we wont think we have already joined...
-                                if(AutoJoinRoomNames!=null && AutoJoinRoomNames.Contains(roomName))
-                                {
-                                    AutoJoinRoomNames.Remove(roomName);
-                                    SaveAutoJoinRoomsToSharedPrefs();
-                                }
-                                isChanged = true;
-                                //TODO: SAVE
-                            }
+                            isJoinedChanged = RemoveRoomFromJoinedAndOthers(roomName);
                         }
                     }
                     if(refreshViewAfter)
                     {
                         ChatroomController.GetRoomListApi(false);
                     }
-                    else if(isChanged)
+                    else if(isJoinedChanged)
                     {
                         //this one will just update the existing list 
                         // marking the now joined rooms as such.
+                        MainActivity.LogDebug("FULL JOINED CHANGED");
                         ChatroomController.UpdateJoinedRooms();
+                    }
+                    else if(isCurrentChanged)
+                    {
+                        //if the user already joined but we are reconnected.
+                        ChatroomController.UpdateForCurrentChanged(roomName);
                     }
                 }
             });
+        }
+
+        public static bool RemoveRoomFromJoinedAndOthers(string roomName)
+        {
+            //add to joined list and save joined list...
+            bool isChanged = false;
+            if (JoinedRoomNames.Contains(roomName))
+            {
+                JoinedRoomNames.Remove(roomName);
+                JoinedRoomData.Remove(roomName, out _); //that way when we go to inner, we wont think we have already joined...
+                if (AutoJoinRoomNames != null && AutoJoinRoomNames.Contains(roomName))
+                {
+                    AutoJoinRoomNames.Remove(roomName);
+                    SaveAutoJoinRoomsToSharedPrefs();
+                }
+                isChanged = true;
+                //TODO: SAVE
+            }
+
+            if (CurrentlyJoinedRoomNames.ContainsKey(roomName))
+            {
+                CurrentlyJoinedRoomNames.TryRemove(roomName, out _);
+                isChanged = true;
+            }
+            return isChanged;
         }
 
 
@@ -3944,6 +4029,14 @@ namespace AndriodApp1
                     MainActivity.LogDebug("NotifyItemChanged notifyRoomStatusChanged");
                     break;
                 }
+            }
+        }
+
+        public void notifyRoomStatusesChanged(List<string> rooms)
+        {
+            foreach(string roomName in rooms)
+            {
+                notifyRoomStatusChanged(roomName);
             }
         }
 
@@ -4018,7 +4111,21 @@ namespace AndriodApp1
         private void ChatroomOverviewRecyclerAdapter_Click(object sender, EventArgs e)
         {
             setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.AdapterPosition);
-            ChatroomController.JoinRoomApi(localDataSet[position].Name, false, true, true, false);
+            string roomName = localDataSet[position].Name;
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                //allow user to leave even if offline.
+                //just remove it from list so that they do not rejoin when logging back in.
+                ChatroomController.RemoveRoomFromJoinedAndOthers(roomName);
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
+                });
+                ChatroomController.UpdateJoinedRooms();
+            }
+            else
+            {
+                ChatroomController.JoinRoomApi(roomName, false, true, true, false);
+            }
         }
 
         public ChatroomOverviewRecyclerAdapter(List<Soulseek.RoomInfo> ti)
@@ -4231,9 +4338,11 @@ namespace AndriodApp1
             viewRoomName.Text = roomInfo.Name;
             viewUsersInRoom.Text = roomInfo.UserCount.ToString();
 
+
             if(ChatroomController.UnreadRooms.ContainsKey(roomInfo.Name))
             {
                 unreadImageView.Visibility = ViewStates.Visible;
+
                 viewRoomName.SetTypeface(null, TypefaceStyle.Bold);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Bold);
                 viewRoomName.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
@@ -4249,6 +4358,19 @@ namespace AndriodApp1
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Normal);
                 viewRoomName.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
                 viewUsersInRoom.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+            }
+
+            if (ChatroomController.CurrentlyJoinedRoomNames.ContainsKey(roomInfo.Name))
+            {
+                unreadImageView.Alpha = 1.0f;
+                viewRoomName.Alpha = 1.0f;
+                viewUsersInRoom.Alpha = 1.0f;
+            }
+            else
+            {
+                unreadImageView.Alpha = 0.4f;
+                viewRoomName.Alpha = 0.4f;
+                viewUsersInRoom.Alpha = 0.4f;
             }
 
             //string msgText = m.ChatroomText;

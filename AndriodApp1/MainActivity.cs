@@ -10384,7 +10384,18 @@ namespace AndriodApp1
 
                                 if (unknownException)
                                 {
-                                    MainActivity.LogFirebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                    if(task.Exception.InnerException.StackTrace.Contains("System.Xml.Serialization.XmlSerializationWriterInterpreter"))
+                                    {
+                                        if(task.Exception.InnerException.StackTrace.Length > 1201)
+                                        {
+                                            MainActivity.LogFirebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1200).ToString());
+                                        }
+                                        MainActivity.LogFirebase("xml Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                    }
+                                    else
+                                    {
+                                        MainActivity.LogFirebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                    }
                                 }
                             }
                             else if (task.Exception != null && unknownException)
