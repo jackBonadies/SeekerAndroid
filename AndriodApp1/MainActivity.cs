@@ -154,6 +154,11 @@ namespace AndriodApp1
                 {
                     AutoAwayTimer.Stop();
                 }
+
+                //if(SeekerApplication.ShouldWeTryToConnect())
+                //{
+                //    TryToReconnect();
+                //}
             }
 
             if(SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending)
@@ -166,6 +171,46 @@ namespace AndriodApp1
                 MainActivity.LogDebug("Our current status is away, lets set it back to online!");
                 //set back to online
                 MainActivity.SetStatusApi(false);
+            }
+        }
+
+        private void TryToReconnect()
+        {
+            try
+            {
+                MainActivity.LogDebug("! TryToReconnect (on app resume) !");
+
+                if (SeekerApplication.ReconnectSteppedBackOffThreadIsRunning)
+                {
+                    //set and let it run.
+                    MainActivity.LogDebug("In progress, so .Set to let the next one run.");
+                    SeekerApplication.ReconnectAutoResetEvent.Set();
+                }
+                else
+                {
+                    System.Threading.ThreadPool.QueueUserWorkItem( (object o) => {
+
+                    Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
+#if DEBUG
+                    t.ContinueWith((Task t) => {
+
+                        if(t.IsFaulted)
+                        {
+                            MainActivity.LogDebug("TryToReconnect FAILED");
+                        }
+                        else
+                        {
+                            MainActivity.LogDebug("TryToReconnect SUCCESSFUL");
+                        }
+                    
+                    });
+#endif
+                    });
+                }
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("TryToReconnect Failed " + e.Message + e.StackTrace);
             }
         }
 
@@ -2436,7 +2481,12 @@ namespace AndriodApp1
         public static bool NetworkSuccessfullyHandedOff = false;
         private static DateTime DisconnectedTime = DateTime.MinValue;
         private static DateTime NetworkHandOffTime = DateTime.MinValue;
-        public static void ProcessEvent(NetworkInfo netInfo)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="netInfo"></param>
+        /// <returns>true if connected</returns>
+        public static bool ProcessEvent(NetworkInfo netInfo)
         {
             if (netInfo == null)
             {
@@ -2452,6 +2502,7 @@ namespace AndriodApp1
                         NetworkHandOffTime = DateTime.UtcNow;
                         NetworkSuccessfullyHandedOff = true;
                     }
+                    return true;
                 }
                 else
                 {
@@ -2459,6 +2510,7 @@ namespace AndriodApp1
                     DisconnectedTime = DateTime.UtcNow;
                 }
             }
+            return false;
         }
 
         public static bool HasHandoffOccuredRecently()
@@ -2480,7 +2532,7 @@ namespace AndriodApp1
         public override void OnReceive(Context context, Intent intent)
         {
             NetworkInfo netInfo = intent?.GetParcelableExtra("networkInfo") as NetworkInfo; //this will say Wifi Disconnected, and then Mobile Connected. so just wait for the "Connected" one.            
-            NetworkHandoffDetector.ProcessEvent(netInfo);
+            bool isConnected = NetworkHandoffDetector.ProcessEvent(netInfo);
 
             MainActivity.LogDebug("ConnectionReceiver.OnReceive");
             //these are just toasts letting us know the status of the network..
@@ -3636,7 +3688,7 @@ namespace AndriodApp1
                 }
                 else if (AUTO_CONNECT_ON && SoulSeekState.currentlyLoggedIn)
                 {
-                    Thread reconnectRetrier = new Thread(ReconnectExponentialBackOffThreadTask);
+                    Thread reconnectRetrier = new Thread(ReconnectSteppedBackOffThreadTask);
                     reconnectRetrier.Start();
                 }
             }
@@ -3704,46 +3756,82 @@ namespace AndriodApp1
             return SeekerApplication.ApplicationContext.GetString(resId);
         }
 
-
-        public static void ReconnectExponentialBackOffThreadTask()
+        public static bool ShouldWeTryToConnect()
         {
-            int MAX_TRIES = 6;
-            for (int i = 0; i < MAX_TRIES; i++)
+            if(!SoulSeekState.currentlyLoggedIn)
             {
-                if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.currentlyLoggedIn)
-                {   //^SoulSeekState.currentlyLoggedIn is if we are supposed to be logged in. so if false then we logged ourselves out on purpose so do not try to reconnect
-                    return; //our work here is done
-                }
-                if (i != MAX_TRIES - 1)
+                //we logged out on purpose
+                return false;
+            }
+
+            if (SoulSeekState.SoulseekClient == null)
+            {
+                //too early
+                return false;
+            }
+
+            if(SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) && SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                //already connected
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// This is the number of seconds after the last try.
+        /// </summary>
+        private static readonly int[] retrySeconds = new int[MAX_TRIES] { 1, 2, 4, 10, 20 };
+        private const int MAX_TRIES = 5;
+        // if the reconnect stepped backoff thread is in progress but a change ocurred that makes us
+        // want to trigger it immediately, then we can just set this event.
+        public static AutoResetEvent ReconnectAutoResetEvent = new AutoResetEvent(false);
+        public static volatile bool ReconnectSteppedBackOffThreadIsRunning = false;
+        public static void ReconnectSteppedBackOffThreadTask()
+        {
+            try
+            {
+                ReconnectSteppedBackOffThreadIsRunning = true;
+                for (int i = 0; i < MAX_TRIES; i++)
                 {
-                    System.Threading.Thread.Sleep((int)(1000 * Math.Pow((i + 1), 2)));
-                }
-                else
-                {
-                    //do 2 mins for the last try..
-                    System.Threading.Thread.Sleep(1000 * 60 * 2);
-                }
-                try
-                {
-                    //a general note for connecting:
-                    //whenever you reconnect if you want the server to tell you the status of users on your user list
-                    //you have to re-AddUser them.  This is what SoulSeekQt does (wireshark message code 5 for each user in list).
-                    //and what Nicotine does (userlist.server_login()).
-                    //and reconnecting means every single time, including toggling from wifi to data / vice versa.
-                    Task t = ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
-                    t.Wait();
-                    if (t.IsCompletedSuccessfully)
+                    if (!ShouldWeTryToConnect())
                     {
-                        MainActivity.LogDebug("RETRY " + i + "SUCCEEDED");
                         return; //our work here is done
                     }
-                }
-                catch (Exception)
-                {
 
+                    bool isDueToAutoReset = ReconnectAutoResetEvent.WaitOne(retrySeconds[i] * 1000);
+                    if(isDueToAutoReset)
+                    {
+                        MainActivity.LogDebug("is woken due to auto reset");
+                    }
+                    //System.Threading.Thread.Sleep(retrySeconds[i] * 1000); //todo AutoResetEvent or WaitOne(ms) etc.
+
+                    try
+                    {
+                        //a general note for connecting:
+                        //whenever you reconnect if you want the server to tell you the status of users on your user list
+                        //you have to re-AddUser them.  This is what SoulSeekQt does (wireshark message code 5 for each user in list).
+                        //and what Nicotine does (userlist.server_login()).
+                        //and reconnecting means every single time, including toggling from wifi to data / vice versa.
+                        Task t = ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
+                        t.Wait();
+                        if (t.IsCompletedSuccessfully)
+                        {
+                            MainActivity.LogDebug("RETRY " + i + "SUCCEEDED");
+                            return; //our work here is done
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    //if we got here we failed.. so try again shortly...
+                    MainActivity.LogDebug("RETRY " + i + "FAILED");
                 }
-                //if we got here we failed.. so try again shortly...
-                MainActivity.LogDebug("RETRY " + i + "FAILED");
+            }
+            finally
+            {
+                ReconnectSteppedBackOffThreadIsRunning = false;
             }
         }
 
