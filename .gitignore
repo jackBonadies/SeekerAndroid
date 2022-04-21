@@ -10,3 +10,9 @@ fdroid/repo/status
 fdroid/metadata/**/phoneScreenshots
 
 metascoop/metascoop
+
+# remove xarantolus stuff
+notability_*.apk
+rockit_*.apk
+io.github.xarantolus.*
+#apps.yaml # only used for git-filter-repo, to reduce noise in history
