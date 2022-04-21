@@ -1,6 +1,15 @@
 # fdroid
 This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This allows you to install and update apps very easily.
 
+### Apps
+
+<!-- This table is auto-generated. Do not edit -->
+| Icon | Name | Description | Version |
+| --- | --- | --- | --- |
+| <a href="https://github.com/xarantolus/notality"><img src="fdroid/repo/icons/io.github.xarantolus.notality.8.png" alt="Notality icon" width="36px" height="36px"></a> | [**Notality**](https://github.com/xarantolus/notality) | A very simple note taking app for Android. | 1.7.0 (8) |
+| <a href="https://github.com/xarantolus/rockit"><img src="fdroid/repo/icons/" alt="Rock It! icon" width="36px" height="36px"></a> | [**Rock It!**](https://github.com/xarantolus/rockit) | Rock It! is an app that helps you stay informed on all things space | 0.8.0 (12) |
+<!-- end apps table -->
+
 ### How to use
 1. At first, you should [install the F-Droid app](https://f-droid.org/), it's an alternative app store for Android.
 2. Now you can copy the following [link](https://raw.githubusercontent.com/xarantolus/fdroid/main/fdroid/repo?fingerprint=080898ae4309aeceb58915e43a4b7c4a3e2cda40c91738e2c02f58339ab2fbd7), then add this repository to your F-Droid client:
@@ -22,6 +31,7 @@ This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This 
 
 <!-- This table is auto-generated. Do not edit -->
 <!-- end apps table -->
+Please note that some apps published here might contain [Anti-Features](https://f-droid.org/en/docs/Anti-Features/). If you can't find an app by searching for it, you can go to settings and enable "Include anti-feature apps".
 
 ### For developers
 If you are a developer and want to publish your own apps right from GitHub Actions as an F-Droid repo, you can fork/copy this repo and see  [the documentation](setup.md) for more information on how to set it up.
