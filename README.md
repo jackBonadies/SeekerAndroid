@@ -1,6 +1,3 @@
-## note
-This repo is a clone of [xarantolus/fdroid](https://github.com/xarantolus/fdroid), filtered (via git-filter-repo's clean-ignore filter) to remove all app-specific commits
-
 # fdroid
 This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This allows you to install and update apps very easily.
 
@@ -17,7 +14,7 @@ This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This 
 2. Now you can copy the following [link](https://raw.githubusercontent.com/xarantolus/fdroid/main/fdroid/repo?fingerprint=080898ae4309aeceb58915e43a4b7c4a3e2cda40c91738e2c02f58339ab2fbd7), then add this repository to your F-Droid client:
 
     ```
-    https://raw.githubusercontent.com/xarantolus/fdroid/main/fdroid/repo?fingerprint=080898ae4309aeceb58915e43a4b7c4a3e2cda40c91738e2c02f58339ab2fbd7
+    https://raw.githubusercontent.com/efreak/seeker-fdroid/main/fdroid/repo?fingerprint=5BA6D312D0454F36CF8CBFAB06AF95D6F5A3B5FD44E9DAF1AEA096A39F3FD743
     ```
 
     Alternatively, you can also scan this QR code:
