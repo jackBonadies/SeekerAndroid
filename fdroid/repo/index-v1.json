@@ -1,11 +1,11 @@
 {
   "repo": {
-    "timestamp": 1650591901000,
+    "timestamp": 1650596682000,
     "version": 20001,
-    "name": "My First F-Droid Repo Demo",
+    "name": "Seeker Android app",
     "icon": "icon.png",
     "address": "https://raw.githubusercontent.com/efreak/seeker-fdroid/main/fdroid/repo",
-    "description": "This is a repository of apps to be used with F-Droid. Applications in this repository are either official binaries built by the original application developers, or are binaries built from source by the admin of f-droid.org using the tools on https://gitlab.com/fdroid."
+    "description": "All apps in this repo are downloaded from github releases automatically."
   },
   "requests": {
     "install": [],
@@ -24,10 +24,10 @@
       "name": "Seeker",
       "sourceCode": "https://github.com/jackBonadies/SeekerAndroid",
       "summary": "Android client for the Soulseek peer-to-peer network",
-      "added": 1650591880000,
+      "added": 1650596662000,
       "icon": "com.companyname.andriodapp1.86.png",
       "packageName": "com.companyname.andriodapp1",
-      "lastUpdated": 1650591895000,
+      "lastUpdated": 1650596677000,
       "localized": {
         "en-US": {
           "phoneScreenshots": [
@@ -46,7 +46,7 @@
   "packages": {
     "com.companyname.andriodapp1": [
       {
-        "added": 1650591895000,
+        "added": 1650596677000,
         "apkName": "seeker_v2.9.7.apk",
         "hash": "94ef59a628daca7a3aed1eaa96fe1a4107a55487d4c8c9f4fae73b9299ef9163",
         "hashType": "sha256",
@@ -106,7 +106,7 @@
         "versionName": "2.9.7"
       },
       {
-        "added": 1650591893000,
+        "added": 1650596675000,
         "apkName": "seeker_v2.9.5.apk",
         "hash": "e14e755628ce4205ce89e30fa35f424a4562bb076c40a2e632078536cf1858aa",
         "hashType": "sha256",
@@ -166,7 +166,7 @@
         "versionName": "2.9.5"
       },
       {
-        "added": 1650591891000,
+        "added": 1650596673000,
         "apkName": "seeker_v2.8.8.apk",
         "hash": "d52e49b9bad270dbd4c1034e010613f65591efd28f383354217c176b7bb34b88",
         "hashType": "sha256",
@@ -226,7 +226,7 @@
         "versionName": "2.8.8"
       },
       {
-        "added": 1650591890000,
+        "added": 1650596672000,
         "apkName": "seeker_v2.8.6.apk",
         "hash": "0d79fd7edd2348c0c1aa03e00ca67d8f3c38e4c40ef9f3a8a803bdd5a6173ab8",
         "hashType": "sha256",
@@ -282,7 +282,7 @@
         "versionName": "2.8.6"
       },
       {
-        "added": 1650591888000,
+        "added": 1650596670000,
         "apkName": "seeker_v2.8.5.apk",
         "hash": "c79bf5138d4f0b5e8874d6f350fcb59575b6d613730d32dce01c954936aff0fd",
         "hashType": "sha256",
@@ -338,7 +338,7 @@
         "versionName": "2.8.5"
       },
       {
-        "added": 1650591892000,
+        "added": 1650596674000,
         "apkName": "seeker_v2.8.apk",
         "hash": "3a07f6718187389fe1b53342fe54cf62111405262c30baa9a3c017fa8be81d5e",
         "hashType": "sha256",
@@ -394,7 +394,7 @@
         "versionName": "2.8"
       },
       {
-        "added": 1650591887000,
+        "added": 1650596669000,
         "apkName": "seeker_v2.4.2.apk",
         "hash": "2a8530f8fbf104c7be6932eb07adf4a360c02d96a156f227c44857250dfe1f6a",
         "hashType": "sha256",
@@ -450,7 +450,7 @@
         "versionName": "2.4.2"
       },
       {
-        "added": 1650591886000,
+        "added": 1650596668000,
         "apkName": "seeker_v2.3.1.apk",
         "hash": "08ce49e869f09727f5c438b77b0d23b097705e948ed6252f716006043b8dc144",
         "hashType": "sha256",
@@ -506,7 +506,7 @@
         "versionName": "2.3.1"
       },
       {
-        "added": 1650591885000,
+        "added": 1650596667000,
         "apkName": "seeker_v2.1.0.apk",
         "hash": "e48736207ce515ccd1995d6e714618577f3b3b747cd9e923a483092c0cc9e097",
         "hashType": "sha256",
@@ -562,7 +562,7 @@
         "versionName": "2.1.0"
       },
       {
-        "added": 1650591883000,
+        "added": 1650596666000,
         "apkName": "seeker_v1.98900.apk",
         "hash": "faebed6b3aa15402aafc0e08c09b5b4d05dbe336023d4ce0a8e008e378b36c4b",
         "hashType": "sha256",
@@ -618,7 +618,7 @@
         "versionName": "1.98900"
       },
       {
-        "added": 1650591880000,
+        "added": 1650596662000,
         "apkName": "seeker_1.98800.apk",
         "hash": "cde155ca7f4d7bd7ccc70838a63be18459d5b9ebb2548f5ab57055cf0ca82f6a",
         "hashType": "sha256",
@@ -674,7 +674,7 @@
         "versionName": "1.98800"
       },
       {
-        "added": 1650591881000,
+        "added": 1650596663000,
         "apkName": "seeker_v.198751.apk",
         "hash": "42a587fd9e90157eede4149d7a2f5e10075ff4d7e4dda38ea0dc1753c7487619",
         "hashType": "sha256",
@@ -730,7 +730,7 @@
         "versionName": "1.98751"
       },
       {
-        "added": 1650591882000,
+        "added": 1650596665000,
         "apkName": "seeker_v1.9875.apk",
         "hash": "8eaf231a7c094e8e61b8c6b06610a24299ba073e987df2ced12ec79d325e3c30",
         "hashType": "sha256",
