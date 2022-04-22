@@ -1,0 +1,4 @@
+Connection Fix for those on IPv6 only networks.
+A lot of bug fixes and cleanup.
+New translation link: https://crowdin.com/project/seeker
+Swipe down gesture in search dialog to get full folder.

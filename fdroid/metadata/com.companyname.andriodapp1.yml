@@ -1,9 +1,24 @@
-AuthorName: ''
+AuthorName: jackBonadies
 Categories:
-- fdroid
-CurrentVersionCode: 2147483647
-IssueTracker: ''
+    - Internet
+CurrentVersion: 2.9.7
+CurrentVersionCode: 86
+Description: |
+    Android client for the Soulseek peer-to-peer network
+
+
+    Seeker is a Soulseek client for Android written in C# (with Xamarin) supporting downloading, searching (including wishlist and filters), sharing, messages, chatrooms, port forwarding, user info, privileges, and more.
+
+    This work uses the Soulseek.NET library for communicating with Soulseek server and network peers. It also references the unofficial Soulseek Protocol Documentation implemented by the developers of the Nicotine+ client.
+
+    - The Soulseek server, which makes this app possible, relies on donations. Donate: at https://www.slsknet.org/donate.php
+    - Please help translate: https://crowdin.com/project/seeker
+    - Official release is through Google Play store: https://play.google.com/store/apps/details?id=com.companyname.andriodapp1
+
+    This app will always be completely free and open source software, no ads, no 'premium' versions or paid features, etc.
+IssueTracker: ""
+License: GPL-3.0
 Name: Seeker
-SourceCode: ''
-Summary: ''
-WebSite: ''
+SourceCode: https://github.com/jackBonadies/SeekerAndroid
+Summary: Android client for the Soulseek peer-to-peer network
+WebSite: ""

@@ -9,8 +9,7 @@ This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This 
 <!-- This table is auto-generated. Do not edit -->
 | Icon | Name | Description | Version |
 | --- | --- | --- | --- |
-| <a href="https://github.com/xarantolus/notality"><img src="fdroid/repo/icons/io.github.xarantolus.notality.8.png" alt="Notality icon" width="36px" height="36px"></a> | [**Notality**](https://github.com/xarantolus/notality) | A very simple note taking app for Android. | 1.7.0 (8) |
-| <a href="https://github.com/xarantolus/rockit"><img src="fdroid/repo/icons/" alt="Rock It! icon" width="36px" height="36px"></a> | [**Rock It!**](https://github.com/xarantolus/rockit) | Rock It! is an app that helps you stay informed on all things space | 0.8.0 (12) |
+| <a href="https://github.com/jackBonadies/SeekerAndroid"><img src="fdroid/repo/icons/com.companyname.andriodapp1.86.png" alt="Seeker icon" width="36px" height="36px"></a> | [**Seeker**](https://github.com/jackBonadies/SeekerAndroid) | Android client for the Soulseek peer-to-peer network | 2.9.7 (86) |
 <!-- end apps table -->
 
 ### How to use
