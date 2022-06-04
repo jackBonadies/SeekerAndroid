@@ -135,7 +135,7 @@
     <Compile Include="ViewUserInfoActivity.cs" />
   </ItemGroup>
   <ItemGroup>
-    <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json')" />
+    <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig">

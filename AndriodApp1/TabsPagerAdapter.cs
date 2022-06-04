@@ -6984,20 +6984,20 @@ namespace AndriodApp1
 
             if (SoulSeekState.TransferViewShowSizes)
             {
-                menu.FindItem(Resource.Id.action_show_size).SetTitle("Hide Size");
+                menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.HideSize);
             }
             else
             {
-                menu.FindItem(Resource.Id.action_show_size).SetTitle("Show Size");
+                menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.ShowSize);
             }
 
             if (SoulSeekState.TransferViewShowSpeed)
             {
-                menu.FindItem(Resource.Id.action_show_speed).SetTitle("Hide Speed");
+                menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.HideSpeed);
             }
             else
             {
-                menu.FindItem(Resource.Id.action_show_speed).SetTitle("Show Speed");
+                menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.ShowSpeed);
             }
 
             base.OnPrepareOptionsMenu(menu);
@@ -7157,7 +7157,7 @@ namespace AndriodApp1
                     //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                     TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
-                    TransfersActionMode.Title = string.Format("0 Selected");
+                    TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected),0);
                     TransfersActionMode.Invalidate();
                     return true;
             }
@@ -8473,7 +8473,7 @@ namespace AndriodApp1
             }
             else
             {
-                TransfersActionMode.Title = string.Format("{0} Selected", cnt.ToString());
+                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
                 TransfersActionMode.Invalidate();
             }
         }
@@ -8517,7 +8517,7 @@ namespace AndriodApp1
             }
             else if(BatchSelectedItems.Count != cnt) //if we have 1 less now.
             {
-                TransfersActionMode.Title = string.Format("{0} Selected", BatchSelectedItems.Count.ToString());
+                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
                 TransfersActionMode.Invalidate();
             }
         }
@@ -8654,7 +8654,7 @@ namespace AndriodApp1
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format("{0} Selected", cnt.ToString());
+                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
                         TransfersActionMode.Invalidate();
                         return true;
                     case Resource.Id.invert_selection:
@@ -8671,7 +8671,7 @@ namespace AndriodApp1
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format("{0} Selected", BatchSelectedItems.Count.ToString());
+                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
                         TransfersActionMode.Invalidate();
                         return true;
                 }
