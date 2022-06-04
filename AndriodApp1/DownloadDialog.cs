@@ -428,6 +428,30 @@ namespace AndriodApp1
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
                 return;
             }
+
+            Action<Task> actualActionToPerform = new Action<Task>((Task connectionTask) => {
+
+                if (connectionTask.IsFaulted)
+                {
+                    if (!(connectionTask.Exception.InnerException is FaultPropagationException)) //i.e. only show it once.
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                            Toast tst2 = Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                            tst2.Show();
+                        }));
+                    }
+                    throw new FaultPropagationException();
+                }
+                else
+                {
+                    //the original logic...
+                    Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname);
+                    t.ContinueWith(continueWithAction);
+                }
+
+            });
+
+
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
@@ -437,28 +461,20 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                conTask.ContinueWith(new Action<Task>((Task connectionTask) =>
-                {
-                    if (connectionTask.IsFaulted)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
-                            Toast tst2 = Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                            tst2.Show();
-                        }));
-                        return;
-                    }
-                    else
-                    {
-                        //the original logic...
-                        Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname);
-                        t.ContinueWith(continueWithAction);
-                    }
-                }));
+                SeekerApplication.OurCurrentLoginTask = conTask.ContinueWith(actualActionToPerform);
             }
             else
             {
-                Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname); //throws not logged in...
-                t.ContinueWith(continueWithAction);
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
+                {
+                    MainActivity.LogDebug("on finish log in we will do it");
+                    return;
+                }
+                else
+                {
+                    Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname);
+                    t.ContinueWith(continueWithAction);
+                }
             }
         }
 
@@ -632,7 +648,7 @@ namespace AndriodApp1
             try
             {
                 List<Task> tsks = new List<Task>();
-                foreach (int position in this.customAdapter.SelectedPositions)
+                foreach (int position in this.customAdapter.SelectedPositions) //nullref?
                 {
                     try
                     {

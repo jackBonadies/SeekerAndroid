@@ -3663,6 +3663,9 @@ namespace AndriodApp1
             MainActivity.LogDebug("Prev: " + e.PreviousState.ToString() + " Next: " + e.State.ToString());
             if (e.PreviousState.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Disconnecting))
             {
+                MainActivity.LogDebug("!! changing from connected to disconnecting");
+
+
                 if (e.Exception is KickedFromServerException)
                 {
                     MainActivity.LogDebug("Kicked Kicked Kicked");
@@ -3691,6 +3694,14 @@ namespace AndriodApp1
                     Thread reconnectRetrier = new Thread(ReconnectSteppedBackOffThreadTask);
                     reconnectRetrier.Start();
                 }
+            }
+            else if(e.PreviousState.HasFlag(SoulseekClientStates.Disconnected))
+            {
+                MainActivity.LogDebug("!! changing from disconnected to trying to connect");
+            }
+            else if(e.State.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Connected))
+            {
+                MainActivity.LogDebug("!! changing trying to connect to successfully connected");
             }
         }
 
@@ -6084,6 +6095,12 @@ namespace AndriodApp1
                 toStrip = string.Empty;
             }
 
+            // Forcing Override Case
+            // Basically there are two ways we construct the tree. One by appending each new name to the base as we go
+            // (the 'Override' Case) the other by taking current.Uri minus root.Uri to get the difference.  
+            // The latter does not work because sometimes current.Uri will be say "home:" and root will be say "primary:".
+            overrideCase = true;
+
             if (!string.IsNullOrEmpty(rootFolderDisplayName))
             {
                 presentableNameToUse = rootFolderDisplayName;
@@ -6091,6 +6108,7 @@ namespace AndriodApp1
             else
             {
                 presentableNameToUse = GetPresentableName(uri, toStrip, volName);
+                rootFolderDisplayName = presentableNameToUse;
             }
         }
 
