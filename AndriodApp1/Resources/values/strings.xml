@@ -865,6 +865,9 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
 	<string name="ClearFolder">Clear Folder</string>
 
+	<string name="HideSize">Hide Size</string>
+	<string name="HideSpeed">Hide Speed</string>
 
+	<string name="Num_Selected">{0} Selected</string>
 
 </resources>

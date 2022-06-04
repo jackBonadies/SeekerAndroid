@@ -2631,7 +2631,7 @@ namespace AndriodApp1
 
             SoulSeekState.OffsetFromUtcCached = DateTime.Now.Subtract(DateTime.UtcNow);
 
-            SoulSeekState.SystemLanguage = Resources.Configuration.Locale.Language;
+            SoulSeekState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
             SetLanguage(SoulSeekState.Language, false);
 
 
