@@ -154,7 +154,7 @@ namespace AndriodApp1
                     this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"),true);
                     return true;
                 case Resource.Id.action_delete_all_messages:
-                    if(MessageController.Messages.Count==0)
+                    if(MessageController.Messages.Count==0) //nullref
                     {
                         Toast.MakeText(this,this.GetString(Resource.String.deleted_all_no_messages),ToastLength.Long).Show();
                         return true;

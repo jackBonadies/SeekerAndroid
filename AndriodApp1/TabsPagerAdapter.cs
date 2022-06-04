@@ -1677,6 +1677,7 @@ namespace AndriodApp1
         {
             //this fixes the same bug as the MainActivity OnStart fixes.
             SearchFragment.Instance = this;
+            MainActivity.LogDebug("SearchFragmentOnStart");
             base.OnStart();
         }
         public override void OnResume()
@@ -2947,7 +2948,7 @@ namespace AndriodApp1
                 }
                 //when coming from an intent its actually (toolbar.Menu.FindItem(Resource.Id.action_search)) that is null.  so the menu is there, just no action_search menu item.
                 Android.Support.V7.Widget.Toolbar toolbar = (this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-                return toolbar.Menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable;
+                return toolbar.Menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable; //nullref
             }
             else
             {
