@@ -544,7 +544,6 @@ namespace AndriodApp1
                 login.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
                 //}
                 //if we get here then we logged in
-                //rootView.FindViewById<TextView>(Resource.Id.userNameView).Text = "Welcome, " + SoulSeekState.Username;
             }
             catch (System.Exception ex)
             {
@@ -2622,7 +2621,7 @@ namespace AndriodApp1
             UpdateDrawableState(filterText, true);
 
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? "Hide Smart Filters" : "Show Smart Filters";
+            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters): this.GetString(Resource.String.ShowSmartFilters);
             showHideSmartFilters.Click += ShowHideSmartFilters_Click;
 
             return rootView;
@@ -2632,7 +2631,7 @@ namespace AndriodApp1
         {
             SoulSeekState.ShowSmartFilters = !SoulSeekState.ShowSmartFilters;
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? "Hide Smart Filters" : "Show Smart Filters";
+            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
             if (SoulSeekState.ShowSmartFilters)
             {
                 if (SearchTabHelper.CurrentlySearching)
@@ -6246,7 +6245,7 @@ namespace AndriodApp1
                     }
                 }
 
-                filesLongStatus.Text = string.Format("{0} of {1} remaining", numRemaining, total);
+                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.X_of_Y_Remaining), numRemaining, total);
                 currentFile.Visibility = ViewStates.Visible;
                 currentFile.Text = string.Format("Current: {0}", currentFilename);
             }
@@ -6254,7 +6253,7 @@ namespace AndriodApp1
             {
                 int numSucceeded = fi.TransferItems.Count;
 
-                filesLongStatus.Text = string.Format("All {0} succeeded", numSucceeded);
+                filesLongStatus.Text = string.Format("{0} {1} {2}", SeekerApplication.GetString(Resource.String.all), numSucceeded, SeekerApplication.GetString(Resource.String.Succeeded).ToLower());
                 currentFile.Visibility = ViewStates.Gone;
             }
             else if (folderState.HasFlag(TransferStates.Errored) || folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.TimedOut))
@@ -6325,42 +6324,45 @@ namespace AndriodApp1
                 //i.e. None, can be due to uploading 0 byte files. or for transfers that never got initialized.
                 //     dont leave this as is bc it will display "3 files remaining and Current: filename..." always.
                 currentFile.Visibility = ViewStates.Gone;
-                filesLongStatus.Text = string.Format("{0} files remaining", fi.TransferItems.Count);
+                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.Num_FilesRemaining), fi.TransferItems.Count);
             }
 
         }
 
         private static void SetFilesLongStatusIfNotInProgress(TextView filesLongStatus, FolderItem fi, int numFailed, int numSucceeded, int numPaused)
         {
-            string cancelledString = fi.IsUpload() ? "aborted" : "paused";
+            string failedString = SeekerApplication.GetString(Resource.String.failed).ToLower();
+            string succeededString = SeekerApplication.GetString(Resource.String.Succeeded).ToLower();
+            string AllString = SeekerApplication.GetString(Resource.String.all);
+            string cancelledString = fi.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted).ToLower() : SeekerApplication.GetString(Resource.String.paused).ToLower();
             // 0 0 0 isnt one.
             if (numSucceeded == 0 && numFailed == 0 && numPaused != 0) //all paused
             {
-                filesLongStatus.Text = string.Format("All {0} {1}", numPaused, cancelledString);
+                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numPaused, cancelledString);
             }
             else if (numSucceeded == 0 && numFailed != 0 && numPaused == 0) //all failed
             {
-                filesLongStatus.Text = string.Format("All {0} failed", numFailed);
+                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numFailed, failedString);
             }
             else if (numSucceeded == 0 && numFailed != 0 && numPaused != 0) //all failed or paused
             {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} failed", numPaused, cancelledString, numFailed);
+                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numPaused, cancelledString, numFailed, failedString);
             }
             else if (numSucceeded != 0 && numFailed == 0 && numPaused == 0) //all succeeded
             {
-                filesLongStatus.Text = string.Format("All {0} succeeded", numSucceeded);
+                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numSucceeded, succeededString);
             }
             else if (numSucceeded != 0 && numFailed == 0 && numPaused != 0) //all succeeded or paused
             {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded", numPaused, cancelledString, numSucceeded);
+                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numPaused, cancelledString, numSucceeded, succeededString);
             }
             else if (numSucceeded != 0 && numFailed != 0 && numPaused == 0) //all succeeded or failed
             {
-                filesLongStatus.Text = string.Format("{0} failed, {1} succeeded", numFailed, numSucceeded);
+                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numFailed, failedString, numSucceeded, succeededString);
             }
             else //all
             {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} succeeded, {3} failed", numPaused, cancelledString, numSucceeded, numFailed);
+                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}, {4} {5}", numPaused, cancelledString, numSucceeded, succeededString, numFailed, failedString);
             }
         }
 
@@ -6412,7 +6414,7 @@ namespace AndriodApp1
             {
                 if (isUpload)
                 {
-                    viewStatus.Text = "Aborted";
+                    viewStatus.Text = SeekerApplication.GetString(Resource.String.Aborted);
                 }
                 else
                 {
@@ -6423,7 +6425,7 @@ namespace AndriodApp1
             {
                 if (isUpload)
                 {
-                    viewStatus.Text = "Failed - Cancelled"; //if the user on the other end cancelled / paused / removed it.
+                    viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.Cancelled));//if the user on the other end cancelled / paused / removed it.
                 }
                 else
                 {
@@ -6436,7 +6438,7 @@ namespace AndriodApp1
             }
             else if (isFolder && state.HasFlag(TransferStates.CannotConnect))
             {
-                viewStatus.Text = "Failed - Cannot Connect"; 
+                viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.CannotConnect));
                 //"cannot connect" is too long for average screen. but the root problem needs to be fixed (for folder combine two TextView into one with padding???? TODO)
             }
             else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
@@ -6540,24 +6542,24 @@ namespace AndriodApp1
             {
                 if(item.IsUpload())
                 {
-                    viewStatusAdditionalInfo.Text = "Cancelled";
+                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.Cancelled);
                 }
                 else
                 {
-                    viewStatusAdditionalInfo.Text = "Denied";
+                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.denied);
                 }
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.TimedOut))
             {
-                viewStatusAdditionalInfo.Text = "Timed Out";
+                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.TimedOut);
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
             {
-                viewStatusAdditionalInfo.Text = "User is Offline";
+                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.UserIsOffline);
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.CannotConnect))
             {
-                viewStatusAdditionalInfo.Text = "Cannot Connect";
+                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.CannotConnect);
             }
             else
             {
@@ -9235,11 +9237,11 @@ namespace AndriodApp1
                     {
                         if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 100, 0, "Resume Folder");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 100, 0, Resource.String.ResumeFolder);
                         }
                         else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, "Pause Folder");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.PauseFolder);
                         }
                     }
                 }
@@ -9249,14 +9251,14 @@ namespace AndriodApp1
                     {
                         if (tvh != null && ti != null && !(Helpers.IsUploadCompleteOrAborted(ti.State)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, "Abort Upload");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, Resource.String.AbortUpload);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && !(Helpers.IsUploadCompleteOrAborted(folderItemState)));
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, "Abort Uploads");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.AbortUploads);
                         }
                     }
                 }
@@ -9297,7 +9299,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, "Abort and Clear Upload");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.AbortandClearUpload);
                         }
                     }
                     else
@@ -9308,7 +9310,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, "Abort and Clear Uploads");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.AbortandClearUploads);
                         }
                     }
                 }
@@ -9372,13 +9374,13 @@ namespace AndriodApp1
                         if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
                         {
                             //no op
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 102, 4, "Retry Failed Files");
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 102, 4, Resource.String.RetryFailedFiles);
                         }
                     }
                 }
-                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, 5, 5, "User Options");
+                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, 5, 5, Resource.String.UserOptions);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 6, 6, Resource.String.browse_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, "Browse At Location");
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, Resource.String.browse_at_location);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 8, 8, Resource.String.search_user_files);
                 Helpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 9, 9, tvh.InnerTransferItem.GetUsername(), false);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.msg_user);
@@ -9388,10 +9390,10 @@ namespace AndriodApp1
 
                 if (isUpload)
                 {
-                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 104, 6, "Ignore (Unshare) User");
+                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 104, 6, Resource.String.IgnoreUnshareUser);
                 }
                 //finally batch selection mode
-                menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, "Batch Select");
+                menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, Resource.String.BatchSelect);
 
                 //if (!isUpload)
                 //{

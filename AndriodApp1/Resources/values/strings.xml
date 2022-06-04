@@ -835,4 +835,36 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 
 	<string name="FailedDownloadDirectoryNotSet">Failed: Download directory not properly set.</string>
 
+
+	<string name="CopyLink">Copy Link</string>
+	<string name="DownloadFile">Download File</string>
+
+	<string name="IgnoreUnshareUser">Ignore (Unshare) User</string>
+	<string name="RetryFailedFiles">Retry Failed Files</string>
+	<string name="ResumeFolder">Resume Folder</string>
+	<string name="PauseFolder">Pause Folder</string>
+	<string name="AbortUpload">Abort Upload</string>
+	<string name="AbortUploads">Abort Uploads</string>
+	<string name="AbortandClearUpload">Abort and Clear Upload</string>
+	<string name="AbortandClearUploads">Abort and Clear Uploads</string>
+	<string name="HideSmartFilters">Hide Smart Filters</string>
+
+	<string name="UserIsOffline">User is Offline</string>
+	<string name="Cancelled">Cancelled</string>
+	<string name="TimedOut">Timed Out</string>
+	<string name="CannotConnect">Cannot Connect</string>
+
+	<string name="Succeeded">Succeeded</string>
+	<string name="Aborted">Aborted</string>
+	<string name="Num_FilesRemaining">{0} files remaining</string>
+	<string name="X_of_Y_Remaining">{0} of {1} remaining</string>
+	<string name="SetLanguage">Lanugauge:</string>
+	<string name="Automatic">Automatic</string>
+
+	<string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
+	<string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+	<string name="ClearFolder">Clear Folder</string>
+
+
+
 </resources>

@@ -515,7 +515,7 @@ namespace AndriodApp1
         public void ShowSortUserListDialog()
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle("Sort Users By");
+            builder.SetTitle(this.Resources.GetString(Resource.String.SortUsersBy));
 
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.change_sort_order_dialog, this.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
 

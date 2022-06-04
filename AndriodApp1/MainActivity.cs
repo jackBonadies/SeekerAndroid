@@ -2631,7 +2631,9 @@ namespace AndriodApp1
 
             SoulSeekState.OffsetFromUtcCached = DateTime.Now.Subtract(DateTime.UtcNow);
 
- 
+            SoulSeekState.SystemLanguage = Resources.Configuration.Locale.Language;
+            SetLanguage(SoulSeekState.Language, false);
+
 
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
             //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
@@ -2702,6 +2704,73 @@ namespace AndriodApp1
             //shouldnt we also connect??? TODO TODO
 
 
+        }
+
+        public static Java.Util.Locale LocaleFromString(string localeString)
+        {
+            Java.Util.Locale locale = null;
+            if (localeString.Contains("-r"))
+            {
+                var parts = localeString.Replace("-r", "-").Split('-');
+                locale = new Java.Util.Locale(parts[0], parts[1]);
+            }
+            else
+            {
+                locale = new Java.Util.Locale(localeString);
+            }
+            return locale;
+        }
+
+        public void SetLanguage(string language, bool changed)
+        {
+            string localeString = language;
+            var res = this.Resources;
+            var config = res.Configuration;
+            var displayMetrics = res.DisplayMetrics;
+
+            var currentLocale = config.Locale;
+
+            if(LocaleToString(currentLocale) == language)
+            {
+                return;
+            }
+
+            if(language == SoulSeekState.FieldLangAuto && SoulSeekState.SystemLanguage == LocaleToString(currentLocale))
+            {
+                return;
+            }
+
+
+            Java.Util.Locale locale = language != SoulSeekState.FieldLangAuto ? LocaleFromString(localeString) : LocaleFromString(SoulSeekState.SystemLanguage);
+
+            Java.Util.Locale.Default = locale;
+            config.SetLocale(locale);
+
+            this.BaseContext.Resources.UpdateConfiguration(config, displayMetrics);
+
+            if(changed)
+            {
+                RecreateActivies();
+            }
+        }
+
+        public static string LocaleToString(Java.Util.Locale locale)
+        {
+            //"en" ""
+            //"pt" "br"
+            if(string.IsNullOrEmpty(locale.Variant))
+            {
+                return locale.Language;
+            }
+            else
+            {
+                return locale.Language + "-r" + locale.Variant.ToUpper();
+            }
+        }
+
+        public static bool AreLocalesSame(Java.Util.Locale locale1, Java.Util.Locale locale2)
+        {
+            return LocaleToString(locale1) == LocaleToString(locale2);
         }
 
         /// <summary>
@@ -4347,6 +4416,7 @@ namespace AndriodApp1
                 SoulSeekState.SaveDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(SoulSeekState.M_SaveDataDirectoryUriIsFromTree, true);
                 SoulSeekState.NumberSearchResults = sharedPreferences.GetInt(SoulSeekState.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
                 SoulSeekState.DayNightMode = sharedPreferences.GetInt(SoulSeekState.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
+                SoulSeekState.Language = sharedPreferences.GetString(SoulSeekState.M_Lanuage, SoulSeekState.FieldLangAuto);
                 SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(SoulSeekState.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
                 SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(sharedPreferences.GetInt(SoulSeekState.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple));
                 SoulSeekState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
@@ -5470,6 +5540,23 @@ namespace AndriodApp1
             SeekerApplication.Activities.Add(ourWeakRef);
             base.OnCreate(savedInstanceState);
         }
+
+        protected override void AttachBaseContext(Context @base)
+        {
+            if(SoulSeekState.Language != SoulSeekState.FieldLangAuto)
+            {
+                var config = new Android.Content.Res.Configuration();
+                config.Locale = SeekerApplication.LocaleFromString(SoulSeekState.Language);
+                var baseContext = @base.CreateConfigurationContext(config);
+                base.AttachBaseContext(baseContext);
+            }
+            else
+            {
+                base.AttachBaseContext(@base);
+            }
+
+        }
+
     }
 
 
@@ -5493,17 +5580,17 @@ namespace AndriodApp1
                 if (isFile)
                 {
                     //download file
-                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, "Download File");
+                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, Resource.String.DownloadFile);
                     //show containing folder
                 }
                 else
                 {
                     //download folder
-                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, "Download Folder");
+                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, this.GetString(Resource.String.download_folder));
                     //show folder
                 }
-                menu.Add(FromSlskLinkBrowseAtLocation, FromSlskLinkBrowseAtLocation, 2, "Browse At Location");
-                menu.Add(FromSlskLinkCopyLink, FromSlskLinkCopyLink, 3, "Copy Link");
+                menu.Add(FromSlskLinkBrowseAtLocation, FromSlskLinkBrowseAtLocation, 2, this.GetString(Resource.String.browse_at_location));
+                menu.Add(FromSlskLinkCopyLink, FromSlskLinkCopyLink, 3, Resource.String.CopyLink);
             }
             base.OnCreateContextMenu(menu, v, menuInfo);
         }
@@ -7923,7 +8010,7 @@ namespace AndriodApp1
 
 
             Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
-            myToolbar.Title = "Home";
+            myToolbar.Title = this.GetString(Resource.String.home_tab);
             myToolbar.InflateMenu(Resource.Menu.account_menu);
             SetSupportActionBar(myToolbar);
             myToolbar.InflateMenu(Resource.Menu.account_menu); //twice??
@@ -10790,7 +10877,7 @@ namespace AndriodApp1
                     bttn.Click -= BttnClick;
                     bttn.Click += BttnClick;
                     loggingInLayout.Visibility = ViewStates.Gone;
-                    welcome.Text = "Welcome, " + SoulSeekState.Username;
+                    welcome.Text = String.Format(SeekerApplication.GetString(Resource.String.welcome), SoulSeekState.Username);
                 }
                 else if (cWelcome != null)
                 {
@@ -13109,6 +13196,13 @@ namespace AndriodApp1
         public static String SaveDataDirectoryUri = null;
         public static bool SaveDataDirectoryUriIsFromTree = true;
 
+        public static string SystemLanguage;
+        public static string Language = FieldLangAuto;
+        public const string FieldLangAuto = "Auto";
+        public const string FieldLangEn = "en";
+        public const string FieldLangPtBr = "pt-rBR";
+        public const string FieldLangFr = "fr";
+
 
 
 
@@ -13420,6 +13514,7 @@ namespace AndriodApp1
         public const string M_SaveDataDirectoryUriIsFromTree = "Momento_SaveDataDirectoryUriIsFromTree";
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
+        public const string M_Lanuage = "Momento_Lanuage";
         public const string M_NightVarient = "Momento_NightModeVarient";
         public const string M_DayVarient = "Momento_DayModeVarient";
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";
