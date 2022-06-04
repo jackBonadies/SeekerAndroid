@@ -531,6 +531,14 @@ namespace AndriodApp1
             SetSpinnerPositionNightVarient(nightVarientSpinner);
             nightVarientSpinner.ItemSelected += NightVarient_ItemSelected;
 
+            Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
+            languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
+            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français" };
+            ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
+            languageSpinner.Adapter = languageSpinnerOptions;
+            SetSpinnerPositionLangauge(languageSpinner);
+            languageSpinner.ItemSelected += LanguageSpinner_ItemSelected;
+
 
 
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
@@ -746,6 +754,25 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
             UpdateLayoutParametersForScreenSize();
+        }
+
+        private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        {
+            string selection = GetLanguageStringFromPosition(e.Position);
+            if(selection == SoulSeekState.Language)
+            {
+                return;
+            }
+
+            SoulSeekState.Language = selection;
+            lock (MainActivity.SHARED_PREF_LOCK)
+            {
+                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                editor.PutString(SoulSeekState.M_Lanuage, SoulSeekState.Language);
+                editor.Commit();
+            }
+
+            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(SoulSeekState.Language, true);
         }
 
         private void UpdateLayoutParametersForScreenSize()
@@ -2358,11 +2385,11 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-            editor.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
-            bool success = editor.Commit();
-            int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(SoulSeekState.M_DayNightMode,-1);
-            MainActivity.LogDebug("was commit successful: "  + success);
-            MainActivity.LogDebug("after writing and immediately reading: " + x);
+                editor.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
+                bool success = editor.Commit();
+                int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(SoulSeekState.M_DayNightMode,-1);
+                MainActivity.LogDebug("was commit successful: "  + success);
+                MainActivity.LogDebug("after writing and immediately reading: " + x);
             }
             //auto = 0, light = 1, dark = 2.  //NO we do NOT want to do AUTO, that is follow time.  we want to do FOLLOW SYSTEM i.e. -1.
             switch (e.Position)
@@ -2446,6 +2473,47 @@ namespace AndriodApp1
         {
             s.SetSelection((int)(SoulSeekState.DayModeVarient));
         }
+
+        private void SetSpinnerPositionLangauge(Spinner s)
+        {
+            switch (SoulSeekState.Language)
+            {
+                case SoulSeekState.FieldLangAuto:
+                    s.SetSelection(0);
+                    break;
+                case SoulSeekState.FieldLangEn:
+                    s.SetSelection(1);
+                    break;
+                case SoulSeekState.FieldLangPtBr:
+                    s.SetSelection(2);
+                    break;
+                case SoulSeekState.FieldLangFr:
+                    s.SetSelection(3);
+                    break;
+                default:
+                    s.SetSelection(0);
+                    break;
+            }
+        }
+
+        private string GetLanguageStringFromPosition(int pos)
+        {
+            switch (pos)
+            {
+                case 0:
+                    return SoulSeekState.FieldLangAuto;
+                case 1:
+                    return SoulSeekState.FieldLangEn;
+                case 2:
+                    return SoulSeekState.FieldLangPtBr;
+                case 3:
+                    return SoulSeekState.FieldLangFr;
+                default:
+                    return SoulSeekState.FieldLangAuto;
+                    break;
+            }
+        }
+
         private void SetSpinnerPositionNightVarient(Spinner s)
         {
             switch (SoulSeekState.NightModeVarient)
@@ -2460,7 +2528,7 @@ namespace AndriodApp1
                     s.SetSelection((int)(SoulSeekState.NightModeVarient));
                     break;
             }
-           
+
         }
         private void CloseButton_Click(object sender, EventArgs e)
         {
