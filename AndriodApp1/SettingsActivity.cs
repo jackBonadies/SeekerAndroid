@@ -533,7 +533,7 @@ namespace AndriodApp1
 
             Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
             languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français" };
+            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к" };
             ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
             SetSpinnerPositionLangauge(languageSpinner);
@@ -2490,6 +2490,9 @@ namespace AndriodApp1
                 case SoulSeekState.FieldLangFr:
                     s.SetSelection(3);
                     break;
+                case SoulSeekState.FieldLangRu:
+                    s.SetSelection(4);
+                    break;
                 default:
                     s.SetSelection(0);
                     break;
@@ -2508,6 +2511,8 @@ namespace AndriodApp1
                     return SoulSeekState.FieldLangPtBr;
                 case 3:
                     return SoulSeekState.FieldLangFr;
+                case 4:
+                    return SoulSeekState.FieldLangRu;
                 default:
                     return SoulSeekState.FieldLangAuto;
                     break;

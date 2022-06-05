@@ -12216,7 +12216,7 @@ namespace AndriodApp1
             {
                 if (TransfersFragment.CurrentlySelectedUploadFolder == null)
                 {
-                    this.SupportActionBar.Title = SeekerApplication.GetString(Resource.String.Uploads);
+                    this.SupportActionBar.Title = this.GetString(Resource.String.Uploads);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
@@ -12231,7 +12231,7 @@ namespace AndriodApp1
             {
                 if (TransfersFragment.CurrentlySelectedDLFolder == null)
                 {
-                    this.SupportActionBar.Title = SeekerApplication.GetString(Resource.String.Downloads);
+                    this.SupportActionBar.Title = this.GetString(Resource.String.Downloads);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
@@ -13202,6 +13202,7 @@ namespace AndriodApp1
         public const string FieldLangEn = "en";
         public const string FieldLangPtBr = "pt-rBR";
         public const string FieldLangFr = "fr";
+        public const string FieldLangRu = "ru";
 
 
 
