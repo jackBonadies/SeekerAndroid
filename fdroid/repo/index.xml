@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fdroid>
-	<repo icon="icon.png" name="Seeker Android app" pubkey="30820508308202f0a003020102020900919565f395d86a6c300d06092a864886f70d01010b050030323110300e060355040b1307462d44726f6964311e301c060355040313156c6f63616c686f73742e6c6f63616c646f6d61696e301e170d3232303432323030313132395a170d3439303930373030313132395a30323110300e060355040b1307462d44726f6964311e301c060355040313156c6f63616c686f73742e6c6f63616c646f6d61696e30820222300d06092a864886f70d01010105000382020f003082020a0282020100bedf41927da4417ad7952deeea61a615f34fab00ac8ba5cfa20d8e43eab1415054cd86c62b93b849ca1d4681396909578b38df654163b9dfc303b8cb17798dc7cf4e85597cbbb13fe6d115c1dd67b8f7a5d789121a205004037a10e5fd0612514cd652281637f490390a69545668d5122d365be626fbbbbf90a1e262c3d13742c28ec84d0db66b1998ac6a8fc4aaf6e953df176d462fa01d41fef23adff650fafb9b3bffcc1e6b9adf0efacc0de5277ecf480dae29250942cb5f37ef764e5195f25b6a1a51ac97c5c0884cb8d0b82fc4c2acb8604b1c3b9f10aaf95dc8f777102dc8a38247934ecd30e9f09d29816b91ebb9042c17320fec849c2ac9a732ffc7f0663c3ec0ba285d0f16fc2c5b0f1f105d2b90edab092998778c06f0d744fd98524d58f373bada19fa0d29f46a03157628d106029e54eba0b7ca279b4362b4b9ffd63c3e682448c8b5f059410948423dc17efabba47ee98fa8f5f9923080f14cfbb43ecfc24366b91c21ac0c983686360da93006c1fa2b434709282b376354ff259e2c615376fca67e1bb4f5835b67fd245c7ab3f05a43cb778496be916f62d9ac36e82ebb48d47ee1c65b9e3cae4114265fa02bc117b8bd42a5483c5ffd3e28ff8573638fe84996ecb93026054b041e994ab25cde847fa1710620aff1a83801938fc055f091fca2f86d70e853b7bbbf8072a093a8fe79983b246502148a17050203010001a321301f301d0603551d0e041604148f3892f4a87c30cefba6d35a140bc9245476f16f300d06092a864886f70d01010b0500038202010047fd1fe923dd177cc7ae8da938539007ed0338b7a4252ab493eb9d461de3e3810d6ccd58f0609c3267d4f7be8f67a73d5aff75b528cd1996e34caf00ef2e8df4f96763059d6c330b1adabd23a8a92614dad3ea23fd726ffe511c8a2ac1344f8c474b64a38daae9aa4471eeb0fa16b318de6116bcc60641c527f97c93d3021eba6c87a258a44390688098d7c4b3055825a9edc8a38af3cefa7b0efaff0c8bfbb394b662cd272d277f149f2f2060ec7c91f4c816066ca8b909f1f0ca30956d08015134ba8f22255e6109725be069f48a67c3515e7ecc9b14402c436c9c455e3f4d79636afe27bfecf43238e4ead091816fb661475e9897e564d05432489bec768bcc25f569e1204b37c16cafcb82fbdcf978a924d53e63d6557068ce2312700a02b508a86b374dad26cbf9aaa000fe886600d97b058e6f7202b9c279368935df636feb37ca43e238ad36176b74e366edc18947b791efdb49f05191f04c0a0fe77c9824b8c96ad239e75a4858508574025ea93a93ad130fe08e0dfadb1ba58bd878fe02aa6b4db7b7c7f1348e6ffb0b3ccc0fb017dc4ec2070c23f385b2b3c53f069497a3914a4c082ae3a78e478c4c1cf1af69fc555d364337efecace4ca8d6ccb79fffcad97297399099789fa9920922ac05800049d1b475acf8825e4a5cd815197c2304d85e35f8cbf7c015d330702006e604b75f5a35530f7310c2af1edc9a1" timestamp="1650596682" url="https://raw.githubusercontent.com/efreak/seeker-fdroid/main/fdroid/repo" version="20001">
+	<repo icon="icon.png" name="Seeker Android app" pubkey="30820508308202f0a003020102020900919565f395d86a6c300d06092a864886f70d01010b050030323110300e060355040b1307462d44726f6964311e301c060355040313156c6f63616c686f73742e6c6f63616c646f6d61696e301e170d3232303432323030313132395a170d3439303930373030313132395a30323110300e060355040b1307462d44726f6964311e301c060355040313156c6f63616c686f73742e6c6f63616c646f6d61696e30820222300d06092a864886f70d01010105000382020f003082020a0282020100bedf41927da4417ad7952deeea61a615f34fab00ac8ba5cfa20d8e43eab1415054cd86c62b93b849ca1d4681396909578b38df654163b9dfc303b8cb17798dc7cf4e85597cbbb13fe6d115c1dd67b8f7a5d789121a205004037a10e5fd0612514cd652281637f490390a69545668d5122d365be626fbbbbf90a1e262c3d13742c28ec84d0db66b1998ac6a8fc4aaf6e953df176d462fa01d41fef23adff650fafb9b3bffcc1e6b9adf0efacc0de5277ecf480dae29250942cb5f37ef764e5195f25b6a1a51ac97c5c0884cb8d0b82fc4c2acb8604b1c3b9f10aaf95dc8f777102dc8a38247934ecd30e9f09d29816b91ebb9042c17320fec849c2ac9a732ffc7f0663c3ec0ba285d0f16fc2c5b0f1f105d2b90edab092998778c06f0d744fd98524d58f373bada19fa0d29f46a03157628d106029e54eba0b7ca279b4362b4b9ffd63c3e682448c8b5f059410948423dc17efabba47ee98fa8f5f9923080f14cfbb43ecfc24366b91c21ac0c983686360da93006c1fa2b434709282b376354ff259e2c615376fca67e1bb4f5835b67fd245c7ab3f05a43cb778496be916f62d9ac36e82ebb48d47ee1c65b9e3cae4114265fa02bc117b8bd42a5483c5ffd3e28ff8573638fe84996ecb93026054b041e994ab25cde847fa1710620aff1a83801938fc055f091fca2f86d70e853b7bbbf8072a093a8fe79983b246502148a17050203010001a321301f301d0603551d0e041604148f3892f4a87c30cefba6d35a140bc9245476f16f300d06092a864886f70d01010b0500038202010047fd1fe923dd177cc7ae8da938539007ed0338b7a4252ab493eb9d461de3e3810d6ccd58f0609c3267d4f7be8f67a73d5aff75b528cd1996e34caf00ef2e8df4f96763059d6c330b1adabd23a8a92614dad3ea23fd726ffe511c8a2ac1344f8c474b64a38daae9aa4471eeb0fa16b318de6116bcc60641c527f97c93d3021eba6c87a258a44390688098d7c4b3055825a9edc8a38af3cefa7b0efaff0c8bfbb394b662cd272d277f149f2f2060ec7c91f4c816066ca8b909f1f0ca30956d08015134ba8f22255e6109725be069f48a67c3515e7ecc9b14402c436c9c455e3f4d79636afe27bfecf43238e4ead091816fb661475e9897e564d05432489bec768bcc25f569e1204b37c16cafcb82fbdcf978a924d53e63d6557068ce2312700a02b508a86b374dad26cbf9aaa000fe886600d97b058e6f7202b9c279368935df636feb37ca43e238ad36176b74e366edc18947b791efdb49f05191f04c0a0fe77c9824b8c96ad239e75a4858508574025ea93a93ad130fe08e0dfadb1ba58bd878fe02aa6b4db7b7c7f1348e6ffb0b3ccc0fb017dc4ec2070c23f385b2b3c53f069497a3914a4c082ae3a78e478c4c1cf1af69fc555d364337efecace4ca8d6ccb79fffcad97297399099789fa9920922ac05800049d1b475acf8825e4a5cd815197c2304d85e35f8cbf7c015d330702006e604b75f5a35530f7310c2af1edc9a1" timestamp="1654486884" url="https://raw.githubusercontent.com/efreak/seeker-fdroid/main/fdroid/repo" version="20001">
 		<description>All apps in this repo are downloaded from github releases automatically.</description>
 	</repo>
 	<application id="com.companyname.andriodapp1">
 		<id>com.companyname.andriodapp1</id>
-		<added>2022-04-22</added>
-		<lastupdated>2022-04-22</lastupdated>
+		<added>2022-06-06</added>
+		<lastupdated>2022-06-06</lastupdated>
 		<name>Seeker</name>
 		<summary>Android client for the Soulseek peer-to-peer network</summary>
-		<icon>com.companyname.andriodapp1.86.png</icon>
+		<icon>com.companyname.andriodapp1.88.png</icon>
 		<desc>Android client for the Soulseek peer-to-peer network
 
 
@@ -30,8 +30,21 @@ This app will always be completely free and open source software, no ads, no 'pr
 		<source>https://github.com/jackBonadies/SeekerAndroid</source>
 		<tracker></tracker>
 		<author>jackBonadies</author>
-		<marketversion>2.9.7</marketversion>
-		<marketvercode>86</marketvercode>
+		<marketversion>2.9.9</marketversion>
+		<marketvercode>88</marketvercode>
+		<package>
+			<version>2.9.9</version>
+			<versioncode>88</versioncode>
+			<apkname>seeker_v2.9.9.apk</apkname>
+			<hash type="sha256">0cda7a58fdb02dd9ecc6b0d0c4c50dbd51fb9e3945ba42f839aca648566a45f5</hash>
+			<size>15252613</size>
+			<sdkver>19</sdkver>
+			<targetSdkVersion>31</targetSdkVersion>
+			<added>2022-06-06</added>
+			<sig>d22a36e154c97d17f1186735d768534b</sig>
+			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
+			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
+		</package>
 		<package>
 			<version>2.9.7</version>
 			<versioncode>86</versioncode>
@@ -40,7 +53,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>15133829</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>31</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -53,7 +66,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>15056149</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>31</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -66,7 +79,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>15014133</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>31</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -79,7 +92,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>15001845</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>31</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -92,7 +105,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>15001845</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>31</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -105,7 +118,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>14451649</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>30</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -118,7 +131,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>13794686</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>30</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -131,7 +144,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>13761918</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>29</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -144,7 +157,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>13870915</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>29</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -157,7 +170,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>13850027</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>29</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -170,7 +183,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>13845931</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>29</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -183,7 +196,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>13841751</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>29</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
@@ -196,7 +209,7 @@ This app will always be completely free and open source software, no ads, no 'pr
 			<size>21232276</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>29</targetSdkVersion>
-			<added>2022-04-22</added>
+			<added>2022-06-06</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE,com.google.android.c2dm.permission.RECEIVE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a,x86,x86_64</nativecode>
