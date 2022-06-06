@@ -1,0 +1,3 @@
+Added Russian, Portuguese (Brazilian) and partial French translations.
+Special thank you to translators Albert2022, Luiz-bro, Jonta, and BrevalF.
+Translation link: https://crowdin.com/project/seeker
