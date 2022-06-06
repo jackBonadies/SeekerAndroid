@@ -1,8 +1,8 @@
 AuthorName: jackBonadies
 Categories:
     - Internet
-CurrentVersion: 2.9.7
-CurrentVersionCode: 86
+CurrentVersion: 2.9.9
+CurrentVersionCode: 88
 Description: |
     Android client for the Soulseek peer-to-peer network
 
