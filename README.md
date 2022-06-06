@@ -6,7 +6,7 @@ This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This 
 <!-- This table is auto-generated. Do not edit -->
 | Icon | Name | Description | Version |
 | --- | --- | --- | --- |
-| <a href="https://github.com/jackBonadies/SeekerAndroid"><img src="fdroid/repo/icons/com.companyname.andriodapp1.86.png" alt="Seeker icon" width="36px" height="36px"></a> | [**Seeker**](https://github.com/jackBonadies/SeekerAndroid) | Android client for the Soulseek peer-to-peer network | 2.9.7 (86) |
+| <a href="https://github.com/jackBonadies/SeekerAndroid"><img src="fdroid/repo/icons/com.companyname.andriodapp1.88.png" alt="Seeker icon" width="36px" height="36px"></a> | [**Seeker**](https://github.com/jackBonadies/SeekerAndroid) | Android client for the Soulseek peer-to-peer network | 2.9.9 (88) |
 <!-- end apps table -->
 
 ### How to use
