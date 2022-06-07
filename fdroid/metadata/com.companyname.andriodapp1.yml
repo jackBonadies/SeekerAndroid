@@ -1,6 +1,15 @@
 AuthorName: jackBonadies
+AntiFeatures:
+  - NonFreeDep
+  - NonFreeNet
 Categories:
-    - Internet
+  - Internet
+License: GPL-3.0-only
+AuthorEmail: jbonadies6@gmail.com
+SourceCode: https://github.com/jackBonadies/SeekerAndroid
+IssueTracker: https://github.com/jackBonadies/SeekerAndroid/issues
+Changelog: https://github.com/jackBonadies/SeekerAndroid/releases
+
 CurrentVersion: 2.9.9
 CurrentVersionCode: 88
 Description: |
@@ -16,9 +25,7 @@ Description: |
     - Official release is through Google Play store: https://play.google.com/store/apps/details?id=com.companyname.andriodapp1
 
     This app will always be completely free and open source software, no ads, no 'premium' versions or paid features, etc.
-IssueTracker: ""
-License: GPL-3.0
+
 Name: Seeker
-SourceCode: https://github.com/jackBonadies/SeekerAndroid
 Summary: Android client for the Soulseek peer-to-peer network
 WebSite: ""
