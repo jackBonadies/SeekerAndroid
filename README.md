@@ -29,7 +29,7 @@ Please note that some apps published here might contain [Anti-Features](https://
 4. You can now install the app, e.g. start by searching for "Seeker" in the F-Droid client.
 
 ### For developers
-If you are a developer and want to publish your own apps right from GitHub Actions as an F-Droid repo, you can fork/copy this repo and see  [the documentation](setup.md) for more information on how to set it up.
+If you are a developer and want to publish your own apps right from GitHub Actions as an F-Droid repo, you can use the template [efreak/fdroid-action](https://github.com/efreak/fdroid-action) or fork [xarantolus/fdroid](https://github.com/xarantolus/fdroid) and see  [the documentation](setup.md) for more information on how to set it up.
 
 ### [License](LICENSE)
 The license is for the files in this repository, *except* those in the `fdroid` directory. These files *might* be licensed differently; you can use an F-Droid client to get the details for each app.
