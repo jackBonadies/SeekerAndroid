@@ -60,7 +60,7 @@ func ListAllReleases(githubClient *github.Client, appRepoAuthor, appRepoName str
 	})
 	if ierr != nil || len(rels) == 0 {
 		err = ierr
-		break
+		return
 	}
 
 	allReleases = append(allReleases, rels...)
