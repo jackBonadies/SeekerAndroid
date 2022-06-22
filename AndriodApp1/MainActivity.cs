@@ -5372,7 +5372,7 @@ namespace AndriodApp1
                 PendingIntent.GetActivity(context, 0, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true);
+            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
         }
 
 
@@ -10545,7 +10545,7 @@ namespace AndriodApp1
                                 if (task.Exception.InnerException.InnerException != null && unknownException)
                                 {
 
-                                    if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)"))
+                                    if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)") || task.Exception.InnerException.InnerException.Message.Contains("Read error: Disk full."))
                                     {
                                         action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
                                         unknownException = false;
@@ -11211,7 +11211,7 @@ namespace AndriodApp1
                 catch (Exception e)
                 {
                     LogFirebase("Legacy Filesystem Issue: " + e.Message + e.StackTrace + System.Environment.NewLine + incompleteDir.Exists() + musicDir.Exists() + fileExists);
-                    throw e;
+                    throw;
                 }
                 return fs;
             }
@@ -11391,7 +11391,7 @@ namespace AndriodApp1
                     partialLength = 0;
                     DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
-                    incompleteUri = mFile.Uri;
+                    incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
                     stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
                 }
 
@@ -14833,33 +14833,55 @@ namespace AndriodApp1
         }
 
 
-        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce = true, bool forForegroundService = false)
+        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce = true, bool forForegroundService = false, bool shutdownAction = false)
         {
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
+            
 
             //here we use the non compat notif builder as we want the special SetForegroundServiceBehavior method to prevent the new 10 second foreground notification delay.
             Notification notification = null;
             if ((int)Android.OS.Build.VERSION.SdkInt >= 31 && forForegroundService)
             {
-                notification = new Notification.Builder(context, channelID)
+                var builder = new Notification.Builder(context, channelID)
                           .SetContentTitle(titleText)
                           .SetContentText(contentText)
                           .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
                           .SetContentIntent(pendingIntent)
                           .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
                           .SetForegroundServiceBehavior((int)(Android.App.NotificationForegroundService.Immediate)) //new for api 31+
-                          .SetTicker(titleText).Build();
+                          .SetTicker(titleText);
+                if(shutdownAction)
+                {
+                    Intent intent3 = new Intent(context, typeof(CloseActivity));
+                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
+                    var pi = PendingIntent.GetActivity(context, 7618, intent3, PendingIntentFlags.Immutable);
+
+                    Notification.Action replyAction = new Notification.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
+                    builder.AddAction(replyAction);
+                }
+                notification = builder.Build();
             }
             else
             {
-                notification = new NotificationCompat.Builder(context, channelID)
+                var builder = new NotificationCompat.Builder(context, channelID)
                           .SetContentTitle(titleText)
                           .SetContentText(contentText)
                           .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
                           .SetContentIntent(pendingIntent)
                           .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                          .SetTicker(titleText).Build();
+                          .SetTicker(titleText);
+                //for < 21 it is possible (must use png icon instead of xml) but the icon does look great 
+                //  and it doesnt clear from recents..
+                if (shutdownAction && (int)Android.OS.Build.VERSION.SdkInt >= 21) 
+                {
+                    Intent intent3 = new Intent(context, typeof(CloseActivity));
+                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
+                    var pi = PendingIntent.GetActivity(context, 7618, intent3, 0);
+                    NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
+                    builder.AddAction(replyAction);
+                }
+                notification = builder.Build();
             }
             return notification;
 
