@@ -13,10 +13,10 @@ Please note that some apps published here might contain [Anti-Features](https://
 
 ### How to use
 1. At first, you should [install the F-Droid app](https://f-droid.org/), it's an alternative app store for Android.
-2. Now you can copy the following [link](https://raw.githubusercontent.com/efreak/seeker-fdroid/main/fdroid/repo?fingerprint=5BA6D312D0454F36CF8CBFAB06AF95D6F5A3B5FD44E9DAF1AEA096A39F3FD743), then add this repository to your F-Droid client:
+2. Now you can copy the following [link](https://raw.githubusercontent.com/jackbonadies/seekerandroid/fdroid/fdroid/repo?fingerprint=D9613C106A63D632F0F15597F4A91C276D3C6ED152F19518C3A5573BF8DA2375), then add this repository to your F-Droid client:
 
     ```
-    https://raw.githubusercontent.com/efreak/seeker-fdroid/main/fdroid/repo?fingerprint=5BA6D312D0454F36CF8CBFAB06AF95D6F5A3B5FD44E9DAF1AEA096A39F3FD743
+    https://raw.githubusercontent.com/jackbonadies/seekerandroid/fdroid/fdroid/repo?fingerprint=D9613C106A63D632F0F15597F4A91C276D3C6ED152F19518C3A5573BF8DA2375
     ```
 
     Alternatively, you can also scan this QR code:
