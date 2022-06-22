@@ -27,9 +27,9 @@
 # The same policy is applied to the archive repo, if there is one.
 # repo_maxage: 0
 
- repo_url: https://raw.githubusercontent.com/jackBonadies/SeekerAndroid/fdroid/fdroid/repo
- repo_name: Seeker slsk client
- repo_description: >-
+repo_url: https://raw.githubusercontent.com/jackBonadies/SeekerAndroid/fdroid/fdroid/repo
+repo_name: Seeker slsk client
+repo_description: >-
     This repository contains official releases of the Seeker soulseek client
     from https://github.com/jackBonadies/SeekerAndroid
 
