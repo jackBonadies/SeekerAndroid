@@ -1885,7 +1885,7 @@ namespace AndriodApp1
                 }
                 dataItemsForListView.Clear();
                 
-                foreach (TreeNode<Directory> d in item.Children)
+                foreach (TreeNode<Directory> d in item.Children) //nullref TODO TODO
                 {
                     dataItemsForListView.Add(new DataItem(d.Data, d));
                 }

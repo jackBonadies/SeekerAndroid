@@ -198,7 +198,7 @@ Directory Count: {5}"</string>
   <string name="success_set_pic">Successfully set picture</string>
   <string name="error_no_file_manager_image">ERROR - No file manager installed that is capable of choosing an image. Please install one.</string>
   <string name="error_no_file_manager_dir">ERROR - No file manager installed that is capable of choosing a directory. Please install one.</string>
-  <string name="error_no_file_manager_dir_manage_storage">ERROR - No file manager installed that is capable of choosing a directory. Please install one. If your device does not implement OPEN_DOCUMENT_TREE intent, please install Seeker from Fdroid which has the Manage External Storage permission.</string>
+  <string name="error_no_file_manager_dir_manage_storage">ERROR - No file manager installed that is capable of choosing a directory. Please install one. If your device does not implement OPEN_DOCUMENT_TREE intent, please install Seeker from Fdroid (IzzyOnDroid Repo) which has the Manage External Storage permission.</string>
   <string name="error_image_doesnt_exist">Image does not exist</string>
   <string name="error_image_too_large">Image is too large. Please choose a smaller image. (&lt;5MB).</string>
 
@@ -869,5 +869,9 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="HideSpeed">Hide Speed</string>
 
 	<string name="Num_Selected">{0} Selected</string>
+
+	<string name="ExportClientData">Export Client Data</string>
+	<string name="export_more_info">Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.</string>
+	<string name="successfully_exported">Successfully exported Seeker client data.</string>
 
 </resources>

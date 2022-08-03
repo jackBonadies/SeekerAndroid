@@ -1762,10 +1762,51 @@
                 android:id="@+id/importDataButton"
        />
 
+                        <LinearLayout
+                android:layout_below="@id/importDataButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop = "2dp"
+                android:layout_marginBottom = "2dp"
+                android:layout_centerHorizontal="true"
+                android:id="@+id/exportClientData"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal|fill_horizontal|center">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ExportClientData"
+                android:layout_marginStart="10dp"
+                android:foreground="@drawable/button"
+                style="@style/SeekerButtonStyle"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
+                android:id="@+id/exportDataButton"
+       />
+
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop = "2dp"
+                    android:layout_marginStart = "14dp"
+                    android:layout_marginBottom = "2dp"
+                    android:id="@+id/moreInfoExport"
+                    app:srcCompat="@drawable/help_circle_outline"
+                    android:tint="?attr/mainTextColor"
+            />
+            </LinearLayout>
+
 
 
             <Button
-                android:layout_below="@id/importDataButton"
+                android:layout_below="@id/exportClientData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/restore_default_settings"

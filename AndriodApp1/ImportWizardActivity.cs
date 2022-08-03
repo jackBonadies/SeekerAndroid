@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
+using System.Runtime.Serialization;
 
 namespace AndriodApp1
 {
@@ -49,7 +51,7 @@ namespace AndriodApp1
 
 
 
-[Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
+    [Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class ImportWizardActivity : ThemeableActivity
     {
         private const int IMPORT_FILE_SELECTED = 2000;
@@ -104,7 +106,7 @@ namespace AndriodApp1
 
         public override void OnBackPressed()
         {
-            PrevButton_Click(null,new EventArgs());
+            PrevButton_Click(null, new EventArgs());
         }
 
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
@@ -116,11 +118,12 @@ namespace AndriodApp1
 
                     StartPageFragment.Instance.PreImportLoad();
                     string realName = string.Empty;
-                    System.Threading.Tasks.Task.Run(() => {
-
-                    if (data.Data.Scheme == "content")
+                    System.Threading.Tasks.Task.Run(() =>
                     {
-                            
+
+                        if (data.Data.Scheme == "content")
+                        {
+
                             Android.Database.ICursor cursor = this.ContentResolver.Query(data.Data, new string[] { Android.Provider.MediaStore.IMediaColumns.DisplayName }, null, null, null);
                             try
                             {
@@ -138,13 +141,15 @@ namespace AndriodApp1
                             fullImportedData = ImportHelper.ImportFile(realName, stream);
                             selectedImportedData = new ImportedData();
 
-                            } }).ContinueWith(
+                        }
+                    }).ContinueWith(
                             (System.Threading.Tasks.Task t) =>
                             {
-                                this.RunOnUiThread(() => {
-                                    if(t.IsCompletedSuccessfully)
+                                this.RunOnUiThread(() =>
+                                {
+                                    if (t.IsCompletedSuccessfully)
                                     {
-                                        StartPageFragment.Instance.PostImportLoad(); 
+                                        StartPageFragment.Instance.PostImportLoad();
                                         SetButtonText(this.pager.CurrentItem);
                                         Toast.MakeText(this, Resource.String.SuccessfullyParsed, ToastLength.Long).Show();
                                     }
@@ -152,9 +157,9 @@ namespace AndriodApp1
                                     {
                                         StartPageFragment.Instance.PostImportLoad();
                                         SetButtonText(this.pager.CurrentItem);
-                                        if(t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
+                                        if (t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
                                         {
-                                            Toast.MakeText(this, String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev),npe.MessageToToast), ToastLength.Long).Show();
+                                            Toast.MakeText(this, String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev), npe.MessageToToast), ToastLength.Long).Show();
                                         }
                                         else
                                         {
@@ -162,14 +167,14 @@ namespace AndriodApp1
                                         }
                                         MainActivity.LogFirebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
                                     }
-                                    
-                                    });
+
+                                });
                             });
-                        //if(fullImportedData != null)
-                        //{
-                        //    //go to next step
-                        //    pager.SetCurrentItem(1, true);
-                        //}
+                    //if(fullImportedData != null)
+                    //{
+                    //    //go to next step
+                    //    pager.SetCurrentItem(1, true);
+                    //}
                 }
             }
             base.OnActivityResult(requestCode, resultCode, data);
@@ -252,7 +257,7 @@ namespace AndriodApp1
 
         private void ImportSelectedData(ImportedData selectedData)
         {
-            foreach(string uname in selectedData.IgnoredBanned)
+            foreach (string uname in selectedData.IgnoredBanned)
             {
                 lock (SoulSeekState.IgnoreUserList)
                 {
@@ -315,7 +320,7 @@ namespace AndriodApp1
         {
             SetButtonText(e.Position);
             strip1.setCurrentPage(e.Position);
-            if(e.Position != 0)
+            if (e.Position != 0)
             {
                 ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).SetState(this);
             }
@@ -323,7 +328,7 @@ namespace AndriodApp1
 
         private void SetButtonText(int position)
         {
-            if(fullImportedData!=null)
+            if (fullImportedData != null)
             {
                 nextButton.Enabled = true;
                 nextButton.Clickable = true;
@@ -365,7 +370,7 @@ namespace AndriodApp1
             this.importButton = this.rootView.FindViewById<Button>(Resource.Id.importData);
             importButton.Click += ImportButton_Click;
             this.loadingBar = this.rootView.FindViewById<AndroidX.Core.Widget.ContentLoadingProgressBar>(Resource.Id.contentLoadingProgressBar1);
-            if(isLoading)
+            if (isLoading)
             {
                 this.loadingBar.Show();
             }
@@ -440,7 +445,7 @@ namespace AndriodApp1
         public void ToggleAll()
         {
             bool allChecked = localDataSet.TrueForAll((item) => item.isChecked);
-            for(int i=0; i<localDataSet.Count; i++)
+            for (int i = 0; i < localDataSet.Count; i++)
             {
                 //if they are all checked, then uncheck them all.  else check them all.
                 localDataSet[i].isChecked = !allChecked;
@@ -553,7 +558,7 @@ namespace AndriodApp1
         public void setItem(ImportItem item)
         {
             InnerImportItem = item;
-            if(item.showAsterisk)
+            if (item.showAsterisk)
             {
                 ImportItemCheckbox.Text = item.item + "*";
             }
@@ -580,7 +585,7 @@ namespace AndriodApp1
 
         public List<string> GetSelectedItems()
         {
-            return this.importListAdapter.localDataSet.Where((item)=>item.isChecked).Select(item=>item.item).ToList();
+            return this.importListAdapter.localDataSet.Where((item) => item.isChecked).Select(item => item.item).ToList();
         }
 
         //private Recyc alreadyAdded;
@@ -605,7 +610,7 @@ namespace AndriodApp1
         }
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            if(savedInstanceState != null)
+            if (savedInstanceState != null)
             {
                 importListType = (ImportListType)(savedInstanceState.GetInt("IMPORT_LIST_TYPE", (int)-1));
             }
@@ -671,11 +676,11 @@ namespace AndriodApp1
         {
             string userString = "users";
             string userListString = "User List";
-            if(listType == ImportListType.Ignore)
+            if (listType == ImportListType.Ignore)
             {
                 userListString = "Ignore List";
             }
-            else if(listType == ImportListType.Wishlist)
+            else if (listType == ImportListType.Wishlist)
             {
                 userString = "searches";
                 userListString = "Wishlist";
@@ -683,7 +688,7 @@ namespace AndriodApp1
             StringBuilder alreadyAddedNote = new StringBuilder(string.Format("Note: The following {0} are already present in {1} - ", userString, userListString));
             if (usernames.Count() > 10)
             {
-                foreach(string name in usernames.Take(10))
+                foreach (string name in usernames.Take(10))
                 {
                     alreadyAddedNote.Append(name);
                     alreadyAddedNote.Append(", ");
@@ -708,7 +713,7 @@ namespace AndriodApp1
         {
             string title = "Select the following {0} to add to {1}";
             string none = "No {0} found to import";
-            if(selectTheFollowing==null)
+            if (selectTheFollowing == null)
             {
                 return;//too early.
             }
@@ -716,7 +721,7 @@ namespace AndriodApp1
             {
                 case ImportListType.UserList:
                     selectTheFollowing.Text = string.Format(title, "friends", "User List");
-                    if(data.UserList == null || data.UserList.Count == 0)
+                    if (data.UserList == null || data.UserList.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;
                         noneFound.Text = string.Format(none, "friends");
@@ -729,7 +734,7 @@ namespace AndriodApp1
                     var currentlyHave = SoulSeekState.UserList.Select(item => item.Username).ToList();
                     var notYetAdded = data.UserList.Except(currentlyHave).ToList();
                     var alreadyAddedList = data.UserList.Except(notYetAdded).ToList();
-                    if(alreadyAddedList.Count==0)
+                    if (alreadyAddedList.Count == 0)
                     {
                         alreadyAdded.Visibility = ViewStates.Gone;
                     }
@@ -739,7 +744,7 @@ namespace AndriodApp1
                         alreadyAdded.Text = CreateAlreadyAddedString(alreadyAddedList, listType);
                     }
 
-                    if(ImportWizardActivity.selectedImportedData.Value.UserList != null)
+                    if (ImportWizardActivity.selectedImportedData.Value.UserList != null)
                     {
                         var selectedItemsDict = ImportWizardActivity.selectedImportedData.Value.UserList.ToDictionary(x => x, x => 0);
                         importListAdapter = new ImportListAdapter(notYetAdded.Select(item => new ImportItem(item, selectedItemsDict.ContainsKey(item) ? true : false, false)).ToList());
@@ -748,10 +753,10 @@ namespace AndriodApp1
                     {
                         importListAdapter = new ImportListAdapter(notYetAdded.Select(item => new ImportItem(item, true, false)).ToList());
                     }
-                    
+
                     this.recyclerView.SetAdapter(importListAdapter);
 
-                    if(notYetAdded == null || notYetAdded.Count == 0)
+                    if (notYetAdded == null || notYetAdded.Count == 0)
                     {
                         this.recyclerView.Visibility = ViewStates.Gone;
                         this.toggleAll.Visibility = ViewStates.Gone;
@@ -797,7 +802,7 @@ namespace AndriodApp1
                     {
                         importListAdapter = new ImportListAdapter(notYetIgnored.Select(item => new ImportItem(item, true, false)).ToList());
                     }
-                        this.recyclerView.SetAdapter(importListAdapter);
+                    this.recyclerView.SetAdapter(importListAdapter);
                     //}
                     if (notYetIgnored == null || notYetIgnored.Count == 0)
                     {
@@ -824,7 +829,7 @@ namespace AndriodApp1
                     //todo already present
                     //maybe do asterick
                     var currentlyHaveNoted = SoulSeekState.UserNotes.Select(item => item.Key).ToList();
-                    var notYetNoted = data.UserNotes.Select(item=>item.Item1).Except(currentlyHaveNoted).ToList();
+                    var notYetNoted = data.UserNotes.Select(item => item.Item1).Except(currentlyHaveNoted).ToList();
                     var alreadyNotedList = data.UserNotes.Select(item => item.Item1).Except(notYetNoted).ToList();
                     if (alreadyNotedList.Count == 0)
                     {
@@ -837,21 +842,21 @@ namespace AndriodApp1
                     }
                     //if (importListAdapter == null)
                     //{
-                        var notYetNotedItems = notYetNoted.Select(item => new ImportItem(item, true, false)).ToList();
-                        notYetNotedItems.AddRange(alreadyNotedList.Select(item => new ImportItem(item, true, true)));
-                    if(ImportWizardActivity.selectedImportedData.Value.UserNotes != null)
+                    var notYetNotedItems = notYetNoted.Select(item => new ImportItem(item, true, false)).ToList();
+                    notYetNotedItems.AddRange(alreadyNotedList.Select(item => new ImportItem(item, true, true)));
+                    if (ImportWizardActivity.selectedImportedData.Value.UserNotes != null)
                     {
                         var selectedItemsNotesDict = ImportWizardActivity.selectedImportedData.Value.UserNotes.ToDictionary(x => x.Item1, x => 0);
-                        foreach(var item in notYetNotedItems)
+                        foreach (var item in notYetNotedItems)
                         {
-                            if(!selectedItemsNotesDict.ContainsKey(item.item))
+                            if (!selectedItemsNotesDict.ContainsKey(item.item))
                             {
                                 item.isChecked = false;
                             }
                         }
                     }
-                        importListAdapter = new ImportListAdapter(notYetNotedItems.ToList());
-                        this.recyclerView.SetAdapter(importListAdapter);
+                    importListAdapter = new ImportListAdapter(notYetNotedItems.ToList());
+                    this.recyclerView.SetAdapter(importListAdapter);
                     if (notYetNotedItems == null || notYetNotedItems.Count == 0)
                     {
                         this.recyclerView.Visibility = ViewStates.Gone;
@@ -875,7 +880,7 @@ namespace AndriodApp1
                     {
                         noneFound.Visibility = ViewStates.Gone;
                     }
-                    var currentlyHaveWishes = SearchTabHelper.SearchTabCollection.Where(item=>item.Key<0).Select(item=>item.Value.LastSearchTerm).ToList();
+                    var currentlyHaveWishes = SearchTabHelper.SearchTabCollection.Where(item => item.Key < 0).Select(item => item.Value.LastSearchTerm).ToList();
                     var notYetWished = data.Wishlist.Except(currentlyHaveWishes).ToList();
                     var alreadyWishedList = data.Wishlist.Except(notYetWished).ToList();
                     if (alreadyWishedList.Count == 0)
@@ -896,7 +901,7 @@ namespace AndriodApp1
                     {
                         importListAdapter = new ImportListAdapter(notYetWished.Select(item => new ImportItem(item, true, false)).ToList());
                     }
-                        this.recyclerView.SetAdapter(importListAdapter);
+                    this.recyclerView.SetAdapter(importListAdapter);
                     //}
 
                     if (notYetWished == null || notYetWished.Count == 0)
@@ -940,7 +945,7 @@ namespace AndriodApp1
 
         public void UpdatePagerReference(Android.Support.V4.App.Fragment frag, ImportListType importListType)
         {
-            switch(importListType)
+            switch (importListType)
             {
                 case ImportListType.UserList:
                     userListPage1 = frag;
@@ -1296,7 +1301,9 @@ namespace AndriodApp1
         Unknown = -1,
         SoulseekQT = 0,
         NicotineTarBz2 = 1,
-        Nicotine = 2
+        Nicotine = 2,
+        Seeker = 3
+          
     }
 
     public static class ImportHelper
@@ -1440,7 +1447,7 @@ namespace AndriodApp1
             bool doubleQuotesUsedInsteadOfSingle = false;
             if (!currentLine.StartsWith('\''))
             {
-                if(!currentLine.StartsWith('"'))
+                if (!currentLine.StartsWith('"'))
                 {
                     throw new Exception("doesnt start with \" or '");
                 }
@@ -1612,6 +1619,18 @@ namespace AndriodApp1
             }
         }
 
+        public static ImportedData ParseSeeker(System.IO.Stream stream)
+        {
+            var data = new XmlSerializer(typeof(SeekerImportExportData)).Deserialize(stream) as SeekerImportExportData;
+            List<Tuple<string,string>> userNotes = new List<Tuple<string, string>>();
+            foreach(KeyValueEl keyValueEl in data.UserNotes)
+            {
+                userNotes.Add(new Tuple<string,string>(keyValueEl.Key, keyValueEl.Value));
+            }
+            var importData = new ImportedData(data.Userlist, data.BanIgnoreList, data.Wishlist, userNotes);
+            return importData;
+        }
+
         /// <summary>
         /// Note: there is an older config file version that has userlist in a section 
         /// called columns that can mess things up if we dont consider the section...
@@ -1648,7 +1667,7 @@ namespace AndriodApp1
                                 {
                                     userList = ParseUserList(line, out notes);
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     throw new NicotineParsingException(ex, "Error reading UserList");
                                 }
@@ -1658,7 +1677,7 @@ namespace AndriodApp1
                                 {
                                     bannedIgnoredList.AddRange(GetListOfString(line));
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     throw new NicotineParsingException(ex, "Error reading BanList");
                                 }
@@ -1668,7 +1687,7 @@ namespace AndriodApp1
                                 {
                                     bannedIgnoredList.AddRange(GetListOfString(line));
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     throw new NicotineParsingException(ex, "Error reading IgnoreList");
                                 }
@@ -1678,7 +1697,7 @@ namespace AndriodApp1
                                 {
                                     bannedIgnoredList.AddRange(GetListOfStringFromDictValues(line));
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     throw new NicotineParsingException(ex, "Error reading IpIgnoreList");
                                 }
@@ -1698,7 +1717,7 @@ namespace AndriodApp1
                                 {
                                     wishlists = GetListOfString(line);
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     throw new NicotineParsingException(ex, "Error reading Wishlist");
                                 }
@@ -1721,7 +1740,25 @@ namespace AndriodApp1
             return new ImportedData(userList, bannedIgnoredList.Distinct().ToList(), wishlists, notes);
         }
 
-
+        private static ImportType DetermineImportTypeByFirstLine(Stream stream)
+        {
+            System.IO.StreamReader fStream = new System.IO.StreamReader(stream);
+            string firstLine = fStream.ReadLine();
+            stream.Seek(0, SeekOrigin.Begin);
+            if (firstLine.StartsWith("<?xml"))
+            {
+                return ImportType.Seeker;
+            }
+            else if (firstLine.StartsWith("["))
+            {
+                return ImportType.Nicotine;
+            }
+            else
+            {
+                MainActivity.LogDebug("Unsure of filetype.  Firstline = " + firstLine);
+                return ImportType.Nicotine;
+            }
+        }
 
         /// <summary>
         /// Entry point
@@ -1730,253 +1767,257 @@ namespace AndriodApp1
         /// <param name="stream"></param>
         /// <returns></returns>
         public static ImportedData ImportFile(string fileName, System.IO.Stream stream)
-    {
-        ImportType importType = ImportType.Unknown;
-        if (System.IO.Path.GetExtension(fileName) == ".scd1" || System.IO.Path.GetExtension(fileName) == ".dat")
         {
-            importType = ImportType.SoulseekQT;
-        }
-        else if (System.IO.Path.GetExtension(fileName) == ".bz2")
-        {
-            importType = ImportType.NicotineTarBz2;
-        }
-        else if (string.IsNullOrEmpty(System.IO.Path.GetExtension(fileName)) || System.IO.Path.GetExtension(fileName) == ".txt")
-        {
-            importType = ImportType.Nicotine;
-        }
 
-        //if import type still unknown then assume QT
-        ImportedData? data = null;
-        switch (importType)
-        {
-            case ImportType.SoulseekQT:
-            case ImportType.Unknown:
-                data = ParseSoulseekQTData(stream);
-                break;
-            case ImportType.NicotineTarBz2:
-                //unzip
-                Bzip2.BZip2InputStream zippedStream = new Bzip2.BZip2InputStream(stream, false);
-                MemoryStream memStream = new MemoryStream();
-                zippedStream.CopyTo(memStream);
-                memStream.Seek(0, SeekOrigin.Begin);
-                //seek past tar header
-                SkipTar(memStream);
-                //parse actual config file
-                data = ParseNicotine(memStream);
-                break;
-            case ImportType.Nicotine:
-                data = ParseNicotine(stream);
-                break;
-        }
-        return data.Value;
-    }
-
-
-
-
-    public static ImportedData ParseSoulseekQTData(System.IO.Stream stream)
-    {
-        byte[] fourBytes = new byte[4];
-        stream.Read(fourBytes, 0, 4);
-        int numberOfTables = BitConverter.ToInt32(fourBytes);
-
-        //here is our file check. basically, we cant just "try our best" since that will likely lead to memory allocations of GB causing crashes
-        //(for example string length, for an invalid file, will just be any value from 0 to 4GB, leading to Java out of memory and process termination,
-        //rather than a simple exception or even just an activity crash).
-        //the simple check is, if the number of tables is 0 or greater than 10k throw.  
-        //its very very very lenient since I think this number will in reality be very close to 47 +- 5 say.
-        if(numberOfTables > 10000 || numberOfTables <= 0)
-        {
-            throw new Exception("The QT File does not seem to be valid.  Number of tables is: " + numberOfTables);
-        }
-
-        if (!BitConverter.IsLittleEndian)
-        {
-            throw new Exception("Big Endian");
-        }
-        List<string> tablesOfInterest = new List<string>();
-        //definitely: in_user_list, user (parsing helper - has the (key, len, username) tuples for every single user), user_note, is_ignored + unshared (both are combined in seeker)
-        //potentially: user_online_alert, wish_list_item
-        tablesOfInterest.Add("in_user_list");
-        tablesOfInterest.Add("user_note");
-        tablesOfInterest.Add("user");
-        tablesOfInterest.Add("is_ignored");
-        tablesOfInterest.Add("unshared");
-
-        tablesOfInterest.Add("user_online_alert");
-        tablesOfInterest.Add("wish_list_item");
-
-
-        List<Tuple<int, byte[]>> user_list_table = null;
-        List<Tuple<int, string>> user_note_table = null;
-        Dictionary<int, string> user_table = null;
-        List<Tuple<int, byte[]>> is_ignored_table = null;
-        List<Tuple<int, byte[]>> unshared_table = null;
-        List<Tuple<int, byte[]>> user_online_alert_table = null;
-        List<Tuple<int, string>> wish_list_item_table = null;
-
-
-        while (numberOfTables > 0)
-        {
-            stream.Read(fourBytes, 0, 4);
-
-            int tableNameLength = BitConverter.ToInt32(fourBytes);
-            byte[] tableNameBytes = new byte[tableNameLength];
-            stream.Read(tableNameBytes, 0, tableNameBytes.Length);
-
-
-            string tableName = System.Text.Encoding.UTF8.GetString(tableNameBytes); //ascii works fine, but just in case.
-
-            System.Console.WriteLine(tableName);
-
-            stream.Read(fourBytes, 0, 4);
-            int itemsInTable = BitConverter.ToInt32(fourBytes);
-            //if not a table of interest, read through it
-            if (tablesOfInterest.Contains(tableName))
+            ImportType importType = ImportType.Unknown;
+            if (System.IO.Path.GetExtension(fileName) == ".scd1" || System.IO.Path.GetExtension(fileName) == ".dat")
             {
-                switch (tableName)
-                {
-                    case "in_user_list":
-                        user_list_table = GetTableAsBytes(stream, itemsInTable);
-                        //my linux box got results 1 byte 49, 50, 51
-                        //also some of these are not users they are user_groups, but we can just skip those..
-                        break;
-                    case "user_note":
-                        user_note_table = GetTableAsString(stream, itemsInTable);
-                        break;
-                    case "user":
-                        user_table = GetTableAsDictString(stream, itemsInTable);
-                        break;
-                    case "is_ignored":
-                        is_ignored_table = GetTableAsBytes(stream, itemsInTable);
-                        break;
-                    case "unshared":
-                        unshared_table = GetTableAsBytes(stream, itemsInTable);
-                        break;
-                    case "user_online_alert":
-                        user_online_alert_table = GetTableAsBytes(stream, itemsInTable);
-                        break;
-                    case "wish_list_item":
-                        wish_list_item_table = GetTableAsString(stream, itemsInTable);
-                        break;
-                }
+                importType = ImportType.SoulseekQT;
             }
-            else
+            else if (System.IO.Path.GetExtension(fileName) == ".bz2")
             {
-                //lets just speed through here to get to the tables we care about...
-                SkipTable(stream, itemsInTable);
+                importType = ImportType.NicotineTarBz2;
             }
-            numberOfTables--;
-        }
+            else// if (string.IsNullOrEmpty(System.IO.Path.GetExtension(fileName)) || System.IO.Path.GetExtension(fileName) == ".txt" || System.IO.Path.GetExtension(fileName) == ".xml")
+            {
+                importType = DetermineImportTypeByFirstLine(stream);
+            }
 
-        //now read the final table
-        stream.Read(fourBytes, 0, 4);
-        int numOfMappings = BitConverter.ToInt32(fourBytes);
 
-        if (numOfMappings * 8 != stream.Length - stream.Position) //these 2*4 byte entries take us to the very end of the stream.
-        {
-            throw new Exception("Unexpected size");
-        }
-        Dictionary<int, List<int>> mappingTable = new Dictionary<int, List<int>>();
-        Dictionary<int, List<int>> reverseMappingTable = new Dictionary<int, List<int>>();
-        while (numOfMappings > 0)
-        {
-            stream.Read(fourBytes, 0, 4);
-            int keyA = BitConverter.ToInt32(fourBytes);
-            stream.Read(fourBytes, 0, 4);
-            int keyB = BitConverter.ToInt32(fourBytes);
-
-            if (mappingTable.ContainsKey(keyA))
+            //if import type still unknown then assume QT
+            ImportedData? data = null;
+            switch (importType)
             {
-                mappingTable[keyA].Add(keyB);
-            }
-            else
-            {
-                mappingTable[keyA] = new List<int> { keyB };
-            }
-            if (reverseMappingTable.ContainsKey(keyB))
-            {
-                reverseMappingTable[keyB].Add(keyA);
-            }
-            else
-            {
-                reverseMappingTable[keyB] = new List<int> { keyA };
-            }
-            numOfMappings--;
-
-        }
-
-        //now time to resolve our IDs
-        List<string> user_list = new List<string>();
-        foreach (var user in user_list_table) //fix this, we dont care about byte[] in this case..
-        {
-            if(mappingTable.ContainsKey(user.Item1))
-            {
-                foreach (int key in mappingTable[user.Item1])
-                {
-                    if (user_table.ContainsKey(key))
-                    {
-                        user_list.Add(user_table[key]);
-                        break;
-                    }
-                }
-            }
-        }
-
-        List<string> ignored_unshared_list = new List<string>();
-        //the ignored key is an index into the mapping table for the user keys
-        if (is_ignored_table.Count > 0) //if not ignoring anyone this will be empty...
-        {
-                if(mappingTable.ContainsKey(is_ignored_table[0].Item1))
-                {
-            foreach (int key in mappingTable[is_ignored_table[0].Item1])
-            {
-                if (user_table.ContainsKey(key))
-                {
-                    ignored_unshared_list.Add(user_table[key]);
-                }
-            }
-                }
-        }
-        //for unshared you need to do a reverse lookup..... 
-        //if you are unsharing from 3 people then it will be a resulting value for three people.
-        if (unshared_table.Count > 0)
-        {
-                if(reverseMappingTable.ContainsKey(unshared_table[0].Item1))
-                {
-            foreach (int key in reverseMappingTable[unshared_table[0].Item1])
-            {
-                if (user_table.ContainsKey(key))
-                {
-                    string user = user_table[key];
-                    //a lot of these are probably duplicate with ignored.
-                    if (!ignored_unshared_list.Contains(user))
-                    {
-                        ignored_unshared_list.Add(user_table[key]);
-                    }
-                }
-            }
-                }
-        }
-
-        //now time to resolve our IDs
-        List<Tuple<string, string>> user_notes = new List<Tuple<string, string>>();
-        foreach (var user in user_note_table) //fix this, we dont care about byte[] in this case..
-        {
-                if(mappingTable.ContainsKey(user.Item1))
-                {
-            foreach (int key in mappingTable[user.Item1])
-            {
-                if (user_table.ContainsKey(key))
-                {
-                    user_notes.Add(new Tuple<string, string>(user_table[key], user.Item2));
+                case ImportType.SoulseekQT:
+                case ImportType.Unknown:
+                    data = ParseSoulseekQTData(stream);
                     break;
+                case ImportType.NicotineTarBz2:
+                    //unzip
+                    Bzip2.BZip2InputStream zippedStream = new Bzip2.BZip2InputStream(stream, false);
+                    MemoryStream memStream = new MemoryStream();
+                    zippedStream.CopyTo(memStream);
+                    memStream.Seek(0, SeekOrigin.Begin);
+                    //seek past tar header
+                    SkipTar(memStream);
+                    //parse actual config file
+                    data = ParseNicotine(memStream);
+                    break;
+                case ImportType.Nicotine:
+                    data = ParseNicotine(stream);
+                    break;
+                case ImportType.Seeker:
+                    data = ParseSeeker(stream);
+                    break;
+            }
+            return data.Value;
+        }
+
+
+
+        public static ImportedData ParseSoulseekQTData(System.IO.Stream stream)
+        {
+            byte[] fourBytes = new byte[4];
+            stream.Read(fourBytes, 0, 4);
+            int numberOfTables = BitConverter.ToInt32(fourBytes);
+
+            //here is our file check. basically, we cant just "try our best" since that will likely lead to memory allocations of GB causing crashes
+            //(for example string length, for an invalid file, will just be any value from 0 to 4GB, leading to Java out of memory and process termination,
+            //rather than a simple exception or even just an activity crash).
+            //the simple check is, if the number of tables is 0 or greater than 10k throw.  
+            //its very very very lenient since I think this number will in reality be very close to 47 +- 5 say.
+            if (numberOfTables > 10000 || numberOfTables <= 0)
+            {
+                throw new Exception("The QT File does not seem to be valid.  Number of tables is: " + numberOfTables);
+            }
+
+            if (!BitConverter.IsLittleEndian)
+            {
+                throw new Exception("Big Endian");
+            }
+            List<string> tablesOfInterest = new List<string>();
+            //definitely: in_user_list, user (parsing helper - has the (key, len, username) tuples for every single user), user_note, is_ignored + unshared (both are combined in seeker)
+            //potentially: user_online_alert, wish_list_item
+            tablesOfInterest.Add("in_user_list");
+            tablesOfInterest.Add("user_note");
+            tablesOfInterest.Add("user");
+            tablesOfInterest.Add("is_ignored");
+            tablesOfInterest.Add("unshared");
+
+            tablesOfInterest.Add("user_online_alert");
+            tablesOfInterest.Add("wish_list_item");
+
+
+            List<Tuple<int, byte[]>> user_list_table = null;
+            List<Tuple<int, string>> user_note_table = null;
+            Dictionary<int, string> user_table = null;
+            List<Tuple<int, byte[]>> is_ignored_table = null;
+            List<Tuple<int, byte[]>> unshared_table = null;
+            List<Tuple<int, byte[]>> user_online_alert_table = null;
+            List<Tuple<int, string>> wish_list_item_table = null;
+
+
+            while (numberOfTables > 0)
+            {
+                stream.Read(fourBytes, 0, 4);
+
+                int tableNameLength = BitConverter.ToInt32(fourBytes);
+                byte[] tableNameBytes = new byte[tableNameLength];
+                stream.Read(tableNameBytes, 0, tableNameBytes.Length);
+
+
+                string tableName = System.Text.Encoding.UTF8.GetString(tableNameBytes); //ascii works fine, but just in case.
+
+                System.Console.WriteLine(tableName);
+
+                stream.Read(fourBytes, 0, 4);
+                int itemsInTable = BitConverter.ToInt32(fourBytes);
+                //if not a table of interest, read through it
+                if (tablesOfInterest.Contains(tableName))
+                {
+                    switch (tableName)
+                    {
+                        case "in_user_list":
+                            user_list_table = GetTableAsBytes(stream, itemsInTable);
+                            //my linux box got results 1 byte 49, 50, 51
+                            //also some of these are not users they are user_groups, but we can just skip those..
+                            break;
+                        case "user_note":
+                            user_note_table = GetTableAsString(stream, itemsInTable);
+                            break;
+                        case "user":
+                            user_table = GetTableAsDictString(stream, itemsInTable);
+                            break;
+                        case "is_ignored":
+                            is_ignored_table = GetTableAsBytes(stream, itemsInTable);
+                            break;
+                        case "unshared":
+                            unshared_table = GetTableAsBytes(stream, itemsInTable);
+                            break;
+                        case "user_online_alert":
+                            user_online_alert_table = GetTableAsBytes(stream, itemsInTable);
+                            break;
+                        case "wish_list_item":
+                            wish_list_item_table = GetTableAsString(stream, itemsInTable);
+                            break;
+                    }
+                }
+                else
+                {
+                    //lets just speed through here to get to the tables we care about...
+                    SkipTable(stream, itemsInTable);
+                }
+                numberOfTables--;
+            }
+
+            //now read the final table
+            stream.Read(fourBytes, 0, 4);
+            int numOfMappings = BitConverter.ToInt32(fourBytes);
+
+            if (numOfMappings * 8 != stream.Length - stream.Position) //these 2*4 byte entries take us to the very end of the stream.
+            {
+                throw new Exception("Unexpected size");
+            }
+            Dictionary<int, List<int>> mappingTable = new Dictionary<int, List<int>>();
+            Dictionary<int, List<int>> reverseMappingTable = new Dictionary<int, List<int>>();
+            while (numOfMappings > 0)
+            {
+                stream.Read(fourBytes, 0, 4);
+                int keyA = BitConverter.ToInt32(fourBytes);
+                stream.Read(fourBytes, 0, 4);
+                int keyB = BitConverter.ToInt32(fourBytes);
+
+                if (mappingTable.ContainsKey(keyA))
+                {
+                    mappingTable[keyA].Add(keyB);
+                }
+                else
+                {
+                    mappingTable[keyA] = new List<int> { keyB };
+                }
+                if (reverseMappingTable.ContainsKey(keyB))
+                {
+                    reverseMappingTable[keyB].Add(keyA);
+                }
+                else
+                {
+                    reverseMappingTable[keyB] = new List<int> { keyA };
+                }
+                numOfMappings--;
+
+            }
+
+            //now time to resolve our IDs
+            List<string> user_list = new List<string>();
+            foreach (var user in user_list_table) //fix this, we dont care about byte[] in this case..
+            {
+                if (mappingTable.ContainsKey(user.Item1))
+                {
+                    foreach (int key in mappingTable[user.Item1])
+                    {
+                        if (user_table.ContainsKey(key))
+                        {
+                            user_list.Add(user_table[key]);
+                            break;
+                        }
+                    }
                 }
             }
+
+            List<string> ignored_unshared_list = new List<string>();
+            //the ignored key is an index into the mapping table for the user keys
+            if (is_ignored_table.Count > 0) //if not ignoring anyone this will be empty...
+            {
+                if (mappingTable.ContainsKey(is_ignored_table[0].Item1))
+                {
+                    foreach (int key in mappingTable[is_ignored_table[0].Item1])
+                    {
+                        if (user_table.ContainsKey(key))
+                        {
+                            ignored_unshared_list.Add(user_table[key]);
+                        }
+                    }
                 }
+            }
+            //for unshared you need to do a reverse lookup..... 
+            //if you are unsharing from 3 people then it will be a resulting value for three people.
+            if (unshared_table.Count > 0)
+            {
+                if (reverseMappingTable.ContainsKey(unshared_table[0].Item1))
+                {
+                    foreach (int key in reverseMappingTable[unshared_table[0].Item1])
+                    {
+                        if (user_table.ContainsKey(key))
+                        {
+                            string user = user_table[key];
+                            //a lot of these are probably duplicate with ignored.
+                            if (!ignored_unshared_list.Contains(user))
+                            {
+                                ignored_unshared_list.Add(user_table[key]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //now time to resolve our IDs
+            List<Tuple<string, string>> user_notes = new List<Tuple<string, string>>();
+            foreach (var user in user_note_table) //fix this, we dont care about byte[] in this case..
+            {
+                if (mappingTable.ContainsKey(user.Item1))
+                {
+                    foreach (int key in mappingTable[user.Item1])
+                    {
+                        if (user_table.ContainsKey(key))
+                        {
+                            user_notes.Add(new Tuple<string, string>(user_table[key], user.Item2));
+                            break;
+                        }
+                    }
+                }
+            }
+            return new ImportedData(user_list, ignored_unshared_list, wish_list_item_table.Select(item => item.Item2).ToList(), user_notes);
         }
-        return new ImportedData(user_list, ignored_unshared_list, wish_list_item_table.Select(item => item.Item2).ToList(), user_notes);
-    }
     }
 
     public struct ImportedData
@@ -1990,6 +2031,31 @@ namespace AndriodApp1
         public List<string> UserList { private set; get; }
         public List<string> IgnoredBanned { private set; get; }
         public List<Tuple<string, string>> UserNotes { private set; get; }
+    }
+
+    /// <summary>
+    /// For friendliness with XmlSerializer
+    /// </summary>
+    [Serializable]
+    public class SeekerImportExportData
+    {
+        public List<string> Wishlist;
+        public List<string> Userlist;
+        public List<string> BanIgnoreList;
+        public List<KeyValueEl> UserNotes;
+        //public string AddedAfterTheFact; //XmlSerializer IS backward compatible.
+                                           //You can add extra fields (such as messages) to SeekerImportExportData without worry.
+                                           //They will just have the default value (empty string in this case).
+    }
+
+    /// <summary>
+    /// Since Xml Serializer does not do dictionaries.
+    /// </summary>
+    [Serializable]
+    public class KeyValueEl
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
     }
 
 

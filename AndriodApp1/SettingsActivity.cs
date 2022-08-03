@@ -38,6 +38,8 @@ using Android.Content.PM;
 //using Android.Support.V7.Widget.Helper;
 using Android.Util;
 using AndroidX.RecyclerView.Widget;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace AndriodApp1
 {
@@ -55,6 +57,7 @@ namespace AndriodApp1
         private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY_Settings = 0x932;
         private const int UPLOAD_DIR_CHANGE_WRITE_EXTERNAL_LEGACY_Settings_Reselect_Case = 0x855;
 
+        private const int SAVE_SEEKER_SETTINGS = 0x856;
 
         private const int READ_EXTERNAL_FOR_MEDIA_STORE = 1182021;
 
@@ -465,6 +468,12 @@ namespace AndriodApp1
             Button clearHistory = FindViewById<Button>(Resource.Id.clearHistory);
             clearHistory.Click += ClearHistory_Click;
 
+            Button exportClientData = FindViewById<Button>(Resource.Id.exportDataButton);
+            exportClientData.Click += ExportClientData_Click;
+
+            ImageView moreInfoExport = FindViewById<ImageView>(Resource.Id.moreInfoExport);
+            moreInfoExport.Click += MoreInfoExport_Click;
+
             CheckBox rememberSearchHistory = FindViewById<CheckBox>(Resource.Id.searchHistoryRemember);
             rememberSearchHistory.Checked = SoulSeekState.RememberSearchHistory;
             rememberSearchHistory.CheckedChange += RememberSearchHistory_CheckedChange;
@@ -754,6 +763,28 @@ namespace AndriodApp1
             configSmartFilters.Click += ConfigSmartFilters_Click;
 
             UpdateLayoutParametersForScreenSize();
+        }
+
+        private void MoreInfoExport_Click(object sender, EventArgs e)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var diag = builder.SetMessage(Resource.String.export_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            diag.Show();
+        }
+
+        private const string DefaultDocumentsUri = "content://com.android.externalstorage.documents/tree/primary%3ADocuments";
+
+        private void ExportClientData_Click(object sender, EventArgs e)
+        {
+            var intent = new Android.Content.Intent(Android.Content.Intent.ActionCreateDocument);
+            intent.SetType("application/xml");
+            intent.PutExtra(Android.Content.Intent.ExtraTitle, "seeker_data.xml");
+            intent.AddCategory(Android.Content.Intent.CategoryOpenable);
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            {
+                intent.PutExtra(Android.Provider.DocumentsContract.ExtraInitialUri, Android.Net.Uri.Parse(DefaultDocumentsUri));
+            }
+            this.StartActivityForResult(intent, SAVE_SEEKER_SETTINGS);
         }
 
         private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
@@ -3338,7 +3369,37 @@ namespace AndriodApp1
 
             }
 
+            if(SAVE_SEEKER_SETTINGS == requestCode)
+            {
+                if (resultCode == Result.Ok)
+                {
+                    var seekerImportExportData = GetCurrentExportData();
 
+                    var stream = this.ContentResolver.OpenOutputStream(data.Data);
+                    var xmlWriterSettings = new XmlWriterSettings() { Indent = true };
+                    using (var writer = XmlWriter.Create(stream, xmlWriterSettings))
+                    {
+                        new XmlSerializer(typeof(SeekerImportExportData)).Serialize(writer, seekerImportExportData);
+                    }
+
+                    Toast.MakeText(this, Resource.String.successfully_exported, ToastLength.Short).Show();
+                }
+            }
+        }
+
+        private SeekerImportExportData GetCurrentExportData()
+        {
+            var seekerImportExportData = new SeekerImportExportData();
+            seekerImportExportData.Userlist = SoulSeekState.UserList.Select(uli => uli.Username).ToList();
+            seekerImportExportData.BanIgnoreList = SoulSeekState.IgnoreUserList.Select(uli => uli.Username).ToList();
+            seekerImportExportData.Wishlist = SearchTabHelper.SearchTabCollection.Where((pair1) => pair1.Value.SearchTarget == SearchTarget.Wishlist).Select((pair1) => pair1.Value.LastSearchTerm).ToList();
+            List<KeyValueEl> userNotes = new List<KeyValueEl>();
+            foreach (KeyValuePair<string, string> pair in SoulSeekState.UserNotes)
+            {
+                userNotes.Add(new KeyValueEl() { Key = pair.Key, Value = pair.Value });
+            }
+            seekerImportExportData.UserNotes = userNotes;
+            return seekerImportExportData;
         }
 
         public static void RestoreAdditionalDirectorySettingsFromSharedPreferences()
