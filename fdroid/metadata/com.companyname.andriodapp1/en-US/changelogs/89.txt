@@ -1,0 +1,1 @@
+Updated translations, ability to Import/Export seeker client data, foreground notification update.
