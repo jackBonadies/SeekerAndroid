@@ -1,5 +1,4 @@
 AntiFeatures:
-    - NonFreeDep
     - NonFreeNet
 AuthorEmail: jbonadies6@gmail.com
 AuthorName: jackBonadies
