@@ -542,7 +542,7 @@ namespace AndriodApp1
 
             Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
             languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к" };
+            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español" };
             ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
             SetSpinnerPositionLangauge(languageSpinner);
@@ -645,7 +645,7 @@ namespace AndriodApp1
 
             concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
             concurrentDlButton.Click += ConcurrentDlBottom_Click;
-            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
             
 
@@ -1701,7 +1701,8 @@ namespace AndriodApp1
                     }
 
                     Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent = concurrentDL;
-                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+                    // always add space as the resource string will always trim trailing spaces.
+                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
                     SaveMaxConcurrentDownloadsSettings();
                     changeDialog.Dismiss();
@@ -2524,6 +2525,9 @@ namespace AndriodApp1
                 case SoulSeekState.FieldLangRu:
                     s.SetSelection(4);
                     break;
+                case SoulSeekState.FieldLangEs:
+                    s.SetSelection(5);
+                    break;
                 default:
                     s.SetSelection(0);
                     break;
@@ -2544,9 +2548,10 @@ namespace AndriodApp1
                     return SoulSeekState.FieldLangFr;
                 case 4:
                     return SoulSeekState.FieldLangRu;
+                case 5:
+                    return SoulSeekState.FieldLangEs;
                 default:
                     return SoulSeekState.FieldLangAuto;
-                    break;
             }
         }
 

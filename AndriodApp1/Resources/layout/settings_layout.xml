@@ -507,6 +507,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/start_service_on_startup"
+                    android:maxEms="12"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
@@ -538,6 +539,7 @@
                     android:layout_marginTop = "0dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginBottom = "0dp"
+                    android:layout_marginEnd = "16dp"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     
@@ -1116,12 +1118,14 @@
                         android:tint="?attr/mainTextColor"
                 />
                         </FrameLayout>
+                    <!--MaxEms added for translated strings-->
                     <Button
                         android:layout_centerHorizontal="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/RescanShares"
                         android:textSize="12dp"
+                        android:maxEms="10"
                         android:layout_marginStart="16dp"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
@@ -1144,6 +1148,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/browse_yourself"
                         android:textSize="12dp"
+                        android:maxEms="10"
                         android:layout_marginStart="6dp"
                         android:paddingTop="8dp"
                         android:paddingBottom="8dp"
@@ -1300,6 +1305,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/use_pnp_for_port_forwarding"
+                        android:layout_weight="1"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
@@ -1314,6 +1320,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginTop = "10dp"
                         android:layout_marginBottom = "10dp"
+                        android:layout_marginEnd = "16dp"
                         android:layout_width="26dp"
                         android:layout_height="26dp"
                         android:id="@+id/UPnPStatus"
@@ -1578,6 +1585,7 @@
                     android:layout_marginBottom="18dp"
                     android:id="@+id/limitConcurrentDownloadsSublayout2"
                     android:orientation="horizontal">
+                    <!--layout_weight prevents the button from getting squashed (due to translation strings being longer)-->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1590,6 +1598,8 @@
                         android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
+                        
+                        android:layout_weight="1"
                         android:id="@+id/concurrentDownloadsLabel"
             />
                     <Button

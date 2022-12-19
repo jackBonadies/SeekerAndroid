@@ -51,11 +51,11 @@
     <string name="unsaved_changes_title">Descartar alterações não salvas?</string>
     <string name="unsaved_changes_body">Você tem alterações não salvas. Tem certeza de que deseja descartá-las?</string>
     <string name="user_status_string">Slots de upload: {0}
-Livre para upload: {1}
-Uploads na fila: {2}
-Velocidade de upload: {3}
-Contagem de arquivos: {4}
-Contador de diretórios: {5}</string>
+\nLivre para upload: {1}
+\nUploads na fila: {2}
+\nVelocidade de upload: {3}
+\nContagem de arquivos: {4}
+\nContador de diretórios: {5}</string>
     <string name="add_user">Adicionar usuário</string>
     <string name="empty_browse_directory">  Essa aba é usada para navegar pela árvore do diretório de um usuário.\n\nPara começar a fazer uma pesquisa na aba de pesquisa ou toque em \'+\'.</string>
     <string name="clear">Limpar</string>

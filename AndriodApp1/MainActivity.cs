@@ -13203,6 +13203,7 @@ namespace AndriodApp1
         public const string FieldLangPtBr = "pt-rBR";
         public const string FieldLangFr = "fr";
         public const string FieldLangRu = "ru";
+        public const string FieldLangEs = "es";
 
 
 
