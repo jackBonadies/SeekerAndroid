@@ -379,7 +379,7 @@ namespace Common
                     files.Add(f);
                 }
             }
-            return new Directory(d.Name, files);
+            return new Directory(d.Name, files, d.DecodedViaLatin1);
         }
 
 

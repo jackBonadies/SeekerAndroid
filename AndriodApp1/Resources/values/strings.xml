@@ -398,11 +398,13 @@ Directory Count: {5}"</string>
   <string name="remote_conn_closed">Read Error: Remote Connection Closed</string>
   <string name="network_down">Network Subsystem is Down</string>
   <string name="reported_as_failed">Error: Transfer reported as failed by the uploader</string>
+
   <string name="error_no_space">Error: No space left on device.</string>
   <string name="error_unspecified">The task did not complete due to unhandled exception</string>
 
   <string name="timeout_peer">Timout talking to peer</string>
   <string name="transfer_rejected">Transfer Request Rejected</string>
+  <string name="transfer_rejected_file_not_shared">Transfer Request Rejected. Reason: File Not Shared</string>
 
   <string name="delete_messages">Delete Messages</string>
   <string name="delete_all_messages">Delete All Messages</string>

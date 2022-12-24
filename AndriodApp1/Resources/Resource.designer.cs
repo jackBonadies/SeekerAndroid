@@ -12165,35 +12165,38 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0F009D
 			public const int Total_ = 2131689629;
 			
-			// aapt resource value: 0x7F0F02D6
-			public const int transfers_in_progress = 2131690198;
+			// aapt resource value: 0x7F0F02D7
+			public const int transfers_in_progress = 2131690199;
 			
 			// aapt resource value: 0x7F0F02D4
 			public const int transfer_rejected = 2131690196;
 			
 			// aapt resource value: 0x7F0F02D5
-			public const int transfer_tab = 2131690197;
+			public const int transfer_rejected_file_not_shared = 2131690197;
 			
-			// aapt resource value: 0x7F0F02D7
-			public const int type_chatroom_ticker_message = 2131690199;
+			// aapt resource value: 0x7F0F02D6
+			public const int transfer_tab = 2131690198;
 			
 			// aapt resource value: 0x7F0F02D8
-			public const int type_notes_here = 2131690200;
+			public const int type_chatroom_ticker_message = 2131690200;
 			
 			// aapt resource value: 0x7F0F02D9
-			public const int undo = 2131690201;
+			public const int type_notes_here = 2131690201;
 			
 			// aapt resource value: 0x7F0F02DA
-			public const int unknown = 2131690202;
+			public const int undo = 2131690202;
+			
+			// aapt resource value: 0x7F0F02DB
+			public const int unknown = 2131690203;
 			
 			// aapt resource value: 0x7F0F009E
 			public const int UnknownErrorShared = 2131689630;
 			
-			// aapt resource value: 0x7F0F02DB
-			public const int unsaved_changes_body = 2131690203;
-			
 			// aapt resource value: 0x7F0F02DC
-			public const int unsaved_changes_title = 2131690204;
+			public const int unsaved_changes_body = 2131690204;
+			
+			// aapt resource value: 0x7F0F02DD
+			public const int unsaved_changes_title = 2131690205;
 			
 			// aapt resource value: 0x7F0F009F
 			public const int UploadFolderOptions = 2131689631;
@@ -12201,50 +12204,50 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0F00A0
 			public const int Uploads = 2131689632;
 			
-			// aapt resource value: 0x7F0F02E0
-			public const int uploads_in_progress = 2131690208;
-			
 			// aapt resource value: 0x7F0F02E1
-			public const int uploads_remaining = 2131690209;
-			
-			// aapt resource value: 0x7F0F02DD
-			public const int upload_f_string = 2131690205;
-			
-			// aapt resource value: 0x7F0F02DE
-			public const int upload_remaining = 2131690206;
-			
-			// aapt resource value: 0x7F0F02DF
-			public const int upload_slots_ = 2131690207;
+			public const int uploads_in_progress = 2131690209;
 			
 			// aapt resource value: 0x7F0F02E2
-			public const int upnp_currently_running = 2131690210;
+			public const int uploads_remaining = 2131690210;
+			
+			// aapt resource value: 0x7F0F02DE
+			public const int upload_f_string = 2131690206;
+			
+			// aapt resource value: 0x7F0F02DF
+			public const int upload_remaining = 2131690207;
+			
+			// aapt resource value: 0x7F0F02E0
+			public const int upload_slots_ = 2131690208;
 			
 			// aapt resource value: 0x7F0F02E3
-			public const int upnp_last_success = 2131690211;
-			
-			// aapt resource value: 0x7F0F02E5
-			public const int upnp_not_ran = 2131690213;
+			public const int upnp_currently_running = 2131690211;
 			
 			// aapt resource value: 0x7F0F02E4
-			public const int upnp_no_wifi_conn = 2131690212;
+			public const int upnp_last_success = 2131690212;
 			
 			// aapt resource value: 0x7F0F02E6
-			public const int upnp_off = 2131690214;
+			public const int upnp_not_ran = 2131690214;
+			
+			// aapt resource value: 0x7F0F02E5
+			public const int upnp_no_wifi_conn = 2131690213;
 			
 			// aapt resource value: 0x7F0F02E7
-			public const int upnp_search_finished = 2131690215;
+			public const int upnp_off = 2131690215;
 			
 			// aapt resource value: 0x7F0F02E8
-			public const int upnp_success = 2131690216;
+			public const int upnp_search_finished = 2131690216;
 			
 			// aapt resource value: 0x7F0F02E9
-			public const int upnp_wifi_only = 2131690217;
+			public const int upnp_success = 2131690217;
+			
+			// aapt resource value: 0x7F0F02EA
+			public const int upnp_wifi_only = 2131690218;
 			
 			// aapt resource value: 0x7F0F00A1
 			public const int UserIsOffline = 2131689633;
 			
-			// aapt resource value: 0x7F0F02F8
-			public const int username = 2131690232;
+			// aapt resource value: 0x7F0F02F9
+			public const int username = 2131690233;
 			
 			// aapt resource value: 0x7F0F00A2
 			public const int UserOptions = 2131689634;
@@ -12252,53 +12255,53 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0F00A3
 			public const int UserXIsOffline = 2131689635;
 			
-			// aapt resource value: 0x7F0F02EB
-			public const int user_ = 2131690219;
-			
-			// aapt resource value: 0x7F0F02ED
-			public const int user_has_no_bio = 2131690221;
+			// aapt resource value: 0x7F0F02EC
+			public const int user_ = 2131690220;
 			
 			// aapt resource value: 0x7F0F02EE
-			public const int user_has_no_pic = 2131690222;
+			public const int user_has_no_bio = 2131690222;
 			
 			// aapt resource value: 0x7F0F02EF
-			public const int user_info_bio = 2131690223;
+			public const int user_has_no_pic = 2131690223;
 			
 			// aapt resource value: 0x7F0F02F0
-			public const int user_info_failed_conn = 2131690224;
+			public const int user_info_bio = 2131690224;
 			
 			// aapt resource value: 0x7F0F02F1
-			public const int user_info_failed_offline = 2131690225;
+			public const int user_info_failed_conn = 2131690225;
 			
 			// aapt resource value: 0x7F0F02F2
-			public const int user_info_failed_timeout = 2131690226;
+			public const int user_info_failed_offline = 2131690226;
 			
 			// aapt resource value: 0x7F0F02F3
-			public const int user_info_picture = 2131690227;
+			public const int user_info_failed_timeout = 2131690227;
 			
 			// aapt resource value: 0x7F0F02F4
-			public const int user_info_received = 2131690228;
+			public const int user_info_picture = 2131690228;
 			
 			// aapt resource value: 0x7F0F02F5
-			public const int user_info_stats_header = 2131690229;
+			public const int user_info_received = 2131690229;
 			
 			// aapt resource value: 0x7F0F02F6
-			public const int user_list_empty = 2131690230;
+			public const int user_info_stats_header = 2131690230;
 			
 			// aapt resource value: 0x7F0F02F7
-			public const int user_status_string = 2131690231;
+			public const int user_list_empty = 2131690231;
 			
-			// aapt resource value: 0x7F0F02EC
-			public const int user_X_is_now_online = 2131690220;
+			// aapt resource value: 0x7F0F02F8
+			public const int user_status_string = 2131690232;
 			
-			// aapt resource value: 0x7F0F02EA
-			public const int use_pnp_for_port_forwarding = 2131690218;
+			// aapt resource value: 0x7F0F02ED
+			public const int user_X_is_now_online = 2131690221;
+			
+			// aapt resource value: 0x7F0F02EB
+			public const int use_pnp_for_port_forwarding = 2131690219;
 			
 			// aapt resource value: 0x7F0F00A4
 			public const int UsingThisWizardLong = 2131689636;
 			
-			// aapt resource value: 0x7F0F02F9
-			public const int view = 2131690233;
+			// aapt resource value: 0x7F0F02FA
+			public const int view = 2131690234;
 			
 			// aapt resource value: 0x7F0F00A5
 			public const int ViewErrorOptions = 2131689637;
@@ -12306,41 +12309,41 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0F00A6
 			public const int ViewFolderOptions = 2131689638;
 			
-			// aapt resource value: 0x7F0F02FA
-			public const int view_all_tickers = 2131690234;
-			
 			// aapt resource value: 0x7F0F02FB
-			public const int view_self = 2131690235;
+			public const int view_all_tickers = 2131690235;
 			
 			// aapt resource value: 0x7F0F02FC
-			public const int view_users = 2131690236;
+			public const int view_self = 2131690236;
+			
+			// aapt resource value: 0x7F0F02FD
+			public const int view_users = 2131690237;
 			
 			// aapt resource value: 0x7F0F00A7
 			public const int WaitForParsing = 2131689639;
 			
-			// aapt resource value: 0x7F0F02FE
-			public const int welcome = 2131690238;
-			
-			// aapt resource value: 0x7F0F02FD
-			public const int we_are_already_logging_in = 2131690237;
-			
 			// aapt resource value: 0x7F0F02FF
-			public const int wishlist = 2131690239;
+			public const int welcome = 2131690239;
+			
+			// aapt resource value: 0x7F0F02FE
+			public const int we_are_already_logging_in = 2131690238;
 			
 			// aapt resource value: 0x7F0F0300
-			public const int wishlist_bold = 2131690240;
+			public const int wishlist = 2131690240;
 			
 			// aapt resource value: 0x7F0F0301
-			public const int wishlist_empty_bold = 2131690241;
+			public const int wishlist_bold = 2131690241;
 			
 			// aapt resource value: 0x7F0F0302
-			public const int wishlist_search = 2131690242;
+			public const int wishlist_empty_bold = 2131690242;
 			
 			// aapt resource value: 0x7F0F0303
-			public const int wishlist_tab_error = 2131690243;
+			public const int wishlist_search = 2131690243;
 			
 			// aapt resource value: 0x7F0F0304
-			public const int wishlist_tab_target = 2131690244;
+			public const int wishlist_tab_error = 2131690244;
+			
+			// aapt resource value: 0x7F0F0305
+			public const int wishlist_tab_target = 2131690245;
 			
 			// aapt resource value: 0x7F0F00A8
 			public const int XFilesParsed = 2131689640;
@@ -12348,8 +12351,8 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0F00A9
 			public const int X_of_Y_Remaining = 2131689641;
 			
-			// aapt resource value: 0x7F0F0305
-			public const int yes = 2131690245;
+			// aapt resource value: 0x7F0F0306
+			public const int yes = 2131690246;
 			
 			// aapt resource value: 0x7F0F00AA
 			public const int You = 2131689642;

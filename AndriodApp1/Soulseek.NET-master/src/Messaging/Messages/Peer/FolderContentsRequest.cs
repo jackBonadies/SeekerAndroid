@@ -27,10 +27,11 @@ namespace Soulseek.Messaging.Messages
         /// </summary>
         /// <param name="token">The unique token for the request.</param>
         /// <param name="directoryName">The directory to fetch.</param>
-        public FolderContentsRequest(int token, string directoryName)
+        public FolderContentsRequest(int token, string directoryName, bool isLegacy)
         {
             DirectoryName = directoryName;
             Token = token;
+            IsLegacy = isLegacy;
         }
 
         /// <summary>
@@ -42,6 +43,8 @@ namespace Soulseek.Messaging.Messages
         ///     Gets the unique token for the request.
         /// </summary>
         public int Token { get; }
+
+        public bool IsLegacy { get; }
 
         /// <summary>
         ///     Creates a new instance of <see cref="FolderContentsRequest"/> from the specified <paramref name="bytes"/>.
@@ -61,7 +64,7 @@ namespace Soulseek.Messaging.Messages
             var token = reader.ReadInteger();
             var directoryName = reader.ReadString();
 
-            return new FolderContentsRequest(token, directoryName);
+            return new FolderContentsRequest(token, directoryName, false);
         }
 
         /// <summary>
@@ -73,7 +76,7 @@ namespace Soulseek.Messaging.Messages
             return new MessageBuilder()
                 .WriteCode(MessageCode.Peer.FolderContentsRequest)
                 .WriteInteger(Token)
-                .WriteString(DirectoryName)
+                .WriteString(DirectoryName, this.IsLegacy, this.IsLegacy) //i.e. never split.
                 .Build();
         }
     }

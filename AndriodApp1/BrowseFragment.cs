@@ -891,6 +891,8 @@ namespace AndriodApp1
                 f.FileName = d.File.Filename;
                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                 f.Size = d.File.Size;
+                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                 fullFileList.Add(f);
                 return;
             }
@@ -902,6 +904,8 @@ namespace AndriodApp1
                     f.FileName = slskFile.Filename;
                     f.FullFileName = d.Node.Data.Name + @"\" + slskFile.Filename;
                     f.Size = slskFile.Size;
+                    f.wasFilenameLatin1Decoded = slskFile.IsLatin1Decoded;
+                    f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                     fullFileList.Add(f);
                 }
                 foreach(var childNode in d.Node.Children) //dirs in dir
@@ -1100,6 +1104,8 @@ namespace AndriodApp1
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
                                 f.FileName = d.File.Filename;
+                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
                                 slskFile.Add(f);
@@ -1123,6 +1129,8 @@ namespace AndriodApp1
                                 f.FileName = d.File.Filename;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
+                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                                 slskFile.Add(f);
                             }
                         }
@@ -1180,6 +1188,8 @@ namespace AndriodApp1
                                 f.FileName = d.File.Filename;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
+                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                                 slskFile.Add(f);
                             }
                         }
@@ -1201,6 +1211,8 @@ namespace AndriodApp1
                                 f.FileName = d.File.Filename;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
+                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                                 slskFile.Add(f);
                             }
                         }
@@ -1295,6 +1307,8 @@ namespace AndriodApp1
                             f.FileName = d.File.Filename;
                             f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                             f.Size = d.File.Size;
+                            f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                            f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                             topLevelFullFileInfoOnly.Add(f);
                             toplevelItems++;
                         }
@@ -1322,6 +1336,8 @@ namespace AndriodApp1
                             f.FileName = d.File.Filename;
                             f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                             f.Size = d.File.Size;
+                            f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                            f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                             topLevelFullFileInfoOnly.Add(f);
                             toplevelItems++;
                         }
@@ -1614,7 +1630,7 @@ namespace AndriodApp1
                 foreach (FullFileInfo file in files)
                 {
 
-                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, out bool transferExists);
+                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, out bool transferExists);
                     if(!transferExists)
                     {
                         allExist = false;
@@ -2221,6 +2237,8 @@ namespace AndriodApp1
             public string FileName = string.Empty;
             public string FullFileName = string.Empty;
             public int Depth = 1;
+            public bool wasFilenameLatin1Decoded = false;
+            public bool wasFolderLatin1Decoded = false;
         }
 
         public class DataItem

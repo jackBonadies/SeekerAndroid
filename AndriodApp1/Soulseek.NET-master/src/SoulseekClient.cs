@@ -1099,7 +1099,7 @@ namespace Soulseek
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        public Task<byte[]> DownloadAsync(string username, string filename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<byte[]> DownloadAsync(string username, string filename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null, bool isLegacy = false, bool isFolderDecodedLegacy = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -1140,7 +1140,7 @@ namespace Soulseek
 
             options ??= new TransferOptions();
 
-            return DownloadToByteArrayAsync(username, filename, size, startOffset, token.Value, options, cancellationToken ?? CancellationToken.None);
+            return DownloadToByteArrayAsync(username, filename, size, startOffset, token.Value, options, cancellationToken ?? CancellationToken.None, isLegacy, isFolderDecodedLegacy);
         }
 
         /// <summary>
@@ -1183,7 +1183,17 @@ namespace Soulseek
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        public Task<Tuple<string,string>> DownloadAsync(string username, string filename, Stream outputStream, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null, Task<Tuple<System.IO.Stream,long, string, string>> streamTask = null)
+        public Task<Tuple<string,string>> DownloadAsync(string username, 
+            string filename, 
+            Stream outputStream, 
+            long? size = null, 
+            long startOffset = 0, 
+            int? token = null, 
+            TransferOptions options = null, 
+            CancellationToken? cancellationToken = null, 
+            Task<Tuple<System.IO.Stream,long, string, string>> streamTask = null, 
+            bool isFilenameDecodedLegacy = false, 
+            bool isFolderDecodedLegacy = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -1234,7 +1244,7 @@ namespace Soulseek
 
             options ??= new TransferOptions();
 
-            return DownloadToStreamAsync(username, filename, outputStream, size, startOffset, token.Value, options, cancellationToken ?? CancellationToken.None, streamTask);
+            return DownloadToStreamAsync(username, filename, outputStream, size, startOffset, token.Value, options, cancellationToken ?? CancellationToken.None, streamTask, isFilenameDecodedLegacy, isFolderDecodedLegacy);
         }
 
         /// <summary>
@@ -1310,7 +1320,7 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        public Task<Directory> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null)
+        public Task<Directory> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -1329,7 +1339,7 @@ namespace Soulseek
 
             token ??= GetNextToken();
 
-            return GetDirectoryContentsInternalAsync(username, directoryName, token.Value, cancellationToken ?? CancellationToken.None);
+            return GetDirectoryContentsInternalAsync(username, directoryName, token.Value, cancellationToken ?? CancellationToken.None, isLegacy);
         }
 
         /// <summary>
@@ -1349,7 +1359,7 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null)
+        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -1371,7 +1381,7 @@ namespace Soulseek
                 throw new TransferNotFoundException($"A download of {filename} from user {username} is not active");
             }
 
-            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken ?? CancellationToken.None);
+            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken ?? CancellationToken.None, wasFileLatin1Decoded, wasFolderLatin1Decoded);
         }
 
         /// <summary>
@@ -2786,7 +2796,7 @@ namespace Soulseek
             }
         }
 
-        private async Task<byte[]> DownloadToByteArrayAsync(string username, string filename, long? size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
+        private async Task<byte[]> DownloadToByteArrayAsync(string username, string filename, long? size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken, bool isLegacy, bool isFolderDecodedLegacy)
         {
             // overwrite provided options to ensure the stream disposal flags are false; this will prevent the enclosing memory
             // stream from capturing the output.
@@ -2803,12 +2813,22 @@ namespace Soulseek
             await using var memoryStream = new MemoryStream();
 #endif
 
-            await DownloadToStreamAsync(username, filename, memoryStream, size, startOffset, token, options, cancellationToken).ConfigureAwait(false);
+            await DownloadToStreamAsync(username, filename, memoryStream, size, startOffset, token, options, cancellationToken, null, isLegacy, isFolderDecodedLegacy).ConfigureAwait(false);
             return memoryStream.ToArray();
         }
 
 
-        private async Task<Tuple<string, string>> DownloadToStreamAsync(string username, string filename, Stream outputStream, long? size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken, Task<Tuple<System.IO.Stream,long, string, string>> streamTask=null)
+        private async Task<Tuple<string, string>> DownloadToStreamAsync(string username, 
+            string filename, 
+            Stream outputStream, 
+            long? size, 
+            long startOffset, 
+            int token, 
+            TransferOptions options, 
+            CancellationToken cancellationToken, 
+            Task<Tuple<System.IO.Stream,long, string, string>> streamTask=null, 
+            bool isFileDecodedLatin1 = false, 
+            bool isFolderDecodedLatin1 = false)
         {
             //Diagnostic.Info($"!!! - Started Opening Incomplete Stream {Path.GetFileName(filename)}");
             //InvokeDebugLogHandler($"!!! - Started Opening Incomplete Stream  {Path.GetFileName(filename)}");
@@ -2907,7 +2927,7 @@ namespace Soulseek
                     // request the file
                     //Diagnostic.Info($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
                     //InvokeDebugLogHandler($"!!! - Requesing File {Path.GetFileName(download.Filename)}");
-                    await peerConnection.WriteAsync(new TransferRequest(TransferDirection.Download, token, filename), cancellationToken).ConfigureAwait(false);
+                    await peerConnection.WriteAsync(new TransferRequest(TransferDirection.Download, token, filename, 0, isFileDecodedLatin1, isFolderDecodedLatin1), cancellationToken).ConfigureAwait(false);
                     UpdateState(TransferStates.Requested, null);
 
                     var transferRequestAcknowledgement = await transferRequestAcknowledged.ConfigureAwait(false);
@@ -3204,7 +3224,7 @@ namespace Soulseek
             }
         }
 
-        private async Task<Directory> GetDirectoryContentsInternalAsync(string username, string directoryName, int token, CancellationToken cancellationToken)
+        private async Task<Directory> GetDirectoryContentsInternalAsync(string username, string directoryName, int token, CancellationToken cancellationToken, bool isLegacy)
         {
             try
             {
@@ -3214,7 +3234,7 @@ namespace Soulseek
                 var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
 
                 var connection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
-                await connection.WriteAsync(new FolderContentsRequest(token, directoryName), cancellationToken).ConfigureAwait(false);
+                await connection.WriteAsync(new FolderContentsRequest(token, directoryName, isLegacy), cancellationToken).ConfigureAwait(false);
 
                 var response = await contentsWait.ConfigureAwait(false);
 
@@ -3226,7 +3246,7 @@ namespace Soulseek
             }
         }
 
-        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken cancellationToken)
+        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken cancellationToken, bool isLegacy, bool wasFolderLatin1Decoded)
         {
             try
             {
@@ -3235,7 +3255,7 @@ namespace Soulseek
 
                 var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
                 var connection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
-                await connection.WriteAsync(new PlaceInQueueRequest(filename), cancellationToken).ConfigureAwait(false);
+                await connection.WriteAsync(new PlaceInQueueRequest(filename, isLegacy, wasFolderLatin1Decoded), cancellationToken).ConfigureAwait(false);
 
                 var response = await responseWait.ConfigureAwait(false);
 

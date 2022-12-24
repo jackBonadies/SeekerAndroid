@@ -31,12 +31,13 @@ namespace Soulseek
         /// </summary>
         /// <param name="name">The directory name.</param>
         /// <param name="fileList">The optional list of <see cref="File"/> s.</param>
-        public Directory(string name, IEnumerable<File> fileList = null)
+        public Directory(string name, IEnumerable<File> fileList = null, bool decodedViaLatin1 = false)
         {
             Name = name;
 
             Files = (fileList?.ToList() ?? new List<File>()).AsReadOnly();
             FileCount = Files.Count;
+            DecodedViaLatin1 = decodedViaLatin1;
         }
 
         //for serializer..
@@ -49,6 +50,12 @@ namespace Soulseek
         ///     Gets the directory name.
         /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        ///     Gets the directory name.
+        /// </summary>
+        [field: System.NonSerialized]
+        public bool DecodedViaLatin1 { get; }
 
         /// <summary>
         ///     Gets the number of files within the directory.
@@ -73,7 +80,7 @@ namespace Soulseek
 
         public Directory DeepCopy()
         {
-            Directory d = new Directory(this.Name,this.Files.ToList()); //this creates a new list.. you can add or remove without affecting original...
+            Directory d = new Directory(this.Name,this.Files.ToList(), this.DecodedViaLatin1); //this creates a new list.. you can add or remove without affecting original...
             return d;
         }
     }

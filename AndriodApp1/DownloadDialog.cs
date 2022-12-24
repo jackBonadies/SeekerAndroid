@@ -88,14 +88,14 @@ namespace AndriodApp1
                 {
                     if(fName==fullFileInfo.Filename)
                     {
-                        fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, fullFileInfo.Attributes));
+                        fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, fullFileInfo.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
                         extraAttr = true;
                         break;
                     }
                 }
                 if(!extraAttr)
                 {
-                    fullFilenameCollection.Add(new File(f.Code, fName, f.Size,f.Extension,f.Attributes));
+                    fullFilenameCollection.Add(new File(f.Code, fName, f.Size,f.Extension,f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
                 }
             }
             SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username,searchResponse.Token,searchResponse.FreeUploadSlots,searchResponse.UploadSpeed,searchResponse.QueueLength, fullFilenameCollection);
@@ -420,8 +420,23 @@ namespace AndriodApp1
             browseResponseTask.ContinueWith(continueWithAction);
         }
 
-
-        public static void GetFolderContentsAPI(string username, string dirname, Action<Task<Directory>> continueWithAction)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="dirname"></param>
+        /// <param name="isLegacy"></param>
+        /// <param name="continueWithAction"></param>
+        /// <exception cref="FaultPropagationException"></exception>
+        /// <remarks>
+        /// Older versions of Nicotine do not send us the token we sent them (the token we get is always 1).
+        /// This will result in a timeout error.
+        /// Regarding fixing the case where older Nicotine and older slsk.net send us a Latin1 encoded string
+        /// that is ambigious (i.e. fÃ¶r) if we sent it back properly we get a timeout.  I dont think its worth
+        /// retrying since the versions of Nicotine that send us a Latin1 string are the same versions that send
+        /// the token = 1.  Also, even if it did work, the the user would only get the folder after a full 30 second timeout.  
+        /// </remarks>
+        public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<Directory>> continueWithAction)
         {
             if (!SoulSeekState.currentlyLoggedIn)
             {
@@ -445,7 +460,7 @@ namespace AndriodApp1
                 else
                 {
                     //the original logic...
-                    Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname);
+                    Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
                     t.ContinueWith(continueWithAction);
                 }
 
@@ -472,7 +487,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname);
+                    Task<Directory> t = SoulSeekState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
                     t.ContinueWith(continueWithAction);
                 }
             }
@@ -902,14 +917,14 @@ namespace AndriodApp1
             MainActivity.LogDebug("CreateDownloadTask");
             Task task = new Task(()=>
             {
-                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, out _);
+                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, out _);
 
             });
             return task;
         }
 
 
-        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, bool queuePaused, out bool errorExists)
+        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, out bool errorExists)
         {
             errorExists = false;
             Task dlTask = null;
@@ -930,8 +945,10 @@ namespace AndriodApp1
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
                 transferItem.QueueLength = downloadInfo.QueueLength;
+                transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
+                transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
 
-                if(!queuePaused)
+                if (!queuePaused)
                 {
                     try
                     {
@@ -956,7 +973,7 @@ namespace AndriodApp1
 
 
 
-                dlTask = DownloadFileAsync(username, fname, size, cancellationTokenSource, depth);
+                dlTask = DownloadFileAsync(username, fname, size, cancellationTokenSource, depth, wasLatin1Decoded, wasFolderLatin1Decoded);
 
                 var e = new DownloadAddedEventArgs(downloadInfo);
                 downloadInfo.downloadTask = dlTask;
@@ -995,7 +1012,7 @@ namespace AndriodApp1
             /// <param name="cts"></param>
             /// <param name="incompleteUri"></param>
             /// <returns></returns>
-            public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth=1) //an indicator for how much of the full filename to use...
+            public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth=1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
         {
             MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
             Task dlTask = null;
@@ -1007,7 +1024,9 @@ namespace AndriodApp1
                         filename: fullfilename,
                         size: size,
                         options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
-                        cancellationToken: cts.Token);
+                        cancellationToken: cts.Token,
+                        isLegacy: isFileDecodedLegacy,
+                        isFolderDecodedLegacy: isFolderDecodedLegacy);
             }
             else
             {
@@ -1024,11 +1043,13 @@ namespace AndriodApp1
                         startOffset:partialLength, //this will get populated
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
                         cancellationToken: cts.Token,
-                        streamTask: GetStreamTask(username, fullfilename, depth));
+                        streamTask: GetStreamTask(username, fullfilename, depth),
+                        isFilenameDecodedLegacy: isFileDecodedLegacy,
+                        isFolderDecodedLegacy: isFolderDecodedLegacy);
 
 
                 //System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, out incompleteUri, out partialLength);
-                
+
 
                 //dlTask = SoulSeekState.SoulseekClient.DownloadAsync(
                 //        username: username,
@@ -1119,7 +1140,7 @@ namespace AndriodApp1
             Task task = new Task(() => { 
                 foreach(Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResultsInSearch))
                 {
-                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, out _);
+                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, out _);
                 }
             });
             return task;
@@ -1210,7 +1231,8 @@ namespace AndriodApp1
 
         public void GetFolderContents()
         {
-            string dirname = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0).Filename);
+            var file = searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0);
+            string dirname = Helpers.GetDirectoryRequestFolderName(file.Filename);
             if (dirname == string.Empty)
             {
                 MainActivity.LogFirebase("The dirname is empty!!");
@@ -1221,7 +1243,7 @@ namespace AndriodApp1
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
                 return;
             }
-            GetFolderContentsAPI(searchResponse.Username, dirname, DirectoryReceivedContAction);
+            GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
         }
 
         public bool OnMenuItemClick(IMenuItem item)

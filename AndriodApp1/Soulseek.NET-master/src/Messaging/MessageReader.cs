@@ -218,6 +218,37 @@ namespace Soulseek.Messaging
         }
 
         /// <summary>
+        ///     Reads a string at the head of the reader.
+        /// </summary>
+        /// <returns>The read string.</returns>
+        public string ReadStringAndNoteEncoding(out bool isDecodedViaLatin1)
+        {
+            var length = ReadInteger();
+
+            if (length > Payload.Length - Position)
+            {
+                throw new MessageReadException("Specified string length extends beyond the length of the message payload");
+            }
+
+            var bytes = Payload.Slice(Position, length).ToArray();
+            string retVal;
+
+            try
+            {
+                retVal = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
+                isDecodedViaLatin1 = false;
+            }
+            catch (Exception)
+            {
+                retVal = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
+                isDecodedViaLatin1 = true;
+            }
+
+            Position += length;
+            return retVal;
+        }
+
+        /// <summary>
         ///     Moves the head of the reader to the specified <paramref name="position"/>.
         /// </summary>
         /// <param name="position">The desired position.</param>

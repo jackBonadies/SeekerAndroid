@@ -52,7 +52,7 @@ namespace Soulseek.Messaging.Messages
             return new MessageBuilder()
                 .WriteCode(MessageCode.Server.FileSearch)
                 .WriteInteger(Token)
-                .WriteString(SearchText)
+                .WriteString(SearchText, true, true)
                 .Build();
         }
     }

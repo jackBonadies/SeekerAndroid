@@ -5643,20 +5643,20 @@ namespace AndriodApp1
 
                 //the filenames for these files are NOT the fullname.
                 //the fullname is dirTask.Result.Name "\\" f.Filename
-
-                foreach (var f in dirTask.Result.Files)
+                var directory = dirTask.Result;
+                foreach (var f in directory.Files)
                 {
-                    string fullFilename = dirTask.Result.Name + "\\" + f.Filename;
+                    string fullFilename = directory.Name + "\\" + f.Filename;
                     if (thisFileOnly == null)
                     {
-                        fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size });
+                        fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                     }
                     else
                     {
                         if (fullFilename == thisFileOnly)
                         {
                             //add
-                            fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size });
+                            fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                             break;
                         }
                     }
@@ -5712,7 +5712,7 @@ namespace AndriodApp1
                     {
                         ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, null); };
                     }
-                    DownloadDialog.GetFolderContentsAPI(_username, _dirPath, ContAction);
+                    DownloadDialog.GetFolderContentsAPI(_username, _dirPath, false, ContAction);
                     return true;
             }
             return base.OnContextItemSelected(item);
@@ -9008,7 +9008,7 @@ namespace AndriodApp1
             Task<int> getDownloadPlace = null;
             try
             {
-                getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName);
+                getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
             }
             catch (TransferNotFoundException)
             {
@@ -9026,7 +9026,7 @@ namespace AndriodApp1
                         transferItemInQuestion.QueueLength = int.MaxValue;
                         Android.Net.Uri incompleteUri = null;
                         TransfersFragment.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                        Task task = DownloadDialog.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource);
+                        Task task = DownloadDialog.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource, isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1());
                         task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, task, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion })));
                     }
                     catch (DuplicateTransferException)
@@ -9054,7 +9054,7 @@ namespace AndriodApp1
                     //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
                     try
                     {
-                        getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName);
+                        getDownloadPlace = SoulSeekState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
                         getDownloadPlace.ContinueWith(updateTask);
                     }
                     catch (Exception e)
@@ -10414,7 +10414,7 @@ namespace AndriodApp1
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 Android.Net.Uri incompleteUri = null;
                                 TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
+                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
                                 retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
                             }
                             catch (System.Exception e)
@@ -10448,7 +10448,17 @@ namespace AndriodApp1
                     else if (task.Status == TaskStatus.Faulted)
                     {
                         bool retriable = false;
+
+                        // in the cases where there is mojibake, and you undo it, you still cannot download from Nicotine older client.
+                        // reason being: the shared cache and disk do not match.
+                        // so if you send them the filename on disk they will say it is not in the cache.
+                        // and if you send them the filename from cache they will say they could not find it on disk.
+
+                        //bool tryUndoMojibake = false; //this is still needed even with keeping track of encodings.
                         bool resetRetryCount = false;
+                        var transferItem = e.dlInfo.TransferItemReference;
+                        //bool wasTriedToUndoMojibake = transferItem.TryUndoMojibake;
+                        //transferItem.TryUndoMojibake = false;
                         if (task.Exception.InnerException is System.TimeoutException)
                         {
                             action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
@@ -10457,10 +10467,38 @@ namespace AndriodApp1
                         {
                             action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
                         }
-                        else if (task.Exception.InnerException is Soulseek.TransferRejectedException) //derived class of TransferException...
+                        else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
                         {
                             //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
-                            action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
+                            bool isFileNotShared = tre.Message.ToLower().Contains("file not shared");
+                            // if we request a file from a soulseek NS client such as eÌe.jpg which when encoded in UTF fails to be decoded by Latin1
+                            // soulseek NS will send TransferRejectedException "File Not Shared." with our filename (the filename will be identical).
+                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
+                            // we only want to try this once. and if it fails reset it to normal and do not try it again.
+                            // if we encode the same way we decode, then such a thing will not occur.
+
+                            // in the latest nicotine (non dev) branch as of Dec 2022, if we request a file such as "fÃ¶r", nicotine will encode it in Latin1.  We will
+                            // decode it as UTF8, encode it back as UTF8 and then they will decode it as UTF-8 resulting in för".  So even though we encoded and decoded
+                            // in the same way there can still be an issue.  If we force legacy it will be fixed.
+
+                            //if (!wasTriedToUndoMojibake && isFileNotShared && HasNonASCIIChars(transferItem.FullFilename))
+                            //{
+                            //    tryUndoMojibake = true;
+                            //    transferItem.TryUndoMojibake = true;
+                            //    retriable = true;
+                            //}
+
+
+                            // always set this since it only shows if we DO NOT retry
+                            if (isFileNotShared)
+                            {
+                                action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected_file_not_shared), "_2_"); }; //needed
+                            }
+                            else
+                            {
+                                action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
+                            }
+                            MainActivity.LogDebug("rejected. is not shared: " + isFileNotShared);
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferException)
                         {
@@ -10510,6 +10548,16 @@ namespace AndriodApp1
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
                         {
+                            // if we request a file from a soulseek NS client such as eÌÌÌe.jpg which when encoded in UTF fails to be decoded by Latin1
+                            // soulseek NS will send UploadFailed with our filename (the filename will be identical).
+                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
+                            // we only want to try this once. and if it fails reset it to normal and do not try it again.
+                            //if(!wasTriedToUndoMojibake && HasNonASCIIChars(transferItem.FullFilename))
+                            //{
+                            //    tryUndoMojibake = true;
+                            //    transferItem.TryUndoMojibake = true;
+                            //    retriable = true;
+                            //}
                             retriable = true;
                             //MainActivity.LogFirebase("Reported as failed by uploader");
                             LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
@@ -10599,16 +10647,17 @@ namespace AndriodApp1
                         }
 
 
-                        if ((resetRetryCount || e.dlInfo.RetryCount == 0) && SoulSeekState.AutoRetryDownload && retriable)
+                        if ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SoulSeekState.AutoRetryDownload) && retriable)
                         {
                             MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
+                            //MainActivity.LogDebug("!!! try undo mojibake " + tryUndoMojibake);
                             try
                             {
                                 //retry download.
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 Android.Net.Uri incompleteUri = null;
                                 TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource);
+                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
                                 retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth))));
                                 return; //i.e. dont toast anything just retry.
                             }
@@ -10683,6 +10732,11 @@ namespace AndriodApp1
         public static void ToastUI_short(int msgCode)
         {
             Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(msgCode), ToastLength.Short).Show();
+        }
+
+        private static bool HasNonASCIIChars(string str)
+        {
+            return (System.Text.Encoding.UTF8.GetByteCount(str) != str.Length);
         }
 
 
@@ -13157,7 +13211,7 @@ namespace AndriodApp1
 
         public static bool FreeUploadSlotsOnly = true;
         public static bool DisableDownloadToastNotification = true;
-        public static bool AutoRetryDownload = false; //todo change back..
+        public const bool AutoRetryDownload = true;
 
         public static bool HideLockedResultsInSearch = true;
         public static bool HideLockedResultsInBrowse = true;

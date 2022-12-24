@@ -60,7 +60,7 @@ namespace Soulseek.Messaging.Messages
                 .WriteCode(MessageCode.Server.UserSearch)
                 .WriteString(Username)
                 .WriteInteger(Token)
-                .WriteString(SearchText)
+                .WriteString(SearchText, true, true)
                 .Build();
         }
     }

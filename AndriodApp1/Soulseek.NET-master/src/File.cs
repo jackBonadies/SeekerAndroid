@@ -34,7 +34,7 @@ namespace Soulseek
         /// <param name="size">The file size in bytes.</param>
         /// <param name="extension">The file extension.</param>
         /// <param name="attributeList">The optional list of <see cref="FileAttribute"/> s.</param>
-        public File(int code, string filename, long size, string extension, IEnumerable<FileAttribute> attributeList = null)
+        public File(int code, string filename, long size, string extension, IEnumerable<FileAttribute> attributeList = null, bool isLatin1Decoded = false, bool isDirectoryLatin1Decoded = false)
         {
             Code = code;
             Filename = filename;
@@ -43,6 +43,9 @@ namespace Soulseek
 
             Attributes = (attributeList?.ToList() ?? new List<FileAttribute>()).AsReadOnly();
             AttributeCount = Attributes.Count;
+            IsLatin1Decoded = isLatin1Decoded;
+            IsDirectoryLatin1Decoded = isDirectoryLatin1Decoded;
+
         }
 
         //public File DeepCopy()
@@ -77,6 +80,19 @@ namespace Soulseek
         /// </summary>
         public int? BitRate => GetAttributeValue(FileAttributeType.BitRate);
 
+
+        /// <summary>
+        ///     Gets the file code.
+        /// </summary>
+        [field: System.NonSerialized]
+        public bool IsLatin1Decoded { get; }
+
+        /// <summary>
+        ///     Gets the file code. If True it is.  If False, either no or do not know (consult Directory).
+        /// </summary>
+        [field: System.NonSerialized]
+        public bool IsDirectoryLatin1Decoded { get; }
+
         /// <summary>
         ///     Gets the file code.
         /// </summary>
@@ -88,7 +104,9 @@ namespace Soulseek
         public string Extension { get; }
 
         /// <summary>
-        ///     Gets the file name.
+        ///     Gets the file name. 
+        ///     This will be decoded as the fullname including directory if from search response.
+        ///     This will be decoded as just the filename if from browse response.
         /// </summary>
         public string Filename { get; }
 

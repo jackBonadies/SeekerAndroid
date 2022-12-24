@@ -188,19 +188,83 @@ namespace Soulseek.Messaging
         ///     Writes the specified string <paramref name="value"/> to the message.
         /// </summary>
         /// <param name="value">The value to write.</param>
+        /// <param name="attemptLatin1File">Whether to attempt Latin1 (necessary if SoulseekNS) or to use UTF8 (prevents string appearing incorrectly if any special characters like accents)</param>
         /// <returns>This MessageBuilder.</returns>
         /// <exception cref="InvalidOperationException">
         ///     Thrown when attempting to write additional data to a message that has been compressed.
         /// </exception>
-        public MessageBuilder WriteString(string value)
+        public MessageBuilder WriteString(string value, bool attemptLatin1File = false, bool attemptLatin1Folder = false)
         {
             byte[] bytes;
 
-            try
+
+            //if(tryUndoMojibake)
+            //{
+            //    // try to undo mojibake that occurs when a client sends a string as latin1 and reads it as utf8
+            //    // i.e. they have a file fÃ¶r. they send it to us and we decode it as unicode as för. we need to send
+            //    //  them back fÃ¶r.
+            //    try
+            //    {
+            //        bytes = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+            //        string theirString = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
+            //        bytes = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(theirString);
+            //        string finalString = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
+            //    }
+            //    catch (Exception)
+            //    {
+            //        bytes = Encoding.GetEncoding("UTF-8").GetBytes(value);
+            //    }
+            //}
+            if(attemptLatin1File || attemptLatin1Folder)
             {
-                bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+
+                // if when reading the filename, we failed to decode it as UTF-8 (which means the client sent a Latin1 string).
+                // then make sure to encode it the way we decoded it, so that they get the same byte sequence back.
+
+                try
+                {
+                    if(attemptLatin1File && attemptLatin1Folder)
+                    {
+                        bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+                    }
+                    else
+                    {
+                        int split = value.LastIndexOf('\\');
+                        string folderNameWithSlash = value.Substring(0, split + 1);
+                        string fileName = value.Substring(split + 1);
+                        if (attemptLatin1Folder)
+                        {
+                            bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(folderNameWithSlash);
+                        }
+                        else
+                        {
+                            bytes = Encoding.GetEncoding("UTF-8").GetBytes(folderNameWithSlash);
+                        }
+
+                        var previous = bytes.ToList();
+                        if (attemptLatin1File)
+                        {
+                            bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(fileName);
+                        }
+                        else
+                        {
+                            bytes = Encoding.GetEncoding("UTF-8").GetBytes(fileName);
+                        }
+
+                        foreach(byte b in bytes)
+                        {
+                            previous.Add(b);
+                        }
+
+                        bytes = previous.ToArray();
+                    }
+                }
+                catch (Exception)
+                {
+                    bytes = Encoding.GetEncoding("UTF-8").GetBytes(value);
+                }
             }
-            catch (Exception)
+            else
             {
                 bytes = Encoding.GetEncoding("UTF-8").GetBytes(value);
             }

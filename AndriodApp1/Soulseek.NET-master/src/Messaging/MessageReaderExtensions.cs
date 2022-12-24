@@ -32,13 +32,22 @@ namespace Soulseek.Messaging
         /// </summary>
         /// <param name="reader">The reader from which to read the file.</param>
         /// <returns>The file.</returns>
-        internal static File ReadFile(this MessageReader<MessageCode.Peer> reader)
+        internal static File ReadFile(this MessageReader<MessageCode.Peer> reader, bool fileIsFullfilename = false, bool isDirectoryDecodedViaLatin1 = false)
         {
             var file = new File(
                 code: reader.ReadByte(),
-                filename: reader.ReadString(),
+                filename: reader.ReadStringAndNoteEncoding(out bool isLatin1),
                 size: reader.ReadLong(),
                 extension: reader.ReadString());
+
+            #if DEBUG
+
+            if(isLatin1)
+            {
+                
+            }
+
+            #endif
 
             var attributeCount = reader.ReadInteger();
             var attributeList = new List<FileAttribute>();
@@ -57,7 +66,9 @@ namespace Soulseek.Messaging
                 filename: file.Filename,
                 size: file.Size,
                 extension: file.Extension,
-                attributeList: attributeList);
+                attributeList: attributeList,
+                isLatin1Decoded: isLatin1,
+                isDirectoryLatin1Decoded: (fileIsFullfilename && isLatin1) || isDirectoryDecodedViaLatin1);
         }
 
         /// <summary>
@@ -65,14 +76,15 @@ namespace Soulseek.Messaging
         /// </summary>
         /// <param name="reader">The reader from which to read the list of files.</param>
         /// <param name="count">The number of files to read.</param>
+        /// <param name="filenameIsFullfilename">The filename we are reading includes the directory.</param>
         /// <returns>The list of files.</returns>
-        internal static IReadOnlyCollection<File> ReadFiles(this MessageReader<MessageCode.Peer> reader, int count)
+        internal static IReadOnlyCollection<File> ReadFiles(this MessageReader<MessageCode.Peer> reader, int count, bool filenameIsFullfilename = false)
         {
             var files = new List<File>();
 
             for (int i = 0; i < count; i++)
             {
-                files.Add(reader.ReadFile());
+                files.Add(reader.ReadFile(filenameIsFullfilename));
             }
 
             return files.AsReadOnly();
@@ -85,19 +97,30 @@ namespace Soulseek.Messaging
         /// <returns>The directory.</returns>
         internal static Directory ReadDirectory(this MessageReader<MessageCode.Peer> reader)
         {
-            var directoryName = reader.ReadString();
+            var directoryName = reader.ReadStringAndNoteEncoding(out bool isDirectoryDecodedViaLatin1);
+
+            #if DEBUG
+
+            if(isDirectoryDecodedViaLatin1)
+            {
+
+            }
+
+            #endif
+
             var fileCount = reader.ReadInteger();
 
             var fileList = new List<File>();
 
             for (int j = 0; j < fileCount; j++)
             {
-                fileList.Add(reader.ReadFile());
+                fileList.Add(reader.ReadFile(false, isDirectoryDecodedViaLatin1));
             }
 
             return new Directory(
                 name: directoryName,
-                fileList: fileList);
+                fileList: fileList,
+                decodedViaLatin1: isDirectoryDecodedViaLatin1);
         }
     }
 }

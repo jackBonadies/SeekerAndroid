@@ -5917,6 +5917,20 @@ namespace AndriodApp1
         public bool isUpload;
         private int queuelength = int.MaxValue;
         public bool CancelAndRetryFlag = false;
+        public bool WasFilenameLatin1Decoded = false;
+        public bool WasFolderLatin1Decoded = false;
+        //public bool TryUndoMojibake = false;
+
+        public bool ShouldEncodeFolderLatin1()
+        {
+            return WasFolderLatin1Decoded;
+        }
+
+        public bool ShouldEncodeFileLatin1()
+        {
+            return WasFilenameLatin1Decoded;
+        }
+
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public double AvgSpeed = 0;
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -7845,7 +7859,7 @@ namespace AndriodApp1
                 {
                     Android.Net.Uri incompleteUri = null;
                     SetupCancellationToken(item, cancellationTokenSource, out _);
-                    Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource);
+                    Task task = DownloadDialog.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
                     task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
@@ -7994,7 +8008,7 @@ namespace AndriodApp1
 
                 Android.Net.Uri incompleteUri = null;
                 SetupCancellationToken(item1, cancellationTokenSource, out _);
-                Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource);
+                Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
                 //SoulSeekState.SoulseekClient.DownloadAsync(
                 //username: item1.Username,
                 //filename: item1.FullFilename,

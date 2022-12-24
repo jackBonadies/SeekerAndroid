@@ -47,7 +47,7 @@ namespace Soulseek.Messaging.Messages
             var token = reader.ReadInteger();
             var fileCount = reader.ReadInteger();
 
-            var fileList = reader.ReadFiles(fileCount);
+            var fileList = reader.ReadFiles(fileCount, true);
 
             var freeUploadSlots = reader.ReadByte();
             var uploadSpeed = reader.ReadInteger();
