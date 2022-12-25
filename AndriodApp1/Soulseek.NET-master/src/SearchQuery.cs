@@ -58,10 +58,10 @@ namespace Soulseek
         {
             IEnumerable<string> tokens = searchText?.Split(' ') ?? Enumerable.Empty<string>();
 
-            var excludedTokens = tokens.Where(t => t.StartsWith("-", IgnoreCase));
+            var excludedTokens = tokens.Where(t => t.StartsWith("-", IgnoreCase) && t.Length > 1);
             Exclusions = excludedTokens.Select(t => t.TrimStart('-')).Distinct().ToList().AsReadOnly();
 
-            Terms = tokens.Except(excludedTokens).ToList().AsReadOnly();
+            Terms = tokens.Where(token => !excludedTokens.Contains(token)).ToList().AsReadOnly();
         }
 
         /// <summary>
