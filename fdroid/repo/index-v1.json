@@ -1,6 +1,6 @@
 {
   "repo": {
-    "timestamp": 1659565999000,
+    "timestamp": 1672074073000,
     "version": 20001,
     "name": "Seeker slsk client",
     "icon": "icon.png",
@@ -14,7 +14,6 @@
   "apps": [
     {
       "antiFeatures": [
-        "NonFreeDep",
         "NonFreeNet"
       ],
       "authorEmail": "jbonadies6@gmail.com",
@@ -23,18 +22,18 @@
         "Internet"
       ],
       "changelog": "https://github.com/jackBonadies/SeekerAndroid/releases",
-      "suggestedVersionName": "2.9.10",
-      "suggestedVersionCode": "89",
+      "suggestedVersionName": "2.9.12",
+      "suggestedVersionCode": "91",
       "description": "Android client for the Soulseek peer-to-peer network\n\n\nSeeker is a Soulseek client for Android written in C# (with Xamarin) supporting downloading, searching (including wishlist and filters), sharing, messages, chatrooms, port forwarding, user info, privileges, and more.\n\nThis work uses the Soulseek.NET library for communicating with Soulseek server and network peers. It also references the unofficial Soulseek Protocol Documentation implemented by the developers of the Nicotine+ client.\n\n- The Soulseek server, which makes this app possible, relies on donations. Donate: at https://www.slsknet.org/donate.php\n- Please help translate: https://crowdin.com/project/seeker\n- Official release is through Google Play store: https://play.google.com/store/apps/details?id=com.companyname.andriodapp1\n\nThis app will always be completely free and open source software, no ads, no 'premium' versions or paid features, etc.\n",
       "issueTracker": "https://github.com/jackBonadies/SeekerAndroid/issues",
       "license": "GPL-3.0",
       "name": "Seeker",
       "sourceCode": "https://github.com/jackBonadies/SeekerAndroid",
       "summary": "Android client for the Soulseek peer-to-peer network",
-      "added": 1659565984000,
-      "icon": "com.companyname.andriodapp1.89.png",
+      "added": 1672074055000,
+      "icon": "com.companyname.andriodapp1.91.png",
       "packageName": "com.companyname.andriodapp1",
-      "lastUpdated": 1659565991000,
+      "lastUpdated": 1672074063000,
       "localized": {
         "en-US": {
           "phoneScreenshots": [
@@ -45,7 +44,7 @@
             "5.png",
             "6.png"
           ],
-          "whatsNew": "Updated translations, ability to Import/Export seeker client data, foreground notification update."
+          "whatsNew": "Add new Spanish, Ukranian, and update French translations.\nBetter handing encoding issues with mojibake between Latin1 and UTF8.\nTransfer Size mismatch implementation (cases where user has updated file and rescanned while we still have the old filesize in queue).\nOptional workaround for filesystem permissions issues.\nLogin Username validation."
         }
       }
     }
@@ -53,7 +52,67 @@
   "packages": {
     "com.companyname.andriodapp1": [
       {
-        "added": 1659565987000,
+        "added": 1672074059000,
+        "apkName": "seeker_v2.9.12.apk",
+        "hash": "08038cac35413c5086e6074e904fc5b38575ae3a3f96e532ce95883e0514c088",
+        "hashType": "sha256",
+        "minSdkVersion": 19,
+        "nativecode": [
+          "arm64-v8a",
+          "armeabi-v7a"
+        ],
+        "packageName": "com.companyname.andriodapp1",
+        "sig": "d22a36e154c97d17f1186735d768534b",
+        "signer": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2",
+        "size": 15404165,
+        "targetSdkVersion": 31,
+        "uses-permission": [
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.INTERNET",
+            null
+          ],
+          [
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "android.permission.ACCESS_WIFI_STATE",
+            null
+          ],
+          [
+            "android.permission.MANAGE_EXTERNAL_STORAGE",
+            null
+          ],
+          [
+            "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ],
+          [
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            null
+          ],
+          [
+            "android.permission.READ_EXTERNAL_STORAGE",
+            null
+          ]
+        ],
+        "versionCode": 91,
+        "versionName": "2.9.12"
+      },
+      {
+        "added": 1672074058000,
         "apkName": "seeker_v2.9.10.apk",
         "hash": "a8302fa91d049f171ad1fffec39fa6588c1df1b6e19dca4793e4a9fe1f62fa01",
         "hashType": "sha256",
@@ -113,7 +172,7 @@
         "versionName": "2.9.10"
       },
       {
-        "added": 1659565991000,
+        "added": 1672074063000,
         "apkName": "seeker_v2.9.9.apk",
         "hash": "0cda7a58fdb02dd9ecc6b0d0c4c50dbd51fb9e3945ba42f839aca648566a45f5",
         "hashType": "sha256",
@@ -173,7 +232,7 @@
         "versionName": "2.9.9"
       },
       {
-        "added": 1659565990000,
+        "added": 1672074062000,
         "apkName": "seeker_v2.9.7.apk",
         "hash": "94ef59a628daca7a3aed1eaa96fe1a4107a55487d4c8c9f4fae73b9299ef9163",
         "hashType": "sha256",
@@ -233,7 +292,7 @@
         "versionName": "2.9.7"
       },
       {
-        "added": 1659565988000,
+        "added": 1672074061000,
         "apkName": "seeker_v2.9.5.apk",
         "hash": "e14e755628ce4205ce89e30fa35f424a4562bb076c40a2e632078536cf1858aa",
         "hashType": "sha256",
@@ -293,7 +352,7 @@
         "versionName": "2.9.5"
       },
       {
-        "added": 1659565985000,
+        "added": 1672074057000,
         "apkName": "seeker_v2.8.8.apk",
         "hash": "d52e49b9bad270dbd4c1034e010613f65591efd28f383354217c176b7bb34b88",
         "hashType": "sha256",
@@ -353,7 +412,7 @@
         "versionName": "2.8.8"
       },
       {
-        "added": 1659565984000,
+        "added": 1672074055000,
         "apkName": "seeker_v2.8.6.apk",
         "hash": "0d79fd7edd2348c0c1aa03e00ca67d8f3c38e4c40ef9f3a8a803bdd5a6173ab8",
         "hashType": "sha256",

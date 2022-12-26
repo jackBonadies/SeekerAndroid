@@ -1,0 +1,5 @@
+Add new Spanish, Ukranian, and update French translations.
+Better handing encoding issues with mojibake between Latin1 and UTF8.
+Transfer Size mismatch implementation (cases where user has updated file and rescanned while we still have the old filesize in queue).
+Optional workaround for filesystem permissions issues.
+Login Username validation.
