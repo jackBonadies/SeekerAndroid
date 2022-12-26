@@ -40,6 +40,7 @@ using Android.Util;
 using AndroidX.RecyclerView.Widget;
 using System.Xml;
 using System.Xml.Serialization;
+using Android.Support.V4.Content;
 
 namespace AndriodApp1
 {
@@ -64,6 +65,8 @@ namespace AndriodApp1
         private const int CHANGE_INCOMPLETE_EXTERNAL = 0x913;
         private const int CHANGE_INCOMPLETE_EXTERNAL_LEGACY = 0x914;
         private const int CHANGE_INCOMPLETE_EXTERNAL_LEGACY_Settings = 0x934;
+
+        private const int FORCE_REQUEST_STORAGE_MANAGER = 0x434;
 
         private List<Tuple<int,int>> positionNumberPairs = new List<Tuple<int, int>>();
         private CheckBox allowPrivateRoomInvitations;
@@ -685,6 +688,20 @@ namespace AndriodApp1
             ImageView privHelp = FindViewById<ImageView>(Resource.Id.privHelp);
             privHelp.Click += PrivHelp_Click;
 
+            Button forceFilesystemPermission = FindViewById<Button>(Resource.Id.forceFilesystemPermission);
+            forceFilesystemPermission.Click += ForceFilesystemPermission_Click;
+
+#if !IzzySoft
+
+            forceFilesystemPermission.Enabled = false;
+            forceFilesystemPermission.Alpha = 0.5f;
+            forceFilesystemPermission.Clickable = false;
+
+#endif
+
+            ImageView moreInfoForceFilesystem = FindViewById<ImageView>(Resource.Id.moreInfoButtonForceFilesystemPermission);
+            moreInfoForceFilesystem.Click += MoreInfoForceFilesystem_Click;
+
             Button editUserInfo = FindViewById<Button>(Resource.Id.editUserInfoButton);
             editUserInfo.Click += EditUserInfo_Click;
 
@@ -764,6 +781,8 @@ namespace AndriodApp1
 
             UpdateLayoutParametersForScreenSize();
         }
+
+
 
         private void MoreInfoExport_Click(object sender, EventArgs e)
         {
@@ -1849,6 +1868,55 @@ namespace AndriodApp1
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             var diag = builder.SetMessage(Resource.String.listening).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
+        }
+
+        public void MoreInfoForceFilesystem_Click(object sender, EventArgs e)
+        {
+            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            //var diag = builder.SetMessage(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            var diag = builder.SetMessage(Resource.String.force_filesystem_message).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            diag.Show();
+            var origString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.force_filesystem_message); //this is a literal CDATA string.
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
+            {
+                ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
+            }
+            else
+            {
+                ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString); //this can be slow so do NOT do it in loops...
+            }
+            ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = (Android.Text.Method.LinkMovementMethod.Instance);
+        }
+
+        private static bool HasManageStoragePermission(Context context)
+        {
+            bool hasExternalStoragePermissions = false;
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 30)
+            {
+                hasExternalStoragePermissions = Android.OS.Environment.IsExternalStorageManager;
+            }
+            else
+            {
+                hasExternalStoragePermissions = ContextCompat.CheckSelfPermission(context, Android.Manifest.Permission.ManageExternalStorage) != Android.Content.PM.Permission.Denied;
+            }
+            return hasExternalStoragePermissions;
+        }
+
+        private void ForceFilesystemPermission_Click(object sender, EventArgs e)
+        {
+            bool hasExternalStoragePermissions = HasManageStoragePermission(this);
+
+            if (hasExternalStoragePermissions)
+            {
+                Toast.MakeText(this, SoulSeekState.ActiveActivityRef.GetString(Resource.String.permission_already_successfully_granted), ToastLength.Long).Show();
+            }
+            else
+            {
+                Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
+                Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
+                allFilesPermission.SetData(packageUri);
+                this.StartActivityForResult(allFilesPermission, FORCE_REQUEST_STORAGE_MANAGER);
+            }
         }
 
         public const string FromBrowseSelf = "FromBrowseSelf";
@@ -3393,6 +3461,19 @@ namespace AndriodApp1
                     }
 
                     Toast.MakeText(this, Resource.String.successfully_exported, ToastLength.Short).Show();
+                }
+            }
+
+            if(FORCE_REQUEST_STORAGE_MANAGER == requestCode)
+            {
+                bool hasPermision = HasManageStoragePermission(this);
+                if(hasPermision)
+                {
+                    Toast.MakeText(this, Resource.String.permission_successfully_granted, ToastLength.Short).Show();
+                }
+                else
+                {
+                    Toast.MakeText(this, Resource.String.permission_failed, ToastLength.Short).Show();
                 }
             }
         }

@@ -1740,8 +1740,58 @@
             />
             </LinearLayout>
 
-            <Button
+                                <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop = "0dp"
+                        android:layout_gravity="center"
+                android:layout_centerHorizontal="true"
+                        android:layout_marginBottom = "12dp"
+                        android:id="@+id/forceManageStoragePermissionLayout"
                 android:layout_below="@id/enableDiagnosticsLayout"
+                        android:orientation="horizontal"
+                   >
+                        <Button
+                    
+                    
+                            android:layout_centerHorizontal="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ForceFilesystemPermission"
+                            android:minHeight="16dp"
+                            android:textSize="12dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:paddingStart="7dp"
+                            android:gravity="center_vertical"
+                            android:paddingEnd="7dp"
+                            android:textAllCaps="false"
+                            android:layout_marginTop = "6dp"
+                            android:layout_marginBottom = "6dp"
+                            style="@style/SeekerButtonStyle"
+                            android:foreground="@drawable/button"
+                            android:id="@+id/forceFilesystemPermission"
+       />
+
+
+                        <ImageView
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:gravity="center_vertical"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginTop = "6dp"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginBottom = "6dp"
+                            android:id="@+id/moreInfoButtonForceFilesystemPermission"
+                            app:srcCompat="@drawable/help_circle_outline"
+                            android:tint="?attr/mainTextColor"
+            />
+
+
+                    </LinearLayout>
+
+            <Button
+                android:layout_below="@id/forceManageStoragePermissionLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/edit_your_user_info"

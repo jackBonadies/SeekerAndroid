@@ -378,7 +378,11 @@ Directory Count: {5}"</string>
   <string name="port_already_in_use">Failed to set up listener. Port likely already in use.</string>
   <string name="dns_failed">DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.</string>
   <string name="bad_user_pass">Bad username or password</string>
-  <string name="network_unreachable">Network is unreachable</string>
+  <string name="invalid_username">Invalid Username</string>
+  <string name="invalid_password">Invalid Password</string>
+	<string name="user_too_long">Username must be under 30 characters</string>
+	<string name="user_invalid_char">Username cannot contain special characters</string>
+	<string name="network_unreachable">Network is unreachable</string>
   <string name="cannot_login">Cannot Login</string>
   <string name="no_empty_user_pass">Username and Password cannot be empty</string>
   <string name="dns_failed_2">Failed to resolve soulseek server ip address.</string>
@@ -594,6 +598,12 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 <br><br>Version: {0}.
 ]]>
   </string>
+	<string name="force_filesystem_message">
+<![CDATA[
+The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
+<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.andriodapp1">Download Here</a>). The Google Play Store does not allow applications to request this permission.
+]]>	
+	</string>
   <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
     <string name="note">Note</string>
       <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
@@ -625,7 +635,7 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 
 	<string name="failed_user_offline">Failed - User Offline</string>
 	<string name="failed_denied">Failed - Denied</string>
-
+	<string name="re_requesting">Re-Requesting</string>
 
 	<string name="concurrent_dialog">Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
 	</string>
@@ -875,5 +885,10 @@ Seeker is a free and open source Soulseek client for Android.  It will never hav
 	<string name="ExportClientData">Export Client Data</string>
 	<string name="export_more_info">Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.</string>
 	<string name="successfully_exported">Successfully exported Seeker client data.</string>
+
+	<string name="ForceFilesystemPermission">Force Filesystem Permissions</string>
+	<string name="permission_already_successfully_granted">Permission has already been succesfully granted</string>
+	<string name="permission_successfully_granted">Permission succesfully granted</string>
+	<string name="permission_failed">Failed to grant permission</string>
 
 </resources>

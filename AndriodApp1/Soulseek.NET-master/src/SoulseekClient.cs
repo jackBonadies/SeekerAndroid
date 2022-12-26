@@ -427,6 +427,13 @@ namespace Soulseek
 
         public static event EventHandler<TransferAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
         public static event EventHandler<TransferAddedRemovedInternalEventArgs> UploadAddedRemovedInternal;
+        /// <summary>
+        /// Solves the transfer size mismatch problem in line.
+        /// </summary>
+        /// 
+
+        public delegate bool TransferSizeMismatchDelegate(Stream stream, string b, string c, long d, long e, long f, string g, out Stream h);
+        public static TransferSizeMismatchDelegate OnTransferSizeMismatchFunc;
 
         //public static void ClearDownloadAddedInternalHandler(object target)
         //{
@@ -2946,6 +2953,25 @@ namespace Soulseek
 
                     if (transferRequestAcknowledgement.IsAllowed)
                     {
+
+                        // the size of the remote file may have changed since it was sent in a search or browse response
+                        // if 0 then ignore it.  QT sends for filesize about 2GB.
+                        if (download.Size.HasValue && download.Size.Value != transferRequestAcknowledgement.FileSize && transferRequestAcknowledgement.FileSize > 0)
+                        {
+                            bool success = OnTransferSizeMismatchFunc(outputStream, filename, username, startOffset, download.Size.Value, transferRequestAcknowledgement.FileSize, incompleteUriString, out Stream newStream);
+                            if(startOffset != 0 && newStream != null)
+                            {
+                                outputStream = newStream;
+                            }
+                            startOffset = 0;
+                            download.Size = transferRequestAcknowledgement.FileSize;
+                            download.StartOffset = 0;
+                            if (!success)
+                            {
+                                throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {transferRequestAcknowledgement.FileSize} does not match expected size {download.Size}", download.Size.Value, transferRequestAcknowledgement.FileSize);
+                            }
+                        }
+
                         // the peer is ready to initiate the transfer immediately; we are bypassing their queue.
                         UpdateState(TransferStates.Initializing, incompleteUriParentString);
 
@@ -2976,6 +3002,25 @@ namespace Soulseek
 
                         // wait for the peer to respond that they are ready to start the transfer
                         var transferStartRequest = await transferStartRequested.ConfigureAwait(false);
+
+                        // the size of the remote file may have changed since it was sent in a search or browse response
+                        // if 0 then ignore it.  QT sends for filesize about 2GB.
+                        if (download.Size.HasValue && download.Size.Value != transferStartRequest.FileSize && transferStartRequest.FileSize > 0)
+                        {
+                            bool success = OnTransferSizeMismatchFunc(outputStream, filename, username, startOffset, download.Size.Value, transferStartRequest.FileSize, incompleteUriString, out Stream newStream);
+                            if (startOffset != 0 && newStream != null)
+                            {
+                                outputStream = newStream;
+                            }
+                            startOffset = 0;
+                            download.Size = transferStartRequest.FileSize;
+                            download.StartOffset = 0;
+                            if (!success)
+                            {
+                                throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {transferStartRequest.FileSize} does not match expected size {download.Size}", download.Size.Value, transferStartRequest.FileSize);
+                            }
+                        }
+
 
                         // if size wasn't supplied, use the size provided by the remote client. for files over 4gb, the value provided
                         // by the remote client will erroneously be reported as zero and the transfer will fail.
@@ -3073,6 +3118,14 @@ namespace Soulseek
                     download.State = TransferStates.Rejected;
 
                     throw new TransferRejectedException($"Download of file {filename} rejected by user {username}: {ex.Message}", ex);
+                }
+                catch (TransferSizeMismatchException ex)
+                {
+                    download.State = TransferStates.Aborted;
+                    download.Connection?.Disconnect("Transfer cancelled - Size mismatch", ex);
+
+                    Diagnostic.Debug(ex.ToString());
+                    throw;
                 }
                 catch (OperationCanceledException ex)
                 {

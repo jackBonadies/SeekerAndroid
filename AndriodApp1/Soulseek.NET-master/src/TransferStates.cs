@@ -98,5 +98,12 @@ namespace Soulseek
         ///     Fallen from Queue.  This is when a transfer that was queued gets cancelled due to user being offline, or no longer able to connect.
         /// </summary>
         FallenFromQueue = 4096,
+
+        /// <summary>
+        ///     We abort because the size they give us is different from when we originally added it.
+        ///     Note: This is the case when someone Scans shares, we browse them and queue as paused, they edit metadata
+        ///             and then RESCAN shares.  And then we try to download.  i.e. they still have to rescan (at least on QT).
+        /// </summary>
+        Aborted = 8192,
     }
 }

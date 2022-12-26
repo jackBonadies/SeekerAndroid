@@ -173,9 +173,9 @@ namespace AndriodApp1
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
-        private static void EnableDisableLoginButton(EditText uname, EditText passwd, Button login)
+        private static void EnableDisableLoginButton(EditText uname, EditText passwd, Button login, bool hasError)
         {
-            if(string.IsNullOrEmpty(uname.Text) || string.IsNullOrEmpty(passwd.Text))
+            if(string.IsNullOrEmpty(uname.Text) || string.IsNullOrEmpty(passwd.Text) || hasError)
             {
                 login.Alpha = 0.5f;
                 login.Clickable = false;
@@ -198,6 +198,7 @@ namespace AndriodApp1
         private Button loginButton = null;
         private EditText usernameTextEdit = null;
         private EditText passwordTextEdit = null;
+        private TextInputLayout usernameInputLayout = null;
 
 
         public void SetUpLogInLayout()
@@ -206,11 +207,13 @@ namespace AndriodApp1
             loginButton.Click += LogInClick;
             usernameTextEdit = rootView.FindViewById<EditText>(Resource.Id.etUsername);
             passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
+            usernameInputLayout = rootView.FindViewById<TextInputLayout>(Resource.Id.usernameTextInputLayout);
             usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
             usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
             passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
             passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
-            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton);
+            bool hasError = ValidateUsername();
+            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
         }
 
 
@@ -282,9 +285,47 @@ namespace AndriodApp1
             }
         }
 
+        private readonly int[] All_Ascii = Enumerable.Range('\x1', 127).ToArray();
+
         private void UsernamePasswordTextEdit_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            EnableDisableLoginButton(this.usernameTextEdit, this.passwordTextEdit, loginButton);
+            bool hasError = ValidateUsername();
+            EnableDisableLoginButton(this.usernameTextEdit, this.passwordTextEdit, loginButton, hasError);
+        }
+
+        private bool ValidateUsername()
+        {
+            // special chars and length check.
+            bool hasError = false;
+            if (!string.IsNullOrEmpty(usernameTextEdit.Text))
+            {
+                var uname = usernameTextEdit.Text.ToString();
+                if (uname.Length > 30)
+                {
+                    usernameInputLayout.Error = this.GetString(Resource.String.user_too_long);
+                    hasError = true;
+                }
+                else
+                {
+                    foreach (char c in uname)
+                    {
+                        if (!All_Ascii.Contains(c))
+                        {
+                            usernameInputLayout.Error = this.GetString(Resource.String.user_invalid_char);
+                            hasError = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!hasError)
+            {
+                usernameInputLayout.Error = null;
+                usernameInputLayout.ErrorEnabled = false;
+            }
+
+            return hasError;
         }
 
 
@@ -342,10 +383,23 @@ namespace AndriodApp1
                     Console.WriteLine(t.Exception.ToString());
                     Console.WriteLine(t.Exception?.InnerExceptions?.Count);
                     Console.WriteLine(t.Exception?.InnerExceptions?.ToString());
-                    if (t.Exception.InnerExceptions[0] is Soulseek.LoginRejectedException)
+                    if (t.Exception.InnerExceptions[0] is Soulseek.LoginRejectedException lre)
                     {
+                        string loginRejectedMessage = lre.Message;
                         cannotLogin = true;
-                        msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
+                        //"The server rejected login attempt: INVALIDUSERNAME"
+                        if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDUSERNAME"))
+                        {
+                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.invalid_username);
+                        }
+                        else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDPASS"))
+                        {
+                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.invalid_password);
+                        }
+                        else
+                        {
+                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
+                        }
                     }
                     else if (t.Exception.InnerExceptions[0] is Soulseek.SoulseekClientException)
                     {
@@ -6206,7 +6260,7 @@ namespace AndriodApp1
                     {
                         numQueued++;
                     }
-                    else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested))
+                    else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested) || ti.State.HasFlag(TransferStates.Aborted))
                     {
                         numInProgress++;
                     }
@@ -6234,7 +6288,7 @@ namespace AndriodApp1
             //if completed, X files suceeded - hide p2
             //if failed, X files suceeded (if applicable), X files failed. - hide p2
             //if paused, X files suceeded, X failed, X paused. - hide p2
-            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Queued) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested))
+            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Queued) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
             {
                 int numRemaining = 0;
                 string currentFilename = string.Empty;
@@ -6470,6 +6524,11 @@ namespace AndriodApp1
             else if (state.HasFlag(TransferStates.Succeeded))
             {
                 viewStatus.SetText(Resource.String.completed);
+            }
+            else if (state.HasFlag(TransferStates.Aborted))
+            {
+                // this is the case that the filesize is wrong. In that case we always immediately re-request.
+                viewStatus.SetText(Resource.String.re_requesting);
             }
             else
             {
@@ -7357,6 +7416,12 @@ namespace AndriodApp1
             foreach (var ti in transfers)
             {
                 if (ti.State.HasFlag(TransferStates.InProgress))
+                {
+                    ti.State = TransferStates.Cancelled;
+                    ti.RemainingTime = null;
+                }
+
+                if (ti.State.HasFlag(TransferStates.Aborted)) //i.e. re-requesting.
                 {
                     ti.State = TransferStates.Cancelled;
                     ti.RemainingTime = null;

@@ -1171,23 +1171,23 @@ namespace AndriodApp1
                             }
                         }
                         //do priority
-                        if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
+                        if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested) || state.HasFlag(TransferStates.Aborted))
                         {
                             folderState = state;
                         }
-                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
                         {
                             folderState = state;
                         }
-                        else if ((state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut)) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if ((state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut)) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
                         {
                             folderState = state;
                         }
-                        else if (state.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if (state.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
                         {
                             folderState = state;
                         }
-                        else if (state.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested))
+                        else if (state.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
                         {
                             folderState = state;
                         }
@@ -1666,6 +1666,12 @@ namespace AndriodApp1
                 foreach (var ti in AllTransferItems)
                 {
                     if (ti.State.HasFlag(TransferStates.InProgress))
+                    {
+                        ti.State = TransferStates.Cancelled;
+                        ti.RemainingTime = null;
+                    }
+
+                    if(ti.State.HasFlag(TransferStates.Aborted))
                     {
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;
@@ -2685,7 +2691,7 @@ namespace AndriodApp1
                 ChatroomController.Initialize();
 
 
-
+                SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
                 SoulseekClient.ErrorLogHandler += MainActivity.SoulseekClient_ErrorLogHandler;
 
                 SoulseekClient.DebugLogHandler += MainActivity.DebugLogHandler;
@@ -3539,7 +3545,7 @@ namespace AndriodApp1
             }
             else
             {
-                if (relevantItem == null && e.Transfer.State == TransferStates.Requested)
+                if (relevantItem == null && (e.Transfer.State == TransferStates.Requested || e.Transfer.State == TransferStates.Aborted))
                 {
                     return; //TODO sometimes this can happen too fast.  this is okay thouugh bc it will soon go to another state.
                 }
@@ -3552,6 +3558,60 @@ namespace AndriodApp1
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
         }
+
+        public static bool OnTransferSizeMismatchFunc(System.IO.Stream fileStream, string fullFilename, string username, long startOffset, long oldSize, long newSize, string incompleteUriString, out System.IO.Stream newStream)
+        {
+            newStream = null;
+            try
+            {
+                var relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
+                if(startOffset == 0)
+                {
+                    // all we need to do is update the size.
+                    relevantItem.Size = newSize;
+                    MainActivity.LogDebug("updated the size");
+                }
+                else
+                {
+                    // we need to truncate the incomplete file and set our progress back to 0.
+                    relevantItem.Size = newSize;
+                    //fileStream.SetLength(0); //this is not supported. we cannot do seek.
+                    //fileStream.Flush();
+
+                    fileStream.Close();
+                    bool useDownloadDir = false;
+                    if (SoulSeekState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+                    {
+                        useDownloadDir = true;
+                    }
+                    
+                    var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
+
+                        // this is the only time we do legacy.
+                    bool isLegacyCase = SoulSeekState.UseLegacyStorage() && (SoulSeekState.RootDocumentFile == null && useDownloadDir);
+                    if(isLegacyCase)
+                    {
+                        newStream = new System.IO.FileStream(incompleteUri.Path, System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);
+                    }
+                    else
+                    {
+                        
+                        newStream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wt");
+                    }
+
+                    relevantItem.Progress = 0;
+                    MainActivity.LogDebug("truncated the file and updated the size");
+                }
+
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogDebug("OnTransferSizeMismatchFunc: " + e.ToString());
+                return false;
+            }
+            return true;
+        }
+
 
         private void SoulseekClient_TransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
         {
@@ -8426,6 +8486,21 @@ namespace AndriodApp1
                     {
                         canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
                     }
+
+                    // if canwrite is false then if we try to create a file we get null.
+                    //if (SoulSeekState.SaveDataDirectoryUriIsFromTree)
+                    //{
+                    //    SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
+
+                    //}
+                    //else
+                    //{
+                    //    SoulSeekState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(res.Path));
+                    //}
+
+                    //var file1 = SoulSeekState.RootDocumentFile.CreateFile("text/plain", "testing_1234.txt");
+
+
                 }
                 catch (Exception e)
                 {
@@ -10356,33 +10431,33 @@ namespace AndriodApp1
         //    }
         //}
 
-        public static void SoulSeekState_DownloadAdded(object sender, DownloadAddedEventArgs e)
-        {
-            MainActivity.LogDebug("SoulSeekState_DownloadAdded");
-            TransferItem transferItem = new TransferItem();
-            transferItem.Filename = Helpers.GetFileNameFromFile(e.dlInfo.fullFilename);
-            transferItem.FolderName = Helpers.GetFolderNameFromFile(e.dlInfo.fullFilename);
-            transferItem.Username = e.dlInfo.username;
-            transferItem.FullFilename = e.dlInfo.fullFilename;
-            transferItem.Size = e.dlInfo.Size;
-            transferItem.QueueLength = e.dlInfo.QueueLength;
-            e.dlInfo.TransferItemReference = transferItem;
+        //public static void SoulSeekState_DownloadAdded(object sender, DownloadAddedEventArgs e)
+        //{
+        //    MainActivity.LogDebug("SoulSeekState_DownloadAdded");
+        //    TransferItem transferItem = new TransferItem();
+        //    transferItem.Filename = Helpers.GetFileNameFromFile(e.dlInfo.fullFilename);
+        //    transferItem.FolderName = Helpers.GetFolderNameFromFile(e.dlInfo.fullFilename);
+        //    transferItem.Username = e.dlInfo.username;
+        //    transferItem.FullFilename = e.dlInfo.fullFilename;
+        //    transferItem.Size = e.dlInfo.Size;
+        //    transferItem.QueueLength = e.dlInfo.QueueLength;
+        //    e.dlInfo.TransferItemReference = transferItem;
 
-            TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource, out _);
-            //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
-            //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
-            //{
-            //    //likely old already exists so just replace the old one
-            //    CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
-            //}
+        //    TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource, out _);
+        //    //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
+        //    //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
+        //    //{
+        //    //    //likely old already exists so just replace the old one
+        //    //    CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
+        //    //}
 
-            //once task completes, write to disk
-            Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
-            e.dlInfo.downloadTask.ContinueWith(continuationActionSaveFile);
+        //    //once task completes, write to disk
+        //    Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
+        //    e.dlInfo.downloadTask.ContinueWith(continuationActionSaveFile);
 
-            TransfersFragment.TransferItemManagerDL.Add(transferItem);
-            MainActivity.DownloadAddedUINotify?.Invoke(null, e);
-        }
+        //    TransfersFragment.TransferItemManagerDL.Add(transferItem);
+        //    MainActivity.DownloadAddedUINotify?.Invoke(null, e);
+        //}
 
         /// <summary>
         /// This RETURNS the task for Continuewith
@@ -10414,8 +10489,8 @@ namespace AndriodApp1
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 Android.Net.Uri incompleteUri = null;
                                 TransfersFragment.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
+                                Task retryTask = DownloadDialog.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, cancellationTokenSource, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
+                                retryTask.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
                             }
                             catch (System.Exception e)
                             {
@@ -10448,6 +10523,7 @@ namespace AndriodApp1
                     else if (task.Status == TaskStatus.Faulted)
                     {
                         bool retriable = false;
+                        bool forceRetry = false;
 
                         // in the cases where there is mojibake, and you undo it, you still cannot download from Nicotine older client.
                         // reason being: the shared cache and disk do not match.
@@ -10462,6 +10538,32 @@ namespace AndriodApp1
                         if (task.Exception.InnerException is System.TimeoutException)
                         {
                             action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
+                        }
+                        else if(task.Exception.InnerException is TransferSizeMismatchException sizeException)
+                        {
+                            // THIS SHOULD NEVER HAPPEN. WE FIX THE TRANSFER SIZE MISMATCH INLINE.
+
+                            // update the size and rerequest.
+                            // if we have partially downloaded the file already we need to delete it to prevent corruption.
+                            MainActivity.LogDebug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
+                            transferItem.Size = sizeException.RemoteSize;
+                            e.dlInfo.Size = sizeException.RemoteSize;
+                            retriable = true;
+                            forceRetry = true;
+                            resetRetryCount = true;
+                            if (!string.IsNullOrEmpty(transferItem.IncompleteParentUri)/* && transferItem.Progress > 0*/)
+                            {
+                                try
+                                {
+                                    TransferItemManagerWrapper.PerformCleanupItem(transferItem);
+                                }
+                                catch(Exception ex)
+                                {
+                                    string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
+                                    MainActivity.LogDebug(exceptionString);
+                                    MainActivity.LogFirebase(exceptionString);
+                                }
+                            }
                         }
                         else if(task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
@@ -10647,7 +10749,7 @@ namespace AndriodApp1
                         }
 
 
-                        if ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SoulSeekState.AutoRetryDownload) && retriable)
+                        if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SoulSeekState.AutoRetryDownload) && retriable))
                         {
                             MainActivity.LogDebug("!! retry the download " + e.dlInfo.fullFilename);
                             //MainActivity.LogDebug("!!! try undo mojibake " + tryUndoMojibake);
