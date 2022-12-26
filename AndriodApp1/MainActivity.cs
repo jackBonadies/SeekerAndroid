@@ -10579,7 +10579,7 @@ namespace AndriodApp1
                             // we only want to try this once. and if it fails reset it to normal and do not try it again.
                             // if we encode the same way we decode, then such a thing will not occur.
 
-                            // in the latest nicotine (non dev) branch as of Dec 2022, if we request a file such as "fÃ¶r", nicotine will encode it in Latin1.  We will
+                            // in the nicotine 3.1.1 and earlier, if we request a file such as "fÃ¶r", nicotine will encode it in Latin1.  We will
                             // decode it as UTF8, encode it back as UTF8 and then they will decode it as UTF-8 resulting in för".  So even though we encoded and decoded
                             // in the same way there can still be an issue.  If we force legacy it will be fixed.
 
