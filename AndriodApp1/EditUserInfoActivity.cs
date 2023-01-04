@@ -194,7 +194,7 @@ namespace AndriodApp1
             }
             catch (System.Exception ex)
             {
-                if (ex.Message.Contains("No Activity found to handle Intent"))
+                if (ex.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
                 {
                     Toast.MakeText(this, this.GetString(Resource.String.error_no_file_manager_image), ToastLength.Long).Show();
                 }

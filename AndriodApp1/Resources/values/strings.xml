@@ -109,7 +109,7 @@ Directory Count: {5}"</string>
 
   <string name="seeker_needs_dl_dir">Seeker needs Access to a Directory to Save Downloaded Files</string>
   <string name="seeker_needs_dl_dir_content">Please Choose a Download Directory (Default is the Music Folder)</string>
-  <string name="seeker_needs_dl_dir_error">Must select a directory to place downloads. This will be needed to place downloaded files.</string>
+  <string name="seeker_needs_dl_dir_error">Must select a directory to place downloaded files</string>
   <string name="seeker_needs_dl_dir_choose_settings">Please set a download directory in Settings.</string>
   <string name="seeker_cannot_access_files">Cannot access filesystem.  You must select a download directory, either in the login page or in settings.</string>
 
@@ -268,6 +268,7 @@ Directory Count: {5}"</string>
   <string name="enabling_listener">Enabling Listener</string>
   <string name="disabling_listener">Disabling Listener</string>
   <string name="add_user_title">Add User(s):</string>
+	<string name="ignore_user_title">Ignore User(s):</string>
 
   <string name="success_setting_shared_dir_fnum_dnum">Successfully set Shared Directory with {0} directories and {1} files.</string>
   <string name="parsing_files_wait">Parsing Files... this may take several seconds...</string>
@@ -608,7 +609,9 @@ The standard way of requesting folder access does not always persist permissions
     <string name="note">Note</string>
       <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
 
-  <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
+	<string name="removed_user">Removed user: \"{0}\"</string>
+
+	<string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
   <string name="no_uploads_yet">No uploads currently, as you upload files they will appear here</string>
   <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
 
@@ -794,6 +797,7 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="Options">Options</string>
 	<string name="Save">Save</string>
 	<string name="SortOrder">Sort Order</string>
+	<string name="AddUserToIgnored">Add User To Ignored</string>
 
 
 	<string name="ClearAllCompleteAndAborted">Clear all Complete and Aborted</string>

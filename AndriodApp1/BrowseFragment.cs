@@ -2620,8 +2620,10 @@ namespace AndriodApp1
             try
             {
                 BrowseFragment.browseUserDialog.Show();
+                Helpers.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
+
             }
-            catch(WindowManagerBadTokenException e)
+            catch (WindowManagerBadTokenException e)
             {
                 if(SoulSeekState.MainActivityRef==null || this.Activity==null)
                 {

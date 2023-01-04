@@ -24,6 +24,12 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 	android:title="@string/SortOrder"
 	app:showAsAction="never"/>
 
+	<item
+android:id="@+id/add_user_to_ignored_action"
+android:icon="@drawable/baseline_add_white_24"
+android:title="@string/AddUserToIgnored"
+app:showAsAction="never"/>
+
   <!-- Settings, should always be in the overflow --><!--
   <item android:id="@+id/action_settings"
         android:title="@string/abc_menu_enter_shortcut_label"

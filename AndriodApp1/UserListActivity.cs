@@ -135,7 +135,10 @@ namespace AndriodApp1
             switch(item.ItemId)
             {
                 case Resource.Id.add_user_action:
-                    ShowEditTextDialogAddUserToList();
+                    ShowEditTextDialogAddUserToList(false);
+                    return true;
+                case Resource.Id.add_user_to_ignored_action:
+                    ShowEditTextDialogAddUserToList(true);
                     return true;
                 case Resource.Id.sort_user_list_action:
                     ShowSortUserListDialog();
@@ -293,7 +296,7 @@ namespace AndriodApp1
         {
             if (SoulSeekState.UserList != null)
             {
-                lock (SoulSeekState.UserList)
+                lock (SoulSeekState.UserList) //shouldnt we also lock IgnoreList?
                 {
                     recyclerAdapter = new RecyclerUserListAdapter(this,ParseUserListForPresentation());
                     recyclerViewUserList.SetAdapter(recyclerAdapter);
@@ -596,10 +599,21 @@ namespace AndriodApp1
             }
         }
 
-        public void ShowEditTextDialogAddUserToList()
+        public void ShowEditTextDialogAddUserToList(bool toIgnored)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(Resource.String.add_user_title);
+            // the reason the title is plural is because, using enter, you can add multiple users without closing the dialog.
+            if(toIgnored)
+            {
+                string ignoreUser = this.GetString(Resource.String.ignore_user_title);
+                builder.SetTitle(ignoreUser);
+            }
+            else
+            {
+                string addUser = this.GetString(Resource.String.add_user_title);
+                builder.SetTitle(addUser);
+            }
+
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.add_user_to_userlist, (ViewGroup)this.FindViewById<ViewGroup>(Resource.Layout.user_list_activity_layout), false);
@@ -611,11 +625,25 @@ namespace AndriodApp1
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                if(input.Text!=String.Empty)
+                if(toIgnored)
                 {
-                    SoulSeekState.RecentUsersManager.AddUserToTop(input.Text, true);
+                    if (string.IsNullOrEmpty(input.Text))
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
+                        return;
+                    }
+
+                    SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, input.Text.ToString());
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { RefreshUserList(); }));
                 }
-                AddUserAPI(SoulSeekState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
+                else
+                {
+                    if(input.Text!=String.Empty)
+                    {
+                        SoulSeekState.RecentUsersManager.AddUserToTop(input.Text, true);
+                    }
+                    AddUserAPI(SoulSeekState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
+                }
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
             {
@@ -681,8 +709,11 @@ namespace AndriodApp1
             builder.SetNegativeButton(Resource.String.close, eventHandlerCancel);
             // Set up the buttons
 
-            builder.Show();
+            var dialog = builder.Show();
+            Helpers.DoNotEnablePositiveUntilText(dialog, input);
         }
+
+
 
         //public void IgnoredUserListItemMoreOptionsClick(object sender, EventArgs e) //this can get attached very many times...
         //{

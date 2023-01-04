@@ -109,6 +109,7 @@ namespace AndriodApp1
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
             Helpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
+            Helpers.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
             return base.OnPrepareOptionsMenu(menu);
         }
 
@@ -335,6 +336,7 @@ namespace AndriodApp1
 
             messageUserDialog = builder.Create();
             messageUserDialog.Show();
+            Helpers.DoNotEnablePositiveUntilText(messageUserDialog, input);
         }
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)

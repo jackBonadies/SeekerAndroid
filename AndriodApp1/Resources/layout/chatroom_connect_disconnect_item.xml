@@ -16,13 +16,5 @@
         android:text="@string/chatroom_disconnected"
         android:textSize="16sp"
         />
-<!--    <TextView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="20dp"
-        android:layout_weight="1"
-        android:text="90"
-        android:id="@+id/usersInRoom"
-        android:textSize="22sp"
-        />-->
+
 </LinearLayout>

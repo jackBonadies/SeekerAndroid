@@ -20,6 +20,10 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
  android:title="@string/delete_messages"
  app:showAsAction="never"
       />
+	<item android:id="@+id/action_ignore"
+ android:title="@string/ignore_user"
+ app:showAsAction="never"
+      />
 
 
 

@@ -4249,7 +4249,10 @@ namespace AndriodApp1
 
         public static bool IsUserInIgnoreList(string username)
         {
-            return SoulSeekState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
+            lock (SoulSeekState.IgnoreUserList)
+            {
+                return SoulSeekState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
+            }
         }
 
 
@@ -8533,7 +8536,7 @@ namespace AndriodApp1
                         }
                         catch (Exception ex)
                         {
-                            if (ex.Message.Contains("No Activity found to handle Intent"))
+                            if (ex.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
                             {
                                 FallbackFileSelectionEntry(false);
                             }
@@ -9404,7 +9407,7 @@ namespace AndriodApp1
         }
 
         /// <summary>
-        /// This is for adding new users...
+        /// Remove user from user list.
         /// </summary>
         /// <returns>true if user was found (if false then bad..)</returns>
         public static bool UserListRemoveUser(string username)
@@ -10181,10 +10184,8 @@ namespace AndriodApp1
 
                 Action hideButton = new Action(() =>
                 {
-                    //ToastUI("Must select a directory to place downloads. This will be needed to place downloaded files.");
                     Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
                     bttn.Visibility = ViewStates.Gone;
-                    //bttn.Click += MustSelectDirectoryClick;
                 });
 
                 if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
@@ -10298,16 +10299,16 @@ namespace AndriodApp1
             intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
             try
             {
-                //this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
-                if(1==1)
-                {
-                    throw new Exception("No Activity found to handle Intent");
-                }
-                
+                this.StartActivityForResult(intent, MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL);
+                //if(1==1)
+                //{
+                //    throw new Exception(Helpers.NoDocumentOpenTreeToHandle);
+                //}
+
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("No Activity found to handle Intent"))
+                if (ex.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
                 {
                     FallbackFileSelectionEntry(true);
                 }
@@ -14134,6 +14135,27 @@ namespace AndriodApp1
             }
         }
 
+        public static void SetIgnoreUnignoreTitle(IMenuItem menuItem, string username)
+        {
+            if (menuItem != null && !string.IsNullOrEmpty(username))
+            {
+                if (SeekerApplication.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
+                {
+                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user))
+                    {
+                        menuItem.SetTitle(Resource.String.remove_from_ignored);
+                    }
+                }
+                else
+                {
+                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored))
+                    {
+                        menuItem.SetTitle(Resource.String.ignore_user);
+                    }
+                }
+            }
+        }
+
         private static void SetAddRemoveTitle(IMenuItem menuItem, string username)
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
@@ -14195,6 +14217,32 @@ namespace AndriodApp1
             SetAddRemoveTitle(menuItem, username);
             menuItem = menu.FindItem(Resource.Id.action_add_note);
             SetAddNoteEditNoteTitle(menuItem, username);
+            menuItem = menu.FindItem(Resource.Id.action_ignore);
+            SetIgnoreUnignoreTitle(menuItem, username);
+        }
+
+        public static void SetIgnoreAddExclusive(IMenu menu, string username)
+        {
+            // if we added this user as a friend do not show the option to ignore. they must be removed first.
+            if(!string.IsNullOrEmpty(username))
+            {
+                bool isInUserList = MainActivity.UserListContainsUser(username);
+                var menuItem = menu.FindItem(Resource.Id.action_ignore);
+                menuItem?.SetVisible(!isInUserList);
+            }
+
+
+            // if we have this user in ignore, do not show the option to add as friend.
+            if(!string.IsNullOrEmpty(username))
+            {
+                bool isInIgnoreList = SeekerApplication.IsUserInIgnoreList(username);
+                var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
+                menuItem?.SetVisible(!isInIgnoreList);
+                menuItem = menu.FindItem(Resource.Id.action_add_user);
+                menuItem?.SetVisible(!isInIgnoreList);
+                menuItem = menu.FindItem(Resource.Id.action_add_note);
+                menuItem?.SetVisible(!isInIgnoreList);
+            }
         }
 
 
@@ -14294,6 +14342,31 @@ namespace AndriodApp1
             }
         }
 
+        public static void DoNotEnablePositiveUntilText(AndroidX.AppCompat.App.AlertDialog dialog, EditText input)
+        {
+            var positiveButton = dialog.GetButton((int)DialogButtonType.Positive);
+            // note: this will be null if .Show() has not been called.
+            if (positiveButton == null)
+            {
+                // better to be safe.
+                return;
+            }
+            positiveButton.Enabled = false;
+
+            void Input_AfterTextChanged(object sender, Android.Text.AfterTextChangedEventArgs e)
+            {
+                if (string.IsNullOrEmpty(input.Text))
+                {
+                    positiveButton.Enabled = false;
+                }
+                else
+                {
+                    positiveButton.Enabled = true;
+                }
+            }
+            input.AfterTextChanged += Input_AfterTextChanged;
+        }
+
         /// <summary>
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
@@ -14334,7 +14407,7 @@ namespace AndriodApp1
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
-                MainActivity.ToastUI_short(string.Format("Removing user: {0}", usernameInQuestion));
+                MainActivity.ToastUI_short(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
                 MainActivity.UserListRemoveUser(usernameInQuestion);
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
@@ -14550,13 +14623,15 @@ namespace AndriodApp1
             }
             catch (Exception e)
             {
-                if (e.Message.ToLower().Contains("no activity found to handle"))
+                if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
                 {
                     MainActivity.LogFirebase("viewUri: " + e.Message + httpUri.ToString());
                     SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
                 }
             }
         }
+
+        public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";
 
         public static bool IsUploadCompleteOrAborted(TransferStates state)
         {

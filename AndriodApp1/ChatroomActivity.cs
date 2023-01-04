@@ -596,6 +596,7 @@ namespace AndriodApp1
             try
             {
                 dialogInstance.Show();
+                Helpers.DoNotEnablePositiveUntilText(dialogInstance, input);
             }
             catch (WindowManagerBadTokenException e)
             {
@@ -732,6 +733,7 @@ namespace AndriodApp1
             try
             {
                 dialogInstance.Show();
+                Helpers.DoNotEnablePositiveUntilText(dialogInstance, input);
             }
             catch (WindowManagerBadTokenException e)
             {
@@ -840,6 +842,7 @@ namespace AndriodApp1
             try
             {
                 dialogInstance.Show();
+                Helpers.DoNotEnablePositiveUntilText(dialogInstance, chatNameInput);
             }
             catch (WindowManagerBadTokenException e)
             {

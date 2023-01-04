@@ -2798,7 +2798,7 @@ namespace AndriodApp1
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.ToLower().Contains("no activity found to handle"))
+                    if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
@@ -2844,7 +2844,7 @@ namespace AndriodApp1
                 }
                 catch(Exception e)
                 {
-                    if (e.Message.ToLower().Contains("no activity found to handle"))
+                    if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
