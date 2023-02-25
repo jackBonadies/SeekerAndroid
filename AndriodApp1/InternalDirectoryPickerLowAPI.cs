@@ -187,7 +187,7 @@ namespace AndriodApp1
             AndroidX.AppCompat.App.AlertDialog.Builder dialogBuilder = CreateDirectoryChooserDialog(dir, _mSubdirs, (sender, args) =>
             {
                 String mDirOld = _mDir;
-                String sel = "" + ((AndroidX.AppCompat.App.AlertDialog)sender).ListView.Adapter.GetItem(args.Which);
+                String sel = "" + _listView.Adapter.GetItem(args.Position);
                 if (sel[sel.Length - 1] == '/') sel = sel.Substring(0, sel.Length - 1);
 
                 // Navigate into the sub-directory
@@ -380,10 +380,12 @@ namespace AndriodApp1
             return Color.Rgb(Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
         }
 
+        private ListView _listView;
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////                                   START DIALOG DEFINITION                                    //////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
-        private AndroidX.AppCompat.App.AlertDialog.Builder CreateDirectoryChooserDialog(String title, List<String> listItems, EventHandler<DialogClickEventArgs> onClickListener)
+        private AndroidX.AppCompat.App.AlertDialog.Builder CreateDirectoryChooserDialog(String title, List<String> listItems, EventHandler<AdapterView.ItemClickEventArgs> onClickListener)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder dialogBuilder = new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme);
             DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -448,7 +450,13 @@ namespace AndriodApp1
             LinearLayout titleLayout = new LinearLayout(_mContext);
             titleLayout.Orientation = Orientation.Vertical;
 
+            _listView = new ListView(_mContext);
+            
+            _listView.SetPadding((int)Math.Ceiling(10 * density), (int)Math.Ceiling(5 * density), 0, (int)Math.Ceiling(3 * density));
+            _listView.ItemClick += onClickListener;
+            _listView.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 1f);
 
+            titleLayout.AddView(_listView);
 
             var currentSelection = new TextView(_mContext);
             currentSelection.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
@@ -484,7 +492,7 @@ namespace AndriodApp1
             dialogBuilder.SetView(titleLayout);
             dialogBuilder.SetCustomTitle(titleLayout1);
             _mListAdapter = CreateListAdapter(listItems);
-            dialogBuilder.SetSingleChoiceItems(_mListAdapter, -1, onClickListener);
+            _listView.Adapter = _mListAdapter;
             dialogBuilder.SetCancelable(true);
             return dialogBuilder;
         }
@@ -518,8 +526,8 @@ namespace AndriodApp1
             _mSubdirs.Clear();
             _mSubdirs.AddRange(GetDirectories(_mDir));
             _mTitleView.Text = _mDir;
-            _dirsDialog.ListView.Adapter = null;
-            _dirsDialog.ListView.Adapter = CreateListAdapter(_mSubdirs);
+            _listView.Adapter = null;
+            _listView.Adapter = CreateListAdapter(_mSubdirs);
             //#scorch
             if (_selectType == _fileSave || _selectType == _fileOpen)
             {
