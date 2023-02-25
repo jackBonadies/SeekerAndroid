@@ -78,6 +78,11 @@ namespace AndriodApp1
             _mContext = context;
             
             Java.IO.File[] externalRootDirs = context.GetExternalFilesDirs(null);
+            if(externalRootDirs != null)
+            {
+                _topPaths = externalRootDirs.Select(f => f.AbsolutePath).ToArray();
+            }
+
             if(externalRootDirs != null && externalRootDirs.Count()>1) //this means user has SDCARD
             {
                 //get root (I assume this is going to be /storage/ but just in case)
@@ -114,6 +119,34 @@ namespace AndriodApp1
             catch (IOException ioe)
             {
             }
+        }
+
+        private string[] _topPaths = null;
+
+        private List<string> PsuedoListFiles(File f)
+        {
+            List<string> dirPaths = new List<string>();
+            if(_topPaths != null)
+            {
+                string fullPath = f.AbsolutePath;
+                foreach (var cand in _topPaths)
+                {
+                    
+                    if (cand.StartsWith(fullPath))
+                    {
+                        //int plusOne = fullPath.EndsWith('/') ? 0 : 1;
+                        //int toNextChild = cand.IndexOf("/", fullPath.Length + plusOne);
+                        //string child = cand.Substring(0, toNextChild) + "/";
+                        //dirPaths.Add(child);
+                        int plusOne = fullPath.EndsWith('/') ? 0 : 1;
+                        int endOfFirstPart = fullPath.Length + plusOne;
+                        int toNextChild = cand.IndexOf("/", endOfFirstPart);
+                        string child = cand.Substring(endOfFirstPart, toNextChild - endOfFirstPart) + "/";
+                        dirPaths.Add(child);
+                    }
+                }
+            }
+            return dirPaths;
         }
 
         public enum FileSelectionMode
@@ -160,6 +193,7 @@ namespace AndriodApp1
                 // Navigate into the sub-directory
                 GoToSubDir(sel, mDirOld);
                 UpdateDirectory();
+                SetPositiveButtonState();
             });
             dialogBuilder.SetPositiveButton(Resource.String.okay, (sender, args) =>
             {
@@ -198,6 +232,30 @@ namespace AndriodApp1
             return _result;
         }
 
+        private void SetPositiveButtonState()
+        {
+            if(_mDir == null)
+            {
+                return;
+            }
+
+            try
+            {
+                File dirFile = new File(_mDir);
+                if(dirFile.CanWrite())
+                {
+                    _dirsDialog.GetButton((int)DialogButtonType.Positive).Enabled = true;
+                }
+                else
+                {
+                    _dirsDialog.GetButton((int)DialogButtonType.Positive).Enabled = false;
+                }
+            }
+            catch(Exception ex)
+            {
+            }
+        }
+
 
         public class DialogBackListener : Java.Lang.Object, IDialogInterfaceOnKeyListener
         {
@@ -210,7 +268,7 @@ namespace AndriodApp1
                     {
                         return false;
                     }
-                    this.FileDialog.GoToSubDir("..", string.Empty);
+                    this.FileDialog.GoToSubDir(UpDir, string.Empty);
                     this.FileDialog.UpdateDirectory();
                     return true;
                 }
@@ -233,6 +291,8 @@ namespace AndriodApp1
             return !((_mGoToUpper || !_mDir.Equals(_mSdcardDirectory)) && !"/".Equals(_mDir));
         }
 
+        private const string UpDir = "..";
+
         private List<String> GetDirectories(String dir)
         {
             List<String> dirs = new List<String>();
@@ -243,7 +303,7 @@ namespace AndriodApp1
                 // if directory is not the base sd card directory add ".." for going up one directory
                 if ((_mGoToUpper || !_mDir.Equals(_mSdcardDirectory)) && !"/".Equals(_mDir))
                 {
-                    dirs.Add("..");
+                    dirs.Add(UpDir);
                 }
                 Log.Debug("~~~~", "m_dir=" + _mDir);
                 if (!dirFile.Exists() || !dirFile.IsDirectory)
@@ -251,24 +311,47 @@ namespace AndriodApp1
                     return dirs;
                 }
 
-                foreach (File file in dirFile.ListFiles())
+                var listedFiles = dirFile.ListFiles();
+                if(listedFiles == null)
                 {
-                    if (file.IsDirectory)
+                    // file.ListFiles() returns null if at '/storage/emulated/' or '/storage/'
+                    var psuedoListFiles = PsuedoListFiles(dirFile);
+                    dirs.AddRange(psuedoListFiles);
+                }
+                else
+                {
+                    foreach (File file in dirFile.ListFiles())
                     {
-                        // Add "/" to directory names to identify them in the list
-                        dirs.Add(file.Name + "/");
-                    }
-                    else if (_selectType == _fileSave || _selectType == _fileOpen)
-                    {
-                        // Add file names to the list if we are doing a file save or file open operation
-                        dirs.Add(file.Name);
+                        if (file.IsDirectory)
+                        {
+                            // Add "/" to directory names to identify them in the list
+                            dirs.Add(file.Name + "/");
+                        }
+                        else if (_selectType == _fileSave || _selectType == _fileOpen)
+                        {
+                            // Add file names to the list if we are doing a file save or file open operation
+                            dirs.Add(file.Name);
+                        }
                     }
                 }
             }
             catch (Exception e) { }
 
-            dirs.Sort();
+            DirectorySort(dirs);
             return dirs;
+        }
+
+        private void DirectorySort(List<string> dirs)
+        {
+            dirs.Sort();
+
+            // '(filename' gets placed before '..'. always put '..' first.
+            int indexOfUpDir = dirs.IndexOf(UpDir);
+            if(indexOfUpDir > 0)
+            {
+                dirs.RemoveAt(indexOfUpDir);
+                dirs.Insert(0, UpDir);
+            }
         }
 
         public static Color GetColorFromAttribute(Context c, int attr)
@@ -409,7 +492,7 @@ namespace AndriodApp1
         public void GoToSubDir(string sel, string mDirOld)
         {
             // Navigate into the sub-directory
-            if (sel.Equals(".."))
+            if (sel.Equals(UpDir))
             {
                 _mDir = _mDir.Substring(0, _mDir.LastIndexOf("/"));
                 if ("".Equals(_mDir))
