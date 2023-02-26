@@ -53,7 +53,7 @@ namespace AndriodApp1
                     //create file type, file num, and keyword buckets.
                     //get counts to show in order
                     //there are parent child relationships between 'fileType' and 'fileType (vbr/kbps/samples/depth)'
-                    string ftype = searchResponse.GetDominantFileType(hideHidden);
+                    string ftype = searchResponse.GetDominantFileType(hideHidden, out _);
                     if (string.IsNullOrEmpty(ftype))
                     {
                         continue;

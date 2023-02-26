@@ -80,14 +80,17 @@ namespace Soulseek
                 return true;
             }
         }
+
         private string cachedDominantFileType = null;
+        private double cachedCalcBitRate = double.NaN;
         //we used to do this in SetItem.  That might get called too many times.. so lets cache the result so that we only do it once.
         //similar to before we only compute it when we actually need it (i.e. it scrolls into view).
         //if hideLocked is true, then only iterate over unlocked files. else iterate over everything.
-        public string GetDominantFileType(bool hideLocked = true)
+        public string GetDominantFileType(bool hideLocked, out double calcBitRate)
         {
             if(!string.IsNullOrEmpty(cachedDominantFileType))
             {
+                calcBitRate = cachedCalcBitRate;
                 return cachedDominantFileType;
             }
             //basically this works in two ways.  if the first file has a type of .mp3, .flac, .wav, .aiff, .wma, .aac then thats likely the type.
@@ -124,6 +127,17 @@ namespace Soulseek
                         dominantType = pair.Key;
                         count = pair.Value;
                     }
+                    else if (pair.Value == count)
+                    {
+                        // if equal but this type is a known type and the other is not
+                        // then replace it.  (ex. this is case of 1 mp3, 1 jpg)
+                        if(SlskHelp.CommonHelpers.KNOWN_TYPES.Contains(pair.Key) &&
+                            !SlskHelp.CommonHelpers.KNOWN_TYPES.Contains(dominantType))
+                        {
+                            dominantType = pair.Key;
+                            count = pair.Value;
+                        }
+                    }
                 }
                 dominantTypeToReturn = dominantType;
             }
@@ -148,6 +162,7 @@ namespace Soulseek
             {
                 //shouldnt happen
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
+                cachedCalcBitRate = calcBitRate = -1;
                 return cachedDominantFileType;
             }
 
@@ -196,33 +211,55 @@ namespace Soulseek
             if (!isVbr && bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
+                if(representative.Length.HasValue)
+                {
+                    // sometimes (though rarely) we do get length but not bitrate.
+                    cachedCalcBitRate = calcBitRate = calcBitRateFromSizeAndLength(representative.Size, representative.Length.Value);
+                }
+                else
+                {
+                    cachedCalcBitRate = calcBitRate = -1;
+                }
                 return cachedDominantFileType; //nothing to add
             }
             else if (isVbr)
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (vbr)";
+                cachedCalcBitRate = calcBitRate = bitRate; // using that of first file.
                 return cachedDominantFileType;
             }
             else if (bitDepth != -1 && !double.IsNaN(sampleRate))
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ + ")";
+                cachedCalcBitRate = calcBitRate = bitDepth * sampleRate * 2;
                 return cachedDominantFileType;
             }
             else if (!double.IsNaN(sampleRate))
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ + ")";
+                cachedCalcBitRate = calcBitRate = bitRate != -1 ? bitRate : 16 * sampleRate * 2;
                 return cachedDominantFileType;
             }
             else if (bitRate != -1)
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.') + " (" + bitRate + SlskHelp.CommonHelpers.STRINGS_KBS + ")";
+                cachedCalcBitRate = calcBitRate = bitRate;
                 return cachedDominantFileType;
             }
             else
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
+                cachedCalcBitRate = calcBitRate = -1;
                 return cachedDominantFileType;
             }
+        }
+
+        /// <summary>
+        /// returns kilobits per second
+        /// </summary>
+        private static double calcBitRateFromSizeAndLength(long bytes, int seconds)
+        {
+            return (8 * (bytes / 1024) / seconds);
         }
 
         /// <summary>

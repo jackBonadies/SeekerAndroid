@@ -895,4 +895,7 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="permission_successfully_granted">Permission succesfully granted</string>
 	<string name="permission_failed">Failed to grant permission</string>
 
+
+	<string name="bitrate">Bitrate</string>
+
 </resources>

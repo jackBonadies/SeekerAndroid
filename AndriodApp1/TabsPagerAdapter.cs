@@ -684,73 +684,78 @@ namespace AndriodApp1
             searchResultSorting = _searchResultSorting;
         }
 
+        private int CompareByAvailable(SearchResponse x, SearchResponse y)
+        {
+            //highest precedence. locked files.
+            //so if any of the search responses have 0 unlocked files, they are considered the worst.
+            if ((x.FileCount != 0 && y.FileCount == 0) || (x.FileCount == 0 && y.FileCount != 0))
+            {
+                if (y.FileCount == 0)
+                {
+                    //x is better
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            //next highest - free upload slots. for now just they are free or not.
+            if ((x.FreeUploadSlots == 0 && y.FreeUploadSlots != 0) || (x.FreeUploadSlots != 0 && y.FreeUploadSlots == 0))
+            {
+                if (x.FreeUploadSlots == 0)
+                {
+                    //x is worse
+                    return 1;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            //next highest - queue length
+            if (x.QueueLength != y.QueueLength)
+            {
+                if (x.QueueLength > y.QueueLength)
+                {
+                    //x is worse
+                    return 1;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            //next speed (MOST should fall here, from my testing at least).
+            if (x.UploadSpeed != y.UploadSpeed)
+            {
+                if (x.UploadSpeed > y.UploadSpeed)
+                {
+                    //x is better
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            //VERY FEW, should go here
+            if (x.Files.Count != 0 && y.Files.Count != 0)
+            {
+                return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
+            }
+            if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
+            {
+                return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
+            }
+            return 0;
+        }
+
         public virtual int Compare(SearchResponse x, SearchResponse y)
         {
             if(searchResultSorting == SearchResultSorting.Available)
             {
-                //highest precedence. locked files.
-                //so if any of the search responses have 0 unlocked files, they are considered the worst.
-                if ((x.FileCount != 0 && y.FileCount == 0) || (x.FileCount == 0 && y.FileCount != 0))
-                {
-                    if (y.FileCount == 0)
-                    {
-                        //x is better
-                        return -1;
-                    }
-                    else
-                    {
-                        return 1;
-                    }
-                }
-                //next highest - free upload slots. for now just they are free or not.
-                if ((x.FreeUploadSlots == 0 && y.FreeUploadSlots != 0) || (x.FreeUploadSlots != 0 && y.FreeUploadSlots == 0))
-                {
-                    if (x.FreeUploadSlots == 0)
-                    {
-                        //x is worse
-                        return 1;
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-                //next highest - queue length
-                if (x.QueueLength != y.QueueLength)
-                {
-                    if (x.QueueLength > y.QueueLength)
-                    {
-                        //x is worse
-                        return 1;
-                    }
-                    else
-                    {
-                        return -1;
-                    }
-                }
-                //next speed (MOST should fall here, from my testing at least).
-                if (x.UploadSpeed != y.UploadSpeed)
-                {
-                    if (x.UploadSpeed > y.UploadSpeed)
-                    {
-                        //x is better
-                        return -1;
-                    }
-                    else
-                    {
-                        return 1;
-                    }
-                }
-                //VERY FEW, should go here
-                if (x.Files.Count != 0 && y.Files.Count != 0)
-                {
-                    return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
-                }
-                if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
-                {
-                    return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
-                }
-                return 0;
+                return CompareByAvailable(x, y);
             }
             else if(searchResultSorting == SearchResultSorting.Fastest)
             {
@@ -777,27 +782,65 @@ namespace AndriodApp1
                 }
                 return 0;
             }
+            else if(searchResultSorting == SearchResultSorting.BitRate)
+            {
+                //for fastest, only speed matters. if they pick this then even locked files are in the running.
+                x.GetDominantFileType(SoulSeekState.HideLockedResultsInSearch, out double xbitRate);
+                y.GetDominantFileType(SoulSeekState.HideLockedResultsInSearch, out double ybitRate);
+                if(xbitRate != ybitRate)
+                {
+                    if (xbitRate > ybitRate)
+                    {
+                        //x is better
+                        return -1;
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+                // known issue (though more an an issue with the GetDominantFileType call) is when
+                // the first 2 files are mp3 - no info, and later files are mp3 (320).
+                // then it is considered mp3 - no info.
+                // if someone sends a flac without length, bitrate, or sample rate info, then 
+                // we treat that as no info and its at the bottom of the sort. I can see this 
+                // being user unfriendly or counterintuitive.
+
+                return CompareByAvailable(x, y);
+            }
             else if(searchResultSorting == SearchResultSorting.FolderAlphabetical)
             {
-                if (x.Files.Count != 0 && y.Files.Count != 0)
+                string xFolder = null;
+                string yFolder = null;
+                if (x.Files.Count != 0)
                 {
-                    string xFolder = Helpers.GetFolderNameFromFile(x.Files.First().Filename);
-                    string yFolder = Helpers.GetFolderNameFromFile(y.Files.First().Filename);
+                    xFolder = Helpers.GetFolderNameFromFile(x.Files.First().Filename);
+                }
+                else if (x.LockedFiles.Count != 0)
+                {
+                    xFolder = Helpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
+                }
+
+                if (y.Files.Count != 0)
+                {
+                    yFolder = Helpers.GetFolderNameFromFile(y.Files.First().Filename);
+                }
+                else if (y.LockedFiles.Count != 0)
+                {
+                    yFolder = Helpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
+                }
+
+                if(xFolder != null && yFolder != null)
+                {
                     int ret = xFolder.CompareTo(yFolder);
-                    if(ret != 0)
+                    if (ret != 0)
                     {
                         return ret;
                     }
                 }
-                if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
+                else
                 {
-                    string xLockedFolder = Helpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
-                    string yLockedFolder = Helpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
-                    int lockedret = xLockedFolder.CompareTo(yLockedFolder);
-                    if (lockedret != 0)
-                    {
-                        return lockedret;
-                    }
+                    // should not happen
                 }
 
                 //if its a tie (which is probably pretty common)
@@ -863,6 +906,7 @@ namespace AndriodApp1
         Available = 0,
         Fastest = 1,
         FolderAlphabetical = 2,
+        BitRate = 3,
     }
 
     public class SearchTab
@@ -3055,6 +3099,7 @@ namespace AndriodApp1
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortAvailability = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.availability);
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortSpeed = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.speed);
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortFolderNameAlpha = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.folderNameAlpha);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton sortBitrate = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.bitRate);
             CheckBox checkBoxSetAsDefault = viewInflated.FindViewById<CheckBox>(Resource.Id.setAsDefault);
             switch (SearchTabHelper.SortHelperSorting)
             {
@@ -3067,11 +3112,15 @@ namespace AndriodApp1
                 case SearchResultSorting.FolderAlphabetical:
                     sortFolderNameAlpha.Checked = true;
                     break;
+                case SearchResultSorting.BitRate:
+                    sortBitrate.Checked = true;
+                    break;
             }
 
             sortAvailability.Click += SortAvailabilityClick;
             sortSpeed.Click += SortSpeedClick;
             sortFolderNameAlpha.Click += SortFoldernameAlphaClick;
+            sortBitrate.Click += SortBitrate_Click;
 
             builder.SetView(viewInflated);
 
@@ -3107,6 +3156,12 @@ namespace AndriodApp1
             dialogInstance = builder.Create();
             dialogInstance.Show();
         }
+
+        private void SortBitrate_Click(object sender, EventArgs e)
+        {
+            UpdateSortAvailability(SearchResultSorting.BitRate);
+        }
+
         private void SortAvailabilityClick(object sender, EventArgs e)
         {
             UpdateSortAvailability(SearchResultSorting.Available);
@@ -3595,14 +3650,14 @@ namespace AndriodApp1
                 match = chipFilter.AllVarientsFileType.Count == 0 && chipFilter.SpecificFileType.Count == 0;
                 foreach (string varient in chipFilter.AllVarientsFileType)
                 {
-                    if (s.GetDominantFileType(hideLocked) == varient || s.GetDominantFileType(hideLocked).Contains(varient + " "))
+                    if (s.GetDominantFileType(hideLocked, out _) == varient || s.GetDominantFileType(hideLocked, out _).Contains(varient + " "))
                     {
                         match = true;
                     }
                 }
                 foreach (string specific in chipFilter.SpecificFileType)
                 {
-                    if (s.GetDominantFileType(hideLocked) == specific)
+                    if (s.GetDominantFileType(hideLocked, out _) == specific)
                     {
                         match = true;
                     }
@@ -5667,7 +5722,7 @@ namespace AndriodApp1
             viewUsername.Text = item.Username;
             viewFoldername.Text = Helpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
-            viewFileType.Text = item.GetDominantFileType(hideLocked);
+            viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
             if (item.FreeUploadSlots > 0)
             {
                 viewQueue.Text = "";
@@ -5783,7 +5838,7 @@ namespace AndriodApp1
             {
                 viewQueue.Text = item.QueueLength.ToString();
             }
-            viewFileType.Text = item.GetDominantFileType(hideLocked);
+            viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
 
             if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll && opposite ||
                 SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)
