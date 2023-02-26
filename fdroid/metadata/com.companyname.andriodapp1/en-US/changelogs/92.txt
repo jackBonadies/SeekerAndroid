@@ -1,0 +1,2 @@
+Internal Directory Picker - bug fix preventing user from browsing to SD card.  bug fix where buttons were cut off.
+Ability to sort search results by bitrate.  Fix sorting bug regarding locked files.

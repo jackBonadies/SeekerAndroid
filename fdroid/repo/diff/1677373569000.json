@@ -1,0 +1,14 @@
+{
+  "repo": {
+    "timestamp": 1677373582000
+  },
+  "packages": {
+    "com.companyname.andriodapp1": {
+      "versions": {
+        "05efb716ba9529b16476f429f36198fbcab48b00b37f386ca266fae315cd0a5d": {
+          "releaseChannels": null
+        }
+      }
+    }
+  }
+}
