@@ -2923,15 +2923,15 @@ namespace AndriodApp1
 
 
 
-        private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromSubApi21=false)
+        private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker=false)
         {
             var x = uri;
             //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
             SoulSeekState.SaveDataDirectoryUri = uri.ToString();
-            SoulSeekState.SaveDataDirectoryUriIsFromTree = fromSubApi21;
+            SoulSeekState.SaveDataDirectoryUriIsFromTree = !fromLegacyPicker;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
             DocumentFile docFile = null;
-            if (fromSubApi21)
+            if (fromLegacyPicker)
             {
                 docFile = DocumentFile.FromFile(new Java.IO.File(uri.Path));
             }
