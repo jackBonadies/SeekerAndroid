@@ -211,7 +211,7 @@ namespace Soulseek
             if (!isVbr && bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
             {
                 cachedDominantFileType = dominantTypeToReturn.TrimStart('.');
-                if(representative.Length.HasValue)
+                if(representative.Length.HasValue && representative.Length.Value > 0)
                 {
                     // sometimes (though rarely) we do get length but not bitrate.
                     cachedCalcBitRate = calcBitRate = calcBitRateFromSizeAndLength(representative.Size, representative.Length.Value);
