@@ -1379,7 +1379,7 @@ namespace AndriodApp1
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendMessageAPI(new Message(Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1394,7 +1394,7 @@ namespace AndriodApp1
             if(e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendMessageAPI(new Message(Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1561,7 +1561,7 @@ namespace AndriodApp1
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendMessageAPI(new Message(Username,-1,false,DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendMessageAPI(new Message(Username,-1,false,Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
@@ -2427,9 +2427,9 @@ namespace AndriodApp1
                 if (remoteInputBundle != null)
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");
-                    //Message msg = new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, replyText, false);
+                    //Message msg = new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     MainActivity.LogDebug("direct reply " + replyText + " " + uname);
-                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, DateTime.Now, DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
+                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
                     
                 }

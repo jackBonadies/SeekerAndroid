@@ -5074,7 +5074,7 @@ namespace AndriodApp1
         public static void SearchAPI(CancellationToken cancellationToken, Android.Graphics.Drawables.TransitionDrawable transitionDrawable, string searchString, int fromTab, bool fromWishlist = false)
         {
             SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm = searchString;
-            SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = DateTime.Now;
+            SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = Helpers.GetDateTimeNowSafe();
             if (!fromWishlist)
             {
                 //try to clearFocus on the search if you can (gets rid of blinking cursor)

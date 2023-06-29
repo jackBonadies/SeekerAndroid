@@ -443,7 +443,7 @@ namespace AndriodApp1
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Q)
             {
                 ContentValues valuesForContentResolver = GetContentValues();
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + DateTime.Now.ToString("_yyyyMMdd_hhmmss") + ext);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + Helpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.RelativePath, "Pictures");
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
                                                                                                                //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected. 
@@ -463,7 +463,7 @@ namespace AndriodApp1
                 {
                     directory.Mkdirs();
                 }
-                string fileName = UserToView + DateTime.Now.ToString("_yyyyMMdd_hhmmss") + ext;
+                string fileName = UserToView + Helpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
                 Java.IO.File file = new Java.IO.File(directory, fileName);
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
@@ -477,7 +477,7 @@ namespace AndriodApp1
         private ContentValues GetContentValues() 
         {
             ContentValues valuesForContentResolver = new ContentValues();
-            DateTime now = DateTime.Now;
+            DateTime now = Helpers.GetDateTimeNowSafe();
             long ms = new DateTimeOffset(now).ToUnixTimeMilliseconds();
             long s = ms / 1000;
             valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DateAdded, s);

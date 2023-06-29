@@ -2635,7 +2635,7 @@ namespace AndriodApp1
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
 
-            SoulSeekState.OffsetFromUtcCached = DateTime.Now.Subtract(DateTime.UtcNow);
+            SoulSeekState.OffsetFromUtcCached = Helpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
 
             SoulSeekState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
             SetLanguage(SoulSeekState.Language, false);
@@ -12138,7 +12138,7 @@ namespace AndriodApp1
         private static void SaveFileToMediaStore(string path)
         {
             //ContentValues contentValues = new ContentValues();
-            //contentValues.Put(MediaStore.MediaColumns.DateAdded, DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond);
+            //contentValues.Put(MediaStore.MediaColumns.DateAdded, Helpers.GetDateTimeNowSafe().Ticks / TimeSpan.TicksPerMillisecond);
             //contentValues.Put(MediaStore.Audio.AudioColumns.Data,path);
             //ContentResolver.Insert(MediaStore.Audio.Media.ExternalContentUri, contentValues);from
 
@@ -13984,7 +13984,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
-            if (dt.Date == DateTime.Now.Date)
+            if (dt.Date == Helpers.GetDateTimeNowSafe().Date)
             {
                 return SoulSeekState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
             }
@@ -14307,6 +14307,18 @@ namespace AndriodApp1
             }
         }
 
+        public static DateTime GetDateTimeNowSafe()
+        {
+            try
+            {
+                return DateTime.Now;
+            }
+            catch(System.TimeZoneNotFoundException)
+            {
+                return DateTime.UtcNow;
+            }
+        }
+
         public static void AddGivePrivilegesIfApplicable(IMenu menu, int indexToUse)
         {
             if (PrivilegesManager.Instance.GetRemainingDays() >= 1)
@@ -14507,7 +14519,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
-            if (dt.Date == DateTime.Now.Date)
+            if (dt.Date == Helpers.GetDateTimeNowSafe().Date)
             {
                 return dt.ToString("h:mm:ss tt", cultureInfo); //this is the only difference...
             }
@@ -14849,7 +14861,7 @@ namespace AndriodApp1
 
         public static string GetDateTimeSinceAbbrev(DateTime dtThen)
         {
-            var dtNow = DateTime.Now; //2.5 microseconds
+            var dtNow = Helpers.GetDateTimeNowSafe(); //2.5 microseconds
             if (dtNow.Day == dtThen.Day)
             {
                 //if on same day then show time. 24 hour time? maybe option to change?

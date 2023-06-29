@@ -374,7 +374,7 @@ namespace AndriodApp1
                 for (int i = 0; i < 1000; i++)
                 {
                     System.Threading.Thread.Sleep(r.Next(0, 100));
-                    Message m = new Message("test", 1, false, DateTime.Now, DateTime.UtcNow, "test" + i, false);
+                    Message m = new Message("test", 1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, "test" + i, false);
                     ChatroomController.AddMessage(ChatroomInnerFragment.OurRoomInfo.Name, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(ChatroomInnerFragment.OurRoomInfo.Name, m));
                 }
@@ -1905,7 +1905,7 @@ namespace AndriodApp1
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1920,7 +1920,7 @@ namespace AndriodApp1
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name,new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name,new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -2059,7 +2059,7 @@ namespace AndriodApp1
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, DateTime.Now, DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
@@ -2443,7 +2443,7 @@ namespace AndriodApp1
                 List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
                 foreach (string room in noLongerConnectedRooms) 
                 {
-                    Message m = new Message(DateTime.Now, DateTime.UtcNow, code);
+                    Message m = new Message(Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, code);
                     ChatroomController.AddMessage(room, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs( room, m ));
                 }
@@ -3165,7 +3165,7 @@ namespace AndriodApp1
 
                 MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
-            Message msg = new Message(e.Username, -1, false, DateTime.Now, DateTime.UtcNow, e.Message, false);
+            Message msg = new Message(e.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
             if(e.Username == SoulSeekState.Username)
             {
                 //we already logged it..
