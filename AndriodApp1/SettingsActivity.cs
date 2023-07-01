@@ -821,7 +821,8 @@ namespace AndriodApp1
                 editor.PutString(SoulSeekState.M_Lanuage, SoulSeekState.Language);
                 editor.Commit();
             }
-
+            //TODO API33 - MonoAndroid Get/Set locale missing.
+            
             (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(SoulSeekState.Language, true);
         }
 
@@ -2689,13 +2690,43 @@ namespace AndriodApp1
             ShowDirSettings(SoulSeekState.SaveDataDirectoryUri,DirectoryType.Download);
         }
 
+        private bool needsMediaStorePermission()
+        {
+            if((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            {
+                return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
+            }
+            else
+            {
+                return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied;
+            }
+        }
+
+        private void requestMediaStorePermission()
+        {
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            {
+                Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadMediaAudio }, READ_EXTERNAL_FOR_MEDIA_STORE);
+            }
+            else
+            {
+                Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
+            }
+        }
+
         private void AddUploadDirectory(object sender, EventArgs e)
         {
+            // We request ReadExternalStorage so that we can query the media store to get music attributes (duration, bitrate)
+            //   quickly (i.e. without having to load the file from disk and read attributes).
+            // API 33 (Android 13) target - this permission has no effect.  Instead use the granular ReadMediaAudio since we only 
+            //   use the media store for audio anyway.  If we were previously granted ReadExternalStorage then we get ReadMedia* 
+            //   automatically when upgrading.
+
             //you dont have this on api >= 29 because you never requested it, but it is NECESSARY to read media store
-            if (Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied) 
+            if (needsMediaStorePermission())
             {
                 //if they deny the permission twice and are on api >= 30, then it will auto deny (behavior is the same as if they manually clicked deny).
-                Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
+                requestMediaStorePermission();
             }
             else
             {

@@ -55,6 +55,7 @@ using static Android.Provider.DocumentsContract;
 using Android.Util;
 using SearchResponseExtensions;
 using Android.Net;
+using System.Linq.Expressions;
 
 //using System.IO;
 //readme:
@@ -7905,16 +7906,17 @@ namespace AndriodApp1
         }
 
 
-        public static string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
-        public static int SETTINGS_EXTERNAL = 0x430;
-        public static int DEFAULT_SEARCH_RESULTS = 50;
-        private int WRITE_EXTERNAL = 9999;
-        private int NEW_WRITE_EXTERNAL = 0x428;
-        private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
-        private int NEW_WRITE_EXTERNAL_VIA_LEGACY = 0x42A;
-        private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY = 0x42B;
-        private int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
-        private int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
+        public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
+        public const int SETTINGS_EXTERNAL = 0x430;
+        public const int DEFAULT_SEARCH_RESULTS = 50;
+        private const int WRITE_EXTERNAL = 9999;
+        private const int NEW_WRITE_EXTERNAL = 0x428;
+        private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
+        private const int NEW_WRITE_EXTERNAL_VIA_LEGACY = 0x42A;
+        private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY = 0x42B;
+        private const int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
+        private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
+        private const int POST_NOTIFICATION_PERMISSION = 0x42E;
         private Android.Support.V4.View.ViewPager pager = null;
 
         public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
@@ -8094,6 +8096,8 @@ namespace AndriodApp1
             //    // System is in Day mode
             //}
 
+
+            //this.RequestPostNotificationPermissionsIfApplicable();
 
             //restoreSoulSeekState(savedInstanceState);
 
@@ -8726,6 +8730,114 @@ namespace AndriodApp1
                         this.OnActivityResult(requestCode, Result.Ok, intent);
                     }
                 });
+        }
+
+        public static Action<Task> GetPostNotifPermissionTask()
+        {
+            return new Action<Task>((task) => {
+                if (task.IsCompletedSuccessfully)
+                {
+                    RequestPostNotificationPermissionsIfApplicable();
+                }
+            });
+            
+        }
+
+        private static bool postNotficationAlreadyRequestedInSession = false;
+        /// <summary>
+        /// As far as where to place this, doing it on launch is no good (as they will already
+        ///   see yet another though more important permission in the background behind them).
+        /// Doing this on login (i.e. first session login) seems decent.
+        /// </summary>
+        private static void RequestPostNotificationPermissionsIfApplicable()
+        {
+            if (postNotficationAlreadyRequestedInSession)
+            {
+                return;
+            }
+            postNotficationAlreadyRequestedInSession = true;
+
+            if ((int)Android.OS.Build.VERSION.SdkInt < 33)
+            {
+                return;
+            }
+
+            try
+            {
+                if (ContextCompat.CheckSelfPermission(SoulSeekState.ActiveActivityRef, Manifest.Permission.PostNotifications) == Android.Content.PM.Permission.Denied)
+                {
+                    bool alreadyShown = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_PostNotificationRequestAlreadyShown, false);
+                    if (alreadyShown)
+                    {
+                        return;
+                    }
+
+                    if (OnUIthread())
+                    {
+                        RequestNotifPermissionsLogic();
+                    }
+                    else
+                    {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(RequestNotifPermissionsLogic);
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: " + e.Message + e.StackTrace);
+            }
+        }
+
+        // recommended way, if user only denies once then next time (ShouldShowRequestPermissionRationale lets us know this)
+        //   then show a blurb on what the permissions are used for and ask a second (and last) time.
+        private static void RequestNotifPermissionsLogic()
+        {
+            try
+            {
+                if (ActivityCompat.ShouldShowRequestPermissionRationale(SoulSeekState.ActiveActivityRef, Manifest.Permission.PostNotifications))
+                {
+                    var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                    b.SetTitle("Allow Notifications?");
+                    b.SetMessage("Seeker provides push notifications to keep you updated on file uploads/downloads and incoming user messages.");
+                    ManualResetEvent mre = new ManualResetEvent(false);
+
+                    // make sure we never prompt the user for these permissions again
+                    void setAlreadyShown()
+                    {
+                        lock (MainActivity.SHARED_PREF_LOCK)
+                        {
+                            var editor = SoulSeekState.SharedPreferences.Edit();
+                            editor.PutBoolean(SoulSeekState.M_PostNotificationRequestAlreadyShown, true);
+                            editor.Commit();
+                        }
+                    }
+
+                    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+                    {
+                        ActivityCompat.RequestPermissions(SoulSeekState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
+                        setAlreadyShown();
+                    });
+                    b.SetPositiveButton(Resource.String.okay, eventHandler);
+
+                    EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs noArgs) =>
+                    {
+                        setAlreadyShown();
+                    });
+                    b.SetNegativeButton("No thanks", eventHandlerCancel);
+
+                    b.SetCancelable(false);
+                    b.Show();
+                }
+                else
+                {
+                    // normal first time
+                    ActivityCompat.RequestPermissions(SoulSeekState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
+                }
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: " + e.Message + e.StackTrace);
+            }
         }
 
         protected override void OnStart()
@@ -10929,7 +11041,10 @@ namespace AndriodApp1
         /// 
         /// </summary>
         /// <param name="rootView"></param>
-        public static void AddLoggedInLayout(View rootView = null)
+        /// <param name="force">the log in layout is full of hacks. that being said force 
+        ///   makes it so that if we are currently logged in to still add the logged in fragment
+        ///   if not there, which makes sense. </param>
+        public static void AddLoggedInLayout(View rootView = null, bool force = false)
         {
             View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
             View bttnTryTwo = rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
@@ -10944,7 +11059,7 @@ namespace AndriodApp1
                 bttnTwoIsAttached = true;
             }
 
-            if (!bttnIsAttached && !bttnTwoIsAttached && !SoulSeekState.currentlyLoggedIn)
+            if (!bttnIsAttached && !bttnTwoIsAttached && (!SoulSeekState.currentlyLoggedIn || force))
             {
                 //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
                 //ViewGroup relLayout = SoulSeekState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
@@ -11215,7 +11330,7 @@ namespace AndriodApp1
                 Button settingsButton = null;
                 try
                 {
-                    if (StaticHacks.RootView != null)
+                    if (StaticHacks.RootView != null && rootView == null)
                     {
                         logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
                         settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
@@ -11242,7 +11357,7 @@ namespace AndriodApp1
                     logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
                     Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                     loggingInView.Visibility = ViewStates.Visible;
-                    welcome.Visibility = ViewStates.Gone;
+                    welcome.Visibility = ViewStates.Gone; //WE GET NULLREF HERE. FORCE connection already established exception and maybe see what is going on here...
                     logoutButton.Visibility = ViewStates.Gone;
                     settingsButton.Visibility = ViewStates.Gone;
                     Android.Support.V4.View.ViewCompat.SetTranslationZ(logoutButton, 0);
@@ -12494,13 +12609,20 @@ namespace AndriodApp1
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+            switch(requestCode)
             {
-                return;
-            }
-            else
-            {
-                FinishAndRemoveTask();
+                case POST_NOTIFICATION_PERMISSION:
+                    break;
+                default:
+                    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        FinishAndRemoveTask(); //TODO - why?? this was added in initial commit. kills process if permission not granted?
+                    }
+                    break;
             }
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -13753,6 +13875,7 @@ namespace AndriodApp1
         public const string M_CreateCompleteAndIncompleteFolders = "Momento_CreateCompleteIncomplete";
         public const string M_AdditionalUsernameSubdirectories = "Momento_M_AdditionalUsernameSubdirectories";
 
+        public const string M_PostNotificationRequestAlreadyShown = "Momento_M_PostNotificationRequestAlreadyShown";
 
         public const string M_SmartFilter_KeywordsEnabled = "Momento_SmartFilterKeywordsEnabled";
         public const string M_SmartFilter_CountsEnabled = "Momento_SmartFilterCountsEnabled";

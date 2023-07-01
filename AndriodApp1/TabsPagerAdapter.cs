@@ -253,6 +253,7 @@ namespace AndriodApp1
                     }
                     //Task login = SoulSeekState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SoulSeekState.Username, SoulSeekState.Password);
                     login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
+                    login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
                     SoulSeekState.MainActivityRef.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
                 }
                 else if (!StaticHacks.LoggingIn || StaticHacks.UpdateUI)
@@ -518,7 +519,7 @@ namespace AndriodApp1
         public void LogInClick(object sender, EventArgs e)
         {
             var pager = (Android.Support.V4.View.ViewPager)Activity.FindViewById(Resource.Id.pager);
-
+            bool alreadyConnected = false;
             Task login = null;
             try
             {
@@ -534,6 +535,10 @@ namespace AndriodApp1
                     return;
                 }
                 login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
+                login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
+                //throw new InvalidOperationException("The client is already connected"); //bug catcher
+
+                //login.ContinueWith(t=>t.IsCompletedSuccessfully)
                 try
                 {
                     Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
@@ -560,9 +565,10 @@ namespace AndriodApp1
             {
                 if (err.Message.Equals("The client is already connected"))
                 {
+                    alreadyConnected = true;
                     SoulSeekState.currentlyLoggedIn = true;
-                    MainActivity.AddLoggedInLayout(StaticHacks.RootView);
-                    MainActivity.UpdateUIForLoggedIn(StaticHacks.RootView);
+                    MainActivity.AddLoggedInLayout(this.rootView, true);
+                    MainActivity.UpdateUIForLoggedIn(this.rootView);
                 }
                 else
                 {
@@ -577,10 +583,16 @@ namespace AndriodApp1
                 //LayoutInflater inflater = (LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService);
                 //View rootView = inflater.Inflate(Resource.Layout.loggedin,null);
                 MainActivity.AddLoggedInLayout(this.rootView); //i.e. if not already
-                MainActivity.UpdateUIForLoggingInLoading(this.rootView);
+                if (!alreadyConnected)
+                {
+                    MainActivity.UpdateUIForLoggingInLoading(this.rootView);
+                }
                 SoulSeekState.Username = this.usernameTextEdit.Text;
                 SoulSeekState.Password = this.passwordTextEdit.Text;
-                StaticHacks.LoggingIn = true;
+                if (!alreadyConnected)
+                {
+                    StaticHacks.LoggingIn = true;
+                }
                 SoulSeekState.ManualResetEvent.Reset();
                 //if(login.IsCompleted)
                 //{
