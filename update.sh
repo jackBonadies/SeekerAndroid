@@ -24,7 +24,7 @@ elif [ $EXIT_CODE -eq 0 ]; then
 
     git config --global user.name 'github-actions'
     git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
+    git lfs install
     # Undo changes to fdroid config.yml (remove the secrets) before committing changes
     git checkout fdroid/config.yml
 
