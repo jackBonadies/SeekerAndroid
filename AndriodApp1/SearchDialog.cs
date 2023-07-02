@@ -1,6 +1,5 @@
 ﻿using Android.Content;
 using Android.App;
-using Android.Content;
 using Android.Net.Wifi;
 using Android.OS;
 using Android.Runtime;
@@ -270,7 +269,7 @@ namespace AndriodApp1
     }
 
 
-    public class SearchDialog : Android.Support.V4.App.DialogFragment
+    public class SearchDialog : AndroidX.Fragment.App.DialogFragment
     {
 
         public static EventHandler<bool> SearchTermFetched;

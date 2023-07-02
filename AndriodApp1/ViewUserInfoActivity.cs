@@ -204,7 +204,7 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.view_user_info_layout);
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.view_user_info_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.view_user_info_toolbar);
             myToolbar.InflateMenu(Resource.Menu.view_user_info_menu);
             if (Intent != null)
             {
@@ -465,7 +465,7 @@ namespace AndriodApp1
                 }
                 string fileName = UserToView + Helpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
                 Java.IO.File file = new Java.IO.File(directory, fileName);
-                SaveToStream(pic, this.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(file).Uri, "w"));
+                SaveToStream(pic, this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
 
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.Data, file.AbsolutePath);

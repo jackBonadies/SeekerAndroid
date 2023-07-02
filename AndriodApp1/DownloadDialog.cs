@@ -30,7 +30,6 @@ using Android.Drm;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.Provider;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
@@ -45,7 +44,7 @@ using Common;
 
 namespace AndriodApp1
 {
-    class DownloadDialog : Android.Support.V4.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
+    class DownloadDialog : AndroidX.Fragment.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
     {
         private int searchPosition = -1;
         private SearchResponse searchResponse = null;
@@ -379,9 +378,9 @@ namespace AndriodApp1
                         }
                         return;
                     }
-                    if(SoulSeekState.MainActivityRef != null && ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
+                    if(SoulSeekState.MainActivityRef != null && ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
                     {
-                        if(SoulSeekState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))
+                        if(SoulSeekState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Started))
                         {
                             return; //they are already there... they see it populating, no need to show them notification...
                         }
@@ -391,7 +390,7 @@ namespace AndriodApp1
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         SoulSeekState.ActiveActivityRef.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
 
                     try
@@ -497,7 +496,7 @@ namespace AndriodApp1
         {
             Action<View> action = new Action<View>((v) => {
                 this.Dismiss();
-                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
             RequestFilesApi(searchResponse.Username, this.View, action, null);
         }
@@ -1257,7 +1256,7 @@ namespace AndriodApp1
                     string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);
                     Action<View> action = new Action<View>((v) => {
                         this.Dismiss();
-                        ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
                     if(!SoulSeekState.HideLockedResultsInSearch && SoulSeekState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
                     {
@@ -1325,7 +1324,7 @@ namespace AndriodApp1
     public class DownloadCustomAdapter : ArrayAdapter<FileLockedUnlockedWrapper>
     {
         public List<int> SelectedPositions = new List<int>();
-        public Android.Support.V4.App.DialogFragment Owner = null;
+        public AndroidX.Fragment.App.DialogFragment Owner = null;
         public DownloadCustomAdapter(Context c, List<FileLockedUnlockedWrapper> items) : base(c, 0, items)
         {
         }

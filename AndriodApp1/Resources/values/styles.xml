@@ -12,13 +12,13 @@
     </style>
 
 	<style name="OutlinedRoundedBox" parent="">
-		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
+		<!--<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>-->
 	</style>
 
-	<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="Widget.Design.TextInputLayout">
+	<!--<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="Widget.Design.TextInputLayout">
 		<item name="cornerFamily">rounded</item>
 		<item name="cornerSize">8dp</item>
-	</style>
+	</style>-->
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>

@@ -3,7 +3,7 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.App;
+using AndroidX.Fragment.App;
 using Android.Support.V4.View;
 using Android.Util;
 using Android.Views;
@@ -58,7 +58,7 @@ namespace AndriodApp1
 
         Button prevButton;
         Button nextButton;
-        Android.Support.V4.View.ViewPager pager;
+        AndroidX.ViewPager.Widget.ViewPager pager;
         StepPagerStrip strip1;
         public static ImportedData? fullImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         public static ImportedData? selectedImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
@@ -76,7 +76,7 @@ namespace AndriodApp1
             nextButton = this.FindViewById<Button>(Resource.Id.next_button);
             nextButton.Click += NextButton_Click;
 
-            pager = this.FindViewById<Android.Support.V4.View.ViewPager>(Resource.Id.pager);
+            pager = this.FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
             pager.Adapter = new WizardPagerAdapter(this.SupportFragmentManager);
             pager.PageSelected += Pager_PageSelected;
 
@@ -84,12 +84,12 @@ namespace AndriodApp1
             strip1.setPageCount(pager.Adapter.Count);
             strip1.setCurrentPage(pager.CurrentItem);
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.setting_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById< AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.setting_toolbar);
             myToolbar.Title = SeekerApplication.GetString(Resource.String.ImportWizard);
             SetButtonText(pager.CurrentItem);
         }
 
-        public void UpdatePagerReference(Android.Support.V4.App.Fragment frag, ImportListType importListType)
+        public void UpdatePagerReference(AndroidX.Fragment.App.Fragment frag, ImportListType importListType)
         {
             (pager.Adapter as WizardPagerAdapter).UpdatePagerReference(frag, importListType);
         }
@@ -99,7 +99,7 @@ namespace AndriodApp1
             base.OnDestroy();
         }
 
-        public bool IsCurrentStep(Android.Support.V4.App.Fragment f)
+        public bool IsCurrentStep(AndroidX.Fragment.App.Fragment f)
         {
             return f == (this.pager.Adapter as WizardPagerAdapter).GetItem(this.pager.CurrentItem);
         }
@@ -316,7 +316,7 @@ namespace AndriodApp1
             }
         }
 
-        private void Pager_PageSelected(object sender, Android.Support.V4.View.ViewPager.PageSelectedEventArgs e)
+        private void Pager_PageSelected(object sender, AndroidX.ViewPager.Widget.ViewPager.PageSelectedEventArgs e)
         {
             SetButtonText(e.Position);
             strip1.setCurrentPage(e.Position);
@@ -359,7 +359,7 @@ namespace AndriodApp1
     }
 
 
-    public class StartPageFragment : Android.Support.V4.App.Fragment
+    public class StartPageFragment : AndroidX.Fragment.App.Fragment
     {
         private View rootView;
         private Button importButton;
@@ -572,7 +572,7 @@ namespace AndriodApp1
 
 
 
-    public class ImportListFragment : Android.Support.V4.App.Fragment
+    public class ImportListFragment : AndroidX.Fragment.App.Fragment
     {
         private View rootView;
         private TextView noneFound;
@@ -924,17 +924,17 @@ namespace AndriodApp1
     }
 
 
-    public class WizardPagerAdapter : FragmentPagerAdapter
+    public class WizardPagerAdapter : AndroidX.Fragment.App.FragmentPagerAdapter
     {
-        Android.Support.V4.App.Fragment startPage = null;
+        AndroidX.Fragment.App.Fragment startPage = null;
 
-        Android.Support.V4.App.Fragment userListPage1 = null;
-        Android.Support.V4.App.Fragment ignoredPage2 = null;
-        Android.Support.V4.App.Fragment userNotesPage3 = null;
-        Android.Support.V4.App.Fragment wishlistPage4 = null;
+        AndroidX.Fragment.App.Fragment userListPage1 = null;
+        AndroidX.Fragment.App.Fragment ignoredPage2 = null;
+        AndroidX.Fragment.App.Fragment userNotesPage3 = null;
+        AndroidX.Fragment.App.Fragment wishlistPage4 = null;
 
 
-        public WizardPagerAdapter(Android.Support.V4.App.FragmentManager fm) : base(fm)
+        public WizardPagerAdapter(AndroidX.Fragment.App.FragmentManager fm) : base(fm)
         {
             startPage = new StartPageFragment();
             userListPage1 = new ImportListFragment(ImportListType.UserList);
@@ -943,7 +943,7 @@ namespace AndriodApp1
             wishlistPage4 = new ImportListFragment(ImportListType.Wishlist);
         }
 
-        public void UpdatePagerReference(Android.Support.V4.App.Fragment frag, ImportListType importListType)
+        public void UpdatePagerReference(AndroidX.Fragment.App.Fragment frag, ImportListType importListType)
         {
             switch (importListType)
             {
@@ -964,9 +964,9 @@ namespace AndriodApp1
 
         public override int Count => 5;
 
-        public override Android.Support.V4.App.Fragment GetItem(int position)
+        public override AndroidX.Fragment.App.Fragment GetItem(int position)
         {
-            Android.Support.V4.App.Fragment frag = null;
+            AndroidX.Fragment.App.Fragment frag = null;
             switch (position)
             {
                 case 0:

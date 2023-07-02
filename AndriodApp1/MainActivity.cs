@@ -26,11 +26,7 @@ using Android.Provider;
 using Soulseek;
 using Android.Runtime;
 using Android.Support.Design.Widget;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
-using Android.Support.V4.Provider;
-using Android.Support.V4.View;
-using Android.Support.V7.App;
+using AndroidX.Fragment.App;
 using Android.Views;
 using Android.Widget;
 using Common;
@@ -56,6 +52,12 @@ using Android.Util;
 using SearchResponseExtensions;
 using Android.Net;
 using System.Linq.Expressions;
+using AndroidX.AppCompat.App;
+using Google.Android.Material.BottomNavigation;
+using Google.Android.Material.Tabs;
+using AndroidX.Core.App;
+using AndroidX.ViewPager.Widget;
+using AndroidX.DocumentFile.Provider;
 
 //using System.IO;
 //readme:
@@ -106,7 +108,7 @@ namespace AndriodApp1
                     {
                         if (activity is AppCompatActivity)
                         {
-                            bool foreground = (activity as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                            bool foreground = (activity as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                             if (foreground)
                             {
                                 MainActivity.LogFirebase("FOREGROUND seeker keep alive cannot be started: " + e.Message + e.StackTrace);
@@ -3082,7 +3084,7 @@ namespace AndriodApp1
                     {
                         if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
                         {
-                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                         }
                     }
                     catch
@@ -3166,7 +3168,7 @@ namespace AndriodApp1
                     {
                         if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
                         {
-                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                         }
                     }
                     catch
@@ -5757,7 +5759,7 @@ namespace AndriodApp1
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
 
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);
@@ -5788,7 +5790,7 @@ namespace AndriodApp1
 
     //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
-    public class MainActivity : ThemeableActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : ThemeableActivity, AndriodApp1.MainActivity.DownloadCallback, AndroidX.Core.App.ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
     {
         public static object SHARED_PREF_LOCK = new object();
         public const string logCatTag = "seeker";
@@ -7917,7 +7919,7 @@ namespace AndriodApp1
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
-        private Android.Support.V4.View.ViewPager pager = null;
+        private AndroidX.ViewPager.Widget.ViewPager pager = null;
 
         public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
         public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_Transfer = null;
@@ -8068,13 +8070,13 @@ namespace AndriodApp1
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
             SetContentView(Resource.Layout.activity_main);
 
-            //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
+            //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
             //SetSupportActionBar(myToolbar);
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
 
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
             myToolbar.Title = this.GetString(Resource.String.home_tab);
             myToolbar.InflateMenu(Resource.Menu.account_menu);
             SetSupportActionBar(myToolbar);
@@ -8103,7 +8105,7 @@ namespace AndriodApp1
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
 
-            pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+            pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
             pager.PageSelected += Pager_PageSelected;
             TabsPagerAdapter adapter = new TabsPagerAdapter(SupportFragmentManager);
 
@@ -9767,7 +9769,7 @@ namespace AndriodApp1
         {
             try
             {
-                var pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
                 return pager.CurrentItem == 3;
             }
             catch
@@ -9786,7 +9788,7 @@ namespace AndriodApp1
             try
             {
                 //TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs); returns -1
-                var pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
                     relevant = BrowseFragment.Instance.BackButton();
@@ -9988,7 +9990,7 @@ namespace AndriodApp1
             }
         }
 
-        public void RecreateFragment(Android.Support.V4.App.Fragment f)
+        public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
         {
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)//Build.VERSION_CODES.N)
             {
@@ -12407,7 +12409,7 @@ namespace AndriodApp1
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                 this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
             }
             if (e.Position == 1) //search
             {
@@ -12430,14 +12432,14 @@ namespace AndriodApp1
                 this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
                 SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
                 //this.SupportActionBar.CustomView.FindViewById<View>(Resource.Id.searchHere).FocusChange += MainActivity_FocusChange;
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                 if (goToSearchTab != int.MaxValue)
                 {
                     //if(SearchFragment.Instance == null)
                     //{
                     //    MainActivity.LogDebug("Search Frag Instance is Null");
                     //}
-                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
+                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
                     {
                         //let onresume go to the search tab..
                         MainActivity.LogDebug("Delay Go To Wishlist Search Fragment for OnResume");
@@ -12461,7 +12463,7 @@ namespace AndriodApp1
 
                 SetTransferSupportActionBarState();
 
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
             }
             else if (e.Position == 3)
             {
@@ -12478,7 +12480,7 @@ namespace AndriodApp1
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
                 }
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
             }
         }
 
@@ -13884,12 +13886,12 @@ namespace AndriodApp1
         public const string M_SmartFilter_CountsOrder = "Momento_SmartFilterCountsOrder";
         public const string M_SmartFilter_TypesOrder = "Momento_SmartFilterTypesOrder";
 
-        public static Android.Support.V4.Provider.DocumentFile DiagnosticTextFile = null;
+        public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
         public static System.IO.StreamWriter DiagnosticStreamWriter = null;
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
-        public static Android.Support.V4.Provider.DocumentFile RootDocumentFile = null;
-        public static Android.Support.V4.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
+        public static AndroidX.DocumentFile.Provider.DocumentFile RootDocumentFile = null;
+        public static AndroidX.DocumentFile.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
         public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
         {
             BrowseResponseReceived(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
@@ -13923,7 +13925,7 @@ namespace AndriodApp1
         ///at android.support.v4.view.MotionEventCompatEclair.getX(MotionEventCompatEclair.java:32)
         ///at android.support.v4.view.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
         ///at android.support.v4.view.MotionEventCompat.getX(MotionEventCompat.java:184)
-        ///at android.support.v4.view.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
+        ///at AndroidX.ViewPager.Widget.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
         /// </summary>
         /// <param name="context"></param>
 
@@ -13989,7 +13991,7 @@ namespace AndriodApp1
         public static bool LoggingIn = false;
         public static bool UpdateUI = false;
         public static View RootView = null;
-        public static Android.Support.V4.App.Fragment LoginFragment = null;
+        public static AndroidX.Fragment.App.Fragment LoginFragment = null;
         public static TransfersFragment TransfersFrag = null;
     }
 
@@ -14566,7 +14568,7 @@ namespace AndriodApp1
                     intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                     intent.AddFlags(ActivityFlags.SingleTop); //??
                     activity.StartActivity(intent);
-                    //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                    //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                 });
                 DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
                 return true;
