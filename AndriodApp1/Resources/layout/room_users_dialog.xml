@@ -8,7 +8,7 @@
     android:layout_height="match_parent">
 
 
-           <AndroidX.AppCompat.Widget.Toolbar
+           <androidx.appcompat.widget.Toolbar
             android:id="@+id/roomUsersDialogToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"

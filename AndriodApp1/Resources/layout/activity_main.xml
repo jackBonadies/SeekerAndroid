@@ -6,13 +6,13 @@
     android:fitsSystemWindows="true"
     android:background="?attr/pseudo_window_background_color"
     android:layout_height="match_parent">
-<android.support.design.widget.AppBarLayout
+<com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
     android:layout_width="match_parent"
         android:theme="@style/AppTheme.AppBarOverlay"
     android:layout_height="wrap_content">
 
-  <AndroidX.AppCompat.Widget.Toolbar
+  <androidx.appcompat.widget.Toolbar
       android:id="@+id/toolbar"
       android:layout_width="match_parent"
       android:layout_height="?attr/actionBarSize"
@@ -22,7 +22,7 @@
       tools:layout_editor_absoluteX="0dp"
       tools:layout_editor_absoluteY="0dp" />
 
-</android.support.design.widget.AppBarLayout>
+</com.google.android.material.appbar.AppBarLayout>
 
 
 <RelativeLayout
@@ -34,7 +34,7 @@
     android:gravity="center_horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <android.support.design.widget.TabLayout
+    <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
