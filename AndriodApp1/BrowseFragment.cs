@@ -19,7 +19,6 @@
 
 using Android.Content;
 using Android.OS;
-using Android.Support.Design.Widget;
 using AndroidX.Fragment.App;
 using Android.Text;
 using Android.Util;
@@ -35,6 +34,7 @@ using System.Threading.Tasks;
 using AndroidX.RecyclerView.Widget;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Google.Android.Material.BottomNavigation;
 
 namespace AndriodApp1
 {

@@ -29,6 +29,7 @@ using AndroidX.ConstraintLayout.Widget;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.FloatingActionButton;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1725,7 +1726,7 @@ namespace AndriodApp1
             recycleLayoutManagerStatuses.ReverseLayout = false;
             recyclerViewStatusesView.SetLayoutManager(recycleLayoutManagerStatuses);
             fabScrollToNewest = rootView.FindViewById<View>(Resource.Id.bsbutton);
-            (fabScrollToNewest as Android.Support.Design.Widget.FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
+            (fabScrollToNewest as FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
             fabScrollToNewest.Clickable = true;
             fabScrollToNewest.Click += ScrollToBottomClick;
             

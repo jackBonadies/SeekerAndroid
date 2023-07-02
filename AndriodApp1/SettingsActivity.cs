@@ -40,8 +40,8 @@ using Android.Util;
 using AndroidX.RecyclerView.Widget;
 using System.Xml;
 using System.Xml.Serialization;
-using Android.Support.V4.Content;
 using System.Runtime.CompilerServices;
+using AndroidX.Core.Content;
 
 namespace AndriodApp1
 {
@@ -2695,11 +2695,11 @@ namespace AndriodApp1
         {
             if((int)Android.OS.Build.VERSION.SdkInt >= 33)
             {
-                return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
+                return AndroidX.Core.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
             }
             else
             {
-                return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied;
+                return AndroidX.Core.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied;
             }
         }
 

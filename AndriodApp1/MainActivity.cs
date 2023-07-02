@@ -25,7 +25,7 @@ using Android.OS;
 using Android.Provider;
 using Soulseek;
 using Android.Runtime;
-using Android.Support.Design.Widget;
+using AndroidX.ViewPager.Widget;
 using AndroidX.Fragment.App;
 using Android.Views;
 using Android.Widget;
@@ -58,6 +58,8 @@ using Google.Android.Material.Tabs;
 using AndroidX.Core.App;
 using AndroidX.ViewPager.Widget;
 using AndroidX.DocumentFile.Provider;
+using AndroidX.Core.Content;
+using Google.Android.Material.Snackbar;
 
 //using System.IO;
 //readme:
@@ -8974,15 +8976,15 @@ namespace AndriodApp1
             // throw new NotImplementedException();
         }
 
-        private void Navigator_NavigationItemSelected(object sender, BottomNavigationView.NavigationItemSelectedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
+        //private void Navigator_NavigationItemSelected(object sender, BottomNavigationView.NavigationItemSelectedEventArgs e)
+        //{
+        //    //throw new NotImplementedException();
+        //}
 
-        private void Navigator_NavigationItemReselected(object sender, BottomNavigationView.NavigationItemReselectedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
+        //private void Navigator_NavigationItemReselected(object sender, BottomNavigationView.NavigationItemReselectedEventArgs e)
+        //{
+        //    //throw new NotImplementedException();
+        //}
 
         public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
@@ -11147,7 +11149,7 @@ namespace AndriodApp1
 
                     settings.Click -= SettingClick;
                     settings.Click += SettingClick;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 90);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 90);
                     bttn.Click -= BttnClick;
                     bttn.Click += BttnClick;
                     loggingInLayout.Visibility = ViewStates.Gone;
@@ -11157,7 +11159,7 @@ namespace AndriodApp1
                 {
                     cWelcome.Visibility = ViewStates.Visible;
                     cbttn.Visibility = ViewStates.Visible;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(cbttn, 90);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(cbttn, 90);
                     cLoading.Visibility = ViewStates.Gone;
                 }
                 else
@@ -11167,7 +11169,7 @@ namespace AndriodApp1
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                 }
 
             });
@@ -11275,7 +11277,7 @@ namespace AndriodApp1
                         logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = SoulSeekState.Username;
                         logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SoulSeekState.Password;
                     }
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
 
                     if (loading == null)
                     {
@@ -11299,7 +11301,7 @@ namespace AndriodApp1
                     welcome.Visibility = ViewStates.Gone;
                     settings.Visibility = ViewStates.Gone;
                     bttn.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 0);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
 
 
                 }
@@ -11357,12 +11359,12 @@ namespace AndriodApp1
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                     loggingInView.Visibility = ViewStates.Visible;
                     welcome.Visibility = ViewStates.Gone; //WE GET NULLREF HERE. FORCE connection already established exception and maybe see what is going on here...
                     logoutButton.Visibility = ViewStates.Gone;
                     settingsButton.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logoutButton, 0);
+                    AndroidX.Core.View.ViewCompat.SetTranslationZ(logoutButton, 0);
                 }
 
             });
@@ -13922,9 +13924,9 @@ namespace AndriodApp1
         ///ava.lang.IllegalArgumentException: pointerIndex out of range
         ///at android.view.MotionEvent.nativeGetAxisValue(Native Method)
         ///at android.view.MotionEvent.getX(MotionEvent.java:1981)
-        ///at android.support.v4.view.MotionEventCompatEclair.getX(MotionEventCompatEclair.java:32)
-        ///at android.support.v4.view.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
-        ///at android.support.v4.view.MotionEventCompat.getX(MotionEventCompat.java:184)
+        ///at AndroidX.Core.View.MotionEventCompatEclair.getX(MotionEventCompatEclair.java:32)
+        ///at AndroidX.Core.View.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
+        ///at AndroidX.Core.View.MotionEventCompat.getX(MotionEventCompat.java:184)
         ///at AndroidX.ViewPager.Widget.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
         /// </summary>
         /// <param name="context"></param>

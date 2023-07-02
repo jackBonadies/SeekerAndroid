@@ -22,9 +22,7 @@ using Android.Content.Res;
 using Android.Graphics;
 using Android.Net;
 using Android.OS;
-using Android.Support.Design.Widget;
 using AndroidX.Fragment.App;
-using Android.Support.V4.Content;
 using Android.Text.Style;
 using Android.Util;
 using Android.Views;
@@ -46,10 +44,11 @@ using AndroidX.RecyclerView.Widget;
 using System.Runtime.Serialization.Formatters.Binary;
 using SearchResponseExtensions;
 using AndroidX.DocumentFile.Provider;
-using AndroidX.Fragment.App;
 using Google.Android.Material.TextField;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Google.Android.Material.BottomNavigation;
+using AndroidX.Core.Content;
 
 namespace AndriodApp1
 {
@@ -281,7 +280,7 @@ namespace AndriodApp1
                 settings.Visibility = ViewStates.Gone;
                 settings.Click += Settings_Click;
 
-                Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 0);
+                AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
                 this.cbttn = bttn;
                 this.cLoading = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                 this.cWelcome = welcome;

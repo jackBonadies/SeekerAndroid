@@ -805,13 +805,13 @@ namespace AndriodApp1
                     //get backed in disabled color.
                     Color mainColor = SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainPurple);
                     Color backgroundColor = SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback);
-                    int disableColor = Android.Support.V4.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
+                    int disableColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
 
                     int red = Color.GetRedComponent(disableColor);
                     int green = Color.GetGreenComponent(disableColor);
                     int blue = Color.GetBlueComponent(disableColor);
 
-                    int disableTextColor = Android.Support.V4.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
+                    int disableTextColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
 
                     int redtc = Color.GetRedComponent(disableTextColor);
                     int greentc = Color.GetGreenComponent(disableTextColor);
