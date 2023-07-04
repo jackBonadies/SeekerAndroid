@@ -14,18 +14,18 @@
       }
     },
     "address": "https://raw.githubusercontent.com/jackBonadies/SeekerAndroid/fdroid/fdroid/repo",
-    "timestamp": 1677373582000
+    "timestamp": 1688474650000
   },
   "packages": {
     "com.companyname.andriodapp1": {
       "metadata": {
-        "added": 1677373558000,
+        "added": 1688474639000,
         "categories": [
           "Internet"
         ],
         "changelog": "https://github.com/jackBonadies/SeekerAndroid/releases",
         "issueTracker": "https://github.com/jackBonadies/SeekerAndroid/issues",
-        "lastUpdated": 1677373569000,
+        "lastUpdated": 1688474643000,
         "license": "GPL-3.0",
         "sourceCode": "https://github.com/jackBonadies/SeekerAndroid",
         "screenshots": {
@@ -77,7 +77,7 @@
         },
         "icon": {
           "en-US": {
-            "name": "/icons/com.companyname.andriodapp1.92.png",
+            "name": "/icons/com.companyname.andriodapp1.94.png",
             "sha256": "196e93d312276869e14fd0db39e83dd206443218d2df88aa07c786234ba32d14",
             "size": 1290
           }
@@ -85,23 +85,23 @@
         "preferredSigner": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2"
       },
       "versions": {
-        "05efb716ba9529b16476f429f36198fbcab48b00b37f386ca266fae315cd0a5d": {
-          "added": 1677373564000,
+        "ae321374cb2213ba62502270d7f591c422a3e602bdee89008851f4cb5bd8906a": {
+          "added": 1688474642000,
           "file": {
-            "name": "/seeker_v2.9.13.apk",
-            "sha256": "05efb716ba9529b16476f429f36198fbcab48b00b37f386ca266fae315cd0a5d",
-            "size": 15404165
+            "name": "/seeker_v2.9.15.apk",
+            "sha256": "ae321374cb2213ba62502270d7f591c422a3e602bdee89008851f4cb5bd8906a",
+            "size": 15474676
           },
           "manifest": {
             "nativecode": [
               "arm64-v8a",
               "armeabi-v7a"
             ],
-            "versionName": "2.9.13",
-            "versionCode": 92,
+            "versionName": "2.9.15",
+            "versionCode": 94,
             "usesSdk": {
               "minSdkVersion": 19,
-              "targetSdkVersion": 31
+              "targetSdkVersion": 33
             },
             "signer": {
               "sha256": [
@@ -125,13 +125,19 @@
                 "name": "android.permission.ACCESS_WIFI_STATE"
               },
               {
-                "name": "android.permission.MANAGE_EXTERNAL_STORAGE"
-              },
-              {
                 "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE"
               },
               {
                 "name": "android.permission.WAKE_LOCK"
+              },
+              {
+                "name": "android.permission.MANAGE_EXTERNAL_STORAGE"
+              },
+              {
+                "name": "android.permission.POST_NOTIFICATIONS"
+              },
+              {
+                "name": "android.permission.READ_MEDIA_AUDIO"
               },
               {
                 "name": "android.permission.RECEIVE_BOOT_COMPLETED"
@@ -146,7 +152,7 @@
           }
         },
         "08038cac35413c5086e6074e904fc5b38575ae3a3f96e532ce95883e0514c088": {
-          "added": 1677373563000,
+          "added": 1688474641000,
           "file": {
             "name": "/seeker_v2.9.12.apk",
             "sha256": "08038cac35413c5086e6074e904fc5b38575ae3a3f96e532ce95883e0514c088",
@@ -206,7 +212,7 @@
           }
         },
         "a8302fa91d049f171ad1fffec39fa6588c1df1b6e19dca4793e4a9fe1f62fa01": {
-          "added": 1677373561000,
+          "added": 1688474639000,
           "file": {
             "name": "/seeker_v2.9.10.apk",
             "sha256": "a8302fa91d049f171ad1fffec39fa6588c1df1b6e19dca4793e4a9fe1f62fa01",
@@ -266,7 +272,7 @@
           }
         },
         "0cda7a58fdb02dd9ecc6b0d0c4c50dbd51fb9e3945ba42f839aca648566a45f5": {
-          "added": 1677373569000,
+          "added": 1688474643000,
           "file": {
             "name": "/seeker_v2.9.9.apk",
             "sha256": "0cda7a58fdb02dd9ecc6b0d0c4c50dbd51fb9e3945ba42f839aca648566a45f5",
@@ -306,243 +312,6 @@
               },
               {
                 "name": "android.permission.MANAGE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE"
-              },
-              {
-                "name": "android.permission.WAKE_LOCK"
-              },
-              {
-                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
-              },
-              {
-                "name": "android.permission.READ_EXTERNAL_STORAGE"
-              }
-            ]
-          },
-          "antiFeatures": {
-            "NonFreeNet": {}
-          }
-        },
-        "94ef59a628daca7a3aed1eaa96fe1a4107a55487d4c8c9f4fae73b9299ef9163": {
-          "added": 1677373567000,
-          "file": {
-            "name": "/seeker_v2.9.7.apk",
-            "sha256": "94ef59a628daca7a3aed1eaa96fe1a4107a55487d4c8c9f4fae73b9299ef9163",
-            "size": 15133829
-          },
-          "manifest": {
-            "nativecode": [
-              "arm64-v8a",
-              "armeabi-v7a"
-            ],
-            "versionName": "2.9.7",
-            "versionCode": 86,
-            "usesSdk": {
-              "minSdkVersion": 19,
-              "targetSdkVersion": 31
-            },
-            "signer": {
-              "sha256": [
-                "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2"
-              ]
-            },
-            "usesPermission": [
-              {
-                "name": "android.permission.ACCESS_NETWORK_STATE"
-              },
-              {
-                "name": "android.permission.INTERNET"
-              },
-              {
-                "name": "android.permission.WRITE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.FOREGROUND_SERVICE"
-              },
-              {
-                "name": "android.permission.ACCESS_WIFI_STATE"
-              },
-              {
-                "name": "android.permission.MANAGE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE"
-              },
-              {
-                "name": "android.permission.WAKE_LOCK"
-              },
-              {
-                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
-              },
-              {
-                "name": "android.permission.READ_EXTERNAL_STORAGE"
-              }
-            ]
-          },
-          "antiFeatures": {
-            "NonFreeNet": {}
-          }
-        },
-        "e14e755628ce4205ce89e30fa35f424a4562bb076c40a2e632078536cf1858aa": {
-          "added": 1677373566000,
-          "file": {
-            "name": "/seeker_v2.9.5.apk",
-            "sha256": "e14e755628ce4205ce89e30fa35f424a4562bb076c40a2e632078536cf1858aa",
-            "size": 15056149
-          },
-          "manifest": {
-            "nativecode": [
-              "arm64-v8a",
-              "armeabi-v7a"
-            ],
-            "versionName": "2.9.5",
-            "versionCode": 84,
-            "usesSdk": {
-              "minSdkVersion": 19,
-              "targetSdkVersion": 31
-            },
-            "signer": {
-              "sha256": [
-                "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2"
-              ]
-            },
-            "usesPermission": [
-              {
-                "name": "android.permission.ACCESS_NETWORK_STATE"
-              },
-              {
-                "name": "android.permission.INTERNET"
-              },
-              {
-                "name": "android.permission.WRITE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.FOREGROUND_SERVICE"
-              },
-              {
-                "name": "android.permission.ACCESS_WIFI_STATE"
-              },
-              {
-                "name": "android.permission.MANAGE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE"
-              },
-              {
-                "name": "android.permission.WAKE_LOCK"
-              },
-              {
-                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
-              },
-              {
-                "name": "android.permission.READ_EXTERNAL_STORAGE"
-              }
-            ]
-          },
-          "antiFeatures": {
-            "NonFreeNet": {}
-          }
-        },
-        "d52e49b9bad270dbd4c1034e010613f65591efd28f383354217c176b7bb34b88": {
-          "added": 1677373560000,
-          "file": {
-            "name": "/seeker_v2.8.8.apk",
-            "sha256": "d52e49b9bad270dbd4c1034e010613f65591efd28f383354217c176b7bb34b88",
-            "size": 15014133
-          },
-          "manifest": {
-            "nativecode": [
-              "arm64-v8a",
-              "armeabi-v7a"
-            ],
-            "versionName": "2.8.8",
-            "versionCode": 78,
-            "usesSdk": {
-              "minSdkVersion": 19,
-              "targetSdkVersion": 31
-            },
-            "signer": {
-              "sha256": [
-                "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2"
-              ]
-            },
-            "usesPermission": [
-              {
-                "name": "android.permission.ACCESS_NETWORK_STATE"
-              },
-              {
-                "name": "android.permission.INTERNET"
-              },
-              {
-                "name": "android.permission.WRITE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.FOREGROUND_SERVICE"
-              },
-              {
-                "name": "android.permission.ACCESS_WIFI_STATE"
-              },
-              {
-                "name": "android.permission.MANAGE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE"
-              },
-              {
-                "name": "android.permission.WAKE_LOCK"
-              },
-              {
-                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
-              },
-              {
-                "name": "android.permission.READ_EXTERNAL_STORAGE"
-              }
-            ]
-          },
-          "antiFeatures": {
-            "NonFreeNet": {}
-          }
-        },
-        "0d79fd7edd2348c0c1aa03e00ca67d8f3c38e4c40ef9f3a8a803bdd5a6173ab8": {
-          "added": 1677373558000,
-          "file": {
-            "name": "/seeker_v2.8.6.apk",
-            "sha256": "0d79fd7edd2348c0c1aa03e00ca67d8f3c38e4c40ef9f3a8a803bdd5a6173ab8",
-            "size": 15001845
-          },
-          "manifest": {
-            "nativecode": [
-              "arm64-v8a",
-              "armeabi-v7a"
-            ],
-            "versionName": "2.8.6",
-            "versionCode": 76,
-            "usesSdk": {
-              "minSdkVersion": 19,
-              "targetSdkVersion": 31
-            },
-            "signer": {
-              "sha256": [
-                "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2"
-              ]
-            },
-            "usesPermission": [
-              {
-                "name": "android.permission.ACCESS_NETWORK_STATE"
-              },
-              {
-                "name": "android.permission.INTERNET"
-              },
-              {
-                "name": "android.permission.WRITE_EXTERNAL_STORAGE"
-              },
-              {
-                "name": "android.permission.FOREGROUND_SERVICE"
-              },
-              {
-                "name": "android.permission.ACCESS_WIFI_STATE"
               },
               {
                 "name": "android.permission.CHANGE_WIFI_MULTICAST_STATE"
