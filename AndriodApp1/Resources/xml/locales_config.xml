@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+   <locale android:name="en"/>
+
+	<!--Note: res file is pt-rBR-->
+   <locale android:name="pt-BR"/>
+
+   <locale android:name="fr"/>
+   <locale android:name="ru"/>
+   <locale android:name="es"/>
+   <locale android:name="uk"/>
+</locale-config>

@@ -56,6 +56,7 @@ using Android.Util;
 using SearchResponseExtensions;
 using Android.Net;
 using System.Linq.Expressions;
+using AndriodApp1;
 
 //using System.IO;
 //readme:
@@ -2639,8 +2640,25 @@ namespace AndriodApp1
             SoulSeekState.OffsetFromUtcCached = Helpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
 
             SoulSeekState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
-            SetLanguage(SoulSeekState.Language, false);
 
+            if (HasProperPerAppLanguageSupport())
+            {
+                if(!SoulSeekState.LegacyLanguageMigrated)
+                {
+                    SoulSeekState.LegacyLanguageMigrated = true;
+                    SetLanguage(SoulSeekState.Language);
+                    lock (MainActivity.SHARED_PREF_LOCK)
+                    {
+                        var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                        editor.PutBoolean(SoulSeekState.M_LegacyLanguageMigrated, SoulSeekState.LegacyLanguageMigrated);
+                        editor.Commit();
+                    }
+                }
+            }
+            else
+            {
+                SetLanguageLegacy(SoulSeekState.Language, false);
+            }
 
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
             //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
@@ -2713,6 +2731,55 @@ namespace AndriodApp1
 
         }
 
+        public static string GetLegacyLanguageString()
+        {
+            if (SeekerApplication.HasProperPerAppLanguageSupport())
+            {
+                var lm = (LocaleManager)Context.GetSystemService(Context.LocaleService);
+                LocaleList appLocales = lm.ApplicationLocales;
+                if (appLocales.IsEmpty)
+                {
+                    return SoulSeekState.FieldLangAuto;
+                }
+                else
+                {
+                    Java.Util.Locale locale = appLocales.Get(0);
+                    string lang = locale.Language; // ex. fr, uk
+                    if (lang == "br")
+                    {
+                        return SoulSeekState.FieldLangPtBr;
+                    }
+                    return lang;
+                }
+            }
+            else
+            {
+                return SoulSeekState.Language;
+            }
+        }
+
+        /// <summary>
+        /// converts say "pt-rBR" to "pt-BR"
+        /// </summary>
+        /// <param name="locale"></param>
+        /// <returns></returns>
+        public static string FormatLocaleFromResourcesToStandard(string locale)
+        {
+            if (locale.Length == 6 && locale.Contains("-r"))
+            {
+                return locale.Replace("-r", "-");
+            }
+            else
+            {
+                return locale;
+            }
+        }
+
+        public static bool HasProperPerAppLanguageSupport()
+        {
+            return (int)Android.OS.Build.VERSION.SdkInt >= 33;
+        }
+
         public static Java.Util.Locale LocaleFromString(string localeString)
         {
             Java.Util.Locale locale = null;
@@ -2728,7 +2795,29 @@ namespace AndriodApp1
             return locale;
         }
 
-        public void SetLanguage(string language, bool changed)
+
+        public void SetLanguage(string language)
+        {
+            if (HasProperPerAppLanguageSupport())
+            {
+                var lm = (LocaleManager)ApplicationContext.GetSystemService(Context.LocaleService);
+
+                if (language == SoulSeekState.FieldLangAuto)
+                {
+                    lm.ApplicationLocales = LocaleList.EmptyLocaleList;
+                }
+                else
+                {
+                    lm.ApplicationLocales = LocaleList.ForLanguageTags(FormatLocaleFromResourcesToStandard(language));
+                }
+            }
+            else
+            {
+                SetLanguageLegacy(SoulSeekState.Language, true);
+            }
+        }
+
+        public void SetLanguageLegacy(string language, bool changed)
         {
             string localeString = language;
             var res = this.Resources;
@@ -4481,6 +4570,7 @@ namespace AndriodApp1
                 SoulSeekState.NumberSearchResults = sharedPreferences.GetInt(SoulSeekState.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
                 SoulSeekState.DayNightMode = sharedPreferences.GetInt(SoulSeekState.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
                 SoulSeekState.Language = sharedPreferences.GetString(SoulSeekState.M_Lanuage, SoulSeekState.FieldLangAuto);
+                SoulSeekState.LegacyLanguageMigrated = sharedPreferences.GetBoolean(SoulSeekState.M_LegacyLanguageMigrated, false);
                 SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(SoulSeekState.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
                 SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(sharedPreferences.GetInt(SoulSeekState.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple));
                 SoulSeekState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
@@ -5478,7 +5568,8 @@ namespace AndriodApp1
             //.setContentIntent(pendingIntent)
             //.setTicker(getText(R.string.ticker_text))
             //.build();
-            StartForeground(NOTIF_ID, notification);
+            //System.Threading.Thread.Sleep(4000); //doesnt help reproduce...
+            StartForeground(NOTIF_ID, notification); // this can crash if started in background...
             //runs indefinitely until stop.
 
             return StartCommandResult.Sticky;
@@ -5607,7 +5698,7 @@ namespace AndriodApp1
 
         protected override void AttachBaseContext(Context @base)
         {
-            if(SoulSeekState.Language != SoulSeekState.FieldLangAuto)
+            if(!SeekerApplication.HasProperPerAppLanguageSupport() && SoulSeekState.Language != SoulSeekState.FieldLangAuto)
             {
                 var config = new Android.Content.Res.Configuration();
                 config.Locale = SeekerApplication.LocaleFromString(SoulSeekState.Language);
@@ -8492,6 +8583,7 @@ namespace AndriodApp1
                     else
                     {
                         canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
+                        bool exists = DocumentFile.FromTreeUri(this, res).Exists();
                     }
 
                     // if canwrite is false then if we try to create a file we get null.
@@ -8794,45 +8886,46 @@ namespace AndriodApp1
         {
             try
             {
-                if (ActivityCompat.ShouldShowRequestPermissionRationale(SoulSeekState.ActiveActivityRef, Manifest.Permission.PostNotifications))
+                void setAlreadyShown()
                 {
-                    var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-                    b.SetTitle("Allow Notifications?");
-                    b.SetMessage("Seeker provides push notifications to keep you updated on file uploads/downloads and incoming user messages.");
-                    ManualResetEvent mre = new ManualResetEvent(false);
-
-                    // make sure we never prompt the user for these permissions again
-                    void setAlreadyShown()
+                    lock (MainActivity.SHARED_PREF_LOCK)
                     {
-                        lock (MainActivity.SHARED_PREF_LOCK)
-                        {
-                            var editor = SoulSeekState.SharedPreferences.Edit();
-                            editor.PutBoolean(SoulSeekState.M_PostNotificationRequestAlreadyShown, true);
-                            editor.Commit();
-                        }
+                        var editor = SoulSeekState.SharedPreferences.Edit();
+                        editor.PutBoolean(SoulSeekState.M_PostNotificationRequestAlreadyShown, true);
+                        editor.Commit();
                     }
-
-                    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
-                    {
-                        ActivityCompat.RequestPermissions(SoulSeekState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
-                        setAlreadyShown();
-                    });
-                    b.SetPositiveButton(Resource.String.okay, eventHandler);
-
-                    EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs noArgs) =>
-                    {
-                        setAlreadyShown();
-                    });
-                    b.SetNegativeButton("No thanks", eventHandlerCancel);
-
-                    b.SetCancelable(false);
-                    b.Show();
                 }
-                else
-                {
-                    // normal first time
-                    ActivityCompat.RequestPermissions(SoulSeekState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
-                }
+
+                ActivityCompat.RequestPermissions(SoulSeekState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
+                setAlreadyShown();
+
+                // better to not bother the user.. they know what notifications are and they know how to turn them on in settings after the fact.
+                // also the dialog asking someone "okay" to then show the android "yes"/"no" dialog feels weird (even if recommended way).
+                //if (ActivityCompat.ShouldShowRequestPermissionRationale(SoulSeekState.ActiveActivityRef, Manifest.Permission.PostNotifications))
+                //{
+                //    var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                //    b.SetTitle("Allow Notifications?");
+                //    b.SetMessage("Seeker provides push notifications to keep you updated on file uploads/downloads and incoming user messages.");
+                //    ManualResetEvent mre = new ManualResetEvent(false);
+
+                //    // make sure we never prompt the user for these permissions again
+
+                //    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+                //    {
+                //        ActivityCompat.RequestPermissions(SoulSeekState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);
+                //        setAlreadyShown();
+                //    });
+                //    b.SetPositiveButton(Resource.String.okay, eventHandler);
+
+                //    EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs noArgs) =>
+                //    {
+                //        setAlreadyShown();
+                //    });
+                //    b.SetNegativeButton("No thanks", eventHandlerCancel);
+
+                //    b.SetCancelable(false);
+                //    b.Show();
+                //}
             }
             catch(Exception e)
             {
@@ -13475,11 +13568,12 @@ namespace AndriodApp1
         public static String SaveDataDirectoryUri = null;
         public static bool SaveDataDirectoryUriIsFromTree = true;
 
+        public static bool LegacyLanguageMigrated = false;
         public static string SystemLanguage;
         public static string Language = FieldLangAuto;
         public const string FieldLangAuto = "Auto";
         public const string FieldLangEn = "en";
-        public const string FieldLangPtBr = "pt-rBR";
+        public const string FieldLangPtBr = "pt-rBR"; //language code -"r" region code
         public const string FieldLangFr = "fr";
         public const string FieldLangRu = "ru";
         public const string FieldLangEs = "es";
@@ -13796,6 +13890,7 @@ namespace AndriodApp1
         public const string M_NumberSearchResults = "Momento_NumberSearchResults";
         public const string M_DayNightMode = "Momento_DayNightMode";
         public const string M_Lanuage = "Momento_Lanuage";
+        public const string M_LegacyLanguageMigrated = "Momento_LegacyLanugageMigrated";
         public const string M_NightVarient = "Momento_NightModeVarient";
         public const string M_DayVarient = "Momento_DayModeVarient";
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";

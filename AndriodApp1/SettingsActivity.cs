@@ -41,6 +41,7 @@ using AndroidX.RecyclerView.Widget;
 using System.Xml;
 using System.Xml.Serialization;
 using Android.Support.V4.Content;
+using Android.Text;
 
 namespace AndriodApp1
 {
@@ -809,7 +810,7 @@ namespace AndriodApp1
         private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
             string selection = GetLanguageStringFromPosition(e.Position);
-            if(selection == SoulSeekState.Language)
+            if(SeekerApplication.GetLegacyLanguageString() == selection)
             {
                 return;
             }
@@ -821,9 +822,8 @@ namespace AndriodApp1
                 editor.PutString(SoulSeekState.M_Lanuage, SoulSeekState.Language);
                 editor.Commit();
             }
-            //TODO API33 - MonoAndroid Get/Set locale missing.
-            
-            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(SoulSeekState.Language, true);
+
+            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(SoulSeekState.Language);
         }
 
         private void UpdateLayoutParametersForScreenSize()
@@ -2577,7 +2577,7 @@ namespace AndriodApp1
 
         private void SetSpinnerPositionLangauge(Spinner s)
         {
-            switch (SoulSeekState.Language)
+            switch (SeekerApplication.GetLegacyLanguageString())
             {
                 case SoulSeekState.FieldLangAuto:
                     s.SetSelection(0);
