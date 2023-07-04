@@ -41,7 +41,6 @@ using log = Android.Util.Log;
 using System.Linq;
 using SlskHelp;
 
-using AndroidX.Work;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using Android.Animation;
