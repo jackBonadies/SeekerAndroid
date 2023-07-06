@@ -5,5 +5,5 @@
       android:topLeftRadius="30dp"
       android:topRightRadius="30dp" />
   <padding android:top="@dimen/abc_dialog_padding_top_material" />
-  <solid android:color="@color/cellback" />
+ 
 </shape>

@@ -17,29 +17,25 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Android.App;
+using Android.Content;
+using Android.Content.Res;
+using Android.Graphics;
+using Android.OS;
+using Android.Util;
+using Android.Views;
+using Android.Widget;
+using Common;
+using Google.Android.Material.Snackbar;
+using SearchResponseExtensions;
+using Soulseek;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.App;
-using Android.Content;
-using Android.Drm;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
-using Android.Util;
-using Android.Views;
-using Android.Widget;
-using Google.Android.Material.Snackbar;
-using Soulseek;
-
 using log = Android.Util.Log;
-using SearchResponseExtensions;
-using Android.Content.Res;
-using Common;
 
 namespace AndriodApp1
 {
