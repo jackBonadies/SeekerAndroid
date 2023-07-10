@@ -2646,13 +2646,13 @@ namespace AndriodApp1
                 if(!SoulSeekState.LegacyLanguageMigrated)
                 {
                     SoulSeekState.LegacyLanguageMigrated = true;
-                    SetLanguage(SoulSeekState.Language);
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
                         var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                         editor.PutBoolean(SoulSeekState.M_LegacyLanguageMigrated, SoulSeekState.LegacyLanguageMigrated);
                         editor.Commit();
                     }
+                    SetLanguage(SoulSeekState.Language);
                 }
             }
             else
@@ -2745,7 +2745,7 @@ namespace AndriodApp1
                 {
                     Java.Util.Locale locale = appLocales.Get(0);
                     string lang = locale.Language; // ex. fr, uk
-                    if (lang == "br")
+                    if (lang == "pt")
                     {
                         return SoulSeekState.FieldLangPtBr;
                     }
