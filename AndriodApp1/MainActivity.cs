@@ -5544,6 +5544,27 @@ namespace AndriodApp1
             Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
 
+
+            //System.Threading.Thread.Sleep(4000); // bug exposer - does help reproduce on samsung galaxy
+            
+            //if (foreground)
+            //{
+            try
+            {
+                StartForeground(NOTIF_ID, notification); // this can crash if started in background... (and firebase does say they started in background)
+            }
+            catch(Exception e)
+            {
+                // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
+                //   in my case it did not.
+                SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
+                bool foreground = (SoulSeekState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
+#if DEBUG
+                SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
+#endif
+            }
+
             try
             {
                 if (CpuKeepAlive_FullService != null && !CpuKeepAlive_FullService.IsHeld)
@@ -5562,14 +5583,7 @@ namespace AndriodApp1
                 MainActivity.LogInfoFirebase("keepalive issue: " + e.Message + e.StackTrace);
                 MainActivity.LogFirebase("keepalive issue: " + e.Message + e.StackTrace);
             }
-            //.setContentTitle(getText(R.string.notification_title))
-            //.setContentText(getText(R.string.notification_message))
-            //.setSmallIcon(R.drawable.icon)
-            //.setContentIntent(pendingIntent)
-            //.setTicker(getText(R.string.ticker_text))
-            //.build();
-            //System.Threading.Thread.Sleep(4000); //doesnt help reproduce...
-            StartForeground(NOTIF_ID, notification); // this can crash if started in background...
+            //}
             //runs indefinitely until stop.
 
             return StartCommandResult.Sticky;
@@ -8583,7 +8597,6 @@ namespace AndriodApp1
                     else
                     {
                         canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
-                        bool exists = DocumentFile.FromTreeUri(this, res).Exists();
                     }
 
                     // if canwrite is false then if we try to create a file we get null.
