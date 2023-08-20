@@ -8013,7 +8013,7 @@ namespace AndriodApp1
 
         public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
         public const int SETTINGS_EXTERNAL = 0x430;
-        public const int DEFAULT_SEARCH_RESULTS = 50;
+        public const int DEFAULT_SEARCH_RESULTS = 100;
         private const int WRITE_EXTERNAL = 9999;
         private const int NEW_WRITE_EXTERNAL = 0x428;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
@@ -13591,6 +13591,8 @@ namespace AndriodApp1
         public const string FieldLangRu = "ru";
         public const string FieldLangEs = "es";
         public const string FieldLangUk = "uk"; //ukrainian
+        public const string FieldLangCs = "cs"; //czech
+        public const string FieldLangNl = "nl"; //dutch
 
 
 

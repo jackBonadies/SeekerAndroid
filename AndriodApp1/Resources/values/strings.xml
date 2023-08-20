@@ -874,7 +874,7 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="Aborted">Aborted</string>
 	<string name="Num_FilesRemaining">{0} files remaining</string>
 	<string name="X_of_Y_Remaining">{0} of {1} remaining</string>
-	<string name="SetLanguage">Lanugauge:</string>
+	<string name="SetLanguage">Language:</string>
 	<string name="Automatic">Automatic</string>
 
 	<string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>

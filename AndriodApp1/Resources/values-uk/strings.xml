@@ -50,13 +50,12 @@
     <string name="user_info_stats_header"><b>Інформація</b></string>
     <string name="unsaved_changes_title">Скасувати незбережені зміни?</string>
     <string name="unsaved_changes_body">У вас є незбережені зміни. Ви впевнені, що бажаєте їх скасувати?</string>
-    <string name="user_status_string">
-Вивантажені комірки: {0}
-\nВільне до вивантаження: {1}
-\nВивантаження в черзі: {2}
-\nШвидкість вивантаження: {3}
-\nКількість файлів: {4}
-\nКількість папок: {5}</string>
+    <string name="user_status_string">"Вивантажені комірки: {0}
+Вільне до вивантаження: {1}
+Вивантаження в черзі: {2}
+Швидкість вивантаження: {3}
+Кількість файлів: {4}
+Кількість папок: {5}"</string>
     <string name="add_user">Додати користувача</string>
     <string name="empty_browse_directory">Ця вкладка використовується для перегляду папок користувача.\n\nЩоб почати, виконайте пошук у вкладці пошуку або торкніться «+».</string>
     <string name="clear">Очистити</string>
@@ -328,7 +327,7 @@
     <string name="user_info_failed_offline">Не вдалося отримати інформацію про користувача: {0}. Користувач не в мережі.</string>
     <string name="user_info_failed_timeout">Не вдалося отримати інформацію про користувача: {0}. Час підключення минув.</string>
     <string name="deleted_message_history_with">Видалено історію повідомлень із {0}</string>
-    <string name="welcome">Ласкаво просимо, {0}</string>
+    <string name="welcome">Вітання, {0}</string>
     <string name="failed_to_establish_direct_or_indirect">Не вдалося встановити пряме чи непряме підключення до користувача</string>
     <string name="remote_conn_closed">Помилка зчитування: Віддалене підключення закрито</string>
     <string name="network_down">Підсистема мережі не працює</string>
@@ -483,7 +482,7 @@
     <string name="current_folder_only">Лише поточна папка</string>
     <string name="must_be_logged_in_to_give_privileges">Щоб надати привілеї, необхідно увійти в систему</string>
     <string name="about_body"><![CDATA[Seeker — це безплатний клієнт Soulseek з відкритим кодом для Android. У ньому ніколи не буде реклами чи платних функцій.
-<br><br>Допоможіть перекласти Seeker <a href="https://crwd.in/seeker">тут</a>.
+<br><br>Допомогти перекласти Seeker <a href="https://crwd.in/seeker">тут</a>.
 <br><br>Вихідний код <a href="https://github.com/jackBonadies/SeekerAndroid">тут</a>.
 <br><br>Версія: {0}.]]></string>
     <string name="must_be_logged_in_to_get_dir_contents">Щоб отримати вміст каталогу, необхідно увійти в систему</string>
@@ -501,7 +500,7 @@
     <string name="uploads_in_progress">Триває вивантаження</string>
     <string name="search_tabs_bold">    <b>Вкладки пошуку</b>
   </string>
-    <string name="shutdown">Вийти</string>
+    <string name="shutdown">Вимкнути</string>
     <string name="set_online_alert">Встановити сповіщення</string>
     <string name="remove_online_alert">Видалити сповіщення</string>
     <string name="user_X_is_now_online">Користувач {0} зараз у мережі</string>

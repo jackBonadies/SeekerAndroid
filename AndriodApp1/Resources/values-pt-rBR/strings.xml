@@ -103,7 +103,7 @@
     <!--
   Download Dialog Buttons
   -->
-    <string name="download_folder">Pasta de download</string>
+    <string name="download_folder">Baixar diretório</string>
     <string name="download_selected">Baixar selecionado</string>
     <string name="request_directories">Requisitar diretórios</string>
     <string name="close_download_diag">Fechar</string>
@@ -122,7 +122,7 @@
     <string name="submit">Enviar</string>
     <string name="ConnectingToServer">Conectando ao servidor</string>
     <string name="PleaseWait_">Por favor, aguarde...</string>
-    <string name="choose_a_download_folder">Selecionar pasta de download</string>
+    <string name="choose_a_download_folder">Selecionar Pasta de Download</string>
     <string name="settings">Configurações</string>
     <string name="enter_user_to_message">Digite o usuário para enviar mensagem</string>
     <!--Search Result Styles-->
@@ -164,7 +164,7 @@
     <string name="success_set_pic">Imagem definida com sucesso</string>
     <string name="error_no_file_manager_image">ERRO - Nenhum gerenciador de arquivos instalado capaz de escolher uma imagem. Por favor, instale um.</string>
     <string name="error_no_file_manager_dir">ERRO - Nenhum gerenciador de arquivos instalado capaz de escolher um diretório. Por favor, instale um.</string>
-    <string name="error_no_file_manager_dir_manage_storage">ERRO - Nenhum gerenciador de arquivos instalado capaz de escolher um diretório. Por favor, instale um. Se o seu dispositivo não implementar a intenção OPEN_DOCUMENT_TREE, instale o Seeker do Fdroid (IzzyOnDroid) que tem a permissão gerenciar armazenamento externo.</string>
+    <string name="error_no_file_manager_dir_manage_storage">ERRO - Nenhum gerenciador de arquivos instalado capaz de escolher um diretório. Por favor, instale um. Se o seu dispositivo não implementar a intenção OPEN_DOCUMENT_TREE, instale o Seeker do Fdroid (IzzyOnDroid Repo) que tem a permissão gerenciar armazenamento externo.</string>
     <string name="error_image_doesnt_exist">A imagem não existe</string>
     <string name="error_image_too_large">A imagem é muito grande. Por favor, escolha uma imagem menor. (&lt;5 MB).</string>
     <string name="no_room_tickers">Ainda não há tickers de sala...</string>
@@ -691,7 +691,7 @@
     <string name="HideSize">Ocultar Tamanho</string>
     <string name="HideSpeed">Ocultar Velocidade</string>
     <string name="Num_Selected">{0} Selecionado(s)</string>
-    <string name="ExportClientData">Export Client Data</string>
-    <string name="export_more_info">Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.</string>
-    <string name="successfully_exported">Successfully exported Seeker client data.</string>
+    <string name="ExportClientData">Exportar dados do Seeker</string>
+    <string name="export_more_info">Exportar Lista de Usuários, Lista de Ignorados/Bloqueados, Notas do Usuário e Lista de Desejos para XML. Útil para fazer backup ou migração de dados para o novo telefone.</string>
+    <string name="successfully_exported">Os dados do Seeker foram exportados com sucesso.</string>
 </resources>
