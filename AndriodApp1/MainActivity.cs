@@ -4581,8 +4581,8 @@ namespace AndriodApp1
                 SoulSeekState.HideLockedResultsInBrowse = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedBrowse, true);
                 SoulSeekState.HideLockedResultsInSearch = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedSearch, true);
 
-                SoulSeekState.TransferViewShowSizes = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSizes, false);
-                SoulSeekState.TransferViewShowSpeed = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSpeed, false);
+                SoulSeekState.TransferViewShowSizes = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSizes, true);
+                SoulSeekState.TransferViewShowSpeed = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSpeed, true);
 
                 SoulSeekState.SpeedLimitUploadOn = sharedPreferences.GetBoolean(SoulSeekState.M_UploadLimitEnabled, false);
                 SoulSeekState.SpeedLimitDownloadOn = sharedPreferences.GetBoolean(SoulSeekState.M_DownloadLimitEnabled, false);
