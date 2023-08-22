@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fdroid>
-	<repo icon="icon.png" name="Seeker slsk client" pubkey="3082050f308202f7a0030201020204369de826300d06092a864886f70d01010b050030383110300e060355040b1307462d44726f6964312430220603550403131b4445534b544f502d44424f494237342e6c6f63616c646f6d61696e301e170d3232303631383137313232325a170d3439313130333137313232325a30383110300e060355040b1307462d44726f6964312430220603550403131b4445534b544f502d44424f494237342e6c6f63616c646f6d61696e30820222300d06092a864886f70d01010105000382020f003082020a0282020100afeeee8fd5c35324871f270078a84aac2f000bc6178fe1234d98153385389121cf6cafafdcce15dd70ffb9de79663a67d8960cd896ccee45a20fc66b34b0d5fb1eff957305fd64d346434a42b986073774a92177e39afa30f841de42733ca16aebe70fd533b857189557484c50862ecafcf0e4af7ed6e5d2b03e15f1f91d2cf396ce1c28a3523a65c3930a9052437bda3c5f919997d110dcf8fb8f8627756584bb912dc40c28de4f0ce4397ba27098b1e3df28b0f37a86f5f0444909b467d79b92bb7e54ff45c262a0ee5b7261999c692c1070a446dfd7641736615cbdef4829db0f5dedd24e73d0ee68096c588e37cdb8d1dcbee37a9a4449719b3e912a2f544bdd48f7d9d86fe9c1a20589bd587b4ccdc415c35199bd6b1fef4513ec391517829fb6613cb95dd5c4b5e0ae4fa2922742ec77f5f1d3ad97d8acafdc3709bfd7933ed1bba072a43e67625eaa52408cb2d9d5d7330ccce5e3973c799fed1169ef3777a81e13f7ce5e1139b7369ed22413fca36f7dc89c86439e4ccaae4c1b20488eabcc1c63239f224fa39e7d371b62d2c5da2b38c9bc9ffe13eb24371f6fc806d4216ff2c4cb66d0d0186d972ac6235e562d16ca46e578ed9df14fc33c55bcc7dd0eb060c2784afc417d1821fe266b30050f361b7d43cb2ba74a544f1264b94a64743751a4b836580add7489189282bbe75c33829c10aae59031c775317437110203010001a321301f301d0603551d0e04160414f03c48317df6da87ff50d50646a5590c7e016181300d06092a864886f70d01010b0500038202010009e09824bde0ed979e423878a5118f7db6d33ab5ce07286d6b93263e24a12781091a478debb021309adeffc0c3f6678ce58b1fa7ede927ccfa5338cda74c88594eb6ac4eff23ac3a24f26c3b2054686f7aa8b4d43776c4aa7fe2b93861e170ea9798bbcb450f747363a97f46aefbe2dc36e1698e350df41483e13468d9b70bb03b6a831dad9f2d52886be2ec585b0aa5eabae3ecc422f686afb366cc1990979a28159f81d1c934589ac5baf44b086a4ccb046480860c69988b2e3d32a2b1730d1eb61ee7f3a931676fe34135c2633ecac152e5b369e6007b61911fba8fb624076a5a9998ced96b3333df335479e3df53cfa7383a1a4183392aa7b049dcc7ec16ce74881a59a7fe6dd47682e2713b82625843952d223152835eeeac34cb1391318af6f38857b34d2a094d18b8e0809925c8aa445ca9933eca850bba6d8f3c3290c2c0e91a6aab1b7129f2df0aa742d46abbd764b79f89b5ffe9de7bd9c7beb6e02c6f8d52c90a93b7bda293d7f517fd0b4d0cc5c3998c9adf3302ee5c2338410b8910a8a67b312019684c18942268cf698aa194b02fc4438226e4c9318a3251141367daa33be1deb0ae65b65e8f2c34d49db6a47adf64bc78678656a73f9a1ae3b07d1d18c4c3b23832ac12a4696f0d8d3bab5043be079cabc6610492c420fc731fd2f913657d9c941b050081acaaa45da86d492214b1da664481f03cfbf76b2d" timestamp="1688474650" url="https://raw.githubusercontent.com/jackBonadies/SeekerAndroid/fdroid/fdroid/repo" version="20002">
+	<repo icon="icon.png" name="Seeker slsk client" pubkey="3082050f308202f7a0030201020204369de826300d06092a864886f70d01010b050030383110300e060355040b1307462d44726f6964312430220603550403131b4445534b544f502d44424f494237342e6c6f63616c646f6d61696e301e170d3232303631383137313232325a170d3439313130333137313232325a30383110300e060355040b1307462d44726f6964312430220603550403131b4445534b544f502d44424f494237342e6c6f63616c646f6d61696e30820222300d06092a864886f70d01010105000382020f003082020a0282020100afeeee8fd5c35324871f270078a84aac2f000bc6178fe1234d98153385389121cf6cafafdcce15dd70ffb9de79663a67d8960cd896ccee45a20fc66b34b0d5fb1eff957305fd64d346434a42b986073774a92177e39afa30f841de42733ca16aebe70fd533b857189557484c50862ecafcf0e4af7ed6e5d2b03e15f1f91d2cf396ce1c28a3523a65c3930a9052437bda3c5f919997d110dcf8fb8f8627756584bb912dc40c28de4f0ce4397ba27098b1e3df28b0f37a86f5f0444909b467d79b92bb7e54ff45c262a0ee5b7261999c692c1070a446dfd7641736615cbdef4829db0f5dedd24e73d0ee68096c588e37cdb8d1dcbee37a9a4449719b3e912a2f544bdd48f7d9d86fe9c1a20589bd587b4ccdc415c35199bd6b1fef4513ec391517829fb6613cb95dd5c4b5e0ae4fa2922742ec77f5f1d3ad97d8acafdc3709bfd7933ed1bba072a43e67625eaa52408cb2d9d5d7330ccce5e3973c799fed1169ef3777a81e13f7ce5e1139b7369ed22413fca36f7dc89c86439e4ccaae4c1b20488eabcc1c63239f224fa39e7d371b62d2c5da2b38c9bc9ffe13eb24371f6fc806d4216ff2c4cb66d0d0186d972ac6235e562d16ca46e578ed9df14fc33c55bcc7dd0eb060c2784afc417d1821fe266b30050f361b7d43cb2ba74a544f1264b94a64743751a4b836580add7489189282bbe75c33829c10aae59031c775317437110203010001a321301f301d0603551d0e04160414f03c48317df6da87ff50d50646a5590c7e016181300d06092a864886f70d01010b0500038202010009e09824bde0ed979e423878a5118f7db6d33ab5ce07286d6b93263e24a12781091a478debb021309adeffc0c3f6678ce58b1fa7ede927ccfa5338cda74c88594eb6ac4eff23ac3a24f26c3b2054686f7aa8b4d43776c4aa7fe2b93861e170ea9798bbcb450f747363a97f46aefbe2dc36e1698e350df41483e13468d9b70bb03b6a831dad9f2d52886be2ec585b0aa5eabae3ecc422f686afb366cc1990979a28159f81d1c934589ac5baf44b086a4ccb046480860c69988b2e3d32a2b1730d1eb61ee7f3a931676fe34135c2633ecac152e5b369e6007b61911fba8fb624076a5a9998ced96b3333df335479e3df53cfa7383a1a4183392aa7b049dcc7ec16ce74881a59a7fe6dd47682e2713b82625843952d223152835eeeac34cb1391318af6f38857b34d2a094d18b8e0809925c8aa445ca9933eca850bba6d8f3c3290c2c0e91a6aab1b7129f2df0aa742d46abbd764b79f89b5ffe9de7bd9c7beb6e02c6f8d52c90a93b7bda293d7f517fd0b4d0cc5c3998c9adf3302ee5c2338410b8910a8a67b312019684c18942268cf698aa194b02fc4438226e4c9318a3251141367daa33be1deb0ae65b65e8f2c34d49db6a47adf64bc78678656a73f9a1ae3b07d1d18c4c3b23832ac12a4696f0d8d3bab5043be079cabc6610492c420fc731fd2f913657d9c941b050081acaaa45da86d492214b1da664481f03cfbf76b2d" timestamp="1692665359" url="https://raw.githubusercontent.com/jackBonadies/SeekerAndroid/fdroid/fdroid/repo" version="20002">
 		<description>This repository contains official releases of the Seeker soulseek client from https://github.com/jackBonadies/SeekerAndroid</description>
 	</repo>
 	<application id="com.companyname.andriodapp1">
 		<id>com.companyname.andriodapp1</id>
-		<added>2023-07-04</added>
-		<lastupdated>2023-07-04</lastupdated>
+		<added>2023-08-22</added>
+		<lastupdated>2023-08-22</lastupdated>
 		<name>Seeker</name>
 		<summary>Android client for the Soulseek peer-to-peer network</summary>
-		<icon>com.companyname.andriodapp1.94.png</icon>
+		<icon>com.companyname.andriodapp1.98.png</icon>
 		<desc>Android client for the Soulseek peer-to-peer network
 
 
@@ -32,59 +32,20 @@ This app will always be completely free and open source software, no ads, no 'pr
 		<changelog>https://github.com/jackBonadies/SeekerAndroid/releases</changelog>
 		<author>jackBonadies</author>
 		<email>jbonadies6@gmail.com</email>
-		<marketversion>2.9.15</marketversion>
-		<marketvercode>94</marketvercode>
+		<marketversion>2.9.19</marketversion>
+		<marketvercode>98</marketvercode>
 		<antifeatures>NonFreeNet</antifeatures>
 		<package>
-			<version>2.9.15</version>
-			<versioncode>94</versioncode>
-			<apkname>seeker_v2.9.15.apk</apkname>
-			<hash type="sha256">ae321374cb2213ba62502270d7f591c422a3e602bdee89008851f4cb5bd8906a</hash>
-			<size>15474676</size>
+			<version>2.9.19</version>
+			<versioncode>98</versioncode>
+			<apkname>seeker_v2.9.18.apk</apkname>
+			<hash type="sha256">c6cbdd4bd95baf6e6be0e18c239f16311945202c69692ee6b2743a1e58561c0f</hash>
+			<size>15523900</size>
 			<sdkver>19</sdkver>
 			<targetSdkVersion>33</targetSdkVersion>
-			<added>2023-07-04</added>
+			<added>2023-08-22</added>
 			<sig>d22a36e154c97d17f1186735d768534b</sig>
 			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,POST_NOTIFICATIONS,READ_EXTERNAL_STORAGE,READ_MEDIA_AUDIO,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
-			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
-		</package>
-		<package>
-			<version>2.9.12</version>
-			<versioncode>91</versioncode>
-			<apkname>seeker_v2.9.12.apk</apkname>
-			<hash type="sha256">08038cac35413c5086e6074e904fc5b38575ae3a3f96e532ce95883e0514c088</hash>
-			<size>15404165</size>
-			<sdkver>19</sdkver>
-			<targetSdkVersion>31</targetSdkVersion>
-			<added>2023-07-04</added>
-			<sig>d22a36e154c97d17f1186735d768534b</sig>
-			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
-			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
-		</package>
-		<package>
-			<version>2.9.10</version>
-			<versioncode>89</versioncode>
-			<apkname>seeker_v2.9.10.apk</apkname>
-			<hash type="sha256">a8302fa91d049f171ad1fffec39fa6588c1df1b6e19dca4793e4a9fe1f62fa01</hash>
-			<size>15264901</size>
-			<sdkver>19</sdkver>
-			<targetSdkVersion>31</targetSdkVersion>
-			<added>2023-07-04</added>
-			<sig>d22a36e154c97d17f1186735d768534b</sig>
-			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
-			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
-		</package>
-		<package>
-			<version>2.9.9</version>
-			<versioncode>88</versioncode>
-			<apkname>seeker_v2.9.9.apk</apkname>
-			<hash type="sha256">0cda7a58fdb02dd9ecc6b0d0c4c50dbd51fb9e3945ba42f839aca648566a45f5</hash>
-			<size>15252613</size>
-			<sdkver>19</sdkver>
-			<targetSdkVersion>31</targetSdkVersion>
-			<added>2023-07-04</added>
-			<sig>d22a36e154c97d17f1186735d768534b</sig>
-			<permissions>ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,CHANGE_WIFI_MULTICAST_STATE,FOREGROUND_SERVICE,INTERNET,MANAGE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,WAKE_LOCK,WRITE_EXTERNAL_STORAGE</permissions>
 			<nativecode>arm64-v8a,armeabi-v7a</nativecode>
 		</package>
 	</application>

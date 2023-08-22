@@ -6,7 +6,7 @@ This repository hosts an [F-Droid](https://f-droid.org/) repo for my apps. This 
 <!-- This table is auto-generated. Do not edit -->
 | Icon | Name | Description | Version |
 | --- | --- | --- | --- |
-| <a href="https://github.com/jackBonadies/SeekerAndroid"><img src="fdroid/repo/icons/com.companyname.andriodapp1.94.png" alt="Seeker icon" width="36px" height="36px"></a> | [**Seeker**](https://github.com/jackBonadies/SeekerAndroid) | Android client for the Soulseek peer-to-peer network | 2.9.15 (94) |
+| <a href="https://github.com/jackBonadies/SeekerAndroid"><img src="fdroid/repo/icons/com.companyname.andriodapp1.98.png" alt="Seeker icon" width="36px" height="36px"></a> | [**Seeker**](https://github.com/jackBonadies/SeekerAndroid) | Android client for the Soulseek peer-to-peer network | 2.9.19 (98) |
 <!-- end apps table -->
 
 Please note that some apps published here might contain [Anti-Features](https://f-droid.org/en/docs/Anti-Features/). If you can't find an app by searching for it, you can go to settings and enable "Include anti-feature apps".

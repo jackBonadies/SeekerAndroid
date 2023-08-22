@@ -1,6 +1,6 @@
 {
   "repo": {
-    "timestamp": 1688474650000,
+    "timestamp": 1692665359000,
     "version": 20002,
     "name": "Seeker slsk client",
     "icon": "icon.png",
@@ -22,18 +22,18 @@
         "Internet"
       ],
       "changelog": "https://github.com/jackBonadies/SeekerAndroid/releases",
-      "suggestedVersionName": "2.9.15",
-      "suggestedVersionCode": "94",
+      "suggestedVersionName": "2.9.19",
+      "suggestedVersionCode": "98",
       "description": "Android client for the Soulseek peer-to-peer network\n\n\nSeeker is a Soulseek client for Android written in C# (with Xamarin) supporting downloading, searching (including wishlist and filters), sharing, messages, chatrooms, port forwarding, user info, privileges, and more.\n\nThis work uses the Soulseek.NET library for communicating with Soulseek server and network peers. It also references the unofficial Soulseek Protocol Documentation implemented by the developers of the Nicotine+ client.\n\n- The Soulseek server, which makes this app possible, relies on donations. Donate: at https://www.slsknet.org/donate.php\n- Please help translate: https://crowdin.com/project/seeker\n- Official release is through Google Play store: https://play.google.com/store/apps/details?id=com.companyname.andriodapp1\n\nThis app will always be completely free and open source software, no ads, no 'premium' versions or paid features, etc.\n",
       "issueTracker": "https://github.com/jackBonadies/SeekerAndroid/issues",
       "license": "GPL-3.0",
       "name": "Seeker",
       "sourceCode": "https://github.com/jackBonadies/SeekerAndroid",
       "summary": "Android client for the Soulseek peer-to-peer network",
-      "added": 1688474639000,
-      "icon": "com.companyname.andriodapp1.94.png",
+      "added": 1692665351000,
+      "icon": "com.companyname.andriodapp1.98.png",
       "packageName": "com.companyname.andriodapp1",
-      "lastUpdated": 1688474643000,
+      "lastUpdated": 1692665351000,
       "localized": {
         "en-US": {
           "phoneScreenshots": [
@@ -44,7 +44,7 @@
             "5.png",
             "6.png"
           ],
-          "whatsNew": "Updates and adjustments for Android 13 target.  Small bug fixes."
+          "whatsNew": "Update Translations"
         }
       }
     }
@@ -52,9 +52,9 @@
   "packages": {
     "com.companyname.andriodapp1": [
       {
-        "added": 1688474642000,
-        "apkName": "seeker_v2.9.15.apk",
-        "hash": "ae321374cb2213ba62502270d7f591c422a3e602bdee89008851f4cb5bd8906a",
+        "added": 1692665351000,
+        "apkName": "seeker_v2.9.18.apk",
+        "hash": "c6cbdd4bd95baf6e6be0e18c239f16311945202c69692ee6b2743a1e58561c0f",
         "hashType": "sha256",
         "minSdkVersion": 19,
         "nativecode": [
@@ -64,7 +64,7 @@
         "packageName": "com.companyname.andriodapp1",
         "sig": "d22a36e154c97d17f1186735d768534b",
         "signer": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2",
-        "size": 15474676,
+        "size": 15523900,
         "targetSdkVersion": 33,
         "uses-permission": [
           [
@@ -116,188 +116,8 @@
             null
           ]
         ],
-        "versionCode": 94,
-        "versionName": "2.9.15"
-      },
-      {
-        "added": 1688474641000,
-        "apkName": "seeker_v2.9.12.apk",
-        "hash": "08038cac35413c5086e6074e904fc5b38575ae3a3f96e532ce95883e0514c088",
-        "hashType": "sha256",
-        "minSdkVersion": 19,
-        "nativecode": [
-          "arm64-v8a",
-          "armeabi-v7a"
-        ],
-        "packageName": "com.companyname.andriodapp1",
-        "sig": "d22a36e154c97d17f1186735d768534b",
-        "signer": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2",
-        "size": 15404165,
-        "targetSdkVersion": 31,
-        "uses-permission": [
-          [
-            "android.permission.ACCESS_NETWORK_STATE",
-            null
-          ],
-          [
-            "android.permission.INTERNET",
-            null
-          ],
-          [
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-            null
-          ],
-          [
-            "android.permission.FOREGROUND_SERVICE",
-            null
-          ],
-          [
-            "android.permission.ACCESS_WIFI_STATE",
-            null
-          ],
-          [
-            "android.permission.MANAGE_EXTERNAL_STORAGE",
-            null
-          ],
-          [
-            "android.permission.CHANGE_WIFI_MULTICAST_STATE",
-            null
-          ],
-          [
-            "android.permission.WAKE_LOCK",
-            null
-          ],
-          [
-            "android.permission.RECEIVE_BOOT_COMPLETED",
-            null
-          ],
-          [
-            "android.permission.READ_EXTERNAL_STORAGE",
-            null
-          ]
-        ],
-        "versionCode": 91,
-        "versionName": "2.9.12"
-      },
-      {
-        "added": 1688474639000,
-        "apkName": "seeker_v2.9.10.apk",
-        "hash": "a8302fa91d049f171ad1fffec39fa6588c1df1b6e19dca4793e4a9fe1f62fa01",
-        "hashType": "sha256",
-        "minSdkVersion": 19,
-        "nativecode": [
-          "arm64-v8a",
-          "armeabi-v7a"
-        ],
-        "packageName": "com.companyname.andriodapp1",
-        "sig": "d22a36e154c97d17f1186735d768534b",
-        "signer": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2",
-        "size": 15264901,
-        "targetSdkVersion": 31,
-        "uses-permission": [
-          [
-            "android.permission.ACCESS_NETWORK_STATE",
-            null
-          ],
-          [
-            "android.permission.INTERNET",
-            null
-          ],
-          [
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-            null
-          ],
-          [
-            "android.permission.FOREGROUND_SERVICE",
-            null
-          ],
-          [
-            "android.permission.ACCESS_WIFI_STATE",
-            null
-          ],
-          [
-            "android.permission.MANAGE_EXTERNAL_STORAGE",
-            null
-          ],
-          [
-            "android.permission.CHANGE_WIFI_MULTICAST_STATE",
-            null
-          ],
-          [
-            "android.permission.WAKE_LOCK",
-            null
-          ],
-          [
-            "android.permission.RECEIVE_BOOT_COMPLETED",
-            null
-          ],
-          [
-            "android.permission.READ_EXTERNAL_STORAGE",
-            null
-          ]
-        ],
-        "versionCode": 89,
-        "versionName": "2.9.10"
-      },
-      {
-        "added": 1688474643000,
-        "apkName": "seeker_v2.9.9.apk",
-        "hash": "0cda7a58fdb02dd9ecc6b0d0c4c50dbd51fb9e3945ba42f839aca648566a45f5",
-        "hashType": "sha256",
-        "minSdkVersion": 19,
-        "nativecode": [
-          "arm64-v8a",
-          "armeabi-v7a"
-        ],
-        "packageName": "com.companyname.andriodapp1",
-        "sig": "d22a36e154c97d17f1186735d768534b",
-        "signer": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2",
-        "size": 15252613,
-        "targetSdkVersion": 31,
-        "uses-permission": [
-          [
-            "android.permission.ACCESS_NETWORK_STATE",
-            null
-          ],
-          [
-            "android.permission.INTERNET",
-            null
-          ],
-          [
-            "android.permission.WRITE_EXTERNAL_STORAGE",
-            null
-          ],
-          [
-            "android.permission.FOREGROUND_SERVICE",
-            null
-          ],
-          [
-            "android.permission.ACCESS_WIFI_STATE",
-            null
-          ],
-          [
-            "android.permission.MANAGE_EXTERNAL_STORAGE",
-            null
-          ],
-          [
-            "android.permission.CHANGE_WIFI_MULTICAST_STATE",
-            null
-          ],
-          [
-            "android.permission.WAKE_LOCK",
-            null
-          ],
-          [
-            "android.permission.RECEIVE_BOOT_COMPLETED",
-            null
-          ],
-          [
-            "android.permission.READ_EXTERNAL_STORAGE",
-            null
-          ]
-        ],
-        "versionCode": 88,
-        "versionName": "2.9.9"
+        "versionCode": 98,
+        "versionName": "2.9.19"
       }
     ]
   }
