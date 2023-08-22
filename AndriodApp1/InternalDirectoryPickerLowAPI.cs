@@ -78,7 +78,13 @@ namespace AndriodApp1
             _mContext = context;
             
             Java.IO.File[] externalRootDirs = context.GetExternalFilesDirs(null);
-            if(externalRootDirs != null)
+
+            if (externalRootDirs != null)
+            {
+                externalRootDirs = externalRootDirs.Where(f => f != null).ToArray();
+            }
+
+            if (externalRootDirs != null)
             {
                 _topPaths = externalRootDirs.Select(f => f.AbsolutePath).ToArray();
             }
