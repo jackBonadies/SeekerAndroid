@@ -9387,26 +9387,19 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case Resource.Id.user_list_action:
-                    // User chose the "Settings" item, show the app settings UI...
                     Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(UserListActivity));
-                    //intent.PutExtra("SaveDataDirectoryUri", SoulSeekState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
                     SoulSeekState.MainActivityRef.StartActivityForResult(intent, 141);
                     return true;
                 case Resource.Id.messages_action:
-                    // User chose the "Settings" item, show the app settings UI...
                     Intent intentMessages = new Intent(SoulSeekState.MainActivityRef, typeof(MessagesActivity));
-                    //intent.PutExtra("SaveDataDirectoryUri", SoulSeekState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
                     SoulSeekState.MainActivityRef.StartActivityForResult(intentMessages, 142);
                     return true;
                 case Resource.Id.chatroom_action:
-                    // User chose the "Settings" item, show the app settings UI...
                     Intent intentChatroom = new Intent(SoulSeekState.MainActivityRef, typeof(ChatroomActivity));
-                    //intent.PutExtra("SaveDataDirectoryUri", SoulSeekState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
                     SoulSeekState.MainActivityRef.StartActivityForResult(intentChatroom, 143);
                     return true;
                 case Resource.Id.settings_action:
                     Intent intent2 = new Intent(SoulSeekState.MainActivityRef, typeof(SettingsActivity));
-                    //intent.PutExtra("SaveDataDirectoryUri", SoulSeekState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
                     SoulSeekState.MainActivityRef.StartActivityForResult(intent2, 140);
                     return true;
                 case Resource.Id.shutdown_action:

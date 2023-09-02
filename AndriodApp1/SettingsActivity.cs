@@ -69,6 +69,9 @@ namespace AndriodApp1
 
         private const int FORCE_REQUEST_STORAGE_MANAGER = 0x434;
 
+        public const int SCROLL_TO_SHARING_SECTION = 10;
+        public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
+
         private List<Tuple<int,int>> positionNumberPairs = new List<Tuple<int, int>>();
         private CheckBox allowPrivateRoomInvitations;
 
@@ -392,10 +395,12 @@ namespace AndriodApp1
                 }
             }
         }
-        
-        
-        
-        
+
+
+
+
+        private ScrollView mainScrollView;
+        private View sharingLayoutParent;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -787,6 +792,13 @@ namespace AndriodApp1
 
             Button configSmartFilters = FindViewById<Button>(Resource.Id.configureSmartFilters);
             configSmartFilters.Click += ConfigSmartFilters_Click;
+
+            mainScrollView = FindViewById<ScrollView>(Resource.Id.mainScrollView);
+            sharingLayoutParent = FindViewById<ViewGroup>(Resource.Id.sharingLayoutParent);
+            if (Intent != null && Intent.GetIntExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, -1) != -1)
+            {
+                mainScrollView.Post(new Action(() => { mainScrollView.SmoothScrollTo(0, sharingLayoutParent.Top - 14); }));
+            }
 
             UpdateLayoutParametersForScreenSize();
         }

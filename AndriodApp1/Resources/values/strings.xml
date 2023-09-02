@@ -898,4 +898,7 @@ The standard way of requesting folder access does not always persist permissions
 
 	<string name="bitrate">Bitrate</string>
 
+	<string name="setUpSharing">Set up Sharing</string>
+
+
 </resources>

@@ -6988,6 +6988,7 @@ namespace AndriodApp1
 
         //private ListView primaryListView = null;
         private TextView noTransfers = null;
+        private Button setupUpSharing = null;
         private ISharedPreferences sharedPreferences = null;
         private static System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> ProgressUpdatedThrottler = new System.Collections.Concurrent.ConcurrentDictionary<string, DateTime>();
         public static int THROTTLE_PROGRESS_UPDATED_RATE = 200;//in ms;
@@ -7527,6 +7528,7 @@ namespace AndriodApp1
                 if (!(TransferItemManagerUploads.IsEmpty()))
                 {
                     noTransfers.Visibility = ViewStates.Gone;
+                    setupUpSharing.Visibility = ViewStates.Gone;
                 }
                 else
                 {
@@ -7534,15 +7536,18 @@ namespace AndriodApp1
                     if (MainActivity.MeetsSharingConditions())
                     {
                         noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
+                        setupUpSharing.Visibility = ViewStates.Gone;
                     }
                     else
                     {
                         noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_not_sharing);
+                        setupUpSharing.Visibility = ViewStates.Visible;
                     }
                 }
             }
             else
             {
+                setupUpSharing.Visibility = ViewStates.Gone;
                 if (!(TransferItemManagerDL.IsEmpty()))
                 {
                     noTransfers.Visibility = ViewStates.Gone;
@@ -7573,6 +7578,8 @@ namespace AndriodApp1
             //this.primaryListView = rootView.FindViewById<ListView>(Resource.Id.listView1);
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerView1);
             this.noTransfers = rootView.FindViewById<TextView>(Resource.Id.noTransfersView);
+            this.setupUpSharing = rootView.FindViewById<Button>(Resource.Id.setUpSharing);
+            this.setupUpSharing.Click += SetupUpSharing_Click;
 
             //View transferOptions = rootView.FindViewById<View>(Resource.Id.transferOptions);
             //transferOptions.Click += TransferOptions_Click;
@@ -7623,6 +7630,13 @@ namespace AndriodApp1
             MainActivity.LogInfoFirebase("AutoRetry: " + SoulSeekState.AutoRetryDownload);
 
             return rootView;
+        }
+
+        private void SetupUpSharing_Click(object sender, EventArgs e)
+        {
+            Intent intent2 = new Intent(SoulSeekState.MainActivityRef, typeof(SettingsActivity));
+            intent2.PutExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, SettingsActivity.SCROLL_TO_SHARING_SECTION);
+            SoulSeekState.MainActivityRef.StartActivityForResult(intent2, 140);
         }
 
         public void SaveScrollPositionOnMovingIntoFolder()
@@ -7835,6 +7849,7 @@ namespace AndriodApp1
                 MainActivity.fromNotificationMoveToUploads = false;
                 this.MoveToUploadForNotif();
             }
+            SetNoTransfersMessage(); // in case coming back from settings
             base.OnResume();
         }
 

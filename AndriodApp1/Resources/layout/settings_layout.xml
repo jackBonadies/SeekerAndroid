@@ -31,6 +31,7 @@
         android:paddingBottom="60dp"
         android:clipToPadding="false"
         android:layout_width="fill_parent"
+        android:id="@+id/mainScrollView"
         android:layout_below="@id/appbarLayout"
         android:layout_height="fill_parent">
 
