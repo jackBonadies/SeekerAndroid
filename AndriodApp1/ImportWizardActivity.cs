@@ -288,7 +288,7 @@ namespace AndriodApp1
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
                     var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
+                    editor.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
                     editor.Commit();
                 }
             }
@@ -297,7 +297,7 @@ namespace AndriodApp1
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
                     var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_IgnoreUserList, SeekerApplication.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                    editor.PutString(SoulSeekState.M_IgnoreUserList, PreferenceHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
                     editor.Commit();
                 }
             }

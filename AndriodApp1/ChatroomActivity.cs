@@ -2799,18 +2799,14 @@ namespace AndriodApp1
         public static void SaveAutoJoinRoomsToSharedPrefs()
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
-            if (RootAutoJoinRoomNames == null || AutoJoinRoomNames==null)
+            if (RootAutoJoinRoomNames == null || AutoJoinRoomNames ==null)
             {
                 return;
             }
             RootAutoJoinRoomNames[SoulSeekState.Username] = AutoJoinRoomNames;
-            string joinedRoomsString = string.Empty;
-            using (System.IO.MemoryStream autoJoinStream = new System.IO.MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(autoJoinStream, RootAutoJoinRoomNames);
-                joinedRoomsString = Convert.ToBase64String(autoJoinStream.ToArray());
-            }
+
+            var joinedRoomsString = PreferenceHelper.SaveAutoJoinRoomsListToString(RootAutoJoinRoomNames);
+
             if (joinedRoomsString != null && joinedRoomsString != string.Empty)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
@@ -2833,20 +2829,16 @@ namespace AndriodApp1
             }
             else
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(joinedRooms)))
+                RootAutoJoinRoomNames = PreferenceHelper.RestoreAutoJoinRoomsListFromString(joinedRooms);
+                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SoulSeekState.Username))
                 {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    RootAutoJoinRoomNames = binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>;
-                    if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SoulSeekState.Username))
-                    {
-                        AutoJoinRoomNames = RootAutoJoinRoomNames[SoulSeekState.Username];
-                        CurrentUsername = SoulSeekState.Username;
-                    }
-                    else
-                    {
-                        AutoJoinRoomNames = new List<string>();
-                        CurrentUsername = SoulSeekState.Username;
-                    }
+                    AutoJoinRoomNames = RootAutoJoinRoomNames[SoulSeekState.Username];
+                    CurrentUsername = SoulSeekState.Username;
+                }
+                else
+                {
+                    AutoJoinRoomNames = new List<string>();
+                    CurrentUsername = SoulSeekState.Username;
                 }
             }
         }
@@ -2863,13 +2855,9 @@ namespace AndriodApp1
                 return;
             }
             RootNotifyRoomNames[SoulSeekState.Username] = NotifyRoomNames;
-            string notifyRoomsString = string.Empty;
-            using (System.IO.MemoryStream notifyStream = new System.IO.MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(notifyStream, RootNotifyRoomNames);
-                notifyRoomsString = Convert.ToBase64String(notifyStream.ToArray());
-            }
+
+            string notifyRoomsString = PreferenceHelper.SaveNotifyRoomsListToString(RootNotifyRoomNames);
+
             if (notifyRoomsString != null && notifyRoomsString != string.Empty)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
@@ -2892,20 +2880,16 @@ namespace AndriodApp1
             }
             else
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(notifyRooms)))
+                RootNotifyRoomNames = PreferenceHelper.RestoreNotifyRoomsListFromString(notifyRooms);
+                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SoulSeekState.Username))
                 {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    RootNotifyRoomNames = binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>;
-                    if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SoulSeekState.Username))
-                    {
-                        NotifyRoomNames = RootNotifyRoomNames[SoulSeekState.Username];
-                        CurrentUsername = SoulSeekState.Username;
-                    }
-                    else
-                    {
-                        NotifyRoomNames = new List<string>();
-                        CurrentUsername = SoulSeekState.Username;
-                    }
+                    NotifyRoomNames = RootNotifyRoomNames[SoulSeekState.Username];
+                    CurrentUsername = SoulSeekState.Username;
+                }
+                else
+                {
+                    NotifyRoomNames = new List<string>();
+                    CurrentUsername = SoulSeekState.Username;
                 }
             }
         }

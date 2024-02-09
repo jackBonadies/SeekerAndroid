@@ -4292,7 +4292,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_IgnoreUserList, SeekerApplication.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                editor.PutString(SoulSeekState.M_IgnoreUserList, PreferenceHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
                 editor.Commit();
             }
             return true;
@@ -4331,7 +4331,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_IgnoreUserList, SeekerApplication.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                editor.PutString(SoulSeekState.M_IgnoreUserList, PreferenceHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
                 editor.Commit();
             }
             return true;
@@ -4603,10 +4603,10 @@ namespace AndriodApp1
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
-                SoulSeekState.UserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
+                SoulSeekState.UserList = PreferenceHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
 
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
-                SoulSeekState.IgnoreUserList = RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
+                SoulSeekState.IgnoreUserList = PreferenceHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
                 SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
                 SoulSeekState.StartServiceOnStartup = sharedPreferences.GetBoolean(SoulSeekState.M_ServiceOnStartup, true);
 
@@ -4616,8 +4616,8 @@ namespace AndriodApp1
                 SoulSeekState.UserInfoBio = sharedPreferences.GetString(SoulSeekState.M_UserInfoBio, string.Empty);
                 SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
 
-                SoulSeekState.UserNotes = RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
-                SoulSeekState.UserOnlineAlerts = RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
+                SoulSeekState.UserNotes = PreferenceHelper.RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
+                SoulSeekState.UserOnlineAlerts = PreferenceHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
                 SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
                 SoulSeekState.AutoRetryBackOnline = sharedPreferences.GetBoolean(SoulSeekState.M_AutoRetryBackOnline, true);
@@ -4696,78 +4696,7 @@ namespace AndriodApp1
             }
         }
 
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes)
-        {
-            if (base64userNotes == string.Empty)
-            {
-                return new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
-            }
-            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64userNotes)))
-            {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, string>;
-            }
-        }
 
-        public static string SaveUserNotesToString(System.Collections.Concurrent.ConcurrentDictionary<string, string> userNotes)
-        {
-            if (userNotes == null || userNotes.Keys.Count == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                using (System.IO.MemoryStream userNotesStream = new System.IO.MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(userNotesStream, userNotes);
-                    return Convert.ToBase64String(userNotesStream.ToArray());
-                }
-            }
-        }
-
-        public static string SaveUserOnlineAlertsFromString(System.Collections.Concurrent.ConcurrentDictionary<string, byte> onlineAlertsDict)
-        {
-            if (onlineAlertsDict == null || onlineAlertsDict.Keys.Count == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                using (System.IO.MemoryStream onlineAlertsStream = new System.IO.MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(onlineAlertsStream, onlineAlertsDict);
-                    return Convert.ToBase64String(onlineAlertsStream.ToArray());
-                }
-            }
-        }
-
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> RestoreUserOnlineAlertsFromString(string base64onlineAlerts)
-        {
-            if (base64onlineAlerts == string.Empty)
-            {
-                return new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
-            }
-            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64onlineAlerts)))
-            {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, byte>;
-            }
-        }
-
-        public static List<UserListItem> RestoreUserListFromString(string base64userList)
-        {
-            if (base64userList == string.Empty)
-            {
-                return new List<UserListItem>();
-            }
-            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64userList)))
-            {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                return binaryFormatter.Deserialize(mem) as List<UserListItem>;
-            }
-        }
 
         public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
         {
@@ -4864,22 +4793,7 @@ namespace AndriodApp1
             }
         }
 
-        public static string SaveUserListToString(List<UserListItem> userList)
-        {
-            if (userList == null || userList.Count == 0)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                using (System.IO.MemoryStream userListStream = new System.IO.MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(userListStream, userList);
-                    return Convert.ToBase64String(userListStream.ToArray());
-                }
-            }
-        }
+
 
 
         /// <summary>
@@ -12429,7 +12343,7 @@ namespace AndriodApp1
 
                 if (SoulSeekState.UserList != null)
                 {
-                    editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
+                    editor.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
                 }
 
 
@@ -12467,7 +12381,7 @@ namespace AndriodApp1
             outState.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
             if (SoulSeekState.UserList != null)
             {
-                outState.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
+                outState.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
             }
 
         }
@@ -15535,7 +15449,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserNotes, SeekerApplication.SaveUserNotesToString(SoulSeekState.UserNotes));
+                editor.PutString(SoulSeekState.M_UserNotes, PreferenceHelper.SaveUserNotesToString(SoulSeekState.UserNotes));
                 editor.Commit();
             }
         }
@@ -15546,7 +15460,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SeekerApplication.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
+                editor.PutString(SoulSeekState.M_UserOnlineAlerts, PreferenceHelper.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
                 editor.Commit();
             }
         }

@@ -1205,18 +1205,7 @@ namespace AndriodApp1
         public static void RestoreUnreadStateDict(ISharedPreferences sharedPrefs)
         {
             string unreadMessageUsernames = sharedPrefs.GetString(SoulSeekState.M_UnreadMessageUsernames, string.Empty);
-            if (unreadMessageUsernames == string.Empty)
-            {
-                UnreadUsernames = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
-            }
-            else
-            {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(unreadMessageUsernames)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    UnreadUsernames = binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, byte>;
-                }
-            }
+            UnreadUsernames = PreferenceHelper.RestoreUnreadUsernamesFromString(unreadMessageUsernames);
         }
 
         public static void SaveUnreadStateDict(ISharedPreferences sharedPrefs)
@@ -1235,13 +1224,10 @@ namespace AndriodApp1
                     bool success = editor.Commit();
                 }
             }
-            string messagesString = string.Empty;
-            using (System.IO.MemoryStream messagesStream = new System.IO.MemoryStream())
+            else
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(messagesStream, UnreadUsernames);
-                messagesString = Convert.ToBase64String(messagesStream.ToArray());
-                if (messagesString != null && messagesString != string.Empty)
+                var messagesString = PreferenceHelper.SaveUnreadUsernamesToString(UnreadUsernames);
+                if (!string.IsNullOrEmpty(messagesString))
                 {
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
@@ -1251,7 +1237,6 @@ namespace AndriodApp1
                     }
                 }
             }
-
         }
 
         public static void SetAsUnreadAndSaveIfApplicable(string username)

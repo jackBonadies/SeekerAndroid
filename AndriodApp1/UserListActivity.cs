@@ -169,7 +169,7 @@ namespace AndriodApp1
             if (SoulSeekState.UserList == null)
             {
                 var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
-                SoulSeekState.UserList = SeekerApplication.RestoreUserListFromString(sharedPref.GetString(SoulSeekState.M_UserList,""));
+                SoulSeekState.UserList = PreferenceHelper.RestoreUserListFromString(sharedPref.GetString(SoulSeekState.M_UserList,""));
             }
 
             //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
@@ -441,7 +441,7 @@ namespace AndriodApp1
                             lock (MainActivity.SHARED_PREF_LOCK)
                             {
                              var editor = SoulSeekState.SharedPreferences.Edit();
-                            editor.PutString(SoulSeekState.M_UserList, SeekerApplication.SaveUserListToString(SoulSeekState.UserList));
+                            editor.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
                             editor.Commit();
                             }
                         }
