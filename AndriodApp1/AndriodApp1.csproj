@@ -125,6 +125,7 @@
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="MessagesActivity.cs" />
+    <Compile Include="SeekerApplication.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
