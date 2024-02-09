@@ -119,6 +119,7 @@
     <Compile Include="bzip2\MoveToFront.cs" />
     <Compile Include="ChatroomActivity.cs" />
     <Compile Include="ChipsAdapter.cs" />
+    <Compile Include="ConfigureProxy.cs" />
     <Compile Include="DownloadDialog.cs" />
     <Compile Include="EditUserInfoActivity.cs" />
     <Compile Include="ImportWizardActivity.cs" />
@@ -1509,6 +1510,11 @@
   <ItemGroup>
     <AndroidResource Include="Resources\values-cs\strings.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\configure_proxy.xml">
+      <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

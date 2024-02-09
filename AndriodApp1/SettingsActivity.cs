@@ -719,6 +719,9 @@ namespace AndriodApp1
             Button editUserInfo = FindViewById<Button>(Resource.Id.editUserInfoButton);
             editUserInfo.Click += EditUserInfo_Click;
 
+            Button configureProxy = FindViewById<Button>(Resource.Id.configureProxyButton);
+            configureProxy.Click += ConfigureProxy_Click; ;
+
             useUPnPCheckBox = FindViewById<CheckBox>(Resource.Id.useUPnPCheckBox);
             useUPnPCheckBox.Checked = SoulSeekState.ListenerUPnpEnabled;
             useUPnPCheckBox.CheckedChange += UseUPnPCheckBox_CheckedChange;
@@ -802,7 +805,6 @@ namespace AndriodApp1
 
             UpdateLayoutParametersForScreenSize();
         }
-
 
 
         private void MoreInfoExport_Click(object sender, EventArgs e)
@@ -1404,6 +1406,13 @@ namespace AndriodApp1
         private void EditUserInfo_Click(object sender, EventArgs e)
         {
             Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(EditUserInfoActivity));
+            this.StartActivity(intent);
+        }
+
+
+        private void ConfigureProxy_Click(object sender, EventArgs e)
+        {
+            Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(ConfigureProxyActivity));
             this.StartActivity(intent);
         }
 

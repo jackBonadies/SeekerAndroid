@@ -1,0 +1,95 @@
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="?attr/pseudo_window_background_color"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbarLayout"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/configure_proxy_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/mainPurple"
+            android:minHeight="100dp"
+            android:theme="?attr/actionBarTheme"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+    </android.support.design.widget.AppBarLayout>
+<!--      <android.support.design.widget.TextInputLayout
+   android:id="@+id/name_text_input"
+   style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+   android:layout_width="match_parent"
+   android:layout_height="wrap_content"
+        android:layout_below="@id/configure_proxy_toolbar"
+   >
+
+   <android.support.design.widget.TextInputEditText
+       android:id="@+id/name_edit_text"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:hint="testttt" />
+</android.support.design.widget.TextInputLayout>-->
+
+              <com.google.android.material.textfield.TextInputLayout
+   android:id="@+id/name_text_input"
+   android:layout_width="match_parent"
+   android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+         android:layout_below="@id/configure_proxy_toolbar"
+        android:layout_centerInParent="true"
+   >
+
+   <com.google.android.material.textfield.TextInputEditText
+       android:id="@+id/name_edit_text"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:hint="testttt" />
+</com.google.android.material.textfield.TextInputLayout>
+
+
+
+
+       <!--   <android.support.design.widget.TextInputLayout
+        
+        android:id="@+id/serverNameOrIpHolder"
+        android:layout_marginTop = "38dp"
+        android:background="?attr/rounded_input_edit"
+        android:layout_below="@id/configure_proxy_toolbar"
+        
+        app:errorEnabled="false"
+        app:hintEnabled="false"
+        
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content">
+      
+               <android.support.design.widget.TextInputEditText
+
+            android:textColorHighlight = "?attr/mainTextColor"
+            android:textColorHint="?attr/mainTextColor"
+    
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:singleLine="true"
+            android:focusable = "true"
+            android:id="@+id/serverNameOrIp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:ems="10"
+            android:inputType="text"
+            android:hint="Address" />
+
+        </android.support.design.widget.TextInputLayout>-->
+</RelativeLayout>
