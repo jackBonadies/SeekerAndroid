@@ -20,13 +20,21 @@ namespace AndriodApp1
         {
             return base64string.StartsWith(@"AAEAAAD/////");
         }
-        public static string SerializeToString<T>(T objectToSerialize)
+        public static string BinarySerializeToString<T>(T objectToSerialize)
         {
             using (System.IO.MemoryStream userNotesStream = new System.IO.MemoryStream())
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(userNotesStream, objectToSerialize);
                 return Convert.ToBase64String(userNotesStream.ToArray());
+            }
+        }
+        public static T BinaryDeserializeFromString<T>(string base64String) where T : class
+        {
+            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64String)))
+            {
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                return binaryFormatter.Deserialize(mem) as T;
             }
         }
 
@@ -38,7 +46,7 @@ namespace AndriodApp1
             }
             else
             {
-                return SerializeToString(userNotes);
+                return BinarySerializeToString(userNotes);
             }
         }
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes)
@@ -50,11 +58,7 @@ namespace AndriodApp1
 
             if (isBinaryFormatterSerialized(base64userNotes))
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64userNotes)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, string>;
-                }
+                return BinaryDeserializeFromString<System.Collections.Concurrent.ConcurrentDictionary<string, string>>(base64userNotes);
             }
             else
             {
@@ -73,7 +77,7 @@ namespace AndriodApp1
             }
             else
             {
-                return SerializeToString(onlineAlertsDict);
+                return BinarySerializeToString(onlineAlertsDict);
             }
         }
 
@@ -86,11 +90,7 @@ namespace AndriodApp1
 
             if (isBinaryFormatterSerialized(base64onlineAlerts))
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64onlineAlerts)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, byte>;
-                }
+                return BinaryDeserializeFromString<System.Collections.Concurrent.ConcurrentDictionary<string, byte>>(base64onlineAlerts);
             }
             else
             {
@@ -109,7 +109,7 @@ namespace AndriodApp1
             }
             else
             {
-                return SerializeToString(userList);
+                return BinarySerializeToString(userList);
             }
         }
 
@@ -121,11 +121,7 @@ namespace AndriodApp1
             }
             if (isBinaryFormatterSerialized(base64userList))
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64userList)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    return binaryFormatter.Deserialize(mem) as List<UserListItem>;
-                }
+                return BinaryDeserializeFromString<List<UserListItem>>(base64userList);
             }
             else
             {
@@ -136,18 +132,14 @@ namespace AndriodApp1
 
         public static string SaveAutoJoinRoomsListToString(System.Collections.Concurrent.ConcurrentDictionary<string, List<string>> autoJoinRoomNames)
         {
-            return SerializeToString(autoJoinRoomNames);
+            return BinarySerializeToString(autoJoinRoomNames);
         }
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, List<string>> RestoreAutoJoinRoomsListFromString(string joinedRooms)
         {
             if (isBinaryFormatterSerialized(joinedRooms))
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(joinedRooms)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>;
-                }
+                return BinaryDeserializeFromString<System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>>(joinedRooms);
             }
             else
             {
@@ -158,18 +150,14 @@ namespace AndriodApp1
 
         public static string SaveNotifyRoomsListToString(System.Collections.Concurrent.ConcurrentDictionary<string, List<string>> notifyRoomsList)
         {
-            return SerializeToString(notifyRoomsList);
+            return BinarySerializeToString(notifyRoomsList);
         }
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, List<string>> RestoreNotifyRoomsListFromString(string notifyRoomsListString)
         {
             if (isBinaryFormatterSerialized(notifyRoomsListString))
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(notifyRoomsListString)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>;
-                }
+                return BinaryDeserializeFromString<System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>>(notifyRoomsListString);
             }
             else
             {
@@ -179,7 +167,7 @@ namespace AndriodApp1
 
         public static string SaveUnreadUsernamesToString(System.Collections.Concurrent.ConcurrentDictionary<string, byte> unreadUsernames)
         {
-            return SerializeToString(unreadUsernames);
+            return BinarySerializeToString(unreadUsernames);
         }
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> RestoreUnreadUsernamesFromString(string unreadUsernames)
@@ -192,11 +180,7 @@ namespace AndriodApp1
             {
                 if (isBinaryFormatterSerialized(unreadUsernames))
                 {
-                    using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(unreadUsernames)))
-                    {
-                        BinaryFormatter binaryFormatter = new BinaryFormatter();
-                        return binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, byte>;
-                    }
+                    return BinaryDeserializeFromString<System.Collections.Concurrent.ConcurrentDictionary<string, byte>>(unreadUsernames);
                 }
                 else
                 {

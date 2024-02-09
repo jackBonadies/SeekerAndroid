@@ -440,9 +440,9 @@ namespace AndriodApp1
                         {
                             lock (MainActivity.SHARED_PREF_LOCK)
                             {
-                             var editor = SoulSeekState.SharedPreferences.Edit();
-                            editor.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
-                            editor.Commit();
+                                var editor = SoulSeekState.SharedPreferences.Edit();
+                                editor.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
+                                editor.Commit();
                             }
                         }
                     }
