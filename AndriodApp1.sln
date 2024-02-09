@@ -14,12 +14,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Soulseek_Source", "AndriodA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mono.Nat", "AndriodApp1\Mono.Nat-master\Mono.Nat\Mono.Nat.csproj", "{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB} = {F4D9D870-A509-463B-90D4-8D9D6CC340FB}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestCommon", "UnitTestCommon\UnitTestCommon.csproj", "{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestCommon", "UnitTestCommon\UnitTestCommon.csproj", "{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2618,6 +2618,10 @@ namespace AndriodApp1
 
         public override void OnCreate()
         {
+#if DEBUG
+            SerializationHelperTests.Test();
+#endif
+
             base.OnCreate();
             ApplicationContext = this;
 #if !IzzySoft
@@ -4292,7 +4296,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_IgnoreUserList, PreferenceHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                editor.PutString(SoulSeekState.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
                 editor.Commit();
             }
             return true;
@@ -4331,7 +4335,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_IgnoreUserList, PreferenceHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                editor.PutString(SoulSeekState.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
                 editor.Commit();
             }
             return true;
@@ -4603,10 +4607,10 @@ namespace AndriodApp1
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
-                SoulSeekState.UserList = PreferenceHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
+                SoulSeekState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
 
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
-                SoulSeekState.IgnoreUserList = PreferenceHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
+                SoulSeekState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
                 SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
                 SoulSeekState.StartServiceOnStartup = sharedPreferences.GetBoolean(SoulSeekState.M_ServiceOnStartup, true);
 
@@ -4616,8 +4620,8 @@ namespace AndriodApp1
                 SoulSeekState.UserInfoBio = sharedPreferences.GetString(SoulSeekState.M_UserInfoBio, string.Empty);
                 SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
 
-                SoulSeekState.UserNotes = PreferenceHelper.RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
-                SoulSeekState.UserOnlineAlerts = PreferenceHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
+                SoulSeekState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
+                SoulSeekState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
                 SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
                 SoulSeekState.AutoRetryBackOnline = sharedPreferences.GetBoolean(SoulSeekState.M_AutoRetryBackOnline, true);
@@ -12343,7 +12347,7 @@ namespace AndriodApp1
 
                 if (SoulSeekState.UserList != null)
                 {
-                    editor.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
+                    editor.PutString(SoulSeekState.M_UserList, SerializationHelper.SaveUserListToString(SoulSeekState.UserList));
                 }
 
 
@@ -12381,7 +12385,7 @@ namespace AndriodApp1
             outState.PutBoolean(SoulSeekState.M_SharingOn, SoulSeekState.SharingOn);
             if (SoulSeekState.UserList != null)
             {
-                outState.PutString(SoulSeekState.M_UserList, PreferenceHelper.SaveUserListToString(SoulSeekState.UserList));
+                outState.PutString(SoulSeekState.M_UserList, SerializationHelper.SaveUserListToString(SoulSeekState.UserList));
             }
 
         }
@@ -15449,7 +15453,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserNotes, PreferenceHelper.SaveUserNotesToString(SoulSeekState.UserNotes));
+                editor.PutString(SoulSeekState.M_UserNotes, SerializationHelper.SaveUserNotesToString(SoulSeekState.UserNotes));
                 editor.Commit();
             }
         }
@@ -15460,7 +15464,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserOnlineAlerts, PreferenceHelper.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
+                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
                 editor.Commit();
             }
         }

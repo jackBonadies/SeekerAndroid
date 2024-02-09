@@ -1205,7 +1205,7 @@ namespace AndriodApp1
         public static void RestoreUnreadStateDict(ISharedPreferences sharedPrefs)
         {
             string unreadMessageUsernames = sharedPrefs.GetString(SoulSeekState.M_UnreadMessageUsernames, string.Empty);
-            UnreadUsernames = PreferenceHelper.RestoreUnreadUsernamesFromString(unreadMessageUsernames);
+            UnreadUsernames = SerializationHelper.RestoreUnreadUsernamesFromString(unreadMessageUsernames);
         }
 
         public static void SaveUnreadStateDict(ISharedPreferences sharedPrefs)
@@ -1226,7 +1226,7 @@ namespace AndriodApp1
             }
             else
             {
-                var messagesString = PreferenceHelper.SaveUnreadUsernamesToString(UnreadUsernames);
+                var messagesString = SerializationHelper.SaveUnreadUsernamesToString(UnreadUsernames);
                 if (!string.IsNullOrEmpty(messagesString))
                 {
                     lock (MainActivity.SHARED_PREF_LOCK)

@@ -2805,7 +2805,7 @@ namespace AndriodApp1
             }
             RootAutoJoinRoomNames[SoulSeekState.Username] = AutoJoinRoomNames;
 
-            var joinedRoomsString = PreferenceHelper.SaveAutoJoinRoomsListToString(RootAutoJoinRoomNames);
+            var joinedRoomsString = SerializationHelper.SaveAutoJoinRoomsListToString(RootAutoJoinRoomNames);
 
             if (joinedRoomsString != null && joinedRoomsString != string.Empty)
             {
@@ -2829,7 +2829,7 @@ namespace AndriodApp1
             }
             else
             {
-                RootAutoJoinRoomNames = PreferenceHelper.RestoreAutoJoinRoomsListFromString(joinedRooms);
+                RootAutoJoinRoomNames = SerializationHelper.RestoreAutoJoinRoomsListFromString(joinedRooms);
                 if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SoulSeekState.Username))
                 {
                     AutoJoinRoomNames = RootAutoJoinRoomNames[SoulSeekState.Username];
@@ -2856,7 +2856,7 @@ namespace AndriodApp1
             }
             RootNotifyRoomNames[SoulSeekState.Username] = NotifyRoomNames;
 
-            string notifyRoomsString = PreferenceHelper.SaveNotifyRoomsListToString(RootNotifyRoomNames);
+            string notifyRoomsString = SerializationHelper.SaveNotifyRoomsListToString(RootNotifyRoomNames);
 
             if (notifyRoomsString != null && notifyRoomsString != string.Empty)
             {
@@ -2880,7 +2880,7 @@ namespace AndriodApp1
             }
             else
             {
-                RootNotifyRoomNames = PreferenceHelper.RestoreNotifyRoomsListFromString(notifyRooms);
+                RootNotifyRoomNames = SerializationHelper.RestoreNotifyRoomsListFromString(notifyRooms);
                 if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SoulSeekState.Username))
                 {
                     NotifyRoomNames = RootNotifyRoomNames[SoulSeekState.Username];

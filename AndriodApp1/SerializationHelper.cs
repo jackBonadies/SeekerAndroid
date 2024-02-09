@@ -1,20 +1,14 @@
-﻿using Android.App;
-using Android.Content;
-using Android.Hardware.Camera2;
-using Android.Net;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
+﻿using Org.Apache.Http.Conn;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace AndriodApp1
 {
-    public class PreferenceHelper
+    public class SerializationHelper
     {
         private static bool isBinaryFormatterSerialized(string base64string)
         {
@@ -188,5 +182,68 @@ namespace AndriodApp1
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// TODO move PreferenceHelper to Common. Requires Moving UserListItem to common and then fixing the binary resolver
+    /// </summary>
+    public class SerializationHelperTests
+    {
+        public static void Test()
+        {
+            System.Collections.Concurrent.ConcurrentDictionary<string, byte> unreadUsernames = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();
+            unreadUsernames["testuser1"] = 0;
+            unreadUsernames["testuser2"] = 0;
+            unreadUsernames["testuser3"] = 1;
+            unreadUsernames["testuser4"] = 0;
+
+            var ser = SerializationHelper.SaveUnreadUsernamesToString(unreadUsernames);
+            var restored = SerializationHelper.RestoreUnreadUsernamesFromString(ser);
+
+            Debug.Assert(unreadUsernames.Count == restored.Count);
+            Debug.Assert(unreadUsernames["testuser1"] == restored["testuser1"]);
+
+            System.Collections.Concurrent.ConcurrentDictionary<string, List<string>> notifyRooms = new System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>();
+            notifyRooms["testuser1"] = new List<string>() { "music", "music2", "music3" };
+            notifyRooms["testuser2"] = new List<string>() { "musically", "musically2", "musically3" };
+
+            var ser1 = SerializationHelper.SaveNotifyRoomsListToString(notifyRooms);
+            var restored1 = SerializationHelper.RestoreNotifyRoomsListFromString(ser1);
+
+            Debug.Assert(restored1.Count == notifyRooms.Count);
+            Debug.Assert(restored1["testuser1"].Count == notifyRooms["testuser1"].Count);
+            Debug.Assert(restored1["testuser1"].First() == notifyRooms["testuser1"].First());
+
+            List<UserListItem> list = new List<UserListItem>();
+            list.Add(new UserListItem()
+            {
+                DoesNotExist = true,
+                Role = UserRole.Friend,
+                Username = "helloworld",
+                UserStatus = new Soulseek.UserStatus(Soulseek.UserPresence.Offline, true),
+                UserData = new Soulseek.UserData("hellowworld", Soulseek.UserPresence.Online, 100, 11, 12, 14, "en", 4),
+                UserInfo = new Soulseek.UserInfo("testing", 1, 3, true)
+            });
+            list.Add(new UserListItem()
+            {
+                DoesNotExist = false,
+                Role = UserRole.Ignored,
+                Username = "helloworld1",
+                UserStatus = null,
+                UserData = new Soulseek.UserData("hellowworld", Soulseek.UserPresence.Online, 100, 11, 12, 14, "en")
+            });
+            list.Add(new UserListItem()
+            {
+                DoesNotExist = true,
+                Role = UserRole.Friend,
+                Username = "helloworld2",
+                UserStatus = null,
+                UserData = null,
+            });
+
+            var userSer = SerializationHelper.SaveUserListToString(list);
+            var restoredList = SerializationHelper.RestoreUserListFromString(userSer);
+        }
+
     }
 }
