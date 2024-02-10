@@ -53,7 +53,7 @@ using System.Collections.ObjectModel;
 using Android.Net.Wifi;
 using static Android.Provider.DocumentsContract;
 using Android.Util;
-using SearchResponseExtensions;
+using AndriodApp1.Extensions.SearchResponseExtensions;
 using Android.Net;
 using System.Linq.Expressions;
 using AndriodApp1;
@@ -764,6 +764,7 @@ namespace AndriodApp1
         }
 
 
+        // TODOORG move to Utils\SpeedLimitHelper
         public static class SpeedLimitHelper
         {
 
@@ -940,9 +941,10 @@ namespace AndriodApp1
         }
 
 
-        public class ProgressUpdatedUI : EventArgs
+        // TODOORG move to EventArgs?
+        public class ProgressUpdatedUIEventArgs : EventArgs
         {
-            public ProgressUpdatedUI(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete, double _avgspeedBytes)
+            public ProgressUpdatedUIEventArgs(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete, double _avgspeedBytes)
             {
                 ti = _ti;
                 wasFailed = _wasFailed;
@@ -959,7 +961,7 @@ namespace AndriodApp1
 
         public static EventHandler<TransferItem> StateChangedForItem;
         public static EventHandler<int> StateChangedAtIndex;
-        public static EventHandler<ProgressUpdatedUI> ProgressUpdated;
+        public static EventHandler<ProgressUpdatedUIEventArgs> ProgressUpdated;
 
         private void SoulseekClient_TransferStateChanged(object sender, TransferStateChangedEventArgs e)
         {
@@ -1240,7 +1242,7 @@ namespace AndriodApp1
 
                 }
 
-                ProgressUpdated?.Invoke(null, new ProgressUpdatedUI(relevantItem, wasFailed, fullRefresh, percentComplete, e.Transfer.AverageSpeed));
+                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, fullRefresh, percentComplete, e.Transfer.AverageSpeed));
 
             }
         }
@@ -1806,6 +1808,7 @@ namespace AndriodApp1
         }
 
 
+        // TODOORG
         public class NotifInfo
         {
             public NotifInfo(string firstDir)
@@ -1813,8 +1816,10 @@ namespace AndriodApp1
                 NOTIF_ID_FOR_USER = NotifIdCounter;
                 NotifIdCounter++;
                 FilesUploadedToUser = 1;
-                DirNames = new List<string>();
-                DirNames.Add(firstDir);
+                DirNames = new List<string>
+                {
+                    firstDir
+                };
             }
             public int NOTIF_ID_FOR_USER;
             public int FilesUploadedToUser;

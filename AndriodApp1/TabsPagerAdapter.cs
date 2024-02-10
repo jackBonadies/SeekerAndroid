@@ -44,7 +44,7 @@ using Java.Interop;
 using Android.Animation;
 using AndroidX.RecyclerView.Widget;
 using System.Runtime.Serialization.Formatters.Binary;
-using SearchResponseExtensions;
+using AndriodApp1.Extensions.SearchResponseExtensions;
 using AndroidX.DocumentFile.Provider;
 
 namespace AndriodApp1
@@ -9578,7 +9578,7 @@ namespace AndriodApp1
 
         }
 
-        private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUI e)
+        private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
         {
             bool needsRefresh = (e.ti.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.ti.IsUpload()) && !(TransfersFragment.InUploadsMode));
             if (!needsRefresh)

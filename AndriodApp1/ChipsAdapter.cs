@@ -18,7 +18,7 @@ using AndroidX.RecyclerView.Widget;
 using System.Collections.Generic;
 using System;
 
-using SearchResponseExtensions;
+using AndriodApp1.Extensions.SearchResponseExtensions;
 
 namespace AndriodApp1
 {

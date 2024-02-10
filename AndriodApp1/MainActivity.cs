@@ -53,7 +53,7 @@ using System.Collections.ObjectModel;
 using Android.Net.Wifi;
 using static Android.Provider.DocumentsContract;
 using Android.Util;
-using SearchResponseExtensions;
+using AndriodApp1.Extensions.SearchResponseExtensions;
 using Android.Net;
 using System.Linq.Expressions;
 using AndriodApp1;
@@ -67,6 +67,7 @@ using AndriodApp1;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace AndriodApp1
 {
+    // TODOORG seperate class activities?
     public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivityLifecycleCallbacks
     {
         public static bool HasAppEverStarted = false;
@@ -266,6 +267,7 @@ namespace AndriodApp1
 
     }
 
+    // TODO ORG UpnpUnums
     public enum UpnpDiagStatus
     {
         None = 0,
@@ -278,6 +280,7 @@ namespace AndriodApp1
         ErrorUnspecified = 10
     }//what about captive portal??
 
+    // TODO ORG UpnpUnums
     public enum UpnpRunningStatus
     {
         NeverStarted = 0,
@@ -286,6 +289,7 @@ namespace AndriodApp1
         AlreadyMapped = 3
     }
 
+    // TODOORG manager?
     public class PrivilegesManager
     {
         public static object PrivilegedUsersLock = new object();
@@ -520,6 +524,7 @@ namespace AndriodApp1
 
     }
 
+    // TODO Org UPNP folder
     public class UPnpManager
     {
         public static Context Context = null;
@@ -975,6 +980,8 @@ namespace AndriodApp1
             //nothing to do here...
         }
     }
+
+    // TODOORG Models
     public interface ITransferItem
     {
         public string GetDisplayName();
@@ -986,6 +993,7 @@ namespace AndriodApp1
         public bool IsUpload();
     }
 
+    // TODOORG Models
     [Serializable]
     public class FolderItem : ITransferItem
     {
@@ -1266,6 +1274,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG Managers
     /// <summary>
     /// for both uploads and downloads
     /// </summary>
@@ -1621,6 +1630,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG Managers
     [Serializable]
     public class TransferItemManager
     {
@@ -2477,6 +2487,7 @@ namespace AndriodApp1
         }
     }
 
+    //TODOORG HELPER
     /// <summary>
     /// When we switch from wifi to data or vice versa, we want to try to continue our downloads and uploads seamlessly.
     /// We try to detect this event (as a netinfo disconnect (from old network) and then netinfo connect (with new network)).
@@ -2535,6 +2546,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG activites? receivers?
     public class ConnectionReceiver : BroadcastReceiver
     {
         public override void OnReceive(Context context, Intent intent)
@@ -2603,19 +2615,7 @@ namespace AndriodApp1
         }
     }
 
-
-
-
-
-
-
-
-
- 
-
-
-
-
+    // TODOORG Utils. Common. add unit test
     public class SearchResponseComparer : IEqualityComparer<SearchResponse>
     {
         private bool hideLockedResults = true;
@@ -2652,6 +2652,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG exceptions
     public class DownloadDirectoryNotSetException : System.Exception
     {
     }
@@ -2660,6 +2661,7 @@ namespace AndriodApp1
     {
     }
 
+    // TODOORG controllers
     public class TransfersController
     {
         private static System.Timers.Timer TransfersTimer = null;
@@ -2715,6 +2717,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG controllers
     public class WishlistController
     {
         private static int searchIntervalMilliseconds = -1;
@@ -2892,6 +2895,7 @@ namespace AndriodApp1
 
 
 
+    // TODOORG seperate class
     //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
     [Service(Name = "com.companyname.andriodapp1.DownloadService")]
     public class DownloadForegroundService : Service
@@ -3003,6 +3007,7 @@ namespace AndriodApp1
     }
 
 
+    // TODOORG seperate class
     //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
     [Service(Name = "com.companyname.andriodapp1.UploadService")]
     public class UploadForegroundService : Service
@@ -3120,7 +3125,7 @@ namespace AndriodApp1
 
 
 
-
+    //TODOORG seperate class
     //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
     [Service(Name = "com.companyname.andriodapp1.SeekerKeepAliveService")]
     public class SeekerKeepAliveService : Service
@@ -3253,6 +3258,7 @@ namespace AndriodApp1
 
 
 
+    // TODOORG seperate class
     [Activity(Label = "CloseActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class CloseActivity : AppCompatActivity
     {
@@ -3304,6 +3310,7 @@ namespace AndriodApp1
     }
 
 
+    //TODOORG seperate class
     public class ThemeableActivity : AppCompatActivity
     {
         private WeakReference<ThemeableActivity> ourWeakRef;
@@ -3351,6 +3358,7 @@ namespace AndriodApp1
     }
 
 
+    // TODOORG seperate class
     public class SlskLinkMenuActivity : ThemeableActivity
     {
         public const int FromSlskLinkCopyLink = 78;
@@ -3582,6 +3590,7 @@ namespace AndriodApp1
             }
         }
 
+        // TODOORG seperate class
         public class ListenerKeyboard : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
         {   //oh so it just needs the Java.Lang.Object and then you can make it like a Java Anon Class where you only implement that one thing that you truly need
             //Since C# doesn't support anonymous classes
@@ -3658,29 +3667,6 @@ namespace AndriodApp1
             }
         }
 
-
-        public class BottomNavigationViewAnimationListenerVis : Java.Lang.Object, Android.Animation.Animator.IAnimatorListener
-        {
-            public void OnAnimationCancel(Animator animation)
-            {
-
-            }
-
-            public void OnAnimationEnd(Animator animation)
-            {
-                SoulSeekState.MainActivityRef.FindViewById<BottomNavigationView>(Resource.Id.navigation).Visibility = ViewStates.Visible;
-            }
-
-            public void OnAnimationRepeat(Animator animation)
-            {
-                //throw new NotImplementedException();
-            }
-
-            public void OnAnimationStart(Animator animation)
-            {
-                //throw new NotImplementedException();
-            }
-        }
 
         public static event EventHandler<TransferItem> TransferAddedUINotify;
 
@@ -4067,6 +4053,7 @@ namespace AndriodApp1
             }
         }
 
+        // TODOORG with other exception classes
         public class DirectoryAccessFailure : System.Exception
         {
             public DirectoryAccessFailure(string msg) : base(msg)
@@ -4372,6 +4359,7 @@ namespace AndriodApp1
         }
 
 
+        // TODO org models
         public class CachedParseResults
         {
             public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys = null;
@@ -10378,6 +10366,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG models
     public class DownloadInfo
     {
         public string username;
@@ -10405,6 +10394,7 @@ namespace AndriodApp1
         }
     }
 
+    // TODOORG Helpers
     /// <summary>
     /// When getting a users info for their User Info Activity, we need their peer UserInfo and their server UserData.  We add them to a list so that when the UserData comes in from the server, we know to save it.
     /// </summary>
@@ -10641,6 +10631,9 @@ namespace AndriodApp1
             return found;
         }
     }
+
+
+    //TODOORG Managers
     /// <summary>
     /// Manages recent users
     /// </summary>
@@ -10702,6 +10695,7 @@ namespace AndriodApp1
     }
 
 
+    //TODOORG Models
     [Serializable]
     public class UploadDirectoryInfo
     {
@@ -10782,6 +10776,7 @@ namespace AndriodApp1
     }
 
 
+    // TODOORG manager
     public static class UploadDirectoryManager
     {
         public static string GetCompositeErrorString()
@@ -11141,6 +11136,7 @@ namespace AndriodApp1
     }
 
 
+    // TODOORG SeekerState
     public static class SoulSeekState
     {
         static SoulSeekState()
@@ -11309,6 +11305,7 @@ namespace AndriodApp1
         public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
         public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
+        // TODOORG seperateclass models
         public struct SmartFilterState
         {
             public bool KeywordsEnabled;
@@ -11718,1518 +11715,6 @@ namespace AndriodApp1
         public static TransfersFragment TransfersFrag = null;
     }
 
-    public static class Helpers
-    {
-
-
-        public static string AvoidLineBreaks(string orig)
-        {
-            return orig.Replace(' ', '\u00A0').Replace("\\", "\\\u2060");
-        }
-        /// <summary>
-        /// This is necessary since DocumentFile.ListFiles() returns files in an incomprehensible order (not by name, size, modified, inode, etc.)
-        /// </summary>
-        /// <param name="files"></param>
-        public static void SortSlskDirFiles(List<Soulseek.File> files)
-        {
-            files.Sort((x, y) => x.Filename.CompareTo(y.Filename));
-        }
-
-        public static bool CompleteIncompleteDifferentVolume()
-        {
-            if (SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootIncompleteDocumentFile != null && SoulSeekState.RootDocumentFile != null)
-            {
-                //if(!SoulSeekState.UseLegacyStorage())
-                //{
-                //    //this method is only for API29+
-                //    //var sm = (SoulSeekState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);
-                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(SoulSeekState.RootDocumentFile.Uri); //fails if not media store uri
-                //    //string uuid1 = sv1.Uuid;
-                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(SoulSeekState.RootIncompleteDocumentFile.Uri);
-                //    //string uuid2 = sv2.Uuid;
-
-
-                //    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, out _);
-                //    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
-
-                //    return uuid1 != uuid2;
-                //}
-                //else
-                //{
-                try
-                {
-                    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
-                    if (everything)
-                    {
-                        volume1 = SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
-                    }
-                    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
-                    if (everything)
-                    {
-                        volume2 = SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
-                    }
-                    return volume1 != volume2;
-                }
-                catch (Exception e)
-                {
-                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SoulSeekState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SoulSeekState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
-                    return false;
-                }
-                //}
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public static string GenerateIncompleteFolderName(string username, string fullFileName, int depth)
-        {
-            string albumFolderName = null;
-            if (depth == 1)
-            {
-                albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
-            }
-            else
-            {
-                albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
-                albumFolderName = albumFolderName.Replace('\\', '_');
-            }
-            string incompleteFolderName = username + "_" + albumFolderName;
-            //Path.GetInvalidPathChars() doesnt seem like enough bc I still get failures on ''' and '&'
-            foreach (char c in System.IO.Path.GetInvalidPathChars().Union(new[] { '&', '\'' }))
-            {
-                incompleteFolderName = incompleteFolderName.Replace(c, '_');
-            }
-            return incompleteFolderName;
-        }
-
-        public static bool IsFileUri(string uriString)
-        {
-            if (uriString.StartsWith("file:"))
-            {
-                return true;
-            }
-            else if (uriString.StartsWith("content:"))
-            {
-                return false;
-            }
-            else
-            {
-                throw new Exception("IsFileUri failed: " + uriString);
-            }
-        }
-
-
-        public static string GetNiceDateTime(DateTime dt)
-        {
-            System.Globalization.CultureInfo cultureInfo = null;
-            try
-            {
-                cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
-            }
-            if (dt.Date == Helpers.GetDateTimeNowSafe().Date)
-            {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
-            }
-            else
-            {
-                return dt.ToString("MMM d h:mm:ss tt", cultureInfo);
-            }
-        }
-
-        [Flags]
-        public enum SpecialMessageType : short
-        {
-            None = 0,
-            SlashMe = 1,
-            MagnetLink = 2,
-            SlskLink = 4,
-        }
-
-        /// <summary>
-        /// true if '/me ' message
-        /// </summary>
-        /// <returns>true if special message</returns>
-        public static bool IsSpecialMessage(string msg, out SpecialMessageType specialMessageType)
-        {
-            specialMessageType = SpecialMessageType.None;
-            if (string.IsNullOrEmpty(msg))
-            {
-                return false;
-            }
-            if (msg.StartsWith(@"/me "))
-            {
-                specialMessageType = SpecialMessageType.SlashMe;
-                return true;
-            }
-            if (msg.Contains(@"magnet:?xt=urn:"))
-            {
-                specialMessageType = SpecialMessageType.MagnetLink;
-                return true;
-            }
-            if (msg.Contains(@"slsk://"))
-            {
-                specialMessageType = SpecialMessageType.SlskLink;
-                return true;
-            }
-            return false;
-        }
-
-        private readonly static System.Text.RegularExpressions.Regex MagnetLinkRegex = new System.Text.RegularExpressions.Regex(@"magnet:\?xt=urn:[^ ""]+");
-        private readonly static System.Text.RegularExpressions.Regex SlskLinkRegex = new System.Text.RegularExpressions.Regex(@"slsk://[^ ""]+");
-
-        public static void ConfigureSpecialLinks(TextView textView, string msgText, SpecialMessageType specialMessageType)
-        {
-            Android.Text.SpannableString messageText = new Android.Text.SpannableString(msgText);
-            if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink))
-            {
-                var matches = MagnetLinkRegex.Matches(msgText);
-                //add in our spans.
-                if (matches.Count > 0)
-                {
-                    foreach (var match in matches)
-                    {
-                        var m = match as System.Text.RegularExpressions.Match;
-                        var ourMagnetSpan = new MagnetLinkClickableSpan(m.Value);
-                        messageText.SetSpan(ourMagnetSpan, m.Index, m.Index + m.Length, Android.Text.SpanTypes.InclusiveExclusive);
-                    }
-                }
-            }
-            if (specialMessageType.HasFlag(SpecialMessageType.SlskLink))
-            {
-                var matches = SlskLinkRegex.Matches(msgText);
-                //add in our spans.
-                if (matches.Count > 0)
-                {
-                    foreach (var match in matches)
-                    {
-                        var m = match as System.Text.RegularExpressions.Match;
-                        var ourSlskSpan = new SlskLinkClickableSpan(m.Value);
-                        messageText.SetSpan(ourSlskSpan, m.Index, m.Index + m.Length, Android.Text.SpanTypes.InclusiveExclusive);
-                    }
-                }
-            }
-            textView.MovementMethod = Android.Text.Method.LinkMovementMethod.Instance; //needed for slsk:// not needed for magnet. weird.
-            textView.TextFormatted = messageText;
-        }
-
-        public static string ParseSpecialMessage(string msg)
-        {
-            if (IsSpecialMessage(msg, out SpecialMessageType specialMessageType))
-            {
-                //if slash me dont include other special links, too excessive.
-                if (specialMessageType == SpecialMessageType.SlashMe)
-                {
-                    //"/me goes to the store"
-                    //"goes to the store" + style
-                    return msg.Substring(4, msg.Length - 4);
-                }
-                else
-                {
-                    return msg;
-                }
-            }
-            else
-            {
-                return msg;
-
-            }
-        }
-
-        public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
-        {
-            string title = null;
-            if (SoulSeekState.UserNotes.ContainsKey(username))
-            {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note);
-            }
-            else
-            {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note);
-            }
-            if (i != -1)
-            {
-                menu.Add(i, j, k, title);
-            }
-            else
-            {
-                menu.Add(title);
-            }
-        }
-
-        public static void AddUserOnlineAlertMenuItem(IMenu menu, int i, int j, int k, string username)
-        {
-            string title = null;
-            if (SoulSeekState.UserOnlineAlerts.ContainsKey(username))
-            {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_online_alert);
-            }
-            else
-            {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.set_online_alert);
-            }
-            if (i != -1)
-            {
-                menu.Add(i, j, k, title);
-            }
-            else
-            {
-                menu.Add(title);
-            }
-        }
-
-        public static void SetIgnoreUnignoreTitle(IMenuItem menuItem, string username)
-        {
-            if (menuItem != null && !string.IsNullOrEmpty(username))
-            {
-                if (SeekerApplication.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
-                {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user))
-                    {
-                        menuItem.SetTitle(Resource.String.remove_from_ignored);
-                    }
-                }
-                else
-                {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored))
-                    {
-                        menuItem.SetTitle(Resource.String.ignore_user);
-                    }
-                }
-            }
-        }
-
-        private static void SetAddRemoveTitle(IMenuItem menuItem, string username)
-        {
-            if (menuItem != null && !string.IsNullOrEmpty(username))
-            {
-                if (MainActivity.UserListContainsUser(username)) //if we already have added said user, change title add to remove..
-                {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
-                    {
-                        menuItem.SetTitle(Resource.String.remove_from_user_list);
-                    }
-                    else if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_user))
-                    {
-                        menuItem.SetTitle(Resource.String.remove_user);
-                    }
-                }
-                else
-                {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list))
-                    {
-                        menuItem.SetTitle(Resource.String.add_to_user_list);
-                    }
-                    else if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user))
-                    {
-                        menuItem.SetTitle(Resource.String.add_user);
-                    }
-                }
-            }
-        }
-
-        private static void SetAddNoteEditNoteTitle(IMenuItem menuItem, string username)
-        {
-            if (menuItem != null && !string.IsNullOrEmpty(username))
-            {
-                if (SoulSeekState.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
-                {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note))
-                    {
-                        menuItem.SetTitle(Resource.String.edit_note);
-                    }
-
-                }
-                else
-                {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note))
-                    {
-                        menuItem.SetTitle(Resource.String.add_note);
-                    }
-                }
-            }
-        }
-
-        public static void SetMenuTitles(IMenu menu, string username)
-        {
-            var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
-            SetAddRemoveTitle(menuItem, username);
-            menuItem = menu.FindItem(Resource.Id.action_add_user);
-            SetAddRemoveTitle(menuItem, username);
-            menuItem = menu.FindItem(Resource.Id.addUser);
-            SetAddRemoveTitle(menuItem, username);
-            menuItem = menu.FindItem(Resource.Id.action_add_note);
-            SetAddNoteEditNoteTitle(menuItem, username);
-            menuItem = menu.FindItem(Resource.Id.action_ignore);
-            SetIgnoreUnignoreTitle(menuItem, username);
-        }
-
-        public static void SetIgnoreAddExclusive(IMenu menu, string username)
-        {
-            // if we added this user as a friend do not show the option to ignore. they must be removed first.
-            if(!string.IsNullOrEmpty(username))
-            {
-                bool isInUserList = MainActivity.UserListContainsUser(username);
-                var menuItem = menu.FindItem(Resource.Id.action_ignore);
-                menuItem?.SetVisible(!isInUserList);
-            }
-
-
-            // if we have this user in ignore, do not show the option to add as friend.
-            if(!string.IsNullOrEmpty(username))
-            {
-                bool isInIgnoreList = SeekerApplication.IsUserInIgnoreList(username);
-                var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
-                menuItem?.SetVisible(!isInIgnoreList);
-                menuItem = menu.FindItem(Resource.Id.action_add_user);
-                menuItem?.SetVisible(!isInIgnoreList);
-                menuItem = menu.FindItem(Resource.Id.action_add_note);
-                menuItem?.SetVisible(!isInIgnoreList);
-            }
-        }
-
-
-        public static void AddAddRemoveUserMenuItem(IMenu menu, int i, int j, int k, string username, bool full_title = false)
-        {
-            string title = null;
-            if (!MainActivity.UserListContainsUser(username))
-            {
-                if (full_title)
-                {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list);
-                }
-                else
-                {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_user);
-                }
-            }
-            else
-            {
-                if (full_title)
-                {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list);
-                }
-                else
-                {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user);
-                }
-            }
-            if (i != -1)
-            {
-                menu.Add(i, j, k, title);
-            }
-            else
-            {
-                menu.Add(title);
-            }
-        }
-
-        public static void AddIgnoreUnignoreUserMenuItem(IMenu menu, int i, int j, int k, string username)
-        {
-            //ignored and added are mutually exclusive.  you cannot have a user be both ignored and added.
-            if (MainActivity.UserListContainsUser(username))
-            {
-                return;
-            }
-            string title = null;
-            if (!SeekerApplication.IsUserInIgnoreList(username))
-            {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user);
-            }
-            else
-            {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored);
-            }
-            if (i != -1)
-            {
-                menu.Add(i, j, k, title);
-            }
-            else
-            {
-                menu.Add(title);
-            }
-        }
-
-        public static DateTime GetDateTimeNowSafe()
-        {
-            try
-            {
-                return DateTime.Now;
-            }
-            catch(System.TimeZoneNotFoundException)
-            {
-                return DateTime.UtcNow;
-            }
-        }
-
-        public static void AddGivePrivilegesIfApplicable(IMenu menu, int indexToUse)
-        {
-            if (PrivilegesManager.Instance.GetRemainingDays() >= 1)
-            {
-                if (indexToUse == -1)
-                {
-                    menu.Add(Resource.String.give_privileges);
-                }
-                else
-                {
-                    menu.Add(indexToUse, indexToUse, indexToUse, Resource.String.give_privileges);
-                }
-            }
-        }
-
-        public static PendingIntentFlags AppendMutabilityIfApplicable(PendingIntentFlags existingFlags, bool immutable)
-        {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
-            {
-                if (immutable)
-                {
-                    return existingFlags | PendingIntentFlags.Immutable;
-                }
-                else
-                {
-                    return existingFlags | PendingIntentFlags.Mutable;
-                }
-            }
-            else
-            {
-                //immutable flag was only introduced in 23 so if less than that we always need to OR with mutable (or we can just leave it alone). (remember mutable is the default)
-                return existingFlags;
-            }
-        }
-
-        public static void DoNotEnablePositiveUntilText(AndroidX.AppCompat.App.AlertDialog dialog, EditText input)
-        {
-            var positiveButton = dialog.GetButton((int)DialogButtonType.Positive);
-            // note: this will be null if .Show() has not been called.
-            if (positiveButton == null)
-            {
-                // better to be safe.
-                return;
-            }
-            positiveButton.Enabled = false;
-
-            void Input_AfterTextChanged(object sender, Android.Text.AfterTextChangedEventArgs e)
-            {
-                if (string.IsNullOrEmpty(input.Text))
-                {
-                    positiveButton.Enabled = false;
-                }
-                else
-                {
-                    positiveButton.Enabled = true;
-                }
-            }
-            input.AfterTextChanged += Input_AfterTextChanged;
-        }
-
-        /// <summary>
-        /// returns true if found and handled.  a time saver for the more generic context menu items..
-        /// </summary>
-        /// <returns></returns>
-        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote = null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored = null, Action uiUpdateSetResetOnlineAlert = null)
-        {
-            if (activity == null)
-            {
-                activity = SoulSeekState.ActiveActivityRef;
-            }
-            if (contextMenuTitle == activity.GetString(Resource.String.ignore_user))
-            {
-                SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
-            {
-                SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.msg_user))
-            {
-                Intent intentMsg = new Intent(activity, typeof(MessagesActivity));
-                intentMsg.AddFlags(ActivityFlags.SingleTop);
-                intentMsg.PutExtra(MessageController.FromUserName, usernameInQuestion); //so we can go to this user..
-                intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                activity.StartActivity(intentMsg);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) ||
-                contextMenuTitle == activity.GetString(Resource.String.add_user))
-            {
-                UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
-                contextMenuTitle == activity.GetString(Resource.String.remove_user))
-            {
-                MainActivity.ToastUI_short(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
-                MainActivity.UserListRemoveUser(usernameInQuestion);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
-            {
-                SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                SearchTabHelper.SearchTargetChosenUser = usernameInQuestion;
-                //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                Intent intent = new Intent(activity, typeof(MainActivity));
-                intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
-                intent.AddFlags(ActivityFlags.SingleTop); //??
-                activity.StartActivity(intent);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.browse_user))
-            {
-                Action<View> action = new Action<View>((v) =>
-                {
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
-                    intent.AddFlags(ActivityFlags.SingleTop); //??
-                    activity.StartActivity(intent);
-                    //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                });
-                DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.get_user_info))
-            {
-                RequestedUserInfoHelper.RequestUserInfoApi(usernameInQuestion);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.give_privileges))
-            {
-                ShowGivePrilegesDialog(usernameInQuestion);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.edit_note) ||
-                    contextMenuTitle == activity.GetString(Resource.String.add_note))
-            {
-                ShowEditAddNoteDialog(usernameInQuestion, uiUpdateActionNote);
-                return true;
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
-            {
-                SoulSeekState.UserOnlineAlerts[usernameInQuestion] = 0;
-                Helpers.SaveOnlineAlerts();
-                uiUpdateSetResetOnlineAlert();
-            }
-            else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
-            {
-                SoulSeekState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
-                Helpers.SaveOnlineAlerts();
-                uiUpdateSetResetOnlineAlert();
-
-            }
-            return false;
-        }
-
-        public static void SetMessageTextView(TextView viewMessage, Message msg)
-        {
-            if (Helpers.IsSpecialMessage(msg.MessageText, out SpecialMessageType specialMessageType))
-            {
-                if (specialMessageType.HasFlag(SpecialMessageType.SlashMe))
-                {
-                    viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
-                    viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
-                }
-                else if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SpecialMessageType.SlskLink))
-                {
-                    viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
-                    Helpers.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
-                }
-                else
-                {
-                    //fallback
-                    viewMessage.Text = msg.MessageText;
-                    viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
-                }
-            }
-            else
-            {
-                viewMessage.Text = msg.MessageText;
-                viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
-            }
-        }
-
-        public static string GetNiceDateTimeGroupChat(DateTime dt)
-        {
-            System.Globalization.CultureInfo cultureInfo = null;
-            try
-            {
-                cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
-            }
-            if (dt.Date == Helpers.GetDateTimeNowSafe().Date)
-            {
-                return dt.ToString("h:mm:ss tt", cultureInfo); //this is the only difference...
-            }
-            else
-            {
-                return dt.ToString("MMM d h:mm:ss tt", cultureInfo);
-            }
-        }
-
-        public static void CopyTextToClipboard(Activity a, string txt)
-        {
-            var clipboardManager = a.GetSystemService(Context.ClipboardService) as ClipboardManager;
-            ClipData clip = ClipData.NewPlainText("simple text", txt);
-            clipboardManager.PrimaryClip = clip;
-        }
-
-        public static string GetFileNameFromFile(string filename) //is also used to get the last folder
-        {
-            int begin = filename.LastIndexOf("\\");
-            string clipped = filename.Substring(begin + 1);
-            return clipped;
-        }
-
-        public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
-        {
-            int end = path.LastIndexOf("\\");
-            string clipped = path.Substring(0, end);
-            return clipped; //"raw:\\storage\\emulated\\0\\Download"
-        }
-
-
-        //this is a helper for this issue:
-        //var name1 = df.CreateFile("audio/m4a", "name1").Name;
-        //var name2 = df.CreateFile("audio/x-m4a", "name2").Name;
-        //  are both extensionless....
-        public static DocumentFile CreateMediaFile(DocumentFile parent, string name)
-        {
-            if (Helpers.GetMimeTypeFromFilename(name) == M4A_MIME)
-            {
-                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .m4a extension for us..
-            }
-            else if (Helpers.GetMimeTypeFromFilename(name) == APE_MIME)
-            {
-                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .ape extension for us..
-            }
-            else if (Helpers.GetMimeTypeFromFilename(name) == null)
-            {
-                //a null mimetype is fine, it just defaults to application/octet-stream
-                return parent.CreateFile(null, name); //we use just name since it will not add the extension for us..
-            }
-            else
-            {
-                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
-            }
-        }
-
-
-
-        //examples..
-        //Helpers.GetMimeTypeFromFilename("x.flac");//"audio/flac"
-        //Helpers.GetMimeTypeFromFilename("x.mp3"); //"audio/mpeg"
-        //Helpers.GetMimeTypeFromFilename("x.wmv"); //"video/x-ms-wmv"
-        //Helpers.GetMimeTypeFromFilename("x.wma"); // good
-        //Helpers.GetMimeTypeFromFilename("x.png"); //"image/png"
-        //THIS FAILS MISERABLY FOR M4A FILES. it regards them as mp3, causing both android and windows foobar to deem them corrupted and refuse to play them!
-        //[seeker] .wma === audio/x-ms-wma
-        //[seeker] .flac === audio/flac
-        //[seeker] .aac === audio/aac
-        //[seeker] .m4a === audio/mpeg  --- miserable failure should be audio/m4a or audio/x-m4a
-        //[seeker] .mp3 === audio/mpeg
-        //[seeker] .oga === audio/ogg
-        //[seeker] .ogg === audio/ogg
-        //[seeker] .opus === audio/ogg
-        //[seeker] .wav === audio/x-wav
-        //[seeker] .mp4 === video/mp4
-
-        //other problematic - 
-        //        ".alac", -> null
-        //        ".ape",  -> null  // audio/x-ape
-        //        ".m4p" //aac with apple drm. similar to the drm free m4a. audio/m4p not mp4 which is reported. I am not sure...
-        public const string M4A_MIME = "audio/m4a";
-        public const string APE_MIME = "audio/x-ape";
-        public static string GetMimeTypeFromFilename(string filename)
-        {
-            string ext = System.IO.Path.GetExtension(filename).ToLower();
-            string mimeType = @"audio/mpeg"; //default
-            if (ext != null && ext != string.Empty)
-            {
-                switch (ext)
-                {
-                    case ".ape":
-                        mimeType = APE_MIME;
-                        break;
-                    case ".m4a":
-                        mimeType = M4A_MIME;
-                        break;
-                    default:
-                        ext = ext.TrimStart('.');
-                        mimeType = Android.Webkit.MimeTypeMap.Singleton.GetMimeTypeFromExtension(ext);
-                        break;
-                }
-
-            }
-            return mimeType;
-        }
-
-        public static void ViewUri(Android.Net.Uri httpUri, Context c)
-        {
-            try
-            {
-                Intent intent = new Intent(Intent.ActionView, httpUri);
-                c.StartActivity(intent);
-            }
-            catch (Exception e)
-            {
-                if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
-                {
-                    MainActivity.LogFirebase("viewUri: " + e.Message + httpUri.ToString());
-                    SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
-                }
-            }
-        }
-
-        public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";
-
-        public static bool IsUploadCompleteOrAborted(TransferStates state)
-        {
-            return (state.HasFlag(TransferStates.Succeeded) || state.HasFlag(TransferStates.Cancelled) || state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Completed) || state.HasFlag(TransferStates.Rejected));
-        }
-
-        public static string GetLastPathSegmentWithSpecialCaseProtection(DocumentFile dir, out bool msdCase)
-        {
-            msdCase = false;
-            if (dir.Uri.LastPathSegment == "downloads")
-            {
-                var dfs = dir.ListFiles();
-                if (dfs.Length > 0)
-                {
-                    //if last path segment is downloads then its likely that this is the "com.android.providers.downloads.documents" authority rather than the "com.android.externalstorage.documents" authority
-                    //on android 10 (reproducible on emulator), the providers.downloads.documents authority does not give any kind of paths.  The last encoded path will always be msd:uniquenumber and so is useless
-                    //as far as a presentable name is concerned.
-
-                    string lastPathSegmentChild = dfs[0].Uri.LastPathSegment.Replace('/', '\\');
-                    //last path segment child will be "raw:/storage/emulated/0/Download/Soulseek Incomplete" for the reasonable case and "msd:24" for the bad case
-                    if (lastPathSegmentChild.Contains("\\"))
-                    {
-                        if(lastPathSegmentChild.StartsWith("raw:")) //scheme says "content" even though it starts with "raw:"
-                        {
-                            MainActivity.LogInfoFirebase("soft msdcase (raw:) : " + lastPathSegmentChild); //should be raw: provider
-                            msdCase = true;
-                            return String.Empty;
-                        }
-                        else
-                        {
-                            return Helpers.GetAllButLast(lastPathSegmentChild);
-                        }
-                    }
-                    else
-                    {
-                        MainActivity.LogInfoFirebase("msdcase: " + lastPathSegmentChild); //should be msd:int
-                        msdCase = true;
-                        return String.Empty;
-                    }
-                }
-                else
-                {
-                    MainActivity.LogInfoFirebase("downloads without any files");
-                    return dir.Uri.LastPathSegment.Replace('/', '\\');
-                }
-            }
-            else
-            {
-                return dir.Uri.LastPathSegment.Replace('/', '\\');
-            }
-        }
-
-        private static string GetUnlockedFileName(SearchResponse item)
-        {
-            try
-            {
-                Soulseek.File f = item.Files.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public static string SlskLinkClickedData = null;
-        public static bool ShowSlskLinkContextMenu = false;
-
-        /// <summary>
-        /// returns false if unable to parse
-        /// </summary>
-        /// <param name="linkStringToParse"></param>
-        /// <param name="username"></param>
-        /// <param name="dirPath"></param>
-        /// <param name="fullFilePath"></param>
-        /// <param name="isFile"></param>
-        /// <returns></returns>
-        public static bool ParseSlskLinkString(string linkStringToParse, out string username, out string dirPath, out string fullFilePath, out bool isFile)
-        {
-            try
-            {
-                if (linkStringToParse.EndsWith('/'))
-                {
-                    isFile = false;
-                }
-                else
-                {
-                    isFile = true;
-                }
-
-                linkStringToParse = linkStringToParse.Substring(7);
-                linkStringToParse = Android.Net.Uri.Decode(linkStringToParse);
-                username = linkStringToParse.Substring(0, linkStringToParse.IndexOf('/'));
-                fullFilePath = linkStringToParse.Substring(linkStringToParse.IndexOf('/') + 1).TrimEnd('/').Replace('/', '\\');
-                if (isFile)
-                {
-                    dirPath = Helpers.GetDirectoryRequestFolderName(fullFilePath);
-                }
-                else
-                {
-                    dirPath = fullFilePath;
-                }
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("failure to parse: " + linkStringToParse);
-                username = dirPath = fullFilePath = null;
-                isFile = false;
-                return false;
-            }
-            return true;
-        }
-
-        public static string CreateSlskLink(bool isDirectory, string fullFileOrFolderName, string username)
-        {
-            string link = username + "/" + fullFileOrFolderName.Replace("\\", "/");
-            if (isDirectory)
-            {
-                link = link + "/";
-            }
-            return "slsk://" + Android.Net.Uri.Encode(link, "/");
-        }
-
-        private static string GetLockedFileName(SearchResponse item)
-        {
-            try
-            {
-                Soulseek.File f = item.LockedFiles.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        /// <summary>
-        /// This will prepend the lock when applicable..
-        /// </summary>
-        /// <returns></returns>
-        public static string GetFolderNameForSearchResult(SearchResponse item)
-        {
-            if (item.FileCount > 0)
-            {
-                return Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
-            }
-            else if (item.LockedFileCount > 0)
-            {
-                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFolderNameFromFile(GetLockedFileName(item));
-            }
-            else
-            {
-                return "\\Locked\\";
-            }
-        }
-
-        public static string GetFolderNameFromFile(string filename, int levels = 1)
-        {
-            try
-            {
-                int folderCount = 0;
-                int index = -1; //-1 is important.  i.e. in the case of Folder\test.mp3, it can be Folder.
-                int firstIndex = int.MaxValue;
-                for (int i = filename.Length - 1; i >= 0; i--)
-                {
-                    if (filename[i] == '\\')
-                    {
-                        folderCount++;
-                        if (firstIndex == int.MaxValue)
-                        {
-                            //strip off the file name
-                            firstIndex = i;
-                        }
-                        if (folderCount == (levels + 1))
-                        {
-                            index = i;
-                            break;
-                        }
-                    }
-                }
-                return filename.Substring(index + 1, firstIndex - index - 1);
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public static string GetParentFolderNameFromFile(string filename)
-        {
-            try
-            {
-                string parent = filename.Substring(0, filename.LastIndexOf('\\'));
-                parent = parent.Substring(0, parent.LastIndexOf('\\'));
-                parent = parent.Substring(parent.LastIndexOf('\\') + 1);
-                return parent;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public static string GetTransferSpeedString(double bytesPerSecond)
-        {
-            if (bytesPerSecond > 1048576) //more than 1MB
-            {
-                return string.Format("{0:F1}mbs", bytesPerSecond / 1048576.0);
-            }
-            else
-            {
-                return string.Format("{0:F1}kbs", bytesPerSecond / 1024.0);
-            }
-        }
-
-        public static string GetDateTimeSinceAbbrev(DateTime dtThen)
-        {
-            var dtNow = Helpers.GetDateTimeNowSafe(); //2.5 microseconds
-            if (dtNow.Day == dtThen.Day)
-            {
-                //if on same day then show time. 24 hour time? maybe option to change?
-                //ex. 2:45, 20:34
-                //hh:mm
-                return dtThen.ToString("H:mm");
-            }
-            else if (dtNow.Year == dtThen.Year)
-            {
-                //if different day but same year show month day
-                //ex. Jan 4
-                return dtThen.ToString("MMM d"); // d = 7 or 17.
-            }
-            else
-            {
-                //if different year show full.
-                //ex. Dec 30 2021
-                return dtThen.ToString("MMM d yyyy");
-            }
-        }
-
-        public static string GetSubHeaderText(SearchResponse searchResponse)
-        {
-            int numFiles = 0;
-            long totalBytes = -1;
-            if (SoulSeekState.HideLockedResultsInSearch)
-            {
-                numFiles = searchResponse.FileCount;
-                totalBytes = searchResponse.Files.Sum(f => f.Size);
-            }
-            else
-            {
-                numFiles = searchResponse.FileCount + searchResponse.LockedFileCount;
-                totalBytes = searchResponse.Files.Sum(f => f.Size) + searchResponse.LockedFiles.Sum(f => f.Size);
-            }
-
-            //if total bytes greater than 1GB 
-            string sizeString = GetHumanReadableSize(totalBytes);
-
-            var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
-            if (!SoulSeekState.HideLockedResultsInSearch)
-            {
-                filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
-            }
-            string timeString = null;
-            if (filesWithLength.Count() > 0)
-            {
-                //translate length into human readable
-                timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value));
-            }
-            if (timeString == null)
-            {
-                return string.Format("{0} files • {1}", numFiles, sizeString);
-            }
-            else
-            {
-                return string.Format("{0} files • {1} • {2}", numFiles, sizeString, timeString);
-            }
-
-
-        }
-
-        public static string GetSizeLengthAttrString(Soulseek.File f)
-        {
-
-            string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
-            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : null;
-            string attrString = GetHumanReadableAttributesForSingleItem(f);
-            if (attrString == null && lengthString == null)
-            {
-                return sizeString;
-            }
-            else if (attrString == null)
-            {
-                return String.Format("{0} • {1}", sizeString, lengthString);
-            }
-            else if (lengthString == null)
-            {
-                return String.Format("{0} • {1}", sizeString, attrString);
-            }
-            else
-            {
-                return String.Format("{0} • {1} • {2}", sizeString, lengthString, attrString);
-            }
-        }
-
-
-        public static string GetHumanReadableAttributesForSingleItem(Soulseek.File f)
-        {
-
-            int bitRate = -1;
-            int bitDepth = -1;
-            double sampleRate = double.NaN;
-            foreach (var attr in f.Attributes)
-            {
-                switch (attr.Type)
-                {
-                    case FileAttributeType.BitRate:
-                        bitRate = attr.Value;
-                        break;
-                    case FileAttributeType.BitDepth:
-                        bitDepth = attr.Value;
-                        break;
-                    case FileAttributeType.SampleRate:
-                        sampleRate = attr.Value / 1000.0;
-                        break;
-                }
-            }
-            if (bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
-            {
-                return null; //nothing to add
-            }
-            else if (bitDepth != -1 && !double.IsNaN(sampleRate))
-            {
-                return bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
-            }
-            else if (!double.IsNaN(sampleRate))
-            {
-                return sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
-            }
-            else if (bitRate != -1)
-            {
-                return bitRate + SlskHelp.CommonHelpers.STRINGS_KBS;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static string GetHumanReadableSize(long totalBytes)
-        {
-            if (totalBytes > 1024 * 1024 * 1024)
-            {
-                return string.Format("{0:0.##} gb", totalBytes / (1024.0 * 1024.0 * 1024.0));
-            }
-            else
-            {
-                return string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
-            }
-        }
-
-
-        public static string GetHumanReadableTime(int totalSeconds)
-        {
-            int sec = totalSeconds % 60;
-            int minutes = (totalSeconds % 3600) / 60;
-            int hours = (totalSeconds / 3600);
-            if (minutes == 0 && hours == 0 && sec == 0)
-            {
-                return null;
-            }
-            else if (minutes == 0 && hours == 0)
-            {
-                return string.Format("{0}s", sec);
-            }
-            else if (hours == 0)
-            {
-                return string.Format("{0}m{1}s", minutes, sec);
-            }
-            else
-            {
-                return string.Format("{0}h{1}m{2}s", hours, minutes, sec);
-            }
-        }
-
-
-
-
-        /// <summary>
-        /// Get all BUT the filename
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        public static string GetDirectoryRequestFolderName(string filename)
-        {
-            try
-            {
-                int end = filename.LastIndexOf("\\");
-                string clipped = filename.Substring(0, end);
-                return clipped;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public static void CreateNotificationChannel(Context c, string id, string name, Android.App.NotificationImportance importance = Android.App.NotificationImportance.Low)
-        {
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-            {
-                NotificationChannel serviceChannel = new NotificationChannel(
-                        id,
-                        name,
-                        importance
-                );
-                NotificationManager manager = c.GetSystemService(Context.NotificationService) as NotificationManager;
-                manager.CreateNotificationChannel(serviceChannel);
-            }
-        }
-
-        public static void SetToolTipText(View v, string tip)
-        {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
-            {
-                v.TooltipText = tip; //api26+ otherwise crash...
-            }
-            else
-            {
-                AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(v, tip);
-            }
-        }
-
-
-        public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce = true, bool forForegroundService = false, bool shutdownAction = false)
-        {
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
-            
-
-            //here we use the non compat notif builder as we want the special SetForegroundServiceBehavior method to prevent the new 10 second foreground notification delay.
-            Notification notification = null;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 31 && forForegroundService)
-            {
-                var builder = new Notification.Builder(context, channelID)
-                          .SetContentTitle(titleText)
-                          .SetContentText(contentText)
-                          .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                          .SetContentIntent(pendingIntent)
-                          .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                          .SetForegroundServiceBehavior((int)(Android.App.NotificationForegroundService.Immediate)) //new for api 31+
-                          .SetTicker(titleText);
-                if(shutdownAction)
-                {
-                    Intent intent3 = new Intent(context, typeof(CloseActivity));
-                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    var pi = PendingIntent.GetActivity(context, 7618, intent3, PendingIntentFlags.Immutable);
-
-                    Notification.Action replyAction = new Notification.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
-                    builder.AddAction(replyAction);
-                }
-                notification = builder.Build();
-            }
-            else
-            {
-                var builder = new NotificationCompat.Builder(context, channelID)
-                          .SetContentTitle(titleText)
-                          .SetContentText(contentText)
-                          .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                          .SetContentIntent(pendingIntent)
-                          .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                          .SetTicker(titleText);
-                //for < 21 it is possible (must use png icon instead of xml) but the icon does look great 
-                //  and it doesnt clear from recents..
-                if (shutdownAction && (int)Android.OS.Build.VERSION.SdkInt >= 21) 
-                {
-                    Intent intent3 = new Intent(context, typeof(CloseActivity));
-                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    var pi = PendingIntent.GetActivity(context, 7618, intent3, 0);
-                    NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
-                    builder.AddAction(replyAction);
-                }
-                notification = builder.Build();
-            }
-            return notification;
-
-        }
-
-        /// <summary>
-        /// Since this is always called by the UI it handles showing toasts etc.
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="numDays"></param>
-        /// <returns>false if operation could not be attempted, true if successfully met prereqs and was attempted</returns>
-        public static bool GivePrilegesAPI(string username, string numDays)
-        {
-            int numDaysInt = int.MinValue;
-            if (!int.TryParse(numDays, out numDaysInt))
-            {
-                MainActivity.ToastUI(Resource.String.error_days_entered_no_parse);
-                return false;
-            }
-            if (numDaysInt <= 0)
-            {
-                MainActivity.ToastUI(Resource.String.error_days_entered_not_positive);
-                return false;
-            }
-            if (PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
-            {
-                MainActivity.ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
-                return false;
-            }
-            if (!SoulSeekState.currentlyLoggedIn)
-            {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
-                return false;
-            }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
-                {
-                    return false; //if we get here we already did a toast message.
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-
-                        });
-                        return;
-                    }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
-                }));
-                return true;
-            }
-            else
-            {
-                GivePrivilegesLogic(username, numDaysInt);
-                return true;
-            }
-        }
-
-
-        private static void GivePrivilegesLogic(string username, int numDaysInt)
-        {
-            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
-            SoulSeekState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
-                ((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        if (t.Exception.InnerException is TimeoutException)
-                        {
-                            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
-                        }
-                        else
-                        {
-                            MainActivity.LogFirebase(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
-                            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
-                        }
-                        return;
-                    }
-                    else
-                    {
-                        //now there is a chance the user does not exist or something happens.  in which case our days will be incorrect...
-                        PrivilegesManager.Instance.SubtractDays(numDaysInt);
-
-                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
-
-                        //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
-                        //in the rare case that it fails they do get a message so they can figure it out
-                    }
-                }));
-        }
-
-        public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction = null)
-        {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.note_title), username));
-            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.user_note_dialog, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
-            // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.editUserNote);
-
-            string existingNote = null;
-            SoulSeekState.UserNotes.TryGetValue(username, out existingNote);
-            if (existingNote != null)
-            {
-                input.Text = existingNote;
-            }
-
-
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-            builder.SetView(viewInflated);
-
-            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
-            {
-                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
-                //you cannot input '.' or negative even with physical keyboard, etc.
-                string newText = input.Text;
-                bool isEmpty = string.IsNullOrEmpty(newText);
-                bool wasEmpty = string.IsNullOrEmpty(existingNote);
-                bool addedOrRemoved = isEmpty != wasEmpty;
-                if (addedOrRemoved)
-                {
-                    //either we cleared an existing note or added a new note
-                    if (!wasEmpty && isEmpty)
-                    {
-                        //we removed the note
-                        SoulSeekState.UserNotes.TryRemove(username, out _);
-                        SaveUserNotes();
-
-                    }
-                    else
-                    {
-                        //we added a note
-                        SoulSeekState.UserNotes[username] = newText;
-                        SaveUserNotes();
-                    }
-                    if (uiUpdateAction != null)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
-                    }
-
-                }
-                else if (isEmpty && wasEmpty)
-                {
-                    //nothing was there and nothing is there now
-                    return;
-                }
-                else //something was there and is there now
-                {
-                    if (newText == existingNote)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        //update note and save prefs..
-                        SoulSeekState.UserNotes[username] = newText;
-                        SaveUserNotes();
-                    }
-                }
-
-            });
-            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
-            {
-                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-            });
-
-            builder.SetPositiveButton(Resource.String.okay, eventHandler);
-            builder.SetNegativeButton(Resource.String.close, eventHandlerCancel);
-            // Set up the buttons
-
-            builder.Show();
-        }
-
-        public static void SaveUserNotes()
-        {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserNotes, SerializationHelper.SaveUserNotesToString(SoulSeekState.UserNotes));
-                editor.Commit();
-            }
-        }
-
-
-        public static void SaveOnlineAlerts()
-        {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
-                editor.Commit();
-            }
-        }
-
-
-        public static void ShowGivePrilegesDialog(string username)
-        {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_to_), username));
-            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.give_privileges_layout, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
-            // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.givePrivilegesEditText);
-
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-            builder.SetView(viewInflated);
-
-            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
-            {
-                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
-                //you cannot input '.' or negative even with physical keyboard, etc.
-                GivePrilegesAPI(username, input.Text);
-            });
-            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
-            {
-                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-            });
-
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Send || //in this case it is Send (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
-                {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(SoulSeekState.ActiveActivityRef.Window.DecorView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-            };
-
-            input.EditorAction += editorAction;
-
-            builder.SetPositiveButton(Resource.String.send, eventHandler);
-            builder.SetNegativeButton(Resource.String.close, eventHandlerCancel);
-            // Set up the buttons
-
-            builder.Show();
-        }
-    }
 
     public class MagnetLinkClickableSpan : Android.Text.Style.ClickableSpan
     {
@@ -13271,504 +11756,6 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef.UnregisterForContextMenu(widget);
         }
     }
-
-    public static class MicroTagReader
-    {
-        static List<List<int>> samplerates;
-        static List<int> channels_per_mode;
-        static List<List<List<int>>> bitrate_by_version_by_layer;
-        static MicroTagReader()
-        {
-            samplerates = new List<List<int>>();
-            var level1 = new List<int>() { 11025, 12000, 8000 };
-            samplerates.Add(level1);
-            var level2 = new List<int>();
-            samplerates.Add(level2);
-            var level3 = new List<int>() { 22050, 24000, 16000 };
-            samplerates.Add(level3);
-            var level4 = new List<int>() { 44100, 48000, 32000 };
-            samplerates.Add(level4);
-
-            bitrate_by_version_by_layer = new List<List<List<int>>>();
-
-            List<int> v1l1 = new List<int>() { 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0 };
-            List<int> v1l2 = new List<int>() { 0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0 };
-            List<int> v1l3 = new List<int>() { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
-            List<int> v2l1 = new List<int>() { 0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, 0 };
-            List<int> v2l2 = new List<int>() { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
-            List<int> v2l3 = v2l2;
-
-            List<List<int>> v2_5 = new List<List<int>>() { null, v2l3, v2l2, v2l1 };
-            //List<List<int>> v2_5 = new List<List<int>>() { null, v2l3, v2l2, v2l1 }
-            List<List<int>> v2 = new List<List<int>>() { null, v2l3, v2l2, v2l1 };
-            List<List<int>> v1 = new List<List<int>>() { null, v1l3, v1l2, v1l1 };
-            bitrate_by_version_by_layer.Add(v2_5);
-            bitrate_by_version_by_layer.Add(null);
-            bitrate_by_version_by_layer.Add(v2);
-            bitrate_by_version_by_layer.Add(v1);
-            //samples_per_frame = 1152  # the default frame size for mp3
-
-            channels_per_mode = new List<int>() { 2, 2, 2, 1 };
-        }
-
-        /// <summary>
-        /// used since android messes up very badly when it comes to vbr mp3s
-        /// </summary>
-        /// <param name="contentResolver"></param>
-        /// <param name="uri"></param>
-        /// <param name="sampleRate"></param>
-        /// <param name="bitDepth"></param>
-        public static void GetMp3Metadata(ContentResolver contentResolver, Android.Net.Uri uri, int true_duration, long true_size, out int bitrate)
-        {
-            bitrate = -1;
-            System.IO.Stream fileStream = null;
-            try
-            {
-                //int max_estimation_frames = 30 * 44100 / 1152;
-
-                double bitrate_accumulator = 0;
-                int frame_size_accu = 0;
-                List<double> last_bitrates = new List<double>();
-                //int audio_offset = -1;
-                fileStream = contentResolver.OpenInputStream(uri);
-                byte[] header = new byte[4];
-                fileStream.Read(header, 0, 4);
-                bool startsWithID3 = header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3"));
-                //{
-                //its technically incorrect, but flac files can have ID3 tags.
-                //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
-                byte[] id3Header = new byte[10];
-                if ((fileStream.Read(id3Header, 0, 10) == 10))
-                {
-                    if (startsWithID3)
-                    {
-                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
-                        fileStream.Seek(size, System.IO.SeekOrigin.Begin);
-                    }
-                    else
-                    {
-                        fileStream.Seek(0, System.IO.SeekOrigin.Begin);
-                    }
-                }
-                int frames = 0;
-                while (true)
-                {
-                    byte[] nextFour = new byte[4];
-                    int read = fileStream.Read(nextFour, 0, 4);
-                    if (read < 4)
-                    {
-                        return;
-                    }
-                    int br_id = (byte)(((nextFour[2] >> 4))) & 0x0F;
-                    int sr_id = (byte)((nextFour[2] / 4)) & 0x03;
-                    int padding = (nextFour[2] & 0x02) > 0 ? 1 : 0;
-                    int mpeg_id = (byte)((nextFour[1] / 8)) & 0x03;
-                    int layer_id = (byte)((nextFour[1] / 2)) & 0x03;
-                    int channel_mode = (byte)((nextFour[3] / 64)) & 0x03;
-                    int val = nextFour[0] * 256 + nextFour[1];
-                    if (val <= (65504) || br_id > 14 || br_id == 0 || sr_id == 3 || layer_id == 0 || mpeg_id == 1)
-                    {
-                        int index = Array.IndexOf(nextFour, (byte)(0xFF));
-                        if (index == -1)
-                        {
-                            index = nextFour.Length;
-                        }
-                        if (index == 0)
-                        {
-                            index = 1;
-                        }
-                        int amountToMove = index - 4;
-                        fileStream.Seek(amountToMove, System.IO.SeekOrigin.Current); //we go backwards if need be.
-                        continue;
-                    }
-
-                    int frame_bitrate = bitrate_by_version_by_layer[mpeg_id][layer_id][br_id];
-                    int samplerate = samplerates[mpeg_id][sr_id];
-                    int channels = channels_per_mode[channel_mode];
-
-
-                    if (frames == 0)
-                    {
-                        byte[] lookForXing = new byte[1024];
-                        fileStream.Read(lookForXing, 0, 1024);
-                        fileStream.Seek(-1028, System.IO.SeekOrigin.Current);
-                        byte[] toLookForXing = nextFour.Concat(lookForXing).ToArray();
-                        int index = -1;
-                        for (int i = 0; i < toLookForXing.Length - 4; i++)
-                        {
-                            if (toLookForXing[i] == (byte)(88) &&
-                                toLookForXing[i + 1] == (byte)(105) &&
-                                toLookForXing[i + 2] == (byte)(110) &&
-                                toLookForXing[i + 3] == (byte)(103))
-                            {
-                                index = i;
-                                break;
-                            }
-                        }
-                        if (index != -1)
-                        {
-                            fileStream.Seek(index + 4, System.IO.SeekOrigin.Current);
-
-
-                            fileStream.Read(nextFour, 0, 4);
-                            var id3header = nextFour.ToArray();
-                            int id3frames = -1;
-                            int byte_count = -1;
-                            if ((id3header[3] & 0x01) != 0)
-                            {
-                                fileStream.Read(nextFour, 0, 4);
-                                id3frames = nextFour[0] * 256 * 256 * 256 + nextFour[1] * 256 * 256 + nextFour[2] * 256 + nextFour[3];
-                            }
-                            if ((id3header[3] & 0x02) != 0)
-                            {
-                                fileStream.Read(nextFour, 0, 4);
-                                byte_count = nextFour[0] * 256 * 256 * 256 + nextFour[1] * 256 * 256 + nextFour[2] * 256 + nextFour[3];
-                            }
-                            if ((id3header[3] & 0x04) != 0)
-                            {
-                                byte[] next400 = new byte[400];
-                                fileStream.Read(next400, 0, 400);
-                            }
-                            if ((id3header[3] & 0x08) != 0)
-                            {
-                                fileStream.Read(nextFour, 0, 4);
-                            }
-                            if (id3frames != -1 && byte_count != -1 && id3frames != 0)
-                            {
-                                double duration = id3frames * 1152 / (double)(samplerate);
-                                bitrate = (int)(byte_count * 8 / duration / 1000) * 1000;
-                            }
-                            return;
-                        }
-                        else
-                        {
-                            fileStream.Seek(4, System.IO.SeekOrigin.Current);
-                        }
-                    }
-
-
-
-
-                    frames += 1;
-                    bitrate_accumulator += frame_bitrate;
-                    if (frames <= 5)
-                    {
-                        last_bitrates.Add(frame_bitrate);
-                    }
-
-
-                    //if(frames==1)
-                    //{
-                    //    audio_offset = fileStream.Position;
-                    //}
-
-                    //fileStream.Seek(4, System.IO.SeekOrigin.Current) 
-
-                    int frame_length = (144000 * frame_bitrate) / samplerate + padding;
-                    frame_size_accu += frame_length;
-                    //if bitrate does not change over time its probably CBR
-                    bool is_cbr = (frames == 5 && last_bitrates.Distinct().Count() == 1);
-                    if (is_cbr)
-                    {
-                        //int audio_stream_size = fileStream.Position - audio_offset;
-                        //int est_frame_count = audio_stream_size / (frame_size_accu / float(frames))
-                        //int samples = est_frame_count * 1152;
-                        //double duration = samples / (double)(samplerate);
-                        bitrate = (int)(bitrate_accumulator / frames) * 1000; //works especially great for cbr
-                        return;
-                    }
-
-                    if (frames > 5)
-                    {
-                        //dont use this estimation method for vbr... its no more accurate than size / duration... and takes way longer.
-                        bitrate = (true_duration != -1) ? (int)((true_size * 8 * 1000.0 / 1024.0) / true_duration) : -1;//todo test
-                        return;
-                    }
-
-                    if (frame_length > 1)
-                    {
-                        fileStream.Seek(frame_length - header.Length, System.IO.SeekOrigin.Current);
-                    }
-                }
-                //}
-                //else
-                //{
-                //    return;
-                //}
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("getMp3Metadata: " + e.Message + e.StackTrace);
-            }
-            finally
-            {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
-            }
-        }
-
-        public static void GetAiffMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth, out int durationSeconds)
-        {
-            sampleRate = -1;
-            bitDepth = -1;
-            durationSeconds = -1;
-            System.IO.Stream fileStream = null;
-            try
-            {
-                fileStream = contentResolver.OpenInputStream(uri); byte[] buffer = new byte[4];
-                fileStream.Read(buffer, 0, 4); //FORM
-
-                if (System.Text.Encoding.ASCII.GetString(buffer) != "FORM")
-                {
-                    throw new Exception("malformed FORM");
-                }
-
-
-                fileStream.Read(buffer, 0, 4); //filesize UINT.
-                Array.Reverse(buffer, 0, buffer.Length); //big endian
-                uint fileSize = System.BitConverter.ToUInt32(buffer);
-
-                fileStream.Read(buffer, 0, 4); //AIFF
-                if (System.Text.Encoding.ASCII.GetString(buffer) != "AIFF")
-                {
-                    throw new Exception("malformed AIFF");
-                }
-
-
-                long comm_chunk = long.MinValue;
-                long cur_position = fileStream.Position;
-                while (cur_position < fileSize)
-                {
-                    // Read 4-byte chunk name
-                    fileStream.Read(buffer, 0, 4);
-
-                    if (System.Text.Encoding.ASCII.GetString(buffer) == "COMM")
-                    {
-                        comm_chunk = fileStream.Position - 4;
-                        break;
-                    }
-
-                    // chunk size
-                    fileStream.Read(buffer, 0, 4);
-                    Array.Reverse(buffer, 0, buffer.Length); //big endian
-                    uint chunkSize = System.BitConverter.ToUInt32(buffer);
-                    if (chunkSize % 2 != 0)
-                    {
-                        chunkSize++;
-                    }
-                    fileStream.Seek(chunkSize, System.IO.SeekOrigin.Current);
-                    cur_position = fileStream.Position;
-
-                    //if (chunkHeader == chunkName)
-                    //{
-                    //	// We found a matching chunk, return the position
-                    //	// of the header start
-                    //	return Tell - 4;
-                    //}
-                    //else
-                    //{
-                    //	// This chunk is not the one we are looking for
-                    //	// Continue the search, seeking over the chunk
-                    //	uint chunkSize = ReadBlock(4).ToUInt();
-                    //	// Seek forward "chunkSize" bytes
-                    //	Seek(chunkSize, System.IO.SeekOrigin.Current);
-                    //}
-                }
-
-                if (comm_chunk == long.MinValue)
-                {
-                    throw new Exception("couldnt find comm block");
-                }
-
-                fileStream.Seek(comm_chunk, System.IO.SeekOrigin.Begin);
-                byte[] comm_buffer = new byte[26];
-                fileStream.Read(comm_buffer, 0, 26);
-
-                uint totalFrames = System.BitConverter.ToUInt32(comm_buffer.Skip(10).Take(4).Reverse().ToArray());
-                ushort bits_per_sample = System.BitConverter.ToUInt16(comm_buffer.Skip(14).Take(2).Reverse().ToArray());
-                double sample_rate = ToExtendedPrecision(comm_buffer.Skip(16).Take(10).ToArray());
-                int seconds = (int)(totalFrames / sample_rate);
-                sampleRate = (int)sample_rate;
-                bitDepth = (int)bits_per_sample;
-                durationSeconds = seconds;
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("GetAiffMetadata: " + e.Message + e.StackTrace);
-            }
-            finally
-            {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
-            }
-        }
-
-        /// <summary>
-        /// From taglib-sharp:
-        ///    Converts the first 10 bytes of the current instance to an IEEE
-        ///    754 80-bit extended precision floating point number, expressed
-        ///    as a <see cref="double"/>.
-        /// </summary>
-        /// <returns>
-        ///    A <see cref="double"/> value containing the value read from the
-        ///    current instance.
-        /// </returns>
-        private static double ToExtendedPrecision(byte[] bytesToConvert)
-        {
-            int exponent = ((bytesToConvert[0] & 0x7F) << 8) | bytesToConvert[1];
-            ulong hiMantissa = ((ulong)bytesToConvert[2] << 24)
-                               | ((ulong)bytesToConvert[3] << 16)
-                               | ((ulong)bytesToConvert[4] << 8)
-                               | bytesToConvert[5];
-            ulong loMantissa = ((ulong)bytesToConvert[6] << 24)
-                               | ((ulong)bytesToConvert[7] << 16)
-                               | ((ulong)bytesToConvert[8] << 8)
-                               | bytesToConvert[9];
-
-            double f;
-            if (exponent == 0 && hiMantissa == 0 && loMantissa == 0)
-            {
-                f = 0;
-            }
-            else
-            {
-                if (exponent == 0x7FFF)
-                {
-                    f = double.PositiveInfinity;
-                }
-                else
-                {
-                    exponent -= 16383;
-                    f = hiMantissa * Math.Pow(2, exponent -= 31);
-                    f += loMantissa * Math.Pow(2, exponent -= 32);
-                }
-            }
-
-            return (bytesToConvert[0] & 0x80) != 0 ? -f : f;
-        }
-
-        public static void GetApeMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth, out int durationSeconds)
-        {
-            sampleRate = -1;
-            bitDepth = -1;
-            durationSeconds = -1;
-            System.IO.Stream fileStream = null;
-            try
-            {
-                fileStream = contentResolver.OpenInputStream(uri);
-                byte[] a = new byte[76];
-                fileStream.Read(a, 0, 76); //ape header
-                if((System.Text.Encoding.ASCII.GetString(a.Take(4).ToArray())!="MAC "))
-                {
-                    throw new Exception("MAC  not present");
-                }
-
-                byte[] b = a.Skip(68).Take(2).ToArray();
-                bitDepth = (int)System.BitConverter.ToUInt16(b);
-                byte[] c = a.Skip(72).Take(4).ToArray();
-                sampleRate = (int)System.BitConverter.ToUInt32(c);
-                byte[] d = a.Skip(64).Take(4).ToArray();
-                uint total_frames = System.BitConverter.ToUInt32(d);
-                uint blocks_per_frame = System.BitConverter.ToUInt32(a.Skip(56).Take(4).ToArray());
-                uint final_frame_blocks = System.BitConverter.ToUInt32(a.Skip(60).Take(4).ToArray());
-
-                durationSeconds = (int)(((total_frames - 1) *
-                     blocks_per_frame + final_frame_blocks) /
-                    (double)sampleRate);
-            }
-            catch(Exception e)
-            {
-                MainActivity.LogFirebase("GetApeMetadata: " + e.Message + e.StackTrace);
-            }
-            finally
-            {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
-            }
-        }
-
-        public static void GetFlacMetadata(ContentResolver contentResolver, Android.Net.Uri uri, out int sampleRate, out int bitDepth)
-        {
-            sampleRate = -1;
-            bitDepth = -1;
-            System.IO.Stream fileStream = null;
-            try
-            {
-                fileStream = contentResolver.OpenInputStream(uri);
-                byte[] header = new byte[4];
-                fileStream.Read(header, 0, 4);
-                if (header.Take(3).SequenceEqual(System.Text.Encoding.ASCII.GetBytes("ID3")))
-                {
-                    //its technically incorrect, but flac files can have ID3 tags.
-                    //I found the sample file to test in tinytag repo.  otherwise I think this is rare.
-                    //just skip over this
-                    byte[] id3Header = new byte[10];
-                    if ((fileStream.Read(id3Header, 0, 10) == 10))
-                    {
-                        int size = id3Header[2] * 128 * 128 * 128 + id3Header[3] * 128 * 128 + id3Header[4] * 128 + id3Header[5];
-                        fileStream.Seek(size - 4, System.IO.SeekOrigin.Current);
-                        fileStream.Read(header, 0, 4);
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
-                if (!(header.SequenceEqual(System.Text.Encoding.ASCII.GetBytes("fLaC"))))
-                {
-                    throw new Exception("bad format");
-                }
-                //position is now after the fLaC
-
-                while (fileStream.Read(header, 0, 4) == 4)
-                {
-                    int blockType = header[0] & (byte)(0x7f);
-                    int isLastBlock = header[0] & (byte)(0x80);
-                    int size = header[1] * 256 * 256 + header[2] * 256 + header[3];
-                    if (blockType == 0)
-                    {
-                        byte[] stream_info_header = new byte[size];
-                        if (fileStream.Read(stream_info_header, 0, size) != size)
-                        {
-                            return;
-                        }
-                        int offset_to_sample_rate = 10;
-                        sampleRate = (stream_info_header[offset_to_sample_rate] * 256 * 256 + stream_info_header[offset_to_sample_rate + 1] * 256 + stream_info_header[offset_to_sample_rate + 2]) / 16;
-
-                        bitDepth = ((stream_info_header[offset_to_sample_rate + 2] & (byte)(0x1)) * 16 + (stream_info_header[offset_to_sample_rate + 3] & (byte)(0xf0)) / 16) + 1;
-                        return;
-                    }
-                    else if (isLastBlock != 0) //it will be 128
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        //go to next block
-                        fileStream.Seek(size, System.IO.SeekOrigin.Current);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("getFlacMetadata: " + e.Message + e.StackTrace); //TODO: getFlacMetadata: FileDescriptor must not be null a
-            }
-            finally
-            {
-                if (fileStream != null)
-                {
-                    fileStream.Close();
-                }
-            }
-        }
-    }
-
 
     public class MaterialProgressBarPassThrough : LinearLayout
     {
@@ -13821,51 +11808,7 @@ namespace AndriodApp1
         CurrentlyParsing = 3,
         OffDueToNetwork = 4,
     }
-
-
-
 }
-
-
-namespace SearchResponseExtensions
-{
-    public static class SearchResponseExtensions
-    {
-        public static IEnumerable<Soulseek.File> GetFiles(this SearchResponse searchResponse, bool hideLocked)
-        {
-            return hideLocked ? searchResponse.Files : searchResponse.Files.Concat(searchResponse.LockedFiles);
-        }
-
-        public static bool IsLockedOnly(this SearchResponse searchResponse)
-        {
-            return searchResponse.FileCount == 0 && searchResponse.LockedFileCount != 0;
-        }
-
-        public static Soulseek.File GetElementAtAdapterPosition(this SearchResponse searchResponse, bool hideLocked, int position)
-        {
-            if (hideLocked)
-            {
-                return searchResponse.Files.ElementAt(position);
-            }
-            else
-            {
-                //we always do Files, then LockedFiles
-                if (position >= searchResponse.Files.Count)
-                {
-                    return searchResponse.LockedFiles.ElementAt(position - searchResponse.Files.Count);
-                }
-                else
-                {
-                    return searchResponse.Files.ElementAt(position);
-                }
-
-            }
-
-        }
-    }
-}
-
-
 
 #if DEBUG
 public static class TestClient

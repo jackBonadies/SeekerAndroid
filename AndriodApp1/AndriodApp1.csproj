@@ -121,6 +121,9 @@
     <Compile Include="ChipsAdapter.cs" />
     <Compile Include="DownloadDialog.cs" />
     <Compile Include="EditUserInfoActivity.cs" />
+    <Compile Include="Extensions\SearchResponseExtensions.cs" />
+    <Compile Include="Helpers\Helpers.cs" />
+    <Compile Include="Helpers\MicroTagReader.cs" />
     <Compile Include="ImportWizardActivity.cs" />
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />
     <Compile Include="MainActivity.cs" />

@@ -39,7 +39,7 @@ using Google.Android.Material.Snackbar;
 using Soulseek;
 
 using log = Android.Util.Log;
-using SearchResponseExtensions;
+using AndriodApp1.Extensions.SearchResponseExtensions;
 using Android.Content.Res;
 using Common;
 
