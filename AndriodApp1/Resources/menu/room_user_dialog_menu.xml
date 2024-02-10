@@ -11,7 +11,7 @@
 		android:title="@string/searches_tab2"
 		android:icon="@drawable/abc_ic_go_search_api_material"
 		app:showAsAction="always"
-		app:actionViewClass="AndroidX.AppCompat.Widget.SearchView"/>
+		app:actionViewClass="androidx.appcompate.widget.SearchView"/>
 
 
 

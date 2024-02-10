@@ -24,24 +24,24 @@
       android:layout_centerVertical="true"
       android:textColor = "?attr/mainTextColorHinted"
       android:textSize = "20dp" />
-        <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/setUpSharing"
-        android:id="@+id/setUpSharing"
-        android:textSize="16dp"
+	<Button
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:text="@string/setUpSharing"
+	android:id="@+id/setUpSharing"
+	android:textSize="16dp"
         
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
+	android:paddingTop="8dp"
+	android:paddingBottom="8dp"
+	android:paddingStart="7dp"
+	android:paddingEnd="7dp"
         
-        android:textAllCaps="false"
-        android:minHeight="16dp"
-        android:foreground="@drawable/button"
-        style="@style/SeekerButtonStyle"
+	android:textAllCaps="false"
+	android:minHeight="16dp"
+	android:foreground="@drawable/button"
+	style="@style/SeekerButtonStyle"
 
-        android:layout_below="@id/noTransfersView"
-        android:layout_centerHorizontal="true"
-        android:translationY="-140dp"/>
+	android:layout_below="@id/noTransfersView"
+	android:layout_centerHorizontal="true"
+	android:translationY="-140dp"/>
 </RelativeLayout>

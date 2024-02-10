@@ -9,11 +9,12 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
         
-       app:trackCornerRadius="5dp"
+        app:trackCornerRadius="5dp"
         app:indicatorSize="120dp"
         app:trackThickness="6dp"
         app:indicatorColor="#3498DB"
         android:indeterminateOnly="true"
+
         />
 
 </LinearLayout>

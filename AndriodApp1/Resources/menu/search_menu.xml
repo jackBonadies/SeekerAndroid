@@ -8,7 +8,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
        app:showAsAction="ifRoom|collapseActionView"
        android:layout_width="match_parent"
        android:iconifiedByDefault="false"
-       app:actionViewClass="AndroidX.AppCompat.Widget.SearchView" />-->
+       app:actionViewClass="androidx.appcompate.widget.SearchView" />-->
 
   <item android:id="@+id/action_search"
 android:title="@string/searches_tab2"

@@ -26,7 +26,7 @@
       android:textColor = "?attr/mainTextColor"
       android:textSize = "35dp" />
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         
         android:id="@+id/usernameTextInputLayout"
         android:layout_below = "@+id/textView"
@@ -42,7 +42,7 @@
          android:layout_width="match_parent"
          android:layout_height="wrap_content">
       
-               <android.support.design.widget.TextInputEditText
+               <com.google.android.material.textfield.TextInputEditText
 
             android:textColorHighlight = "?attr/mainTextColor"
             android:textColorHint="?attr/mainTextColor"
@@ -59,9 +59,9 @@
             android:inputType="text"
             android:hint="@string/username" />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
         android:layout_below="@+id/usernameTextInputLayout"
         android:id="@+id/passwordTextInputLayout"
         android:layout_marginTop = "15dp"
@@ -96,7 +96,7 @@
             android:inputType="textPassword"
             android:hint="@string/password" />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
       <Button
         
