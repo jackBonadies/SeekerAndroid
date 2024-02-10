@@ -122,7 +122,9 @@
     <Compile Include="DownloadDialog.cs" />
     <Compile Include="EditUserInfoActivity.cs" />
     <Compile Include="Extensions\SearchResponseExtensions.cs" />
-    <Compile Include="Helpers\Helpers.cs" />
+    <Compile Include="Helpers\SearchSendIntentHelper.cs" />
+    <Compile Include="Helpers\SearchTabHelper.cs" />
+    <Compile Include="Helpers\Utils.cs" />
     <Compile Include="Helpers\MicroTagReader.cs" />
     <Compile Include="ImportWizardActivity.cs" />
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />

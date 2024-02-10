@@ -227,7 +227,7 @@ namespace AndriodApp1
                 return;
             }
             userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + Helpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + Utils.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
             log.Debug(MainActivity.logCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
@@ -255,7 +255,7 @@ namespace AndriodApp1
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + Helpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + Utils.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -939,8 +939,8 @@ namespace AndriodApp1
                 downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
 
                 transferItem = new TransferItem();
-                transferItem.Filename = Helpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
+                transferItem.Filename = Utils.GetFileNameFromFile(downloadInfo.fullFilename);
+                transferItem.FolderName = Utils.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
@@ -1232,7 +1232,7 @@ namespace AndriodApp1
         public void GetFolderContents()
         {
             var file = searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0);
-            string dirname = Helpers.GetDirectoryRequestFolderName(file.Filename);
+            string dirname = Utils.GetDirectoryRequestFolderName(file.Filename);
             if (dirname == string.Empty)
             {
                 MainActivity.LogFirebase("The dirname is empty!!");
@@ -1254,7 +1254,7 @@ namespace AndriodApp1
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = Helpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);
+                    string startingDir = Utils.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);
                     Action<View> action = new Action<View>((v) => {
                         this.Dismiss();
                         ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
@@ -1407,13 +1407,13 @@ namespace AndriodApp1
         {
             if(wrapper.IsLocked)
             {
-                viewFilename.Text = new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = new System.String(Java.Lang.Character.ToChars(0x1F512)) + Utils.GetFileNameFromFile(wrapper.File.Filename);
             }
             else
             {
-                viewFilename.Text = Helpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = Utils.GetFileNameFromFile(wrapper.File.Filename);
             }
-            viewAttributes.Text = Helpers.GetSizeLengthAttrString(wrapper.File);
+            viewAttributes.Text = Utils.GetSizeLengthAttrString(wrapper.File);
         }
 
         /// <summary>

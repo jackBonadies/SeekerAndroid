@@ -42,6 +42,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Android.Support.V4.Content;
 using Android.Text;
+using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -1307,16 +1308,16 @@ namespace AndriodApp1
 
         private void SetCompleteFolderView()
         {
-            string friendlyName = Helpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
+            string friendlyName = Utils.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
             currentCompleteFolderView.Text = friendlyName;
-            Helpers.SetToolTipText(currentCompleteFolderView, friendlyName);
+            Utils.SetToolTipText(currentCompleteFolderView, friendlyName);
         }
 
         private void SetIncompleteFolderView()
         {
-            string friendlyName = Helpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
+            string friendlyName = Utils.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
             currentIncompleteFolderView.Text = friendlyName;
-            Helpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
+            Utils.SetToolTipText(currentIncompleteFolderView, friendlyName);
         }
 
         private void SetSharedFolderView()
@@ -1398,7 +1399,7 @@ namespace AndriodApp1
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
             Android.Net.Uri uri = Android.Net.Uri.Parse("https://www.slsknet.org/userlogin.php?username=" + Android.Net.Uri.Encode(SoulSeekState.Username)); // missing 'http://' will cause crash.
-            Helpers.ViewUri(uri,this);
+            Utils.ViewUri(uri,this);
         }
 
         private void EditUserInfo_Click(object sender, EventArgs e)
@@ -1458,7 +1459,7 @@ namespace AndriodApp1
         private void CheckStatus_Click(object sender, EventArgs e)
         {
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
-            Helpers.ViewUri(uri,this);
+            Utils.ViewUri(uri,this);
         }
         private static AndroidX.AppCompat.App.AlertDialog changeDialog = null;
         private void ChangePort_Click(object sender, EventArgs e)
@@ -2859,7 +2860,7 @@ namespace AndriodApp1
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
@@ -2905,7 +2906,7 @@ namespace AndriodApp1
                 }
                 catch(Exception e)
                 {
-                    if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }

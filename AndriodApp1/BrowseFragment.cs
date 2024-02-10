@@ -175,7 +175,7 @@ namespace AndriodApp1
         {
             int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
 
-            Helpers.SetMenuTitles(menu,username);
+            Utils.SetMenuTitles(menu,username);
             
             if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
             {
@@ -209,7 +209,7 @@ namespace AndriodApp1
         {
             if(item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),username,SoulSeekState.ActiveActivityRef, null))
+                if(Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),username,SoulSeekState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -244,8 +244,8 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_copy_folder_url:
                     string fullDirName = dataItemsForListView[0].Node.Data.Name;
-                    string slskLink = Helpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
-                    Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
+                    string slskLink = Utils.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
+                    Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
                     Toast.MakeText(SoulSeekState.ActiveActivityRef,Resource.String.LinkCopied, ToastLength.Short).Show();
                     return true;
                 case Resource.Id.action_copy_selected_url:
@@ -1146,9 +1146,9 @@ namespace AndriodApp1
                     {
                         linkToCopy = linkToCopy + " \n";
                     }
-                    linkToCopy = linkToCopy + Helpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
+                    linkToCopy = linkToCopy + Utils.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
                 }
-                Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, linkToCopy);
+                Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, linkToCopy);
                 if((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
                 {
                     Toast.MakeText(this.Context, Resource.String.LinksCopied, ToastLength.Short).Show();
@@ -2020,7 +2020,7 @@ namespace AndriodApp1
 
         private static void GetPathItemsInternal(List<PathItem> pathItems, TreeNode<Directory> treeNode, bool lastChild)
         {
-            string displayName = Helpers.GetFileNameFromFile(treeNode.Data.Name);
+            string displayName = Utils.GetFileNameFromFile(treeNode.Data.Name);
             pathItems.Add(new PathItem(displayName, lastChild));
             if (treeNode.Parent==null)
             {
@@ -2063,8 +2063,8 @@ namespace AndriodApp1
                     case 3:
                         DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
                         //bool isDir = itemSelected.IsDirectory();
-                        string slskLink = Helpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
-                        Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
+                        string slskLink = Utils.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
+                        Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
                         return true;
                 }
@@ -2074,10 +2074,10 @@ namespace AndriodApp1
 
         public void ShowFolderSummaryDialog(FolderSummary folderSummary)
         {
-            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", Helpers.GetHumanReadableTime(folderSummary.LengthSeconds));
+            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", Utils.GetHumanReadableTime(folderSummary.LengthSeconds));
             string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
                 
-            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", Helpers.GetHumanReadableSize(folderSummary.SizeBytes));
+            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", Utils.GetHumanReadableSize(folderSummary.SizeBytes));
 
             string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
             string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
@@ -2269,11 +2269,11 @@ namespace AndriodApp1
                 {
                     if(this.Node.IsLocked)
                     {
-                        return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFileNameFromFile(Name);
+                        return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Utils.GetFileNameFromFile(Name);
                     }
                     else
                     {
-                        return Helpers.GetFileNameFromFile(Name);
+                        return Utils.GetFileNameFromFile(Name);
                     }
                 }
                 else
@@ -2486,7 +2486,7 @@ namespace AndriodApp1
                 {
                     itemView.FolderIndicator.Visibility = ViewStates.Gone;
                     itemView.FileDetails.Visibility = ViewStates.Visible;
-                    itemView.FileDetails.Text = Helpers.GetSizeLengthAttrString(dataItem.File);
+                    itemView.FileDetails.Text = Utils.GetSizeLengthAttrString(dataItem.File);
                     //itemView.ContainingViewGroup.SetPadding(0,SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
                 }
                 itemView.DisplayName.Text = dataItem.GetDisplayName();
@@ -2620,7 +2620,7 @@ namespace AndriodApp1
             try
             {
                 BrowseFragment.browseUserDialog.Show();
-                Helpers.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
+                Utils.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
 
             }
             catch (WindowManagerBadTokenException e)

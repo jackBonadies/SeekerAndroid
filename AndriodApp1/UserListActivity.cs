@@ -31,6 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AndroidX.RecyclerView.Widget;
+using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -81,7 +82,7 @@ namespace AndriodApp1
         {
             if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
             {
-                if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null,null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
+                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null,null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
                     MainActivity.LogDebug("handled by commons");
                     return true;
@@ -710,7 +711,7 @@ namespace AndriodApp1
             // Set up the buttons
 
             var dialog = builder.Show();
-            Helpers.DoNotEnablePositiveUntilText(dialog, input);
+            Utils.DoNotEnablePositiveUntilText(dialog, input);
         }
 
 
@@ -942,14 +943,14 @@ namespace AndriodApp1
             if(isIgnored)
             {
                 SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
-                Helpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                Utils.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
             }
             else
             {
                 SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
-                Helpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
-                Helpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
-                Helpers.AddGivePrivilegesIfApplicable(menu, -1);
+                Utils.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                Utils.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
+                Utils.AddGivePrivilegesIfApplicable(menu, -1);
             }
         }
     }

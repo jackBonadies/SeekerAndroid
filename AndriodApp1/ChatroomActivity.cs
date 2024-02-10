@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using AndriodApp1.Helpers;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -374,7 +375,7 @@ namespace AndriodApp1
                 for (int i = 0; i < 1000; i++)
                 {
                     System.Threading.Thread.Sleep(r.Next(0, 100));
-                    Message m = new Message("test", 1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, "test" + i, false);
+                    Message m = new Message("test", 1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, "test" + i, false);
                     ChatroomController.AddMessage(ChatroomInnerFragment.OurRoomInfo.Name, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(ChatroomInnerFragment.OurRoomInfo.Name, m));
                 }
@@ -596,7 +597,7 @@ namespace AndriodApp1
             try
             {
                 dialogInstance.Show();
-                Helpers.DoNotEnablePositiveUntilText(dialogInstance, input);
+                Utils.DoNotEnablePositiveUntilText(dialogInstance, input);
             }
             catch (WindowManagerBadTokenException e)
             {
@@ -733,7 +734,7 @@ namespace AndriodApp1
             try
             {
                 dialogInstance.Show();
-                Helpers.DoNotEnablePositiveUntilText(dialogInstance, input);
+                Utils.DoNotEnablePositiveUntilText(dialogInstance, input);
             }
             catch (WindowManagerBadTokenException e)
             {
@@ -842,7 +843,7 @@ namespace AndriodApp1
             try
             {
                 dialogInstance.Show();
-                Helpers.DoNotEnablePositiveUntilText(dialogInstance, chatNameInput);
+                Utils.DoNotEnablePositiveUntilText(dialogInstance, chatNameInput);
             }
             catch (WindowManagerBadTokenException e)
             {
@@ -922,7 +923,7 @@ namespace AndriodApp1
         {
             string statusMessage = null;
             DateTime dateTimeLocal = data.DateTimeUtc.Add(SoulSeekState.OffsetFromUtcCached);
-            string timePrefix = $"[{Helpers.GetNiceDateTimeGroupChat(dateTimeLocal)}]";
+            string timePrefix = $"[{Utils.GetNiceDateTimeGroupChat(dateTimeLocal)}]";
             switch (data.StatusType)
             {
                 case ChatroomController.StatusMessageType.Joined:
@@ -1113,7 +1114,7 @@ namespace AndriodApp1
     {
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            MainActivity.LogDebug("ShowSlskLinkContextMenu " + Helpers.ShowSlskLinkContextMenu);
+            MainActivity.LogDebug("ShowSlskLinkContextMenu " + Utils.ShowSlskLinkContextMenu);
 
             //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
             //in that case we still dont want to show anything.
@@ -1121,10 +1122,10 @@ namespace AndriodApp1
             {
                 return;
             }
-            else if (Helpers.ShowSlskLinkContextMenu)
+            else if (Utils.ShowSlskLinkContextMenu)
             {
                 //closing wont turn this off since its invalid parse, so turn it off here...
-                Helpers.ShowSlskLinkContextMenu = false;
+                Utils.ShowSlskLinkContextMenu = false;
                 return;
             }
 
@@ -1140,14 +1141,14 @@ namespace AndriodApp1
 
             menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
             menu.Add(1, 1, 1, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
-            Helpers.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
+            Utils.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
             var subMenu = menu.AddSubMenu(3,3,3,SoulSeekState.ActiveActivityRef.GetString(Resource.String.more_options));
             subMenu.Add(4,4,4,Resource.String.search_user_files);
             subMenu.Add(5,5,5,Resource.String.browse_user);
             subMenu.Add(6,6,6,Resource.String.get_user_info);
             subMenu.Add(7,7,7,Resource.String.msg_user);
             //subMenu.Add(8,8,8,Resource.String.give_privileges);
-            Helpers.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
+            Utils.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
         }
 
         public GroupMessageInnerViewReceived messageInnerView;
@@ -1205,8 +1206,8 @@ namespace AndriodApp1
         public void setItem(Message msg)
         {
             DataItem = msg;
-            viewTimeStamp.Text = Helpers.GetNiceDateTimeGroupChat(msg.LocalDateTime);
-            Helpers.SetMessageTextView(viewMessage,msg);
+            viewTimeStamp.Text = Utils.GetNiceDateTimeGroupChat(msg.LocalDateTime);
+            Utils.SetMessageTextView(viewMessage,msg);
             if(msg.SameAsLastUser)
             {
                 viewUsername.Visibility = ViewStates.Gone;
@@ -1379,7 +1380,7 @@ namespace AndriodApp1
             //}
             //MainActivity.LogDebug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
             string username = MessagesLongClickData.Username;
-            if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, this.View))
+            if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, this.View))
             {
                 MainActivity.LogDebug("Handled by commons");
                 return base.OnContextItemSelected(item);
@@ -1387,7 +1388,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case 0: //"Copy Text"
-                    Helpers.CopyTextToClipboard(this.Activity, MessagesLongClickData.MessageText);
+                    Utils.CopyTextToClipboard(this.Activity, MessagesLongClickData.MessageText);
                     break;
                 case 1: //"Ignore User"
                     SeekerApplication.AddToIgnoreListFeedback(this.Activity, username);
@@ -1905,7 +1906,7 @@ namespace AndriodApp1
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1920,7 +1921,7 @@ namespace AndriodApp1
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name,new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name,new Message(SoulSeekState.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -2059,7 +2060,7 @@ namespace AndriodApp1
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
@@ -2443,7 +2444,7 @@ namespace AndriodApp1
                 List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
                 foreach (string room in noLongerConnectedRooms) 
                 {
-                    Message m = new Message(Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, code);
+                    Message m = new Message(Utils.GetDateTimeNowSafe(), DateTime.UtcNow, code);
                     ChatroomController.AddMessage(room, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs( room, m ));
                 }
@@ -3149,7 +3150,7 @@ namespace AndriodApp1
 
                 MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
-            Message msg = new Message(e.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
+            Message msg = new Message(e.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
             if(e.Username == SoulSeekState.Username)
             {
                 //we already logged it..
@@ -3307,14 +3308,14 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
                 try
                 {
-                    Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                    Utils.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(ChatroomActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop);
                     notifIntent.PutExtra(FromRoomName, roomName); //so we can go to this user..
                     notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = Utils.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(roomName.GetHashCode(), n);
@@ -4893,7 +4894,7 @@ namespace AndriodApp1
             var userdata = longClickedUserData;
             if(item.ItemId!=0) //this is "Remove User" as in Remove User from Room!
             {
-                if(Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
+                if(Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
                     MainActivity.LogDebug("Handled by commons");
                     return base.OnContextItemSelected(item);
@@ -5103,10 +5104,10 @@ namespace AndriodApp1
             //normal - add to user list, browse, etc...
             menu.Add(1, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user));
             menu.Add(1, 4, 4, SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_user_files));
-            Helpers.AddAddRemoveUserMenuItem(menu, 1, 5, 5, roomUserItemView.DataItem.Username, true);
-            Helpers.AddIgnoreUnignoreUserMenuItem(menu, 1, 6, 6, roomUserItemView.DataItem.Username);
+            Utils.AddAddRemoveUserMenuItem(menu, 1, 5, 5, roomUserItemView.DataItem.Username, true);
+            Utils.AddIgnoreUnignoreUserMenuItem(menu, 1, 6, 6, roomUserItemView.DataItem.Username);
             menu.Add(1, 7, 7, SoulSeekState.ActiveActivityRef.GetString(Resource.String.msg_user));
-            Helpers.AddUserNoteMenuItem(menu, 1, 8, 8, roomUserItemView.DataItem.Username);
+            Utils.AddUserNoteMenuItem(menu, 1, 8, 8, roomUserItemView.DataItem.Username);
 
             var hackFixDialogContext = new FixForDialogFragmentContext();
             for (int i = 0; i < menu.Size(); i++)

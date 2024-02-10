@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using System.Runtime.Serialization;
+using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -282,7 +283,7 @@ namespace AndriodApp1
             }
             SearchTabHelper.SaveHeadersToSharedPrefs();
             //SearchTabHelper.SaveAllSearchTabsToDisk(SoulSeekState.ActiveActivityRef); //there are no additional results...
-            Helpers.SaveUserNotes();
+            Utils.SaveUserNotes();
             if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)

@@ -39,10 +39,11 @@ using AndriodApp1.Extensions.SearchResponseExtensions;
 using Android.Net;
 using System.Linq.Expressions;
 using AndriodApp1;
+using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
-    public static class Helpers
+    public static class Utils
     {
         public static string AvoidLineBreaks(string orig)
         {
@@ -110,11 +111,11 @@ namespace AndriodApp1
             string albumFolderName = null;
             if (depth == 1)
             {
-                albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = Utils.GetFolderNameFromFile(fullFileName, depth);
             }
             else
             {
-                albumFolderName = Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = Utils.GetFolderNameFromFile(fullFileName, depth);
                 albumFolderName = albumFolderName.Replace('\\', '_');
             }
             string incompleteFolderName = username + "_" + albumFolderName;
@@ -154,7 +155,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
-            if (dt.Date == Helpers.GetDateTimeNowSafe().Date)
+            if (dt.Date == Utils.GetDateTimeNowSafe().Date)
             {
                 return SoulSeekState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
             }
@@ -637,13 +638,13 @@ namespace AndriodApp1
             else if (contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
             {
                 SoulSeekState.UserOnlineAlerts[usernameInQuestion] = 0;
-                Helpers.SaveOnlineAlerts();
+                Utils.SaveOnlineAlerts();
                 uiUpdateSetResetOnlineAlert();
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
             {
                 SoulSeekState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
-                Helpers.SaveOnlineAlerts();
+                Utils.SaveOnlineAlerts();
                 uiUpdateSetResetOnlineAlert();
 
             }
@@ -652,17 +653,17 @@ namespace AndriodApp1
 
         public static void SetMessageTextView(TextView viewMessage, Message msg)
         {
-            if (Helpers.IsSpecialMessage(msg.MessageText, out SpecialMessageType specialMessageType))
+            if (Utils.IsSpecialMessage(msg.MessageText, out SpecialMessageType specialMessageType))
             {
                 if (specialMessageType.HasFlag(SpecialMessageType.SlashMe))
                 {
-                    viewMessage.Text = Helpers.ParseSpecialMessage(msg.MessageText);
+                    viewMessage.Text = Utils.ParseSpecialMessage(msg.MessageText);
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
                 }
                 else if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SpecialMessageType.SlskLink))
                 {
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
-                    Helpers.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
+                    Utils.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
                 }
                 else
                 {
@@ -689,7 +690,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogFirebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
-            if (dt.Date == Helpers.GetDateTimeNowSafe().Date)
+            if (dt.Date == Utils.GetDateTimeNowSafe().Date)
             {
                 return dt.ToString("h:mm:ss tt", cultureInfo); //this is the only difference...
             }
@@ -727,22 +728,22 @@ namespace AndriodApp1
         //  are both extensionless....
         public static DocumentFile CreateMediaFile(DocumentFile parent, string name)
         {
-            if (Helpers.GetMimeTypeFromFilename(name) == M4A_MIME)
+            if (Utils.GetMimeTypeFromFilename(name) == M4A_MIME)
             {
-                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .m4a extension for us..
+                return parent.CreateFile(Utils.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .m4a extension for us..
             }
-            else if (Helpers.GetMimeTypeFromFilename(name) == APE_MIME)
+            else if (Utils.GetMimeTypeFromFilename(name) == APE_MIME)
             {
-                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .ape extension for us..
+                return parent.CreateFile(Utils.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .ape extension for us..
             }
-            else if (Helpers.GetMimeTypeFromFilename(name) == null)
+            else if (Utils.GetMimeTypeFromFilename(name) == null)
             {
                 //a null mimetype is fine, it just defaults to application/octet-stream
                 return parent.CreateFile(null, name); //we use just name since it will not add the extension for us..
             }
             else
             {
-                return parent.CreateFile(Helpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
+                return parent.CreateFile(Utils.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
             }
         }
 
@@ -805,7 +806,7 @@ namespace AndriodApp1
             }
             catch (Exception e)
             {
-                if (e.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
+                if (e.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
                 {
                     MainActivity.LogFirebase("viewUri: " + e.Message + httpUri.ToString());
                     SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
@@ -844,7 +845,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            return Helpers.GetAllButLast(lastPathSegmentChild);
+                            return Utils.GetAllButLast(lastPathSegmentChild);
                         }
                     }
                     else
@@ -910,7 +911,7 @@ namespace AndriodApp1
                 fullFilePath = linkStringToParse.Substring(linkStringToParse.IndexOf('/') + 1).TrimEnd('/').Replace('/', '\\');
                 if (isFile)
                 {
-                    dirPath = Helpers.GetDirectoryRequestFolderName(fullFilePath);
+                    dirPath = Utils.GetDirectoryRequestFolderName(fullFilePath);
                 }
                 else
                 {
@@ -958,11 +959,11 @@ namespace AndriodApp1
         {
             if (item.FileCount > 0)
             {
-                return Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+                return Utils.GetFolderNameFromFile(GetUnlockedFileName(item));
             }
             else if (item.LockedFileCount > 0)
             {
-                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Helpers.GetFolderNameFromFile(GetLockedFileName(item));
+                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Utils.GetFolderNameFromFile(GetLockedFileName(item));
             }
             else
             {
@@ -1031,7 +1032,7 @@ namespace AndriodApp1
 
         public static string GetDateTimeSinceAbbrev(DateTime dtThen)
         {
-            var dtNow = Helpers.GetDateTimeNowSafe(); //2.5 microseconds
+            var dtNow = Utils.GetDateTimeNowSafe(); //2.5 microseconds
             if (dtNow.Day == dtThen.Day)
             {
                 //if on same day then show time. 24 hour time? maybe option to change?

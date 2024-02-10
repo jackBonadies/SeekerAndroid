@@ -57,6 +57,7 @@ using AndriodApp1.Extensions.SearchResponseExtensions;
 using Android.Net;
 using System.Linq.Expressions;
 using AndriodApp1;
+using AndriodApp1.Helpers;
 
 //using System.IO;
 //readme:
@@ -1217,7 +1218,7 @@ namespace AndriodApp1
             Add(initialTransferItem);
             if (folderName == null)
             {
-                folderName = Helpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
+                folderName = Utils.GetFolderNameFromFile(initialTransferItem.FullFilename);
             }
             FolderName = folderName;
             Username = username;
@@ -1238,7 +1239,7 @@ namespace AndriodApp1
                 TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99; });
                 if (IsUpload())
                 {
-                    TransferItems.RemoveAll((TransferItem i) => { return Helpers.IsUploadCompleteOrAborted(i.State); });
+                    TransferItems.RemoveAll((TransferItem i) => { return Utils.IsUploadCompleteOrAborted(i.State); });
                 }
             }
         }
@@ -1938,7 +1939,7 @@ namespace AndriodApp1
                     string foldername = ti.FolderName;
                     if (foldername == null)
                     {
-                        foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
+                        foldername = Utils.GetFolderNameFromFile(ti.FullFilename);
                     }
                     return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
@@ -1996,7 +1997,7 @@ namespace AndriodApp1
                     string foldername = ti.FolderName;
                     if (foldername == null)
                     {
-                        foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
+                        foldername = Utils.GetFolderNameFromFile(ti.FullFilename);
                     }
                     return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
@@ -2141,7 +2142,7 @@ namespace AndriodApp1
                 string foldername = string.Empty;
                 if (string.IsNullOrEmpty(ti.FolderName))
                 {
-                    foldername = Helpers.GetFolderNameFromFile(ti.FullFilename);
+                    foldername = Utils.GetFolderNameFromFile(ti.FullFilename);
                 }
                 else
                 {
@@ -2218,7 +2219,7 @@ namespace AndriodApp1
                 AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
                 if (isUploads)
                 {
-                    AllTransferItems.RemoveAll((TransferItem i) => { return Helpers.IsUploadCompleteOrAborted(i.State); });
+                    AllTransferItems.RemoveAll((TransferItem i) => { return Utils.IsUploadCompleteOrAborted(i.State); });
                 }
             }
             lock (AllFolderItems)
@@ -2248,7 +2249,7 @@ namespace AndriodApp1
         {
             if (string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
             {
-                return Helpers.GetFolderNameFromFile(ti.FullFilename);
+                return Utils.GetFolderNameFromFile(ti.FullFilename);
             }
             else
             {
@@ -2480,7 +2481,7 @@ namespace AndriodApp1
             {
                 foreach (FolderItem fi in AllFolderItems)
                 {
-                    foldersToNotDelete.Add(Helpers.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
+                    foldersToNotDelete.Add(Utils.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
                 }
             }
             return foldersToNotDelete;
@@ -2805,14 +2806,14 @@ namespace AndriodApp1
                         }
                         string lastTerm = SearchTabHelper.SearchTabCollection[id].LastSearchTerm;
 
-                        Helpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                        Utils.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
                         Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                         notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
-                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                        Notification n = Helpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
+                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                        Notification n = Utils.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
                         NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                         // notificationId is a unique int for each notification that you must define
                         notificationManager.Notify(lastTerm.GetHashCode(), n);
@@ -2918,10 +2919,10 @@ namespace AndriodApp1
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(FromTransferString, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Utils.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
+            return Utils.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
         }
 
 
@@ -2952,7 +2953,7 @@ namespace AndriodApp1
             }
             SoulSeekState.DownloadKeepAliveServiceRunning = true;
 
-            Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            Utils.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
             int cnt = SeekerApplication.DL_COUNT;
             if (cnt == -1)
@@ -3032,10 +3033,10 @@ namespace AndriodApp1
             notifIntent.PutExtra(FromTransferUploadString, 2);
 
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Utils.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
+            return Utils.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
         }
 
 
@@ -3067,7 +3068,7 @@ namespace AndriodApp1
 
             SoulSeekState.UploadKeepAliveServiceRunning = true;
 
-            Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            Utils.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
             int cnt = SeekerApplication.UPLOAD_COUNT;
             if (cnt == -1)
@@ -3150,10 +3151,10 @@ namespace AndriodApp1
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, Helpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
+                PendingIntent.GetActivity(context, 0, notifIntent, Utils.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Helpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
+            return Utils.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
         }
 
 
@@ -3168,7 +3169,7 @@ namespace AndriodApp1
             MainActivity.LogInfoFirebase("keep alive service started...");
             SoulSeekState.IsStartUpServiceCurrentlyRunning = true;
 
-            Helpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            Utils.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
 
 
@@ -3367,9 +3368,9 @@ namespace AndriodApp1
         public const int FromSlskLinkDownloadFiles = 81;
         public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            if (v is TextView && Helpers.ShowSlskLinkContextMenu)
+            if (v is TextView && Utils.ShowSlskLinkContextMenu)
             {
-                if (!Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
+                if (!Utils.ParseSlskLinkString(Utils.SlskLinkClickedData, out _, out _, out _, out bool isFile))
                 {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
                     base.OnCreateContextMenu(menu, v, menuInfo);
@@ -3396,7 +3397,7 @@ namespace AndriodApp1
 
         public override void OnContextMenuClosed(IMenu menu)
         {
-            Helpers.ShowSlskLinkContextMenu = false;
+            Utils.ShowSlskLinkContextMenu = false;
             base.OnContextMenuClosed(menu);
         }
 
@@ -3486,7 +3487,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case FromSlskLinkBrowseAtLocation: //Browse At Location
-                    Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
+                    Utils.ParseSlskLinkString(Utils.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
@@ -3498,10 +3499,10 @@ namespace AndriodApp1
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);
                     return true;
                 case FromSlskLinkCopyLink:
-                    Helpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, Helpers.SlskLinkClickedData);
+                    Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, Utils.SlskLinkClickedData);
                     return true;
                 case FromSlskLinkDownloadFiles:
-                    Helpers.ParseSlskLinkString(Helpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
+                    Utils.ParseSlskLinkString(Utils.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
                     Action<Task<Directory>> ContAction = null;
                     if (isFile)
                     {
@@ -3894,7 +3895,7 @@ namespace AndriodApp1
             //bool msdCase = false;
             //if (uploadDirectoryInfo.UploadDirectory != null)
             //{
-            string lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
+            string lastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
             //}
             //else
             //{
@@ -4225,8 +4226,8 @@ namespace AndriodApp1
                     else
                     {
 
-                        string fname = Helpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string folderName = Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string fname = Utils.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string folderName = Utils.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
                         string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                                                                                //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                //bc we get a path that is:
@@ -4251,7 +4252,7 @@ namespace AndriodApp1
             {
                 closeQuietly(c);
             }
-            Helpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            Utils.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
@@ -4320,7 +4321,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        fname = Helpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
+                        fname = Utils.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
                         searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                     }
                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
@@ -4341,7 +4342,7 @@ namespace AndriodApp1
                 }
 
             }
-            Helpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            Utils.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
@@ -4930,7 +4931,7 @@ namespace AndriodApp1
                         }
 
 
-                        string searchableName = Helpers.GetFolderNameFromFile(presentableName) + @"\" + Helpers.GetFileNameFromFile(presentableName);
+                        string searchableName = Utils.GetFolderNameFromFile(presentableName) + @"\" + Utils.GetFileNameFromFile(presentableName);
 
                         Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
                         if (attributes != null)
@@ -4948,7 +4949,7 @@ namespace AndriodApp1
                         }
                         //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
-                        string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                        string fname = Utils.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                         //for the brose response should only be the filename!!! 
                                                                                                         //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                         //bc we get a path that is:
@@ -4964,7 +4965,7 @@ namespace AndriodApp1
                         files.Add(slskFile);
                     }
                 }
-                Helpers.SortSlskDirFiles(files);
+                Utils.SortSlskDirFiles(files);
                 string lastPathSegment = null;
                 if (msdMsfOrOverrideCase)
                 {
@@ -4972,7 +4973,7 @@ namespace AndriodApp1
                 }
                 else if (isRootCase)
                 {
-                    lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
+                    lastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
                 }
                 else
                 {
@@ -5068,7 +5069,7 @@ namespace AndriodApp1
                         //update public status variable every so often
                         SoulSeekState.NumberParsed = indexNum;
                     }
-                    string fname = Helpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                    string fname = Utils.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                     //for the brose response should only be the filename!!! 
                                                                                                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                     //bc we get a path that is:
@@ -5084,7 +5085,7 @@ namespace AndriodApp1
                 }
             }
 
-            Helpers.SortSlskDirFiles(files);
+            Utils.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
             if(overrideCase)
@@ -5197,7 +5198,7 @@ namespace AndriodApp1
                     var reversed = index.ToDictionary(x => x.Value, x => x.Key);
                     foreach (string presentableName in stringUriPairs.Keys)
                     {
-                        string searchableName = Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(Helpers.GetFileNameFromFile(presentableName));
+                        string searchableName = Utils.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(Utils.GetFileNameFromFile(presentableName));
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                         int code = reversed[presentableName];
                         foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
@@ -5580,7 +5581,7 @@ namespace AndriodApp1
                         string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
                         string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
-                        string searchableName = Helpers.GetFolderNameFromFile(fullPath) + @"\" + Helpers.GetFileNameFromFile(fullPath);
+                        string searchableName = Utils.GetFolderNameFromFile(fullPath) + @"\" + Utils.GetFileNameFromFile(fullPath);
                         if (isRootCase && (volName != null))
                         {
                             if (searchableName.Substring(0, volName.Length) == volName)
@@ -6255,7 +6256,7 @@ namespace AndriodApp1
                         }
                         catch (Exception ex)
                         {
-                            if (ex.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
+                            if (ex.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
                             {
                                 FallbackFileSelectionEntry(false);
                             }
@@ -7095,7 +7096,7 @@ namespace AndriodApp1
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(UPLOADS_NOTIF_EXTRA, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, Helpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             Notification notification = null;
@@ -7861,8 +7862,8 @@ namespace AndriodApp1
             TransferItem transferItem = new TransferItem();
             transferItem.Username = username;
             transferItem.FullFilename = filename;
-            transferItem.Filename = Helpers.GetFileNameFromFile(filename);
-            transferItem.FolderName = Helpers.GetFolderNameFromFile(filename);
+            transferItem.Filename = Utils.GetFileNameFromFile(filename);
+            transferItem.FolderName = Utils.GetFolderNameFromFile(filename);
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
@@ -8129,7 +8130,7 @@ namespace AndriodApp1
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains(Helpers.NoDocumentOpenTreeToHandle))
+                if (ex.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
                 {
                     FallbackFileSelectionEntry(true);
                 }
@@ -8618,7 +8619,7 @@ namespace AndriodApp1
 
                     if (!SoulSeekState.DisableDownloadToastNotification)
                     {
-                        action = () => { ToastUI(Helpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
+                        action = () => { ToastUI(Utils.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
@@ -9106,7 +9107,7 @@ namespace AndriodApp1
 
         public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
-            string name = Helpers.GetFileNameFromFile(fullfilename);
+            string name = Utils.GetFileNameFromFile(fullfilename);
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
@@ -9162,7 +9163,7 @@ namespace AndriodApp1
                         }
                     }
 
-                    string fullDir = rootdir + @"/Soulseek Incomplete/" + Helpers.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
+                    string fullDir = rootdir + @"/Soulseek Incomplete/" + Utils.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
                     musicDir = new Java.IO.File(fullDir);
                     lock (lock_album_ifexist_create)
                     {
@@ -9295,7 +9296,7 @@ namespace AndriodApp1
                     }
 
 
-                    string album_folder_name = Helpers.GenerateIncompleteFolderName(username, fullfilename, depth);
+                    string album_folder_name = Utils.GenerateIncompleteFolderName(username, fullfilename, depth);
                     lock (lock_album_ifexist_create)
                     {
                         folderDir1 = slskDir1.FindFile(album_folder_name); //does the folder we want to save to exist
@@ -9370,7 +9371,7 @@ namespace AndriodApp1
                 else
                 {
                     partialLength = 0;
-                    DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
+                    DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
                     stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
@@ -9434,8 +9435,8 @@ namespace AndriodApp1
 
         private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, int depth, out string finalUri)
         {
-            string name = Helpers.GetFileNameFromFile(fullfilename);
-            string dir = Helpers.GetFolderNameFromFile(fullfilename, depth);
+            string name = Utils.GetFileNameFromFile(fullfilename);
+            string dir = Utils.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
             if (memoryMode && (bytes == null || bytes.Length == 0))
@@ -9688,7 +9689,7 @@ namespace AndriodApp1
                 //FileOutputStream stream = new FileOutputStream(mFile);
                 if (memoryMode)
                 {
-                    DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
+                    DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
                     System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                     stream.Write(bytes);
@@ -9702,11 +9703,11 @@ namespace AndriodApp1
                     if (SoulSeekState.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
                         (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                        Helpers.CompleteIncompleteDifferentVolume() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree || !SoulSeekState.SaveDataDirectoryUriIsFromTree)
+                        Utils.CompleteIncompleteDifferentVolume() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree || !SoulSeekState.SaveDataDirectoryUriIsFromTree)
                     {
                         try
                         {
-                            DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
+                            DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name);
                             uri = mFile.Uri;
                             finalUri = mFile.Uri.ToString();
                             System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
@@ -9785,7 +9786,7 @@ namespace AndriodApp1
                                     try
                                     {
 
-                                        DocumentFile mFile = Helpers.CreateMediaFile(folderDir1, name);
+                                        DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name);
                                         uri = mFile.Uri;
                                         finalUri = mFile.Uri.ToString();
                                         MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri + " parent: " + parentUriOfIncomplete);
@@ -10760,8 +10761,8 @@ namespace AndriodApp1
 
         public string GetPresentableName(UploadDirectoryInfo ourTopMostParent)
         {
-            string parentLastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
-            string ourLastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
+            string parentLastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
+            string ourLastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
             if (ourMsdCase || msdCase)
             {
                 return ourLastPathSegment; //not great but no good solution for msd. TODO test
@@ -10966,7 +10967,7 @@ namespace AndriodApp1
             {
                 if (!uploadDir.IsSubdir && uploadDir.UploadDirectory != null)
                 {
-                    string lastPathSegment = Helpers.GetLastPathSegmentWithSpecialCaseProtection(uploadDir.UploadDirectory, out bool msdCase);
+                    string lastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(uploadDir.UploadDirectory, out bool msdCase);
                     if (msdCase)
                     {
                         interestedVolnames.Add(string.Empty); //primary
@@ -11749,8 +11750,8 @@ namespace AndriodApp1
         public override void OnClick(View widget)
         {
             MainActivity.LogDebug("slsk link click");
-            Helpers.SlskLinkClickedData = textClicked;
-            Helpers.ShowSlskLinkContextMenu = true;
+            Utils.SlskLinkClickedData = textClicked;
+            Utils.ShowSlskLinkContextMenu = true;
             SoulSeekState.ActiveActivityRef.RegisterForContextMenu(widget);
             SoulSeekState.ActiveActivityRef.OpenContextMenu(widget);
             SoulSeekState.ActiveActivityRef.UnregisterForContextMenu(widget);

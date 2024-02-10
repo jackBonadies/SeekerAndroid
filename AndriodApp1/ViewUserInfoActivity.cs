@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -43,13 +44,13 @@ namespace AndriodApp1
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            Helpers.SetMenuTitles(menu, UserToView);
+            Utils.SetMenuTitles(menu, UserToView);
             return base.OnPrepareOptionsMenu(menu);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (Helpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
+            if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
             {
                 return true;
             }
@@ -443,7 +444,7 @@ namespace AndriodApp1
             if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Q)
             {
                 ContentValues valuesForContentResolver = GetContentValues();
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + Helpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + Utils.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.RelativePath, "Pictures");
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
                                                                                                                //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected. 
@@ -463,7 +464,7 @@ namespace AndriodApp1
                 {
                     directory.Mkdirs();
                 }
-                string fileName = UserToView + Helpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
+                string fileName = UserToView + Utils.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
                 Java.IO.File file = new Java.IO.File(directory, fileName);
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
@@ -477,7 +478,7 @@ namespace AndriodApp1
         private ContentValues GetContentValues() 
         {
             ContentValues valuesForContentResolver = new ContentValues();
-            DateTime now = Helpers.GetDateTimeNowSafe();
+            DateTime now = Utils.GetDateTimeNowSafe();
             long ms = new DateTimeOffset(now).ToUnixTimeMilliseconds();
             long s = ms / 1000;
             valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DateAdded, s);
