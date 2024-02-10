@@ -262,2227 +262,6 @@ namespace AndriodApp1
 
     }
 
-    // TODO ORG UpnpUnums
-    public enum UpnpDiagStatus
-    {
-        None = 0,
-        UpnpDisabled = 1,
-        WifiDisabled = 2,
-        NoUpnpDevicesFound = 3,
-        UpnpDeviceFoundButFailedToMap = 4,
-        Success = 5,
-        NoWifiConnection = 6, //wifi is enabled but not connected to any particular connection
-        ErrorUnspecified = 10
-    }//what about captive portal??
-
-    // TODO ORG UpnpUnums
-    public enum UpnpRunningStatus
-    {
-        NeverStarted = 0,
-        CurrentlyRunning = 1,
-        Finished = 2,
-        AlreadyMapped = 3
-    }
-
-    // TODOORG manager?
-    public class PrivilegesManager
-    {
-        public static object PrivilegedUsersLock = new object();
-        public IReadOnlyCollection<string> PrivilegedUsers = null;
-        public bool IsPrivileged = false; //are we privileged
-
-        public static Context Context = null;
-        private static PrivilegesManager instance = null;
-        public static PrivilegesManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new PrivilegesManager();
-                }
-                return instance;
-            }
-        }
-        /// <summary>
-        /// Set Privileged Users List, this will also check if we have privileges and if so, get our remaining time..
-        /// </summary>
-        /// <param name="privUsers"></param>
-        public void SetPrivilegedList(IReadOnlyCollection<string> privUsers)
-        {
-            lock (PrivilegedUsersLock)
-            {
-                PrivilegedUsers = privUsers;
-                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
-                {
-                    IsPrivileged = CheckIfPrivileged(SoulSeekState.Username);
-                    if (IsPrivileged)
-                    {
-                        GetPrivilegesAPI(false);
-                    }
-                }
-            }
-        }
-
-        public void SubtractDays(int days)
-        {
-            SecondsRemainingAtLastCheck -= (days * 24 * 3600);
-        }
-
-        private volatile int SecondsRemainingAtLastCheck = int.MinValue;
-        private DateTime LastCheckTime = DateTime.MinValue;
-        public int GetRemainingSeconds()
-        {
-            if (SecondsRemainingAtLastCheck == 0 || SecondsRemainingAtLastCheck == int.MinValue)
-            {
-                return 0;
-            }
-            else if (LastCheckTime == DateTime.MinValue)
-            {
-                //shouldnt go here
-                return 0;
-            }
-            else
-            {
-                int secondsSinceLastCheck = (int)Math.Floor(LastCheckTime.Subtract(DateTime.UtcNow).TotalSeconds);
-                int remainingSeconds = SecondsRemainingAtLastCheck - secondsSinceLastCheck;
-                return Math.Max(remainingSeconds, 0);
-            }
-        }
-
-        /// <summary>
-        /// Get Remaining Days (rounded down)
-        /// </summary>
-        /// <returns></returns>
-        public int GetRemainingDays()
-        {
-            return GetRemainingSeconds() / (24 * 3600);
-        }
-
-        public string GetPrivilegeStatus()
-        {
-            if (SecondsRemainingAtLastCheck == 0 || SecondsRemainingAtLastCheck == int.MinValue || GetRemainingSeconds() <= 0)
-            {
-                if (IsPrivileged)
-                {
-                    return SeekerApplication.GetString(Resource.String.yes); //this is if we are in the privileged list but our actual amount has not yet been returned.
-                }
-                else
-                {
-                    return SeekerApplication.GetString(Resource.String.no_image_chosen); //"None"
-                }
-            }
-            else
-            {
-                int seconds = GetRemainingSeconds();
-                if (seconds > 3600 * 24)
-                {
-                    int days = seconds / (3600 * 24);
-                    if (days == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.day_left), days);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.days_left), days);
-                    }
-                }
-                else if (seconds > 3600)
-                {
-                    int hours = seconds / 3600;
-                    if (hours == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.hour_left), hours);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.hours_left), hours);
-                    }
-                }
-                else if (seconds > 60)
-                {
-                    int mins = seconds / 60;
-                    if (mins == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.minute_left), mins);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.minutes_left), mins);
-                    }
-                }
-                else
-                {
-                    if (seconds == 1)
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.second_left), seconds);
-                    }
-                    else
-                    {
-                        return string.Format(SeekerApplication.GetString(Resource.String.seconds_left), seconds);
-                    }
-                }
-            }
-        }
-
-        public EventHandler PrivilegesChecked;
-
-        private void GetPrivilegesLogic(bool feedback)
-        {
-            SoulSeekState.SoulseekClient.GetPrivilegesAsync().ContinueWith(new Action<Task<int>>
-                ((Task<int> t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        if (feedback)
-                        {
-                            if (t.Exception.InnerException is TimeoutException)
-                            {
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
-                            }
-                            else
-                            {
-                                MainActivity.LogFirebase("Failed to get privileges" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed), ToastLength.Long);
-                            }
-                        }
-                        return;
-                    }
-                    else
-                    {
-                        SecondsRemainingAtLastCheck = t.Result;
-                        if (t.Result > 0)
-                        {
-                            IsPrivileged = true;
-                        }
-                        else if (t.Result == 0)
-                        {
-                            IsPrivileged = false;
-                        }
-                        LastCheckTime = DateTime.UtcNow;
-                        if (feedback)
-                        {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) + ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(), ToastLength.Long);
-                        }
-                        PrivilegesChecked?.Invoke(null, new EventArgs());
-                    }
-                }));
-        }
-
-        public void GetPrivilegesAPI(bool feedback)
-        {
-            if (!SoulSeekState.currentlyLoggedIn)
-            {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_check_privileges, ToastLength.Short).Show();
-                return;
-            }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-
-                        });
-                        return;
-                    }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });
-
-                }));
-            }
-            else
-            {
-                GetPrivilegesLogic(feedback);
-            }
-        }
-
-        public bool CheckIfPrivileged(string username)
-        {
-            lock (PrivilegedUsersLock)
-            {
-                if (PrivilegedUsers != null)
-                {
-                    return PrivilegedUsers.Contains(username);
-                }
-                return false;
-            }
-        }
-
-    }
-
-    // TODO Org UPNP folder
-    public class UPnpManager
-    {
-        public static Context Context = null;
-        private static UPnpManager instance = null;
-
-        public volatile int DevicesFound = -1;
-        public volatile int DevicesSuccessfullyMapped = -1;
-        public volatile UpnpDiagStatus DiagStatus = UpnpDiagStatus.None;
-        public volatile UpnpRunningStatus RunningStatus = UpnpRunningStatus.NeverStarted;
-        public string LocalIP = string.Empty;
-        public bool Feedback = false;
-
-        public static DateTime LastSetTime = DateTime.MinValue;
-        public static int LastSetLifeTime = -1; //sec
-        public static int LastSetPort = -1;
-        public static string LastSetLocalIP = string.Empty;
-
-        public static void SaveUpnpState()
-        {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutLong(SoulSeekState.M_LastSetUpnpRuleTicks, LastSetTime.Ticks);
-                editor.PutInt(SoulSeekState.M_LifetimeSeconds, LastSetLifeTime);
-                editor.PutInt(SoulSeekState.M_PortMapped, LastSetPort);
-                editor.PutString(SoulSeekState.M_LastSetLocalIP, LastSetLocalIP);
-                editor.Commit();
-            }
-        }
-
-        public static void RestoreUpnpState()
-        {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                LastSetTime = new DateTime(SoulSeekState.SharedPreferences.GetLong(SoulSeekState.M_LastSetUpnpRuleTicks, 0));
-                LastSetLifeTime = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_LifetimeSeconds, -1);
-                LastSetPort = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_PortMapped, -1);
-                LastSetLocalIP = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_LastSetLocalIP, string.Empty);
-            }
-        }
-
-        public static UPnpManager Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new UPnpManager();
-                }
-                return instance;
-            }
-        }
-
-        public EventHandler<EventArgs> SearchStarted; //this is if the actual search starts.  if there is an error early (no wifi, etc) then this wont get called, just finished will be called.
-        public EventHandler<EventArgs> DeviceSuccessfullyMapped;  //these are mostly for UI events...
-        public EventHandler<EventArgs> SearchFinished;            //so if someone is actively running mapping in settings...
-
-        private void CancelSearchAfterTime() //SSDP
-        {
-            int timeout = 7; //seconds.  our MX value is 3 seconds.
-            System.Timers.Timer finishSearchTimer = new System.Timers.Timer(timeout * 1000);
-            finishSearchTimer.AutoReset = false;
-            finishSearchTimer.Elapsed += FinishSearchTimer_Elapsed;
-            finishSearchTimer.Start();
-        }
-
-        public enum ListeningIcon
-        {
-            OffIcon = 0,
-            PendingIcon = 1,
-            ErrorIcon = 2,
-            SuccessIcon = 3
-        }
-
-        public Tuple<ListeningIcon, string> GetIconAndMessage()
-        {
-            if (!SoulSeekState.ListenerUPnpEnabled)
-            {
-                return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_off));
-            }
-            else if (!SoulSeekState.ListenerEnabled)
-            {
-                return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.listener_off));
-            }
-            else if (RunningStatus == UpnpRunningStatus.NeverStarted)
-            {
-                return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_not_ran));
-            }
-            else if (RunningStatus == UpnpRunningStatus.CurrentlyRunning)
-            {
-                return new Tuple<ListeningIcon, string>(ListeningIcon.PendingIcon, Context.GetString(Resource.String.upnp_currently_running));
-            }
-            else if (RunningStatus == UpnpRunningStatus.Finished)
-            {
-                if (DiagStatus == UpnpDiagStatus.NoUpnpDevicesFound)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.no_upnp_devices_found));
-                }
-                else if (DiagStatus == UpnpDiagStatus.WifiDisabled)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.upnp_wifi_only));
-                }
-                else if (DiagStatus == UpnpDiagStatus.NoWifiConnection)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.upnp_no_wifi_conn));
-                }
-                else if (DiagStatus == UpnpDiagStatus.UpnpDeviceFoundButFailedToMap)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.failed_to_set));
-                }
-                else if (DiagStatus == UpnpDiagStatus.ErrorUnspecified)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
-                }
-                else if (DiagStatus == UpnpDiagStatus.Success)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.SuccessIcon, Context.GetString(Resource.String.upnp_success));
-                }
-                else
-                {
-                    MainActivity.LogFirebase("GetIconAndMessage We should not get here");
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
-                }
-            }
-            else if (RunningStatus == UpnpRunningStatus.AlreadyMapped)
-            {
-                return new Tuple<ListeningIcon, string>(ListeningIcon.SuccessIcon, Context.GetString(Resource.String.upnp_last_success));
-            }
-            else
-            {
-                MainActivity.LogFirebase("GetIconAndMessage We should not get here 2");
-                return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
-            }
-        }
-
-        private void FinishSearchTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            RunningStatus = UpnpRunningStatus.Finished;
-            try
-            {
-                Mono.Nat.NatUtility.StopDiscovery();
-            }
-            catch (Exception ex)
-            {
-                MainActivity.LogFirebase("FinishSearchTimer_Elapsed " + ex.Message + ex.StackTrace);
-            }
-            if (DevicesSuccessfullyMapped > 0)
-            {
-                DiagStatus = UpnpDiagStatus.Success;
-            }
-            else if (DevicesSuccessfullyMapped == 0 && DevicesFound > 0)
-            {
-                DiagStatus = UpnpDiagStatus.UpnpDeviceFoundButFailedToMap;
-            }
-            else if (DevicesSuccessfullyMapped == 0 && DevicesFound == 0)
-            {
-                DiagStatus = UpnpDiagStatus.NoUpnpDevicesFound;
-            }
-            if (Feedback)
-            {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    if (DiagStatus == UpnpDiagStatus.NoUpnpDevicesFound)
-                    {
-                        Toast.MakeText(Context, Context.GetString(Resource.String.no_upnp_devices_found), ToastLength.Short).Show();
-                    }
-                    else if (DiagStatus == UpnpDiagStatus.UpnpDeviceFoundButFailedToMap)
-                    {
-                        Toast.MakeText(Context, Context.GetString(Resource.String.failed_to_set), ToastLength.Short).Show();
-                    }
-                });
-            }
-            Feedback = false;
-            MainActivity.LogDebug("finished " + DiagStatus.ToString());
-
-            SearchFinished?.Invoke(null, new EventArgs());
-            if (DiagStatus == UpnpDiagStatus.Success)
-            {
-                //set up timer to run again...
-                RenewMapping();
-            }
-        }
-
-        public void SearchAndSetMappingIfRequired()
-        {
-            try
-            {
-                if (!SoulSeekState.ListenerEnabled || !SoulSeekState.ListenerUPnpEnabled)
-                {
-                    MainActivity.LogDebug("Upnp is off...");
-                    SearchFinished?.Invoke(null, new EventArgs());
-                    Feedback = false;
-                    return;
-                }
-                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SoulSeekState.ListenerPort && IsLocalIPsame())
-                {
-                    MainActivity.LogDebug("Renew Mapping Later... we already have a good one..");
-                    RunningStatus = UpnpRunningStatus.AlreadyMapped;
-                    SearchFinished?.Invoke(null, new EventArgs());
-                    Feedback = false;
-                    RenewMapping();
-                }
-                else
-                {
-                    MainActivity.LogDebug("search and set mapping...");
-                    SearchAndSetMapping();
-                }
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("SearchAndSetMappingIfRequired" + e.Message + e.StackTrace);
-                Feedback = false;
-            }
-        }
-
-
-        public static System.Timers.Timer RenewMappingTimer = null;
-        public void RenewMapping() //if new port
-        {
-            MainActivity.LogDebug("renewing mapping");
-            try
-            {
-                if (LastSetLifeTime != -1 && LastSetPort != -1 && LastSetTime != DateTime.MinValue)
-                {
-                    if (RenewMappingTimer == null)
-                    {
-                        RenewMappingTimer = new System.Timers.Timer();
-                        RenewMappingTimer.AutoReset = false;//since this function will get called again anyway.
-                        RenewMappingTimer.Elapsed += RenewMappingTimer_Elapsed;
-                    }
-                    RenewMappingTimer.Interval = Math.Max(LastSetLifeTime * 1000 / 2, 3600 * 1000 * 2); //at least two hours (for now).  divided by 2!
-                    RenewMappingTimer.Start();
-                }
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("RenewMapping" + e.Message + e.StackTrace);
-            }
-        }
-
-        private void RenewMappingTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            MainActivity.LogDebug("renew timer elapsed");
-            SearchAndSetMapping();
-        }
-
-        public bool IsLocalIPsame()
-        {
-            try
-            {
-                WifiManager wm = (WifiManager)Context.GetSystemService(Context.WifiService);
-                if (wm.WifiState == Android.Net.WifiState.Disabled) //if just mobile is on and wifi is off.
-                {
-                    return false;
-                }
-                return Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress) == LastSetLocalIP;
-            }
-            catch (Exception ex)
-            {
-                MainActivity.LogFirebase("IsLocalIPsame exception " + ex.Message + ex.StackTrace);
-                return false;
-            }
-        }
-
-        public void SearchAndSetMapping()
-        {
-            try
-            {
-                if (!SoulSeekState.ListenerEnabled || !SoulSeekState.ListenerUPnpEnabled)
-                {
-                    DiagStatus = UpnpDiagStatus.UpnpDisabled;
-                    RunningStatus = UpnpRunningStatus.Finished;
-                    SearchFinished?.Invoke(null, new EventArgs());
-                    return;
-                }
-                if (Context == null)
-                {
-                    DiagStatus = UpnpDiagStatus.ErrorUnspecified;
-                    RunningStatus = UpnpRunningStatus.Finished;
-                    throw new Exception("SearchAndSetMapping Context is null");
-                }
-                WifiManager wm = (WifiManager)Context.GetSystemService(Context.WifiService);
-                if (wm.WifiState == Android.Net.WifiState.Disabled) //if just mobile is on and wifi is off.
-                {
-                    //wifi is disabled.
-                    DiagStatus = UpnpDiagStatus.WifiDisabled;
-                    RunningStatus = UpnpRunningStatus.Finished;
-                    SearchFinished?.Invoke(null, new EventArgs());
-                    return;
-                }
-                if (wm.ConnectionInfo.SupplicantState == SupplicantState.Disconnected || wm.ConnectionInfo.IpAddress == 0)
-                {
-                    //wifi is disabled.
-                    DiagStatus = UpnpDiagStatus.NoWifiConnection;
-                    RunningStatus = UpnpRunningStatus.Finished;
-                    SearchFinished?.Invoke(null, new EventArgs());
-                    return;
-                }
-                LocalIP = Mono.Nat.NatUtility.LocalIpAddress = Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress);
-                //string gatewayAddress = Android.Text.Format.Formatter.FormatIpAddress(wm.DhcpInfo.Gateway);
-                MainActivity.LogDebug(LocalIP);
-
-                DevicesFound = 0;
-                DevicesSuccessfullyMapped = 0;
-                RunningStatus = UpnpRunningStatus.CurrentlyRunning;
-                SearchStarted?.Invoke(null, new EventArgs());
-                if (Feedback)
-                {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.attempting_to_find_and_open), ToastLength.Short).Show();
-                }
-
-                CancelSearchAfterTime();
-                Mono.Nat.NatUtility.StartDiscovery(new Mono.Nat.NatProtocol[] { Mono.Nat.NatProtocol.Upnp });
-
-            }
-            catch (Exception e)
-            {
-                DiagStatus = UpnpDiagStatus.ErrorUnspecified;
-                MainActivity.LogFirebase("SearchAndSetMapping: " + e.Message + e.StackTrace);
-                SearchFinished?.Invoke(null, new EventArgs());
-            }
-        }
-
-        public UPnpManager()
-        {
-            Mono.Nat.NatUtility.UnknownDeviceFound += NatUtility_UnknownDeviceFound;
-            Mono.Nat.NatUtility.DeviceFound += NatUtility_DeviceFound;
-        }
-
-        private void NatUtility_DeviceFound(object sender, Mono.Nat.DeviceEventArgs e)
-        {
-            try
-            {
-                MainActivity.LogDebug("Device Found");
-                Interlocked.Increment(ref DevicesFound); //not sure if this will ever be greater than one....
-                if (DevicesFound > 1)
-                {
-                    MainActivity.LogFirebase("more than 1 device found");
-                }
-                bool ipOurs = (e.Device as Mono.Nat.Upnp.UpnpNatDevice).LocalAddress.ToString() == Mono.Nat.NatUtility.LocalIpAddress; //I think this will always be true
-                if (ipOurs)
-                {
-                    int oneWeek = 60 * 60 * 24 * 7; // == 604800.  on my home router I request 1 week, I get back 604800 in the mapping. but then on getting it again its 22 hours (which is probably the real time)
-                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort, SoulSeekState.ListenerPort, oneWeek, "Android Seeker"));
-                    try
-                    {
-                        bool timeOutCreateMapping = !(t.Wait(5000));
-                        if (timeOutCreateMapping)
-                        {
-                            MainActivity.LogFirebase("CreatePortMapAsync timeout");
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //the task can throw (in which case the task.Wait throws)
-
-                        if (ex.InnerException is Mono.Nat.MappingException && ex.InnerException.Message != null && ex.InnerException.Message.Contains("Error 725: OnlyPermanentLeasesSupported")) //happened on my tablet... connected to my other 192.168.1.1 router
-                        {
-                            System.Threading.Tasks.Task<Mono.Nat.Mapping> t0 = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort, SoulSeekState.ListenerPort, 0, "Android Seeker"));
-                            try
-                            {
-                                bool timeOutCreateMapping0lease = !(t0.Wait(5000));
-                                if (timeOutCreateMapping0lease)
-                                {
-                                    MainActivity.LogFirebase("CreatePortMapAsync timeout try with 0 lease");
-                                    return;
-                                }
-                                t = t0; // use this good task instead. bc t.Result is gonna throw heh
-                            }
-                            catch (Exception ex0)
-                            {
-                                MainActivity.LogFirebase("CreatePortMapAsync try with 0 lease " + ex0.Message + ex0.StackTrace);
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            //common errors are:
-                            //Error ConflictInMappingEntry: ConflictInMappingEntry
-                            //Error 403: Not Available Action
-                            //Unexpected error sending a message to the device
-                            //Error 714: NoSuchEntryInArray
-                            //Error ActionFailed: Action Failed
-                            //InvalidArgs
-
-                            MainActivity.LogDebug("CreatePortMapAsync " + ex.Message + ex.StackTrace);
-                            return;
-                        }
-                    }
-                    Mono.Nat.Mapping mapping = t.Result;
-                    int seconds = mapping.Lifetime;
-                    int privatePort = mapping.PrivatePort;
-                    int publicPort = mapping.PublicPort;
-
-                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t2 = e.Device.GetSpecificMappingAsync(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort);
-                    try
-                    {
-                        bool timeOutGetMapping = !(t2.Wait(5000));
-                        if (timeOutGetMapping)
-                        {
-                            MainActivity.LogFirebase("GetSpecificMappingAsync timeout");
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //the task can throw (in which case the task.Wait throws)
-                        MainActivity.LogFirebase("GetSpecificMappingAsync " + ex.Message + ex.StackTrace);
-                        return;
-                    }
-                    Mono.Nat.Mapping actualMapping = t2.Result;
-
-                    //set lifetime and last set.
-                    LastSetTime = DateTime.UtcNow;
-                    LastSetLifeTime = actualMapping.Lifetime; //TODO: if two devices found get the min...
-
-                    //since we use the lifetime value to make decisions and schedule remapping we need to deal with very low values or 0.
-                    //0 means indeterminate, but still may want to remap occasionally...
-                    if (LastSetLifeTime == 0)
-                    {
-                        LastSetLifeTime = 4 * 3600;
-                    }
-                    else if (LastSetLifeTime < 2 * 3600)
-                    {
-                        MainActivity.LogFirebase("less than 2 hours: " + LastSetLifeTime); //20 mins
-                        LastSetLifeTime = 2 * 3600;
-                    }
-
-                    LastSetLocalIP = LocalIP;
-                    LastSetPort = actualMapping.PublicPort;
-                    SaveUpnpState();
-
-                    Interlocked.Increment(ref DevicesSuccessfullyMapped);
-                    MainActivity.LogDebug("successfully mapped");
-                    DiagStatus = UpnpDiagStatus.Success;
-                    DeviceSuccessfullyMapped?.Invoke(null, new EventArgs());
-                }
-                else
-                {
-                    MainActivity.LogFirebase("ip is not ours");
-                }
-            }
-            catch (Exception ex)
-            {
-                MainActivity.LogFirebase("NatUtility_DeviceFound " + ex.Message + ex.StackTrace);
-            }
-            //e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp,3000,3000)).Wait();
-        }
-        private void NatUtility_UnknownDeviceFound(object sender, Mono.Nat.DeviceEventUnknownArgs e)
-        {
-            System.Console.WriteLine(e.Data);
-            //nothing to do here...
-        }
-    }
-
-    // TODOORG Models
-    public interface ITransferItem
-    {
-        public string GetDisplayName();
-        public string GetFolderName();
-        public string GetUsername();
-        public TimeSpan? GetRemainingTime();
-        public double GetAvgSpeed();
-        public int GetQueueLength();
-        public bool IsUpload();
-    }
-
-    // TODOORG Models
-    [Serializable]
-    public class FolderItem : ITransferItem
-    {
-        public bool IsUpload()
-        {
-            if (TransferItems.Count == 0)
-            {
-                return false; //usually this is if we are in the process of clearing the folder....
-            }
-            return TransferItems[0].IsUpload();
-        }
-
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public TimeSpan? RemainingFolderTime; //this should never be serialized
-
-        public TimeSpan? GetRemainingTime()
-        {
-            return RemainingFolderTime;
-        }
-
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public double AvgSpeed; //this could one day be serialized if you want say speed history (like QT does)
-
-        public double GetAvgSpeed()
-        {
-            return AvgSpeed;
-        }
-
-        public string GetDisplayName()
-        {
-            return FolderName;
-        }
-
-        public string GetFolderName()
-        {
-            return FolderName;
-        }
-
-        public string GetUsername()
-        {
-            return Username;
-        }
-
-        public string GetDisplayFolderName()
-        {
-            //this is similar to QT (in the case of Seeker multiple subdirectories)
-            //but not quite.
-            //QT will show subdirs/complete/Soulseek Downloads/Music/H: (where everything after subdirs is your download folder)
-            //whereas we just show subdirs
-            //subdirs is folder name in both cases for single folder, 
-            // and say (01 / 2020 / test_folder) for nested.
-            if (GetDirectoryLevel() == 1)
-            {
-                //they are the same
-                return FolderName;
-            }
-            else
-            {
-                //split reverse.
-                var reversedArray = this.FolderName.Split('\\').Reverse();
-                return string.Join('\\', reversedArray);
-            }
-        }
-
-        public int GetDirectoryLevel()
-        {
-            //just parent folder = level 1 (search result and browse single dir case)
-            //grandparent = level 2 (browse download subdirs case - i.e. Album, Album > covers)
-            //etc.
-            if (this.FolderName == null || !this.FolderName.Contains('\\'))
-            {
-                return 1;
-            }
-            return this.FolderName.Split('\\').Count();
-        }
-
-        /// <summary>
-        /// int - percent.
-        /// </summary>
-        /// <returns></returns>
-        public int GetFolderProgress(out long totalBytes, out long bytesCompleted)
-        {
-            lock (TransferItems)
-            {
-                long folderBytesComplete = 0;
-                long totalFolderBytes = 0;
-                foreach (TransferItem ti in TransferItems)
-                {
-                    folderBytesComplete += (long)((ti.Progress / 100.0) * ti.Size);
-                    totalFolderBytes += ti.Size;
-                }
-                totalBytes = totalFolderBytes;
-                bytesCompleted = folderBytesComplete;
-                //error "System.OverflowException: Value was either too large or too small for an Int32." can occur for example when totalFolderBytes is 0
-                if (totalFolderBytes == 0)
-                {
-                    MainActivity.LogInfoFirebase("total folder bytes == 0");
-                    return 100;
-                }
-                else
-                {
-                    return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get the overall queue of the folder (the lowest queued track)
-        /// </summary>
-        /// <returns></returns>
-        public int GetQueueLength()
-        {
-            lock (TransferItems)
-            {
-                int queueLen = int.MaxValue;
-                foreach (TransferItem ti in TransferItems)
-                {
-                    if (ti.State == TransferStates.Queued)
-                    {
-                        queueLen = Math.Min(ti.QueueLength, queueLen);
-                    }
-                }
-                return queueLen;
-            }
-        }
-
-        public TransferItem GetLowestQueuedTransferItem()
-        {
-            lock (TransferItems)
-            {
-                int queueLen = int.MaxValue;
-                TransferItem curLowest = null;
-                foreach (TransferItem ti in TransferItems)
-                {
-                    if (ti.State == TransferStates.Queued)
-                    {
-                        queueLen = Math.Min(ti.QueueLength, queueLen);
-                        if (queueLen == ti.QueueLength)
-                        {
-                            curLowest = ti;
-                        }
-                    }
-                }
-                return curLowest;
-            }
-        }
-
-
-        /// <summary>
-        /// Get the overall state of the folder.
-        /// </summary>
-        /// <returns></returns>
-        public TransferStates GetState(out bool isFailed, out bool anyOffline)
-        {
-            //top priority - In Progress
-            //if ANY are InProgress then this is considered in progress
-            //if not then if ANY initialized.
-            //if not then if ANY queued its considered queued.  And the queue number is that of the lowest transfer.
-            //if not then if ANY failed its considered failed
-            //if not then its cancelled (i.e. paused)
-            //if not then its Succeeded.
-
-            isFailed = false;
-            anyOffline = false;
-            //if not then none...
-            lock (TransferItems)
-            {
-                TransferStates folderState = TransferStates.None;
-                foreach (TransferItem ti in TransferItems)
-                {
-                    TransferStates state = ti.State;
-                    if (state == TransferStates.InProgress)
-                    {
-                        isFailed = false;
-                        return TransferStates.InProgress;
-                    }
-                    else
-                    {
-                        if (ti.Failed)
-                        {
-                            isFailed = true;
-                            if (ti.State.HasFlag(TransferStates.UserOffline))
-                            {
-                                anyOffline = true;
-                            }
-                        }
-                        //do priority
-                        if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested) || state.HasFlag(TransferStates.Aborted))
-                        {
-                            folderState = state;
-                        }
-                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
-                        {
-                            folderState = state;
-                        }
-                        else if ((state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut)) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
-                        {
-                            folderState = state;
-                        }
-                        else if (state.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
-                        {
-                            folderState = state;
-                        }
-                        else if (state.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Rejected) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Cancelled) && !folderState.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
-                        {
-                            folderState = state;
-                        }
-                    }
-                }
-                return folderState;
-            }
-        }
-
-        public string FolderName; //this is always ex "Album Name" or for depth > 1 "GrandParent/Parent".  Display Folder name is reversed.
-        public string Username;
-        public List<TransferItem> TransferItems;
-
-        public FolderItem(string folderName, string username, TransferItem initialTransferItem)
-        {
-            TransferItems = new List<TransferItem>();
-            Add(initialTransferItem);
-            if (folderName == null)
-            {
-                folderName = Utils.GetFolderNameFromFile(initialTransferItem.FullFilename);
-            }
-            FolderName = folderName;
-            Username = username;
-        }
-
-        /// <summary>
-        /// default public constructor for serialization.
-        /// </summary>
-        public FolderItem()
-        {
-            TransferItems = new List<TransferItem>();
-        }
-
-        public void ClearAllComplete()
-        {
-            lock (TransferItems)
-            {
-                TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99; });
-                if (IsUpload())
-                {
-                    TransferItems.RemoveAll((TransferItem i) => { return Utils.IsUploadCompleteOrAborted(i.State); });
-                }
-            }
-        }
-
-        public bool HasTransferItem(TransferItem ti)
-        {
-            lock (TransferItems)
-            {
-                return TransferItems.Contains(ti);
-            }
-        }
-
-        public bool IsEmpty()
-        {
-            return TransferItems.Count == 0;
-        }
-
-        public void Remove(TransferItem ti)
-        {
-            lock (TransferItems)
-            {
-                TransferItems.Remove(ti);
-            }
-        }
-
-
-        public void Add(TransferItem ti)
-        {
-            lock (TransferItems)
-            {
-                TransferItems.Add(ti);
-            }
-        }
-    }
-
-    // TODOORG Managers
-    /// <summary>
-    /// for both uploads and downloads
-    /// </summary>
-    public class TransferItemManagerWrapper
-    {
-        private TransferItemManager Uploads;
-        private TransferItemManager Downloads;
-        public TransferItemManagerWrapper(TransferItemManager up, TransferItemManager down)
-        {
-            Uploads = up;
-            Downloads = down;
-        }
-
-        public static void CleanupEntry(IEnumerable<TransferItem> tis)
-        {
-            MainActivity.LogDebug("launching cleanup entry");
-            System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, tis);
-        }
-
-        public static void CleanupEntry(TransferItem ti)
-        {
-            MainActivity.LogDebug("launching cleanup entry");
-            System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, ti);
-        }
-
-        static void PeformCleanup(object state)
-        {
-            try
-            {
-                MainActivity.LogDebug("in cleanup entry");
-                if (state is IEnumerable<TransferItem> tis)
-                {
-                    PerfomCleanupItems(tis.ToList()); //added tolist() due to enumerable exception.
-                }
-                else
-                {
-                    PerformCleanupItem(state as TransferItem);
-                }
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("PeformCleanup: " + e.Message + e.StackTrace);
-            }
-        }
-
-        public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                return Uploads.GetTransferItemsForUser(username);
-            }
-            else
-            {
-                return Downloads.GetTransferItemsForUser(username);
-            }
-        }
-
-        public void CancelSelectedItems(bool prepareForClean)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                Uploads.CancelSelectedItems(prepareForClean);
-            }
-            else
-            {
-                Downloads.CancelSelectedItems(prepareForClean);
-            }
-        }
-
-        public void ClearSelectedItemsAndClean()
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                Uploads.ClearSelectedItemsAndClean();
-            }
-            else
-            {
-                Downloads.ClearSelectedItemsAndClean();
-            }
-        }
-
-        public static void PerfomCleanupItems(IEnumerable<TransferItem> tis)
-        {
-            foreach (TransferItem ti in tis)
-            {
-                PerformCleanupItem(ti);
-            }
-        }
-
-        public static void PerformCleanupItem(TransferItem ti)
-        {
-            MainActivity.LogDebug("cleaning up: " + ti.Filename);
-            //if (TransfersFragment.TransferItemManagerDL.ExistsAndInProcessing(ti.FullFilename, ti.Username, ti.Size))
-            //{
-            //    //this should rarely happen. its a race condition if someone clears a download and then goes back to the person they downloaded from to re-download.
-            //    return;
-            //}
-            //api 21+
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-            {
-                DocumentFile parent = null;
-                Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);
-                if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentIncompleteUri.Scheme == "file")
-                {
-                    parent = DocumentFile.FromFile(new Java.IO.File(parentIncompleteUri.Path));
-                }
-                else
-                {
-                    parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentIncompleteUri); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
-                }
-
-                DocumentFile df = parent.FindFile(ti.Filename);
-                if (df == null || !df.Exists())
-                {
-                    MainActivity.LogDebug("delete failed - null or not exist");
-                    MainActivity.LogInfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SoulSeekState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
-                }
-                if (!df.Delete()) //nullref
-                {
-                    MainActivity.LogDebug("delete failed");
-                }
-                MainActivity.DeleteParentIfEmpty(parent);
-            }
-            else
-            {
-                Java.IO.File parent = new Java.IO.File(Android.Net.Uri.Parse(ti.IncompleteParentUri).Path);
-                Java.IO.File f = parent.ListFiles().First((file) => file.Name == ti.Filename);
-                if (f == null || !f.Exists())
-                {
-                    MainActivity.LogDebug("delete failed LEGACY - null or not exist");
-                }
-                if (!f.Delete())
-                {
-                    MainActivity.LogDebug("delete failed LEGACY");
-                }
-                MainActivity.DeleteParentIfEmpty(parent);
-            }
-        }
-
-
-        /// <summary>
-        /// remove and spawn cleanup task if applicable
-        /// </summary>
-        /// <param name="ti"></param>
-        public void RemoveAndCleanUp(TransferItem ti)
-        {
-            Remove(ti);
-            if (NeedsCleanUp(ti))
-            {
-                CleanupEntry(ti);
-            }
-        }
-
-        public static bool NeedsCleanUp(TransferItem ti)
-        {
-            if (ti != null && ti.IncompleteParentUri != null && !ti.CancelAndClearFlag) //if cancel and clear flag is set then it will be cleaned up on continuation. that way we are sure the stream is closed.
-            {
-                return true;
-            }
-            return false;
-        }
-
-
-        public void Remove(TransferItem ti)
-        {
-            if (ti.IsUpload())
-            {
-                Uploads.Remove(ti);
-            }
-            else
-            {
-                Downloads.Remove(ti);
-            }
-        }
-
-        public object GetUICurrentList()
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                return Uploads.GetUICurrentList();
-            }
-            else
-            {
-                return Downloads.GetUICurrentList();
-            }
-        }
-
-        public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, bool isUpload, out int indexOfItem)
-        {
-            if (isUpload)
-            {
-                return Uploads.GetTransferItemWithIndexFromAll(fullFileName, username, out indexOfItem);
-            }
-            else
-            {
-                return Downloads.GetTransferItemWithIndexFromAll(fullFileName, username, out indexOfItem);
-            }
-        }
-
-        public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
-        {
-            if (TransfersFragment.InUploadsMode && ti.IsUpload())
-            {
-                return Uploads.GetUserIndexForTransferItem(ti);
-            }
-            else if (!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
-            {
-                return Downloads.GetUserIndexForTransferItem(ti);
-            }
-            else
-            {
-                return -1; //this is okay. we arent on that page so ui events are irrelevant
-            }
-        }
-
-        public ITransferItem GetItemAtUserIndex(int position)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                return Uploads.GetItemAtUserIndex(position);
-            }
-            else
-            {
-                return Downloads.GetItemAtUserIndex(position);
-            }
-        }
-
-        public object RemoveAtUserIndex(int position)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                return Uploads.RemoveAtUserIndex(position);
-            }
-            else
-            {
-                return Downloads.RemoveAtUserIndex(position);
-            }
-        }
-
-        /// <summary>
-        /// remove and spawn cleanup task if applicable
-        /// </summary>
-        /// <param name="position"></param>
-        public void RemoveAndCleanUpAtUserIndex(int position)
-        {
-            object objectRemoved = RemoveAtUserIndex(position);
-            if (objectRemoved is TransferItem ti)
-            {
-                if (ti.InProcessing)
-                {
-                    ti.CancelAndClearFlag = true;
-                }
-                else
-                {
-                    if (NeedsCleanUp(ti))
-                    {
-                        CleanupEntry(ti);
-                    }
-                }
-            }
-            else
-            {
-                List<TransferItem> tis = objectRemoved as List<TransferItem>;
-                IEnumerable<TransferItem> tisCleanUpOnComplete = tis.Where((item) => { return item.InProcessing; });
-                foreach (var item in tisCleanUpOnComplete)
-                {
-                    item.CancelAndClearFlag = true;
-                }
-                IEnumerable<TransferItem> tisNeedingCleanup = tis.Where((item) => { return NeedsCleanUp(item); });
-                if (tisNeedingCleanup.Any())
-                {
-                    CleanupEntry(tisNeedingCleanup);
-                }
-
-            }
-        }
-
-        public void CancelFolder(FolderItem fi)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                Uploads.CancelFolder(fi);
-            }
-            else
-            {
-                Downloads.CancelFolder(fi);
-            }
-        }
-
-        /// <summary>
-        /// prepare for clear basically says, these guys are going to be cleared, so if they are currently being processed and they get in the download continuation action, clear their incomplete files...
-        /// </summary>
-        /// <param name="fi"></param>
-        /// <param name="prepareForClear"></param>
-        public void CancelFolder(FolderItem fi, bool prepareForClear = false)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                Uploads.CancelFolder(fi);
-            }
-            else
-            {
-                Downloads.CancelFolder(fi, prepareForClear);
-            }
-        }
-
-        public void ClearAllFromFolder(FolderItem fi)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                Uploads.ClearAllFromFolder(fi);
-            }
-            else
-            {
-                Downloads.ClearAllFromFolder(fi);
-            }
-        }
-
-        public void ClearAllFromFolderAndClean(FolderItem fi)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                Uploads.ClearAllFromFolder(fi);
-            }
-            else
-            {
-                Downloads.ClearAllFromFolderAndClean(fi);
-            }
-        }
-
-        public int GetIndexForFolderItem(FolderItem folderItem)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                return Uploads.GetIndexForFolderItem(folderItem);
-            }
-            else
-            {
-                return Downloads.GetIndexForFolderItem(folderItem);
-            }
-        }
-
-        public int GetUserIndexForITransferItem(ITransferItem iti)
-        {
-            if (TransfersFragment.InUploadsMode)
-            {
-                return Uploads.GetUserIndexForITransferItem(iti);
-            }
-            else
-            {
-                return Downloads.GetUserIndexForITransferItem(iti);
-            }
-        }
-    }
-
-    // TODOORG Managers
-    [Serializable]
-    public class TransferItemManager
-    {
-        private bool isUploads;
-        /// <summary>
-        /// Do not use directly.  This is public only for default serialization.
-        /// </summary>
-        public List<TransferItem> AllTransferItems;
-
-        /// <summary>
-        /// Do not use directly.  This is public only for default serialization.
-        /// </summary>
-        public List<FolderItem> AllFolderItems;
-
-        public TransferItemManager()
-        {
-            AllTransferItems = new List<TransferItem>();
-            AllFolderItems = new List<FolderItem>();
-        }
-
-        public TransferItemManager(bool _isUploads)
-        {
-            isUploads = _isUploads;
-            AllTransferItems = new List<TransferItem>();
-            AllFolderItems = new List<FolderItem>();
-        }
-
-        public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
-        {
-            lock (AllTransferItems)
-            {
-                return AllTransferItems.Where((item) => item.Username == username).ToList();
-            }
-        }
-
-        /// <summary>
-        /// transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
-        /// add users where failure occured due to them being offline to dict so we can efficiently check it in response
-        /// to status changed events AND we can AddUser to get their status updates.
-        /// </summary>
-        public void OnRelaunch()
-        {
-            lock (AllTransferItems)
-            {
-                foreach (var ti in AllTransferItems)
-                {
-                    if (ti.State.HasFlag(TransferStates.InProgress))
-                    {
-                        ti.State = TransferStates.Cancelled;
-                        ti.RemainingTime = null;
-                    }
-
-                    if (ti.State.HasFlag(TransferStates.Aborted))
-                    {
-                        ti.State = TransferStates.Cancelled;
-                        ti.RemainingTime = null;
-                    }
-
-                    if (ti.State.HasFlag(TransferStates.UserOffline))
-                    {
-                        TransfersFragment.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
-                    }
-                }
-            }
-        }
-
-        public List<Tuple<TransferItem, int>> GetListOfPausedFromFolder(FolderItem fi)
-        {
-            List<Tuple<TransferItem, int>> transferItemConditionList = new List<Tuple<TransferItem, int>>();
-            lock (fi.TransferItems)
-            {
-                for (int i = 0; i < fi.TransferItems.Count; i++)
-                {
-                    var item = fi.TransferItems[i];
-
-                    if (item.State.HasFlag(TransferStates.Cancelled) || item.State.HasFlag(TransferStates.Queued))
-                    {
-                        transferItemConditionList.Add(new Tuple<TransferItem, int>(item, i));
-                    }
-
-                }
-            }
-            return transferItemConditionList;
-        }
-
-        public List<Tuple<TransferItem, int, int>> GetListOfPaused()
-        {
-            List<Tuple<TransferItem, int, int>> transferItemConditionList = new List<Tuple<TransferItem, int, int>>();
-            lock (AllTransferItems)
-            {
-                lock (AllFolderItems)
-                {
-                    for (int i = 0; i < AllTransferItems.Count; i++)
-                    {
-                        var item = AllTransferItems[i];
-
-                        if (item.State.HasFlag(TransferStates.Cancelled) || item.State.HasFlag(TransferStates.Queued))
-                        {
-                            int folderIndex = -1;
-                            for (int fi = 0; fi < AllFolderItems.Count; fi++)
-                            {
-                                if (AllFolderItems[fi].HasTransferItem(item))
-                                {
-                                    folderIndex = fi;
-                                    break;
-                                }
-
-                            }
-                            transferItemConditionList.Add(new Tuple<TransferItem, int, int>(AllTransferItems[i], i, folderIndex));
-                        }
-
-                    }
-                }
-            }
-            return transferItemConditionList;
-        }
-
-        public List<Tuple<TransferItem, int>> GetListOfFailedFromFolder(FolderItem fi)
-        {
-            List<Tuple<TransferItem, int>> transferItemConditionList = new List<Tuple<TransferItem, int>>();
-            lock (fi.TransferItems)
-            {
-                for (int i = 0; i < fi.TransferItems.Count; i++)
-                {
-                    var item = fi.TransferItems[i];
-
-                    if (item.Failed)
-                    {
-                        transferItemConditionList.Add(new Tuple<TransferItem, int>(item, i));
-                    }
-
-                }
-            }
-            return transferItemConditionList;
-        }
-
-        public List<Tuple<TransferItem, int, int>> GetListOfFailed()
-        {
-            List<Tuple<TransferItem, int, int>> transferItemConditionList = new List<Tuple<TransferItem, int, int>>();
-            lock (AllTransferItems)
-            {
-                lock (AllFolderItems)
-                {
-                    for (int i = 0; i < AllTransferItems.Count; i++)
-                    {
-                        var item = AllTransferItems[i];
-
-                        if (item.Failed)
-                        {
-                            int folderIndex = -1;
-                            for (int fi = 0; fi < AllFolderItems.Count; fi++)
-                            {
-                                if (AllFolderItems[fi].HasTransferItem(item))
-                                {
-                                    folderIndex = fi;
-                                    break;
-                                }
-
-                            }
-                            transferItemConditionList.Add(new Tuple<TransferItem, int, int>(AllTransferItems[i], i, folderIndex));
-                        }
-
-                    }
-                }
-            }
-            return transferItemConditionList;
-        }
-
-        public List<TransferItem> GetListOfCondition(TransferStates state)
-        {
-            List<TransferItem> transferItemConditionList = new List<TransferItem>();
-            lock (AllTransferItems)
-            {
-                for (int i = 0; i < AllTransferItems.Count; i++)
-                {
-                    var item = AllTransferItems[i];
-
-                    if (item.State.HasFlag(state))
-                    {
-                        transferItemConditionList.Add(item);
-                    }
-
-                }
-            }
-            return transferItemConditionList;
-        }
-
-        public List<TransferItem> GetTransferItemsFromUser(string username, bool failedOnly, bool failedAndOfflineOnly)
-        {
-            List<TransferItem> transferItemConditionList = new List<TransferItem>();
-            lock (AllTransferItems)
-            {
-                foreach (var item in AllTransferItems)
-                {
-                    if (item.Username == username)
-                    {
-                        if (failedAndOfflineOnly && !item.State.HasFlag(TransferStates.UserOffline))
-                        {
-                            continue;
-                        }
-                        if (failedOnly && !item.Failed)
-                        {
-                            continue;
-                        }
-                        transferItemConditionList.Add(item);
-                    }
-                }
-            }
-            return transferItemConditionList;
-        }
-
-        public object GetUICurrentList()
-        {
-            if (TransfersFragment.GroupByFolder)
-            {
-                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
-                {
-                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems;
-                }
-                else
-                {
-                    return AllFolderItems;
-                }
-            }
-            else
-            {
-                return AllTransferItems;
-            }
-        }
-
-        /// <summary>
-        /// Returns the removed object (either TransferItem or List of TransferItem)
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public object RemoveAtUserIndex(int indexOfItem)
-        {
-            if (TransfersFragment.GroupByFolder)
-            {
-                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
-                {
-                    var ti = TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem];
-                    Remove(ti);
-                    return ti;
-                }
-                else
-                {
-                    List<TransferItem> transferItemsToRemove = new List<TransferItem>();
-                    lock (AllFolderItems[indexOfItem].TransferItems)
-                    {
-                        foreach (var ti in AllFolderItems[indexOfItem].TransferItems)
-                        {
-                            transferItemsToRemove.Add(ti);
-                        }
-                    }
-                    foreach (var ti in transferItemsToRemove)
-                    {
-                        Remove(ti);
-                    }
-                    return transferItemsToRemove;
-                }
-            }
-            else
-            {
-                var ti = AllTransferItems[indexOfItem];
-                Remove(ti);
-                return ti;
-            }
-        }
-
-        public ITransferItem GetItemAtUserIndex(int indexOfItem)
-        {
-            if (TransfersFragment.GroupByFolder)
-            {
-                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
-                {
-                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems[indexOfItem];
-                }
-                else
-                {
-                    return AllFolderItems[indexOfItem];
-                }
-            }
-            else
-            {
-                return AllTransferItems[indexOfItem];
-            }
-        }
-
-        /// <summary>
-        /// The index in the folder, the folder, or the overall index
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public int GetUserIndexForTransferItem(TransferItem ti)
-        {
-            if (TransfersFragment.GroupByFolder)
-            {
-                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
-                {
-                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems.IndexOf(ti);
-                }
-                else
-                {
-                    string foldername = ti.FolderName;
-                    if (foldername == null)
-                    {
-                        foldername = Utils.GetFolderNameFromFile(ti.FullFilename);
-                    }
-                    return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
-                }
-            }
-            else
-            {
-                return AllTransferItems.IndexOf(ti);
-            }
-        }
-
-        public int GetIndexForFolderItem(FolderItem ti)
-        {
-            lock (AllFolderItems)
-            {
-                return AllFolderItems.IndexOf(ti);
-            }
-        }
-
-        public int GetUserIndexForITransferItem(ITransferItem iti)
-        {
-            if (iti is TransferItem ti)
-            {
-                return GetUserIndexForTransferItem(ti);
-            }
-            else if (iti is FolderItem fi)
-            {
-                return GetIndexForFolderItem(fi);
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// The index in the folder, the folder, or the overall index
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public int GetUserIndexForTransferItem(string fullfilename)
-        {
-            if (TransfersFragment.GroupByFolder)
-            {
-                if (TransfersFragment.GetCurrentlySelectedFolder() != null)
-                {
-                    return TransfersFragment.GetCurrentlySelectedFolder().TransferItems.FindIndex((ti) => ti.FullFilename == fullfilename);
-                }
-                else
-                {
-                    TransferItem ti;
-                    lock (AllTransferItems)
-                    {
-                        ti = AllTransferItems.Find((ti) => ti.FullFilename == fullfilename);
-                    }
-                    string foldername = ti.FolderName;
-                    if (foldername == null)
-                    {
-                        foldername = Utils.GetFolderNameFromFile(ti.FullFilename);
-                    }
-                    return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
-                }
-            }
-            else
-            {
-                return AllTransferItems.FindIndex((ti) => ti.FullFilename == fullfilename);
-            }
-        }
-
-
-        //public TransferItem GetTransferItemWithUserIndex(string fullFileName, out int indexOfItem)
-        //{
-        //    if (fullFileName == null)
-        //    {
-        //        indexOfItem = -1;
-        //        return null;
-        //    }
-        //    lock (AllTransferItems)
-        //    {
-        //        foreach (TransferItem item in AllTransferItems)
-        //        {
-        //            if (item.FullFilename.Equals(fullFileName)) //fullfilename includes dir so that takes care of any ambiguity...
-        //            {
-        //                indexOfItem = AllTransferItems.IndexOf(item);
-        //                return item;
-        //            }
-        //        }
-        //    }
-        //    indexOfItem = -1;
-        //    return null;
-        //}
-
-
-        public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, out int indexOfItem)
-        {
-            if (fullFileName == null || username == null)
-            {
-                indexOfItem = -1;
-                return null;
-            }
-            lock (AllTransferItems)
-            {
-                foreach (TransferItem item in AllTransferItems)
-                {
-                    if (item.FullFilename.Equals(fullFileName) && item.Username.Equals(username)) //fullfilename includes dir so that takes care of any ambiguity...
-                    {
-                        indexOfItem = AllTransferItems.IndexOf(item);
-                        return item;
-                    }
-                }
-            }
-            indexOfItem = -1;
-            return null;
-        }
-
-        public bool Exists(string fullFilename, string username, long size)
-        {
-            lock (AllTransferItems)
-            {
-                return AllTransferItems.Exists((TransferItem ti) =>
-                {
-                    return (ti.FullFilename == fullFilename &&
-                           ti.Size == size &&
-                           ti.Username == username
-                       );
-                });
-            }
-        }
-
-        public bool ExistsAndInProcessing(string fullFilename, string username, long size)
-        {
-            lock (AllTransferItems)
-            {
-                return AllTransferItems.Where((TransferItem ti) =>
-                {
-                    return (ti.FullFilename == fullFilename &&
-                           ti.Size == size &&
-                           ti.Username == username
-                       );
-                }).Any((item) => item.InProcessing);
-            }
-        }
-
-        public bool IsEmpty()
-        {
-            return AllTransferItems.Count == 0;
-        }
-
-        public TransferItem GetTransferItem(string fullfilename)
-        {
-            lock (AllTransferItems)
-            {
-                foreach (TransferItem item in AllTransferItems) //THIS is where those enumeration exceptions are all coming from...
-                {
-                    if (item.FullFilename.Equals(fullfilename))
-                    {
-                        return item;
-                    }
-                }
-            }
-            return null;
-        }
-
-        public bool IsFolderNowComplete(TransferItem ti, bool noSingleItemFolders = false) //!!!!! no single item logic will not work with AutoClearComplete
-        {
-            if (ti == null)
-            {
-                MainActivity.LogDebug("IsFolderNowComplete: transferitem is null");
-                return false;
-            }
-            else
-            {
-                FolderItem folder = null;
-                lock (AllFolderItems)
-                {
-                    folder = GetMatchingFolder(ti).FirstOrDefault();
-                }
-                if (folder == null)
-                {
-                    MainActivity.LogDebug("IsFolderNowComplete: folder is null");
-                    return false;
-                }
-                lock (folder.TransferItems)
-                {
-                    foreach (TransferItem item in folder.TransferItems)
-                    {
-                        if (!item.State.HasFlag(TransferStates.Succeeded))
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-
-        private IEnumerable<FolderItem> GetMatchingFolder(TransferItem ti)
-        {
-            lock (AllFolderItems)
-            {
-                string foldername = string.Empty;
-                if (string.IsNullOrEmpty(ti.FolderName))
-                {
-                    foldername = Utils.GetFolderNameFromFile(ti.FullFilename);
-                }
-                else
-                {
-                    foldername = ti.FolderName;
-                }
-                return AllFolderItems.Where((folder) => folder.FolderName == foldername && folder.Username == ti.Username);
-            }
-        }
-
-        private int GetMatchingFolderIndex(TransferItem ti)
-        {
-            lock (AllFolderItems)
-            {
-                for (int i = 0; i < AllFolderItems.Count; i++)
-                {
-                    if (AllFolderItems[i].HasTransferItem(ti))
-                    {
-                        return i;
-                    }
-                }
-            }
-            return -1;
-        }
-
-        /// <summary>
-        /// This way we will have the right reference
-        /// </summary>
-        /// <param name="ti"></param>
-        /// <returns></returns>
-        public TransferItem AddIfNotExistAndReturnTransfer(TransferItem ti, out bool exists)
-        {
-            lock (AllTransferItems)
-            {
-                var linq = AllTransferItems.Where((existingTi) => { return existingTi.Username == ti.Username && existingTi.FullFilename == ti.FullFilename; });
-                if (linq.Count() > 0)
-                {
-                    exists = true;
-                    return linq.First();
-                }
-                else
-                {
-                    Add(ti);
-                    exists = false;
-                    return ti;
-                }
-            }
-        }
-
-        public void Add(TransferItem ti)
-        {
-            lock (AllTransferItems)
-            {
-                AllTransferItems.Add(ti);
-            }
-            lock (AllFolderItems)
-            {
-                var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder.Count() == 0)
-                {
-                    AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
-                }
-                else
-                {
-                    var folderItem = matchingFolder.First();
-                    folderItem.Add(ti);
-                }
-            }
-        }
-
-        public void ClearAllComplete()
-        {
-            lock (AllTransferItems)
-            {
-                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
-                if (isUploads)
-                {
-                    AllTransferItems.RemoveAll((TransferItem i) => { return Utils.IsUploadCompleteOrAborted(i.State); });
-                }
-            }
-            lock (AllFolderItems)
-            {
-                foreach (FolderItem f in AllFolderItems)
-                {
-                    f.ClearAllComplete();
-                }
-                AllFolderItems.RemoveAll((FolderItem f) => { return f.IsEmpty(); });
-            }
-        }
-
-        public void ClearAllCompleteFromFolder(FolderItem fi)
-        {
-            lock (AllTransferItems)
-            {
-                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99 && fi.Username == i.Username && GetFolderNameFromTransferItem(i) == fi.FolderName; });
-            }
-            fi.ClearAllComplete();
-            if (fi.IsEmpty())
-            {
-                AllFolderItems.Remove(fi);
-            }
-        }
-
-        private static string GetFolderNameFromTransferItem(TransferItem ti)
-        {
-            if (string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
-            {
-                return Utils.GetFolderNameFromFile(ti.FullFilename);
-            }
-            else
-            {
-                return ti.FolderName;
-            }
-        }
-
-        public void ClearAllAndClean()
-        {
-            lock (AllTransferItems)
-            {
-                List<TransferItem> tisNeedingCleanup = AllTransferItems.Where((item) => { return TransferItemManagerWrapper.NeedsCleanUp(item); }).ToList();
-                if (tisNeedingCleanup.Any())
-                {
-                    TransferItemManagerWrapper.CleanupEntry(tisNeedingCleanup);
-                }
-                AllTransferItems.Clear();
-            }
-            lock (AllFolderItems)
-            {
-                AllFolderItems.Clear();
-            }
-        }
-
-        public void ClearSelectedItemsAndClean()
-        {
-            lock (AllTransferItems)
-            {
-                bool isFolderItems = false;
-                if (TransfersFragment.GroupByFolder && TransfersFragment.GetCurrentlySelectedFolder() == null)
-                {
-                    isFolderItems = true;
-                }
-
-
-                if (isFolderItems)
-                {
-                    List<FolderItem> toClear = new List<FolderItem>();
-                    foreach (int pos in TransfersFragment.BatchSelectedItems)
-                    {
-                        toClear.Add(GetItemAtUserIndex(pos) as FolderItem);
-                    }
-                    foreach (FolderItem item in toClear)
-                    {
-                        ClearAllFromFolderAndClean(item);
-                    }
-
-                }
-                else
-                {
-                    List<TransferItem> toCleanUp = new List<TransferItem>();
-                    List<TransferItem> toClear = new List<TransferItem>();
-                    TransfersFragment.BatchSelectedItems.Sort();
-                    TransfersFragment.BatchSelectedItems.Reverse();
-                    foreach (int pos in TransfersFragment.BatchSelectedItems)
-                    {
-                        if (TransferItemManagerWrapper.NeedsCleanUp(GetItemAtUserIndex(pos) as TransferItem))
-                        {
-                            toCleanUp.Add(GetItemAtUserIndex(pos) as TransferItem);
-                        }
-                        this.RemoveAtUserIndex(pos);
-                    }
-                }
-            }
-        }
-
-        public void ClearAll()
-        {
-            lock (AllTransferItems)
-            {
-                AllTransferItems.Clear();
-            }
-            lock (AllFolderItems)
-            {
-                AllFolderItems.Clear();
-            }
-        }
-
-        public void ClearAllFromFolder(FolderItem fi)
-        {
-            lock (AllTransferItems)
-            {
-                foreach (TransferItem ti in fi.TransferItems)
-                {
-                    AllTransferItems.Remove(ti);
-                }
-            }
-            fi.TransferItems.Clear();
-            AllFolderItems.Remove(fi);
-        }
-
-        public void ClearAllFromFolderAndClean(FolderItem fi)
-        {
-            IEnumerable<TransferItem> tisNeedingCleanup = fi.TransferItems.Where((item) => { return TransferItemManagerWrapper.NeedsCleanUp(item); });
-            if (tisNeedingCleanup.Any())
-            {
-                TransferItemManagerWrapper.CleanupEntry(tisNeedingCleanup);
-            }
-            lock (AllTransferItems)
-            {
-                foreach (TransferItem ti in fi.TransferItems)
-                {
-                    AllTransferItems.Remove(ti);
-                }
-            }
-            fi.TransferItems.Clear();
-            AllFolderItems.Remove(fi);
-        }
-
-        public void CancelAll(bool prepareForClear = false)
-        {
-            lock (AllTransferItems)
-            {
-                for (int i = 0; i < AllTransferItems.Count; i++)
-                {
-                    //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-                    TransferItem ti = AllTransferItems[i];
-                    if (prepareForClear)
-                    {
-                        if (ti.InProcessing) //let continuation action clear this guy
-                        {
-                            ti.CancelAndClearFlag = true;
-                        }
-                    }
-                    TransfersFragment.CancellationTokens.TryGetValue(TransfersFragment.ProduceCancellationTokenKey(ti), out CancellationTokenSource token);
-                    token?.Cancel();
-                    //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
-                }
-                TransfersFragment.CancellationTokens.Clear();
-            }
-        }
-
-        public void CancelSelectedItems(bool prepareForClear = false)
-        {
-            lock (AllTransferItems)
-            {
-                bool isFolderItems = false;
-                if (TransfersFragment.GroupByFolder && TransfersFragment.GetCurrentlySelectedFolder() == null)
-                {
-                    isFolderItems = true;
-                }
-
-                for (int i = 0; i < TransfersFragment.BatchSelectedItems.Count; i++)
-                {
-                    //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-                    if (isFolderItems)
-                    {
-                        FolderItem fi = this.GetItemAtUserIndex(TransfersFragment.BatchSelectedItems[i]) as FolderItem;
-                        CancelFolder(fi, prepareForClear);
-                    }
-                    else
-                    {
-                        TransferItem ti = this.GetItemAtUserIndex(TransfersFragment.BatchSelectedItems[i]) as TransferItem;
-                        if (prepareForClear)
-                        {
-                            if (ti.InProcessing) //let continuation action clear this guy
-                            {
-                                ti.CancelAndClearFlag = true;
-                            }
-                        }
-                        TransfersFragment.CancellationTokens.TryRemove(TransfersFragment.ProduceCancellationTokenKey(ti), out CancellationTokenSource token);
-                        token?.Cancel();
-                    }
-                    //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
-                }
-            }
-        }
-
-        public void CancelFolder(FolderItem fi, bool prepareForClear = false)
-        {
-            lock (fi.TransferItems)
-            {
-                for (int i = 0; i < fi.TransferItems.Count; i++)
-                {
-                    //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-                    var ti = fi.TransferItems[i];
-                    if (prepareForClear && ti.InProcessing)
-                    {
-                        ti.CancelAndClearFlag = true;
-                    }
-                    var key = TransfersFragment.ProduceCancellationTokenKey(ti);
-                    TransfersFragment.CancellationTokens.TryGetValue(key, out CancellationTokenSource token);
-                    if (token != null)
-                    {
-                        token.Cancel();
-                        TransfersFragment.CancellationTokens.Remove(key, out _);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// If its the folders last transfer then we remove the folder
-        /// </summary>
-        /// <param name="ti"></param>
-        public void Remove(TransferItem ti)
-        {
-            lock (AllTransferItems)
-            {
-                AllTransferItems.Remove(ti);
-            }
-            lock (AllFolderItems)
-            {
-                var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder.Count() == 0)
-                {
-                    //error folder not found...
-                }
-                else
-                {
-                    var folderItem = matchingFolder.First();
-                    folderItem.Remove(ti);
-                    if (folderItem.IsEmpty())
-                    {
-                        AllFolderItems.Remove(folderItem);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// i.e. the folders to NOT delete
-        /// </summary>
-        /// <returns></returns>
-        public List<string> GetInUseIncompleteFolderNames()
-        {
-            List<string> foldersToNotDelete = new List<string>();
-            lock (AllFolderItems)
-            {
-                foreach (FolderItem fi in AllFolderItems)
-                {
-                    foldersToNotDelete.Add(Utils.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
-                }
-            }
-            return foldersToNotDelete;
-        }
-    }
-
-    //TODOORG HELPER
     /// <summary>
     /// When we switch from wifi to data or vice versa, we want to try to continue our downloads and uploads seamlessly.
     /// We try to detect this event (as a netinfo disconnect (from old network) and then netinfo connect (with new network)).
@@ -2800,14 +579,14 @@ namespace AndriodApp1
                         }
                         string lastTerm = SearchTabHelper.SearchTabCollection[id].LastSearchTerm;
 
-                        Utils.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                        CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
                         Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                         notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
-                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                        Notification n = Utils.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
+                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                        Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
                         NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                         // notificationId is a unique int for each notification that you must define
                         notificationManager.Notify(lastTerm.GetHashCode(), n);
@@ -2913,10 +692,10 @@ namespace AndriodApp1
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(FromTransferString, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Utils.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Utils.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
         }
 
 
@@ -2947,7 +726,7 @@ namespace AndriodApp1
             }
             SoulSeekState.DownloadKeepAliveServiceRunning = true;
 
-            Utils.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
             int cnt = SeekerApplication.DL_COUNT;
             if (cnt == -1)
@@ -3027,10 +806,10 @@ namespace AndriodApp1
             notifIntent.PutExtra(FromTransferUploadString, 2);
 
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, Utils.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
+                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Utils.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
         }
 
 
@@ -3062,7 +841,7 @@ namespace AndriodApp1
 
             SoulSeekState.UploadKeepAliveServiceRunning = true;
 
-            Utils.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
             int cnt = SeekerApplication.UPLOAD_COUNT;
             if (cnt == -1)
@@ -3145,10 +924,10 @@ namespace AndriodApp1
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, Utils.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
+                PendingIntent.GetActivity(context, 0, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return Utils.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
         }
 
 
@@ -3163,7 +942,7 @@ namespace AndriodApp1
             MainActivity.LogInfoFirebase("keep alive service started...");
             SoulSeekState.IsStartUpServiceCurrentlyRunning = true;
 
-            Utils.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
 
 
@@ -3253,266 +1032,6 @@ namespace AndriodApp1
 
 
 
-    // TODOORG seperate class
-    [Activity(Label = "CloseActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
-    public class CloseActivity : AppCompatActivity
-    {
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
-            MainActivity.LogInfoFirebase("shutting down");
-
-            //stop all soulseek connection.
-            if (SoulSeekState.SoulseekClient != null)
-            {
-                //closes server socket, distributed connections, and peer connections. cancels searches, stops listener.
-                //this shutdown cleanly closes tcp connections. 
-                // - ex. say you are downloading from QT, by closing the tcp stream, the person uploading to you will immediately 
-                //       know that you are no longer there and set the status to "Aborted".
-                //       compared to just killing service and "swiping up" which will uncleanly close the connection, QT will continue
-                //       writing bytes with no one receiving them for several seconds.
-                SoulSeekState.SoulseekClient.Dispose();
-                SoulSeekState.SoulseekClient = null;
-            }
-
-            //stop the 3 potential foreground services.
-            Intent intent = new Intent(this, typeof(UploadForegroundService));
-            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
-            StartService(intent);
-
-            intent = new Intent(this, typeof(DownloadForegroundService));
-            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
-            StartService(intent);
-
-            intent = new Intent(this, typeof(SeekerKeepAliveService));
-            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
-            StartService(intent);
-
-            //remove this final "closing" activity from task list.
-            if ((int)Android.OS.Build.VERSION.SdkInt < 21)
-            {
-                this.FinishAffinity();
-            }
-            else
-            {
-                this.FinishAndRemoveTask();
-            }
-
-            //actually unload all classes, statics, etc from JVM.
-            //the process will still be a "cached background process" that is fine.
-            Java.Lang.JavaSystem.Exit(0);
-        }
-    }
-
-
-    //TODOORG seperate class
-    public class ThemeableActivity : AppCompatActivity
-    {
-        private WeakReference<ThemeableActivity> ourWeakRef;
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            SeekerApplication.Activities.Remove(ourWeakRef);
-            if (SeekerApplication.Activities.Count == 0)
-            {
-                MainActivity.LogDebug("----- On Destory ------ Last Activity ------");
-                TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, true);
-            }
-            else
-            {
-                MainActivity.LogDebug("----- On Destory ------ NOT Last Activity ------");
-                TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 0);
-            }
-        }
-
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            SeekerApplication.SetActivityTheme(this);
-            ourWeakRef = new WeakReference<ThemeableActivity>(this, false);
-
-            SeekerApplication.Activities.Add(ourWeakRef);
-            base.OnCreate(savedInstanceState);
-        }
-
-        protected override void AttachBaseContext(Context @base)
-        {
-            if (!SeekerApplication.HasProperPerAppLanguageSupport() && SoulSeekState.Language != SoulSeekState.FieldLangAuto)
-            {
-                var config = new Android.Content.Res.Configuration();
-                config.Locale = SeekerApplication.LocaleFromString(SoulSeekState.Language);
-                var baseContext = @base.CreateConfigurationContext(config);
-                base.AttachBaseContext(baseContext);
-            }
-            else
-            {
-                base.AttachBaseContext(@base);
-            }
-
-        }
-
-    }
-
-
-    // TODOORG seperate class
-    public class SlskLinkMenuActivity : ThemeableActivity
-    {
-        public const int FromSlskLinkCopyLink = 78;
-        public const int FromSlskLinkBrowseAtLocation = 79;
-        //public const int FromSlskLinkDownloadFolder = 80;
-        public const int FromSlskLinkDownloadFiles = 81;
-        public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            if (v is TextView && Utils.ShowSlskLinkContextMenu)
-            {
-                if (!Utils.ParseSlskLinkString(Utils.SlskLinkClickedData, out _, out _, out _, out bool isFile))
-                {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
-                    base.OnCreateContextMenu(menu, v, menuInfo);
-                    return;
-                }
-
-                if (isFile)
-                {
-                    //download file
-                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, Resource.String.DownloadFile);
-                    //show containing folder
-                }
-                else
-                {
-                    //download folder
-                    menu.Add(FromSlskLinkDownloadFiles, FromSlskLinkDownloadFiles, 1, this.GetString(Resource.String.download_folder));
-                    //show folder
-                }
-                menu.Add(FromSlskLinkBrowseAtLocation, FromSlskLinkBrowseAtLocation, 2, this.GetString(Resource.String.browse_at_location));
-                menu.Add(FromSlskLinkCopyLink, FromSlskLinkCopyLink, 3, Resource.String.CopyLink);
-            }
-            base.OnCreateContextMenu(menu, v, menuInfo);
-        }
-
-        public override void OnContextMenuClosed(IMenu menu)
-        {
-            Utils.ShowSlskLinkContextMenu = false;
-            base.OnContextMenuClosed(menu);
-        }
-
-        //public static void DownloadFilesActionEntry(Task<Directory> dirTask)
-        //{
-        //    DownloadFilesLogic(dirTask,null);
-        //}
-
-        public static void DownloadFilesLogic(Task<Directory> dirTask, string _uname, string thisFileOnly = null)
-        {
-            if (dirTask.IsFaulted)
-            {
-                //failed to follow link..
-                if (dirTask.Exception?.InnerException?.Message != null)
-                {
-                    string msgToToast = string.Empty;
-                    if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
-                    {
-                        msgToToast = "Failed to Add Download - Request timed out";
-                    }
-                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
-                    {
-                        msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
-                    }
-                    else if (dirTask.Exception.InnerException is Soulseek.UserOfflineException)
-                    {
-                        msgToToast = $"Failed to Add Download - User {_uname} is offline";
-                    }
-                    else
-                    {
-                        msgToToast = "Failed to follow link";
-                    }
-                    MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
-                    });
-                }
-                MainActivity.LogDebug("DirectoryReceivedContAction faulted");
-            }
-            else
-            {
-                List<BrowseFragment.FullFileInfo> fullFileInfos = new List<BrowseFragment.FullFileInfo>();
-
-                //the filenames for these files are NOT the fullname.
-                //the fullname is dirTask.Result.Name "\\" f.Filename
-                var directory = dirTask.Result;
-                foreach (var f in directory.Files)
-                {
-                    string fullFilename = directory.Name + "\\" + f.Filename;
-                    if (thisFileOnly == null)
-                    {
-                        fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
-                    }
-                    else
-                    {
-                        if (fullFilename == thisFileOnly)
-                        {
-                            //add
-                            fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
-                            break;
-                        }
-                    }
-                }
-
-
-                if (fullFileInfos.Count == 0)
-                {
-                    if (thisFileOnly == null)
-                    {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short).Show();
-                    }
-                    else
-                    {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short).Show();
-                    }
-                    return;
-                }
-
-                BrowseFragment.DownloadListOfFiles(fullFileInfos, false, _uname);
-
-
-            }
-        }
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            switch (item.ItemId)
-            {
-                case FromSlskLinkBrowseAtLocation: //Browse At Location
-                    Utils.ParseSlskLinkString(Utils.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
-                        this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                    });
-
-                    DownloadDialog.RequestFilesApi(username, null, action, dirPath);
-                    return true;
-                case FromSlskLinkCopyLink:
-                    Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, Utils.SlskLinkClickedData);
-                    return true;
-                case FromSlskLinkDownloadFiles:
-                    Utils.ParseSlskLinkString(Utils.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
-                    Action<Task<Directory>> ContAction = null;
-                    if (isFile)
-                    {
-                        ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, fullFilePath); };
-                    }
-                    else
-                    {
-                        ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, null); };
-                    }
-                    DownloadDialog.GetFolderContentsAPI(_username, _dirPath, false, ContAction);
-                    return true;
-            }
-            return base.OnContextItemSelected(item);
-        }
-    }
 
 
 
@@ -3890,7 +1409,7 @@ namespace AndriodApp1
             //bool msdCase = false;
             //if (uploadDirectoryInfo.UploadDirectory != null)
             //{
-            string lastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
+            string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
             //}
             //else
             //{
@@ -4221,8 +1740,8 @@ namespace AndriodApp1
                     else
                     {
 
-                        string fname = Utils.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string folderName = Utils.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string fname = CommonHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string folderName = CommonHelpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
                         string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                                                                                //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                //bc we get a path that is:
@@ -4247,7 +1766,7 @@ namespace AndriodApp1
             {
                 closeQuietly(c);
             }
-            Utils.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            CommonHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
@@ -4316,7 +1835,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        fname = Utils.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
+                        fname = CommonHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
                         searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                     }
                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
@@ -4337,7 +1856,7 @@ namespace AndriodApp1
                 }
 
             }
-            Utils.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            CommonHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
@@ -4424,6 +1943,9 @@ namespace AndriodApp1
                 //deserialize..
                 try
                 {
+
+
+
                     System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                     sw.Start();
                     byte[] b_stringUriPairs = Convert.FromBase64String(s_stringUriPairs);
@@ -4441,7 +1963,6 @@ namespace AndriodApp1
                     {
                         BinaryFormatter binaryFormatter = new BinaryFormatter();
                         CachedParseResults cachedParseResults = new CachedParseResults();
-
                         if (convertFrom2to3)
                         {
                             MainActivity.LogDebug("convert from v2 to v3");
@@ -4926,7 +2447,7 @@ namespace AndriodApp1
                         }
 
 
-                        string searchableName = Utils.GetFolderNameFromFile(presentableName) + @"\" + Utils.GetFileNameFromFile(presentableName);
+                        string searchableName = CommonHelpers.GetFolderNameFromFile(presentableName) + @"\" + CommonHelpers.GetFileNameFromFile(presentableName);
 
                         Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
                         if (attributes != null)
@@ -4944,7 +2465,7 @@ namespace AndriodApp1
                         }
                         //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
-                        string fname = Utils.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                        string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                       //for the brose response should only be the filename!!! 
                                                                                                       //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                       //bc we get a path that is:
@@ -4960,7 +2481,7 @@ namespace AndriodApp1
                         files.Add(slskFile);
                     }
                 }
-                Utils.SortSlskDirFiles(files);
+                CommonHelpers.SortSlskDirFiles(files);
                 string lastPathSegment = null;
                 if (msdMsfOrOverrideCase)
                 {
@@ -4968,7 +2489,7 @@ namespace AndriodApp1
                 }
                 else if (isRootCase)
                 {
-                    lastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
+                    lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
                 }
                 else
                 {
@@ -5064,7 +2585,7 @@ namespace AndriodApp1
                         //update public status variable every so often
                         SoulSeekState.NumberParsed = indexNum;
                     }
-                    string fname = Utils.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                    string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                   //for the brose response should only be the filename!!! 
                                                                                                   //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                   //bc we get a path that is:
@@ -5080,7 +2601,7 @@ namespace AndriodApp1
                 }
             }
 
-            Utils.SortSlskDirFiles(files);
+            CommonHelpers.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
             if (overrideCase)
@@ -5193,7 +2714,7 @@ namespace AndriodApp1
                     var reversed = index.ToDictionary(x => x.Value, x => x.Key);
                     foreach (string presentableName in stringUriPairs.Keys)
                     {
-                        string searchableName = Utils.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(Utils.GetFileNameFromFile(presentableName));
+                        string searchableName = CommonHelpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                         int code = reversed[presentableName];
                         foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
@@ -5576,7 +3097,7 @@ namespace AndriodApp1
                         string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
                         string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
-                        string searchableName = Utils.GetFolderNameFromFile(fullPath) + @"\" + Utils.GetFileNameFromFile(fullPath);
+                        string searchableName = CommonHelpers.GetFolderNameFromFile(fullPath) + @"\" + CommonHelpers.GetFileNameFromFile(fullPath);
                         if (isRootCase && (volName != null))
                         {
                             if (searchableName.Substring(0, volName.Length) == volName)
@@ -6251,7 +3772,7 @@ namespace AndriodApp1
                         }
                         catch (Exception ex)
                         {
-                            if (ex.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
+                            if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                             {
                                 FallbackFileSelectionEntry(false);
                             }
@@ -7093,7 +4614,7 @@ namespace AndriodApp1
             notifIntent.AddFlags(ActivityFlags.SingleTop);
             notifIntent.PutExtra(UPLOADS_NOTIF_EXTRA, 2);
             PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             Notification notification = null;
@@ -7819,7 +5340,7 @@ namespace AndriodApp1
             {
                 //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
                 //CHECK USER LIST
-                if (!CommonHelpers.UserListChecker.IsInUserList(username))
+                if (!SlskHelp.CommonHelpers.UserListChecker.IsInUserList(username))
                 {
                     throw new DownloadEnqueueException($"File not shared");
                 }
@@ -7859,8 +5380,8 @@ namespace AndriodApp1
             TransferItem transferItem = new TransferItem();
             transferItem.Username = username;
             transferItem.FullFilename = filename;
-            transferItem.Filename = Utils.GetFileNameFromFile(filename);
-            transferItem.FolderName = Utils.GetFolderNameFromFile(filename);
+            transferItem.Filename = CommonHelpers.GetFileNameFromFile(filename);
+            transferItem.FolderName = CommonHelpers.GetFolderNameFromFile(filename);
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
@@ -8127,7 +5648,7 @@ namespace AndriodApp1
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
+                if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                 {
                     FallbackFileSelectionEntry(true);
                 }
@@ -8616,7 +6137,7 @@ namespace AndriodApp1
 
                     if (!SoulSeekState.DisableDownloadToastNotification)
                     {
-                        action = () => { ToastUI(Utils.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
+                        action = () => { ToastUI(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
@@ -9104,7 +6625,7 @@ namespace AndriodApp1
 
         public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
-            string name = Utils.GetFileNameFromFile(fullfilename);
+            string name = CommonHelpers.GetFileNameFromFile(fullfilename);
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
@@ -9160,7 +6681,7 @@ namespace AndriodApp1
                         }
                     }
 
-                    string fullDir = rootdir + @"/Soulseek Incomplete/" + Utils.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
+                    string fullDir = rootdir + @"/Soulseek Incomplete/" + CommonHelpers.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
                     musicDir = new Java.IO.File(fullDir);
                     lock (lock_album_ifexist_create)
                     {
@@ -9293,7 +6814,7 @@ namespace AndriodApp1
                     }
 
 
-                    string album_folder_name = Utils.GenerateIncompleteFolderName(username, fullfilename, depth);
+                    string album_folder_name = CommonHelpers.GenerateIncompleteFolderName(username, fullfilename, depth);
                     lock (lock_album_ifexist_create)
                     {
                         folderDir1 = slskDir1.FindFile(album_folder_name); //does the folder we want to save to exist
@@ -9368,7 +6889,7 @@ namespace AndriodApp1
                 else
                 {
                     partialLength = 0;
-                    DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
+                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
                     stream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
@@ -9432,8 +6953,8 @@ namespace AndriodApp1
 
         private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, int depth, out string finalUri)
         {
-            string name = Utils.GetFileNameFromFile(fullfilename);
-            string dir = Utils.GetFolderNameFromFile(fullfilename, depth);
+            string name = CommonHelpers.GetFileNameFromFile(fullfilename);
+            string dir = CommonHelpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
             if (memoryMode && (bytes == null || bytes.Length == 0))
@@ -9686,7 +7207,7 @@ namespace AndriodApp1
                 //FileOutputStream stream = new FileOutputStream(mFile);
                 if (memoryMode)
                 {
-                    DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name);
+                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
                     System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                     stream.Write(bytes);
@@ -9700,11 +7221,11 @@ namespace AndriodApp1
                     if (SoulSeekState.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
                         (SoulSeekState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                        Utils.CompleteIncompleteDifferentVolume() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree || !SoulSeekState.SaveDataDirectoryUriIsFromTree)
+                        CommonHelpers.CompleteIncompleteDifferentVolume() || !SoulSeekState.ManualIncompleteDataDirectoryUriIsFromTree || !SoulSeekState.SaveDataDirectoryUriIsFromTree)
                     {
                         try
                         {
-                            DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name);
+                            DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                             uri = mFile.Uri;
                             finalUri = mFile.Uri.ToString();
                             System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
@@ -9783,7 +7304,7 @@ namespace AndriodApp1
                                     try
                                     {
 
-                                        DocumentFile mFile = Utils.CreateMediaFile(folderDir1, name);
+                                        DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                                         uri = mFile.Uri;
                                         finalUri = mFile.Uri.ToString();
                                         MainActivity.LogInfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri + " parent: " + parentUriOfIncomplete);
@@ -10758,8 +8279,8 @@ namespace AndriodApp1
 
         public string GetPresentableName(UploadDirectoryInfo ourTopMostParent)
         {
-            string parentLastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
-            string ourLastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
+            string parentLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
+            string ourLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
             if (ourMsdCase || msdCase)
             {
                 return ourLastPathSegment; //not great but no good solution for msd. TODO test
@@ -10964,7 +8485,7 @@ namespace AndriodApp1
             {
                 if (!uploadDir.IsSubdir && uploadDir.UploadDirectory != null)
                 {
-                    string lastPathSegment = Utils.GetLastPathSegmentWithSpecialCaseProtection(uploadDir.UploadDirectory, out bool msdCase);
+                    string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(uploadDir.UploadDirectory, out bool msdCase);
                     if (msdCase)
                     {
                         interestedVolnames.Add(string.Empty); //primary
@@ -11747,8 +9268,8 @@ namespace AndriodApp1
         public override void OnClick(View widget)
         {
             MainActivity.LogDebug("slsk link click");
-            Utils.SlskLinkClickedData = textClicked;
-            Utils.ShowSlskLinkContextMenu = true;
+            CommonHelpers.SlskLinkClickedData = textClicked;
+            CommonHelpers.ShowSlskLinkContextMenu = true;
             SoulSeekState.ActiveActivityRef.RegisterForContextMenu(widget);
             SoulSeekState.ActiveActivityRef.OpenContextMenu(widget);
             SoulSeekState.ActiveActivityRef.UnregisterForContextMenu(widget);

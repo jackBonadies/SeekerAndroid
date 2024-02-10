@@ -81,7 +81,7 @@ namespace AndriodApp1
         {
             if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
             {
-                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
+                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
                     MainActivity.LogDebug("handled by commons");
                     return true;
@@ -714,7 +714,7 @@ namespace AndriodApp1
             // Set up the buttons
 
             var dialog = builder.Show();
-            Utils.DoNotEnablePositiveUntilText(dialog, input);
+            CommonHelpers.DoNotEnablePositiveUntilText(dialog, input);
         }
 
 
@@ -946,14 +946,14 @@ namespace AndriodApp1
             if (isIgnored)
             {
                 SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
-                Utils.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                CommonHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
             }
             else
             {
                 SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
-                Utils.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
-                Utils.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
-                Utils.AddGivePrivilegesIfApplicable(menu, -1);
+                CommonHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                CommonHelpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
+                CommonHelpers.AddGivePrivilegesIfApplicable(menu, -1);
             }
         }
     }

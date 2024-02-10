@@ -282,7 +282,7 @@ namespace AndriodApp1
             }
             SearchTabHelper.SaveHeadersToSharedPrefs();
             //SearchTabHelper.SaveAllSearchTabsToDisk(SoulSeekState.ActiveActivityRef); //there are no additional results...
-            Utils.SaveUserNotes();
+            CommonHelpers.SaveUserNotes();
             if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)

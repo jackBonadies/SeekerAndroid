@@ -318,20 +318,20 @@ namespace AndriodApp1
                 string yFolder = null;
                 if (x.Files.Count != 0)
                 {
-                    xFolder = Utils.GetFolderNameFromFile(x.Files.First().Filename);
+                    xFolder = CommonHelpers.GetFolderNameFromFile(x.Files.First().Filename);
                 }
                 else if (x.LockedFiles.Count != 0)
                 {
-                    xFolder = Utils.GetFolderNameFromFile(x.LockedFiles.First().Filename);
+                    xFolder = CommonHelpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
                 }
 
                 if (y.Files.Count != 0)
                 {
-                    yFolder = Utils.GetFolderNameFromFile(y.Files.First().Filename);
+                    yFolder = CommonHelpers.GetFolderNameFromFile(y.Files.First().Filename);
                 }
                 else if (y.LockedFiles.Count != 0)
                 {
-                    yFolder = Utils.GetFolderNameFromFile(y.LockedFiles.First().Filename);
+                    yFolder = CommonHelpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
                 }
 
                 if (xFolder != null && yFolder != null)
@@ -381,110 +381,6 @@ namespace AndriodApp1
             IsCBR = false;
         }
     }
-
-    public enum SearchTarget
-    {
-        AllUsers = 0,
-        UserList = 1,
-        ChosenUser = 2,
-        Wishlist = 3,
-        Room = 4
-    }
-
-    public enum SearchResultStyleEnum
-    {
-        Minimal = 0,
-        Medium = 1,
-        CollapsedAll = 2,
-        ExpandedAll = 3,
-    }
-
-    public enum TabType
-    {
-        Search = 0,
-        Wishlist = 1
-    }
-
-    public enum SearchResultSorting
-    {
-        Available = 0,
-        Fastest = 1,
-        FolderAlphabetical = 2,
-        BitRate = 3,
-    }
-
-    // TODOORG models + all above enums
-    public class SearchTab
-    {
-        public List<SearchResponse> SearchResponses = new List<SearchResponse>();
-        public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(SoulSeekState.DefaultSearchResultSortAlgorithm));
-        public SearchResultSorting SortHelperSorting = SoulSeekState.DefaultSearchResultSortAlgorithm;
-        public object SortHelperLockObject = new object();
-        public bool FilteredResults = false;
-        public bool FilterSticky = false;
-        public string FilterString = string.Empty;
-        public List<string> WordsToAvoid = new List<string>();
-        public List<string> WordsToInclude = new List<string>();
-        public FilterSpecialFlags FilterSpecialFlags = new FilterSpecialFlags();
-        public List<SearchResponse> UI_SearchResponses = new List<SearchResponse>();
-        public SearchTarget SearchTarget = SearchTarget.AllUsers;
-        public bool CurrentlySearching = false;
-        public string SearchTargetChosenRoom = string.Empty;
-        public string SearchTargetChosenUser = string.Empty;
-        public int LastSearchResponseCount = -1; //this tell us how many we have filtered.  since we only filter when its the Current UI Tab.
-        public CancellationTokenSource CancellationTokenSource = null;
-        public DateTime LastRanTime = DateTime.MinValue;
-
-        public string LastSearchTerm = string.Empty;
-        public int LastSearchResultsCount = 0;
-
-        public List<ChipDataItem> ChipDataItems;
-        public SearchFragment.ChipFilter ChipsFilter;
-
-        public bool IsLoaded()
-        {
-            return this.SearchResponses != null;
-        }
-
-
-        public SearchTab Clone(bool forWishlist)
-        {
-            SearchTab clone = new SearchTab();
-            clone.SearchResponses = this.SearchResponses.ToList();
-            SortedDictionary<SearchResponse, object> cloned = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(clone.SortHelperSorting));
-            //without lock, extremely easy to reproduce "collection was modified" exception if creating wishlist tab while searching.
-            lock (this.SortHelperLockObject) //lock the sort helper we are copying from
-            {
-                foreach (var entry in SortHelper)
-                {
-                    if (!cloned.ContainsKey(entry.Key))
-                    {
-                        cloned.Add(entry.Key, entry.Value);
-                    }
-                }
-            }
-            clone.SortHelper = cloned;
-            clone.FilteredResults = this.FilteredResults;
-            clone.FilterSticky = this.FilterSticky;
-            clone.FilterString = this.FilterString;
-            clone.WordsToAvoid = this.WordsToAvoid.ToList();
-            clone.WordsToInclude = this.WordsToInclude.ToList();
-            clone.FilterSpecialFlags = this.FilterSpecialFlags;
-            clone.UI_SearchResponses = this.UI_SearchResponses.ToList();
-            clone.CurrentlySearching = this.CurrentlySearching;
-            clone.SearchTarget = this.SearchTarget;
-            clone.SearchTargetChosenRoom = this.SearchTargetChosenRoom;
-            clone.SearchTargetChosenUser = this.SearchTargetChosenUser;
-            clone.LastSearchResponseCount = this.LastSearchResponseCount;
-            clone.LastSearchTerm = this.LastSearchTerm;
-            clone.LastSearchResultsCount = this.LastSearchResultsCount;
-            clone.LastRanTime = this.LastRanTime;
-            clone.ChipDataItems = this.ChipDataItems;
-            clone.ChipsFilter = this.ChipsFilter;
-            return clone;
-        }
-    }
-
 
     [Serializable]
     public class SavedStateSearchTabHeader
@@ -564,8 +460,6 @@ namespace AndriodApp1
             return searchTab;
 
         }
-
-
     }
 
     [Serializable]
@@ -794,7 +688,7 @@ namespace AndriodApp1
                 string timeString = "-";
                 if (searchTab.LastRanTime != DateTime.MinValue)
                 {
-                    timeString = Utils.GetNiceDateTime(searchTab.LastRanTime);
+                    timeString = CommonHelpers.GetNiceDateTime(searchTab.LastRanTime);
                 }
                 numResults.Text = searchTab.LastSearchResultsCount.ToString() + " Results, Last Ran: " + timeString;
             }
@@ -1180,7 +1074,7 @@ namespace AndriodApp1
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Utils.GetFolderNameForSearchResult(item);
+            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString(); //kb/s
 
             //TEST
@@ -1232,7 +1126,7 @@ namespace AndriodApp1
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Utils.GetFolderNameForSearchResult(item); //todo maybe also cache this...
+            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
             viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
             if (item.FreeUploadSlots > 0)
@@ -1331,7 +1225,7 @@ namespace AndriodApp1
             {
                 TextView tv = new TextView(SoulSeekState.MainActivityRef);
                 SetTextColor(tv, SoulSeekState.MainActivityRef);
-                tv.Text = Utils.GetFileNameFromFile(f.Filename);
+                tv.Text = CommonHelpers.GetFileNameFromFile(f.Filename);
                 viewToHideShow.AddView(tv);
             }
         }
@@ -1340,7 +1234,7 @@ namespace AndriodApp1
         {
             bool opposite = this.AdapterRef.oppositePositions.Contains(position);
             viewUsername.Text = item.Username;
-            viewFoldername.Text = Utils.GetFolderNameForSearchResult(item);
+            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + "kbs"; //kb/s
             if (item.FreeUploadSlots > 0)
             {
@@ -1427,154 +1321,6 @@ namespace AndriodApp1
             tv.SetTextColor(GetColorFromAttribute(c, Resource.Attribute.cellTextColor));
         }
     }
-
-
-
-
-    //public class RowItem
-    //{
-    //    public string Title;
-    //    public string Desc;
-    //    public RowItem() { }
-    //    public RowItem(string title, string desc)
-    //    {
-    //        Title = title;Desc = desc;
-    //    }
-    //}
-    [Serializable]
-    public class TransferItem : ITransferItem
-    {
-        public string GetDisplayName()
-        {
-            return Filename;
-        }
-
-        public string GetFolderName()
-        {
-            return FolderName;
-        }
-
-        public string GetDisplayFolderName()
-        {
-            //this is similar to QT (in the case of Seeker multiple subdirectories)
-            //but not quite.
-            //QT will show subdirs/complete/Soulseek Downloads/Music/H: (where everything after subdirs is your download folder)
-            //whereas we just show subdirs
-            //subdirs is folder name in both cases for single folder, 
-            // and say (01 / 2020 / test_folder) for nested.
-            if (GetDirectoryLevel() == 1)
-            {
-                //they are the same
-                return FolderName;
-            }
-            else
-            {
-                //split reverse.
-                var reversedArray = this.FolderName.Split('\\').Reverse();
-                return string.Join('\\', reversedArray);
-            }
-        }
-
-        public int GetDirectoryLevel()
-        {
-            //just parent folder = level 1 (search result and browse single dir case)
-            //grandparent = level 2 (browse download subdirs case - i.e. Album, Album > covers)
-            //etc.
-            if (this.FolderName == null || !this.FolderName.Contains('\\'))
-            {
-                return 1;
-            }
-            return this.FolderName.Split('\\').Count();
-        }
-
-        public string GetUsername()
-        {
-            return Username;
-        }
-
-        public TimeSpan? GetRemainingTime()
-        {
-            return RemainingTime;
-        }
-
-        public int GetQueueLength()
-        {
-            return queuelength;
-        }
-
-        public bool IsUpload()
-        {
-            return isUpload;
-        }
-
-        public double GetAvgSpeed()
-        {
-            return AvgSpeed;
-        }
-
-        public long? GetSizeForDL()
-        {
-            if (this.Size == -1)
-            {
-                return null;
-            }
-            else
-            {
-                return this.Size;
-            }
-        }
-
-        public string Filename;
-        public string Username;
-        public string FolderName;
-        public string FullFilename;
-        public int Progress;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public TimeSpan? RemainingTime;
-        public bool Failed;
-        public TransferStates State;
-        public long Size;
-
-        public bool isUpload;
-        private int queuelength = int.MaxValue;
-        public bool CancelAndRetryFlag = false;
-        public bool WasFilenameLatin1Decoded = false;
-        public bool WasFolderLatin1Decoded = false;
-        //public bool TryUndoMojibake = false;
-
-        public bool ShouldEncodeFolderLatin1()
-        {
-            return WasFolderLatin1Decoded;
-        }
-
-        public bool ShouldEncodeFileLatin1()
-        {
-            return WasFilenameLatin1Decoded;
-        }
-
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public double AvgSpeed = 0;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public bool CancelAndClearFlag = false;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public bool InProcessing = false; //whether its currently a task in Soulseek.Net.  so from Intialized / Queued to the end of the main download continuation task...
-        public int QueueLength
-        {
-            get
-            {
-                return queuelength;
-            }
-            set
-            {
-                queuelength = value;
-            }
-        }
-        public string FinalUri = string.Empty; //final uri of downloaded item
-        public string IncompleteParentUri = null; //incomplete uri of item.  will be null if successfully downloaded or not yet created.
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public CancellationTokenSource CancellationTokenSource = null;
-    }
-
 
     /**
     Notes on Queue Position:
@@ -2159,7 +1905,7 @@ namespace AndriodApp1
                 //Helpers.GetTransferSpeedString(avgSpeedBytes);
                 if (showSpeed)
                 {
-                    viewStatusAdditionalInfo.Text = Utils.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
+                    viewStatusAdditionalInfo.Text = CommonHelpers.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
                 }
                 else
                 {

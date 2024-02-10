@@ -192,7 +192,7 @@ namespace AndriodApp1
             }
             catch (System.Exception ex)
             {
-                if (ex.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
+                if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                 {
                     Toast.MakeText(this, this.GetString(Resource.String.error_no_file_manager_image), ToastLength.Long).Show();
                 }

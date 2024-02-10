@@ -17,6 +17,8 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 using AndriodApp1.Helpers;
+using AndriodApp1.Managers;
+using AndriodApp1.UPnP;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -76,7 +78,7 @@ namespace AndriodApp1
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
 
-            SoulSeekState.OffsetFromUtcCached = Utils.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
+            SoulSeekState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
 
             SoulSeekState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
 
@@ -160,8 +162,8 @@ namespace AndriodApp1
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
-            CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
-            CommonHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
+            SlskHelp.CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
+            SlskHelp.CommonHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
             SlskHelp.CommonHelpers.UserListChecker = new UserListChecker();
 
@@ -1840,9 +1842,9 @@ namespace AndriodApp1
                 SoulSeekState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
                 try
                 {
-                    Utils.CreateNotificationChannel(SoulSeekState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
+                    CommonHelpers.CreateNotificationChannel(SoulSeekState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
                     NotifInfo notifInfo = null;
-                    string directory = Utils.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
+                    string directory = CommonHelpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
                     {
                         notifInfo = NotificationUploadTracker[e.Transfer.Username];
@@ -1951,13 +1953,13 @@ namespace AndriodApp1
             {
                 try
                 {
-                    Utils.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
+                    CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(UserListActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop);
                     notifIntent.PutExtra(FromUserOnlineAlert, true);
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, username.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = Utils.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(username.GetHashCode(), n);
@@ -1981,15 +1983,15 @@ namespace AndriodApp1
             {
                 try
                 {
-                    Utils.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
+                    CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                     notifIntent.PutExtra(FromFolderAlert, 2);
                     notifIntent.PutExtra(FromFolderAlertUsername, username);
                     notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = Utils.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
+                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify((foldername + username).GetHashCode(), n);

@@ -18,6 +18,8 @@
  */
 
 using AndriodApp1.Helpers;
+using AndriodApp1.Managers;
+using AndriodApp1.UPnP;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -161,7 +163,7 @@ namespace AndriodApp1
         {
             SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                if (SoulSeekState.ListenerEnabled && SoulSeekState.ListenerUPnpEnabled && UPnpManager.Instance.RunningStatus == UpnpRunningStatus.Finished && UPnpManager.Instance.DiagStatus != UpnpDiagStatus.Success)
+                if (SoulSeekState.ListenerEnabled && SoulSeekState.ListenerUPnpEnabled && UPnpManager.Instance.RunningStatus == UPnPRunningStatus.Finished && UPnpManager.Instance.DiagStatus != UPnPDiagStatus.Success)
                 {
                     Toast.MakeText(this, Resource.String.upnp_search_finished, ToastLength.Short).Show();
                 }
@@ -1312,16 +1314,16 @@ namespace AndriodApp1
 
         private void SetCompleteFolderView()
         {
-            string friendlyName = Utils.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
+            string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
             currentCompleteFolderView.Text = friendlyName;
-            Utils.SetToolTipText(currentCompleteFolderView, friendlyName);
+            CommonHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
         }
 
         private void SetIncompleteFolderView()
         {
-            string friendlyName = Utils.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
+            string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
             currentIncompleteFolderView.Text = friendlyName;
-            Utils.SetToolTipText(currentIncompleteFolderView, friendlyName);
+            CommonHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
         }
 
         private void SetSharedFolderView()
@@ -1403,7 +1405,7 @@ namespace AndriodApp1
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
             Android.Net.Uri uri = Android.Net.Uri.Parse("https://www.slsknet.org/userlogin.php?username=" + Android.Net.Uri.Encode(SoulSeekState.Username)); // missing 'http://' will cause crash.
-            Utils.ViewUri(uri, this);
+            CommonHelpers.ViewUri(uri, this);
         }
 
         private void EditUserInfo_Click(object sender, EventArgs e)
@@ -1463,7 +1465,7 @@ namespace AndriodApp1
         private void CheckStatus_Click(object sender, EventArgs e)
         {
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
-            Utils.ViewUri(uri, this);
+            CommonHelpers.ViewUri(uri, this);
         }
         private static AndroidX.AppCompat.App.AlertDialog changeDialog = null;
         private void ChangePort_Click(object sender, EventArgs e)
@@ -2868,7 +2870,7 @@ namespace AndriodApp1
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
@@ -2914,7 +2916,7 @@ namespace AndriodApp1
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }

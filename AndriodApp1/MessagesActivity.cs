@@ -105,14 +105,14 @@ namespace AndriodApp1
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            Utils.SetMenuTitles(menu, MessagesInnerFragment.Username);
-            Utils.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
+            CommonHelpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
+            CommonHelpers.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
             return base.OnPrepareOptionsMenu(menu);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
             {
                 return true;
             }
@@ -335,7 +335,7 @@ namespace AndriodApp1
 
             messageUserDialog = builder.Create();
             messageUserDialog.Show();
-            Utils.DoNotEnablePositiveUntilText(messageUserDialog, input);
+            CommonHelpers.DoNotEnablePositiveUntilText(messageUserDialog, input);
         }
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
@@ -642,11 +642,11 @@ namespace AndriodApp1
         {
             if (connectOrDisconnect == SpecialMessageCode.Disconnect)
             {
-                MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), Utils.GetNiceDateTime(localDateTime));
+                MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
             }
             else
             {
-                MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), Utils.GetNiceDateTime(localDateTime));
+                MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
             }
         }
     }
@@ -1022,7 +1022,7 @@ namespace AndriodApp1
                 {
                     contextToUse = SeekerApplication.ApplicationContext;
                 }
-                Utils.CreateNotificationChannel(contextToUse, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                CommonHelpers.CreateNotificationChannel(contextToUse, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
 
 
                 Intent notifIntent = new Intent(contextToUse, typeof(MessagesActivity));
@@ -1030,7 +1030,7 @@ namespace AndriodApp1
                 notifIntent.PutExtra(FromUserName, msg.Username); //so we can go to this user..
                 notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                 PendingIntent pendingIntent =
-                    PendingIntent.GetActivity(contextToUse, msg.Username.GetHashCode(), notifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    PendingIntent.GetActivity(contextToUse, msg.Username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(contextToUse);
 
                 //no direct reply in <26 and so the actions are rather pointless..
@@ -1045,7 +1045,7 @@ namespace AndriodApp1
                     replayIntent.PutExtra("direct_reply_extra", true);
                     replayIntent.SetAction("seeker_direct_reply");
                     replayIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), replayIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, false)); //mutable, the end user needs to be able to mutate with direct replay action..
+                    PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), replayIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, false)); //mutable, the end user needs to be able to mutate with direct replay action..
                     NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.baseline_chat_bubble_white_24, "Reply", replyPendingIntent).SetAllowGeneratedReplies(false).AddRemoteInput(remoteInput).Build(); //TODO icon
 
 
@@ -1084,7 +1084,7 @@ namespace AndriodApp1
                     clearNotifIntent.PutExtra("clear_notif_extra", true);
                     clearNotifIntent.SetAction("seeker_clear_notification");
                     clearNotifIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), clearNotifIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), clearNotifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
 
 
 
@@ -1094,7 +1094,7 @@ namespace AndriodApp1
 
 
                     markAsReadIntent.PutExtra("seeker_username", msg.Username);
-                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), markAsReadIntent, Utils.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)); //else the new extras will not arrive...
+                    PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), markAsReadIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)); //else the new extras will not arrive...
 
                     string markAsRead = "Mark As Read";
                     //android messages app does "mark as read" even after you respond so I think it is fine..
@@ -1131,7 +1131,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Notification n = Utils.CreateNotification(contextToUse, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
+                    Notification n = CommonHelpers.CreateNotification(contextToUse, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
                     notificationManager.Notify(msg.Username.GetHashCode(), n);
                 }
             }
@@ -1356,7 +1356,7 @@ namespace AndriodApp1
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendMessageAPI(new Message(Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1371,7 +1371,7 @@ namespace AndriodApp1
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendMessageAPI(new Message(Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1382,7 +1382,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case 0: //"Copy Text"
-                    Utils.CopyTextToClipboard(this.Activity, ChatroomInnerFragment.MessagesLongClickData.MessageText);
+                    CommonHelpers.CopyTextToClipboard(this.Activity, ChatroomInnerFragment.MessagesLongClickData.MessageText);
                     break;
                 default:
                     return base.OnContextItemSelected(item);
@@ -1540,7 +1540,7 @@ namespace AndriodApp1
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendMessageAPI(new Message(Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendMessageAPI(new Message(Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
@@ -1876,7 +1876,7 @@ namespace AndriodApp1
 
         public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            MainActivity.LogDebug("ShowSlskLinkContextMenu " + Utils.ShowSlskLinkContextMenu);
+            MainActivity.LogDebug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
 
             //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
             //in that case we still dont want to show anything.
@@ -1884,10 +1884,10 @@ namespace AndriodApp1
             {
                 return;
             }
-            else if (Utils.ShowSlskLinkContextMenu)
+            else if (CommonHelpers.ShowSlskLinkContextMenu)
             {
                 //closing wont turn this off since its invalid parse, so turn it off here...
-                Utils.ShowSlskLinkContextMenu = false;
+                CommonHelpers.ShowSlskLinkContextMenu = false;
                 return;
             }
 
@@ -2043,9 +2043,9 @@ namespace AndriodApp1
             }
             else
             {
-                viewTimeStamp.Text = Utils.GetNiceDateTime(msg.LocalDateTime);
+                viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
             }
-            Utils.SetMessageTextView(viewMessage, msg);
+            CommonHelpers.SetMessageTextView(viewMessage, msg);
         }
 
         public Message DataItem;
@@ -2082,8 +2082,8 @@ namespace AndriodApp1
         public void setItem(Message msg)
         {
             DataItem = msg;
-            viewTimeStamp.Text = Utils.GetNiceDateTime(msg.LocalDateTime);
-            Utils.SetMessageTextView(viewMessage, msg);
+            viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
+            CommonHelpers.SetMessageTextView(viewMessage, msg);
         }
         public Message DataItem;
     }
@@ -2324,7 +2324,7 @@ namespace AndriodApp1
             viewUsername.Text = username;
             Message m = MessageController.Messages[username].Last();
 
-            viewDateTimeAgo.Text = Utils.GetDateTimeSinceAbbrev(m.LocalDateTime);
+            viewDateTimeAgo.Text = CommonHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
             if (MessageController.UnreadUsernames.ContainsKey(username))
             {
@@ -2411,7 +2411,7 @@ namespace AndriodApp1
                     string replyText = remoteInputBundle.GetString("key_text_result");
                     //Message msg = new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     MainActivity.LogDebug("direct reply " + replyText + " " + uname);
-                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
+                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
 
                 }

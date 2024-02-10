@@ -107,6 +107,9 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activities\CloseActivity.cs" />
+    <Compile Include="Activities\SlskLinkMenuActivity.cs" />
+    <Compile Include="Activities\ThemeableActivity.cs" />
     <Compile Include="BrowseFragment.cs" />
     <Compile Include="bzip2\BZip2BitInputStream.cs" />
     <Compile Include="bzip2\BZip2BlockDecompressor.cs" />
@@ -121,16 +124,24 @@
     <Compile Include="ChipsAdapter.cs" />
     <Compile Include="DownloadDialog.cs" />
     <Compile Include="EditUserInfoActivity.cs" />
+    <Compile Include="Enums\SearchEnums.cs" />
     <Compile Include="Extensions\SearchResponseExtensions.cs" />
     <Compile Include="Helpers\SearchSendIntentHelper.cs" />
     <Compile Include="Helpers\SearchTabHelper.cs" />
-    <Compile Include="Helpers\Utils.cs" />
+    <Compile Include="Helpers\CommonHelpers.cs" />
     <Compile Include="Helpers\MicroTagReader.cs" />
     <Compile Include="ImportWizardActivity.cs" />
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />
     <Compile Include="LoginFragment.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="Managers\PrivilegesManager.cs" />
+    <Compile Include="Managers\TransferItemManager.cs" />
+    <Compile Include="Managers\TransferItemManagerWrapper.cs" />
     <Compile Include="MessagesActivity.cs" />
+    <Compile Include="Models\FolderItem.cs" />
+    <Compile Include="Models\ITransferItem.cs" />
+    <Compile Include="Models\SearchTab.cs" />
+    <Compile Include="Models\TransferItem.cs" />
     <Compile Include="SearchFragment.cs" />
     <Compile Include="SeekerApplication.cs" />
     <Compile Include="SerializationHelper.cs" />
@@ -141,6 +152,9 @@
     <Compile Include="SmartFiltersConfig.cs" />
     <Compile Include="TabsPagerAdapter.cs" />
     <Compile Include="TransfersFragment.cs" />
+    <Compile Include="UPnP\UPnPDiagStatus.cs" />
+    <Compile Include="UPnP\UPnPManager.cs" />
+    <Compile Include="UPnP\UPnPRunningStatus.cs" />
     <Compile Include="UserListActivity.cs" />
     <Compile Include="Utils\HtmlEntityDecoder.cs" />
     <Compile Include="ViewUserInfoActivity.cs" />

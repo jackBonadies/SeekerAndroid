@@ -1901,8 +1901,8 @@ namespace AndriodApp1
                 string fullFname = s.Files.FirstOrDefault()?.Filename ?? s.LockedFiles.FirstOrDefault().Filename;
                 foreach (string keyword in chipFilter.Keywords)
                 {
-                    if (!Utils.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
-                        !Utils.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    if (!CommonHelpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
+                        !CommonHelpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                     {
                         return false;
                     }
@@ -1913,8 +1913,8 @@ namespace AndriodApp1
                     bool anyMatch = false;
                     foreach (string keyword in keywordsInvar)
                     {
-                        if (Utils.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
-                            Utils.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                        if (CommonHelpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
+                            CommonHelpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                         {
                             anyMatch = true;
                             break;
@@ -1939,8 +1939,8 @@ namespace AndriodApp1
         {
             foreach (File f in s.GetFiles(hideLocked))
             {
-                string dirString = Utils.GetFolderNameFromFile(f.Filename);
-                string fileString = Utils.GetFileNameFromFile(f.Filename);
+                string dirString = CommonHelpers.GetFolderNameFromFile(f.Filename);
+                string fileString = CommonHelpers.GetFileNameFromFile(f.Filename);
                 foreach (string avoid in SearchTabHelper.WordsToAvoid)
                 {
                     if (dirString.Contains(avoid, StringComparison.OrdinalIgnoreCase) || fileString.Contains(avoid, StringComparison.OrdinalIgnoreCase))
@@ -2395,7 +2395,7 @@ namespace AndriodApp1
                     Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
                     foreach (File f in origResponse.Files)
                     {
-                        string folderName = Utils.GetFolderNameFromFile(f.Filename);
+                        string folderName = CommonHelpers.GetFolderNameFromFile(f.Filename);
                         if (folderFilePairs.ContainsKey(folderName))
                         {
                             //MainActivity.LogDebug("Split Foldername: " + folderName);
@@ -2417,7 +2417,7 @@ namespace AndriodApp1
                     {
                         foreach (File f in origResponse.LockedFiles)
                         {
-                            string folderName = Utils.GetFolderNameFromFile(f.Filename);
+                            string folderName = CommonHelpers.GetFolderNameFromFile(f.Filename);
                             if (lockedFolderFilePairs.ContainsKey(folderName))
                             {
                                 //MainActivity.LogDebug("Split Foldername: " + folderName);
@@ -3305,7 +3305,7 @@ namespace AndriodApp1
         public static void SearchAPI(CancellationToken cancellationToken, Android.Graphics.Drawables.TransitionDrawable transitionDrawable, string searchString, int fromTab, bool fromWishlist = false)
         {
             SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm = searchString;
-            SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = Utils.GetDateTimeNowSafe();
+            SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = CommonHelpers.GetDateTimeNowSafe();
             if (!fromWishlist)
             {
                 //try to clearFocus on the search if you can (gets rid of blinking cursor)

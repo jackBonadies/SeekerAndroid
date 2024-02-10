@@ -74,7 +74,7 @@ namespace AndriodApp1
 
                     //TODO: keywords
 #if DEBUG
-                    Console.WriteLine(Utils.GetFolderNameFromFile(searchResponse.GetElementAtAdapterPosition(false, 0).Filename));
+                    Console.WriteLine(CommonHelpers.GetFolderNameFromFile(searchResponse.GetElementAtAdapterPosition(false, 0).Filename));
 #endif
                 }
 
@@ -404,7 +404,7 @@ namespace AndriodApp1
                 int totalCount = responses.Count();
                 for (int i = 0; i < totalCount; i++)
                 {
-                    string fline = Utils.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    string fline = CommonHelpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                     //fline = fline.Replace(" - ", " ");
                     //fline = fline.Replace(", ", " ");
@@ -495,7 +495,7 @@ namespace AndriodApp1
                 for (int i = 0; i < totalCount; i++)
                 {
                     //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
-                    string fline = Utils.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    string fline = CommonHelpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                     //fline = fline.Replace(" - ", " ");
                     //fline = fline.Replace(", ", " ");

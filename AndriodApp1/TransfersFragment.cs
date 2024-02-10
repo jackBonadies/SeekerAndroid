@@ -477,7 +477,7 @@ namespace AndriodApp1
 
         public static void RestoreUploadTransferItems(ISharedPreferences sharedPreferences)
         {
-            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_Upload_TransferList_v2, string.Empty); //TODO !!! replace
+            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_Upload_TransferList_v2, string.Empty); //TODO !!! replace !!!
             if (transferListv2 == string.Empty)
             {
                 RestoreUploadTransferItemsLegacy(sharedPreferences);
@@ -1338,7 +1338,7 @@ namespace AndriodApp1
                     return base.OnContextItemSelected(item);
                 }
 
-                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
+                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
                 {
                     MainActivity.LogDebug("handled by commons");
                     return base.OnContextItemSelected(item);
@@ -1516,7 +1516,7 @@ namespace AndriodApp1
                             //tested on API25 and API30
                             //AndroidX.Core.Content.FileProvider
                             Android.Net.Uri uriToUse = null;
-                            if (SoulSeekState.UseLegacyStorage() && Utils.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
+                            if (SoulSeekState.UseLegacyStorage() && CommonHelpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
                             {
                                 uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
                             }
@@ -1526,7 +1526,7 @@ namespace AndriodApp1
                             }
                             Intent playFileIntent = new Intent(Intent.ActionView);
                             //playFileIntent.SetDataAndType(uriToUse,"audio/*");  
-                            playFileIntent.SetDataAndType(uriToUse, Utils.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
+                            playFileIntent.SetDataAndType(uriToUse, CommonHelpers.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
                             playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
                             //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
                             this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
@@ -1544,7 +1544,7 @@ namespace AndriodApp1
                         }
                         if (ti is TransferItem ttti)
                         {
-                            string startingDir = Utils.GetDirectoryRequestFolderName(ttti.FullFilename);
+                            string startingDir = CommonHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
                             Action<View> action = new Action<View>((v) =>
                             {
                                 ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
@@ -1560,10 +1560,10 @@ namespace AndriodApp1
                                 Toast.MakeText(SoulSeekState.ActiveActivityRef, "Folder is empty.", ToastLength.Short).Show();
                                 return true;
                             }
-                            string startingDir = Utils.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
+                            string startingDir = CommonHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
                             for (int i = 0; i < fi.GetDirectoryLevel() - 1; i++)
                             {
-                                startingDir = Utils.GetDirectoryRequestFolderName(startingDir); //keep going up..
+                                startingDir = CommonHelpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
                             }
 
 
@@ -2090,7 +2090,7 @@ namespace AndriodApp1
                     {
                         if (v.GetShowSpeed())
                         {
-                            v.GetAdditionalStatusInfoView().Text = Utils.GetTransferSpeedString(avgSpeedBytes) + "  •  " + TransferViewHelper.GetTimeRemainingString(timeRemaining);
+                            v.GetAdditionalStatusInfoView().Text = CommonHelpers.GetTransferSpeedString(avgSpeedBytes) + "  •  " + TransferViewHelper.GetTimeRemainingString(timeRemaining);
                         }
                         else
                         {
@@ -2510,14 +2510,14 @@ namespace AndriodApp1
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && !(Utils.IsUploadCompleteOrAborted(ti.State)))
+                        if (tvh != null && ti != null && !(CommonHelpers.IsUploadCompleteOrAborted(ti.State)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, Resource.String.AbortUpload);
                         }
                     }
                     else
                     {
-                        if (tvh != null && fi != null && !(Utils.IsUploadCompleteOrAborted(folderItemState))) ;
+                        if (tvh != null && fi != null && !(CommonHelpers.IsUploadCompleteOrAborted(folderItemState))) ;
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.AbortUploads);
                         }
@@ -2553,7 +2553,7 @@ namespace AndriodApp1
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && (Utils.IsUploadCompleteOrAborted(ti.State)))
+                        if (tvh != null && ti != null && (CommonHelpers.IsUploadCompleteOrAborted(ti.State)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
@@ -2565,7 +2565,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        if (tvh != null && fi != null && (Utils.IsUploadCompleteOrAborted(folderItemState)))
+                        if (tvh != null && fi != null && (CommonHelpers.IsUploadCompleteOrAborted(folderItemState)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                         }
@@ -2643,11 +2643,11 @@ namespace AndriodApp1
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 6, 6, Resource.String.browse_user);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, Resource.String.browse_at_location);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 8, 8, Resource.String.search_user_files);
-                Utils.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 9, 9, tvh.InnerTransferItem.GetUsername(), false);
+                CommonHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 9, 9, tvh.InnerTransferItem.GetUsername(), false);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.msg_user);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 11, 11, Resource.String.get_user_info);
-                Utils.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 12, 12, tvh.InnerTransferItem.GetUsername());
-                Utils.AddGivePrivilegesIfApplicable(subMenu, 13);
+                CommonHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 12, 12, tvh.InnerTransferItem.GetUsername());
+                CommonHelpers.AddGivePrivilegesIfApplicable(subMenu, 13);
 
                 if (isUpload)
                 {
