@@ -1,5 +1,6 @@
 ﻿using Org.Apache.Http.Conn;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -180,6 +181,24 @@ namespace AndriodApp1
                 {
                     return null;
                 }
+            }
+        }
+
+
+        public static string SaveMessagesToString(ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> rootMessages)
+        {
+            return BinarySerializeToString(rootMessages);
+        }
+
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>> RestoreMessagesFromString(string rootMessagesString)
+        {
+            if (isBinaryFormatterSerialized(rootMessagesString))
+            {
+                return BinaryDeserializeFromString<System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>>>(rootMessagesString);
+            }
+            else
+            {
+                return null;
             }
         }
     }

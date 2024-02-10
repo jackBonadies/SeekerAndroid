@@ -1158,14 +1158,10 @@ namespace AndriodApp1
                 return;
             }
             string messagesString = string.Empty;
-            using (System.IO.MemoryStream messagesStream = new System.IO.MemoryStream())
+            lock (MessageListLockObject)
             {
-                BinaryFormatter formatter = new BinaryFormatter();
-                lock(MessageListLockObject)
-                {
-                    formatter.Serialize(messagesStream, RootMessages);
-                }
-                messagesString = Convert.ToBase64String(messagesStream.ToArray());
+                messagesString = SerializationHelper.SaveMessagesToString(RootMessages);
+
             }
             if(messagesString != null && messagesString != string.Empty)
             {
@@ -1189,15 +1185,11 @@ namespace AndriodApp1
             }
             else
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(messages)))
+                RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
+                if(!string.IsNullOrEmpty(SoulSeekState.Username) && RootMessages.ContainsKey(SoulSeekState.Username))
                 {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    RootMessages = binaryFormatter.Deserialize(mem) as System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>>;
-                    if(SoulSeekState.Username!=null && SoulSeekState.Username != string.Empty && RootMessages.ContainsKey(SoulSeekState.Username))
-                    {
-                        Messages = RootMessages[SoulSeekState.Username];
-                        MessagesUsername = SoulSeekState.Username;
-                    }
+                    Messages = RootMessages[SoulSeekState.Username];
+                    MessagesUsername = SoulSeekState.Username;
                 }
             }
         }
