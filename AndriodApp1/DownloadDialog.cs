@@ -17,31 +17,25 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using AndriodApp1.Extensions.SearchResponseExtensions;
+using Android.App;
+using Android.Content;
+using Android.Content.Res;
+using Android.Graphics;
+using Android.OS;
+using Android.Util;
+using Android.Views;
+using Android.Widget;
+using Common;
+using Google.Android.Material.Snackbar;
+using Soulseek;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.App;
-using Android.Content;
-using Android.Drm;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
-using Android.Support.V4.Provider;
-using Android.Util;
-using Android.Views;
-using Android.Widget;
-using AndroidX.Work;
-using Google.Android.Material.Snackbar;
-using Soulseek;
-
 using log = Android.Util.Log;
-using AndriodApp1.Extensions.SearchResponseExtensions;
-using Android.Content.Res;
-using Common;
 
 namespace AndriodApp1
 {
@@ -79,26 +73,26 @@ namespace AndriodApp1
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
             bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
             List<File> fullFilenameCollection = new List<File>();
-            foreach(File f in d.Files)
+            foreach (File f in d.Files)
             {
                 string fName = d.Name + "\\" + f.Filename;
                 bool extraAttr = false;
                 //if it existed in the old folder then we can get some extra attributes
                 foreach (File fullFileInfo in searchResponse.GetFiles(hideLocked))
                 {
-                    if(fName==fullFileInfo.Filename)
+                    if (fName == fullFileInfo.Filename)
                     {
                         fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, fullFileInfo.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
                         extraAttr = true;
                         break;
                     }
                 }
-                if(!extraAttr)
+                if (!extraAttr)
                 {
-                    fullFilenameCollection.Add(new File(f.Code, fName, f.Size,f.Extension,f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
+                    fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
                 }
             }
-            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username,searchResponse.Token,searchResponse.FreeUploadSlots,searchResponse.UploadSpeed,searchResponse.QueueLength, fullFilenameCollection);
+            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.FreeUploadSlots, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
         }
 
         public override void OnResume()
@@ -124,7 +118,7 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("DownloadDialog OnAttach");
             base.OnAttach(context);
-            if(context is Activity)
+            if (context is Activity)
             {
                 this.activity = context as Activity;
             }
@@ -164,7 +158,7 @@ namespace AndriodApp1
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             MainActivity.LogDebug("DownloadDialog OnCreateView");
-            return inflater.Inflate(Resource.Layout.downloaddialog,container); //container is parent
+            return inflater.Inflate(Resource.Layout.downloaddialog, container); //container is parent
         }
 
         private class OnRefreshListenerGetFolder : Java.Lang.Object, AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout.IOnRefreshListener
@@ -192,13 +186,13 @@ namespace AndriodApp1
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
-            log.Debug(MainActivity.logCatTag, "Is View null: " + (view==null).ToString());
+            log.Debug(MainActivity.logCatTag, "Is View null: " + (view == null).ToString());
 
             log.Debug(MainActivity.logCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
-            this.SetStyle((int)DialogFragmentStyle.NoTitle,0);
+            this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
             log.Debug(MainActivity.logCatTag, "Is dl null: " + (dl == null).ToString());
             dl.Click += DlAll_Click;
@@ -218,8 +212,8 @@ namespace AndriodApp1
             swipeRefreshLayout.SetOnRefreshListener(new OnRefreshListenerGetFolder(this));
 
             ViewGroup headerLayout = view.FindViewById<ViewGroup>(Resource.Id.header1);
-            
-            if(searchResponse == null)
+
+            if (searchResponse == null)
             {
                 log.Debug(MainActivity.logCatTag, "Is searchResponse null");
                 MainActivity.LogFirebase("DownloadDialog search response is null");
@@ -242,10 +236,10 @@ namespace AndriodApp1
         {
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
             List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
-            adapterList.AddRange(searchResponse.Files.ToList().Select(x=>new FileLockedUnlockedWrapper(x, false)));
-            if(!SoulSeekState.HideLockedResultsInSearch)
+            adapterList.AddRange(searchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
+            if (!SoulSeekState.HideLockedResultsInSearch)
             {
-                adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x=>new FileLockedUnlockedWrapper(x, true)));
+                adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
             }
             this.customAdapter = new DownloadCustomAdapter(SoulSeekState.MainActivityRef, adapterList);
             this.customAdapter.Owner = this;
@@ -262,11 +256,11 @@ namespace AndriodApp1
         {
             try
             {
-                PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View,GravityFlags.Right);
+                PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View, GravityFlags.Right);
                 popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
                 popup.Inflate(Resource.Menu.download_diag_options);
 
-                if(customAdapter.SelectedPositions.Count > 0)
+                if (customAdapter.SelectedPositions.Count > 0)
                 {
                     popup.Menu.FindItem(Resource.Id.download_selected_as_queued).SetVisible(true);
                 }
@@ -292,7 +286,7 @@ namespace AndriodApp1
             {
                 Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("RequestFilesLogic: " + e.Message + e.StackTrace);
             }
@@ -301,12 +295,13 @@ namespace AndriodApp1
             {
                 browseResponseTask = SoulSeekState.SoulseekClient.BrowseAsync(username);
             }
-            catch(InvalidOperationException)
+            catch (InvalidOperationException)
             {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
                 return;
             }
-            Action<Task<BrowseResponse>> continueWithAction = new Action<Task<BrowseResponse>>((br) => {
+            Action<Task<BrowseResponse>> continueWithAction = new Action<Task<BrowseResponse>>((br) =>
+            {
                 //var arrayOfDir = br.Result.Directories.ToArray();
                 //for(int i=0;i<arrayOfDir.Length;i++)
                 //{
@@ -326,7 +321,7 @@ namespace AndriodApp1
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
                     return;
                 }
-                else if(br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException is TimeoutException)
+                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException is TimeoutException)
                 {
                     //timeout - this time when the connection was established, but the user has not written to us in over 15 (timeout) seconds. I tested and generally this is fixed by simply retrying.
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
@@ -337,12 +332,12 @@ namespace AndriodApp1
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_down), ToastLength.Short).Show(); });
                     return;
                 }
-                else if(br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
                     return;
                 }
-                else if(br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
+                else if (br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short).Show(); });
                     return;
@@ -359,17 +354,18 @@ namespace AndriodApp1
                 //List<string> terms = new List<string>();
                 //terms.Add("Collective");
                 string errorString = string.Empty;
-                var tree = CreateTree(br.Result,false, null, null, username, out errorString);
-                if(tree!=null)
+                var tree = CreateTree(br.Result, false, null, null, username, out errorString);
+                if (tree != null)
                 {
                     SoulSeekState.OnBrowseResponseReceived(br.Result, tree, username, atLocation);
                 }
 
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=> {
-                    if(tree==null)
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    if (tree == null)
                     {
                         //error case
-                        if(errorString != null && errorString!=string.Empty)
+                        if (errorString != null && errorString != string.Empty)
                         {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, errorString, ToastLength.Long).Show();
                         }
@@ -379,15 +375,16 @@ namespace AndriodApp1
                         }
                         return;
                     }
-                    if(SoulSeekState.MainActivityRef != null && ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
+                    if (SoulSeekState.MainActivityRef != null && ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
                     {
-                        if(SoulSeekState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))
+                        if (SoulSeekState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))
                         {
                             return; //they are already there... they see it populating, no need to show them notification...
                         }
                     }
 
-                    Action<View> action = new Action<View>((v) => {
+                    Action<View> action = new Action<View>((v) =>
+                    {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         SoulSeekState.ActiveActivityRef.StartActivity(intent);
@@ -397,15 +394,15 @@ namespace AndriodApp1
                     try
                     {
                         Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                        (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor( SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor) );//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
-                        sb.Show(); 
+                        (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                        sb.Show();
                     }
                     catch
                     {
                         try
                         {
                             Snackbar sb = Snackbar.Make(SoulSeekState.MainActivityRef.CurrentFocus, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SoulSeekState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor( SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor) );//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                             sb.Show();
                         }
                         catch
@@ -413,9 +410,9 @@ namespace AndriodApp1
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_response_received), ToastLength.Short).Show();
                         }
                     }
-                    
-                    
-                    });
+
+
+                });
             });
             browseResponseTask.ContinueWith(continueWithAction);
         }
@@ -444,13 +441,15 @@ namespace AndriodApp1
                 return;
             }
 
-            Action<Task> actualActionToPerform = new Action<Task>((Task connectionTask) => {
+            Action<Task> actualActionToPerform = new Action<Task>((Task connectionTask) =>
+            {
 
                 if (connectionTask.IsFaulted)
                 {
                     if (!(connectionTask.Exception.InnerException is FaultPropagationException)) //i.e. only show it once.
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                        {
                             Toast tst2 = Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                             tst2.Show();
                         }));
@@ -495,7 +494,8 @@ namespace AndriodApp1
 
         private void ReqFiles_Click(object sender, EventArgs e)
         {
-            Action<View> action = new Action<View>((v) => {
+            Action<View> action = new Action<View>((v) =>
+            {
                 this.Dismiss();
                 ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
@@ -503,7 +503,7 @@ namespace AndriodApp1
         }
 
 
-        public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation=null)
+        public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)
         {
             if (!SoulSeekState.currentlyLoggedIn)
             {
@@ -519,13 +519,14 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
                     if (t.IsFaulted)
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(()=>{RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
                 }));
             }
             else
@@ -576,12 +577,12 @@ namespace AndriodApp1
             //str.Close();
             //end logging code
             bool hideLocked = SoulSeekState.HideLockedResultsInBrowse;
-            if (b.DirectoryCount==0&&b.LockedDirectoryCount!=0&&hideLocked)
+            if (b.DirectoryCount == 0 && b.LockedDirectoryCount != 0 && hideLocked)
             {
                 errorMsgToToast = SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_onlylocked);
                 return null;
             }
-            else if(b.DirectoryCount==0&&b.LockedDirectoryCount==0)
+            else if (b.DirectoryCount == 0 && b.LockedDirectoryCount == 0)
             {
                 errorMsgToToast = SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_none);
                 return null;
@@ -590,19 +591,19 @@ namespace AndriodApp1
             //if the user is sharing only 1 empty directory, then show a message.
             //previously we let it through, but if they are sharing just 1 empty dir, that becomes the root dir
             //and it looks strange. if 2+ empty dirs the same problem does not occur.
-            if(hideLocked && b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
+            if (hideLocked && b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
             {
                 errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                 return null;
             }
-            else if(!hideLocked && (b.DirectoryCount + b.LockedDirectoryCount == 1)) //if just 1 dir total
+            else if (!hideLocked && (b.DirectoryCount + b.LockedDirectoryCount == 1)) //if just 1 dir total
             {
-                if(b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
+                if (b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
                 {
                     errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                     return null;
                 }
-                else if(b.LockedDirectoryCount == 1 && b.LockedDirectories.First().FileCount == 0)
+                else if (b.LockedDirectoryCount == 1 && b.LockedDirectories.First().FileCount == 0)
                 {
                     errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
                     return null;
@@ -615,7 +616,7 @@ namespace AndriodApp1
                 errorMsgToToast = String.Empty;
                 rootNode = Common.Algorithms.CreateTreeCore(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
                 throw e;
@@ -685,7 +686,7 @@ namespace AndriodApp1
                     }
 
                 }
-                if(!queuePaused)
+                if (!queuePaused)
                 {
                     Toast.MakeText(Context, Resource.String.download_is_starting, ToastLength.Short).Show();
                 }
@@ -734,20 +735,21 @@ namespace AndriodApp1
                 Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
                 return;
             }
-            if(MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
                 if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
-                        if (t.IsFaulted)
-                        {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
-                            return;
-                        }
-                        SoulSeekState.MainActivityRef.RunOnUiThread(DownloadSelectedLogic_NotQueued);
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        return;
+                    }
+                    SoulSeekState.MainActivityRef.RunOnUiThread(DownloadSelectedLogic_NotQueued);
                 }));
             }
             else
@@ -760,11 +762,11 @@ namespace AndriodApp1
         private void ListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
             bool alreadySelected = this.customAdapter.SelectedPositions.Contains<int>(e.Position);
-            if(!alreadySelected)
+            if (!alreadySelected)
             {
-                
+
 #pragma warning disable 0618
-                if((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
                     e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
@@ -848,22 +850,23 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
                     if (t.IsFaulted)
                     {
                         SoulSeekState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
                     MainActivity.LogDebug("DownloadDialog Dl_Click");
-                    DownloadAll(false); 
-                    
+                    DownloadAll(false);
+
                 }));
                 try
                 {
                     t.Wait(); //errors will propagate on WAIT.  They will not propagate on ContinueWith.  So you can get an exception thrown here if there is no network.
                     //we dont need to do anything if there is an exception thrown here.  Since the ContinueWith actually takes care of it by checking if task faulted..
                 }
-                catch(Exception exx)
+                catch (Exception exx)
                 {
                     MainActivity.LogDebug("DownloadDialog DlAll_Click: " + exx.Message);
                     return; //dont dismiss dialog.  that only happens on success..
@@ -882,8 +885,9 @@ namespace AndriodApp1
         {
             var task = CreateDownloadAllTask(queuePaused);
             task.Start(); //start task immediately
-            SoulSeekState.MainActivityRef.RunOnUiThread(() => {
-                if(!queuePaused)
+            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            {
+                if (!queuePaused)
                 {
                     Toast.MakeText(Context, Resource.String.download_is_starting, ToastLength.Short).Show();
                 }
@@ -900,10 +904,10 @@ namespace AndriodApp1
         {
             //TODO TODO downloadInfoList is stale..... not what you want to use....
             //TransfersFragment frag = (StaticHacks.TransfersFrag as TransfersFragment);
-            if(TransfersFragment.TransferItemManagerDL != null)
+            if (TransfersFragment.TransferItemManagerDL != null)
             {
                 bool dup = TransfersFragment.TransferItemManagerDL.Exists(file.Filename, searchResponse.Username, file.Size);
-                if(dup)
+                if (dup)
                 {
                     string msg = "Duplicate Detected: user:" + searchResponse.Username + "filename: " + file.Filename; //internal
                     MainActivity.LogDebug("CreateDownloadTask " + msg);
@@ -915,7 +919,7 @@ namespace AndriodApp1
             }
 
             MainActivity.LogDebug("CreateDownloadTask");
-            Task task = new Task(()=>
+            Task task = new Task(() =>
             {
                 SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, out _);
 
@@ -961,7 +965,7 @@ namespace AndriodApp1
                 }
                 transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
 
-                if(queuePaused)
+                if (queuePaused)
                 {
                     transferItem.State = TransferStates.Cancelled;
                     MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null)); //otherwise the ui will not refresh.
@@ -1002,17 +1006,17 @@ namespace AndriodApp1
             }
         }
 
-            /// <summary>
-            /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
-            /// its the same as the old SoulSeekState.SoulseekClient.DownloadAsync but with a few bells and whistles...
-            /// </summary>
-            /// <param name="username"></param>
-            /// <param name="fullfilename"></param>
-            /// <param name="size"></param>
-            /// <param name="cts"></param>
-            /// <param name="incompleteUri"></param>
-            /// <returns></returns>
-            public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth=1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
+        /// <summary>
+        /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
+        /// its the same as the old SoulSeekState.SoulseekClient.DownloadAsync but with a few bells and whistles...
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="fullfilename"></param>
+        /// <param name="size"></param>
+        /// <param name="cts"></param>
+        /// <param name="incompleteUri"></param>
+        /// <returns></returns>
+        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
         {
             MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
             Task dlTask = null;
@@ -1040,7 +1044,7 @@ namespace AndriodApp1
                         filename: fullfilename,
                         null,
                         size: size,
-                        startOffset:partialLength, //this will get populated
+                        startOffset: partialLength, //this will get populated
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
                         cancellationToken: cts.Token,
                         streamTask: GetStreamTask(username, fullfilename, depth),
@@ -1124,7 +1128,7 @@ namespace AndriodApp1
 
         public static int GetQueueLength(SearchResponse s)
         {
-            if(s.FreeUploadSlots>0)
+            if (s.FreeUploadSlots > 0)
             {
                 return 0;
             }
@@ -1137,8 +1141,9 @@ namespace AndriodApp1
         private Task CreateDownloadAllTask(bool queuePaused)
         {
             MainActivity.LogDebug("CreateDownloadAllTask");
-            Task task = new Task(() => { 
-                foreach(Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResultsInSearch))
+            Task task = new Task(() =>
+            {
+                foreach (Soulseek.File file in searchResponse.GetFiles(SoulSeekState.HideLockedResultsInSearch))
                 {
                     SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, out _);
                 }
@@ -1155,18 +1160,18 @@ namespace AndriodApp1
         {
             try
             {
-            Android.Content.Res.UiMode nightModeFlags = (c.Resources.Configuration.UiMode & Android.Content.Res.UiMode.NightMask);
-            switch(nightModeFlags)
-            {
-                case Android.Content.Res.UiMode.NightNo:
-                    return false;
-                case Android.Content.Res.UiMode.NightYes:
-                    return true;
-                case Android.Content.Res.UiMode.NightUndefined:
-                    return false;
-                default:
-                    return false;
-            }
+                Android.Content.Res.UiMode nightModeFlags = (c.Resources.Configuration.UiMode & Android.Content.Res.UiMode.NightMask);
+                switch (nightModeFlags)
+                {
+                    case Android.Content.Res.UiMode.NightNo:
+                        return false;
+                    case Android.Content.Res.UiMode.NightYes:
+                        return true;
+                    case Android.Content.Res.UiMode.NightUndefined:
+                        return false;
+                    default:
+                        return false;
+                }
             }
             catch (Exception e)
             {
@@ -1177,15 +1182,16 @@ namespace AndriodApp1
 
         public void DirectoryReceivedContAction(Task<Directory> dirTask)
         {
-            
+
             //if we have since closed the dialog, then this.View will be null
-            if(this.View==null)
+            if (this.View == null)
             {
                 return;
             }
-            SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            {
 
-                if(this.swipeRefreshLayout != null)
+                if (this.swipeRefreshLayout != null)
                 {
                     this.swipeRefreshLayout.Refreshing = false;
                 }
@@ -1196,9 +1202,9 @@ namespace AndriodApp1
                 }
                 if (dirTask.IsFaulted)
                 {
-                    if(dirTask.Exception?.InnerException?.Message!=null)
+                    if (dirTask.Exception?.InnerException?.Message != null)
                     {
-                        if(dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
+                        if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
                         {
                             Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.folder_request_timed_out), ToastLength.Short).Show();
                         }
@@ -1211,7 +1217,7 @@ namespace AndriodApp1
                 {
                     MainActivity.LogDebug("DirectoryReceivedContAction successful!");
                     ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
-                    if(listView.Count== dirTask.Result.Files.Count)
+                    if (listView.Count == dirTask.Result.Files.Count)
                     {
                         Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.folder_request_already_have), ToastLength.Short).Show();
                         return;
@@ -1219,7 +1225,7 @@ namespace AndriodApp1
                     this.UpdateSearchResponseWithFullDirectory(dirTask.Result);
                     this.UpdateListView();
                     this.UpdateSubHeader();
-                    
+
                     //this.customAdapter = new DownloadCustomAdapter(Context, dirTask.Result.Files.ToList());
                     //this.customAdapter.Owner = this;
                     //listView.Adapter = (customAdapter);
@@ -1254,12 +1260,13 @@ namespace AndriodApp1
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = Utils.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch,0).Filename);
-                    Action<View> action = new Action<View>((v) => {
+                    string startingDir = Utils.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SoulSeekState.HideLockedResultsInSearch, 0).Filename);
+                    Action<View> action = new Action<View>((v) =>
+                    {
                         this.Dismiss();
                         ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
-                    if(!SoulSeekState.HideLockedResultsInSearch && SoulSeekState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    if (!SoulSeekState.HideLockedResultsInSearch && SoulSeekState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
                     {
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;
@@ -1270,11 +1277,11 @@ namespace AndriodApp1
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
                     //transferItems.CopyTo(tempArry);
                     var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
-                    var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) + 
-                        searchResponse.QueueLength + 
-                        System.Environment.NewLine + 
-                        System.Environment.NewLine + 
-                        this.Context.GetString(Resource.String.upload_slots_) + 
+                    var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
+                        searchResponse.QueueLength +
+                        System.Environment.NewLine +
+                        System.Environment.NewLine +
+                        this.Context.GetString(Resource.String.upload_slots_) +
                         searchResponse.FreeUploadSlots).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
@@ -1285,7 +1292,7 @@ namespace AndriodApp1
                     //}
                     //else
                     //{
-                        diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(  SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor ) );
+                    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
                     //}
                     return true;
                 case Resource.Id.getUserInfo:
@@ -1339,7 +1346,7 @@ namespace AndriodApp1
             }
             itemView.setItem(GetItem(position));
 
-            if(SelectedPositions.Contains(position))
+            if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
@@ -1357,14 +1364,14 @@ namespace AndriodApp1
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
 #pragma warning disable 0618
-                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                 {
+                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                {
                     itemView.Background = SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                     //itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                 }
-                 else
-                 {
-                    itemView.Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback)); 
+                else
+                {
+                    itemView.Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback));
                     //itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellback));
                 }
             }
@@ -1405,7 +1412,7 @@ namespace AndriodApp1
 
         public void setItem(FileLockedUnlockedWrapper wrapper)
         {
-            if(wrapper.IsLocked)
+            if (wrapper.IsLocked)
             {
                 viewFilename.Text = new System.String(Java.Lang.Character.ToChars(0x1F512)) + Utils.GetFileNameFromFile(wrapper.File.Filename);
             }
@@ -1430,39 +1437,39 @@ namespace AndriodApp1
 
         private string GetStringFromAttributes(IReadOnlyCollection<Soulseek.FileAttribute> fileAttributes)
         {
-            if(fileAttributes.Count == 0)
+            if (fileAttributes.Count == 0)
             {
                 return "";
             }
             StringBuilder stringBuilder = new StringBuilder();
             string attrString = "";
-            foreach(FileAttribute attr in fileAttributes)
+            foreach (FileAttribute attr in fileAttributes)
             {
 
-                if(attr.Type == FileAttributeType.BitDepth)
+                if (attr.Type == FileAttributeType.BitDepth)
                 {
                     attrString = attr.Value.ToString();
                 }
-                else if(attr.Type == FileAttributeType.SampleRate)
+                else if (attr.Type == FileAttributeType.SampleRate)
                 {
                     attrString = (attr.Value / 1000.0).ToString();
                 }
-                else if(attr.Type == FileAttributeType.BitRate)
+                else if (attr.Type == FileAttributeType.BitRate)
                 {
                     attrString = attr.Value.ToString() + "kbs";
                 }
-                else if(attr.Type == FileAttributeType.VariableBitRate)
+                else if (attr.Type == FileAttributeType.VariableBitRate)
                 {
                     attrString = attr.Value.ToString() + "kbs";
                 }
-                else if(attr.Type == FileAttributeType.Length)
+                else if (attr.Type == FileAttributeType.Length)
                 {
                     continue;
                 }
                 stringBuilder.Append(attrString);
                 stringBuilder.Append(", ");
             }
-            if(stringBuilder.Length <= 3)
+            if (stringBuilder.Length <= 3)
             {
                 return "";
             }

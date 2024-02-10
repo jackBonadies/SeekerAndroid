@@ -16,48 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
-using Android;
+using AndriodApp1.Helpers;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Drm;
+using Android.Net;
 using Android.OS;
-using Android.Provider;
-using Soulseek;
 using Android.Runtime;
-using Android.Support.Design.Widget;
 using Android.Support.V4.App;
-using Android.Support.V4.Content;
 using Android.Support.V4.Provider;
-using Android.Support.V4.View;
 using Android.Support.V7.App;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
-using Common;
-using Java.IO;
+using SlskHelp;
+using Soulseek;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using log = Android.Util.Log;
-using System.Linq;
-using SlskHelp;
-
-using AndroidX.Work;
-using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
-using Android.Animation;
-using System.Collections.ObjectModel;
-using Android.Net.Wifi;
-using static Android.Provider.DocumentsContract;
-using Android.Util;
-using AndriodApp1.Extensions.SearchResponseExtensions;
-using Android.Net;
-using System.Linq.Expressions;
-using AndriodApp1;
-using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {

@@ -25,14 +25,13 @@ using Android.Text;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using Google.Android.Material.Snackbar;
-using Soulseek;
+using AndroidX.RecyclerView.Widget;
 using Common;
+using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AndroidX.RecyclerView.Widget;
 
 namespace AndriodApp1
 {
@@ -44,16 +43,16 @@ namespace AndriodApp1
 
         //private static IParcelable listViewState = null; restoring this did not restore scroll pos
         public View rootView;
-        
+
         private ListView listViewDirectories;
         private RecyclerView treePathRecyclerView;
         private LinearLayoutManager treePathLayoutManager;
         private TreePathRecyclerAdapter treePathRecyclerAdapter;
 
-        private static List<DataItem> dataItemsForListView = new List<DataItem>(); 
-        private static List<PathItem> pathItems = new List<PathItem>(); 
+        private static List<DataItem> dataItemsForListView = new List<DataItem>();
+        private static List<PathItem> pathItems = new List<PathItem>();
         public static string CurrentUsername;
-        private static Tuple<string,List<DataItem>> cachedFilteredDataItemsForListView = null;//to help with superSetQueries new Tuple<string, List<DataItem>>; 
+        private static Tuple<string, List<DataItem>> cachedFilteredDataItemsForListView = null;//to help with superSetQueries new Tuple<string, List<DataItem>>; 
         private static int diagnostics_count;
         private static List<DataItem> filteredDataItemsForListView = new List<DataItem>();
 
@@ -66,8 +65,8 @@ namespace AndriodApp1
         private bool isPaused = true;
         private View noBrowseView = null;
         private View separator = null;
-        public static Stack<Tuple<int,int>> ScrollPositionRestore = new Stack<Tuple<int, int>>(); //indexOfItem, topmargin. for going up/down dirs.
-        public static Tuple<int,int> ScrollPositionRestoreRotate = null; //for rotating..
+        public static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>(); //indexOfItem, topmargin. for going up/down dirs.
+        public static Tuple<int, int> ScrollPositionRestoreRotate = null; //for rotating..
 
         public static bool FilteredResults = false;
         public static string FilterString = string.Empty;
@@ -80,10 +79,10 @@ namespace AndriodApp1
 
         public BrowseFragment() : base()
         {
-            if(DebounceTimer==null)
+            if (DebounceTimer == null)
             {
                 DebounceTimer = new System.Timers.Timer(250);
-                
+
                 DebounceTimer.AutoReset = false;
             }
             DiagStopWatch.Start();
@@ -99,9 +98,9 @@ namespace AndriodApp1
                 int index = listViewDirectories.FirstVisiblePosition;
                 View v = listViewDirectories.GetChildAt(0);
                 int top = (v == null) ? 0 : (v.Top - listViewDirectories.PaddingTop);
-                ScrollPositionRestore.Push(new Tuple<int,int>(index,top));
+                ScrollPositionRestore.Push(new Tuple<int, int>(index, top));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase(e.Message + e.StackTrace);
             }
@@ -132,8 +131,8 @@ namespace AndriodApp1
         {
             try
             {
-                Tuple<int,int> pos = ScrollPositionRestore.Pop();
-                listViewDirectories.SetSelectionFromTop(pos.Item1,pos.Item2);
+                Tuple<int, int> pos = ScrollPositionRestore.Pop();
+                listViewDirectories.SetSelectionFromTop(pos.Item1, pos.Item2);
             }
             catch (Exception e)
             {
@@ -145,12 +144,13 @@ namespace AndriodApp1
         private void DebounceTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             UpdateFilteredResponses(); // this is the expensive function...
-            SoulSeekState.MainActivityRef.RunOnUiThread(() => {
-                lock(filteredDataItemsForListView)
+            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            {
+                lock (filteredDataItemsForListView)
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SoulSeekState.MainActivityRef, filteredDataItemsForListView,this); //enumeration exception (that is, before I added the lock)
+                    BrowseAdapter customAdapter = new BrowseAdapter(SoulSeekState.MainActivityRef, filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
                     ListView lv = rootView?.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                    if(lv!=null)
+                    if (lv != null)
                     {
                         lv.Adapter = (customAdapter);
                     }
@@ -175,8 +175,8 @@ namespace AndriodApp1
         {
             int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
 
-            Utils.SetMenuTitles(menu,username);
-            
+            Utils.SetMenuTitles(menu, username);
+
             if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
             {
                 if (numSelected == 0)
@@ -190,7 +190,7 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(true);
                     menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(true);
                     menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(true);
-                    if(numSelected > 1)
+                    if (numSelected > 1)
                     {
                         menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURLs);
                     }
@@ -207,9 +207,9 @@ namespace AndriodApp1
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if(item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
+            if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if(Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),username,SoulSeekState.ActiveActivityRef, null))
+                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -246,7 +246,7 @@ namespace AndriodApp1
                     string fullDirName = dataItemsForListView[0].Node.Data.Name;
                     string slskLink = Utils.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
                     Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef,Resource.String.LinkCopied, ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
@@ -320,7 +320,7 @@ namespace AndriodApp1
             listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
             this.RegisterForContextMenu(listViewDirectories);
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
-            
+
             treePathRecyclerView = this.rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewHorizontalPath);
             treePathLayoutManager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             treePathRecyclerView.SetLayoutManager(treePathLayoutManager);
@@ -328,10 +328,10 @@ namespace AndriodApp1
 
             //savedInstanceState can be null if first time.
             int[]? selectedPos = savedInstanceState?.GetIntArray("selectedPositions");
-            
+
             if (FilteredResults)
             {
-            //tempHackItemClick = true;
+                //tempHackItemClick = true;
                 lock (filteredDataItemsForListView)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
@@ -348,7 +348,7 @@ namespace AndriodApp1
                 }
             }
 
-            if(dataItemsForListView.Count!=0)
+            if (dataItemsForListView.Count != 0)
             {
                 pathItems = GetPathItems(dataItemsForListView);
             }
@@ -546,11 +546,11 @@ namespace AndriodApp1
 
         public override void OnSaveInstanceState(Bundle outState)
         {
-            outState.PutIntArray("selectedPositions",(this.listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.ToArray());
+            outState.PutIntArray("selectedPositions", (this.listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.ToArray());
             base.OnSaveInstanceState(outState);
         }
 
-        
+
 
         public override void OnViewStateRestored(Bundle savedInstanceState)
         {
@@ -569,7 +569,8 @@ namespace AndriodApp1
         public void BrowseResponseReceivedUI_Handler(object sender, EventArgs args)
         {
             //if the fragment was never created then this.Context will be null
-            SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            {
 
                 lock (dataItemsForListView)
                 {
@@ -583,7 +584,7 @@ namespace AndriodApp1
                     }
                 }
                 var pager = (Android.Support.V4.View.ViewPager)SoulSeekState.MainActivityRef?.FindViewById(Resource.Id.pager);
-                if (pager!=null && pager.CurrentItem == 3)
+                if (pager != null && pager.CurrentItem == 3)
                 {
                     SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
                     SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
@@ -595,7 +596,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             base.OnResume();
-            if(SoulSeekState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
+            if (SoulSeekState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
                 && !SoulSeekState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername)
                 && SoulSeekState.MainActivityRef.OnBrowseTab())
             {
@@ -699,7 +700,7 @@ namespace AndriodApp1
             string oldFilterString = FilteredResults ? FilterString : string.Empty;
             MainActivity.LogDebug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
-            if(e.Text!=null && e.Text.ToString()!=string.Empty && isPaused)
+            if (e.Text != null && e.Text.ToString() != string.Empty && isPaused)
             {
                 return;//this is the case where going from search fragment to browse fragment this event gets fired
                 //with an old e.text value and so its impossible to autoclear the value.
@@ -710,7 +711,7 @@ namespace AndriodApp1
                 FilteredResults = true;
                 FilterString = e.Text.ToString();
                 ParseFilterString();
-                
+
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
                 //UpdateFilteredResponses(); // this is the expensive function...
@@ -722,7 +723,7 @@ namespace AndriodApp1
             {
                 DebounceTimer.Stop();
                 FilteredResults = false;
-                lock(dataItemsForListView) //collection was modified exception here...
+                lock (dataItemsForListView) //collection was modified exception here...
                 {
                     BrowseAdapter customAdapter = new BrowseAdapter(SoulSeekState.MainActivityRef, dataItemsForListView, this);
                     ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
@@ -743,7 +744,7 @@ namespace AndriodApp1
         private bool MatchesCriteriaShallow(DataItem di)
         {
             string fullyQualifiedName = string.Empty;
-            if (di.File!=null)
+            if (di.File != null)
             {
                 //we are looking at files here...
                 fullyQualifiedName = di.Node.Data.Name + di.File.Filename;
@@ -818,35 +819,35 @@ namespace AndriodApp1
                     }
                 }
             }
-            if(includesAll)
+            if (includesAll)
             {
                 return true;
             }
             else
             {
                 //search children for a match.. if there are children.. else we are done..
-                if(di.Node.Children.Count==0&&(di.Directory==null || di.Directory.Files.Count==0))
+                if (di.Node.Children.Count == 0 && (di.Directory == null || di.Directory.Files.Count == 0))
                 {
                     return false;
                 }
-                else if(di.File!=null)
+                else if (di.File != null)
                 {
                     //then we are at the end
                     return false;
                 }
                 else
                 {
-                    if(di.Node.Children.Count!=0)
+                    if (di.Node.Children.Count != 0)
                     {
-                        foreach(TreeNode<Directory> child in di.Node.Children)
+                        foreach (TreeNode<Directory> child in di.Node.Children)
                         {
-                            if (MatchesCriteriaFull(new DataItem(child.Data,child)))
+                            if (MatchesCriteriaFull(new DataItem(child.Data, child)))
                             {
                                 return true;
                             }
                         }
                     }
-                    if(di.File == null && di.Directory!=null && di.Directory.Files.Count != 0)
+                    if (di.File == null && di.Directory != null && di.Directory.Files.Count != 0)
                     {
                         foreach (File f in di.Directory.Files)
                         {
@@ -868,8 +869,8 @@ namespace AndriodApp1
         /// <returns></returns>
         public static List<FullFileInfo> GetRecursiveFullFileInfo(DataItem di)
         {
-            List <FullFileInfo> listOfFiles = new List<FullFileInfo>();
-            AddFiles(listOfFiles,di);
+            List<FullFileInfo> listOfFiles = new List<FullFileInfo>();
+            AddFiles(listOfFiles, di);
             return listOfFiles;
         }
 
@@ -885,7 +886,7 @@ namespace AndriodApp1
 
         private static void AddFiles(List<FullFileInfo> fullFileList, DataItem d)
         {
-            if(d.File != null)
+            if (d.File != null)
             {
                 FullFileInfo f = new FullFileInfo();
                 f.FileName = d.File.Filename;
@@ -898,7 +899,7 @@ namespace AndriodApp1
             }
             else
             {
-                foreach(Soulseek.File slskFile in d.Directory.Files) //files in dir
+                foreach (Soulseek.File slskFile in d.Directory.Files) //files in dir
                 {
                     FullFileInfo f = new FullFileInfo();
                     f.FileName = slskFile.Filename;
@@ -908,7 +909,7 @@ namespace AndriodApp1
                     f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                     fullFileList.Add(f);
                 }
-                foreach(var childNode in d.Node.Children) //dirs in dir
+                foreach (var childNode in d.Node.Children) //dirs in dir
                 {
                     AddFiles(fullFileList, new DataItem(childNode.Data, childNode));
                 }
@@ -925,7 +926,7 @@ namespace AndriodApp1
             public int NumSubFolders = 0;
             public void AddFile(Soulseek.File file)
             {
-                if(file.Length.HasValue)
+                if (file.Length.HasValue)
                 {
                     LengthSeconds += file.Length.Value;
                 }
@@ -981,10 +982,10 @@ namespace AndriodApp1
             System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
             s.Start();
 
-            List < DataItem > filtered = new List<DataItem>();
+            List<DataItem> filtered = new List<DataItem>();
             foreach (DataItem di in unfiltered)
             {
-                if(MatchesCriteriaFull(di)) //change back to shallow...
+                if (MatchesCriteriaFull(di)) //change back to shallow...
                 {
                     filtered.Add(di);
                 }
@@ -1015,7 +1016,7 @@ namespace AndriodApp1
         /// </remarks>
         private static bool IsCurrentSearchMoreRestrictive(string currentSearch, string previousSearch)
         {
-            var currentWords = currentSearch.Split(' ',StringSplitOptions.RemoveEmptyEntries);
+            var currentWords = currentSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var previousWords = previousSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var currentExcludeWords = currentWords.Where(s => s.StartsWith("-") && s.Length != 1);
             var previousExcludeWords = previousWords.Where(s => s.StartsWith("-") && s.Length != 1);
@@ -1044,13 +1045,13 @@ namespace AndriodApp1
 
         private void UpdateFilteredResponses()
         {
-            lock(filteredDataItemsForListView)
+            lock (filteredDataItemsForListView)
             {
                 filteredDataItemsForListView.Clear();
                 //filteredBrowseTree = DownloadDialog.CreateTree(OriginalBrowseResponse,true,WordsToAvoid,WordsToInclude);
                 //string nameToFindInTheFilteredTree = OurCurrentLocation.Data.Name;
                 //TreeNode<Directory> item = GetNodeByName(filteredBrowseTree, nameToFindInTheFilteredTree);
-                if(cachedFilteredDataItemsForListView!= null && IsCurrentSearchMoreRestrictive(FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
+                if (cachedFilteredDataItemsForListView != null && IsCurrentSearchMoreRestrictive(FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
                 {
                     //MainActivity.LogDebug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
                     var test = FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
@@ -1062,13 +1063,13 @@ namespace AndriodApp1
                     var test = FilterBrowseList(dataItemsForListView);
                     filteredDataItemsForListView.AddRange(test);
                 }
-                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(FilterString,filteredDataItemsForListView.ToList());
+                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(FilterString, filteredDataItemsForListView.ToList());
             }
         }
 
         private void UpdateForScreenSize()
         {
-            if(!SoulSeekState.IsLowDpi())return;
+            if (!SoulSeekState.IsLowDpi()) return;
             try
             {
                 //this.rootView.FindViewById<TextView>(Resource.Id.browseQueue).SetTextSize(ComplexUnitType.Dip, 8);
@@ -1142,14 +1143,14 @@ namespace AndriodApp1
                 foreach (FullFileInfo ffi in slskFile)
                 {
                     //there is something before us
-                    if(linkToCopy != string.Empty)
+                    if (linkToCopy != string.Empty)
                     {
                         linkToCopy = linkToCopy + " \n";
                     }
                     linkToCopy = linkToCopy + Utils.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
                 }
                 Utils.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, linkToCopy);
-                if((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
+                if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
                 {
                     Toast.MakeText(this.Context, Resource.String.LinksCopied, ToastLength.Short).Show();
                 }
@@ -1164,11 +1165,11 @@ namespace AndriodApp1
 
         private void DownloadSelectedFiles(bool queuePaused)
         {
-            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count==0))
+            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
             {
                 Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
             }
-            else if((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
+            else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
             {
                 Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long).Show();
             }
@@ -1199,12 +1200,12 @@ namespace AndriodApp1
                 {
                     //List<Soulseek.File> slskFile = new List<File>();
                     //List<UserFilename> = new List<UserFilename>();
-                
+
                     lock (dataItemsForListView)
                     {
-                        for(int i=0;i< dataItemsForListView.Count;i++)
+                        for (int i = 0; i < dataItemsForListView.Count; i++)
                         {
-                            if((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -1228,10 +1229,12 @@ namespace AndriodApp1
                         return;
                     }
 
-                    t.ContinueWith(new Action<Task>((Task t) => {
+                    t.ContinueWith(new Action<Task>((Task t) =>
+                    {
                         if (t.IsFaulted)
                         {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            {
                                 //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
                                 //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
@@ -1376,7 +1379,7 @@ namespace AndriodApp1
                     recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), totalItems);
                 }
 
-                if(queuePaused)
+                if (queuePaused)
                 {
                     builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning_queue_paused), recursiveStr, topLevelStr));
                 }
@@ -1420,12 +1423,12 @@ namespace AndriodApp1
             {
                 int level = GetLevel(fullFileInfo.FullFileName);
                 int depth = level - lowestLevel + 1;
-                #if DEBUG
-                if(depth==0)
+#if DEBUG
+                if (depth == 0)
                 {
                     throw new Exception("depth is 0");
                 }
-                #endif
+#endif
                 fullFileInfo.Depth = depth;
             }
 
@@ -1449,9 +1452,9 @@ namespace AndriodApp1
         private static int GetLevel(string fileName)
         {
             int count = 0;
-            foreach(char c in fileName)
+            foreach (char c in fileName)
             {
-                if(c=='\\')
+                if (c == '\\')
                 {
                     count++;
                 }
@@ -1465,9 +1468,9 @@ namespace AndriodApp1
         /// <param name="queuePaused"></param>
         /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting a single folder.</param>
         /// <param name="positionOfFolderToDownload"></param>
-        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, int positionOfFolderToDownload=-1)
+        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, int positionOfFolderToDownload = -1)
         {
-            if(downloadShownInListView)
+            if (downloadShownInListView)
             {
                 dataItemsForDownload = dataItemsForListView.ToList();
                 filteredDataItemsForDownload = filteredDataItemsForListView.ToList();
@@ -1487,7 +1490,7 @@ namespace AndriodApp1
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                 return;
             }
-            if(FilteredResults && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
+            if (FilteredResults && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
@@ -1531,10 +1534,12 @@ namespace AndriodApp1
                     return;
                 }
 
-                t.ContinueWith(new Action<Task>((Task t) => {
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
                             //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
                             //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
@@ -1598,9 +1603,9 @@ namespace AndriodApp1
         //                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { 
         //                        //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
         //                        //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
-                                
+
         //                        Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
-                                
+
         //                        });
         //                    return;
         //                }
@@ -1619,19 +1624,20 @@ namespace AndriodApp1
 
         public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string _username)
         {
-            if(_username == SoulSeekState.Username)
+            if (_username == SoulSeekState.Username)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self),ToastLength.Long).Show(); });
-                return new Task(()=>{ }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long).Show(); });
+                return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
             }
             MainActivity.LogDebug("CreateDownloadAllTask");
             bool allExist = true; //only show the transfer exists if all transfers in question do already exist
-            Task task = new Task(() => {
+            Task task = new Task(() =>
+            {
                 foreach (FullFileInfo file in files)
                 {
 
                     DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, out bool transferExists);
-                    if(!transferExists)
+                    if (!transferExists)
                     {
                         allExist = false;
                     }
@@ -1642,14 +1648,17 @@ namespace AndriodApp1
                 Action toast1 = null;
                 if (allExist)
                 {
-                    toast1 = new Action(() => {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show(); });
-                
+                    toast1 = new Action(() =>
+                    {
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show();
+                    });
+
                 }
                 else
                 {
-                    toast1 = new Action(() => {
-                        if(queuePaused)
+                    toast1 = new Action(() =>
+                    {
+                        if (queuePaused)
                         {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.QueuedForDownload, ToastLength.Short).Show();
                         }
@@ -1657,7 +1666,7 @@ namespace AndriodApp1
                         {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.download_is_starting, ToastLength.Short).Show();
                         }
-                        
+
                     });
                 }
 
@@ -1720,7 +1729,7 @@ namespace AndriodApp1
             else
             {
                 //no special long click event if file.
-                this.ListViewDirectories_ItemClick(sender, new AdapterView.ItemClickEventArgs(e.Parent,e.View, e.Position, e.Id));
+                this.ListViewDirectories_ItemClick(sender, new AdapterView.ItemClickEventArgs(e.Parent, e.View, e.Position, e.Id));
             }
         }
 
@@ -1756,7 +1765,7 @@ namespace AndriodApp1
             cachedFilteredDataItemsForListView = null;
             bool filteredResults = FilteredResults;
             DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
-            if(itemSelected==null)
+            if (itemSelected == null)
             {
                 return;
             }
@@ -1767,10 +1776,10 @@ namespace AndriodApp1
                 //DataItem itemSelected = dataItemsForListView[e.Position];
                 if (itemSelected.IsDirectory())
                 {
-                    if(itemSelected.Node.Children.Count==0 && (itemSelected.Directory==null || itemSelected.Directory.FileCount==0 ))
+                    if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
                     {
                         //dont let them do this... if this happens then there is no way to get back up...
-                        Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty),ToastLength.Short).Show();
+                        Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short).Show();
                         return;
                     }
                     SaveScrollPosition();
@@ -1824,13 +1833,13 @@ namespace AndriodApp1
                     }
 
                 }
-                
+
             }
-            lock(dataItemsForListView)
+            lock (dataItemsForListView)
             {
-                lock(filteredDataItemsForListView)
+                lock (filteredDataItemsForListView)
                 {
-                    if(!isFile && filteredResults)
+                    if (!isFile && filteredResults)
                     {
                         SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
                     }
@@ -1841,14 +1850,14 @@ namespace AndriodApp1
         private void ClearAllSelectedPositions()
         {
             //nullref crash was here.. not worth crashing over...
-            if(listViewDirectories==null)
+            if (listViewDirectories == null)
             {
                 return;
             }
-            for(int i=0;i<listViewDirectories.Count;i++)
+            for (int i = 0; i < listViewDirectories.Count; i++)
             {
                 View v = listViewDirectories.GetChildAt(i);
-                if(v!=null)
+                if (v != null)
                 {
                     listViewDirectories.GetChildAt(i).Background = null;
                 }
@@ -1864,7 +1873,7 @@ namespace AndriodApp1
         /// 
         /// </summary>
         /// <returns>whether we can successfully go up.</returns>
-        private bool GoUpDirectory(int additionalLevels=0)
+        private bool GoUpDirectory(int additionalLevels = 0)
         {
             cachedFilteredDataItemsForListView = null;
             bool filteredResults = FilteredResults;
@@ -1895,12 +1904,12 @@ namespace AndriodApp1
                 {
                     return false; //we must be at or near the highest
                 }
-                for(int i=0;i<additionalLevels;i++)
+                for (int i = 0; i < additionalLevels; i++)
                 {
                     item = item.Parent;
                 }
                 dataItemsForListView.Clear();
-                
+
                 foreach (TreeNode<Directory> d in item.Children) //nullref TODO TODO
                 {
                     dataItemsForListView.Add(new DataItem(d.Data, d));
@@ -1919,11 +1928,11 @@ namespace AndriodApp1
                     SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
                     //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
                 }
-                
+
             }
-            lock(dataItemsForListView)
+            lock (dataItemsForListView)
             {
-                lock(filteredDataItemsForListView)
+                lock (filteredDataItemsForListView)
                 {
                     SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
                     //if (filteredResults)
@@ -1943,7 +1952,7 @@ namespace AndriodApp1
         /// </summary>
         /// <param name="toFilter"></param>
         /// <param name="nonFilteredItems"></param>
-        public void SetBrowseAdapters(bool toFilter, List<DataItem> nonFilteredItems, bool fullRefreshOfPathItems, bool goingUp=false)
+        public void SetBrowseAdapters(bool toFilter, List<DataItem> nonFilteredItems, bool fullRefreshOfPathItems, bool goingUp = false)
         {
             if (toFilter)
             {
@@ -1962,7 +1971,7 @@ namespace AndriodApp1
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged();
             }
-            else if(goingUp)
+            else if (goingUp)
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged(); //removed individual updates due to weird graphical glitches...
                 //treePathRecyclerAdapter.NotifyItemChanged(pathItems.Count-1); //since now the last node (remove separator)
@@ -1992,12 +2001,12 @@ namespace AndriodApp1
 
         public static List<PathItem> GetPathItems(List<DataItem> nonFilteredDataItemsForListView)
         {
-            if(nonFilteredDataItemsForListView.Count == 0)
+            if (nonFilteredDataItemsForListView.Count == 0)
             {
                 return new List<PathItem>();
             }
             List<PathItem> pathItemsList = new List<PathItem>();
-            if(nonFilteredDataItemsForListView[0].IsDirectory())
+            if (nonFilteredDataItemsForListView[0].IsDirectory())
             {
                 GetPathItemsInternal(pathItemsList, nonFilteredDataItemsForListView[0].Node.Parent, true);
             }
@@ -2012,7 +2021,7 @@ namespace AndriodApp1
 
         private static void FixNullRootDisplayName(List<PathItem> pathItemsList)
         {
-            if(pathItemsList.Count>0 && pathItemsList[0].DisplayName == string.Empty)
+            if (pathItemsList.Count > 0 && pathItemsList[0].DisplayName == string.Empty)
             {
                 pathItemsList[0].DisplayName = "root";
             }
@@ -2022,7 +2031,7 @@ namespace AndriodApp1
         {
             string displayName = Utils.GetFileNameFromFile(treeNode.Data.Name);
             pathItems.Add(new PathItem(displayName, lastChild));
-            if (treeNode.Parent==null)
+            if (treeNode.Parent == null)
             {
                 return;
             }
@@ -2045,9 +2054,9 @@ namespace AndriodApp1
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
-            if(item.GroupId == UNIQUE_BROWSE_GROUP_ID)
+            if (item.GroupId == UNIQUE_BROWSE_GROUP_ID)
             {
-                switch(item.ItemId)
+                switch (item.ItemId)
                 {
                     case 0:
                         DownloadUserFilesEntry(false, false, ItemPositionLongClicked);
@@ -2076,7 +2085,7 @@ namespace AndriodApp1
         {
             string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", Utils.GetHumanReadableTime(folderSummary.LengthSeconds));
             string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
-                
+
             string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", Utils.GetHumanReadableSize(folderSummary.SizeBytes));
 
             string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
@@ -2089,15 +2098,15 @@ namespace AndriodApp1
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var diag = builder.SetMessage(numFilesString + 
-                System.Environment.NewLine + 
-                System.Environment.NewLine + 
-                numSubFoldersString + 
-                System.Environment.NewLine + 
-                System.Environment.NewLine + 
-                sizeString + 
-                System.Environment.NewLine + 
-                System.Environment.NewLine + 
+            var diag = builder.SetMessage(numFilesString +
+                System.Environment.NewLine +
+                System.Environment.NewLine +
+                numSubFoldersString +
+                System.Environment.NewLine +
+                System.Environment.NewLine +
+                sizeString +
+                System.Environment.NewLine +
+                System.Environment.NewLine +
                 lengthTime).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
@@ -2105,16 +2114,16 @@ namespace AndriodApp1
 
         public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
         {
-            if(rootTree.Data.Name == nameToFindDirName)
+            if (rootTree.Data.Name == nameToFindDirName)
             {
                 return rootTree;
             }
             else
             {
-                foreach(TreeNode<Directory> d in rootTree.Children)
+                foreach (TreeNode<Directory> d in rootTree.Children)
                 {
                     var node = GetNodeByName(d, nameToFindDirName);
-                    if(node!=null)
+                    if (node != null)
                     {
                         return node;
                     }
@@ -2130,9 +2139,10 @@ namespace AndriodApp1
             WordsToAvoid.Clear();
             WordsToInclude.Clear();
             //FilterSpecialFlags.Clear();
-            if(BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
+            if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
-                SoulSeekState.MainActivityRef.RunOnUiThread(() => {
+                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                {
                     EditText filterText = BrowseFragment.Instance.rootView.FindViewById<EditText>(Resource.Id.filterText);
                     filterText.Text = string.Empty;
                     SearchFragment.UpdateDrawableState(filterText, true);
@@ -2156,19 +2166,19 @@ namespace AndriodApp1
                 dataItemsForListView.Clear();//clear old
                 //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
                 username = e.Username;
-                if(e.StartingLocation!=null&&e.StartingLocation!=string.Empty)
+                if (e.StartingLocation != null && e.StartingLocation != string.Empty)
                 {
                     var staringPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
 
-                    if(staringPoint==null)
+                    if (staringPoint == null)
                     {
                         MainActivity.LogFirebase("SoulSeekState_BrowseResponseReceived: startingPoint is null");
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location),ToastLength.Long).Show(); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long).Show(); });
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
                     //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
-                    foreach(TreeNode<Directory> d in staringPoint.Children)
+                    foreach (TreeNode<Directory> d in staringPoint.Children)
                     {
                         dataItemsForListView.Add(new DataItem(d.Data, d));
                     }
@@ -2182,9 +2192,9 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    foreach(TreeNode<Directory> d in e.BrowseResponseTree.Children)
+                    foreach (TreeNode<Directory> d in e.BrowseResponseTree.Children)
                     {
-                        dataItemsForListView.Add(new DataItem(d.Data,d));
+                        dataItemsForListView.Add(new DataItem(d.Data, d));
                     }
 
                     //here we do files as well......  **I added this bc on your first browse you will not get any root dir files....
@@ -2261,13 +2271,13 @@ namespace AndriodApp1
             }
             public bool IsDirectory()
             {
-                return Directory!=null;
+                return Directory != null;
             }
             public string GetDisplayName()
             {
-                if(IsDirectory())
+                if (IsDirectory())
                 {
-                    if(this.Node.IsLocked)
+                    if (this.Node.IsLocked)
                     {
                         return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Utils.GetFileNameFromFile(Name);
                     }
@@ -2397,7 +2407,7 @@ namespace AndriodApp1
             {
                 InnerPathItem = item;
                 ViewFolderName.Text = item.DisplayName;
-                if(item.IsLastNode)
+                if (item.IsLastNode)
                 {
                     ViewFolderName.Clickable = false;
                     viewSeparator.Visibility = ViewStates.Gone;
@@ -2424,7 +2434,7 @@ namespace AndriodApp1
             public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner, int[]? selectedPos) : base(c, 0, items)
             {
                 Owner = owner;
-                if(selectedPos!=null && selectedPos.Count()!=0)
+                if (selectedPos != null && selectedPos.Count() != 0)
                 {
                     SelectedPositions = selectedPos.ToList();
                 }
@@ -2467,12 +2477,12 @@ namespace AndriodApp1
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                     {
                         itemView.DisplayName.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                                                   //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
+                                                               //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
                     }
                     else
                     {
                         itemView.DisplayName.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                                                   //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
+                                                               //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
                     }
                 }
                 var dataItem = GetItem(position);
@@ -2510,18 +2520,20 @@ namespace AndriodApp1
             // Set up the input
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
-            
+
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
-            Action<View> goSnackBarAction = new Action<View>((View v) => { 
-                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true); });
+            Action<View> goSnackBarAction = new Action<View>((View v) =>
+            {
+                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+            });
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
                 //Do the Browse Logic...
                 string usernameToBrowse = input.Text;
-                if(usernameToBrowse==null|| usernameToBrowse==string.Empty)
+                if (usernameToBrowse == null || usernameToBrowse == string.Empty)
                 {
                     Toast.MakeText(this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
                     if (sender is AndroidX.AppCompat.App.AlertDialog aDiag1) //actv
@@ -2536,7 +2548,7 @@ namespace AndriodApp1
                 }
                 SoulSeekState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
                 DownloadDialog.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
-                if(sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
                 }
@@ -2557,7 +2569,7 @@ namespace AndriodApp1
                 }
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction =  (object sender, TextView.EditorActionEventArgs e) =>
+            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
             {
                 if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
                     e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
@@ -2578,11 +2590,11 @@ namespace AndriodApp1
                         MainActivity.LogFirebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
-                    eventHandler(sender,null);
+                    eventHandler(sender, null);
                 }
             };
 
-            System.EventHandler < TextView.KeyEventArgs > keypressAction = (object sender, TextView.KeyEventArgs e) =>
+            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
@@ -2625,7 +2637,7 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if(SoulSeekState.MainActivityRef==null || this.Activity==null)
+                if (SoulSeekState.MainActivityRef == null || this.Activity == null)
                 {
                     MainActivity.LogFirebase("WindowManagerBadTokenException null activities");
                 }
@@ -2636,7 +2648,7 @@ namespace AndriodApp1
                     MainActivity.LogFirebase("WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 if (SoulSeekState.MainActivityRef == null || this.Activity == null)
                 {
@@ -2645,11 +2657,11 @@ namespace AndriodApp1
                 else
                 {
                     bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
-                    bool isOurActivityFinishing = this.Activity.IsFinishing; 
+                    bool isOurActivityFinishing = this.Activity.IsFinishing;
                     MainActivity.LogFirebase("Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
-            
+
         }
 
 

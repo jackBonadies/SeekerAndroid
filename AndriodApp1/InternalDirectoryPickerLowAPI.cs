@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Android.App;
+﻿using Android.App;
 //using AndroidX.AppCompat.App;
 using Android.Content;
 using Android.Graphics;
-using Android.OS;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Java.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Environment = Android.OS.Environment;
 //using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
@@ -76,7 +74,7 @@ namespace AndriodApp1
             }
 
             _mContext = context;
-            
+
             Java.IO.File[] externalRootDirs = context.GetExternalFilesDirs(null);
 
             if (externalRootDirs != null)
@@ -89,27 +87,27 @@ namespace AndriodApp1
                 _topPaths = externalRootDirs.Select(f => f.AbsolutePath).ToArray();
             }
 
-            if(externalRootDirs != null && externalRootDirs.Count()>1) //this means user has SDCARD
+            if (externalRootDirs != null && externalRootDirs.Count() > 1) //this means user has SDCARD
             {
                 //get root (I assume this is going to be /storage/ but just in case)
                 string[] folderNames = externalRootDirs[0].AbsolutePath.Split('/');
                 string rootFolder = "storage";
                 foreach (string foldername in folderNames)
                 {
-                    if(foldername!=string.Empty)
+                    if (foldername != string.Empty)
                     {
                         rootFolder = foldername;
                         break;
                     }
                 }
-                if(rootFolder!="storage")
+                if (rootFolder != "storage")
                 {
                     MainActivity.LogFirebase("sdcard root is: " + rootFolder);
                 }
                 _mSdcardDirectory = @"/" + rootFolder + @"/";
                 //this allows one to press '..' to go above the typical emulated root.
             }
-            else if(Environment.ExternalStorageDirectory != null)
+            else if (Environment.ExternalStorageDirectory != null)
             {
                 _mSdcardDirectory = Environment.ExternalStorageDirectory.AbsolutePath;
             }
@@ -117,7 +115,7 @@ namespace AndriodApp1
             {
                 _mSdcardDirectory = "/"; //this is valid.
             }
-            
+
             try
             {
                 _mSdcardDirectory = new File(_mSdcardDirectory).CanonicalPath;
@@ -132,12 +130,12 @@ namespace AndriodApp1
         private List<string> PsuedoListFiles(File f)
         {
             List<string> dirPaths = new List<string>();
-            if(_topPaths != null)
+            if (_topPaths != null)
             {
                 string fullPath = f.AbsolutePath;
                 foreach (var cand in _topPaths)
                 {
-                    
+
                     if (cand.StartsWith(fullPath))
                     {
                         //int plusOne = fullPath.EndsWith('/') ? 0 : 1;
@@ -240,7 +238,7 @@ namespace AndriodApp1
 
         private void SetPositiveButtonState()
         {
-            if(_mDir == null)
+            if (_mDir == null)
             {
                 return;
             }
@@ -248,7 +246,7 @@ namespace AndriodApp1
             try
             {
                 File dirFile = new File(_mDir);
-                if(dirFile.CanWrite())
+                if (dirFile.CanWrite())
                 {
                     _dirsDialog.GetButton((int)DialogButtonType.Positive).Enabled = true;
                 }
@@ -257,7 +255,7 @@ namespace AndriodApp1
                     _dirsDialog.GetButton((int)DialogButtonType.Positive).Enabled = false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
             }
         }
@@ -268,9 +266,9 @@ namespace AndriodApp1
             public SimpleFileDialog FileDialog = null;
             public bool OnKey(IDialogInterface dialog, [GeneratedEnum] Keycode keyCode, KeyEvent e)
             {
-                if(keyCode==Keycode.Back && e.Action == KeyEventActions.Up)
+                if (keyCode == Keycode.Back && e.Action == KeyEventActions.Up)
                 {
-                    if(this.FileDialog.AtRoot())
+                    if (this.FileDialog.AtRoot())
                     {
                         return false;
                     }
@@ -318,7 +316,7 @@ namespace AndriodApp1
                 }
 
                 var listedFiles = dirFile.ListFiles();
-                if(listedFiles == null)
+                if (listedFiles == null)
                 {
                     // file.ListFiles() returns null if at '/storage/emulated/' or '/storage/'
                     var psuedoListFiles = PsuedoListFiles(dirFile);
@@ -353,7 +351,7 @@ namespace AndriodApp1
 
             // '(filename' gets placed before '..'. always put '..' first.
             int indexOfUpDir = dirs.IndexOf(UpDir);
-            if(indexOfUpDir > 0)
+            if (indexOfUpDir > 0)
             {
                 dirs.RemoveAt(indexOfUpDir);
                 dirs.Insert(0, UpDir);
@@ -413,7 +411,7 @@ namespace AndriodApp1
             _mTitleView1.Gravity = GravityFlags.CenterVertical;
             //_mTitleView1.SetBackgroundColor(Color.DarkGray); // dark gray 	-12303292
             _mTitleView1.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor));
-            _mTitleView1.SetPadding((int)Math.Ceiling(10*density), (int)Math.Ceiling(10 * density), 0, (int)Math.Ceiling(15 * density));
+            _mTitleView1.SetPadding((int)Math.Ceiling(10 * density), (int)Math.Ceiling(10 * density), 0, (int)Math.Ceiling(15 * density));
             _mTitleView1.SetTextSize(ComplexUnitType.Dip, 18);
             _mTitleView1.SetTypeface(null, TypefaceStyle.Bold);
             // Create custom view for AlertDialog title
@@ -457,7 +455,7 @@ namespace AndriodApp1
             titleLayout.Orientation = Orientation.Vertical;
 
             _listView = new ListView(_mContext);
-            
+
             _listView.SetPadding((int)Math.Ceiling(10 * density), (int)Math.Ceiling(5 * density), 0, (int)Math.Ceiling(3 * density));
             _listView.ItemClick += onClickListener;
             _listView.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent, 1f);

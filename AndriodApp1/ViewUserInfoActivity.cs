@@ -17,18 +17,14 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using AndriodApp1.Helpers;
 using Android.App;
 using Android.Content;
+using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Widget;
-using Android.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -97,7 +93,7 @@ namespace AndriodApp1
                     this.StartActivity(intentMsg);
                     return true;
                 case Resource.Id.addUser:
-                    UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, this.UserToView, null); 
+                    UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, this.UserToView, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressed();
@@ -118,26 +114,26 @@ namespace AndriodApp1
         protected override void OnSaveInstanceState(Bundle outState)
         {
             outState.PutString("UserToView", UserToView);
-            if(userInfo!=null)
+            if (userInfo != null)
             {
                 outState.PutBoolean("UserInfo.HasPicture", userInfo.HasPicture);
-                if(userInfo.HasPicture)
+                if (userInfo.HasPicture)
                 {
-                    outState.PutByteArray("UserInfo.Picture",userInfo.Picture);
+                    outState.PutByteArray("UserInfo.Picture", userInfo.Picture);
                 }
                 outState.PutString("UserInfo.Description", userInfo.Description);
                 outState.PutInt("UserInfo.QueueLength", userInfo.QueueLength);
                 outState.PutInt("UserInfo.UploadSlots", userInfo.UploadSlots);
                 outState.PutBoolean("UserInfo.HasFreeUploadSlot", userInfo.HasFreeUploadSlot);
             }
-            if(userData!=null)
+            if (userData != null)
             {
-                outState.PutInt("userData.AverageSpeed",userData.AverageSpeed);
+                outState.PutInt("userData.AverageSpeed", userData.AverageSpeed);
                 outState.PutString("userData.CountryCode", userData.CountryCode);
                 outState.PutInt("userData.DirectoryCount", userData.DirectoryCount);
                 outState.PutLong("userData.DownloadCount", userData.DownloadCount);
                 outState.PutInt("userData.FileCount", userData.FileCount);
-                if(userData.SlotsFree.HasValue)
+                if (userData.SlotsFree.HasValue)
                 {
                     outState.PutInt("userData.SlotsFree", userData.SlotsFree.Value);
                 }
@@ -226,7 +222,7 @@ namespace AndriodApp1
                 userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, SoulSeekState.UploadSpeed, 0, SoulSeekState.SharedFileCache?.FileCount ?? 0, SoulSeekState.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = SeekerApplication.UserInfoResponseHandler(UserToView, null).Result; //the task is already completed.  (task.fromresult).
             }
-            else if(UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
+            else if (UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
             {
                 UserListItem uli = RequestedUserInfoHelper.GetInfoForUser(UserToView);
                 userInfo = uli.UserInfo; //null ref on uli.
@@ -248,7 +244,7 @@ namespace AndriodApp1
 
 
 
-            
+
         }
 
         protected override void OnResume()
@@ -282,12 +278,12 @@ namespace AndriodApp1
                 int speedKbs = userData.AverageSpeed / 1000; //someone got a nullref here.... this can happen if the server is slower to respond than the user...
                 speedString = speedKbs.ToString("N0") + " kbs";
             }
-            userStats.Text = string.Format(Resources.GetString(Resource.String.user_status_string),userInfo.UploadSlots, userInfo.HasFreeUploadSlot, userInfo.QueueLength, speedString, userDataNull ? "..." : userData.FileCount.ToString("N0"), userDataNull ? "..." : userData.DirectoryCount.ToString("N0"));
+            userStats.Text = string.Format(Resources.GetString(Resource.String.user_status_string), userInfo.UploadSlots, userInfo.HasFreeUploadSlot, userInfo.QueueLength, speedString, userDataNull ? "..." : userData.FileCount.ToString("N0"), userDataNull ? "..." : userData.DirectoryCount.ToString("N0"));
         }
 
         private void SetBioStatus()
         {
-            if(userInfo.Description!=null && userInfo.Description!=string.Empty)
+            if (userInfo.Description != null && userInfo.Description != string.Empty)
             {
                 userBio.Text = userInfo.Description;
             }
@@ -303,20 +299,20 @@ namespace AndriodApp1
         {
             //if (v.Id == Resource.Id.user_info_picture)
             //{
-                //menu.Add(0, 0, 0, Resource.String.copy_image);
-                menu.Add(1, 1, 1, Resource.String.save_image);
+            //menu.Add(0, 0, 0, Resource.String.copy_image);
+            menu.Add(1, 1, 1, Resource.String.save_image);
             //}
             base.OnCreateContextMenu(menu, v, menuInfo);
         }
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
-            switch(item.ItemId)
+            switch (item.ItemId)
             {
                 //case 0: //"Copy Image"
-                    //var clipboardManager = this.GetSystemService(Context.ClipboardService) as ClipboardManager;
-                    //ClipData clip = ClipData.New("simple text", txt);
-                    //clipboardManager.PrimaryClip = clip;
+                //var clipboardManager = this.GetSystemService(Context.ClipboardService) as ClipboardManager;
+                //ClipData clip = ClipData.New("simple text", txt);
+                //clipboardManager.PrimaryClip = clip;
                 case 1: //"Save Image"
                     SaveImage(userInfo.Picture);
                     Toast.MakeText(this, Resource.String.success_save, ToastLength.Short).Show();
@@ -340,7 +336,7 @@ namespace AndriodApp1
                 //remember, the picture is simply a byte array that another user sends you.
                 //  it can be literally anything (a gif - which actually decodes fine, a .svg - 
                 //  which doesnt, a .txt, etc.). Nicotine for example allows any file to be selected.
-                if(loadedBitmap == null)
+                if (loadedBitmap == null)
                 {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
                     string uname = userData != null ? userData.Username : "no user";
@@ -475,7 +471,7 @@ namespace AndriodApp1
             }
         }
 
-        private ContentValues GetContentValues() 
+        private ContentValues GetContentValues()
         {
             ContentValues valuesForContentResolver = new ContentValues();
             DateTime now = Utils.GetDateTimeNowSafe();
@@ -493,7 +489,7 @@ namespace AndriodApp1
             {
                 //try
                 //{
-                outStream.Write(pic,0,pic.Length);
+                outStream.Write(pic, 0, pic.Length);
                 outStream.Close();
                 //}
                 //catch (e: Exception) 

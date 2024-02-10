@@ -1,11 +1,9 @@
-﻿using Org.Apache.Http.Conn;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 
 namespace AndriodApp1
 {

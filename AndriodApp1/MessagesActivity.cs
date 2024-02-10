@@ -23,8 +23,6 @@ using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.OS;
-using Android.Runtime;
-using Android.Text;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
@@ -36,14 +34,12 @@ using Google.Android.Material.Snackbar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AndriodApp1
 {
 
-    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar",LaunchMode =Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
+    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
@@ -57,7 +53,7 @@ namespace AndriodApp1
 
         public void ChangeToInnerFragment(string username)
         {
-            if(IsFinishing || IsDestroyed)
+            if (IsFinishing || IsDestroyed)
             {
                 return;
             }
@@ -71,7 +67,7 @@ namespace AndriodApp1
         protected override void OnSaveInstanceState(Bundle outState)
         {
             var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if(f != null && f.IsVisible)
+            if (f != null && f.IsVisible)
             {
                 outState.PutBoolean("SaveStateAtInner", true);
             }
@@ -91,14 +87,14 @@ namespace AndriodApp1
         {
             var fOuter = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
             var fInner = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if(fOuter!=null && fOuter.IsVisible)
+            if (fOuter != null && fOuter.IsVisible)
             {
                 MenuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
             }
-            else if(fInner!= null && fInner.IsVisible)
+            else if (fInner != null && fInner.IsVisible)
             {
                 MenuInflater.Inflate(Resource.Menu.messages_inner_list_menu, menu);
-                
+
             }
             else
             {
@@ -116,7 +112,7 @@ namespace AndriodApp1
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if(Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username,this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+            if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
             {
                 return true;
             }
@@ -126,7 +122,7 @@ namespace AndriodApp1
                     ShowEditTextMessageUserDialog();
                     return true;
                 case Resource.Id.action_add_to_user_list:
-                    UserListActivity.AddUserAPI(this, MessagesInnerFragment.Username,new Action(()=>{Toast.MakeText(this,Resource.String.success_added_user, ToastLength.Short).Show(); }));
+                    UserListActivity.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { Toast.MakeText(this, Resource.String.success_added_user, ToastLength.Short).Show(); }));
                     return true;
                 case Resource.Id.action_search_files:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -137,7 +133,8 @@ namespace AndriodApp1
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.action_browse_files:
-                    Action<View> action = new Action<View>((v) => {
+                    Action<View> action = new Action<View>((v) =>
+                    {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
@@ -153,15 +150,15 @@ namespace AndriodApp1
                     DELETED_POSITION = int.MaxValue;
                     MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out DELETED_DATA);
                     MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
-                    this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"),true);
+                    this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
                     return true;
                 case Resource.Id.action_delete_all_messages:
-                    if(MessageController.Messages.Count==0) //nullref
+                    if (MessageController.Messages.Count == 0) //nullref
                     {
-                        Toast.MakeText(this,this.GetString(Resource.String.deleted_all_no_messages),ToastLength.Long).Show();
+                        Toast.MakeText(this, this.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long).Show();
                         return true;
                     }
-                    DELETED_DICTIONARY = MessageController.Messages.ToDictionary(entry=>entry.Key, entry=>entry.Value);
+                    DELETED_DICTIONARY = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
                     MessageController.Messages.Clear();
                     MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
                     this.GetOverviewFragment().RefreshAdapter();
@@ -179,7 +176,8 @@ namespace AndriodApp1
 
         public Action<View> GetUndoDeleteAllSnackBarAction()
         {
-            Action<View> undoSnackBarAction = new Action<View>((View v) => {
+            Action<View> undoSnackBarAction = new Action<View>((View v) =>
+            {
                 if (MessagesActivity.DELETED_DICTIONARY == null)
                 {
                     //error
@@ -189,7 +187,7 @@ namespace AndriodApp1
                     return;
                 }
 
-                foreach(var entry in MessagesActivity.DELETED_DICTIONARY)
+                foreach (var entry in MessagesActivity.DELETED_DICTIONARY)
                 {
                     MessageController.Messages[entry.Key] = entry.Value;
                 }
@@ -210,7 +208,7 @@ namespace AndriodApp1
 
         public void ShowEditTextMessageUserDialog()
         {
-            if(MainActivity.IsNotLoggedIn())
+            if (MainActivity.IsNotLoggedIn())
             {
                 Toast.MakeText(this, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
                 return;
@@ -235,7 +233,7 @@ namespace AndriodApp1
                 if (userToMessage == null || userToMessage == string.Empty)
                 {
                     Toast.MakeText(this, Resource.String.must_type_a_username_to_message, ToastLength.Short).Show();
-                    if((sender as AndroidX.AppCompat.App.AlertDialog)==null)
+                    if ((sender as AndroidX.AppCompat.App.AlertDialog) == null)
                     {
                         messageUserDialog.Dismiss();
                     }
@@ -357,16 +355,16 @@ namespace AndriodApp1
         {
             //if f is non null and f is visible then that means you are backing out from the inner user fragment..
             var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if(f!=null && f.IsVisible)
+            if (f != null && f.IsVisible)
             {
-                if(SupportFragmentManager.BackStackEntryCount==0) //this is if we got to inner messages through a notification, in which case we are done..
+                if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
                 {
                     bool root = IsTaskRoot;
                     MainActivity.LogDebug("IS TASK ROOT: " + root); //returns false if there is in fact a task behind it (such as the main activity task).
-                    if(IsTaskRoot) //it is TRUE if we swiped seeker from task list and then later followed a notification..
+                    if (IsTaskRoot) //it is TRUE if we swiped seeker from task list and then later followed a notification..
                     {
                         Intent intent = new Intent(this, typeof(MainActivity));
-                        intent.AddFlags(ActivityFlags.ClearTop);   
+                        intent.AddFlags(ActivityFlags.ClearTop);
                         this.StartActivity(intent);
                         this.Finish(); //without this, pressing back just launches the main activity (messages will still be behind it)
                         //and so you can go back infinitely, it will show messages behind it, then it will launch main again, then messages behind it, etc.
@@ -398,7 +396,7 @@ namespace AndriodApp1
         public static List<Message> DELETED_DATA = null;
         public static volatile bool FromDeleteMessage = false;
         //for delete all
-        public static Dictionary<string,List<Message>> DELETED_DICTIONARY = null;
+        public static Dictionary<string, List<Message>> DELETED_DICTIONARY = null;
 
         /// <summary>
         /// This method will switch you from inner to outer.  If you came to inner from a notification, outer will be added.
@@ -415,7 +413,7 @@ namespace AndriodApp1
             this.SupportActionBar.SetHomeButtonEnabled(true);
             var outerExists = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
             FromDeleteMessage = forDeleteMessage;
-            if(outerExists!=null)
+            if (outerExists != null)
             {
                 SupportFragmentManager.PopBackStack();
             }
@@ -449,7 +447,7 @@ namespace AndriodApp1
 
         protected override void OnResume()
         {
-            if (SoulSeekState.Username != MessageController.MessagesUsername && MessageController.RootMessages!=null)
+            if (SoulSeekState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
             {
                 MessageController.MessagesUsername = SoulSeekState.Username;
                 MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username]; //username can be null here... perhaps restarting the app without internet or such...
@@ -490,10 +488,10 @@ namespace AndriodApp1
             {
                 var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
                 MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
-                if(SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
+                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
                 {
                     MessageController.MessagesUsername = SoulSeekState.Username;
-                    if(!MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
+                    if (!MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
                     {
                         MessageController.RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                     }
@@ -503,16 +501,16 @@ namespace AndriodApp1
                     }
                 }
             }
-            else if(SoulSeekState.Username != MessageController.MessagesUsername)
+            else if (SoulSeekState.Username != MessageController.MessagesUsername)
             {
                 MessageController.MessagesUsername = SoulSeekState.Username;
-                if(SoulSeekState.Username==null || SoulSeekState.Username==string.Empty)
+                if (SoulSeekState.Username == null || SoulSeekState.Username == string.Empty)
                 {
                     MessageController.Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                 }
                 else
                 {
-                    if(MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
+                    if (MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
                     {
                         MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
                     }
@@ -531,13 +529,13 @@ namespace AndriodApp1
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(MessagesInnerFragment.Username), "InnerUserFragment").Commit();
                 //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
             }
-            else if (Intent!=null) //if an intent started this activity
+            else if (Intent != null) //if an intent started this activity
             {
-                if(Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
+                if (Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
                 {
                     MainActivity.LogDebug("coming from message tapped");
                     string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
-                    if(goToUsersMessages==string.Empty)
+                    if (goToUsersMessages == string.Empty)
                     {
                         MainActivity.LogFirebase("empty goToUsersMessages");
                     }
@@ -573,7 +571,7 @@ namespace AndriodApp1
         None = 0,
         Pending = 1,
         Failed = 2,
-        Success  =3,
+        Success = 3,
     }
 
     /// <summary>
@@ -642,7 +640,7 @@ namespace AndriodApp1
 
         private void SetConnectDisconnectText(DateTime localDateTime, SpecialMessageCode connectOrDisconnect)
         {
-            if(connectOrDisconnect == SpecialMessageCode.Disconnect)
+            if (connectOrDisconnect == SpecialMessageCode.Disconnect)
             {
                 MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), Utils.GetNiceDateTime(localDateTime));
             }
@@ -659,7 +657,7 @@ namespace AndriodApp1
         public static bool IsInitialized = false;
         public static EventHandler<Message> MessageReceived;
         public static System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>> RootMessages = null; //this is for when the user logs in as different people
-        public static System.Collections.Concurrent.ConcurrentDictionary<string,List<Message>> Messages = null;//new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>> Messages = null;//new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
         public static string MessagesUsername = string.Empty;
 
 
@@ -678,7 +676,7 @@ namespace AndriodApp1
         public static void Initialize()
         {
             SoulSeekState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
-            lock(MessageListLockObject)
+            lock (MessageListLockObject)
             {
                 RestoreMessagesFromSharedPrefs(SoulSeekState.SharedPreferences);
             }
@@ -698,62 +696,62 @@ namespace AndriodApp1
 
                 //file
                 Message msg = new Message(e.Username, e.Id, e.Replayed, e.Timestamp.ToLocalTime(), e.Timestamp, e.Message, false);
-            lock (MessageListLockObject)
-            {
-                if(SoulSeekState.Username == null || SoulSeekState.Username == string.Empty)
+                lock (MessageListLockObject)
                 {
-                    MainActivity.LogFirebase("we received a message while our username is still null");
+                    if (SoulSeekState.Username == null || SoulSeekState.Username == string.Empty)
+                    {
+                        MainActivity.LogFirebase("we received a message while our username is still null");
+                    }
+                    else if (!RootMessages.ContainsKey(SoulSeekState.Username))
+                    {
+                        RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessagesUsername = SoulSeekState.Username;
+                        Messages = RootMessages[SoulSeekState.Username];
+                    }
+                    else if (RootMessages.ContainsKey(SoulSeekState.Username))
+                    {
+                        Messages = RootMessages[SoulSeekState.Username];
+                    }
+
+                    if (Messages.ContainsKey(e.Username))
+                    {
+                        Messages[e.Username].Add(msg);
+                    }
+                    else
+                    {
+                        Messages[e.Username] = new List<Message>();
+                        Messages[e.Username].Add(msg);
+                    }
                 }
-                else if(!RootMessages.ContainsKey(SoulSeekState.Username))
+                //do notification
+                //on UI thread..
+                ShowNotification(msg);
+
+                SetAsUnreadAndSaveIfApplicable(e.Username);
+
+                //save to prefs
+                SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+
+                try
                 {
-                    RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                    MessagesUsername = SoulSeekState.Username;
-                    Messages = RootMessages[SoulSeekState.Username];
+                    //raise event
+                    MessageReceived?.Invoke(sender, msg); //if this throws it does not crash anything. it will fail silently which is quite bad bc then we never ACK the message.
                 }
-                else if(RootMessages.ContainsKey(SoulSeekState.Username))
+                catch (Exception error)
                 {
-                    Messages = RootMessages[SoulSeekState.Username];
+                    MainActivity.LogFirebase("MessageReceived raise event failed: " + error.Message);
                 }
 
-                if (Messages.ContainsKey(e.Username))
+                try
                 {
-                    Messages[e.Username].Add(msg);
+                    SoulSeekState.SoulseekClient.AcknowledgePrivateMessageAsync(msg.Id).ContinueWith((Action<Task>)LogIfFaulted);
                 }
-                else
+                catch (Exception err)
                 {
-                    Messages[e.Username] = new List<Message>();
-                    Messages[e.Username].Add(msg);
+                    MainActivity.LogFirebase("AcknowledgePrivateMessageAsync: " + err.Message);
                 }
             }
-            //do notification
-            //on UI thread..
-            ShowNotification(msg);
-
-            SetAsUnreadAndSaveIfApplicable(e.Username);
-
-            //save to prefs
-            SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
-
-            try
-            {
-                //raise event
-                MessageReceived?.Invoke(sender, msg); //if this throws it does not crash anything. it will fail silently which is quite bad bc then we never ACK the message.
-            }
-            catch(Exception error)
-            {
-                MainActivity.LogFirebase("MessageReceived raise event failed: " + error.Message);
-            }
-
-            try
-            {
-                SoulSeekState.SoulseekClient.AcknowledgePrivateMessageAsync(msg.Id).ContinueWith((Action<Task>)LogIfFaulted);
-            }
-            catch(Exception err)
-            {
-                MainActivity.LogFirebase("AcknowledgePrivateMessageAsync: " + err.Message);
-            }
-            }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 MainActivity.LogFirebase("msg received:" + exc.Message + exc.StackTrace);
             }
@@ -766,7 +764,7 @@ namespace AndriodApp1
 
         public static void LogIfFaulted(Task t)
         {
-            if(t.IsFaulted)
+            if (t.IsFaulted)
             {
                 MainActivity.LogFirebase("AcknowledgePrivateMessageAsync faulted: " + t.Exception.Message + t.Exception.StackTrace);
             }
@@ -817,9 +815,9 @@ namespace AndriodApp1
         private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
-            if(Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
             {
-                if(useNightColors)
+                if (useNightColors)
                 {
                     return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SoulSeekState.ActiveActivityRef.Theme);
                 }
@@ -881,7 +879,7 @@ namespace AndriodApp1
             var spannableString = new Android.Text.SpannableString(uname + " ");
 
             Android.Text.Style.ForegroundColorSpan fcs = null;
-            if(messageNotifExtended.IsOurMessage)
+            if (messageNotifExtended.IsOurMessage)
             {
                 fcs = new Android.Text.Style.ForegroundColorSpan(GetYouTextColor(useNightColors, contextToUse));
             }
@@ -898,7 +896,7 @@ namespace AndriodApp1
             ssb.Append(spannableString);
             //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
             string msgToShow = "\n" + messageNotifExtended.MessageText;
-            var spannableString2 = new Android.Text.SpannableString(msgToShow); 
+            var spannableString2 = new Android.Text.SpannableString(msgToShow);
             //spannableString2.SetSpan(textColorSubdued, 0, msgToShow.Length, SpanTypes.InclusiveInclusive);
             ssb.Append(spannableString2);
             return ssb;
@@ -940,7 +938,7 @@ namespace AndriodApp1
                 if (lastUsername != uname)
                 {
                     //add header
-                    
+
                     var spannableString = new Android.Text.SpannableString(uname + " \n"); //space after to prevent android bug
 
                     Android.Text.Style.ForegroundColorSpan fcs = null;
@@ -987,7 +985,7 @@ namespace AndriodApp1
         /// <returns></returns>
         public static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
-            if(SoulSeekState.DayNightMode == (int)(Android.Support.V7.App.AppCompatDelegate.ModeNightFollowSystem))
+            if (SoulSeekState.DayNightMode == (int)(Android.Support.V7.App.AppCompatDelegate.ModeNightFollowSystem))
             {
                 //if we follow the system then we can just return whether our app is in night mode.
                 return DownloadDialog.InNightMode(contextToUse);
@@ -997,7 +995,7 @@ namespace AndriodApp1
                 //if we do not follow the system we have to use the UI Mode Service
                 UiModeManager uiModeManager = (UiModeManager)contextToUse.GetSystemService(Context.UiModeService);//getSystemService(Context.UI_MODE_SERVICE);
                 int mode = (int)(uiModeManager.NightMode);
-                if(mode == (int)UiNightMode.Yes)
+                if (mode == (int)UiNightMode.Yes)
                 {
                     return true;
                 }
@@ -1020,7 +1018,7 @@ namespace AndriodApp1
             try
             {
                 Context contextToUse = broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext;
-                if(contextToUse == null)
+                if (contextToUse == null)
                 {
                     contextToUse = SeekerApplication.ApplicationContext;
                 }
@@ -1053,19 +1051,19 @@ namespace AndriodApp1
 
                     //NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle("me").SetConversationTitle("hi hello there").SetGroupConversation(true);
 
-                    var mne = new MessageNotifExtended() {Username = msg.Username, IsOurMessage = fromOurResponse, IsSpecialMessage = directReplyFailure, MessageText = directReplyFailure ? directReplayFailureReason : msg.MessageText };
+                    var mne = new MessageNotifExtended() { Username = msg.Username, IsOurMessage = fromOurResponse, IsSpecialMessage = directReplyFailure, MessageText = directReplyFailure ? directReplayFailureReason : msg.MessageText };
 
                     //if(!directReplyFailure)
                     //{
-                        if (MessagesActivity.DirectReplyMessages.ContainsKey(msg.Username))
-                        {
-                            MessagesActivity.DirectReplyMessages[msg.Username].Add(mne);
-                        }
-                        else
-                        {
-                            MessagesActivity.DirectReplyMessages[msg.Username] = new List<MessageNotifExtended>();
-                            MessagesActivity.DirectReplyMessages[msg.Username].Add(mne);
-                        }
+                    if (MessagesActivity.DirectReplyMessages.ContainsKey(msg.Username))
+                    {
+                        MessagesActivity.DirectReplyMessages[msg.Username].Add(mne);
+                    }
+                    else
+                    {
+                        MessagesActivity.DirectReplyMessages[msg.Username] = new List<MessageNotifExtended>();
+                        MessagesActivity.DirectReplyMessages[msg.Username].Add(mne);
+                    }
                     //}
 
 
@@ -1074,7 +1072,7 @@ namespace AndriodApp1
                     //    messagingStyle.AddMessage(message);
                     //}
 
-                
+
                     RemoteViews notificationLayout = new RemoteViews(contextToUse.PackageName, Resource.Layout.simple_custom_notification);
                     RemoteViews notificationLayoutExpanded = new RemoteViews(contextToUse.PackageName, Resource.Layout.simple_custom_notification);
 
@@ -1120,7 +1118,7 @@ namespace AndriodApp1
                         .SetDeleteIntent(clearNotifPendingIntent);
 
                     //if android 12+ let the system pick the color.  it will make it Android.Resource.Color.SystemAccent1100 if dark Android.Resource.Color.SystemAccent1600 otherwise.
-                    if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.S) 
+                    if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.S)
                     {
                         builder.SetColor(GetNiceAndroidBlueNotifColor(systemIsInNightMode, contextToUse));
                     }
@@ -1146,8 +1144,9 @@ namespace AndriodApp1
 
         public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "", Context broadcastContext = null)
         {
-            MessagesInnerFragment.BroadcastFriendlyRunOnUiThread(() => {
-                ShowNotificationLogic(msg,fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
+            MessagesInnerFragment.BroadcastFriendlyRunOnUiThread(() =>
+            {
+                ShowNotificationLogic(msg, fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
             });
         }
 
@@ -1164,7 +1163,7 @@ namespace AndriodApp1
                 messagesString = SerializationHelper.SaveMessagesToString(RootMessages);
 
             }
-            if(messagesString != null && messagesString != string.Empty)
+            if (messagesString != null && messagesString != string.Empty)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
@@ -1187,7 +1186,7 @@ namespace AndriodApp1
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
-                if(!string.IsNullOrEmpty(SoulSeekState.Username) && RootMessages.ContainsKey(SoulSeekState.Username))
+                if (!string.IsNullOrEmpty(SoulSeekState.Username) && RootMessages.ContainsKey(SoulSeekState.Username))
                 {
                     Messages = RootMessages[SoulSeekState.Username];
                     MessagesUsername = SoulSeekState.Username;
@@ -1208,7 +1207,7 @@ namespace AndriodApp1
             {
                 return;
             }
-            if(UnreadUsernames.IsEmpty)
+            if (UnreadUsernames.IsEmpty)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
@@ -1240,7 +1239,7 @@ namespace AndriodApp1
             }
             else
             {
-                if(MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
+                if (MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
                 {
                     //if we are already at this user then dont set as unread.
                     return;
@@ -1293,17 +1292,17 @@ namespace AndriodApp1
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            if(Username==null)
+            if (Username == null)
             {
                 Username = savedInstanceState.GetString("Inner_Username_ToMessage");
             }
 
-            
+
 
             MessageController.MessageReceived += OnMessageReceived;
             rootView = inflater.Inflate(Resource.Layout.messages_inner_layout, container, false);
 
-            
+
             Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)MessagesActivity.MessagesActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_inner_list_menu);
             myToolbar.Title = Username;
@@ -1313,7 +1312,7 @@ namespace AndriodApp1
             editTextEnterMessage = rootView.FindViewById<EditText>(Resource.Id.edit_gchat_message);
             sendMessage = rootView.FindViewById<Button>(Resource.Id.button_gchat_send);
 
-            if(editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString()==string.Empty)
+            if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
             {
                 sendMessage.Enabled = false;
             }
@@ -1353,7 +1352,7 @@ namespace AndriodApp1
 
         private void EditTextEnterMessage_KeyPress(object sender, View.KeyEventArgs e)
         {
-            if(e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+            if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
             {
                 e.Handled = true;
                 //send the message and record our send message..
@@ -1369,7 +1368,7 @@ namespace AndriodApp1
 
         private void EditTextEnterMessage_EditorAction(object sender, TextView.EditorActionEventArgs e)
         {
-            if(e.ActionId == Android.Views.InputMethods.ImeAction.Send)
+            if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
                 SendMessageAPI(new Message(Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
@@ -1393,13 +1392,13 @@ namespace AndriodApp1
 
         public override void OnSaveInstanceState(Bundle outState)
         {
-            outState.PutString("Inner_Username_ToMessage",Username);
+            outState.PutString("Inner_Username_ToMessage", Username);
             base.OnSaveInstanceState(outState);
         }
 
         public static void BroadcastFriendlyRunOnUiThread(Action action)
         {
-            if(SoulSeekState.ActiveActivityRef != null)
+            if (SoulSeekState.ActiveActivityRef != null)
             {
                 SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
             }
@@ -1420,10 +1419,10 @@ namespace AndriodApp1
             MainActivity.LogDebug("is ActiveActivityRef null: " + (SoulSeekState.ActiveActivityRef == null).ToString());
 
 
-            if(string.IsNullOrEmpty(msg.MessageText))
+            if (string.IsNullOrEmpty(msg.MessageText))
             {
                 Toast.MakeText(contextToUse, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
-                if(fromDirectReplyAction)
+                if (fromDirectReplyAction)
                 {
                     MessageController.ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
                 }
@@ -1440,7 +1439,8 @@ namespace AndriodApp1
                 return;
             }
 
-            Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
+            {
 
                 MainActivity.LogDebug("our continue with action is occuring!...");
                 if (t.IsFaulted)
@@ -1455,7 +1455,8 @@ namespace AndriodApp1
                     }
                     throw new FaultPropagationException();
                 }
-                BroadcastFriendlyRunOnUiThread(new Action(() => {
+                BroadcastFriendlyRunOnUiThread(new Action(() =>
+                {
                     SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
                 }));
             });
@@ -1504,9 +1505,9 @@ namespace AndriodApp1
             }
             MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
             MessageController.RaiseMessageReceived(msg);
-            Action<Task> continueWithAction = new Action<Task>((Task t)=>
+            Action<Task> continueWithAction = new Action<Task>((Task t) =>
             {
-                if(t.IsFaulted)
+                if (t.IsFaulted)
                 {
                     MainActivity.LogDebug("faulted " + t.Exception.ToString());
                     MainActivity.LogDebug("faulted " + t.Exception.InnerException.Message.ToString());
@@ -1539,14 +1540,14 @@ namespace AndriodApp1
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendMessageAPI(new Message(Username,-1,false,Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendMessageAPI(new Message(Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
 
         private void EditTextEnterMessage_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            if(e.Text!=null && e.Text.ToString() != string.Empty) //ICharSequence..
+            if (e.Text != null && e.Text.ToString() != string.Empty) //ICharSequence..
             {
                 sendMessage.Enabled = true;
             }
@@ -1563,9 +1564,9 @@ namespace AndriodApp1
                 messagesInternal = MessageController.Messages[Username].ToList();
                 recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
                 recyclerViewInner.SetAdapter(recyclerAdapter);
-                if(messagesInternal.Count!=0)
+                if (messagesInternal.Count != 0)
                 {
-                    recyclerViewInner.ScrollToPosition(messagesInternal.Count-1);
+                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
                 }
                 MessageController.MessageReceived -= OnMessageReceived;
                 MessageController.MessageReceived += OnMessageReceived;
@@ -1577,7 +1578,7 @@ namespace AndriodApp1
         {
             MainActivity.LogDebug("inner frag resume");
 
-            if(MessagesActivity.DirectReplyMessages.TryRemove(Username, out _))
+            if (MessagesActivity.DirectReplyMessages.TryRemove(Username, out _))
             {
                 MainActivity.LogDebug("remove the notification history");
                 //remove the now possibly void notification
@@ -1606,15 +1607,16 @@ namespace AndriodApp1
 
         public void OnMessageReceived(object sender, Message msg)
         {
-            this.Activity.RunOnUiThread(new Action(() => {
-                    messagesInternal = MessageController.Messages[Username];
-                    recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
-                    recyclerViewInner.SetAdapter(recyclerAdapter);
-                    recyclerAdapter.NotifyDataSetChanged();
-                    if (messagesInternal.Count != 0)
-                    {
-                        recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
-                    }
+            this.Activity.RunOnUiThread(new Action(() =>
+            {
+                messagesInternal = MessageController.Messages[Username];
+                recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
+                recyclerViewInner.SetAdapter(recyclerAdapter);
+                recyclerAdapter.NotifyDataSetChanged();
+                if (messagesInternal.Count != 0)
+                {
+                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                }
             }));
         }
 
@@ -1622,7 +1624,7 @@ namespace AndriodApp1
     }
 
 
-    
+
     public class MessagesOverviewFragment : Android.Support.V4.App.Fragment
     {
         private RecyclerView recyclerViewOverview;
@@ -1636,7 +1638,7 @@ namespace AndriodApp1
             MessageController.MessageReceived += OnMessageReceived;
             View rootView = inflater.Inflate(Resource.Layout.messages_overview, container, false);
             noMessagesView = rootView.FindViewById<TextView>(Resource.Id.noMessagesView);
-            if (MessageController.Messages==null || MessageController.Messages.Keys.Count==0)
+            if (MessageController.Messages == null || MessageController.Messages.Keys.Count == 0)
             {
                 noMessagesView.Visibility = ViewStates.Visible;
             }
@@ -1648,7 +1650,7 @@ namespace AndriodApp1
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
 
             recycleLayoutManager = new LinearLayoutManager(Activity);
-            if(MessageController.Messages==null)
+            if (MessageController.Messages == null)
             {
                 internalList = new List<string>();
             }
@@ -1668,18 +1670,18 @@ namespace AndriodApp1
             return rootView;
         }
 
-        
+
 
         public override void OnResume()
         {
             base.OnResume();
             SoulSeekState.ActiveActivityRef.InvalidateOptionsMenu();
-            if(MessagesActivity.FromDeleteMessage)
+            if (MessagesActivity.FromDeleteMessage)
             {
                 MessagesActivity.FromDeleteMessage = false;
-                Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), 
-                        string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), 
-                        MessagesActivity.DELETED_USERNAME), 
+                Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
+                        string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+                        MessagesActivity.DELETED_USERNAME),
                         Snackbar.LengthLong)
                     .SetAction(Resource.String.undo, ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true))
                     .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
@@ -1705,17 +1707,17 @@ namespace AndriodApp1
         public class MessageOverviewComparer : IComparer<KeyValuePair<string, List<Message>>>
         {
             // Compares by UserCount then Name
-            public int Compare(KeyValuePair<string,List<Message>> x, KeyValuePair<string, List<Message>> y)
+            public int Compare(KeyValuePair<string, List<Message>> x, KeyValuePair<string, List<Message>> y)
             {
-                if(x.Value.Count == 0 && y.Value.Count == 0)
+                if (x.Value.Count == 0 && y.Value.Count == 0)
                 {
                     return 0;
                 }
-                else if(x.Value.Count == 0)
-                { 
+                else if (x.Value.Count == 0)
+                {
                     return 1;
                 }
-                else if(y.Value.Count==0)
+                else if (y.Value.Count == 0)
                 {
                     return -1;
                 }
@@ -1730,13 +1732,14 @@ namespace AndriodApp1
         {
             var listToSort = MessageController.Messages.ToList();
             listToSort.Sort(new MessageOverviewComparer());
-            return listToSort.Select((pair)=>pair.Key).ToList();
+            return listToSort.Select((pair) => pair.Key).ToList();
         }
 
         public void OnMessageReceived(object sender, Message msg)
         {
             var activity = this.Activity != null ? this.Activity : MessagesActivity.MessagesActivityRef;
-            activity.RunOnUiThread(new Action(() => {
+            activity.RunOnUiThread(new Action(() =>
+            {
                 //if(internalList!=null && internalList.Contains(msg.Username))
                 //{
                 //    //update this one...
@@ -1744,7 +1747,7 @@ namespace AndriodApp1
                 //}
                 //else
                 //{
-                    this.RefreshAdapter();
+                this.RefreshAdapter();
                 //}
             }));
         }
@@ -1763,10 +1766,10 @@ namespace AndriodApp1
 
         public override void OnAttach(Context activity)
         {
-            if(created) //attach can happen before we created our view...
+            if (created) //attach can happen before we created our view...
             {
                 internalList = GetOverviewList();
-                if (internalList.Count!=0)
+                if (internalList.Count != 0)
                 {
                     noMessagesView.Visibility = ViewStates.Gone;
                 }
@@ -1819,7 +1822,7 @@ namespace AndriodApp1
 
         public override int GetItemViewType(int position)
         {
-            if(localDataSet[position].FromMe)
+            if (localDataSet[position].FromMe)
             {
                 return VIEW_SENT;
             }
@@ -1831,7 +1834,7 @@ namespace AndriodApp1
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
-            if(viewType==VIEW_SENT)
+            if (viewType == VIEW_SENT)
             {
                 MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
                 view.setupChildren();
@@ -1854,12 +1857,12 @@ namespace AndriodApp1
 
         private void View_LongClick(object sender, View.LongClickEventArgs e)
         {
-            if(sender is MessageInnerViewSent msgSent)
+            if (sender is MessageInnerViewSent msgSent)
             {
                 //data item cannot be null as that would have caused a nullref eariler on binding view.
                 ChatroomInnerFragment.MessagesLongClickData = msgSent.DataItem;
             }
-            else if(sender is MessageInnerViewReceived msgRecv)
+            else if (sender is MessageInnerViewReceived msgRecv)
             {
                 ChatroomInnerFragment.MessagesLongClickData = msgRecv.DataItem;
             }
@@ -1881,7 +1884,7 @@ namespace AndriodApp1
             {
                 return;
             }
-            else if(Utils.ShowSlskLinkContextMenu)
+            else if (Utils.ShowSlskLinkContextMenu)
             {
                 //closing wont turn this off since its invalid parse, so turn it off here...
                 Utils.ShowSlskLinkContextMenu = false;
@@ -2005,7 +2008,7 @@ namespace AndriodApp1
         public static Color GetColorFromMsgStatus(SentStatus status)
         {
             int resourceIntColor = -1;
-            switch(status)
+            switch (status)
             {
                 case SentStatus.Pending:
                 case SentStatus.Success:
@@ -2029,18 +2032,18 @@ namespace AndriodApp1
         public void setItem(Message msg)
         {
             DataItem = msg;
-            cardView.CardBackgroundColor = Android.Content.Res.ColorStateList.ValueOf( GetColorFromMsgStatus(msg.SentMsgStatus) );
-            if(msg.SentMsgStatus == SentStatus.Pending)
+            cardView.CardBackgroundColor = Android.Content.Res.ColorStateList.ValueOf(GetColorFromMsgStatus(msg.SentMsgStatus));
+            if (msg.SentMsgStatus == SentStatus.Pending)
             {
                 viewTimeStamp.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.pending_);
             }
-            else if(msg.SentMsgStatus == SentStatus.Failed)
+            else if (msg.SentMsgStatus == SentStatus.Failed)
             {
                 viewTimeStamp.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed);
             }
             else
             {
-                viewTimeStamp.Text = Utils.GetNiceDateTime( msg.LocalDateTime );
+                viewTimeStamp.Text = Utils.GetNiceDateTime(msg.LocalDateTime);
             }
             Utils.SetMessageTextView(viewMessage, msg);
         }
@@ -2079,7 +2082,7 @@ namespace AndriodApp1
         public void setItem(Message msg)
         {
             DataItem = msg;
-            viewTimeStamp.Text = Utils.GetNiceDateTime( msg.LocalDateTime );
+            viewTimeStamp.Text = Utils.GetNiceDateTime(msg.LocalDateTime);
             Utils.SetMessageTextView(viewMessage, msg);
         }
         public Message DataItem;
@@ -2094,7 +2097,7 @@ namespace AndriodApp1
         //public static List<Message> DELETED_DATA = null;
         private MessagesOverviewRecyclerAdapter adapter = null;
         private Android.Support.V4.App.Fragment containingFragment = null;
-        public ItemTouchHelperMessageOverviewCallback(MessagesOverviewRecyclerAdapter _adapter, Android.Support.V4.App.Fragment outerFrag) : base(0,ItemTouchHelper.Left) //no dragging. left swiping.
+        public ItemTouchHelperMessageOverviewCallback(MessagesOverviewRecyclerAdapter _adapter, Android.Support.V4.App.Fragment outerFrag) : base(0, ItemTouchHelper.Left) //no dragging. left swiping.
         {
             containingFragment = outerFrag;
             adapter = _adapter;
@@ -2104,7 +2107,7 @@ namespace AndriodApp1
         private Android.Graphics.Drawables.ColorDrawable colorDrawable = new Android.Graphics.Drawables.ColorDrawable(Color.ParseColor("#ed4a51"));
         private Android.Graphics.Drawables.Drawable iconDrawable = null;
         private Android.Graphics.Drawables.ClipDrawable clipDrawable = null;
-       
+
         public override bool OnMove(RecyclerView p0, RecyclerView.ViewHolder p1, RecyclerView.ViewHolder p2)
         {
             return false;
@@ -2112,7 +2115,8 @@ namespace AndriodApp1
 
         public static Action<View> GetSnackBarAction(MessagesOverviewRecyclerAdapter adapter, bool fromOptionMenu = false)
         {
-            Action<View> undoSnackBarAction = new Action<View>((View v) => {
+            Action<View> undoSnackBarAction = new Action<View>((View v) =>
+            {
                 if (MessagesActivity.DELETED_USERNAME == string.Empty || MessagesActivity.DELETED_DATA == null || MessagesActivity.DELETED_POSITION == -1)
                 {
                     //error
@@ -2146,7 +2150,7 @@ namespace AndriodApp1
             MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out MessagesActivity.DELETED_DATA);
             MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
 
-            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with), 
+            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                 MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong)
                 .SetAction(Resource.String.undo, GetSnackBarAction(this.adapter, false))
                 .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
@@ -2159,28 +2163,28 @@ namespace AndriodApp1
             base.OnChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             View itemView = viewHolder.ItemView;
             MainActivity.LogDebug("dX" + dX);
-            if (dX>0)
+            if (dX > 0)
             {
                 this.colorDrawable.SetBounds(itemView.Left, itemView.Top, itemView.Left + (int)dX, itemView.Bottom);
             }
-            else if(dX<0)
+            else if (dX < 0)
             {
-                this.colorDrawable.SetBounds(itemView.Right +(int) dX, itemView.Top, itemView.Right, itemView.Bottom);
-                double margin = (itemView.Bottom - itemView.Top)*.15; //BOTTOM IS GREATER THAN TOP
-                int clipBounds = (int)((itemView.Bottom - itemView.Top)-2*margin);
+                this.colorDrawable.SetBounds(itemView.Right + (int)dX, itemView.Top, itemView.Right, itemView.Bottom);
+                double margin = (itemView.Bottom - itemView.Top) * .15; //BOTTOM IS GREATER THAN TOP
+                int clipBounds = (int)((itemView.Bottom - itemView.Top) - 2 * margin);
                 int level = Math.Min((int)(Math.Abs((dX + margin) / (clipBounds)) * 10000), 10000);
-                MainActivity.LogDebug("level"+ level);
-                if(level<0)
+                MainActivity.LogDebug("level" + level);
+                if (level < 0)
                 {
-                    level=0;
+                    level = 0;
                 }
                 clipDrawable.SetLevel(level);
                 //int dXicon = -300;
-                clipDrawable.SetBounds((int)(itemView.Right - clipBounds - margin), (int)(itemView.Top + margin), (int)(itemView.Right - margin), (int)(itemView.Bottom-margin));
+                clipDrawable.SetBounds((int)(itemView.Right - clipBounds - margin), (int)(itemView.Top + margin), (int)(itemView.Right - margin), (int)(itemView.Bottom - margin));
             }
             else
             {
-                this.colorDrawable.SetBounds(0,0,0,0);
+                this.colorDrawable.SetBounds(0, 0, 0, 0);
                 //this.iconDrawable.SetBounds(0,0,0,0);
             }
             this.colorDrawable.Draw(c);
@@ -2322,15 +2326,15 @@ namespace AndriodApp1
 
             viewDateTimeAgo.Text = Utils.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
-            if(MessageController.UnreadUsernames.ContainsKey(username))
+            if (MessageController.UnreadUsernames.ContainsKey(username))
             {
                 unreadImageView.Visibility = ViewStates.Visible;
-                viewUsername.SetTypeface(viewUsername.Typeface,TypefaceStyle.Bold);
+                viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Bold);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Bold);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Bold);
-                viewUsername.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef,Resource.Attribute.normalTextColorNonTinted));
-                viewDateTimeAgo.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef,Resource.Attribute.normalTextColorNonTinted));
-                viewMessage.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef,Resource.Attribute.normalTextColorNonTinted));
+                viewUsername.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewDateTimeAgo.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewMessage.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
             }
             else
             {
@@ -2365,7 +2369,7 @@ namespace AndriodApp1
         public override void OnReceive(Context context, Intent intent)
         {
             //bool directReply = intent.GetBooleanExtra("direct_reply_extra",false);
-            
+
             //bool markAsRead = intent.GetBooleanExtra("mark_as_read_extra", false);
             string uname = intent.GetStringExtra("seeker_username");
 
@@ -2383,9 +2387,9 @@ namespace AndriodApp1
                 return;
             }
 
-            
 
-            if(markAsRead)
+
+            if (markAsRead)
             {
                 MessageController.UnreadUsernames.TryRemove(uname, out _);
 
@@ -2399,7 +2403,7 @@ namespace AndriodApp1
             }
 
             Bundle remoteInputBundle = AndroidX.Core.App.RemoteInput.GetResultsFromIntent(intent);
-            if(directReply)
+            if (directReply)
             {
                 MessageController.UnreadUsernames.TryRemove(uname, out _);
                 if (remoteInputBundle != null)
@@ -2409,7 +2413,7 @@ namespace AndriodApp1
                     MainActivity.LogDebug("direct reply " + replyText + " " + uname);
                     MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
-                    
+
                 }
             }
         }

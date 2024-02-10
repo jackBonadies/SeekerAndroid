@@ -24,9 +24,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AndriodApp1
 {
@@ -60,7 +58,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case Resource.Id.save_user_action:
-                    if(PendingText == SoulSeekState.UserInfoBio)
+                    if (PendingText == SoulSeekState.UserInfoBio)
                     {
                         Toast.MakeText(this, this.Resources.GetString(Resource.String.no_changes_to_save), ToastLength.Short).Show();
                     }
@@ -142,7 +140,7 @@ namespace AndriodApp1
             editText.TextChanged += EditText_TextChanged;
 
             pictureText = this.FindViewById<TextView>(Resource.Id.user_info_picture_textview);
-            if(SoulSeekState.UserInfoPictureName!=null && SoulSeekState.UserInfoPictureName != string.Empty)
+            if (SoulSeekState.UserInfoPictureName != null && SoulSeekState.UserInfoPictureName != string.Empty)
             {
                 pictureText.Text = SoulSeekState.UserInfoPictureName;
             }
@@ -152,8 +150,8 @@ namespace AndriodApp1
 
             Button clearImage = this.FindViewById<Button>(Resource.Id.buttonClearImage);
             clearImage.Click += ClearImage_Click;
-            
-            
+
+
         }
 
         private void DeleteImage(string image)
@@ -220,7 +218,7 @@ namespace AndriodApp1
                     {
                         chosenFile = Android.Support.V4.Provider.DocumentFile.FromSingleUri(this, data.Data);
                     }
-                    
+
                     //for samsung galaxy api 19 chosenFile.Exists() returns false, whether DF.FromFile or DF.FromSingleUri
                     //even tho it returns false it still works completely fine..
 
@@ -251,7 +249,7 @@ namespace AndriodApp1
                     }
 
                     string oldImage = SoulSeekState.UserInfoPictureName;
-                    if (SoulSeekState.UserInfoPictureName!=string.Empty && SoulSeekState.UserInfoPictureName!=null)
+                    if (SoulSeekState.UserInfoPictureName != string.Empty && SoulSeekState.UserInfoPictureName != null)
                     {
                         DeleteImage(oldImage);  //delete old image in our internal storage.
                     }
@@ -283,17 +281,17 @@ namespace AndriodApp1
 
                     //verify that there is 1 file and its ours.
                     var files = user_info_dir.ListFiles();
-                    if(files.Count()!=1)
+                    if (files.Count() != 1)
                     {
                         MainActivity.LogFirebase("files.Count!=1");
                     }
-                    else if(files[0].Name != SoulSeekState.UserInfoPictureName)
+                    else if (files[0].Name != SoulSeekState.UserInfoPictureName)
                     {
                         MainActivity.LogFirebase("files[0].Name != SoulSeekState.UserInfoPictureName");
                     }
                     pictureText.Text = SoulSeekState.UserInfoPictureName;
                     pictureText.Invalidate();
-                    Toast.MakeText(this, this.GetString(Resource.String.success_set_pic),ToastLength.Long).Show();
+                    Toast.MakeText(this, this.GetString(Resource.String.success_set_pic), ToastLength.Long).Show();
                 }
                 else if (resultCode == Result.Canceled)
                 {
@@ -311,7 +309,7 @@ namespace AndriodApp1
             bool wasSame = (PendingText == SoulSeekState.UserInfoBio);
             PendingText = e.Text.ToString();
             bool isSame = (PendingText == SoulSeekState.UserInfoBio);
-            if(isSame!=wasSame)
+            if (isSame != wasSame)
             {
                 this.InvalidateOptionsMenu();
             }

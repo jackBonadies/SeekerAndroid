@@ -1,13 +1,7 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
+﻿using Android.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AndriodApp1
 {
@@ -401,7 +395,7 @@ namespace AndriodApp1
                 fileStream = contentResolver.OpenInputStream(uri);
                 byte[] a = new byte[76];
                 fileStream.Read(a, 0, 76); //ape header
-                if((System.Text.Encoding.ASCII.GetString(a.Take(4).ToArray())!="MAC "))
+                if ((System.Text.Encoding.ASCII.GetString(a.Take(4).ToArray()) != "MAC "))
                 {
                     throw new Exception("MAC  not present");
                 }
@@ -419,7 +413,7 @@ namespace AndriodApp1
                      blocks_per_frame + final_frame_blocks) /
                     (double)sampleRate);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("GetApeMetadata: " + e.Message + e.StackTrace);
             }

@@ -1,17 +1,11 @@
-﻿using Android.Content;
+﻿using AndriodApp1.Helpers;
 using Android.App;
 using Android.Content;
-using Android.Net.Wifi;
+using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
-using Android.Text.Format;
 using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
-using Android.Util;
 using System;
-using Android.Graphics;
-using AndriodApp1.Helpers;
 namespace AndriodApp1
 {
     public class SearchDialog : Android.Support.V4.App.DialogFragment
@@ -73,7 +67,7 @@ namespace AndriodApp1
 
         public override void OnResume()
         {
-            if(SearchDialog.Instance!=null && SearchDialog.Instance!=this)
+            if (SearchDialog.Instance != null && SearchDialog.Instance != this)
             {
                 //we only support 1 dialog, the most recent one..
                 MainActivity.LogDebug("cancelling old search dialog");
@@ -108,7 +102,7 @@ namespace AndriodApp1
             this.Activity.RunOnUiThread(() =>
             {
                 this.SetControlState();
-                if(failed)
+                if (failed)
                 {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to parse search term from link. Contact Developer.", ToastLength.Long).Show();
                 }
@@ -204,11 +198,11 @@ namespace AndriodApp1
                 intent.PutExtra(SearchSendIntentHelper.FromSearchDialogDummyActivity, SearchSendIntentHelper.FromSearchDialogDummyActivity);
                 string mainText = Intent.GetStringExtra(Intent.ExtraText);
                 string subject = Intent.GetStringExtra(Intent.ExtraSubject);
-                if(mainText != null)
+                if (mainText != null)
                 {
-                    intent.PutExtra(Intent.ExtraText,mainText);
+                    intent.PutExtra(Intent.ExtraText, mainText);
                 }
-                if(subject != null)
+                if (subject != null)
                 {
                     intent.PutExtra(Intent.ExtraSubject, subject);
                 }

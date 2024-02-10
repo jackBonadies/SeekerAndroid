@@ -17,21 +17,19 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using AndriodApp1.Helpers;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.Graphics.Drawable;
+using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using AndroidX.RecyclerView.Widget;
-using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -60,7 +58,8 @@ namespace AndriodApp1
 
         private Action GetUpdateUserListItemAction(string username)
         {
-            Action a = new Action(() => {
+            Action a = new Action(() =>
+            {
                 NotifyItemChanged(username);
             });
             return a;
@@ -82,7 +81,7 @@ namespace AndriodApp1
         {
             if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
             {
-                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null,null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
+                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
                     MainActivity.LogDebug("handled by commons");
                     return true;
@@ -93,7 +92,8 @@ namespace AndriodApp1
             {
                 case Resource.Id.browseUsersFiles:
                     //do browse thing...
-                    Action<View> action = new Action<View>((v) => {
+                    Action<View> action = new Action<View>((v) =>
+                    {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
@@ -133,7 +133,7 @@ namespace AndriodApp1
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            switch(item.ItemId)
+            switch (item.ItemId)
             {
                 case Resource.Id.add_user_action:
                     ShowEditTextDialogAddUserToList(false);
@@ -170,7 +170,7 @@ namespace AndriodApp1
             if (SoulSeekState.UserList == null)
             {
                 var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
-                SoulSeekState.UserList = SerializationHelper.RestoreUserListFromString(sharedPref.GetString(SoulSeekState.M_UserList,""));
+                SoulSeekState.UserList = SerializationHelper.RestoreUserListFromString(sharedPref.GetString(SoulSeekState.M_UserList, ""));
             }
 
             //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
@@ -218,7 +218,7 @@ namespace AndriodApp1
                 int xStatus = x.DoesNotExist ? -1 : (int)UserRowView.GetStatusFromItem(x, out _);
                 int yStatus = y.DoesNotExist ? -1 : (int)UserRowView.GetStatusFromItem(y, out _);
 
-                if(xStatus == yStatus)
+                if (xStatus == yStatus)
                 {
                     //tie breaker is alphabet
                     return x.Username.CompareTo(y.Username);
@@ -235,9 +235,9 @@ namespace AndriodApp1
         {
             //always copy so the original does not get messed up, since it stores info on date added.
             List<UserListItem> userlist = userlistOrig.ToList();
-            if(!isIgnoreList)
+            if (!isIgnoreList)
             {
-                switch(UserListSortOrder)
+                switch (UserListSortOrder)
                 {
                     case SortOrder.DateAddedAsc:
                         return userlist;
@@ -279,13 +279,13 @@ namespace AndriodApp1
 
         private static List<UserListItem> ParseUserListForPresentation()
         {
-            List <UserListItem> forAdapter = new List<UserListItem>();
-            if (SoulSeekState.UserList.Count!=0)
+            List<UserListItem> forAdapter = new List<UserListItem>();
+            if (SoulSeekState.UserList.Count != 0)
             {
-                forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.friends),UserRole.Category));
+                forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.friends), UserRole.Category));
                 forAdapter.AddRange(GetSortedUserList(SoulSeekState.UserList, false));
             }
-            if(SoulSeekState.IgnoreUserList.Count!=0)
+            if (SoulSeekState.IgnoreUserList.Count != 0)
             {
                 forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignored), UserRole.Category));
                 forAdapter.AddRange(GetSortedUserList(SoulSeekState.IgnoreUserList, true));
@@ -299,7 +299,7 @@ namespace AndriodApp1
             {
                 lock (SoulSeekState.UserList) //shouldnt we also lock IgnoreList?
                 {
-                    recyclerAdapter = new RecyclerUserListAdapter(this,ParseUserListForPresentation());
+                    recyclerAdapter = new RecyclerUserListAdapter(this, ParseUserListForPresentation());
                     recyclerViewUserList.SetAdapter(recyclerAdapter);
                 }
             }
@@ -339,9 +339,9 @@ namespace AndriodApp1
 
         private void OnUserStatusChanged(object sender, string username)
         {
-            if(MainActivity.OnUIthread())
+            if (MainActivity.OnUIthread())
             {
-                if(UserListSortOrder == SortOrder.OnlineStatus)
+                if (UserListSortOrder == SortOrder.OnlineStatus)
                 {
 
                     var oldList = recyclerAdapter.localDataSet.ToList();
@@ -376,7 +376,7 @@ namespace AndriodApp1
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>{ OnUserStatusChanged(null, username); });
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { OnUserStatusChanged(null, username); });
             }
         }
 
@@ -402,9 +402,9 @@ namespace AndriodApp1
 
         public static void AddUserLogic(Context c, string username, Action UIaction, bool massImportCase = false)
         {
-            if(!massImportCase)
+            if (!massImportCase)
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.adding_user_),username), ToastLength.Short).Show();
+                Toast.MakeText(c, string.Format(c.GetString(Resource.String.adding_user_), username), ToastLength.Short).Show();
             }
 
             Action<Task<Soulseek.UserData>> continueWithAction = (Task<Soulseek.UserData> t) =>
@@ -414,14 +414,16 @@ namespace AndriodApp1
                     //failed to add user
                     if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.ToLower().Contains("the wait timed out"))
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
                             Toast.MakeText(c, Resource.String.error_adding_user_timeout, ToastLength.Short).Show();
                         });
                     }
                     else if (t.Exception != null && t.Exception != null && t.Exception.InnerException is Soulseek.UserNotFoundException)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                            if(!massImportCase)
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
+                            if (!massImportCase)
                             {
                                 Toast.MakeText(c, Resource.String.error_adding_user_not_found, ToastLength.Short).Show();
                             }
@@ -435,7 +437,7 @@ namespace AndriodApp1
                 else
                 {
                     MainActivity.UserListAddUser(t.Result);
-                    if(!massImportCase)
+                    if (!massImportCase)
                     {
                         if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
                         {
@@ -467,19 +469,20 @@ namespace AndriodApp1
                 return;
             }
 
-            if(!SoulSeekState.currentlyLoggedIn)
+            if (!SoulSeekState.currentlyLoggedIn)
             {
                 Toast.MakeText(c, Resource.String.must_be_logged_to_add_or_remove_user, ToastLength.Short).Show();
                 return;
             }
 
-            if(MainActivity.UserListContainsUser(username))
+            if (MainActivity.UserListContainsUser(username))
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_),username), ToastLength.Short).Show();
+                Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_), username), ToastLength.Short).Show();
                 return;
             }
 
-            Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
+            {
                 if (t.IsFaulted)
                 {
                     //only show once for the original fault.
@@ -588,7 +591,7 @@ namespace AndriodApp1
                     break;
             }
 
-            if(prev != UserListSortOrder)
+            if (prev != UserListSortOrder)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
@@ -604,7 +607,7 @@ namespace AndriodApp1
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             // the reason the title is plural is because, using enter, you can add multiple users without closing the dialog.
-            if(toIgnored)
+            if (toIgnored)
             {
                 string ignoreUser = this.GetString(Resource.String.ignore_user_title);
                 builder.SetTitle(ignoreUser);
@@ -626,7 +629,7 @@ namespace AndriodApp1
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                if(toIgnored)
+                if (toIgnored)
                 {
                     if (string.IsNullOrEmpty(input.Text))
                     {
@@ -639,7 +642,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if(input.Text!=String.Empty)
+                    if (input.Text != String.Empty)
                     {
                         SoulSeekState.RecentUsersManager.AddUserToTop(input.Text, true);
                     }
@@ -873,8 +876,8 @@ namespace AndriodApp1
                 UserRowView view = UserRowView.inflate(parent);
                 view.setupChildren();
                 //view.viewMoreOptions.Click += this.UserListActivity.UserListItemMoreOptionsClick;
-                view.viewUserStatus.Click += view.ViewUserStatus_Click; 
-                view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick; 
+                view.viewUserStatus.Click += view.ViewUserStatus_Click;
+                view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick;
                 view.UserListActivity = this.UserListActivity;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += view.UserRowView_Click;
@@ -940,7 +943,7 @@ namespace AndriodApp1
             UserListItem userListItem = userRowView.BoundItem;
             bool isIgnored = userListItem.Role == UserRole.Ignored;
 
-            if(isIgnored)
+            if (isIgnored)
             {
                 SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
                 Utils.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
@@ -1021,7 +1024,7 @@ namespace AndriodApp1
         public void ViewUserStatus_Click(object sender, EventArgs e)
         {
             (sender as ImageView).PerformLongClick();
-            
+
         }
 
         public void ViewUserStatus_LongClick(object sender, View.LongClickEventArgs e)
@@ -1053,7 +1056,7 @@ namespace AndriodApp1
             viewUsername.Text = item.Username;
             try
             {
-                if(item.Role == UserRole.Ignored)
+                if (item.Role == UserRole.Ignored)
                 {
                     viewStatsLayout.Visibility = ViewStates.Gone;
                 }
@@ -1062,7 +1065,7 @@ namespace AndriodApp1
                     viewStatsLayout.Visibility = ViewStates.Visible;
                 }
 
-                if(SoulSeekState.UserNotes.ContainsKey(item.Username))
+                if (SoulSeekState.UserNotes.ContainsKey(item.Username))
                 {
                     viewNoteLayout.Visibility = ViewStates.Visible;
                     string note = null;
@@ -1074,7 +1077,7 @@ namespace AndriodApp1
                     viewNoteLayout.Visibility = ViewStates.Gone;
                 }
 
-                if(SoulSeekState.UserOnlineAlerts.ContainsKey(item.Username))
+                if (SoulSeekState.UserOnlineAlerts.ContainsKey(item.Username))
                 {
                     viewOnlineAlerts.Visibility = ViewStates.Visible;
                 }
@@ -1085,7 +1088,7 @@ namespace AndriodApp1
 
                 Soulseek.UserPresence status = GetStatusFromItem(item, out bool statusExists);
 
-                if(item.Role == UserRole.Ignored)
+                if (item.Role == UserRole.Ignored)
                 {
                     string ignoredString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignored);
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
@@ -1101,7 +1104,7 @@ namespace AndriodApp1
                 {
                     var drawable = DrawableCompat.Wrap(viewUserStatus.Drawable);
                     var mutableDrawable = drawable.Mutate();
-                    switch(status)
+                    switch (status)
                     {
                         case Soulseek.UserPresence.Away:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.away));
@@ -1141,7 +1144,7 @@ namespace AndriodApp1
                             break;
                     }
                 }
-                else if(item.DoesNotExist)
+                else if (item.DoesNotExist)
                 {
                     viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
                     string doesNotExistString = "Does not Exist";
@@ -1167,7 +1170,7 @@ namespace AndriodApp1
                     //speed = item.UserData.AverageSpeed;
                 }
 
-                if(userDataExists)
+                if (userDataExists)
                 {
                     viewNumFiles.Text = item.UserData.FileCount.ToString("N0") + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.files);
                     viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SlskHelp.CommonHelpers.STRINGS_KBS;

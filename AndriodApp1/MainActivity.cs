@@ -16,14 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+using AndriodApp1.Extensions.SearchResponseExtensions;
+using AndriodApp1.Helpers;
 using Android;
+using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Drm;
+using Android.Net;
+using Android.Net.Wifi;
 using Android.OS;
 using Android.Provider;
-using Soulseek;
 using Android.Runtime;
 using Android.Support.Design.Widget;
 using Android.Support.V4.App;
@@ -31,33 +34,22 @@ using Android.Support.V4.Content;
 using Android.Support.V4.Provider;
 using Android.Support.V4.View;
 using Android.Support.V7.App;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Common;
 using Java.IO;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using log = Android.Util.Log;
-using System.Linq;
 using SlskHelp;
-
-using AndroidX.Work;
+using Soulseek;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
-using Android.Animation;
-using System.Collections.ObjectModel;
-using Android.Net.Wifi;
+using System.Threading;
+using System.Threading.Tasks;
 using static Android.Provider.DocumentsContract;
-using Android.Util;
-using AndriodApp1.Extensions.SearchResponseExtensions;
-using Android.Net;
-using System.Linq.Expressions;
-using AndriodApp1;
-using AndriodApp1.Helpers;
+using log = Android.Util.Log;
 
 //using System.IO;
 //readme:
@@ -151,7 +143,7 @@ namespace AndriodApp1
 
             NumberOfActiveActivities++;
             //we are just coming back alive.
-            if(NumberOfActiveActivities==1)
+            if (NumberOfActiveActivities == 1)
             {
                 MainActivity.LogDebug("We are back!");
                 if (AutoAwayTimer != null)
@@ -165,7 +157,7 @@ namespace AndriodApp1
                 //}
             }
 
-            if(SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending)
+            if (SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending)
             {
                 SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
             }
@@ -192,27 +184,29 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    System.Threading.ThreadPool.QueueUserWorkItem( (object o) => {
+                    System.Threading.ThreadPool.QueueUserWorkItem((object o) =>
+                    {
 
-                    Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
+                        Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
 #if DEBUG
-                    t.ContinueWith((Task t) => {
+                        t.ContinueWith((Task t) =>
+                        {
 
-                        if(t.IsFaulted)
-                        {
-                            MainActivity.LogDebug("TryToReconnect FAILED");
-                        }
-                        else
-                        {
-                            MainActivity.LogDebug("TryToReconnect SUCCESSFUL");
-                        }
-                    
-                    });
+                            if (t.IsFaulted)
+                            {
+                                MainActivity.LogDebug("TryToReconnect FAILED");
+                            }
+                            else
+                            {
+                                MainActivity.LogDebug("TryToReconnect SUCCESSFUL");
+                            }
+
+                        });
 #endif
                     });
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("TryToReconnect Failed " + e.Message + e.StackTrace);
             }
@@ -225,7 +219,7 @@ namespace AndriodApp1
 
             NumberOfActiveActivities--;
             //if this is 0 then app is in background, or screen is locked, user at homescreen, other app in front, etc.
-            if(NumberOfActiveActivities == 0 && SoulSeekState.AutoAwayOnInactivity)
+            if (NumberOfActiveActivities == 0 && SoulSeekState.AutoAwayOnInactivity)
             {
                 MainActivity.LogDebug("We are away!");
                 if (AutoAwayTimer == null)
@@ -254,7 +248,7 @@ namespace AndriodApp1
             //}
             //else
             //{
-                MainActivity.SetStatusApi(true);
+            MainActivity.SetStatusApi(true);
             //}
         }
 
@@ -264,7 +258,7 @@ namespace AndriodApp1
 
         public static int NumberOfActiveActivities = 0;
         public static System.Timers.Timer AutoAwayTimer = null;
-        
+
 
     }
 
@@ -1176,7 +1170,7 @@ namespace AndriodApp1
                         if (ti.Failed)
                         {
                             isFailed = true;
-                            if(ti.State.HasFlag(TransferStates.UserOffline))
+                            if (ti.State.HasFlag(TransferStates.UserOffline))
                             {
                                 anyOffline = true;
                             }
@@ -1673,7 +1667,7 @@ namespace AndriodApp1
         /// to status changed events AND we can AddUser to get their status updates.
         /// </summary>
         public void OnRelaunch()
-        {            
+        {
             lock (AllTransferItems)
             {
                 foreach (var ti in AllTransferItems)
@@ -1684,13 +1678,13 @@ namespace AndriodApp1
                         ti.RemainingTime = null;
                     }
 
-                    if(ti.State.HasFlag(TransferStates.Aborted))
+                    if (ti.State.HasFlag(TransferStates.Aborted))
                     {
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;
                     }
 
-                    if(ti.State.HasFlag(TransferStates.UserOffline))
+                    if (ti.State.HasFlag(TransferStates.UserOffline))
                     {
                         TransfersFragment.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
                     }
@@ -1824,15 +1818,15 @@ namespace AndriodApp1
             List<TransferItem> transferItemConditionList = new List<TransferItem>();
             lock (AllTransferItems)
             {
-                foreach(var item in AllTransferItems)
+                foreach (var item in AllTransferItems)
                 {
-                    if(item.Username==username)
+                    if (item.Username == username)
                     {
-                        if(failedAndOfflineOnly && !item.State.HasFlag(TransferStates.UserOffline))
+                        if (failedAndOfflineOnly && !item.State.HasFlag(TransferStates.UserOffline))
                         {
                             continue;
                         }
-                        if(failedOnly && !item.Failed)
+                        if (failedOnly && !item.Failed)
                         {
                             continue;
                         }
@@ -2104,7 +2098,7 @@ namespace AndriodApp1
 
         public bool IsFolderNowComplete(TransferItem ti, bool noSingleItemFolders = false) //!!!!! no single item logic will not work with AutoClearComplete
         {
-            if(ti==null)
+            if (ti == null)
             {
                 MainActivity.LogDebug("IsFolderNowComplete: transferitem is null");
                 return false;
@@ -2116,16 +2110,16 @@ namespace AndriodApp1
                 {
                     folder = GetMatchingFolder(ti).FirstOrDefault();
                 }
-                if(folder == null)
+                if (folder == null)
                 {
                     MainActivity.LogDebug("IsFolderNowComplete: folder is null");
                     return false;
                 }
-                lock(folder.TransferItems)
+                lock (folder.TransferItems)
                 {
-                    foreach(TransferItem item in folder.TransferItems)
+                    foreach (TransferItem item in folder.TransferItems)
                     {
-                        if(!item.State.HasFlag(TransferStates.Succeeded))
+                        if (!item.State.HasFlag(TransferStates.Succeeded))
                         {
                             return false;
                         }
@@ -2330,7 +2324,7 @@ namespace AndriodApp1
 
         public void ClearAllFromFolder(FolderItem fi)
         {
-            lock(AllTransferItems)
+            lock (AllTransferItems)
             {
                 foreach (TransferItem ti in fi.TransferItems)
                 {
@@ -2348,7 +2342,7 @@ namespace AndriodApp1
             {
                 TransferItemManagerWrapper.CleanupEntry(tisNeedingCleanup);
             }
-            lock(AllTransferItems)
+            lock (AllTransferItems)
             {
                 foreach (TransferItem ti in fi.TransferItems)
                 {
@@ -2562,7 +2556,7 @@ namespace AndriodApp1
             if (action != null && action == ConnectivityManager.ConnectivityAction)
             {
                 bool changed = SeekerApplication.SetNetworkState(context);
-                if(changed)
+                if (changed)
                 {
                     MainActivity.LogDebug("metered state changed.. lets set up our handlers and inform server..");
                     MainActivity.SetUnsetSharingBasedOnConditions(true);
@@ -2683,7 +2677,7 @@ namespace AndriodApp1
                 return;
             }
 
-            if(SoulSeekState.AutoRequeueDownloadsAtStartup)
+            if (SoulSeekState.AutoRequeueDownloadsAtStartup)
             {
                 var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
                 if (queuedTransfers.Count > 0)
@@ -2704,12 +2698,12 @@ namespace AndriodApp1
         private static void TransfersTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             MainActivity.LogDebug("TransfersTimerElapsed");
-            if(MainActivity.IsNotLoggedIn())
+            if (MainActivity.IsNotLoggedIn())
             {
                 return;
             }
             var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
-            if(queuedTransfers.Count > 0)
+            if (queuedTransfers.Count > 0)
             {
                 MainActivity.LogDebug("TransfersTimerElapsed - Lets get position of queued transfers...");
                 MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
@@ -3174,14 +3168,14 @@ namespace AndriodApp1
 
 
             //System.Threading.Thread.Sleep(4000); // bug exposer - does help reproduce on samsung galaxy
-            
+
             //if (foreground)
             //{
             try
             {
                 StartForeground(NOTIF_ID, notification); // this can crash if started in background... (and firebase does say they started in background)
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
                 //   in my case it did not.
@@ -3342,7 +3336,7 @@ namespace AndriodApp1
 
         protected override void AttachBaseContext(Context @base)
         {
-            if(!SeekerApplication.HasProperPerAppLanguageSupport() && SoulSeekState.Language != SoulSeekState.FieldLangAuto)
+            if (!SeekerApplication.HasProperPerAppLanguageSupport() && SoulSeekState.Language != SoulSeekState.FieldLangAuto)
             {
                 var config = new Android.Content.Res.Configuration();
                 config.Locale = SeekerApplication.LocaleFromString(SoulSeekState.Language);
@@ -3422,7 +3416,7 @@ namespace AndriodApp1
                     {
                         msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
                     }
-                    else if(dirTask.Exception.InnerException is Soulseek.UserOfflineException)
+                    else if (dirTask.Exception.InnerException is Soulseek.UserOfflineException)
                     {
                         msgToToast = $"Failed to Add Download - User {_uname} is offline";
                     }
@@ -3431,7 +3425,8 @@ namespace AndriodApp1
                         msgToToast = "Failed to follow link";
                     }
                     MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
                     });
                 }
@@ -3819,8 +3814,8 @@ namespace AndriodApp1
         /// <param name="dir"></param>
         /// <param name="directoryCount"></param>
         /// <returns></returns>
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryFastDocContract(UploadDirectoryInfo newlyAddedDirectoryIfApplicable, 
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br, 
+        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryFastDocContract(UploadDirectoryInfo newlyAddedDirectoryIfApplicable,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br,
             out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
@@ -3850,7 +3845,7 @@ namespace AndriodApp1
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirectoryInfo in tmpUploadDirs)
             {
-                if(uploadDirectoryInfo.IsSubdir || uploadDirectoryInfo.HasError())
+                if (uploadDirectoryInfo.IsSubdir || uploadDirectoryInfo.HasError())
                 {
                     continue;
                 }
@@ -3858,8 +3853,8 @@ namespace AndriodApp1
                 DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
                 GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri, 
-                    pairs, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null, 
+                traverseDirectoryEntriesInternal(SoulSeekState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri,
+                    pairs, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
                     ref directoryCount, ref indexNum);
             }
 
@@ -4006,7 +4001,7 @@ namespace AndriodApp1
                 }
 
 
-                foreach(var chosenVolume in volumeNamesOfInterest)
+                foreach (var chosenVolume in volumeNamesOfInterest)
                 {
                     Android.Net.Uri mediaStoreUri = null;
                     if (!string.IsNullOrEmpty(chosenVolume))
@@ -4065,7 +4060,7 @@ namespace AndriodApp1
 
 
         public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryLegacy(
-            UploadDirectoryInfo newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, 
+            UploadDirectoryInfo newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
@@ -4108,9 +4103,9 @@ namespace AndriodApp1
                 DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
                 GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs, 
-                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, 
-                    previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null, 
+                traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs,
+                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index,
+                    previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
                     ref directoryCount, ref indexNum);
             }
 
@@ -4408,7 +4403,7 @@ namespace AndriodApp1
             bool convertFrom2to3 = false;
 
             string s_stringUriPairs = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_stringUriPairs_v3, string.Empty);
-            if(s_stringUriPairs==string.Empty)
+            if (s_stringUriPairs == string.Empty)
             {
                 s_stringUriPairs = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_stringUriPairs_v2, string.Empty);
                 convertFrom2to3 = true;
@@ -4436,23 +4431,23 @@ namespace AndriodApp1
                     byte[] b_FriendlyDirNameMapping = Convert.FromBase64String(s_FriendlyDirNameMapping);
                     byte[] b_intHelperIndex = Convert.FromBase64String(s_intHelperIndex);
                     byte[] b_tokenIndex = Convert.FromBase64String(s_tokenIndex);
-                    
+
                     using (System.IO.MemoryStream m_stringUriPairs = new System.IO.MemoryStream(b_stringUriPairs))
                     using (System.IO.MemoryStream m_BrowseResponse = new System.IO.MemoryStream(b_BrowseResponse))
                     using (System.IO.MemoryStream m_FriendlyDirNameMapping = new System.IO.MemoryStream(b_FriendlyDirNameMapping))
                     using (System.IO.MemoryStream m_intHelperIndex = new System.IO.MemoryStream(b_intHelperIndex))
-                    
+
                     using (System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
                     {
                         BinaryFormatter binaryFormatter = new BinaryFormatter();
                         CachedParseResults cachedParseResults = new CachedParseResults();
 
-                        if(convertFrom2to3)
+                        if (convertFrom2to3)
                         {
                             MainActivity.LogDebug("convert from v2 to v3");
                             var oldKeys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>;
                             var newKeys = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
-                            if(oldKeys!=null)
+                            if (oldKeys != null)
                             {
                                 foreach (var oldkeyvaluepair in oldKeys)
                                 {
@@ -4480,11 +4475,11 @@ namespace AndriodApp1
                             cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>;
                         }
 
-                        
+
                         cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
 
 
-                        if(!string.IsNullOrEmpty(s_BrowseResponse_hiddenPortion))
+                        if (!string.IsNullOrEmpty(s_BrowseResponse_hiddenPortion))
                         {
                             byte[] b_BrowseResponse_hiddenPortion = Convert.FromBase64String(s_BrowseResponse_hiddenPortion);
                             using (System.IO.MemoryStream m_BrowseResponse_hiddenPortion = new System.IO.MemoryStream(b_BrowseResponse_hiddenPortion))
@@ -4497,7 +4492,7 @@ namespace AndriodApp1
                             cachedParseResults.browseResponseHiddenPortion = null;
                         }
 
-                        
+
                         cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
                         cachedParseResults.direcotryCount = cachedParseResults.browseResponse.DirectoryCount;
                         cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
@@ -4632,7 +4627,7 @@ namespace AndriodApp1
         /// <param name="allMediaInfoDict"></param>
         /// <param name="prevInfoToUse"></param>
         /// <returns></returns>
-        private static Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>,bool, bool>> prevInfoToUse)
+        private static Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> prevInfoToUse)
         {
             try
             {
@@ -4729,7 +4724,7 @@ namespace AndriodApp1
                     catch (Exception e)
                     {
                         //ape and aiff always fail with built in metadata retreiver.
-                        if(System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
+                        if (System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
                         {
                             MicroTagReader.GetApeMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
                         }
@@ -4739,7 +4734,7 @@ namespace AndriodApp1
                         }
 
                         //if still not fixed
-                        if(sampleRate==-1 || duration == -1 || bitDepth == -1)
+                        if (sampleRate == -1 || duration == -1 || bitDepth == -1)
                         {
                             MainActivity.LogFirebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SoulSeekState.ActiveActivityRef == null) + childUri?.ToString());
                         }
@@ -4831,7 +4826,7 @@ namespace AndriodApp1
 
         public static bool IsLockedFolder(string presentableName)
         {
-            if(IsLockedFile(presentableName))
+            if (IsLockedFile(presentableName))
             {
                 return true;
             }
@@ -4847,9 +4842,9 @@ namespace AndriodApp1
 
         public static bool IsLockedFile(string presentableName)
         {
-            foreach(string lockedDir in UploadDirectoryManager.PresentableNameLockedDirectories)
+            foreach (string lockedDir in UploadDirectoryManager.PresentableNameLockedDirectories)
             {
-                if(presentableName.StartsWith($"{lockedDir}\\")) //no need for == bc files
+                if (presentableName.StartsWith($"{lockedDir}\\")) //no need for == bc files
                 {
                     return true;
                 }
@@ -4870,10 +4865,10 @@ namespace AndriodApp1
         }
 
 
-        public static void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri, 
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>,bool, bool>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
-            List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase, 
-            Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, 
+        public static void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
+            List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase,
+            Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             bool msdMsfOrOverrideCase, string msdMsfOrOverrideBuildParentName, ref int totalDirectoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
@@ -4915,7 +4910,7 @@ namespace AndriodApp1
                     {
                         totalDirectoryCount++;
                         traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
-                            dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse, 
+                            dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse,
                             msdMsfOrOverrideCase, msdMsfOrOverrideCase ? msdMsfOrOverrideBuildParentName + '\\' + name : null, ref totalDirectoryCount, ref indexNum);
                     }
                     else
@@ -4939,7 +4934,7 @@ namespace AndriodApp1
                             //MainActivity.LogDebug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
                         }
 
-                        pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(size, childUri.ToString(), attributes, IsLockedFile(presentableName), IsHiddenFile(presentableName))); 
+                        pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(size, childUri.ToString(), attributes, IsLockedFile(presentableName), IsHiddenFile(presentableName)));
                         index.Add(indexNum, presentableName); //throws on same key (the file in question ends with unicode EOT char (\u04)).
                         indexNum++;
                         if (indexNum % 50 == 0)
@@ -4950,11 +4945,11 @@ namespace AndriodApp1
                         //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
                         string fname = Utils.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                                                        //for the brose response should only be the filename!!! 
-                                                                                                        //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                                                        //bc we get a path that is:
-                                                                                                        //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
-                                                                                                        //not quite a full URI but it does add quite a bit..
+                                                                                                      //for the brose response should only be the filename!!! 
+                                                                                                      //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                                                      //bc we get a path that is:
+                                                                                                      //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
+                                                                                                      //not quite a full URI but it does add quite a bit..
 
                         //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
                         //{
@@ -4981,13 +4976,13 @@ namespace AndriodApp1
                 }
                 string directoryPath = lastPathSegment.Replace("/", @"\");
 
-                if(!msdMsfOrOverrideCase)
+                if (!msdMsfOrOverrideCase)
                 {
                     if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
                     {
                         if (volName != null && volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
                         {
-                            if(volName.Length > directoryPath.Length)
+                            if (volName.Length > directoryPath.Length)
                             {
                                 MainActivity.LogFirebase("volName > directoryPath" + volName + " -- " + directoryPath + " -- " + isRootCase);
                             }
@@ -5001,11 +4996,11 @@ namespace AndriodApp1
                 }
 
                 var slskDir = new Soulseek.Directory(directoryPath, files);
-                if(IsHiddenFolder(directoryPath))
+                if (IsHiddenFolder(directoryPath))
                 {
                     listOfHiddenDirs.Add(slskDir);
                 }
-                else if(IsLockedFolder(directoryPath))
+                else if (IsLockedFolder(directoryPath))
                 {
                     listOfLockedDirs.Add(slskDir);
                 }
@@ -5013,7 +5008,7 @@ namespace AndriodApp1
                 {
                     listOfDirs.Add(slskDir);
                 }
-                
+
                 dirMappingFriendlyNameToUri.Add(new Tuple<string, string>(directoryPath, parentUri.ToString()));
             }
             finally
@@ -5023,9 +5018,9 @@ namespace AndriodApp1
         }
 
 
-        public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase, 
-            List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri, 
-            string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, 
+        public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase,
+            List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
+            string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             bool overrideCase, string msdMsfOrOverrideBuildParentName,
             ref int totalDirectoryCount, ref int indexNum)
         {
@@ -5036,7 +5031,7 @@ namespace AndriodApp1
                 if (childDocFile.IsDirectory)
                 {
                     totalDirectoryCount++;
-                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs, 
+                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                         dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, overrideCase,
                         overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, ref totalDirectoryCount, ref indexNum);
                 }
@@ -5046,7 +5041,7 @@ namespace AndriodApp1
                     //".android_secure" so just the filename whereas Path is more similar to last part segment:
                     //"/storage/sdcard/.android_secure"
                     string presentableName = childDocFile.Uri.Path.Replace('/', '\\');
-                    if(overrideCase)
+                    if (overrideCase)
                     {
                         presentableName = msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name;
                     }
@@ -5070,11 +5065,11 @@ namespace AndriodApp1
                         SoulSeekState.NumberParsed = indexNum;
                     }
                     string fname = Utils.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                                                    //for the brose response should only be the filename!!! 
-                                                                                                    //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                                                    //bc we get a path that is:
-                                                                                                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
-                                                                                                    //not quite a full URI but it does add quite a bit..
+                                                                                                  //for the brose response should only be the filename!!! 
+                                                                                                  //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                                                  //bc we get a path that is:
+                                                                                                  //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
+                                                                                                  //not quite a full URI but it does add quite a bit..
 
                     //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
                     //{
@@ -5088,7 +5083,7 @@ namespace AndriodApp1
             Utils.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
-            if(overrideCase)
+            if (overrideCase)
             {
                 directoryPath = msdMsfOrOverrideBuildParentName;
             }
@@ -5138,7 +5133,7 @@ namespace AndriodApp1
             }
         }
 
-        
+
 
         /// <summary>
         /// Check Cache should be false if setting a new dir.. true if on startup.
@@ -5185,7 +5180,7 @@ namespace AndriodApp1
                         stringUriPairs = ParseSharedDirectoryFastDocContract(null, SoulSeekState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index, out hiddenDirectories);
                     }
 
-                    int nonHiddenCountForServer = stringUriPairs.Count(pair1=>!pair1.Value.Item5);
+                    int nonHiddenCountForServer = stringUriPairs.Count(pair1 => !pair1.Value.Item5);
                     MainActivity.LogDebug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
                     SoulSeekState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
@@ -5385,9 +5380,9 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys, 
-                            cachedParseResults.direcotryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping, 
-                            cachedParseResults.tokenIndex, cachedParseResults.helperIndex, cachedParseResults.browseResponseHiddenPortion, 
+                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys,
+                            cachedParseResults.direcotryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping,
+                            cachedParseResults.tokenIndex, cachedParseResults.helperIndex, cachedParseResults.browseResponseHiddenPortion,
                             cachedParseResults.nonHiddenFileCount);
 
                         SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, sharedFileCache.GetNonHiddenFileCountForServer() != -1 ? sharedFileCache.GetNonHiddenFileCountForServer() : sharedFileCache.FileCount));
@@ -5410,7 +5405,7 @@ namespace AndriodApp1
                 LogDebug("Error parsing files: " + e.Message + e.StackTrace);
 
 
-                if(e is DirectoryAccessFailure)
+                if (e is DirectoryAccessFailure)
                 {
                     errorMsg = "Shared Folder Error - " + UploadDirectoryManager.GetCompositeErrorString();
                 }
@@ -5432,7 +5427,7 @@ namespace AndriodApp1
                     }
                 }
 
-                if(errorMsg == defaultUnspecified)
+                if (errorMsg == defaultUnspecified)
                 {
                     MainActivity.LogFirebase("Error Parsing Files Unspecified Error" + e.Message + e.StackTrace);
                 }
@@ -5466,7 +5461,7 @@ namespace AndriodApp1
             string codePointString = string.Empty;
             foreach (char c in str)
             {
-                codePointString = codePointString + ($"_{ (int)c:x4}");
+                codePointString = codePointString + ($"_{(int)c:x4}");
             }
             return codePointString;
         }
@@ -5506,10 +5501,10 @@ namespace AndriodApp1
                 {
                     if (MeetsCurrentSharingConditions())
                     {
-                        if(SoulSeekState.SharedFileCache != null)
+                        if (SoulSeekState.SharedFileCache != null)
                         {
                             MainActivity.LogDebug("Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
-                            SoulSeekState.SoulseekClient.SetSharedCountsAsync(SoulSeekState.SharedFileCache.DirectoryCount, 
+                            SoulSeekState.SoulseekClient.SetSharedCountsAsync(SoulSeekState.SharedFileCache.DirectoryCount,
                                 SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() != -1 ? SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() : SoulSeekState.SharedFileCache.FileCount);
                         }
                         else
@@ -5528,7 +5523,7 @@ namespace AndriodApp1
                 {
                     if (MeetsCurrentSharingConditions())
                     {
-                        if(SoulSeekState.SharedFileCache!=null)
+                        if (SoulSeekState.SharedFileCache != null)
                         {
                             MainActivity.LogDebug("We need to Tell server we are sharing " + SoulSeekState.SharedFileCache.DirectoryCount + " dirs and " + SoulSeekState.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
                         }
@@ -5678,7 +5673,7 @@ namespace AndriodApp1
                     //SoulSeekState.UploadDataDirectoryUri = null;
                     //SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
                     SetUnsetSharingBasedOnConditions(false, true);
-                    if(!(e is DirectoryAccessFailure))
+                    if (!(e is DirectoryAccessFailure))
                     {
                         MainActivity.LogFirebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
                     }
@@ -5992,7 +5987,7 @@ namespace AndriodApp1
                 InformServerOfSharedFiles();
                 SoulSeekState.AttemptedToSetUpSharing = true;
             }
-            
+
 
             //this.DeleteSharedPreferences("SoulSeekPrefs");
 
@@ -6275,10 +6270,10 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if(SoulSeekState.SaveDataDirectoryUriIsFromTree)
+                    if (SoulSeekState.SaveDataDirectoryUriIsFromTree)
                     {
                         SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
-                        
+
                     }
                     else
                     {
@@ -6432,7 +6427,8 @@ namespace AndriodApp1
             //Create FolderOpenDialog
             SimpleFileDialog fileDialog = new SimpleFileDialog(SoulSeekState.ActiveActivityRef, SimpleFileDialog.FileSelectionMode.FolderChoose);
             fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath).ContinueWith(
-                (Task<string> t) => {
+                (Task<string> t) =>
+                {
                     if (t.Result == null || t.Result == string.Empty)
                     {
                         this.OnActivityResult(requestCode, Result.Canceled, new Intent());
@@ -6450,13 +6446,14 @@ namespace AndriodApp1
 
         public static Action<Task> GetPostNotifPermissionTask()
         {
-            return new Action<Task>((task) => {
+            return new Action<Task>((task) =>
+            {
                 if (task.IsCompletedSuccessfully)
                 {
                     RequestPostNotificationPermissionsIfApplicable();
                 }
             });
-            
+
         }
 
         private static bool postNotficationAlreadyRequestedInSession = false;
@@ -6498,7 +6495,7 @@ namespace AndriodApp1
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: " + e.Message + e.StackTrace);
             }
@@ -6551,7 +6548,7 @@ namespace AndriodApp1
                 //    b.Show();
                 //}
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("RequestPostNotificationPermissionsIfApplicable error: " + e.Message + e.StackTrace);
             }
@@ -6736,7 +6733,7 @@ namespace AndriodApp1
 
         public static void GetDownloadPlaceInQueueBatchLogic(List<TransferItem> transferItems, bool addIfNotAdded, Func<TransferItem, object> actionOnComplete = null)
         {
-            foreach(TransferItem transferItem in transferItems)
+            foreach (TransferItem transferItem in transferItems)
             {
                 GetDownloadPlaceInQueueLogic(transferItem.Username, transferItem.FullFilename, addIfNotAdded, true, transferItem, null);
             }
@@ -6784,7 +6781,7 @@ namespace AndriodApp1
                     {
                         bool transitionToNextState = false;
                         Soulseek.TransferStates state = TransferStates.Errored;
-                        if(t.Exception?.InnerException is Soulseek.UserOfflineException uoe)
+                        if (t.Exception?.InnerException is Soulseek.UserOfflineException uoe)
                         {
                             //Nicotine always immediately transitions from queued to user offline the second the user goes offline. We dont do it immediately but on next check.
                             //for QT you always are in "Queued" no matter what.
@@ -6834,7 +6831,7 @@ namespace AndriodApp1
                         }
 
                         // 
-                        if(transitionToNextState)
+                        if (transitionToNextState)
                         {
                             //update the transferItem array
                             if (transferItemInQuestion == null)
@@ -6850,7 +6847,7 @@ namespace AndriodApp1
                             {
                                 transferItemInQuestion.CancellationTokenSource.Cancel();
                             }
-                            catch(Exception err)
+                            catch (Exception err)
                             {
                                 MainActivity.LogFirebase("cancellation token src issue: " + err.Message);
                             }
@@ -6864,7 +6861,7 @@ namespace AndriodApp1
                         bool queuePositionChanged = false;
 
                         //update the transferItem array
-                        if(transferItemInQuestion == null)
+                        if (transferItemInQuestion == null)
                         {
                             transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                         }
@@ -6886,7 +6883,7 @@ namespace AndriodApp1
                                 transferItemInQuestion.QueueLength = int.MaxValue;
                             }
 
-                            if(queuePositionChanged)
+                            if (queuePositionChanged)
                             {
                                 MainActivity.LogDebug($"Queue Position of {fullFileName} has changed to {t.Result}");
                             }
@@ -6902,7 +6899,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            if(queuePositionChanged)
+                            if (queuePositionChanged)
                             {
                                 TransferItemQueueUpdated?.Invoke(null, transferItemInQuestion); //if the transfer item fragment is bound then we update it..
                             }
@@ -6919,10 +6916,10 @@ namespace AndriodApp1
             }
             catch (TransferNotFoundException)
             {
-                if(addIfNotAdded)
+                if (addIfNotAdded)
                 {
                     //it is not downloading... therefore retry the download...
-                    if(transferItemInQuestion==null)
+                    if (transferItemInQuestion == null)
                     {
                         transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                     }
@@ -6952,7 +6949,7 @@ namespace AndriodApp1
                         {
                             MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
                         }
-                        if(!silent)
+                        if (!silent)
                         {
                             SoulSeekState.ActiveActivityRef.RunOnUiThread(a);
                         }
@@ -7385,7 +7382,7 @@ namespace AndriodApp1
             if (MeetsSharingConditions() && IsSharingSetUpSuccessfully())
             {
                 //try to parse this into a path: SoulSeekState.ShareDataDirectoryUri
-                if(MeetsCurrentSharingConditions())
+                if (MeetsCurrentSharingConditions())
                 {
                     return new Tuple<SharingIcons, string>(SharingIcons.On, SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_sharing));
                 }
@@ -7590,7 +7587,7 @@ namespace AndriodApp1
             }
             if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) //tested..
             {
-                if(!silent)
+                if (!silent)
                 {
                     Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
                     tst.Show();
@@ -7598,7 +7595,7 @@ namespace AndriodApp1
             }
             else
             {
-                if(!silent)
+                if (!silent)
                 {
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(
                     () =>
@@ -7635,11 +7632,11 @@ namespace AndriodApp1
 
         public static void SetStatusApi(bool away)
         {
-            if(IsNotLoggedIn())
+            if (IsNotLoggedIn())
             {
                 return;
             }
-            if(!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+            if (!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 //dont log in just for this.
                 //but if we later connect while still in the background, it may be best to set a flag.
@@ -7649,9 +7646,9 @@ namespace AndriodApp1
             }
             try
             {
-                SoulSeekState.SoulseekClient.SetStatusAsync(away ? UserPresence.Away : UserPresence.Online).ContinueWith((Task t)=>
+                SoulSeekState.SoulseekClient.SetStatusAsync(away ? UserPresence.Away : UserPresence.Online).ContinueWith((Task t) =>
                 {
-                    if(t.IsCompletedSuccessfully)
+                    if (t.IsCompletedSuccessfully)
                     {
                         SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
                         SoulSeekState.OurCurrentStatusIsAway = away;
@@ -7664,7 +7661,7 @@ namespace AndriodApp1
                     }
                 });
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogDebug("SetStatusApi FAILED " + e.Message + e.StackTrace);
             }
@@ -7818,11 +7815,11 @@ namespace AndriodApp1
             DocumentFile ourFile = null;
             Android.Net.Uri ourUri = Android.Net.Uri.Parse(ourFileInfo.Item2);
 
-            if(ourFileInfo.Item4 || ourFileInfo.Item5)
+            if (ourFileInfo.Item4 || ourFileInfo.Item5)
             {
                 //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
                 //CHECK USER LIST
-                if(!CommonHelpers.UserListChecker.IsInUserList(username))
+                if (!CommonHelpers.UserListChecker.IsInUserList(username))
                 {
                     throw new DownloadEnqueueException($"File not shared");
                 }
@@ -7937,11 +7934,11 @@ namespace AndriodApp1
                     }
                 });
 
-                if(NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
+                if (NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
                 {
                     //the resultCode will always be Cancelled for this since you have to back out of it.
                     //so instead we check Android.OS.Environment.IsExternalStorageManager
-                    if(SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
+                    if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                     {
                         //phase 2 - actually pick a file.
                         FallbackFileSelection(NEW_WRITE_EXTERNAL_VIA_LEGACY);
@@ -7964,7 +7961,7 @@ namespace AndriodApp1
 
                 if (resultCode == Result.Ok)
                 {
-                    if(NEW_WRITE_EXTERNAL == requestCode)
+                    if (NEW_WRITE_EXTERNAL == requestCode)
                     {
                         var x = data.Data;
                         SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
@@ -7972,7 +7969,7 @@ namespace AndriodApp1
                         SoulSeekState.SaveDataDirectoryUriIsFromTree = true;
                         this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     }
-                    else if(NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
+                    else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
                         SoulSeekState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
                         SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
@@ -7994,8 +7991,8 @@ namespace AndriodApp1
                     //throw new Exception("Seeker requires access to a directory where it can store files.");
                 }
             }
-            else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode || 
-                MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode || 
+            else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode ||
+                MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode ||
                 MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
             {
 
@@ -8010,7 +8007,7 @@ namespace AndriodApp1
                     bttn.Visibility = ViewStates.Gone;
                 });
 
-                if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
+                if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
                 {
                     //the resultCode will always be Cancelled for this since you have to back out of it.
                     //so instead we check Android.OS.Environment.IsExternalStorageManager
@@ -8037,13 +8034,13 @@ namespace AndriodApp1
 
                 if (resultCode == Result.Ok)
                 {
-                    if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
+                    if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
                         SoulSeekState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
                         SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
                         SoulSeekState.SaveDataDirectoryUriIsFromTree = false;
                     }
-                    else if(MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
+                    else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
                     {
                         SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                         SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
@@ -8156,7 +8153,7 @@ namespace AndriodApp1
                 allFilesPermission.SetData(packageUri);
                 this.StartActivityForResult(allFilesPermission, mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen : NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen);
             }
-            else if(SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
+            else if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
             {
                 FallbackFileSelection(mustSelectDirectoryButton ? MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY : NEW_WRITE_EXTERNAL_VIA_LEGACY);
             }
@@ -8164,7 +8161,7 @@ namespace AndriodApp1
             {
 
 
-                if(SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                if (SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
                 {
                     ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
                 }
@@ -8318,7 +8315,7 @@ namespace AndriodApp1
                             catch (System.Exception e)
                             {
                                 //disconnected error
-                                if(e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
+                                if (e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
                                 {
                                     action = () => { ToastUIWithDebouncer(SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL), "_16_"); };
                                 }
@@ -8326,7 +8323,7 @@ namespace AndriodApp1
                                 {
                                     MainActivity.LogFirebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
                                 }
-                                if(action != null)
+                                if (action != null)
                                 {
                                     SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
                                 }
@@ -8362,7 +8359,7 @@ namespace AndriodApp1
                         {
                             action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
                         }
-                        else if(task.Exception.InnerException is TransferSizeMismatchException sizeException)
+                        else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
                         {
                             // THIS SHOULD NEVER HAPPEN. WE FIX THE TRANSFER SIZE MISMATCH INLINE.
 
@@ -8380,7 +8377,7 @@ namespace AndriodApp1
                                 {
                                     TransferItemManagerWrapper.PerformCleanupItem(transferItem);
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
                                     MainActivity.LogDebug(exceptionString);
@@ -8388,7 +8385,7 @@ namespace AndriodApp1
                                 }
                             }
                         }
-                        else if(task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
+                        else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
                             action = () => { ToastUIWithDebouncer(SoulSeekState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
                         }
@@ -8505,9 +8502,9 @@ namespace AndriodApp1
                             {
                                 //I get a lot of null refs from task.Exception.InnerException.Message
 
-                                
+
                                 LogDebug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                                if(task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
+                                if (task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
                                 {
                                     action = () => { ToastUI(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
                                     unknownException = false;
@@ -8529,8 +8526,8 @@ namespace AndriodApp1
                                     {
                                         unknownException = false;
                                     }
-                                    
-                                    if(unknownException)
+
+                                    if (unknownException)
                                     {
                                         MainActivity.LogFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
                                     }
@@ -8550,9 +8547,9 @@ namespace AndriodApp1
 
                                 if (unknownException)
                                 {
-                                    if(task.Exception.InnerException.StackTrace.Contains("System.Xml.Serialization.XmlSerializationWriterInterpreter"))
+                                    if (task.Exception.InnerException.StackTrace.Contains("System.Xml.Serialization.XmlSerializationWriterInterpreter"))
                                     {
-                                        if(task.Exception.InnerException.StackTrace.Length > 1201)
+                                        if (task.Exception.InnerException.StackTrace.Length > 1201)
                                         {
                                             MainActivity.LogFirebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1200).ToString());
                                         }
@@ -8703,7 +8700,7 @@ namespace AndriodApp1
 
         public static void ToastUI(string msg)
         {
-            if(OnUIthread())
+            if (OnUIthread())
             {
                 Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Long).Show();
             }
@@ -8724,7 +8721,7 @@ namespace AndriodApp1
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(()=>
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
                     {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, ToastLength.Short).Show();
                     });
@@ -9207,7 +9204,7 @@ namespace AndriodApp1
                 bool diagSlskDirExistsAfterCreation = false;
                 bool rootDocumentFileIsNull = SoulSeekState.RootDocumentFile == null;
 
-                if(rootDocumentFileIsNull)
+                if (rootDocumentFileIsNull)
                 {
                     throw new DownloadDirectoryNotSetException();
                 }
@@ -9625,7 +9622,7 @@ namespace AndriodApp1
 
                     if (depth == 1)
                     {
-                        lock(string.Intern("IfNotExistCreateAtomic_2"))
+                        lock (string.Intern("IfNotExistCreateAtomic_2"))
                         {
                             folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
                             if (folderDir1 == null || !folderDir1.Exists())
@@ -9755,7 +9752,7 @@ namespace AndriodApp1
                                     string realName = df.Name;
                                     uri = folderDir1.FindFile(realName).Uri;
 
-                                    if(folderDir1.Uri == parentUriOfIncomplete)
+                                    if (folderDir1.Uri == parentUriOfIncomplete)
                                     {
                                         //case where SDCARD was full - all files were 0 bytes, folders could not be created, documenttree.CreateDirectory() returns null.
                                         //no errors until you tried to move it. then you would get "alreay exists" since (if Create Complete and Incomplete folders is checked and 
@@ -10319,7 +10316,7 @@ namespace AndriodApp1
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            switch(requestCode)
+            switch (requestCode)
             {
                 case POST_NOTIFICATION_PERMISSION:
                     break;
@@ -10802,7 +10799,7 @@ namespace AndriodApp1
 
         public static string GetErrorString(UploadDirectoryError errorCode)
         {
-            switch(errorCode)
+            switch (errorCode)
             {
                 case UploadDirectoryError.CannotWrite:
                     return SeekerApplication.GetString(Resource.String.PermissionErrorShared);
@@ -10819,7 +10816,7 @@ namespace AndriodApp1
         public static void RestoreFromSavedState(ISharedPreferences sharedPreferences)
         {
             string sharedDirInfo = sharedPreferences.GetString(SoulSeekState.M_SharedDirectoryInfo, string.Empty);
-            if(string.IsNullOrEmpty(sharedDirInfo))
+            if (string.IsNullOrEmpty(sharedDirInfo))
             {
                 string legacyUploadDataDirectory = sharedPreferences.GetString(SoulSeekState.M_UploadDirectoryUri, string.Empty);
                 bool fromTree = sharedPreferences.GetBoolean(SoulSeekState.M_UploadDirectoryUriIsFromTree, true);
@@ -10860,7 +10857,7 @@ namespace AndriodApp1
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
                 binaryFormatter.Serialize(mem, UploadDirectories);
                 string userDirsString = Convert.ToBase64String(mem.ToArray());
-                lock(sharedPreferences)
+                lock (sharedPreferences)
                 {
                     var editor = sharedPreferences.Edit();
                     editor.PutString(SoulSeekState.M_SharedDirectoryInfo, userDirsString);
@@ -10872,7 +10869,7 @@ namespace AndriodApp1
         public static String UploadDataDirectoryUri = null;
         public static bool UploadDataDirectoryUriIsFromTree = true;
 
-        
+
         public static List<UploadDirectoryInfo> UploadDirectories;
 
 
@@ -10886,7 +10883,7 @@ namespace AndriodApp1
 
         public static bool IsFromTree(string presentablePath)
         {
-            if(UploadDirectories.All(dir=>dir.UploadDataDirectoryUriIsFromTree))
+            if (UploadDirectories.All(dir => dir.UploadDataDirectoryUriIsFromTree))
             {
                 return true;
             }
@@ -10918,9 +10915,9 @@ namespace AndriodApp1
         {
             bool isUnique = true;
             List<string> currentRootNames = new List<string>();
-            foreach(UploadDirectoryInfo dirInfo in UploadDirectories)
+            foreach (UploadDirectoryInfo dirInfo in UploadDirectories)
             {
-                if(dirInfo.IsSubdir || (dirInfo == newDirInfo))
+                if (dirInfo.IsSubdir || (dirInfo == newDirInfo))
                 {
                     continue;
                 }
@@ -10934,7 +10931,7 @@ namespace AndriodApp1
             if (currentRootNames.Contains(presentableNameNew))
             {
                 isUnique = false;
-                if(updateItToHaveUniqueName)
+                if (updateItToHaveUniqueName)
                 {
                     while (currentRootNames.Contains(presentableNameNew))
                     {
@@ -10977,7 +10974,7 @@ namespace AndriodApp1
                         string volName = MainActivity.GetVolumeName(lastPathSegment, true, out _);
 
                         //this is for if the chosen volume is not primary external
-                        if((int)Android.OS.Build.VERSION.SdkInt < 29)
+                        if ((int)Android.OS.Build.VERSION.SdkInt < 29)
                         {
                             interestedVolnames.Add("external");
                             return interestedVolnames;
@@ -11040,7 +11037,7 @@ namespace AndriodApp1
                     else
                     {
                         uploadDirectoryInfo.UploadDirectory = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, uploadDirUri);
-                        if(!uploadDirectoryInfo.UploadDirectory.Exists())
+                        if (!uploadDirectoryInfo.UploadDirectory.Exists())
                         {
                             uploadDirectoryInfo.UploadDirectory = null;
                             uploadDirectoryInfo.ErrorState = UploadDirectoryError.DoesNotExist;
@@ -11117,7 +11114,7 @@ namespace AndriodApp1
                         }
                     }
 
-                    if(!uploadDirectoryInfo.HasError() && !ourTopLevelParent.HasError())  //otherwise pointless + causes nullref
+                    if (!uploadDirectoryInfo.HasError() && !ourTopLevelParent.HasError())  //otherwise pointless + causes nullref
                     {
                         if (uploadDirectoryInfo.IsLocked)
                         {

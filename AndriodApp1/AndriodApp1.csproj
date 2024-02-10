@@ -128,8 +128,10 @@
     <Compile Include="Helpers\MicroTagReader.cs" />
     <Compile Include="ImportWizardActivity.cs" />
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />
+    <Compile Include="LoginFragment.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="MessagesActivity.cs" />
+    <Compile Include="SearchFragment.cs" />
     <Compile Include="SeekerApplication.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -138,6 +140,7 @@
     <Compile Include="SettingsActivity.cs" />
     <Compile Include="SmartFiltersConfig.cs" />
     <Compile Include="TabsPagerAdapter.cs" />
+    <Compile Include="TransfersFragment.cs" />
     <Compile Include="UserListActivity.cs" />
     <Compile Include="Utils\HtmlEntityDecoder.cs" />
     <Compile Include="ViewUserInfoActivity.cs" />

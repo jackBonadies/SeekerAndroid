@@ -1,25 +1,14 @@
-﻿using Android.App;
+﻿using AndriodApp1.Extensions.SearchResponseExtensions;
+using AndriodApp1.Helpers;
 using Android.Content;
-using Android.Net.Wifi;
-using Android.OS;
-using Android.Runtime;
-using Android.Text.Format;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
-using Google.Android.Material.BottomNavigation;
-using System.Net.Sockets;
-using System.Threading.Tasks;
-using System.Linq;
-using System.Runtime.InteropServices;
-using Google.Android.Material.Chip;
-using Android.Util;
 using AndroidX.RecyclerView.Widget;
-using System.Collections.Generic;
+using Google.Android.Material.Chip;
 using System;
-
-using AndriodApp1.Extensions.SearchResponseExtensions;
-using AndriodApp1.Helpers;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AndriodApp1
 {
@@ -39,7 +28,7 @@ namespace AndriodApp1
             bool hideHidden = SoulSeekState.HideLockedResultsInSearch;
 
             //this is relevant to both
-            if(smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
+            if (smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
             {
 
                 Dictionary<string, int> fileTypeCounts = new Dictionary<string, int>();
@@ -84,12 +73,12 @@ namespace AndriodApp1
                     }
 
                     //TODO: keywords
-                    #if DEBUG
+#if DEBUG
                     Console.WriteLine(Utils.GetFolderNameFromFile(searchResponse.GetElementAtAdapterPosition(false, 0).Filename));
-                    #endif
+#endif
                 }
 
-                if(smartFilterOptions.NumFilesEnabled)
+                if (smartFilterOptions.NumFilesEnabled)
                 {
                     //second pass
                     //create file count buckets
@@ -164,7 +153,7 @@ namespace AndriodApp1
                         var sortedList = fileCountCounts.ToList();
                         //key is the folder count, value is the number of times that folder count appeared.
                         sortedList.Sort((x, y) => x.Key.CompareTo(y.Key));
-                        foreach(var pair in sortedList)
+                        foreach (var pair in sortedList)
                         {
                             if (pair.Key == 1)
                             {
@@ -175,10 +164,10 @@ namespace AndriodApp1
                                 chipDescriptions.Add($"{pair.Key} files");
                             }
                         }
-                   
+
                     }
 
-                    finalData[ChipType.FileCount] =  chipDescriptions.Select(str => new ChipDataItem(ChipType.FileCount, false, str));
+                    finalData[ChipType.FileCount] = chipDescriptions.Select(str => new ChipDataItem(ChipType.FileCount, false, str));
                 }
 
                 if (smartFilterOptions.FileTypesEnabled)
@@ -250,12 +239,12 @@ namespace AndriodApp1
                         }
                     }
 
-        #if DEBUG
+#if DEBUG
                     foreach (string ftype in sortedListPass1str)
                     {
                         MainActivity.LogDebug(ftype + " : " + fileTypeCounts[ftype]);
                     }
-        #endif
+#endif
 
 
 
@@ -358,15 +347,15 @@ namespace AndriodApp1
             }
 
             //keywords
-            if(smartFilterOptions.KeywordsEnabled)
+            if (smartFilterOptions.KeywordsEnabled)
             {
                 List<ChipDataItem> chipKeywords = new List<ChipDataItem>();
                 var keywords = GetKeywords(responses, searchTerm);
-                foreach(var keyword in keywords)
+                foreach (var keyword in keywords)
                 {
-                    if(keyword.Item2!=null)
+                    if (keyword.Item2 != null)
                     {
-                        chipKeywords.Add(new ChipDataItem(ChipType.Keyword, false, keyword.Item1,keyword.Item2.ToList()));
+                        chipKeywords.Add(new ChipDataItem(ChipType.Keyword, false, keyword.Item1, keyword.Item2.ToList()));
                     }
                     else
                     {
@@ -379,10 +368,10 @@ namespace AndriodApp1
 
             List<ChipDataItem> finalItems = new List<ChipDataItem>();
             var enabledOrder = smartFilterOptions.GetEnabledOrder();
-            for(int i=0;i<enabledOrder.Count;i++)
+            for (int i = 0; i < enabledOrder.Count; i++)
             {
                 finalItems.AddRange(finalData[enabledOrder[i]]);
-                if(i<enabledOrder.Count -1 && finalData[enabledOrder[i]].Count() > 0)
+                if (i < enabledOrder.Count - 1 && finalData[enabledOrder[i]].Count() > 0)
                 {
                     finalItems[finalItems.Count - 1].LastInGroup = true;
                 }
@@ -409,187 +398,187 @@ namespace AndriodApp1
         {
             try
             {
-            //var sw = System.Diagnostics.Stopwatch.StartNew();
-            KeywordHelper keywordHelper = new KeywordHelper();
-            Dictionary<string, int> counts = new Dictionary<string, int>();
-            int totalCount = responses.Count();
-            for(int i=0; i < totalCount; i++)
-            {
-                string fline = Utils.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
-
-                //fline = fline.Replace(" - ", " ");
-                //fline = fline.Replace(", ", " ");
-                if (fline.StartsWith(" - "))
+                //var sw = System.Diagnostics.Stopwatch.StartNew();
+                KeywordHelper keywordHelper = new KeywordHelper();
+                Dictionary<string, int> counts = new Dictionary<string, int>();
+                int totalCount = responses.Count();
+                for (int i = 0; i < totalCount; i++)
                 {
-                    fline = fline.Substring(3);
-                }
-                fline = fline.Trim();
+                    string fline = Utils.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
-                //fline = fline.ToLower(); //this should be moved so its only for the keys..
-
-                //test if something is in parenthesis and treat it specially bc its likely attributes???
-
-                foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    bool inParen = false;
-                    bool startsWithYear = false;
-                    int dateLen = 0;
-                    string trimmedTerm = term.Trim();
-                    //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
-                    if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
+                    //fline = fline.Replace(" - ", " ");
+                    //fline = fline.Replace(", ", " ");
+                    if (fline.StartsWith(" - "))
                     {
-                        foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            keywordHelper.AddKey(t.Trim());
-                        }
-                        continue;
+                        fline = fline.Substring(3);
                     }
+                    fline = fline.Trim();
 
-                    if (KeywordHelper.IsInParenthesis(trimmedTerm, fline))
-                    {
-                        //normally if in parenthesis those are attributes so split them by ','
-                        inParen = true;
-                    }
-                    if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
-                    {
-                        startsWithYear = true;
-                    }
+                    //fline = fline.ToLower(); //this should be moved so its only for the keys..
 
-                    if (inParen || startsWithYear)
+                    //test if something is in parenthesis and treat it specially bc its likely attributes???
+
+                    foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
                     {
-                        if (startsWithYear)
+                        bool inParen = false;
+                        bool startsWithYear = false;
+                        int dateLen = 0;
+                        string trimmedTerm = term.Trim();
+                        //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                        if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
                         {
-                            string year = trimmedTerm.Substring(0, dateLen);
-
-                            keywordHelper.AddKey(year);
-                        }
-                        string rest = trimmedTerm;//.Substring(5).Trim();
-                        if (startsWithYear)
-                        {
-                            rest = rest.Substring(dateLen).Trim();
-                            //if after stripping date it now starts with - 
-                            if (rest.StartsWith(", ") || rest.StartsWith(". "))
+                            foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
                             {
-                                rest = rest.Substring(2);
+                                keywordHelper.AddKey(t.Trim());
                             }
+                            continue;
                         }
 
-                        if (inParen)
+                        if (KeywordHelper.IsInParenthesis(trimmedTerm, fline))
                         {
-                            foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                            //normally if in parenthesis those are attributes so split them by ','
+                            inParen = true;
+                        }
+                        if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
+                        {
+                            startsWithYear = true;
+                        }
+
+                        if (inParen || startsWithYear)
+                        {
+                            if (startsWithYear)
                             {
-                                keywordHelper.AddKey(restTerm.Trim());
+                                string year = trimmedTerm.Substring(0, dateLen);
+
+                                keywordHelper.AddKey(year);
                             }
-                        }
-                        else
-                        {
-                            keywordHelper.AddKey(rest);
-                        }
-                    }
-                    else
-                    {
-                        keywordHelper.AddKey(trimmedTerm);
-                    }
-                }
-                //generate all ngrams
-            }
-
-
-
-
-            //#if PARENT_VOTE
-
-            //var alllines = File.ReadLines(@"H:\Seeker_Testing\search_results\the_avalanches.txt");
-            //var sw = System.Diagnostics.Stopwatch.StartNew();
-            //KeywordHelper keywordHelper = new KeywordHelper();
-            //Dictionary<string, int> counts = new Dictionary<string, int>();
-            for (int i = 0; i < totalCount; i++)
-            {
-                //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
-                string fline = Utils.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
-
-                //fline = fline.Replace(" - ", " ");
-                //fline = fline.Replace(", ", " ");
-                if (fline.StartsWith(" - "))
-                {
-                    fline = fline.Substring(3);
-                }
-                fline = fline.Trim();
-
-                //fline = fline.ToLower(); //this should be moved so its only for the keys..
-
-                //test if something is in parenthesis and treat it specially bc its likely attributes???
-
-                foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    string termTrimmed = term.Trim();
-                    bool inParen = false;
-                    bool startsWithYear = false;
-                    int dateLen = 0;
-
-                    if(KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(termTrimmed)))
-                    {
-                        continue;
-                    }
-
-                    //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
-                    if (KeywordHelper.IsNoSpacesFormat(termTrimmed))
-                    {
-                        foreach (string t in termTrimmed.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            keywordHelper.VoteIfExists(t.Trim());
-                        }
-                        continue;
-                    }
-
-                    if (KeywordHelper.IsInParenthesis(termTrimmed, fline))
-                    {
-                        //normally if in parenthesis those are attributes so split them by ','
-                        inParen = true;
-                    }
-                    if (KeywordHelper.StartsWithYearOrDate(termTrimmed, out dateLen))
-                    {
-                        startsWithYear = true;
-                    }
-
-                    if (inParen || startsWithYear)
-                    {
-                        if (startsWithYear)
-                        {
-                            string year = termTrimmed.Substring(0, dateLen);
-
-                            keywordHelper.VoteIfExists(year);
-                        }
-                        string rest = termTrimmed;//.Substring(5).Trim();
-                        if (startsWithYear)
-                        {
-                            rest = rest.Substring(dateLen).Trim();
-                        }
-
-                        if (inParen)
-                        {
-                            foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                            string rest = trimmedTerm;//.Substring(5).Trim();
+                            if (startsWithYear)
                             {
-                                keywordHelper.VoteIfExists(restTerm.Trim());
+                                rest = rest.Substring(dateLen).Trim();
+                                //if after stripping date it now starts with - 
+                                if (rest.StartsWith(", ") || rest.StartsWith(". "))
+                                {
+                                    rest = rest.Substring(2);
+                                }
+                            }
+
+                            if (inParen)
+                            {
+                                foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    keywordHelper.AddKey(restTerm.Trim());
+                                }
+                            }
+                            else
+                            {
+                                keywordHelper.AddKey(rest);
                             }
                         }
                         else
                         {
-                            keywordHelper.VoteIfExists(rest);
+                            keywordHelper.AddKey(trimmedTerm);
                         }
                     }
-                    else
-                    {
-                        keywordHelper.VoteIfExists(termTrimmed);
-                    }
+                    //generate all ngrams
                 }
-                //generate all ngrams
-            }
 
-//#endif
-            return keywordHelper.GetTopCandidates(searchTerm, 11);
+
+
+
+                //#if PARENT_VOTE
+
+                //var alllines = File.ReadLines(@"H:\Seeker_Testing\search_results\the_avalanches.txt");
+                //var sw = System.Diagnostics.Stopwatch.StartNew();
+                //KeywordHelper keywordHelper = new KeywordHelper();
+                //Dictionary<string, int> counts = new Dictionary<string, int>();
+                for (int i = 0; i < totalCount; i++)
+                {
+                    //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
+                    string fline = Utils.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+
+                    //fline = fline.Replace(" - ", " ");
+                    //fline = fline.Replace(", ", " ");
+                    if (fline.StartsWith(" - "))
+                    {
+                        fline = fline.Substring(3);
+                    }
+                    fline = fline.Trim();
+
+                    //fline = fline.ToLower(); //this should be moved so its only for the keys..
+
+                    //test if something is in parenthesis and treat it specially bc its likely attributes???
+
+                    foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        string termTrimmed = term.Trim();
+                        bool inParen = false;
+                        bool startsWithYear = false;
+                        int dateLen = 0;
+
+                        if (KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(termTrimmed)))
+                        {
+                            continue;
+                        }
+
+                        //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                        if (KeywordHelper.IsNoSpacesFormat(termTrimmed))
+                        {
+                            foreach (string t in termTrimmed.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                keywordHelper.VoteIfExists(t.Trim());
+                            }
+                            continue;
+                        }
+
+                        if (KeywordHelper.IsInParenthesis(termTrimmed, fline))
+                        {
+                            //normally if in parenthesis those are attributes so split them by ','
+                            inParen = true;
+                        }
+                        if (KeywordHelper.StartsWithYearOrDate(termTrimmed, out dateLen))
+                        {
+                            startsWithYear = true;
+                        }
+
+                        if (inParen || startsWithYear)
+                        {
+                            if (startsWithYear)
+                            {
+                                string year = termTrimmed.Substring(0, dateLen);
+
+                                keywordHelper.VoteIfExists(year);
+                            }
+                            string rest = termTrimmed;//.Substring(5).Trim();
+                            if (startsWithYear)
+                            {
+                                rest = rest.Substring(dateLen).Trim();
+                            }
+
+                            if (inParen)
+                            {
+                                foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                                {
+                                    keywordHelper.VoteIfExists(restTerm.Trim());
+                                }
+                            }
+                            else
+                            {
+                                keywordHelper.VoteIfExists(rest);
+                            }
+                        }
+                        else
+                        {
+                            keywordHelper.VoteIfExists(termTrimmed);
+                        }
+                    }
+                    //generate all ngrams
+                }
+
+                //#endif
+                return keywordHelper.GetTopCandidates(searchTerm, 11);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MainActivity.LogFirebase("keywords failed " + ex.Message + ex.StackTrace);
                 return new List<Tuple<string, HashSet<string>>>();
@@ -663,56 +652,56 @@ namespace AndriodApp1
                 return false;
             }
 
-//            public static bool IsCommonParentFolder(string t)
-//            {
-//#if USE_PARENT
-//            switch (t)
-//            {
-//                case "music":
-//                case "complete":
-//                case "@flac":
-//                case "audio":
-//                case "mp#":
-//                case "m?sica":
-//                case "album":
-//                case "flac albums":
-//                case "albums":
-//                    return true;
-//                default:
-//                    return false;
-//            }
-//#else
-//                return false;
-//#endif
+            //            public static bool IsCommonParentFolder(string t)
+            //            {
+            //#if USE_PARENT
+            //            switch (t)
+            //            {
+            //                case "music":
+            //                case "complete":
+            //                case "@flac":
+            //                case "audio":
+            //                case "mp#":
+            //                case "m?sica":
+            //                case "album":
+            //                case "flac albums":
+            //                case "albums":
+            //                    return true;
+            //                default:
+            //                    return false;
+            //            }
+            //#else
+            //                return false;
+            //#endif
 
-//            }
+            //            }
 
             public static bool IsCommonParentFolder2(string t)
             {
-//#if PARENT_VOTE
-            if (t.Length == 1)
-            {
-                return true;
-            }
-
-            switch (t)
-            {
-                case "music":
-                case "complete":
-                case "@flac":
-                case "audio":
-                case "mp#":
-                case "m?sica":
-                case "album":
-                case "flac albums":
-                case "albums":
+                //#if PARENT_VOTE
+                if (t.Length == 1)
+                {
                     return true;
-                default:
-                    return false;
-            }
-//#else
-//                return false;
-//#endif
+                }
+
+                switch (t)
+                {
+                    case "music":
+                    case "complete":
+                    case "@flac":
+                    case "audio":
+                    case "mp#":
+                    case "m?sica":
+                    case "album":
+                    case "flac albums":
+                    case "albums":
+                        return true;
+                    default:
+                        return false;
+                }
+                //#else
+                //                return false;
+                //#endif
 
             }
 
@@ -911,12 +900,12 @@ namespace AndriodApp1
                     }
                     else
                     {
-//#if USE_PARENT
-//                        if(IsCommonParentFolder(key))
-//                        {
-//                            invarientKeyCounts.Remove(key);
-//                        }
-//#endif
+                        //#if USE_PARENT
+                        //                        if(IsCommonParentFolder(key))
+                        //                        {
+                        //                            invarientKeyCounts.Remove(key);
+                        //                        }
+                        //#endif
                     }
 
                 }
@@ -1043,7 +1032,7 @@ namespace AndriodApp1
 
         public ChipsItemRecyclerAdapter(List<ChipDataItem> ti)
         {
-            if(ti==null)
+            if (ti == null)
             {
                 localDataSet = new List<ChipDataItem>();
             }

@@ -1,15 +1,9 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
+﻿using Android.Content;
 using Android.Widget;
 using Soulseek;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading;
 
 namespace AndriodApp1.Helpers
@@ -63,7 +57,7 @@ namespace AndriodApp1.Helpers
             }
             string name = System.Math.Abs(wishlistSearchResultsToRemove) + "_wishlist_tab";
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
-            if(!fileForOurInternalStorage.Delete())
+            if (!fileForOurInternalStorage.Delete())
             {
                 MainActivity.LogDebug("HEADERS - Delete Search Results: FAILED TO DELETE");
                 MainActivity.LogFirebase("HEADERS - Delete Search Results: FAILED TO DELETE");
@@ -131,7 +125,7 @@ namespace AndriodApp1.Helpers
             {
                 wishlist_dir.Mkdir();
             }
-            string name = System.Math.Abs(wishlistSearchResultsToSave) + "_wishlist_tab"; 
+            string name = System.Math.Abs(wishlistSearchResultsToSave) + "_wishlist_tab";
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
             System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 
@@ -141,7 +135,7 @@ namespace AndriodApp1.Helpers
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(searchRes, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses);
                 byte[] arr = searchRes.ToArray();
-                outputStream.Write(arr,0,arr.Length);
+                outputStream.Write(arr, 0, arr.Length);
                 outputStream.Flush();
                 outputStream.Close();
             }
@@ -166,9 +160,9 @@ namespace AndriodApp1.Helpers
             //there are two cases.
             //  1) we imported the term.  In that case there are no results yet as it hasnt been ran.  Which is fine.  
             //  2) its a bug.
-            if(!fileForOurInternalStorage.Exists())
+            if (!fileForOurInternalStorage.Exists())
             {
-                if(SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount == 0 || SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime == DateTime.MinValue)
+                if (SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount == 0 || SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime == DateTime.MinValue)
                 {
                     //nothing to do.  this is the good case..
                 }
@@ -196,11 +190,11 @@ namespace AndriodApp1.Helpers
                 return;
             }
 
-            using(System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
             {
                 MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
 
-                using(System.IO.MemoryStream ms = new System.IO.MemoryStream())
+                using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
                 {
                     inputStream.CopyTo(ms);
                     ms.Position = 0;

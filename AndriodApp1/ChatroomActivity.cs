@@ -22,19 +22,15 @@ using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.ConstraintLayout.Widget;
 using AndroidX.Core.App;
-using AndroidX.Core.Content;
 using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace AndriodApp1
@@ -105,11 +101,11 @@ namespace AndriodApp1
             //    }
             //}
             bool startWithUserFragment = false;
-            
+
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtChatroomInner"))
             {
                 MainActivity.LogDebug("restoring chatroom inner fragment");
-                if(ChatroomInnerFragment.OurRoomInfo==null)
+                if (ChatroomInnerFragment.OurRoomInfo == null)
                 {
                     MainActivity.LogDebug("ourroominfo is null");
                     RestoreStartingRoomInfo(savedInstanceState);
@@ -132,7 +128,7 @@ namespace AndriodApp1
                     else
                     {
                         startWithUserFragment = true;
-                        Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo)=>{return roomInfo.Name == goToRoom; }); //roomListParsed can be null, causing crash.
+                        Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; }); //roomListParsed can be null, causing crash.
                         SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
                         //switch in that fragment...
                         //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
@@ -165,7 +161,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) =>{return roomInfo.Name == goToRoom; });
+                    Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; });
                     SupportFragmentManager.BeginTransaction().Remove(new ChatroomInnerFragment()).Commit();
                     SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
                     //switch in that fragment...
@@ -187,12 +183,12 @@ namespace AndriodApp1
         /// <param name="outState"></param>
         private static void SaveStartingRoomInfo(Bundle outState, ChatroomInnerFragment f)
         {
-            if(ChatroomInnerFragment.OurRoomInfo!=null)
+            if (ChatroomInnerFragment.OurRoomInfo != null)
             {
                 outState.PutString(INNER_ROOM_NAME_CONST, ChatroomInnerFragment.OurRoomInfo.Name);
                 outState.PutInt(INNER_ROOM_COUNT_CONST, ChatroomInnerFragment.OurRoomInfo.UserCount);
             }
-            if(f!=null&&ChatroomController.RoomList!=null)
+            if (f != null && ChatroomController.RoomList != null)
             {
                 outState.PutBoolean(INNER_ROOM_PRIV_CONST, f.IsPrivate());
                 outState.PutBoolean(INNER_ROOM_OWNED_CONST, f.IsOwned());
@@ -204,13 +200,13 @@ namespace AndriodApp1
         {
             string rName = inState.GetString(INNER_ROOM_NAME_CONST, string.Empty);
             int rCount = inState.GetInt(INNER_ROOM_COUNT_CONST, -1);
-            if(rName==string.Empty)
+            if (rName == string.Empty)
             {
                 MainActivity.LogFirebase("no restore info...");
                 return;
             }
             MainActivity.LogFirebase("restoring info...");
-            ChatroomInnerFragment.OurRoomInfo = new Soulseek.RoomInfo(rName,rCount);
+            ChatroomInnerFragment.OurRoomInfo = new Soulseek.RoomInfo(rName, rCount);
             ChatroomInnerFragment.cachedMod = inState.GetBoolean(INNER_ROOM_MOD_CONST, false);
             ChatroomInnerFragment.cachedOwned = inState.GetBoolean(INNER_ROOM_OWNED_CONST, false);
             ChatroomInnerFragment.cachedPrivate = inState.GetBoolean(INNER_ROOM_PRIV_CONST, false);
@@ -295,7 +291,7 @@ namespace AndriodApp1
 
             bool transitionBothVisible = false;
             var fOuter = SupportFragmentManager.FindFragmentByTag("OuterListChatroomFragment");
-            if(fOuter!=null)
+            if (fOuter != null)
             {
                 transitionBothVisible = fOuter.IsVisible;
             }
@@ -309,7 +305,7 @@ namespace AndriodApp1
                 bool isPrivate = false;
                 bool isOwnedByUs = false;
                 bool isOperator = false;
-                if (ChatroomController.RoomList!=null)
+                if (ChatroomController.RoomList != null)
                 {
                     isPrivate = (fInner as ChatroomInnerFragment).IsPrivate();
                     isOwnedByUs = (fInner as ChatroomInnerFragment).IsOwned();
@@ -344,7 +340,7 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.toggle_notify_room_action).SetTitle(this.Resources.GetString(Resource.String.notification_off));
                 }
 
-                if(ChatroomActivity.ShowTickerView)
+                if (ChatroomActivity.ShowTickerView)
                 {
                     menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle(Resource.String.HideTickerView);
                 }
@@ -353,7 +349,7 @@ namespace AndriodApp1
                     menu.FindItem(Resource.Id.hide_show_ticker_action).SetTitle(Resource.String.ShowTickerView);
                 }
 
-                if(ChatroomActivity.ShowStatusesView)
+                if (ChatroomActivity.ShowStatusesView)
                 {
                     menu.FindItem(Resource.Id.hide_show_user_status_action).SetTitle(Resource.String.HideStatusView);
                 }
@@ -436,7 +432,7 @@ namespace AndriodApp1
                 case Resource.Id.hide_show_ticker_action:
                     ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
                     var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
-                    if(ChatroomActivity.ShowTickerView)
+                    if (ChatroomActivity.ShowTickerView)
                     {
                         f.currentTickerView.Visibility = ViewStates.Visible;
                     }
@@ -470,12 +466,12 @@ namespace AndriodApp1
         {
             MainActivity.LogInfoFirebase("ShowAllTickersDialog" + this.IsFinishing + this.IsDestroyed + SupportFragmentManager.IsDestroyed);
             var tickerDialog = new AllTickersDialog(roomName);
-            tickerDialog.Show(SupportFragmentManager,"ticker dialog");
+            tickerDialog.Show(SupportFragmentManager, "ticker dialog");
         }
 
         public void ShowUserListDialog(Soulseek.RoomInfo roomInfo, bool isPrivate)
         {
-            if(!ChatroomController.JoinedRoomData.ContainsKey(roomInfo.Name))
+            if (!ChatroomController.JoinedRoomData.ContainsKey(roomInfo.Name))
             {
                 Toast.MakeText(this, this.Resources.GetString(Resource.String.room_data_still_loading), ToastLength.Short).Show();
                 return;
@@ -635,7 +631,7 @@ namespace AndriodApp1
 
         public static System.String LocaleToEmoji(string locale)
         {
-            if(locale==string.Empty)
+            if (locale == string.Empty)
             {
                 int unicode = 0x1F310;
                 return new System.String(Java.Lang.Character.ToChars(unicode));
@@ -769,7 +765,7 @@ namespace AndriodApp1
 
         public void ChangeToInnerFragment(Soulseek.RoomInfo roomInfo)
         {
-            if(IsFinishing || IsDestroyed)
+            if (IsFinishing || IsDestroyed)
             {
                 return;
             }
@@ -808,7 +804,7 @@ namespace AndriodApp1
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
-                
+
                 ChatroomController.CreateRoomApi(chatname, isPrivate, true);
 
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
@@ -1021,7 +1017,7 @@ namespace AndriodApp1
             {
                 (holder as MessageInnerViewSentHolder).messageInnerView.setItem(localDataSet[position]);
             }
-            else if(localDataSet[position].SpecialCode!=0)
+            else if (localDataSet[position].SpecialCode != 0)
             {
                 (holder as MessageConnectionStatusHolder).messageInnerView.setItem(localDataSet[position]);
             }
@@ -1068,7 +1064,7 @@ namespace AndriodApp1
                 (view as View).LongClick += ChatroomReceivedAdapter_LongClick;
                 return new MessageInnerViewSentHolder(view as View);
             }
-            else if(viewType == VIEW_RECEIVER)
+            else if (viewType == VIEW_RECEIVER)
             {
                 GroupMessageInnerViewReceived view = GroupMessageInnerViewReceived.inflate(parent);
                 view.setupChildren();
@@ -1089,15 +1085,15 @@ namespace AndriodApp1
 
         private void ChatroomReceivedAdapter_LongClick(object sender, View.LongClickEventArgs e)
         {
-            if(sender is GroupMessageInnerViewReceived recv)
+            if (sender is GroupMessageInnerViewReceived recv)
             {
                 ChatroomInnerFragment.MessagesLongClickData = recv.DataItem;
             }
-            else if(sender is MessageInnerViewSent sent)
+            else if (sender is MessageInnerViewSent sent)
             {
                 ChatroomInnerFragment.MessagesLongClickData = sent.DataItem;
             }
-            
+
 
             (sender as View).ShowContextMenu();
         }
@@ -1106,9 +1102,9 @@ namespace AndriodApp1
         {
             localDataSet = ti;
         }
-        
+
     }
-   
+
 
     public class GroupMessageInnerViewReceivedHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
     {
@@ -1142,11 +1138,11 @@ namespace AndriodApp1
             menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
             menu.Add(1, 1, 1, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
             Utils.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
-            var subMenu = menu.AddSubMenu(3,3,3,SoulSeekState.ActiveActivityRef.GetString(Resource.String.more_options));
-            subMenu.Add(4,4,4,Resource.String.search_user_files);
-            subMenu.Add(5,5,5,Resource.String.browse_user);
-            subMenu.Add(6,6,6,Resource.String.get_user_info);
-            subMenu.Add(7,7,7,Resource.String.msg_user);
+            var subMenu = menu.AddSubMenu(3, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.more_options));
+            subMenu.Add(4, 4, 4, Resource.String.search_user_files);
+            subMenu.Add(5, 5, 5, Resource.String.browse_user);
+            subMenu.Add(6, 6, 6, Resource.String.get_user_info);
+            subMenu.Add(7, 7, 7, Resource.String.msg_user);
             //subMenu.Add(8,8,8,Resource.String.give_privileges);
             Utils.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
         }
@@ -1169,7 +1165,7 @@ namespace AndriodApp1
             return messageInnerView;
         }
 
-        
+
     }
 
     public class GroupMessageInnerViewReceived : ConstraintLayout
@@ -1207,8 +1203,8 @@ namespace AndriodApp1
         {
             DataItem = msg;
             viewTimeStamp.Text = Utils.GetNiceDateTimeGroupChat(msg.LocalDateTime);
-            Utils.SetMessageTextView(viewMessage,msg);
-            if(msg.SameAsLastUser)
+            Utils.SetMessageTextView(viewMessage, msg);
+            if (msg.SameAsLastUser)
             {
                 viewUsername.Visibility = ViewStates.Gone;
                 viewUsername.Text = string.Empty;
@@ -1218,7 +1214,7 @@ namespace AndriodApp1
                 viewUsername.Visibility = ViewStates.Visible;
                 viewUsername.Text = msg.Username;
             }
-            
+
         }
     }
 
@@ -1241,7 +1237,7 @@ namespace AndriodApp1
         protected override void OnSizeChanged(int w, int h, int oldw, int oldh)
         {
             base.OnSizeChanged(w, h, oldw, oldh);
-            if(oldh > h)
+            if (oldh > h)
             {
                 MainActivity.LogDebug("size changed to smaller...");
                 this.GetLayoutManager().ScrollToPosition(this.GetLayoutManager().ItemCount - 1);
@@ -1257,7 +1253,7 @@ namespace AndriodApp1
         private LinearLayoutManager recycleLayoutManager;
         private ChatroomInnerRecyclerAdapter recyclerAdapter;
         private List<Message> messagesInternal = null;
-        private List<ChatroomController.StatusMessageUpdate>  UI_statusMessagesInternal = null;
+        private List<ChatroomController.StatusMessageUpdate> UI_statusMessagesInternal = null;
 
         //private string currentTickerText = string.Empty;
         private bool created = false;
@@ -1296,7 +1292,7 @@ namespace AndriodApp1
         }
         public bool IsOperatedByUs()
         {
-            if(ChatroomController.ModeratedRoomData.ContainsKey(OurRoomInfo.Name))
+            if (ChatroomController.ModeratedRoomData.ContainsKey(OurRoomInfo.Name))
             {
                 return ChatroomController.ModeratedRoomData[OurRoomInfo.Name].Users.Contains(SoulSeekState.Username);
             }
@@ -1343,7 +1339,8 @@ namespace AndriodApp1
         {
             if (OurRoomInfo != null && OurRoomInfo.Name == e.RoomName)
             {
-                this.Activity?.RunOnUiThread(new Action(() => {
+                this.Activity?.RunOnUiThread(new Action(() =>
+                {
                     this.SetTickerMessage(e.Ticker);
                 }));
             }
@@ -1356,10 +1353,11 @@ namespace AndriodApp1
             //nothing to do UNLESS we are not showing any tickers currently.. also make sure its our room..
             if (OurRoomInfo != null && OurRoomInfo.Name == e.RoomName)
             {
-                this.Activity?.RunOnUiThread(new Action(() => {
-                    if(e.TickerCount==0)
+                this.Activity?.RunOnUiThread(new Action(() =>
+                {
+                    if (e.TickerCount == 0)
                     {
-                        this.SetTickerMessage(new Soulseek.RoomTicker("",this.Resources.GetString(Resource.String.no_room_tickers)));
+                        this.SetTickerMessage(new Soulseek.RoomTicker("", this.Resources.GetString(Resource.String.no_room_tickers)));
                     }
                     else
                     {
@@ -1403,27 +1401,28 @@ namespace AndriodApp1
 
         public void OnMessageRecieved(object sender, MessageReceivedArgs roomArgs)
         {
-            if(OurRoomInfo!=null && OurRoomInfo.Name == roomArgs.RoomName)
+            if (OurRoomInfo != null && OurRoomInfo.Name == roomArgs.RoomName)
             {
-                this.Activity?.RunOnUiThread(new Action(() => {
+                this.Activity?.RunOnUiThread(new Action(() =>
+                {
 
-                    if(roomArgs.FromUsConfirmation) //special case, the message is already there we just need to update it
+                    if (roomArgs.FromUsConfirmation) //special case, the message is already there we just need to update it
                     {
                         //the old way (of just doing count - 1) only worked when no messages got there in the mean time.
                         //to test just put a small delay in the send method and receive msg in meantime, and old method will fail...
                         int indexToUpdate = messagesInternal.Count - 1;
                         try
                         {
-                            for (int i = messagesInternal.Count - 1; i>=0; i--)
+                            for (int i = messagesInternal.Count - 1; i >= 0; i--)
                             {
-                                if(System.Object.ReferenceEquals(messagesInternal[i],roomArgs.Message))
+                                if (System.Object.ReferenceEquals(messagesInternal[i], roomArgs.Message))
                                 {
                                     indexToUpdate = i;
                                     break;
                                 }
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             MainActivity.LogFirebase("OnMessageRecieved" + ex.Message);
                         }
@@ -1446,7 +1445,7 @@ namespace AndriodApp1
                             }
                         }
                         //we are now too far away.
-                        if(recycleLayoutManager.ItemCount - lastVisibleItemPosition > scroll_pos_too_far)
+                        if (recycleLayoutManager.ItemCount - lastVisibleItemPosition > scroll_pos_too_far)
                         {
                             fabScrollToNewest.Visibility = ViewStates.Visible;
                         }
@@ -1475,8 +1474,9 @@ namespace AndriodApp1
 
             if (OurRoomInfo != null && OurRoomInfo.Name == room)
             {
-                this.Activity?.RunOnUiThread(new Action(() => {
-                    if(this.IsVisible)
+                this.Activity?.RunOnUiThread(new Action(() =>
+                {
+                    if (this.IsVisible)
                     {
                         MainActivity.LogDebug("pressed back from " + room);
                         this.Activity.OnBackPressed();
@@ -1668,7 +1668,7 @@ namespace AndriodApp1
             else
             {
                 MainActivity.LogDebug("joining room " + OurRoomInfo.Name);
-                if(SoulSeekState.currentlyLoggedIn)
+                if (SoulSeekState.currentlyLoggedIn)
                 {
                     ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, false, false);
                 }
@@ -1688,13 +1688,13 @@ namespace AndriodApp1
                 messagesInternal = new List<Message>();
             }
 
-            if (ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count>0)
+            if (ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count > 0)
             {
                 MainActivity.LogDebug("we have the room tickers");
                 var ticker = ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Last();
                 SetTickerMessage(ticker);
             }
-            else if(ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count == 0)
+            else if (ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count == 0)
             {
                 MainActivity.LogDebug("no tickers yet");
                 SetTickerMessage(new Soulseek.RoomTicker("", this.Resources.GetString(Resource.String.no_room_tickers)));
@@ -1715,7 +1715,7 @@ namespace AndriodApp1
 
             recyclerViewSmall = true;
             recyclerViewStatusesView = rootView.FindViewById<RecyclerView2>(Resource.Id.room_statuses_recycler_view);
-            
+
             CustomClickEvent cce = new CustomClickEvent();
             cce.RecyclerView = recyclerViewStatusesView;
             recyclerViewStatusesView.SetOnTouchListener(cce);
@@ -1729,7 +1729,7 @@ namespace AndriodApp1
             (fabScrollToNewest as Android.Support.Design.Widget.FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
             fabScrollToNewest.Clickable = true;
             fabScrollToNewest.Click += ScrollToBottomClick;
-            
+
 
 
             if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
@@ -1774,8 +1774,8 @@ namespace AndriodApp1
             MainActivity.LogDebug("set up statuses view");
             SetStatusesView();
             MainActivity.LogDebug("finish set up statuses view");
-           
-            created=true;
+
+            created = true;
 
             Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)ChatroomActivity.ChatroomActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
             myToolbar.InflateMenu(Resource.Menu.chatroom_inner_menu);
@@ -1793,11 +1793,11 @@ namespace AndriodApp1
             //the messages start at 0
             //and so what matters is how far the last message is from the count.
             //so if last message is 19 and count is 21 then you are one behind..
-            if(recycleLayoutManager.FindLastVisibleItemPosition() == (recycleLayoutManager.ItemCount - 1) || recycleLayoutManager.ItemCount == 0) //you can see the latest message.
+            if (recycleLayoutManager.FindLastVisibleItemPosition() == (recycleLayoutManager.ItemCount - 1) || recycleLayoutManager.ItemCount == 0) //you can see the latest message.
             {
                 fabScrollToNewest.Visibility = ViewStates.Gone;
             }
-            else if(recycleLayoutManager.ItemCount - recycleLayoutManager.FindLastVisibleItemPosition() > scroll_pos_too_far)
+            else if (recycleLayoutManager.ItemCount - recycleLayoutManager.FindLastVisibleItemPosition() > scroll_pos_too_far)
             {
                 fabScrollToNewest.Visibility = ViewStates.Visible;
             }
@@ -1813,10 +1813,10 @@ namespace AndriodApp1
         private bool recyclerViewSmall = true;
         private void RecyclerViewStatusesView_Click(object sender, EventArgs e)
         {
-            if(recyclerViewSmall)
+            if (recyclerViewSmall)
             {
                 //dont expand if there is nothing to show..
-                if(this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition()==0 && this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition() >= this.recycleLayoutManagerStatuses.ItemCount - 1)
+                if (this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition() == 0 && this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition() >= this.recycleLayoutManagerStatuses.ItemCount - 1)
                 {
                     MainActivity.LogDebug("too small to expand" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
                     MainActivity.LogDebug("too small to expand" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
@@ -1873,9 +1873,9 @@ namespace AndriodApp1
 
         private void SetTickerMessage(Soulseek.RoomTicker t)
         {
-            if(t!=null && currentTickerView!=null)
+            if (t != null && currentTickerView != null)
             {
-                if(t.Username==string.Empty)
+                if (t.Username == string.Empty)
                 {
                     //for the no tickers msg
                     currentTickerView.Text = t.Message;
@@ -1888,7 +1888,7 @@ namespace AndriodApp1
             else
             {
                 //this is if we arent there anymore...... but shouldnt we have unbound?? or if it simply comes in too fast....
-                if(t==null)
+                if (t == null)
                 {
                     MainActivity.LogDebug("null ticker");
                 }
@@ -1921,7 +1921,7 @@ namespace AndriodApp1
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name,new Message(SoulSeekState.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -1944,20 +1944,20 @@ namespace AndriodApp1
                 //}
                 try
                 {
-                messagesInternal = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].ToList();
-                recyclerAdapter = new ChatroomInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewInner.SetAdapter(recyclerAdapter);
-                if (messagesInternal.Count != 0)
-                {
-                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                    messagesInternal = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].ToList();
+                    recyclerAdapter = new ChatroomInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
+                    recyclerViewInner.SetAdapter(recyclerAdapter);
+                    if (messagesInternal.Count != 0)
+                    {
+                        recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                    }
                 }
-                }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     MainActivity.LogDebug("2" + e.Message);
                 }
 
-                
+
 
                 MainActivity.LogDebug("set setatus view");
                 SetStatusesView();
@@ -1980,7 +1980,7 @@ namespace AndriodApp1
         public override void OnResume()
         {
             MainActivity.LogDebug("currentlyInsideRoomName OnResume");
-            if (OurRoomInfo!=null)
+            if (OurRoomInfo != null)
             {
                 ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
                 ChatroomController.UnreadRooms.TryRemove(OurRoomInfo.Name, out _);
@@ -1991,7 +1991,7 @@ namespace AndriodApp1
         public override void OnDetach()
         {
             MainActivity.LogDebug("currentlyInsideRoomName OnDetach -- nulling");
-            
+
             HookUpEventHandlers(false);
             base.OnDetach();
         }
@@ -2000,31 +2000,36 @@ namespace AndriodApp1
         public void SendChatroomMessageAPI(string roomName, Message msg)
         {
 
-            Action<Task> actualActionToPerform = new Action<Task>((Task t) => {
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
+            {
                 if (t.IsFaulted)
                 {
                     //only show once for the original fault.
                     MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
-                    if(!(t.Exception.InnerException is FaultPropagationException))
+                    if (!(t.Exception.InnerException is FaultPropagationException))
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                     }
                     throw new FaultPropagationException();
                 }
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                {
                     ChatroomController.SendChatroomMessageLogic(roomName, msg);
                 }));
             });
 
             if (!SoulSeekState.currentlyLoggedIn)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
+                });
                 return;
             }
-            if(string.IsNullOrEmpty(msg.MessageText))
+            if (string.IsNullOrEmpty(msg.MessageText))
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.empty_message_error), ToastLength.Short).Show();
                 });
                 return;
@@ -2043,13 +2048,13 @@ namespace AndriodApp1
             }
             else
             {
-                if(MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect))) 
+                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
                 {
                     return;
                 }
                 else
                 {
-                  ChatroomController.SendChatroomMessageLogic(roomName, msg);
+                    ChatroomController.SendChatroomMessageLogic(roomName, msg);
                 }
             }
 
@@ -2217,9 +2222,9 @@ namespace AndriodApp1
 
         private static List<Soulseek.RoomInfo> FilterRoomList(List<Soulseek.RoomInfo> original)
         {
-            if(FilterString!=string.Empty)
+            if (FilterString != string.Empty)
             {
-                return original.Where((roomInfo) => {return roomInfo.Name.Contains(FilterString, StringComparison.InvariantCultureIgnoreCase); }).ToList();
+                return original.Where((roomInfo) => { return roomInfo.Name.Contains(FilterString, StringComparison.InvariantCultureIgnoreCase); }).ToList();
             }
             else
             {
@@ -2231,7 +2236,7 @@ namespace AndriodApp1
         {
             internalList = ChatroomController.RoomList;
             internalListParsed = ChatroomController.RoomListParsed; //here it is already parsed.
-            
+
             this.UpdateChatroomList();
         }
 
@@ -2240,7 +2245,8 @@ namespace AndriodApp1
             MainActivity.LogDebug("update chatroom list");
             var filteredRoomList = FilterRoomList(internalListParsed);
             var activity = this.Activity != null ? this.Activity : ChatroomActivity.ChatroomActivityRef;
-            activity?.RunOnUiThread(new Action(() => {
+            activity?.RunOnUiThread(new Action(() =>
+            {
                 recyclerAdapter = new ChatroomOverviewRecyclerAdapter(filteredRoomList); //this depends tightly on MessageController... since these are just strings..
                 chatroomsListLoadingView.Visibility = ViewStates.Gone;
                 recyclerViewOverview.SetAdapter(recyclerAdapter);
@@ -2317,8 +2323,8 @@ namespace AndriodApp1
         public bool Joined;
         public string User;
         public string RoomName;
-        public ChatroomController.StatusMessageUpdate? StatusMessageUpdate; 
-        public Soulseek.UserData UserData; 
+        public ChatroomController.StatusMessageUpdate? StatusMessageUpdate;
+        public Soulseek.UserData UserData;
         public UserJoinedOrLeftEventArgs(string roomName, bool joined, string user, ChatroomController.StatusMessageUpdate? statusMessageUpdate = null, Soulseek.UserData uData = null, bool isOperator = false)
         {
             Joined = joined;
@@ -2338,9 +2344,9 @@ namespace AndriodApp1
         }
         public MessageReceivedArgs(string roomName, bool fromUsPending, bool fromUsCon, Message m)
         {
-            RoomName= roomName;
+            RoomName = roomName;
             FromUsPending = fromUsPending;
-            FromUsConfirmation= fromUsCon;
+            FromUsConfirmation = fromUsCon;
             Message = m;
         }
         public string RoomName;
@@ -2353,7 +2359,7 @@ namespace AndriodApp1
     {
         public static Soulseek.RoomList RoomList = null;
         public static List<Soulseek.RoomInfo> RoomListParsed = null;
-        public static List<Tuple<bool,DateTime>> ConnectionLapse = new List<Tuple<bool, DateTime>>(); //true = connected
+        public static List<Tuple<bool, DateTime>> ConnectionLapse = new List<Tuple<bool, DateTime>>(); //true = connected
         public static EventHandler<EventArgs> RoomListReceived;
         /// <summary>
         /// Invoked whenever moderators are added or removed
@@ -2423,18 +2429,18 @@ namespace AndriodApp1
 
         public static void UpdateForCurrentChanged(string roomName)
         {
-            CurrentlyJoinedRoomHasUpdated?.Invoke(null,roomName);
+            CurrentlyJoinedRoomHasUpdated?.Invoke(null, roomName);
         }
 
         private static void SetConnectionLapsedMessage(bool reconnect)
         {
-            if(reconnect && FirstConnect)
+            if (reconnect && FirstConnect)
             {
                 FirstConnect = false;
                 return;
             }
 
-            if(JoinedRoomNames==null|| JoinedRoomNames.Count==0)
+            if (JoinedRoomNames == null || JoinedRoomNames.Count == 0)
             {
                 //nothing we need to do...
             }
@@ -2442,11 +2448,11 @@ namespace AndriodApp1
             {
                 SpecialMessageCode code = reconnect ? SpecialMessageCode.Reconnect : SpecialMessageCode.Disconnect;
                 List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
-                foreach (string room in noLongerConnectedRooms) 
+                foreach (string room in noLongerConnectedRooms)
                 {
                     Message m = new Message(Utils.GetDateTimeNowSafe(), DateTime.UtcNow, code);
                     ChatroomController.AddMessage(room, m); //background thread
-                    ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs( room, m ));
+                    ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(room, m));
                 }
                 ChatroomController.NoLongerCurrentlyConnected(noLongerConnectedRooms);
             }
@@ -2455,11 +2461,11 @@ namespace AndriodApp1
 
         public static bool IsPrivate(string roomName)
         {
-            if(RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
+            if (RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
             {
                 return true;
             }
-            else if(RoomList.Owned.Any(privRoom => { return privRoom.Name == roomName; }))
+            else if (RoomList.Owned.Any(privRoom => { return privRoom.Name == roomName; }))
             {
                 return true;
             }
@@ -2476,7 +2482,7 @@ namespace AndriodApp1
 
         public static bool IsAutoJoinOn(Soulseek.RoomInfo autoJoinOn)
         {
-            return AutoJoinRoomNames.Any(autoJoin=>{return autoJoinOn.Name == autoJoin; });
+            return AutoJoinRoomNames.Any(autoJoin => { return autoJoinOn.Name == autoJoin; });
         }
 
         public static bool IsNotifyOn(Soulseek.RoomInfo notifyOn)
@@ -2497,7 +2503,7 @@ namespace AndriodApp1
         public static bool PutFriendsOnTop = false;
         public static SortOrderChatroomUsers SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical;
 
-        public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate, string filterString="")
+        public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate, string filterString = "")
         {
             List<Soulseek.UserData> chatroomUserData = new List<Soulseek.UserData>();
 
@@ -2511,16 +2517,16 @@ namespace AndriodApp1
                 Soulseek.UserRole userRole = Soulseek.UserRole.Normal;
                 if (isPrivate)
                 {
-                    if (user.Username==owner)
+                    if (user.Username == owner)
                     {
                         userRole = Soulseek.UserRole.Owner;
                     }
-                    else if(opList.Contains(user.Username))
+                    else if (opList.Contains(user.Username))
                     {
                         userRole = Soulseek.UserRole.Operator;
                     }
                 }
-                if(user.Username.Contains(filterString))
+                if (user.Username.Contains(filterString))
                 {
                     chatroomUserData.Add(GetChatroomUserData(user, userRole));
                 }
@@ -2539,7 +2545,7 @@ namespace AndriodApp1
 
         public static Soulseek.ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
         {
-            var wrappedUser = new Soulseek.ChatroomUserData(ud.Username,ud.Status, ud.AverageSpeed, ud.DownloadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
+            var wrappedUser = new Soulseek.ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.DownloadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
             wrappedUser.ChatroomUserRole = role;
             return wrappedUser;
         }
@@ -2548,7 +2554,7 @@ namespace AndriodApp1
         public static void SendChatroomMessageLogic(string roomName, Message msg) //you can start out with a message...
         {
 
-            ChatroomController.AddMessage(roomName,msg); //ui thread.
+            ChatroomController.AddMessage(roomName, msg); //ui thread.
 
             //MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
             ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, true, false, msg));
@@ -2581,7 +2587,7 @@ namespace AndriodApp1
 
         public static Soulseek.RoomData GetRoomData(string name)
         {
-            if(JoinedRoomData.ContainsKey(name))
+            if (JoinedRoomData.ContainsKey(name))
             {
                 return JoinedRoomData[name];
             }
@@ -2599,25 +2605,25 @@ namespace AndriodApp1
 
             List<Soulseek.RoomInfo> allRooms = new List<Soulseek.RoomInfo>();
 
-            if (JoinedRoomNames.Count!=0)
+            if (JoinedRoomNames.Count != 0)
             {
                 allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
                 //find the rooms and add them...
-                foreach(string roomName in JoinedRoomNames)
+                foreach (string roomName in JoinedRoomNames)
                 {
-                    Soulseek.RoomInfo foundRoom = ownedList.FirstOrDefault((room)=>{return room.Name==roomName; });
-                    if(foundRoom!=null)
-                    {
-                        allRooms.Add(foundRoom);
-                        continue;
-                    }
-                    foundRoom = publicList.FirstOrDefault((room)=>{return room.Name==roomName; });
+                    Soulseek.RoomInfo foundRoom = ownedList.FirstOrDefault((room) => { return room.Name == roomName; });
                     if (foundRoom != null)
                     {
                         allRooms.Add(foundRoom);
                         continue;
                     }
-                    foundRoom = privateList.FirstOrDefault((room)=>{return room.Name==roomName; });
+                    foundRoom = publicList.FirstOrDefault((room) => { return room.Name == roomName; });
+                    if (foundRoom != null)
+                    {
+                        allRooms.Add(foundRoom);
+                        continue;
+                    }
+                    foundRoom = privateList.FirstOrDefault((room) => { return room.Name == roomName; });
                     if (foundRoom != null)
                     {
                         allRooms.Add(foundRoom);
@@ -2626,21 +2632,21 @@ namespace AndriodApp1
                 }
             }
 
-            if(roomList.OwnedCount!=0)
+            if (roomList.OwnedCount != 0)
             {
                 List<Soulseek.RoomInfo> filteredOwned = ownedList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
-                if(filteredOwned.Count>0)
+                if (filteredOwned.Count > 0)
                 {
                     allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
                     filteredOwned.Sort(new RoomCountComparer());
                     allRooms.AddRange(filteredOwned);
                 }
             }
-            
-            if(roomList.PrivateCount!=0)
+
+            if (roomList.PrivateCount != 0)
             {
                 List<Soulseek.RoomInfo> filtered = privateList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
-                if(filtered.Count>0)
+                if (filtered.Count > 0)
                 {
                     allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
                     filtered.Sort(new RoomCountComparer());
@@ -2651,7 +2657,7 @@ namespace AndriodApp1
             if (roomList.PublicCount != 0)
             {
                 allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
-                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !SpamList.Contains(roomInfo.Name) && !JoinedRoomNames.Contains(roomInfo.Name);}).ToList();
+                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !SpamList.Contains(roomInfo.Name) && !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 noSpam.Sort(new RoomCountComparer());
                 allRooms.AddRange(noSpam);
             }
@@ -2700,35 +2706,35 @@ namespace AndriodApp1
             public int Compare(Soulseek.UserData x, Soulseek.UserData y)
             {
                 //always put owners and operators first in private rooms. this is the primary condition.
-                if(x is Soulseek.ChatroomUserData xData && y is Soulseek.ChatroomUserData yData)
+                if (x is Soulseek.ChatroomUserData xData && y is Soulseek.ChatroomUserData yData)
                 {
-                    if((int)yData.ChatroomUserRole != (int)xData.ChatroomUserRole)
+                    if ((int)yData.ChatroomUserRole != (int)xData.ChatroomUserRole)
                     {
                         return (int)yData.ChatroomUserRole - (int)xData.ChatroomUserRole;
                     }
                 }
 
-                if(PutFriendsOnTop)
+                if (PutFriendsOnTop)
                 {
                     bool xFriend = MainActivity.UserListContainsUser(x.Username);
                     bool yFriend = MainActivity.UserListContainsUser(y.Username);
-                    if(xFriend && !yFriend)
+                    if (xFriend && !yFriend)
                     {
                         return -1; //x is better
                     }
-                    else if(yFriend && !xFriend)
+                    else if (yFriend && !xFriend)
                     {
                         return 1; //y is better
                     }
                     //else we continue on to the next criteria
                 }
 
-                switch(SortCriteria)
+                switch (SortCriteria)
                 {
                     case SortOrderChatroomUsers.Alphabetical:
                         return x.Username.CompareTo(y.Username);
                     case SortOrderChatroomUsers.OnlineStatus:
-                        if(x.Status == Soulseek.UserPresence.Online && y.Status != Soulseek.UserPresence.Online)
+                        if (x.Status == Soulseek.UserPresence.Online && y.Status != Soulseek.UserPresence.Online)
                         {
                             return -1;
                         }
@@ -2753,21 +2759,21 @@ namespace AndriodApp1
             }
         }
 
-        
+
 
         public static void ToggleAutoJoin(string roomName, bool feedback, Context c)
         {
-            if(AutoJoinRoomNames.Contains(roomName))
+            if (AutoJoinRoomNames.Contains(roomName))
             {
-                if(feedback)
+                if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off),roomName),ToastLength.Short).Show();
+                    Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short).Show();
                 }
                 AutoJoinRoomNames.Remove(roomName);
             }
             else
             {
-                if(feedback)
+                if (feedback)
                 {
                     Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short).Show();
                 }
@@ -2800,7 +2806,7 @@ namespace AndriodApp1
         public static void SaveAutoJoinRoomsToSharedPrefs()
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
-            if (RootAutoJoinRoomNames == null || AutoJoinRoomNames ==null)
+            if (RootAutoJoinRoomNames == null || AutoJoinRoomNames == null)
             {
                 return;
             }
@@ -2916,7 +2922,7 @@ namespace AndriodApp1
             SoulSeekState.SoulseekClient.PrivateRoomModerationAdded += SoulseekClient_PrivateRoomModerationAdded;
             SoulSeekState.SoulseekClient.PrivateRoomModerationRemoved += SoulseekClient_PrivateRoomModerationRemoved;
             SoulSeekState.SoulseekClient.PrivateRoomUserListReceived += SoulseekClient_PrivateRoomUserListReceived;
-           // SoulSeekState.SoulseekClient.
+            // SoulSeekState.SoulseekClient.
             SoulSeekState.SoulseekClient.RoomJoined += SoulseekClient_RoomJoined;
             SoulSeekState.SoulseekClient.RoomLeft += SoulseekClient_RoomLeft;
             //SoulSeekState.SoulseekClient.RoomListReceived
@@ -2969,7 +2975,7 @@ namespace AndriodApp1
 
         private static void SoulseekClient_OperatorInPrivateRoomAddedRemoved(object sender, Soulseek.OperatorAddedRemovedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_OperatorInPrivateRoomAddedRemoved " + e.RoomName + " " +e.Username + " " + e.Added);
+            MainActivity.LogDebug("SoulseekClient_OperatorInPrivateRoomAddedRemoved " + e.RoomName + " " + e.Username + " " + e.Added);
 
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
@@ -2977,11 +2983,11 @@ namespace AndriodApp1
                 IEnumerable<string> newOperatorList = null;
                 if (e.Added)
                 {
-                     newOperatorList = oldRoomData.Operators.Append(e.Username); 
+                    newOperatorList = oldRoomData.Operators.Append(e.Username);
                 }
                 else
                 {
-                     newOperatorList = oldRoomData.Operators.Where((string username) => { return username != e.Username; });
+                    newOperatorList = oldRoomData.Operators.Where((string username) => { return username != e.Username; });
                 }
                 JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users, oldRoomData.IsPrivate, oldRoomData.Owner, newOperatorList);
             }
@@ -3014,7 +3020,7 @@ namespace AndriodApp1
             MainActivity.LogDebug("SoulseekClient_PrivateRoomModeratedUserListReceived " + e.UserCount);
             ModeratedRoomData[e.Name] = e; //this is WHO ARE THE OPERATORS. and it will show everyone who is an OPERATOR but not an OWNER. So if your name is here you are an operator.. also this gets called every change.
             //update the room data
-            if(JoinedRoomData.ContainsKey(e.Name))
+            if (JoinedRoomData.ContainsKey(e.Name))
             {
                 var oldRoomData = JoinedRoomData[e.Name];
                 JoinedRoomData[e.Name] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users, oldRoomData.IsPrivate, oldRoomData.Owner, e.Users);
@@ -3041,12 +3047,12 @@ namespace AndriodApp1
                 }
             }
 
-            RoomMembershipRemoved?.Invoke(null,e);
+            RoomMembershipRemoved?.Invoke(null, e);
         }
 
         private static void SoulseekClient_PrivateRoomMembershipAdded(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomMembershipAdded "+ e);
+            MainActivity.LogDebug("SoulseekClient_PrivateRoomMembershipAdded " + e);
         }
 
         //public static void UpdateSameUserFlagIfApplicable(string roomName, Message msg)
@@ -3058,7 +3064,7 @@ namespace AndriodApp1
 
         public static void AddMessage(string roomName, Message msg)
         {
-            if(NotifyRoomNames.Contains(roomName) && msg.SpecialCode==SpecialMessageCode.None) //i.e. do not show the disconnect or reconnect messages..
+            if (NotifyRoomNames.Contains(roomName) && msg.SpecialCode == SpecialMessageCode.None) //i.e. do not show the disconnect or reconnect messages..
             {
                 ShowNotification(msg, roomName);
             }
@@ -3082,10 +3088,10 @@ namespace AndriodApp1
                     JoinedRoomMessages[roomName].Dequeue();
                 }
             }
-            if(ChatroomController.currentlyInsideRoomName != roomName 
+            if (ChatroomController.currentlyInsideRoomName != roomName
                 && msg.SpecialCode == SpecialMessageCode.None) //i.e. do not set to unread if just disconnect or reconnect messages.
             {
-                if(!UnreadRooms.ContainsKey(roomName))
+                if (!UnreadRooms.ContainsKey(roomName))
                 {
                     UnreadRooms.TryAdd(roomName, 0);
 
@@ -3130,7 +3136,7 @@ namespace AndriodApp1
         private static void FlagLastUsernameViaHelper(string roomName, Message msg)
         {
             string lastUser = JoinedRoomMessagesLastUserHelper.GetValueOrDefault(roomName);
-            if(lastUser==msg.Username)
+            if (lastUser == msg.Username)
             {
                 msg.SameAsLastUser = true;
             }
@@ -3142,22 +3148,22 @@ namespace AndriodApp1
 
         private static void SoulseekClient_RoomMessageReceived(object sender, Soulseek.RoomMessageReceivedEventArgs e)
         {
-            if(SeekerApplication.IsUserInIgnoreList(e.Username))
+            if (SeekerApplication.IsUserInIgnoreList(e.Username))
             {
                 MainActivity.LogDebug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
                 return;
             }
 
-                MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
+            MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
             Message msg = new Message(e.Username, -1, false, Utils.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
-            if(e.Username == SoulSeekState.Username)
+            if (e.Username == SoulSeekState.Username)
             {
                 //we already logged it..
                 return;
             }
             AddMessage(e.RoomName, msg); //background thread
-            MessageReceived?.Invoke(null,new MessageReceivedArgs(e.RoomName, msg));
+            MessageReceived?.Invoke(null, new MessageReceivedArgs(e.RoomName, msg));
         }
 
         private static void SoulseekClient_RoomLeft(object sender, Soulseek.RoomLeftEventArgs e)
@@ -3165,7 +3171,7 @@ namespace AndriodApp1
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
                 var oldRoomData = JoinedRoomData[e.RoomName];
-                var newUserList = oldRoomData.Users.Where((Soulseek.UserData userData)=>{ return userData.Username != e.Username; });
+                var newUserList = oldRoomData.Users.Where((Soulseek.UserData userData) => { return userData.Username != e.Username; });
                 JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, newUserList, oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
             }
             else
@@ -3174,7 +3180,7 @@ namespace AndriodApp1
             }
             StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(StatusMessageType.Left, e.Username, DateTime.UtcNow);
             ChatroomController.AddStatusMessage(e.RoomName, statusMessageUpdate);
-            UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName,false,e.Username, statusMessageUpdate, null, false));
+            UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName, false, e.Username, statusMessageUpdate, null, false));
         }
 
         private static void SoulseekClient_RoomJoined(object sender, Soulseek.RoomJoinedEventArgs e)
@@ -3183,9 +3189,9 @@ namespace AndriodApp1
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
                 var oldRoomData = JoinedRoomData[e.RoomName];
-                JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users.Append(e.UserData),oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
+                JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users.Append(e.UserData), oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
             }
-            else if(e.Username == SoulSeekState.Username)
+            else if (e.Username == SoulSeekState.Username)
             {
                 //this is when we first join..
             }
@@ -3193,7 +3199,7 @@ namespace AndriodApp1
             {
                 //bad
             }
-            
+
             StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(StatusMessageType.Joined, e.Username, DateTime.UtcNow);
             ChatroomController.AddStatusMessage(e.RoomName, statusMessageUpdate);
             UserJoinedOrLeft?.Invoke(null, new UserJoinedOrLeftEventArgs(e.RoomName, true, e.Username, statusMessageUpdate, e.UserData, false));
@@ -3210,7 +3216,7 @@ namespace AndriodApp1
             {
                 //I dont know if this gets hit or not...
             }
-            RoomTickerAdded?.Invoke(null,e);
+            RoomTickerAdded?.Invoke(null, e);
         }
 
         private static void SoulseekClient_RoomTickerRemoved(object sender, Soulseek.RoomTickerRemovedEventArgs e)
@@ -3229,7 +3235,7 @@ namespace AndriodApp1
         public static string StartingState = null; //this is if we get killed in the inner fragment.
         public static void ClearAndCacheJoined()
         {
-            if(CurrentlyJoinedRoomNames == null || CurrentlyJoinedRoomNames.Count == 0)
+            if (CurrentlyJoinedRoomNames == null || CurrentlyJoinedRoomNames.Count == 0)
             {
                 return;
             }
@@ -3254,11 +3260,11 @@ namespace AndriodApp1
             }
 
             //if connect and reconnect, this will always need to be done..
-            if (JoinedRoomNames != null && JoinedRoomNames.Count > 0) 
+            if (JoinedRoomNames != null && JoinedRoomNames.Count > 0)
             {
                 foreach (string roomName in JoinedRoomNames)
                 {
-                    if(!CurrentlyJoinedRoomNames.ContainsKey(roomName)) //just in case.
+                    if (!CurrentlyJoinedRoomNames.ContainsKey(roomName)) //just in case.
                     {
                         JoinRoomApi(roomName, true, false, false, false);
                     }
@@ -3266,11 +3272,11 @@ namespace AndriodApp1
             }
 
             //if we got killed.
-            if(StartingState!=null && StartingState!=string.Empty)
+            if (StartingState != null && StartingState != string.Empty)
             {
                 MainActivity.LogDebug("starting state is not null " + StartingState);
                 JoinRoomApi(StartingState, true, false, false, false);
-                StartingState=null;
+                StartingState = null;
             }
 
             AttemptedToJoinAutoJoins = true;
@@ -3296,7 +3302,7 @@ namespace AndriodApp1
 
         public static void ShowNotification(Message msg, string roomName)
         {
-            if(msg.Username == SoulSeekState.Username)
+            if (msg.Username == SoulSeekState.Username)
             {
                 return;
             }
@@ -3305,7 +3311,8 @@ namespace AndriodApp1
             {
                 return;
             }
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 try
                 {
                     Utils.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
@@ -3331,19 +3338,21 @@ namespace AndriodApp1
         {
             if (!SoulSeekState.currentlyLoggedIn)
             {
-                if(feedback)
+                if (feedback)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short).Show();
                     });
                 }
                 return;
             }
-            if(feedback)
+            if (feedback)
             {
-                if(SoulSeekState.ActiveActivityRef!=null)
+                if (SoulSeekState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.requesting_room_list), ToastLength.Short).Show();
                     });
                 }
@@ -3394,9 +3403,10 @@ namespace AndriodApp1
                 {
                     RoomList = task.Result;
                     RoomListParsed = GetParsedList(RoomList);
-                    if(feedback)
+                    if (feedback)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.room_list_received), ToastLength.Short).Show();
                         });
                     }
@@ -3421,8 +3431,9 @@ namespace AndriodApp1
             {
                 if (SoulSeekState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                        if(isPrivate)
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
+                        if (isPrivate)
                         {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
                         }
@@ -3458,7 +3469,7 @@ namespace AndriodApp1
             }
         }
 
-        public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead=false)
+        public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead = false)
         {
             if (!SoulSeekState.currentlyLoggedIn)
             {
@@ -3469,27 +3480,28 @@ namespace AndriodApp1
             {
                 if (SoulSeekState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
 
 
                         string msg = string.Empty;
-                        if(asMod && removeInstead)
+                        if (asMod && removeInstead)
                         {
                             msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.removing_mod);
                         }
-                        else if(asMod && !removeInstead)
+                        else if (asMod && !removeInstead)
                         {
                             msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.adding_mod);
                         }
-                        else if(!asMod && !removeInstead)
+                        else if (!asMod && !removeInstead)
                         {
                             msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.inviting_user_to);
                         }
-                        else if(!asMod && removeInstead)
+                        else if (!asMod && removeInstead)
                         {
                             msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.removing_user_from);
                         }
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(msg,roomName), ToastLength.Short).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(msg, roomName), ToastLength.Short).Show();
 
                     });
                 }
@@ -3527,19 +3539,19 @@ namespace AndriodApp1
             string successMsg = string.Empty;
             try
             {
-                if(asMod && !removeInstead)
+                if (asMod && !removeInstead)
                 {
                     successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_added_mod);
                     failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_added_mod);
                     task = SoulSeekState.SoulseekClient.AddPrivateRoomModeratorAsync(roomName, userToAdd);
                 }
-                else if(!asMod && !removeInstead)
+                else if (!asMod && !removeInstead)
                 {
                     successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_invite_user);
                     failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_invite_user);
                     task = SoulSeekState.SoulseekClient.AddPrivateRoomMemberAsync(roomName, userToAdd);
                 }
-                else if(asMod && removeInstead)
+                else if (asMod && removeInstead)
                 {
                     successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_remove_mod);
                     failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_remove_mod);
@@ -3554,7 +3566,8 @@ namespace AndriodApp1
             }
             catch (Exception e)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
                 });
                 return;
@@ -3565,7 +3578,8 @@ namespace AndriodApp1
                 {
                     //TODO
 
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
                     });
 
@@ -3576,7 +3590,8 @@ namespace AndriodApp1
 
                     if (feedback)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, successMsg, ToastLength.Short).Show();
                         });
                     }
@@ -3611,7 +3626,8 @@ namespace AndriodApp1
 
                     if (feedback)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.create_and_refresh), ToastLength.Short).Show();
                         });
                     }
@@ -3620,13 +3636,13 @@ namespace AndriodApp1
                         JoinedRoomNames.Add(roomName);
                         //TODO: SAVE
                     }
-                    if(!CurrentlyJoinedRoomNames.ContainsKey(roomName))
+                    if (!CurrentlyJoinedRoomNames.ContainsKey(roomName))
                     {
                         CurrentlyJoinedRoomNames.TryAdd(roomName, (byte)0x0);
                     }
                     JoinedRoomData[roomName] = task.Result;
                     GetRoomListApi();
-                    
+
                 }
             });
         }
@@ -3647,7 +3663,8 @@ namespace AndriodApp1
                 if (SoulSeekState.ActiveActivityRef != null)
                 {
                     string membership = ownership ? ownershipString : membershipString;
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short).Show();
                     });
                 }
@@ -3682,7 +3699,7 @@ namespace AndriodApp1
             Task task = null;
             try
             {
-                if(ownership)
+                if (ownership)
                 {
                     task = SoulSeekState.SoulseekClient.DropPrivateRoomOwnershipAsync(roomName); //this will create it if it does not exist..
                 }
@@ -3739,7 +3756,8 @@ namespace AndriodApp1
             {
                 if (SoulSeekState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.setting_ticker), ToastLength.Short).Show();
                     });
                 }
@@ -3778,7 +3796,7 @@ namespace AndriodApp1
             }
             catch (Exception e)
             {
-                if(feedback)
+                if (feedback)
                 {
                     SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                 }
@@ -3818,7 +3836,8 @@ namespace AndriodApp1
             {
                 if (SoulSeekState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
                     });
                 }
@@ -3853,7 +3872,7 @@ namespace AndriodApp1
             Task task = null;
             try
             {
-                if(joining)
+                if (joining)
                 {
                     task = SoulSeekState.SoulseekClient.JoinRoomAsync(roomName); //this will create it if it does not exist..
                 }
@@ -3873,11 +3892,11 @@ namespace AndriodApp1
                 {
                     MainActivity.LogDebug(task.Exception.GetType().Name);
                     MainActivity.LogDebug(task.Exception.Message);
-                    if(fromAutoJoin)
+                    if (fromAutoJoin)
                     {
-                        if(task.Exception != null && task.Exception.InnerException != null && task.Exception.InnerException.InnerException != null)
+                        if (task.Exception != null && task.Exception.InnerException != null && task.Exception.InnerException.InnerException != null)
                         {
-                            if(task.Exception.InnerException.InnerException is Soulseek.RoomJoinForbiddenException)
+                            if (task.Exception.InnerException.InnerException is Soulseek.RoomJoinForbiddenException)
                             {
                                 MainActivity.LogDebug("forbidden room exception!! remove it from autojoin.." + joining);
                                 MainActivity.LogFirebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
@@ -3899,27 +3918,27 @@ namespace AndriodApp1
                 {
                     bool isJoinedChanged = false;
                     bool isCurrentChanged = false;
-                    if(task is Task<Soulseek.RoomData> taskRoomData)
+                    if (task is Task<Soulseek.RoomData> taskRoomData)
                     {
                         //add to joined list and save joined list...
-                        if(!JoinedRoomNames.Contains(roomName))
+                        if (!JoinedRoomNames.Contains(roomName))
                         {
                             JoinedRoomNames.Add(roomName);
                             isJoinedChanged = true;
                             //TODO: SAVE
                         }
-                        if(!CurrentlyJoinedRoomNames.ContainsKey(roomName))
+                        if (!CurrentlyJoinedRoomNames.ContainsKey(roomName))
                         {
                             CurrentlyJoinedRoomNames.TryAdd(roomName, (byte)0x0);
                             isCurrentChanged = true;
                         }
                         //we will be part of the room data!!! we also get this AFTER we get the user joined event for ourself.
                         JoinedRoomData[roomName] = taskRoomData.Result;
-                        RoomDataReceived?.Invoke(null,new EventArgs());
+                        RoomDataReceived?.Invoke(null, new EventArgs());
                     }
                     else
                     {
-                        if(joining)
+                        if (joining)
                         {
                             MainActivity.LogDebug("WRONG TASK TYPE");
                         }
@@ -3928,18 +3947,18 @@ namespace AndriodApp1
                             isJoinedChanged = RemoveRoomFromJoinedAndOthers(roomName);
                         }
                     }
-                    if(refreshViewAfter)
+                    if (refreshViewAfter)
                     {
                         ChatroomController.GetRoomListApi(false);
                     }
-                    else if(isJoinedChanged)
+                    else if (isJoinedChanged)
                     {
                         //this one will just update the existing list 
                         // marking the now joined rooms as such.
                         MainActivity.LogDebug("FULL JOINED CHANGED");
                         ChatroomController.UpdateJoinedRooms();
                     }
-                    else if(isCurrentChanged)
+                    else if (isCurrentChanged)
                     {
                         //if the user already joined but we are reconnected.
                         ChatroomController.UpdateForCurrentChanged(roomName);
@@ -3996,11 +4015,11 @@ namespace AndriodApp1
             }
             else
             {
-                if(holder is ChatroomOverviewHolder chatOverview)
+                if (holder is ChatroomOverviewHolder chatOverview)
                 {
                     chatOverview.chatroomOverviewView.setItem(localDataSet[position]);
                 }
-                else if(holder is ChatroomOverviewJoinedViewHolder chatJoinedViewHolder)
+                else if (holder is ChatroomOverviewJoinedViewHolder chatJoinedViewHolder)
                 {
                     chatJoinedViewHolder.chatroomOverviewView.setItem(localDataSet[position]);
                 }
@@ -4010,9 +4029,9 @@ namespace AndriodApp1
 
         public void notifyRoomStatusChanged(string roomName)
         {
-            for(int i=0; i < localDataSet.Count; i++)
+            for (int i = 0; i < localDataSet.Count; i++)
             {
-                if(localDataSet[i].Name == roomName)
+                if (localDataSet[i].Name == roomName)
                 {
                     this.NotifyItemChanged(i);
                     MainActivity.LogDebug("NotifyItemChanged notifyRoomStatusChanged");
@@ -4023,7 +4042,7 @@ namespace AndriodApp1
 
         public void notifyRoomStatusesChanged(List<string> rooms)
         {
-            foreach(string roomName in rooms)
+            foreach (string roomName in rooms)
             {
                 notifyRoomStatusChanged(roomName);
             }
@@ -4056,7 +4075,7 @@ namespace AndriodApp1
             {
                 return VIEW_CATEGORY_HEADER;
             }
-            else if(ChatroomController.JoinedRoomNames.Contains(localDataSet[position].Name))
+            else if (ChatroomController.JoinedRoomNames.Contains(localDataSet[position].Name))
             {
                 return VIEW_JOINED_ROOM;
             }
@@ -4068,7 +4087,7 @@ namespace AndriodApp1
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            if(viewType==VIEW_CATEGORY_HEADER)
+            if (viewType == VIEW_CATEGORY_HEADER)
             {
                 ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.inflate(parent);
                 view.setupChildren();
@@ -4076,7 +4095,7 @@ namespace AndriodApp1
                 //(view as View).Click += ChatroomOverviewClick;
                 return new ChatroomOverviewCategoryHolder(view as View);
             }
-            else if(viewType == VIEW_JOINED_ROOM)
+            else if (viewType == VIEW_JOINED_ROOM)
             {
                 ChatroomOverviewJoinedView view = ChatroomOverviewJoinedView.inflate(parent);
                 view.setupChildren();
@@ -4106,7 +4125,8 @@ namespace AndriodApp1
                 //allow user to leave even if offline.
                 //just remove it from list so that they do not rejoin when logging back in.
                 ChatroomController.RemoveRoomFromJoinedAndOthers(roomName);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
                     Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
                 });
                 ChatroomController.UpdateJoinedRooms();
@@ -4225,7 +4245,7 @@ namespace AndriodApp1
     public interface IChatroomOverviewBase
     {
         public void setItem(Soulseek.RoomInfo roomInfo);
-        public RecyclerView.ViewHolder ViewHolder { get;set;}
+        public RecyclerView.ViewHolder ViewHolder { get; set; }
     }
 
     public class ChatroomOverviewView : LinearLayout, IChatroomOverviewBase
@@ -4328,7 +4348,7 @@ namespace AndriodApp1
             viewUsersInRoom.Text = roomInfo.UserCount.ToString();
 
 
-            if(ChatroomController.UnreadRooms.ContainsKey(roomInfo.Name))
+            if (ChatroomController.UnreadRooms.ContainsKey(roomInfo.Name))
             {
                 unreadImageView.Visibility = ViewStates.Visible;
 
@@ -4479,7 +4499,8 @@ namespace AndriodApp1
             if (e.RoomName == OurRoomName)
             {
 
-                this.Activity.RunOnUiThread(() => {
+                this.Activity.RunOnUiThread(() =>
+                {
 
                     int previousPosition = -1;
                     for (int i = 0; i < UI_userDataList.Count; i++)
@@ -4490,12 +4511,12 @@ namespace AndriodApp1
                             break;
                         }
                     }
-                    if(previousPosition==-1)
+                    if (previousPosition == -1)
                     {
                         return;
                     }
                     UI_userDataList[previousPosition].Status = e.Status;
-                    if(ChatroomController.SortChatroomUsersBy != ChatroomController.SortOrderChatroomUsers.OnlineStatus)
+                    if (ChatroomController.SortChatroomUsersBy != ChatroomController.SortOrderChatroomUsers.OnlineStatus)
                     {
                         //position wont change
                         roomUserListAdapter.NotifyItemChanged(previousPosition);
@@ -4522,7 +4543,7 @@ namespace AndriodApp1
                             p = recycleLayoutManager.OnSaveInstanceState();
                         }
 
-                        roomUserListAdapter.NotifyItemMoved(previousPosition,newPosition);
+                        roomUserListAdapter.NotifyItemMoved(previousPosition, newPosition);
                         roomUserListAdapter.NotifyItemChanged(newPosition); //this is always necessary..
 
                         if (wasAtTop)
@@ -4545,7 +4566,7 @@ namespace AndriodApp1
 
         public void OnUserJoinedOrLeft(object sender, UserJoinedOrLeftEventArgs e)
         {
-            if (e.RoomName==OurRoomName)
+            if (e.RoomName == OurRoomName)
             {
                 UpdateDataIncremental(e.Joined, e.User, e.UserData);
             }
@@ -4554,7 +4575,7 @@ namespace AndriodApp1
         public void OnRoomModeratorsChanged(object sender, UserJoinedOrLeftEventArgs e)
         {
             //TODO diffutil stuff... well we can do the diffutil since its easy to see who got added / removed...
-            if(e.RoomName == OurRoomName)
+            if (e.RoomName == OurRoomName)
             {
                 UpdateDataIncremental(e.Joined, e.User, e.UserData);
             }
@@ -4565,11 +4586,12 @@ namespace AndriodApp1
             try
             {
 
-                this.Activity.RunOnUiThread( () => {
+                this.Activity.RunOnUiThread(() =>
+                {
 
-                    if(joined)
+                    if (joined)
                     {
-                        if(uname.Contains(FilterText))
+                        if (uname.Contains(FilterText))
                         {
                             Soulseek.ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
                             UI_userDataList.Add(cud);
@@ -4581,15 +4603,15 @@ namespace AndriodApp1
                     else
                     {
                         int indexToRemove = -1;
-                        for(int i=0;i<UI_userDataList.Count;i++)
+                        for (int i = 0; i < UI_userDataList.Count; i++)
                         {
-                            if(UI_userDataList[i].Username == uname)
+                            if (UI_userDataList[i].Username == uname)
                             {
                                 indexToRemove = i;
                                 break;
                             }
                         }
-                        if(indexToRemove==-1)
+                        if (indexToRemove == -1)
                         {
                             MainActivity.LogDebug("not there" + uname);
                             return;
@@ -4600,7 +4622,7 @@ namespace AndriodApp1
                 });
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 MainActivity.LogFirebase("EXCEPTION UpdateData " + e.Message + e.StackTrace);
             }
@@ -4616,7 +4638,7 @@ namespace AndriodApp1
             public RoomUserListDialog RoomDialog;
             public bool OnMenuItemClick(IMenuItem item)
             {
-                switch(item.ItemId)
+                switch (item.ItemId)
                 {
                     case Resource.Id.sort_room_user_list_action:
                         RoomDialogInstance = RoomDialog;
@@ -4777,10 +4799,10 @@ namespace AndriodApp1
         {
             string oldText = FilterText;
             FilterText = e.NewText;
-            if(FilterText.Contains(oldText))
+            if (FilterText.Contains(oldText))
             {
                 //more restrictive so just filter out based on our current..
-                var filtered = UI_userDataList.Where(x=>x.Username.Contains(FilterText,StringComparison.InvariantCultureIgnoreCase)).ToList();
+                var filtered = UI_userDataList.Where(x => x.Username.Contains(FilterText, StringComparison.InvariantCultureIgnoreCase)).ToList();
                 UI_userDataList.Clear();
                 UI_userDataList.AddRange(filtered);
                 this.roomUserListAdapter.NotifyDataSetChanged();
@@ -4799,7 +4821,7 @@ namespace AndriodApp1
         private void FilterUIUsersView()
         {
             UI_userDataList.Clear();
-            
+
         }
 
         //public bool OnMenuItemClick(IMenuItem item)
@@ -4820,7 +4842,8 @@ namespace AndriodApp1
 
         private Action GetUpdateUserListRoomAction(Soulseek.UserData longClickedUserData)
         {
-            Action a = new Action( () => {
+            Action a = new Action(() =>
+            {
                 NotifyItemChanged(longClickedUserData);
             });
             return a;
@@ -4831,7 +4854,8 @@ namespace AndriodApp1
             Action a = null;
             if (ChatroomController.PutFriendsOnTop)
             {
-                a = new Action(() => {
+                a = new Action(() =>
+                {
                     bool wasAtTop = recycleLayoutManager.FindFirstCompletelyVisibleItemPosition() == 0;
                     int positionOfTopItem = recycleLayoutManager.FindFirstVisibleItemPosition();
 
@@ -4868,12 +4892,12 @@ namespace AndriodApp1
                     roomUserListAdapter.NotifyItemMoved(previousPosition, newPosition);
                     roomUserListAdapter.NotifyItemChanged(newPosition); //this is always necessary..
 
-                    if(wasAtTop)
+                    if (wasAtTop)
                     {
                         MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
                         recycleLayoutManager.ScrollToPosition(0);
                     }
-                    else if(positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
+                    else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                     {
                         MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
                         recycleLayoutManager.OnRestoreInstanceState(p);
@@ -4882,7 +4906,8 @@ namespace AndriodApp1
             }
             else
             {
-                a = new Action(() => {
+                a = new Action(() =>
+                {
                     NotifyItemChanged(longClickedUserData);
                 });
             }
@@ -4892,9 +4917,9 @@ namespace AndriodApp1
         public override bool OnContextItemSelected(IMenuItem item)
         {
             var userdata = longClickedUserData;
-            if(item.ItemId!=0) //this is "Remove User" as in Remove User from Room!
+            if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
             {
-                if(Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(),userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
+                if (Utils.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
                     MainActivity.LogDebug("Handled by commons");
                     return base.OnContextItemSelected(item);
@@ -4903,8 +4928,8 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case 0: //"Remove User"
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username,true,false,true);
-//                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
+                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, false, true);
+                    //                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 1: //"Remove Moderator Privilege"
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, true);
@@ -4915,7 +4940,8 @@ namespace AndriodApp1
                     SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 3: //browse user
-                    Action<View> action = new Action<View>((v) => {
+                    Action<View> action = new Action<View>((v) =>
+                    {
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
@@ -4957,9 +4983,9 @@ namespace AndriodApp1
         public int GetPositionForUserData(Soulseek.UserData userData)
         {
             string uname = userData.Username;
-            for(int i = 0;i<localDataSet.Count;i++)
+            for (int i = 0; i < localDataSet.Count; i++)
             {
-                if(uname==localDataSet[i].Username)
+                if (uname == localDataSet[i].Username)
                 {
                     return i;
                 }
@@ -4975,7 +5001,7 @@ namespace AndriodApp1
 
         public void setPosition(int position)
         {
-            if(position==-1)
+            if (position == -1)
             {
 
             }
@@ -5062,9 +5088,9 @@ namespace AndriodApp1
             bool isPrivate = ChatroomController.IsPrivate(RoomUserListDialog.OurRoomName);
             if (isPrivate && roomUserItemView.DataItem is Soulseek.ChatroomUserData cData) //that means we are in a private room
             {
-                if(ChatroomController.AreWeOwner(RoomUserListDialog.OurRoomName))
+                if (ChatroomController.AreWeOwner(RoomUserListDialog.OurRoomName))
                 {
-                    if(cData.ChatroomUserRole == Soulseek.UserRole.Operator)
+                    if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
                     {
                         canRemoveModPriviledgesAndApplicable = true;
                     }
@@ -5074,7 +5100,7 @@ namespace AndriodApp1
                     }
                     canRemoveUser = true;
                 }
-                else if(ChatroomController.AreWeMod(RoomUserListDialog.OurRoomName))
+                else if (ChatroomController.AreWeMod(RoomUserListDialog.OurRoomName))
                 {
                     //we do not have any priviledges regarding fellow mods
                     if (cData.ChatroomUserRole == Soulseek.UserRole.Normal)
@@ -5087,19 +5113,19 @@ namespace AndriodApp1
             //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
 
 
-            if(canRemoveUser)
+            if (canRemoveUser)
             {
                 menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user));
             }
-            if(canRemoveModPriviledgesAndApplicable)
+            if (canRemoveModPriviledgesAndApplicable)
             {
                 menu.Add(0, 1, 1, SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_mod_priv));
             }
-            if(canAddModPriviledgesAndApplicable)
+            if (canAddModPriviledgesAndApplicable)
             {
                 menu.Add(0, 2, 2, SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_mod_priv));
             }
-            
+
 
             //normal - add to user list, browse, etc...
             menu.Add(1, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user));
@@ -5174,16 +5200,16 @@ namespace AndriodApp1
             viewUsername.Text = userData.Username;
             viewNumFiles.Text = userData.FileCount.ToString("N0");
             viewSpeed.Text = (userData.AverageSpeed / 1024).ToString("N0") + " " + SlskHelp.CommonHelpers.STRINGS_KBS;
-            if(userData is Soulseek.ChatroomUserData cData)
+            if (userData is Soulseek.ChatroomUserData cData)
             {
-                if(cData.ChatroomUserRole == Soulseek.UserRole.Normal)
+                if (cData.ChatroomUserRole == Soulseek.UserRole.Normal)
                 {
                     viewOperatorStatus.Visibility = ViewStates.Gone;
                 }
-                else if(cData.ChatroomUserRole == Soulseek.UserRole.Operator)
+                else if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = string.Format("({0})",SoulSeekState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper());
+                    viewOperatorStatus.Text = string.Format("({0})", SoulSeekState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper());
                 }
                 else
                 {
@@ -5195,7 +5221,7 @@ namespace AndriodApp1
             {
                 viewOperatorStatus.Visibility = ViewStates.Gone;
             }
-            if(SoulSeekState.UserNotes.ContainsKey(userData.Username))
+            if (SoulSeekState.UserNotes.ContainsKey(userData.Username))
             {
                 imageNoted.Visibility = ViewStates.Visible;
             }
@@ -5203,12 +5229,12 @@ namespace AndriodApp1
             {
                 imageNoted.Visibility = ViewStates.Invisible;
             }
-            if(SeekerApplication.IsUserInIgnoreList(userData.Username))
+            if (SeekerApplication.IsUserInIgnoreList(userData.Username))
             {
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_cancel);
                 imageFriendIgnored.Visibility = ViewStates.Visible;
             }
-            else if(MainActivity.UserListContainsUser(userData.Username))
+            else if (MainActivity.UserListContainsUser(userData.Username))
             {
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_star);
                 imageFriendIgnored.Visibility = ViewStates.Visible;
@@ -5217,7 +5243,7 @@ namespace AndriodApp1
             {
                 imageFriendIgnored.Visibility = ViewStates.Invisible;
             }
-            switch(userData.Status)
+            switch (userData.Status)
             {
                 case Soulseek.UserPresence.Online:
                     imageUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.online));
@@ -5291,7 +5317,7 @@ namespace AndriodApp1
             this.Dialog.SetTitle(OurRoomName);
 
             listViewTickers = view.FindViewById<ListView>(Resource.Id.listViewTickers);
- 
+
 
             UpdateListView();
         }
@@ -5358,4 +5384,4 @@ namespace AndriodApp1
     }
 
 
-    }
+}

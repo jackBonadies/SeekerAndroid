@@ -17,32 +17,29 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using AndriodApp1.Helpers;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
+using Android.Support.V4.Content;
 using Android.Support.V4.Provider;
-using Android.Views;
-using Android.Widget;
-using AndroidX.AppCompat.App;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Common;
-using Google.Android.Material.Snackbar;
-using System.Threading.Tasks;
-using Android.Content.PM;
 //using Android.Support.V7.Widget;
 //using Android.Support.V7.Widget.Helper;
 using Android.Util;
+using Android.Views;
+using Android.Widget;
+using AndroidX.AppCompat.App;
 using AndroidX.RecyclerView.Widget;
+using Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using Android.Support.V4.Content;
-using Android.Text;
-using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -73,7 +70,7 @@ namespace AndriodApp1
         public const int SCROLL_TO_SHARING_SECTION = 10;
         public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
-        private List<Tuple<int,int>> positionNumberPairs = new List<Tuple<int, int>>();
+        private List<Tuple<int, int>> positionNumberPairs = new List<Tuple<int, int>>();
         private CheckBox allowPrivateRoomInvitations;
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -110,7 +107,7 @@ namespace AndriodApp1
             //however with the api<21 it is not paused and so an event is needed.
             SoulSeekState.DirectoryUpdatedEvent += DirectoryUpdated;
             SoulSeekState.SharingStatusChangedEvent += SharingStatusUpdated;
-            
+
             // moved to OnResume from OnCreate
             // this fixes an issue where, when the settings activity is up but one 
             // goes to system settings to change per app language, it triggers 
@@ -129,36 +126,41 @@ namespace AndriodApp1
 
         public void DirectoryViewsChanged(object sender, EventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 recyclerViewFoldersAdapter?.NotifyDataSetChanged();
             });
         }
 
         private void SharingStatusUpdated(object sender, EventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 UpdateShareImageView();
             });
         }
 
         private void PrivilegesChecked(object sender, EventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 SetPrivStatusView(this.FindViewById<TextView>(Resource.Id.privStatusView));
             });
         }
 
         private void UpnpDeviceMapped(object sender, EventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-            Toast.MakeText(this, Resource.String.upnp_success, ToastLength.Short).Show();
-            SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
+                Toast.MakeText(this, Resource.String.upnp_success, ToastLength.Short).Show();
+                SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
             });
         }
 
         private void UpnpSearchFinished(object sender, EventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 if (SoulSeekState.ListenerEnabled && SoulSeekState.ListenerUPnpEnabled && UPnpManager.Instance.RunningStatus == UpnpRunningStatus.Finished && UPnpManager.Instance.DiagStatus != UpnpDiagStatus.Success)
                 {
                     Toast.MakeText(this, Resource.String.upnp_search_finished, ToastLength.Short).Show();
@@ -181,7 +183,8 @@ namespace AndriodApp1
 
         private void UpnpSearchStarted(object sender, EventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
+            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            {
                 SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
             });
         }
@@ -357,7 +360,7 @@ namespace AndriodApp1
             {
                 viewFolderName = FindViewById<TextView>(Resource.Id.uploadFolderName);
                 viewFolderStatus = FindViewById<ImageView>(Resource.Id.uploadFolderStatus);
-               
+
             }
 
             public void setItem(UploadDirectoryInfo item)
@@ -366,7 +369,7 @@ namespace AndriodApp1
                 this.LongClickable = SoulSeekState.SharingOn;
 
                 BoundItem = item;
-                if(string.IsNullOrEmpty(item.DisplayNameOverride))
+                if (string.IsNullOrEmpty(item.DisplayNameOverride))
                 {
                     viewFolderName.Text = item.GetLastPathSegment();
                 }
@@ -375,17 +378,17 @@ namespace AndriodApp1
                     viewFolderName.Text = item.GetLastPathSegment() + $" ({item.DisplayNameOverride})";
                 }
 
-                if(item.HasError())
+                if (item.HasError())
                 {
                     viewFolderStatus.Visibility = ViewStates.Visible;
                     viewFolderStatus.SetImageResource(Resource.Drawable.alert_circle_outline);
                 }
-                else if(item.IsHidden)
+                else if (item.IsHidden)
                 {
                     viewFolderStatus.Visibility = ViewStates.Visible;
                     viewFolderStatus.SetImageResource(Resource.Drawable.hidden_lock_question);
                 }
-                else if(item.IsLocked)
+                else if (item.IsLocked)
                 {
                     viewFolderStatus.Visibility = ViewStates.Visible;
                     viewFolderStatus.SetImageResource(Resource.Drawable.lock_icon);
@@ -425,7 +428,7 @@ namespace AndriodApp1
             Button chbox = this.FindViewById<Button>(Resource.Id.addUploadDirectory);
 
             var progBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
-            progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor),Android.Graphics.PorterDuff.Mode.SrcIn);
+            progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
             progBar.Click += ImageView_Click;
             Intent intent = Intent; //intent that started this activity
             //this.SaveDataDirectoryUri = intent.GetStringExtra("SaveDataDirectoryUri");
@@ -475,7 +478,7 @@ namespace AndriodApp1
 
             CheckBox autoRetryBackOnline = FindViewById<CheckBox>(Resource.Id.autoRetryBackOnline);
             autoRetryBackOnline.Checked = SoulSeekState.AutoRetryBackOnline;
-            autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange; 
+            autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange;
 
             ImageView memoryFileDownloadSwitchIcon = FindViewById<ImageView>(Resource.Id.memoryFileDownloadSwitchIcon);
             memoryFileDownloadSwitchIcon.Click += MemoryFileDownloadSwitchIcon_Click;
@@ -516,14 +519,14 @@ namespace AndriodApp1
 
 
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
-            positionNumberPairs.Add(new Tuple<int, int>(0,5));
-            positionNumberPairs.Add(new Tuple<int, int>(1,10));
-            positionNumberPairs.Add(new Tuple<int, int>(2,15));
-            positionNumberPairs.Add(new Tuple<int, int>(3,30));
-            positionNumberPairs.Add(new Tuple<int, int>(4,50));
-            positionNumberPairs.Add(new Tuple<int, int>(5,100));
-            positionNumberPairs.Add(new Tuple<int, int>(6,250));
-            positionNumberPairs.Add(new Tuple<int, int>(7,1000));
+            positionNumberPairs.Add(new Tuple<int, int>(0, 5));
+            positionNumberPairs.Add(new Tuple<int, int>(1, 10));
+            positionNumberPairs.Add(new Tuple<int, int>(2, 15));
+            positionNumberPairs.Add(new Tuple<int, int>(3, 30));
+            positionNumberPairs.Add(new Tuple<int, int>(4, 50));
+            positionNumberPairs.Add(new Tuple<int, int>(5, 100));
+            positionNumberPairs.Add(new Tuple<int, int>(6, 250));
+            positionNumberPairs.Add(new Tuple<int, int>(7, 1000));
             String[] options = new String[]{ positionNumberPairs[0].Item2.ToString(),
                                              positionNumberPairs[1].Item2.ToString(),
                                              positionNumberPairs[2].Item2.ToString(),
@@ -533,14 +536,14 @@ namespace AndriodApp1
                                              positionNumberPairs[6].Item2.ToString(),
                                              positionNumberPairs[7].Item2.ToString(),
                 };
-            ArrayAdapter<String> searchNumOptions = new ArrayAdapter<string>(this,Resource.Layout.support_simple_spinner_dropdown_item, options);
+            ArrayAdapter<String> searchNumOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, options);
             searchNumSpinner.Adapter = searchNumOptions;
             SetSpinnerPosition(searchNumSpinner);
             searchNumSpinner.ItemSelected += SearchNumSpinner_ItemSelected;
 
             Spinner dayNightMode = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
             dayNightMode.ItemSelected -= DayNightMode_ItemSelected;
-            String[] dayNightOptionsStrings = new String[]{ this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
+            String[] dayNightOptionsStrings = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
             ArrayAdapter<String> dayNightOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayNightOptionsStrings);
             dayNightMode.Adapter = dayNightOptions;
             SetSpinnerPositionDayNight(dayNightMode);
@@ -622,7 +625,7 @@ namespace AndriodApp1
             startServiceOnStartupCheckBox.Checked = SoulSeekState.StartServiceOnStartup;
             startServiceOnStartupCheckBox.CheckedChange += StartServiceOnStartupCheckBox_CheckedChange;
 
-            Button startupServiceButton= FindViewById<Button>(Resource.Id.startServiceOnStartupButton);
+            Button startupServiceButton = FindViewById<Button>(Resource.Id.startServiceOnStartupButton);
             startupServiceButton.Click += StartupServiceButton_Click;
             SetButtonText(startupServiceButton);
 
@@ -665,11 +668,11 @@ namespace AndriodApp1
             concurrentDlButton.Click += ConcurrentDlBottom_Click;
             concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
 
-            
+
 
             UpdateConcurrentDownloadLimitsState();
 
-            String[] dlOptions = new String[]{ SeekerApplication.GetString(Resource.String.PerTransfer), SeekerApplication.GetString(Resource.String.Global) };
+            String[] dlOptions = new String[] { SeekerApplication.GetString(Resource.String.PerTransfer), SeekerApplication.GetString(Resource.String.Global) };
             ArrayAdapter<String> dlOptionsStrings = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dlOptions);
             dlLimitPerTransfer.Adapter = dlOptionsStrings;
             SetSpinnerPositionSpeed(dlLimitPerTransfer, false);
@@ -679,7 +682,7 @@ namespace AndriodApp1
             SetSpinnerPositionSpeed(ulLimitPerTransfer, true);
             ulLimitPerTransfer.ItemSelected += UlLimitPerTransfer_ItemSelected;
 
-            ImageView listeningMoreInfo  = FindViewById<ImageView>(Resource.Id.listeningHelp);
+            ImageView listeningMoreInfo = FindViewById<ImageView>(Resource.Id.listeningHelp);
             listeningMoreInfo.Click += ListeningMoreInfo_Click;
 
             TextView portView = FindViewById<TextView>(Resource.Id.portView);
@@ -851,7 +854,7 @@ namespace AndriodApp1
         {
             try
             {
-                if(this.Resources.DisplayMetrics.WidthPixels < 400) //320 is MDPI
+                if (this.Resources.DisplayMetrics.WidthPixels < 400) //320 is MDPI
                 {
                     (concurrentDlSublayout as LinearLayout).Orientation = Orientation.Vertical;
                     (concurrentDlSublayout as LinearLayout).SetGravity(GravityFlags.Center);
@@ -864,7 +867,7 @@ namespace AndriodApp1
                     ((LinearLayout.LayoutParams)concurrentDlButton.LayoutParameters).Gravity = GravityFlags.CenterVertical;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MainActivity.LogFirebase("Unable to tweak layout " + ex);
             }
@@ -875,7 +878,7 @@ namespace AndriodApp1
             bool oldState = MainActivity.MeetsCurrentSharingConditions();
             SoulSeekState.AllowUploadsOnMetered = !e.IsChecked;
             bool newState = MainActivity.MeetsCurrentSharingConditions();
-            if(oldState != newState)
+            if (oldState != newState)
             {
                 MainActivity.SetUnsetSharingBasedOnConditions(true);
                 UpdateShareImageView();
@@ -890,11 +893,12 @@ namespace AndriodApp1
 
         private void ClearAllFoldersButton_Click(object sender, EventArgs e)
         {
-            if(UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
+            if (UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
             {
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
                 var diag = builder.SetMessage(String.Format(SeekerApplication.GetString(Resource.String.AreYouSureClearAllDirectories), UploadDirectoryManager.UploadDirectories.Count))
-                    .SetPositiveButton(Resource.String.yes, (object sender, DialogClickEventArgs e) => {
+                    .SetPositiveButton(Resource.String.yes, (object sender, DialogClickEventArgs e) =>
+                    {
                         this.ClearAllFolders();
                         this.OnCloseClick(sender, e);
                     })
@@ -953,7 +957,7 @@ namespace AndriodApp1
         {
             bool changed = SoulSeekState.AutoAwayOnInactivity != e.IsChecked;
             SoulSeekState.AutoAwayOnInactivity = e.IsChecked;
-            if(changed)
+            if (changed)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
@@ -1025,7 +1029,7 @@ namespace AndriodApp1
 
         private void DlLimitPerTransfer_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            if(e.Position == 0)
+            if (e.Position == 0)
             {
                 SoulSeekState.SpeedLimitDownloadIsPerTransfer = true;
             }
@@ -1155,7 +1159,7 @@ namespace AndriodApp1
 
         private void ImportData_Click(object sender, EventArgs e)
         {
-            if(!SoulSeekState.currentlyLoggedIn || !SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
+            if (!SoulSeekState.currentlyLoggedIn || !SoulSeekState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
             {
                 Toast.MakeText(this, Resource.String.MustBeLoggedInToImport, ToastLength.Long).Show();
                 return;
@@ -1170,7 +1174,7 @@ namespace AndriodApp1
             int count = SoulSeekState.UserList?.Count ?? 0;
             if (count > 0)
             {
-                lock(SoulSeekState.UserList)
+                lock (SoulSeekState.UserList)
                 {
                     SoulSeekState.RecentUsersManager.SetRecentUserList(SoulSeekState.UserList.Select(uli => uli.Username).ToList());
                 }
@@ -1184,7 +1188,7 @@ namespace AndriodApp1
 
         private void EnableDiagnostics_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if(SeekerApplication.LOG_DIAGNOSTICS != e.IsChecked)
+            if (SeekerApplication.LOG_DIAGNOSTICS != e.IsChecked)
             {
                 SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
                 //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
@@ -1208,7 +1212,7 @@ namespace AndriodApp1
             //for rescan=true, we use the previous parse to get metadata if there is a match...
             //so that we do not have to read the file again to get things like bitrate, samples, etc.
             //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
-            if(SoulSeekState.PreOpenDocumentTree())
+            if (SoulSeekState.PreOpenDocumentTree())
             {
                 Rescan(null, -1, true, true);
             }
@@ -1220,9 +1224,9 @@ namespace AndriodApp1
 
         private static string GetFriendlyDownloadDirectoryName()
         {
-            if(SoulSeekState.RootDocumentFile==null) //even in API<21 we do set this RootDocumentFile
+            if (SoulSeekState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
             {
-                if(SoulSeekState.UseLegacyStorage())
+                if (SoulSeekState.UseLegacyStorage())
                 {
                     //if not set and legacy storage, then the directory is simple the default music
                     string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
@@ -1247,17 +1251,17 @@ namespace AndriodApp1
 
         private static string GetFriendlyIncompleteDirectoryName()
         {
-            if(SoulSeekState.MemoryBackedDownload)
+            if (SoulSeekState.MemoryBackedDownload)
             {
                 return SeekerApplication.GetString(Resource.String.NotInUse);
             }
-            if(SoulSeekState.OverrideDefaultIncompleteLocations && SoulSeekState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
+            if (SoulSeekState.OverrideDefaultIncompleteLocations && SoulSeekState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
             {
                 return SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
             }
             else
             {
-                if(!SoulSeekState.CreateCompleteAndIncompleteFolders)
+                if (!SoulSeekState.CreateCompleteAndIncompleteFolders)
                 {
                     return SeekerApplication.GetString(Resource.String.AppLocalStorage);
                 }
@@ -1322,7 +1326,7 @@ namespace AndriodApp1
 
         private void SetSharedFolderView()
         {
-            if(UploadDirectoryManager.UploadDirectories.Count==0)
+            if (UploadDirectoryManager.UploadDirectories.Count == 0)
             {
                 this.noSharedFoldersView.Visibility = ViewStates.Visible;
                 this.recyclerViewFolders.Visibility = ViewStates.Gone;
@@ -1392,14 +1396,14 @@ namespace AndriodApp1
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if(MainActivity.IsNotLoggedIn())
+            if (MainActivity.IsNotLoggedIn())
             {
                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
             Android.Net.Uri uri = Android.Net.Uri.Parse("https://www.slsknet.org/userlogin.php?username=" + Android.Net.Uri.Encode(SoulSeekState.Username)); // missing 'http://' will cause crash.
-            Utils.ViewUri(uri,this);
+            Utils.ViewUri(uri, this);
         }
 
         private void EditUserInfo_Click(object sender, EventArgs e)
@@ -1410,7 +1414,7 @@ namespace AndriodApp1
 
         private void UseUPnPCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if(e.IsChecked == SoulSeekState.ListenerUPnpEnabled)
+            if (e.IsChecked == SoulSeekState.ListenerUPnpEnabled)
             {
                 return;
             }
@@ -1422,7 +1426,7 @@ namespace AndriodApp1
                 //open port...
                 UPnpManager.Instance.Feedback = true;
                 UPnpManager.Instance.SearchAndSetMappingIfRequired();
-                
+
             }
             else
             {
@@ -1432,13 +1436,13 @@ namespace AndriodApp1
 
         private void EnableListening_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if(e.IsChecked == SoulSeekState.ListenerEnabled)
+            if (e.IsChecked == SoulSeekState.ListenerEnabled)
             {
                 return;
             }
-            if(e.IsChecked)
+            if (e.IsChecked)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef,Resource.String.enabling_listener, ToastLength.Short).Show();
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.enabling_listener, ToastLength.Short).Show();
             }
             else
             {
@@ -1448,7 +1452,7 @@ namespace AndriodApp1
             UpdateListeningViewState();
             SeekerApplication.SaveListeningState();
             ReconfigureOptionsAPI(null, e.IsChecked, null);
-            if(e.IsChecked)
+            if (e.IsChecked)
             {
                 UPnpManager.Instance.Feedback = true;
                 UPnpManager.Instance.SearchAndSetMappingIfRequired(); //bc it may not have been set before...
@@ -1459,7 +1463,7 @@ namespace AndriodApp1
         private void CheckStatus_Click(object sender, EventArgs e)
         {
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SoulSeekState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
-            Utils.ViewUri(uri,this);
+            Utils.ViewUri(uri, this);
         }
         private static AndroidX.AppCompat.App.AlertDialog changeDialog = null;
         private void ChangePort_Click(object sender, EventArgs e)
@@ -1516,7 +1520,7 @@ namespace AndriodApp1
                 DocumentFile rootdir = null;
                 if (useDownloadDir)
                 {
-                    if(SoulSeekState.RootDocumentFile==null)
+                    if (SoulSeekState.RootDocumentFile == null)
                     {
                         Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.ErrorDownloadDirNotProperlySet, ToastLength.Long).Show();
                         return;
@@ -1561,18 +1565,18 @@ namespace AndriodApp1
         public bool CleanIncompleteFolder(DocumentFile incompleteDirectory, List<string> incompleteFoldersToNotDelete, out int folderCount)
         {
             folderCount = 0;
-            if(incompleteDirectory == null || !incompleteDirectory.Exists())
+            if (incompleteDirectory == null || !incompleteDirectory.Exists())
             {
                 return false;
             }
             else
             {
-                foreach(DocumentFile f in incompleteDirectory.ListFiles())
+                foreach (DocumentFile f in incompleteDirectory.ListFiles())
                 {
                     // we dont create files at the root level other than .nomedia which stays.
-                    if(f.IsDirectory)
+                    if (f.IsDirectory)
                     {
-                        if(!incompleteFoldersToNotDelete.Contains(f.Name))
+                        if (!incompleteFoldersToNotDelete.Contains(f.Name))
                         {
                             folderCount++;
                             DeleteDocumentFolder(f);
@@ -1585,9 +1589,9 @@ namespace AndriodApp1
 
         public void DeleteDocumentFolder(DocumentFile folder)
         {
-            if(!folder.Delete())
+            if (!folder.Delete())
             {
-                foreach(DocumentFile f in folder.ListFiles())
+                foreach (DocumentFile f in folder.ListFiles())
                 {
                     f.Delete();
                 }
@@ -1644,7 +1648,7 @@ namespace AndriodApp1
         {
             MainActivity.LogInfoFirebase("ShowChangePortDialog");
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-            if(changeDialogType == ChangeDialogType.ChangePort)
+            if (changeDialogType == ChangeDialogType.ChangePort)
             {
                 builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
             }
@@ -1652,11 +1656,11 @@ namespace AndriodApp1
             {
                 builder.SetTitle(Resource.String.ChangeDownloadSpeed);
             }
-            else if(changeDialogType == ChangeDialogType.ChangeUL)
+            else if (changeDialogType == ChangeDialogType.ChangeUL)
             {
                 builder.SetTitle(Resource.String.ChangeUploadSpeed);
             }
-            else if(changeDialogType == ChangeDialogType.ConcurrentDL)
+            else if (changeDialogType == ChangeDialogType.ConcurrentDL)
             {
                 builder.SetTitle(Resource.String.MaxConcurrentIs);
             }
@@ -1679,7 +1683,7 @@ namespace AndriodApp1
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                if(changeDialogType == ChangeDialogType.ChangePort)
+                if (changeDialogType == ChangeDialogType.ChangePort)
                 {
                     int portNum = -1;
                     if (!int.TryParse(input.Text, out portNum))
@@ -1700,7 +1704,7 @@ namespace AndriodApp1
                     SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
                     changeDialog.Dismiss();
                 }
-                else if(changeDialogType == ChangeDialogType.ChangeUL || changeDialogType == ChangeDialogType.ChangeDL)
+                else if (changeDialogType == ChangeDialogType.ChangeUL || changeDialogType == ChangeDialogType.ChangeDL)
                 {
                     int dlSpeedKbs = -1;
                     if (!int.TryParse(input.Text, out dlSpeedKbs))
@@ -1713,7 +1717,7 @@ namespace AndriodApp1
                         Toast.MakeText(this, "Minimum Speed is 64 kb/s", ToastLength.Long).Show();
                         return;
                     }
-                    if(changeDialogType == ChangeDialogType.ChangeDL)
+                    if (changeDialogType == ChangeDialogType.ChangeDL)
                     {
                         SoulSeekState.SpeedLimitDownloadBytesSec = 1024 * dlSpeedKbs;
                         SetSpeedTextView(FindViewById<TextView>(Resource.Id.downloadSpeed), false);
@@ -1723,11 +1727,11 @@ namespace AndriodApp1
                         SoulSeekState.SpeedLimitUploadBytesSec = 1024 * dlSpeedKbs;
                         SetSpeedTextView(FindViewById<TextView>(Resource.Id.uploadSpeed), true);
                     }
-                    
+
                     SeekerApplication.SaveSpeedLimitState();
                     changeDialog.Dismiss();
                 }
-                else if(changeDialogType == ChangeDialogType.ConcurrentDL)
+                else if (changeDialogType == ChangeDialogType.ConcurrentDL)
                 {
                     int concurrentDL = -1;
                     if (!int.TryParse(input.Text, out concurrentDL))
@@ -1825,7 +1829,7 @@ namespace AndriodApp1
 
         private static void SetSpinnerPositionSpeed(Spinner spinner, bool isUpload)
         {
-            if(isUpload)
+            if (isUpload)
             {
                 if (SoulSeekState.SpeedLimitUploadIsPerTransfer)
                 {
@@ -1838,7 +1842,7 @@ namespace AndriodApp1
             }
             else
             {
-                if(SoulSeekState.SpeedLimitDownloadIsPerTransfer)
+                if (SoulSeekState.SpeedLimitDownloadIsPerTransfer)
                 {
                     spinner.SetSelection(0);
                 }
@@ -1858,8 +1862,8 @@ namespace AndriodApp1
         private static void SetUpnpStatusView(ImageView iv)
         {
             //TODO
-            Tuple< UPnpManager.ListeningIcon,string> info = UPnpManager.Instance.GetIconAndMessage();
-            if(iv==null) return;
+            Tuple<UPnpManager.ListeningIcon, string> info = UPnpManager.Instance.GetIconAndMessage();
+            if (iv == null) return;
             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
             {
                 iv.TooltipText = info.Item2; //api26+ otherwise crash...
@@ -1981,7 +1985,7 @@ namespace AndriodApp1
             {
                 browseResponseToShow = SoulSeekState.SharedFileCache.GetBrowseResponseForUser(null);
             }
-            else if(forceFriend)
+            else if (forceFriend)
             {
                 browseResponseToShow = SoulSeekState.SharedFileCache.GetBrowseResponseForUser(null, true);
             }
@@ -2009,7 +2013,7 @@ namespace AndriodApp1
 
         private void SetButtonText(Button btn)
         {
-            if(SoulSeekState.IsStartUpServiceCurrentlyRunning)
+            if (SoulSeekState.IsStartUpServiceCurrentlyRunning)
             {
                 btn.Text = this.GetString(Resource.String.stop);
             }
@@ -2056,14 +2060,14 @@ namespace AndriodApp1
 
         private void AllowPrivateRoomInvitations_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if(e.IsChecked == SoulSeekState.AllowPrivateRoomInvitations)
+            if (e.IsChecked == SoulSeekState.AllowPrivateRoomInvitations)
             {
                 MainActivity.LogDebug("allow private: nothing to do");
             }
             else
             {
                 string newstate = e.IsChecked ? this.GetString(Resource.String.allowed) : this.GetString(Resource.String.denied);
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(this.GetString(Resource.String.setting_priv_invites),newstate), ToastLength.Short).Show();
+                Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(this.GetString(Resource.String.setting_priv_invites), newstate), ToastLength.Short).Show();
                 ReconfigureOptionsAPI(e.IsChecked, null, null);
 
             }
@@ -2086,7 +2090,8 @@ namespace AndriodApp1
                 {
                     return;
                 }
-                t.ContinueWith(new Action<Task>((Task t) => {
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
                     if (t.IsFaulted)
                     {
                         SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
@@ -2111,37 +2116,39 @@ namespace AndriodApp1
 
                 reconfigTask = SoulSeekState.SoulseekClient.ReconfigureOptionsAsync(patch);
             }
-            catch(Exception e)
+            catch (Exception e)
             {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
                 MainActivity.LogFirebase("reconfigure options: " + e.Message + e.StackTrace);
                 MainActivity.LogDebug("reconfigure options FAILED" + e.Message + e.StackTrace);
                 return;
             }
-            Action<Task<bool>> continueWithAction = new Action<Task<bool>>((reconfigTask) => {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                    if(reconfigTask.IsFaulted)
+            Action<Task<bool>> continueWithAction = new Action<Task<bool>>((reconfigTask) =>
+            {
+                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                {
+                    if (reconfigTask.IsFaulted)
                     {
                         MainActivity.LogDebug("reconfigure options FAILED");
-                        if(allowPrivateInvites.HasValue)
+                        if (allowPrivateInvites.HasValue)
                         {
                             string enabledDisabled = allowPrivateInvites.Value ? SoulSeekState.ActiveActivityRef.GetString(Resource.String.allowed) : SoulSeekState.ActiveActivityRef.GetString(Resource.String.denied);
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites),enabledDisabled), ToastLength.Long).Show();
-                            if(SoulSeekState.ActiveActivityRef is SettingsActivity settingsActivity)
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long).Show();
+                            if (SoulSeekState.ActiveActivityRef is SettingsActivity settingsActivity)
                             {
                                 //set the check to false
                                 settingsActivity.allowPrivateRoomInvitations.Checked = SoulSeekState.AllowPrivateRoomInvitations; //old value
                             }
                         }
 
-                        if(enableTheListener.HasValue)
+                        if (enableTheListener.HasValue)
                         {
                             string enabledDisabled = enableTheListener.Value ? SoulSeekState.ActiveActivityRef.GetString(Resource.String.allowed) : SoulSeekState.ActiveActivityRef.GetString(Resource.String.denied);
                             Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener), enabledDisabled), ToastLength.Long).Show();
                         }
 
-                        if(listenerPort.HasValue)
+                        if (listenerPort.HasValue)
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port),listenerPort.Value), ToastLength.Long).Show();
+                            Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long).Show();
                         }
 
 
@@ -2149,7 +2156,7 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        if(allowPrivateInvites.HasValue)
+                        if (allowPrivateInvites.HasValue)
                         {
                             MainActivity.LogDebug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
                             SoulSeekState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
@@ -2204,21 +2211,21 @@ namespace AndriodApp1
 
         private void UpdateShareImageView()
         {
-            Tuple<SharingIcons,string> info = MainActivity.GetSharingMessageAndIcon(out bool isParsing);
+            Tuple<SharingIcons, string> info = MainActivity.GetSharingMessageAndIcon(out bool isParsing);
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
             ProgressBar progressBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
-            if(imageView==null || progressBar == null) return;
+            if (imageView == null || progressBar == null) return;
             string toolTip = info.Item2;
             int numParsed = SoulSeekState.NumberParsed;
             if (isParsing && numParsed != 0)
             {
-                if(numParsed==int.MaxValue) //our signal we are finishing up (i.e. creating token index)
+                if (numParsed == int.MaxValue) //our signal we are finishing up (i.e. creating token index)
                 {
                     toolTip = toolTip + $" ({SeekerApplication.GetString(Resource.String.finishingUp)})";
                 }
                 else
                 {
-                    toolTip = toolTip + String.Format( $" ({SeekerApplication.GetString(Resource.String.XFilesParsed)})", numParsed);
+                    toolTip = toolTip + String.Format($" ({SeekerApplication.GetString(Resource.String.XFilesParsed)})", numParsed);
                 }
             }
             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
@@ -2231,7 +2238,7 @@ namespace AndriodApp1
                 AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(imageView, toolTip);
                 AndroidX.AppCompat.Widget.TooltipCompat.SetTooltipText(progressBar, toolTip);
             }
-            switch(info.Item1)
+            switch (info.Item1)
             {
                 case SharingIcons.On:
                     imageView.SetImageResource(Resource.Drawable.ic_file_upload_black_24dp);
@@ -2249,8 +2256,8 @@ namespace AndriodApp1
                     imageView.SetImageResource(Resource.Drawable.network_strength_off_outline);
                     break;
             }
-            
-            switch(info.Item1)
+
+            switch (info.Item1)
             {
                 case SharingIcons.CurrentlyParsing:
                     progressBar.Visibility = ViewStates.Visible;
@@ -2266,11 +2273,11 @@ namespace AndriodApp1
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
-            if(item.ItemId == 1) //options
+            if (item.ItemId == 1) //options
             {
                 ShowDialogForUploadDir(ContextMenuItem);
             }
-            else if(item.ItemId == 2) //remove
+            else if (item.ItemId == 2) //remove
             {
                 RemoveUploadDirFolder(ContextMenuItem);
             }
@@ -2279,7 +2286,7 @@ namespace AndriodApp1
 
         private void RemoveUploadDirFolder(UploadDirectoryInfo uploadDirInfo)
         {
-            if(UploadDirectoryManager.UploadDirectories.Count == 1)
+            if (UploadDirectoryManager.UploadDirectories.Count == 1)
             {
                 this.ClearAllFolders(); //since now we have 0 this will just properly clear everything.
             }
@@ -2297,7 +2304,7 @@ namespace AndriodApp1
         {
             SoulSeekState.SharingOn = e.IsChecked;
             MainActivity.SetUnsetSharingBasedOnConditions(true);
-            if(MainActivity.MeetsSharingConditions() && !SoulSeekState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
+            if (MainActivity.MeetsSharingConditions() && !SoulSeekState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
             {
                 //try to set up sharing...
                 MainActivity.SetUpSharing(UpdateShareImageView);
@@ -2312,7 +2319,7 @@ namespace AndriodApp1
         {
             //this isnt winforms where disabling parent, disables all children..
 
-            if(SoulSeekState.SharingOn)
+            if (SoulSeekState.SharingOn)
             {
                 sharingSubLayout1.Enabled = true;
                 sharingSubLayout1.Alpha = 1.0f;
@@ -2340,7 +2347,7 @@ namespace AndriodApp1
 
         private void UpdateListeningViewState()
         {
-            if(SoulSeekState.ListenerEnabled)
+            if (SoulSeekState.ListenerEnabled)
             {
                 listeningSubLayout2.Enabled = true;
                 listeningSubLayout3.Enabled = true;
@@ -2440,7 +2447,7 @@ namespace AndriodApp1
         {
             var oldVarient = SoulSeekState.DayModeVarient;
             SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(e.Position);
-            if(oldVarient != SoulSeekState.DayModeVarient)
+            if (oldVarient != SoulSeekState.DayModeVarient)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
@@ -2450,7 +2457,7 @@ namespace AndriodApp1
                 }
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
-                if(!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+                if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
                 {
                     SeekerApplication.RecreateActivies();
                 }
@@ -2460,7 +2467,7 @@ namespace AndriodApp1
         private void NightVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
             var oldVarient = SoulSeekState.NightModeVarient;
-            switch(e.Position)
+            switch (e.Position)
             {
                 case 3:
                     SoulSeekState.NightModeVarient = ThemeHelper.NightThemeType.AmoledClassicPurple;
@@ -2496,7 +2503,7 @@ namespace AndriodApp1
 
             MainActivity.LogDebug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + SoulSeekState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
 
-            if(e.Position == 0)
+            if (e.Position == 0)
             {
                 SoulSeekState.DayNightMode = -1;
             }
@@ -2509,15 +2516,15 @@ namespace AndriodApp1
                 var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
                 editor.PutInt(SoulSeekState.M_DayNightMode, SoulSeekState.DayNightMode);
                 bool success = editor.Commit();
-                int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(SoulSeekState.M_DayNightMode,-1);
-                MainActivity.LogDebug("was commit successful: "  + success);
+                int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(SoulSeekState.M_DayNightMode, -1);
+                MainActivity.LogDebug("was commit successful: " + success);
                 MainActivity.LogDebug("after writing and immediately reading: " + x);
             }
             //auto = 0, light = 1, dark = 2.  //NO we do NOT want to do AUTO, that is follow time.  we want to do FOLLOW SYSTEM i.e. -1.
             switch (e.Position)
             {
                 case 0:
-                    if(AppCompatDelegate.DefaultNightMode == -1)
+                    if (AppCompatDelegate.DefaultNightMode == -1)
                     {
                         return;
                     }
@@ -2718,12 +2725,12 @@ namespace AndriodApp1
 
         private void ChangeDownloadDirectory(object sender, EventArgs e)
         {
-            ShowDirSettings(SoulSeekState.SaveDataDirectoryUri,DirectoryType.Download);
+            ShowDirSettings(SoulSeekState.SaveDataDirectoryUri, DirectoryType.Download);
         }
 
         private bool needsMediaStorePermission()
         {
-            if((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
             {
                 return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
             }
@@ -2775,7 +2782,8 @@ namespace AndriodApp1
             //Create FolderOpenDialog
             SimpleFileDialog fileDialog = new SimpleFileDialog(this, SimpleFileDialog.FileSelectionMode.FolderChoose);
             fileDialog.GetFileOrDirectoryAsync(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath).ContinueWith(
-                (Task<string> t) => {
+                (Task<string> t) =>
+                {
                     if (t.Result == null || t.Result == string.Empty)
                     {
                         return;
@@ -2784,22 +2792,22 @@ namespace AndriodApp1
                     {
                         Android.Net.Uri uri = Android.Net.Uri.FromFile(new Java.IO.File(t.Result));
                         DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result)); //from tree uri not added til 21 also.  from single uri returns a f.Exists=false file.
-                        if(f==null)
+                        if (f == null)
                         {
                             MainActivity.LogFirebase("api<21 f is null");
                             SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
                             return;
                         }
-                        else if(!f.Exists())
+                        else if (!f.Exists())
                         {
                             MainActivity.LogFirebase("api<21 f does not exist");
                             SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
                             return;
                         }
-                        else if(!f.IsDirectory)
+                        else if (!f.IsDirectory)
                         {
                             MainActivity.LogFirebase("api<21 NOT A DIRECTORY");
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {Toast.MakeText(this, Resource.String.error_not_a_dir, ToastLength.Long).Show(); });
+                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_not_a_dir, ToastLength.Long).Show(); });
                             return;
                         }
 
@@ -2807,11 +2815,11 @@ namespace AndriodApp1
                         {
                             this.SuccessfulWriteExternalLegacyCallback(uri, true);
                         }
-                        else if(requestCode == UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY)
+                        else if (requestCode == UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY)
                         {
                             this.Rescan(uri, requestCode, true);
                         }
-                        else if(requestCode == CHANGE_INCOMPLETE_EXTERNAL_LEGACY)
+                        else if (requestCode == CHANGE_INCOMPLETE_EXTERNAL_LEGACY)
                         {
                             this.SuccessfulIncompleteExternalLegacyCallback(uri, true);
                         }
@@ -2841,7 +2849,7 @@ namespace AndriodApp1
                 }
                 else if (directoryType == DirectoryType.Upload)
                 {
-                    if(errorReselectCase)
+                    if (errorReselectCase)
                     {
                         requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case;
                     }
@@ -2885,7 +2893,7 @@ namespace AndriodApp1
                 {
                     requestCode = CHANGE_WRITE_EXTERNAL;
                 }
-                else if(directoryType == DirectoryType.Upload)
+                else if (directoryType == DirectoryType.Upload)
                 {
                     if (errorReselectCase)
                     {
@@ -2896,7 +2904,7 @@ namespace AndriodApp1
                         requestCode = UPLOAD_DIR_ADD_WRITE_EXTERNAL;
                     }
                 }
-                else if(directoryType == DirectoryType.Incomplete)
+                else if (directoryType == DirectoryType.Incomplete)
                 {
                     requestCode = CHANGE_INCOMPLETE_EXTERNAL;
                 }
@@ -2904,7 +2912,7 @@ namespace AndriodApp1
                 {
                     this.StartActivityForResult(intent, requestCode);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     if (e.Message.Contains(Utils.NoDocumentOpenTreeToHandle))
                     {
@@ -2921,7 +2929,7 @@ namespace AndriodApp1
 
         private int ConvertRequestCodeIntoLegacyVersion(int requestCodeNotLegacy)
         {
-            switch(requestCodeNotLegacy)
+            switch (requestCodeNotLegacy)
             {
                 case UPLOAD_DIR_ADD_WRITE_EXTERNAL:
                     return UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY;
@@ -2938,7 +2946,7 @@ namespace AndriodApp1
 
         public static bool DoWeHaveProperPermissionsForInternalFilePicker()
         {
-            if(SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles())
+            if (SoulSeekState.RequiresEitherOpenDocumentTreeOrManageAllFiles())
             {
                 return Android.OS.Environment.IsExternalStorageManager;
             }
@@ -2964,7 +2972,7 @@ namespace AndriodApp1
                 Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
                 allFilesPermission.SetData(packageUri);
                 this.StartActivityForResult(allFilesPermission, requestCode + 32);
-            } 
+            }
             else if (DoWeHaveProperPermissionsForInternalFilePicker())  //isExternalStorageManager added in API30, but RequiresEitherOpenDocumentTreeOrManageAllFiles protects against that being called on pre 30 devices.
             {
                 UseInternalFilePicker(requestCode);
@@ -2985,7 +2993,7 @@ namespace AndriodApp1
 
 
 
-        private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker=false)
+        private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
             var x = uri;
             //SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
@@ -3001,7 +3009,7 @@ namespace AndriodApp1
             {
                 docFile = DocumentFile.FromTreeUri(this, uri);
             }
-            SoulSeekState.RootDocumentFile = docFile; 
+            SoulSeekState.RootDocumentFile = docFile;
             this.RunOnUiThread(new Action(() =>
             {
                 SoulSeekState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
@@ -3040,7 +3048,7 @@ namespace AndriodApp1
 
         public void ShowDialogForUploadDir(UploadDirectoryInfo uploadInfo)
         {
-            if(uploadInfo.HasError())
+            if (uploadInfo.HasError())
             {
                 ShowUploadDirectoryErrorDialog(uploadInfo);
             }
@@ -3056,11 +3064,13 @@ namespace AndriodApp1
             builder.SetTitle(Resource.String.FolderError);
             string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
-                .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) => { //puts it slightly right
+                .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) =>
+                { //puts it slightly right
                     this.RemoveUploadDirFolder(uploadInfo);
                     this.OnCloseClick(sender, e);
                 })
-                .SetPositiveButton(Resource.String.Reselect, (object sender, DialogClickEventArgs e) => { //puts it rightmost
+                .SetPositiveButton(Resource.String.Reselect, (object sender, DialogClickEventArgs e) =>
+                { //puts it rightmost
                     UploadDirToReplaceOnReselect = uploadInfo;
                     this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
                     this.OnCloseClick(sender, e);
@@ -3079,8 +3089,9 @@ namespace AndriodApp1
             CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(Resource.Id.overrideFolderName);
             CheckBox hiddenCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.hiddenUserlistOnly);
             CheckBox lockedCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.lockedUserlistOnly);
-            overrideFolderName.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) => {
-                if(e.IsChecked)
+            overrideFolderName.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) =>
+            {
+                if (e.IsChecked)
                 {
                     custromFolderNameEditText.Enabled = true;
                     custromFolderNameEditText.Alpha = 1.0f;
@@ -3092,7 +3103,7 @@ namespace AndriodApp1
                 }
 
 
-                };
+            };
             if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
             {
                 custromFolderNameEditText.Text = uploadDirInfo.DisplayNameOverride;
@@ -3116,7 +3127,7 @@ namespace AndriodApp1
 
                 bool hiddenChanged = uploadDirInfo.IsHidden != hiddenCheck.Checked;
                 bool lockedChanged = uploadDirInfo.IsLocked != lockedCheck.Checked;
-                bool overrideNameChanged = 
+                bool overrideNameChanged =
                     (string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
                     ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride)) ||
                     (overrideFolderName.Checked && uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text);
@@ -3127,11 +3138,11 @@ namespace AndriodApp1
 
                 if (overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text))
                 {
-                    if(uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text)
+                    if (uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text)
                     {
                         //make sure that we CAN change it.
                         uploadDirInfo.DisplayNameOverride = custromFolderNameEditText.Text;
-                        if(!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
                         {
                             uploadDirInfo.DisplayNameOverride = displayNameOld;
                             Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
@@ -3141,7 +3152,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if(!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+                    if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
                     {
                         //make sure that we CAN change it.
                         uploadDirInfo.DisplayNameOverride = null;
@@ -3155,7 +3166,7 @@ namespace AndriodApp1
                 }
 
                 this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
-                if(hiddenChanged || lockedChanged || overrideNameChanged)
+                if (hiddenChanged || lockedChanged || overrideNameChanged)
                 {
                     MainActivity.LogDebug("things changed re: folder options..");
                     Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
@@ -3236,7 +3247,7 @@ namespace AndriodApp1
                     //error!!
                     this.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.ErrorAlreadyAdded , ToastLength.Long).Show();
+                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.ErrorAlreadyAdded, ToastLength.Long).Show();
                     }));
                     return;
                     //throw new Exception("Directory is already added!");
@@ -3359,7 +3370,7 @@ namespace AndriodApp1
             finally
             {
                 SoulSeekState.IsParsing = false;
-                if(MoreChangesHaveBeenMadeSoRescanWhenDone)
+                if (MoreChangesHaveBeenMadeSoRescanWhenDone)
                 {
                     MainActivity.LogDebug("okay now lets pick up our new changes");
                     MoreChangesHaveBeenMadeSoRescanWhenDone = false;
@@ -3378,16 +3389,17 @@ namespace AndriodApp1
         /// <param name="rescanClicked"></param>
         private void Rescan(Android.Net.Uri newlyAddedUriIfApplicable, int requestCode, bool fromLegacyPicker = false, bool rescanClicked = false, bool reselectCase = false)
         {
-            Action parseDatabaseAndUpdateUiAction = new Action(() => {
+            Action parseDatabaseAndUpdateUiAction = new Action(() =>
+            {
                 try
                 {
                     ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked, reselectCase);
                 }
-                catch(MainActivity.DirectoryAccessFailure)
+                catch (MainActivity.DirectoryAccessFailure)
                 {
-                    if(rescanClicked)
+                    if (rescanClicked)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {Toast.MakeText(this, Resource.String.SharedFolderIssuesAllFailed, ToastLength.Long).Show(); });
+                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.SharedFolderIssuesAllFailed, ToastLength.Long).Show(); });
                     }
                     else
                     {
@@ -3410,7 +3422,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.NoMediaStore , ToastLength.Short).Show();
+                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.NoMediaStore, ToastLength.Short).Show();
                     ShowDirSettings(null, DirectoryType.Upload);
                 }
             }
@@ -3421,12 +3433,12 @@ namespace AndriodApp1
             base.OnActivityResult(requestCode, resultCode, data);
 
             //if from manage external settings
-            if(CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32 || CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode - 32 || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode - 32)
+            if (CHANGE_WRITE_EXTERNAL_LEGACY == requestCode - 32 || CHANGE_INCOMPLETE_EXTERNAL_LEGACY == requestCode - 32 || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode - 32)
             {
                 if (SettingsActivity.DoWeHaveProperPermissionsForInternalFilePicker())
                 {
                     //phase 2 - actually pick a file.
-                    UseInternalFilePicker(requestCode-32);
+                    UseInternalFilePicker(requestCode - 32);
                 }
                 else
                 {
@@ -3437,21 +3449,21 @@ namespace AndriodApp1
 
             if (CHANGE_WRITE_EXTERNAL == requestCode)
             {
-                if(resultCode == Result.Ok)
+                if (resultCode == Result.Ok)
                 {
                     var x = data.Data;
                     SoulSeekState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                     SoulSeekState.SaveDataDirectoryUri = data.Data.ToString();
                     SoulSeekState.SaveDataDirectoryUriIsFromTree = true;
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission| ActivityFlags.GrantReadUriPermission);
-                    this.RunOnUiThread(new Action( ()=>
+                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    this.RunOnUiThread(new Action(() =>
                     {
                         SoulSeekState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir),data.Data), ToastLength.Long).Show();
+                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long).Show();
                     }));
                 }
             }
-            if(CHANGE_WRITE_EXTERNAL_LEGACY == requestCode)
+            if (CHANGE_WRITE_EXTERNAL_LEGACY == requestCode)
             {
                 if (resultCode == Result.Ok)
                 {
@@ -3487,18 +3499,18 @@ namespace AndriodApp1
             }
 
 
-            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || 
+            if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode ||
                 UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY == requestCode ||
                 UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode ||
                 UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode)
             {
-                if(resultCode != Result.Ok)
+                if (resultCode != Result.Ok)
                 {
                     return;
                 }
 
                 bool reselectCase = false;
-                if(UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode)
+                if (UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_LEGACY_Reselect_Case == requestCode)
                 {
                     reselectCase = true;
                 }
@@ -3509,7 +3521,7 @@ namespace AndriodApp1
 
             }
 
-            if(SAVE_SEEKER_SETTINGS == requestCode)
+            if (SAVE_SEEKER_SETTINGS == requestCode)
             {
                 if (resultCode == Result.Ok)
                 {
@@ -3526,10 +3538,10 @@ namespace AndriodApp1
                 }
             }
 
-            if(FORCE_REQUEST_STORAGE_MANAGER == requestCode)
+            if (FORCE_REQUEST_STORAGE_MANAGER == requestCode)
             {
                 bool hasPermision = HasManageStoragePermission(this);
-                if(hasPermision)
+                if (hasPermision)
                 {
                     Toast.MakeText(this, Resource.String.permission_successfully_granted, ToastLength.Short).Show();
                 }
@@ -3630,7 +3642,7 @@ namespace AndriodApp1
                     return DayThemeType.ClassicPurple;
                 case Grey:
                     return DayThemeType.Grey;
-                case Blue:  
+                case Blue:
                     return DayThemeType.Blue;
                 case Red:
                     return DayThemeType.Red;
@@ -3757,7 +3769,7 @@ namespace AndriodApp1
             Context contextToUse = c == null ? SoulSeekState.ActiveActivityRef : c;
             if (contextToUse.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
             {
-                if(isNightMode)
+                if (isNightMode)
                 {
                     return ThemeHelper.ToNightThemeProper(SoulSeekState.NightModeVarient);
                 }

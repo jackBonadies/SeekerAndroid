@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using AndriodApp1.Helpers;
+using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
@@ -15,8 +16,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
-using System.Runtime.Serialization;
-using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
@@ -1304,7 +1303,7 @@ namespace AndriodApp1
         NicotineTarBz2 = 1,
         Nicotine = 2,
         Seeker = 3
-          
+
     }
 
     public static class ImportHelper
@@ -1623,10 +1622,10 @@ namespace AndriodApp1
         public static ImportedData ParseSeeker(System.IO.Stream stream)
         {
             var data = new XmlSerializer(typeof(SeekerImportExportData)).Deserialize(stream) as SeekerImportExportData;
-            List<Tuple<string,string>> userNotes = new List<Tuple<string, string>>();
-            foreach(KeyValueEl keyValueEl in data.UserNotes)
+            List<Tuple<string, string>> userNotes = new List<Tuple<string, string>>();
+            foreach (KeyValueEl keyValueEl in data.UserNotes)
             {
-                userNotes.Add(new Tuple<string,string>(keyValueEl.Key, keyValueEl.Value));
+                userNotes.Add(new Tuple<string, string>(keyValueEl.Key, keyValueEl.Value));
             }
             var importData = new ImportedData(data.Userlist, data.BanIgnoreList, data.Wishlist, userNotes);
             return importData;
@@ -2045,8 +2044,8 @@ namespace AndriodApp1
         public List<string> BanIgnoreList;
         public List<KeyValueEl> UserNotes;
         //public string AddedAfterTheFact; //XmlSerializer IS backward compatible.
-                                           //You can add extra fields (such as messages) to SeekerImportExportData without worry.
-                                           //They will just have the default value (empty string in this case).
+        //You can add extra fields (such as messages) to SeekerImportExportData without worry.
+        //They will just have the default value (empty string in this case).
     }
 
     /// <summary>
