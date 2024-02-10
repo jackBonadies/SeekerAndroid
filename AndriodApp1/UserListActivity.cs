@@ -770,6 +770,7 @@ namespace AndriodApp1
         Category = 2
     }
 
+    // all fields are public ... including subclasses...
     /// <summary>
     /// This is the full user info...
     /// </summary>
