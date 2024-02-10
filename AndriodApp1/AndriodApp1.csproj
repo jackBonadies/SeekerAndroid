@@ -143,6 +143,7 @@
     <Compile Include="Models\ITransferItem.cs" />
     <Compile Include="Models\SearchTab.cs" />
     <Compile Include="Models\TransferItem.cs" />
+    <Compile Include="Models\UploadDirectoryInfo.cs" />
     <Compile Include="SearchFragment.cs" />
     <Compile Include="SeekerApplication.cs" />
     <Compile Include="SerializationHelper.cs" />

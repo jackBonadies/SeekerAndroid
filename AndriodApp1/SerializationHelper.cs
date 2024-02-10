@@ -1,10 +1,13 @@
 ﻿using Android.Hardware.Camera2;
+using AndroidX.DocumentFile.Provider;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AndriodApp1
 {
@@ -43,12 +46,20 @@ namespace AndriodApp1
 
         private static T JsonDeserializeFromString<T>(string serializedString)
         {
-            return System.Text.Json.JsonSerializer.Deserialize<T>(serializedString);
+            var options = new JsonSerializerOptions
+            {
+                IncludeFields = true,
+            };
+            return System.Text.Json.JsonSerializer.Deserialize<T>(serializedString, options);
         }
 
         private static string JsonSerializeToString<T>(T objectToSerialize)
         {
-            return System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize);
+            var options = new JsonSerializerOptions
+            {
+                IncludeFields = true,
+            };
+            return System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize, options);
         }
 
         private static string BinarySerializeToString<T>(T objectToSerialize)
@@ -141,7 +152,7 @@ namespace AndriodApp1
             }
             else
             {
-                return null;
+                return null; // TODOSERIALIZE
             }
         }
 
@@ -211,6 +222,21 @@ namespace AndriodApp1
     {
         public static void Test()
         {
+
+            var uploadDir = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
+            uploadDir.ErrorState = UploadDirectoryError.CannotWrite;
+            uploadDir.IsSubdir = true;
+
+            List<UploadDirectoryInfo> uploadDirectoryInfos = new List<UploadDirectoryInfo>();
+            uploadDirectoryInfos.Add(uploadDir);
+
+            var serInfos = SerializationHelper.SerializeToString(uploadDirectoryInfos);
+            var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(serInfos);
+
+            Debug.Assert(infos.Count == uploadDirectoryInfos.Count);
+            Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirectoryInfos[0].UploadDataDirectoryUri);
+            Debug.Assert(infos[0].ErrorState != uploadDirectoryInfos[0].ErrorState);
+
             ConcurrentDictionary<string, byte> unreadUsernames = new ConcurrentDictionary<string, byte>();
             unreadUsernames["testuser1"] = 0;
             unreadUsernames["testuser2"] = 0;

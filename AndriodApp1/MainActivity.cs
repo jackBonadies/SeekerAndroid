@@ -8202,94 +8202,7 @@ namespace AndriodApp1
         }
     }
 
-    public enum UploadDirectoryError
-    {
-        NoError = 0,
-        DoesNotExist = 1,
-        CannotWrite = 2,
-        Unknown = 3,
-    }
 
-
-    //TODOORG Models
-    [Serializable]
-    public class UploadDirectoryInfo
-    {
-        public string UploadDataDirectoryUri;
-        public bool UploadDataDirectoryUriIsFromTree;
-        public bool IsLocked;
-        public bool IsHidden;
-        public string DisplayNameOverride;
-
-        public bool HasError()
-        {
-            return ErrorState != UploadDirectoryError.NoError;
-        }
-
-        public string GetLastPathSegment()
-        {
-            return Android.Net.Uri.Parse(this.UploadDataDirectoryUri).LastPathSegment;
-        }
-
-        [NonSerialized]
-        public UploadDirectoryError ErrorState;
-        [NonSerialized]
-        public DocumentFile UploadDirectory;
-        [NonSerialized]
-        public bool IsSubdir;
-        //[System.Xml.Serialization.XmlIgnoreAttribute]
-        //public Android.Net.Uri UploadDirectoryUri;
-
-        public void Reset()
-        {
-            UploadDataDirectoryUri = null;
-            UploadDataDirectoryUriIsFromTree = true;
-            IsLocked = false;
-            IsHidden = false;
-            DisplayNameOverride = null;
-        }
-
-        public UploadDirectoryInfo(string uploadDataDirUri, bool fromTree, bool isLocked, bool isHidden, string displayNameOverride)
-        {
-            UploadDataDirectoryUri = uploadDataDirUri;
-            UploadDataDirectoryUriIsFromTree = fromTree;
-            IsLocked = isLocked;
-            IsHidden = isHidden;
-            DisplayNameOverride = displayNameOverride;
-            ErrorState = UploadDirectoryError.NoError;
-            UploadDirectory = null;
-            IsSubdir = false;
-        }
-
-        public string GetPresentableName()
-        {
-            if (string.IsNullOrEmpty(this.DisplayNameOverride))
-            {
-                MainActivity.GetAllFolderInfo(this, out _, out _, out _, out _, out string presentableName);
-                return presentableName;
-            }
-            else
-            {
-                return this.DisplayNameOverride;
-            }
-        }
-
-        public string GetPresentableName(UploadDirectoryInfo ourTopMostParent)
-        {
-            string parentLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
-            string ourLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
-            if (ourMsdCase || msdCase)
-            {
-                return ourLastPathSegment; //not great but no good solution for msd. TODO test
-            }
-            else
-            {
-                MainActivity.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, out _, out _, out string rootOverrideName, out string parentPresentableName);
-                return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length); //remove parent part and replace it with the parent presentable name.
-            }
-        }
-
-    }
 
 
     // TODOORG manager
@@ -8360,11 +8273,7 @@ namespace AndriodApp1
             }
             else
             {
-                using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(sharedDirInfo)))
-                {
-                    BinaryFormatter binaryFormatter = new BinaryFormatter();
-                    UploadDirectories = binaryFormatter.Deserialize(mem) as List<UploadDirectoryInfo>;
-                }
+                UploadDirectories = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo);
             }
         }
 
@@ -8372,9 +8281,7 @@ namespace AndriodApp1
         {
             using (System.IO.MemoryStream mem = new System.IO.MemoryStream())
             {
-                BinaryFormatter binaryFormatter = new BinaryFormatter();
-                binaryFormatter.Serialize(mem, UploadDirectories);
-                string userDirsString = Convert.ToBase64String(mem.ToArray());
+                string userDirsString = SerializationHelper.SerializeToString(UploadDirectories);
                 lock (sharedPreferences)
                 {
                     var editor = sharedPreferences.Edit();
