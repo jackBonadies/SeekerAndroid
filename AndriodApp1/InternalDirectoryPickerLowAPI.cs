@@ -370,7 +370,7 @@ namespace AndriodApp1
             {
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
                 {
-                    return GetColorFromInteger(Android.Support.V4.Content.ContextCompat.GetColor(c, typedValue.ResourceId));
+                    return GetColorFromInteger(AndroidX.Core.Content.ContextCompat.GetColor(c, typedValue.ResourceId));
                 }
                 else
                 {

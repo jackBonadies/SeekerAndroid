@@ -28,6 +28,7 @@ using Android.Widget;
 using AndroidX.ConstraintLayout.Widget;
 using AndroidX.Core.App;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.FloatingActionButton;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace AndriodApp1
             SetContentView(Resource.Layout.chatroom_main_layout);
 
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
             myToolbar.InflateMenu(Resource.Menu.chatroom_overview_list_menu);
             myToolbar.Title = this.Resources.GetString(Resource.String.chatrooms);
             this.SetSupportActionBar(myToolbar);
@@ -242,7 +243,7 @@ namespace AndriodApp1
                     base.OnBackPressed();
                     return;
                 }
-                Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
+                AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
                 myToolbar.InflateMenu(Resource.Menu.chatroom_overview_list_menu);
                 myToolbar.Title = this.Resources.GetString(Resource.String.chatrooms);
                 this.SetSupportActionBar(myToolbar);
@@ -1247,7 +1248,7 @@ namespace AndriodApp1
 
 
 
-    public class ChatroomInnerFragment : Android.Support.V4.App.Fragment //,PopupMenu.IOnMenuItemClickListener
+    public class ChatroomInnerFragment : AndroidX.Fragment.App.Fragment //,PopupMenu.IOnMenuItemClickListener
     {
         private RecyclerView recyclerViewInner;
         private LinearLayoutManager recycleLayoutManager;
@@ -1726,7 +1727,7 @@ namespace AndriodApp1
             recycleLayoutManagerStatuses.ReverseLayout = false;
             recyclerViewStatusesView.SetLayoutManager(recycleLayoutManagerStatuses);
             fabScrollToNewest = rootView.FindViewById<View>(Resource.Id.bsbutton);
-            (fabScrollToNewest as Android.Support.Design.Widget.FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
+            (fabScrollToNewest as FloatingActionButton).SetImageResource(Resource.Drawable.arrow_down);
             fabScrollToNewest.Clickable = true;
             fabScrollToNewest.Click += ScrollToBottomClick;
 
@@ -1777,7 +1778,7 @@ namespace AndriodApp1
 
             created = true;
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)ChatroomActivity.ChatroomActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)ChatroomActivity.ChatroomActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
             myToolbar.InflateMenu(Resource.Menu.chatroom_inner_menu);
             myToolbar.Title = OurRoomInfo.Name;
             ChatroomActivity.ChatroomActivityRef.SetSupportActionBar(myToolbar);
@@ -2092,7 +2093,7 @@ namespace AndriodApp1
 
 
 
-    public class ChatroomOverviewFragment : Android.Support.V4.App.Fragment
+    public class ChatroomOverviewFragment : AndroidX.Fragment.App.Fragment
     {
         private RecyclerView recyclerViewOverview;
         private LinearLayoutManager recycleLayoutManager;
@@ -4443,7 +4444,7 @@ namespace AndriodApp1
     }
 
 
-    public class RoomUserListDialog : Android.Support.V4.App.DialogFragment //, PopupMenu.IOnMenuItemClickListener doesnt work for dialogfragment
+    public class RoomUserListDialog : AndroidX.Fragment.App.DialogFragment //, PopupMenu.IOnMenuItemClickListener doesnt work for dialogfragment
     {
 
         public static Soulseek.UserData longClickedUserData = null;
@@ -4633,7 +4634,7 @@ namespace AndriodApp1
             return inflater.Inflate(Resource.Layout.room_users_dialog, container); //container is parent
         }
 
-        public class ToolbarMenuItemClickListener : Java.Lang.Object, Android.Support.V7.Widget.Toolbar.IOnMenuItemClickListener
+        public class ToolbarMenuItemClickListener : Java.Lang.Object, AndroidX.AppCompat.Widget.Toolbar.IOnMenuItemClickListener
         {
             public RoomUserListDialog RoomDialog;
             public bool OnMenuItemClick(IMenuItem item)
@@ -4761,15 +4762,15 @@ namespace AndriodApp1
             this.Dialog.SetTitle(OurRoomName);
 
 
-            var toolbar = (Android.Support.V7.Widget.Toolbar)view.FindViewById(Resource.Id.roomUsersDialogToolbar);
+            var toolbar = (AndroidX.AppCompat.Widget.Toolbar)view.FindViewById(Resource.Id.roomUsersDialogToolbar);
             var tmicl = new ToolbarMenuItemClickListener();
             tmicl.RoomDialog = this;
             toolbar.SetOnMenuItemClickListener(tmicl);
             toolbar.InflateMenu(Resource.Menu.room_user_dialog_menu);
             toolbar.Title = OurRoomName;
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryTextChange += RoomUserListDialog_QueryTextChange;
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as Android.Support.V7.Widget.SearchView).QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as AndroidX.AppCompat.Widget.SearchView).QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as AndroidX.AppCompat.Widget.SearchView).QueryTextChange += RoomUserListDialog_QueryTextChange;
+            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as AndroidX.AppCompat.Widget.SearchView).QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
 
 
             recyclerViewUsers = view.FindViewById<RecyclerView>(Resource.Id.recyclerViewUsers);
@@ -4790,12 +4791,12 @@ namespace AndriodApp1
             recyclerViewUsers.SetAdapter(roomUserListAdapter);
         }
 
-        private void RoomUserListDialog_QueryTextSubmit(object sender, Android.Support.V7.Widget.SearchView.QueryTextSubmitEventArgs e)
+        private void RoomUserListDialog_QueryTextSubmit(object sender, AndroidX.AppCompat.Widget.SearchView.QueryTextSubmitEventArgs e)
         {
             //nothing to do. we do it as text change.
         }
 
-        private void RoomUserListDialog_QueryTextChange(object sender, Android.Support.V7.Widget.SearchView.QueryTextChangeEventArgs e)
+        private void RoomUserListDialog_QueryTextChange(object sender, AndroidX.AppCompat.Widget.SearchView.QueryTextChangeEventArgs e)
         {
             string oldText = FilterText;
             FilterText = e.NewText;
@@ -5267,7 +5268,7 @@ namespace AndriodApp1
 
 
 
-    public class AllTickersDialog : Android.Support.V4.App.DialogFragment
+    public class AllTickersDialog : AndroidX.Fragment.App.DialogFragment
     {
         public static string OurRoomName = string.Empty;
         private ListView listViewTickers = null;
@@ -5334,7 +5335,7 @@ namespace AndriodApp1
 
     public class TickerAdapter : ArrayAdapter<Soulseek.RoomTicker>
     {
-        public Android.Support.V4.App.DialogFragment Owner = null;
+        public AndroidX.Fragment.App.DialogFragment Owner = null;
         public TickerAdapter(Context c, List<Soulseek.RoomTicker> items) : base(c, 0, items)
         {
         }

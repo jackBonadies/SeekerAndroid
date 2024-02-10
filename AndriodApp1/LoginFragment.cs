@@ -19,10 +19,10 @@
 
 using Android.Content;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Fragment.App;
+using Google.Android.Material.TextField;
 using Soulseek;
 using System;
 using System.Linq;
@@ -148,7 +148,7 @@ namespace AndriodApp1
                 settings.Visibility = ViewStates.Gone;
                 settings.Click += Settings_Click;
 
-                Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 0);
+               AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
                 this.cbttn = bttn;
                 this.cLoading = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
                 this.cWelcome = welcome;
@@ -389,7 +389,7 @@ namespace AndriodApp1
 
         public void LogInClick(object sender, EventArgs e)
         {
-            var pager = (Android.Support.V4.View.ViewPager)Activity.FindViewById(Resource.Id.pager);
+            var pager = (AndroidX.ViewPager.Widget.ViewPager)Activity.FindViewById(Resource.Id.pager);
             bool alreadyConnected = false;
             Task login = null;
             try

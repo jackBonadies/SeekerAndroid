@@ -4,12 +4,14 @@ using Android.Animation;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
+using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.BottomNavigation;
+using Google.Android.Material.BottomSheet;
+using Google.Android.Material.FloatingActionButton;
 using Java.Lang;
 using Soulseek;
 using System;
@@ -206,7 +208,7 @@ namespace AndriodApp1
         {
             ImageView imgView = null;
             Context c = null;
-            if (this.Activity is Android.Support.V7.App.AppCompatActivity appCompat)
+            if (this.Activity is AndroidX.AppCompat.App.AppCompatActivity appCompat)
             {
                 c = this.Activity;
                 imgView = appCompat.SupportActionBar?.CustomView?.FindViewById<ImageView>(Resource.Id.search_tabs);
@@ -222,7 +224,7 @@ namespace AndriodApp1
 
         public EditText GetCustomViewSearchHere()
         {
-            if (this.Activity is Android.Support.V7.App.AppCompatActivity appCompat)
+            if (this.Activity is AndroidX.AppCompat.App.AppCompatActivity appCompat)
             {
                 var editText = appCompat.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                 if (editText == null)
@@ -313,12 +315,12 @@ namespace AndriodApp1
                     }//timing issue where menu options invalidate etc. may not be done yet...
                     //bool isVisible = GetTransitionDrawable().IsVisible;
                     //GetTransitionDrawable().InvalidateSelf();
-                    //(this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).RefreshDrawableState();
-                    //(this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidateOnAnimation();
-                    //(this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidate();
+                    //(this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).RefreshDrawableState();
+                    //(this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidateOnAnimation();
+                    //(this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidate();
                     //Handler handler = new Handler(Looper.MainLooper);
                     //handler.PostDelayed(new Action(()=> {
-                    //    (this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidate();
+                    //    (this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidate();
                     //    GetTransitionDrawable().InvalidateSelf();
                     //    ActionBarMenu?.FindItem(Resource.Id.action_search).SetVisible(false);
                     //    ActionBarMenu?.FindItem(Resource.Id.action_search).SetVisible(true);
@@ -497,7 +499,7 @@ namespace AndriodApp1
         public void ShowSearchTabsDialog()
         {
             SearchTabDialog searchTabDialog = new SearchTabDialog();
-            //bool isAdded = (((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as Android.Support.V4.View.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
+            //bool isAdded = (((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
             if (!this.IsAdded || this.Activity == null) //then child fragment manager will likely be null
             {
                 MainActivity.LogInfoFirebase("ShowSearchTabsDialog, fragment no longer attached...");
@@ -803,7 +805,7 @@ namespace AndriodApp1
             Instance = this;
             HasOptionsMenu = true;
             //SoulSeekState.MainActivityRef.SupportActionBar.SetDisplayShowCustomEnabled(true);
-            //SoulSeekState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
+            //SoulSeekState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
             MainActivity.LogDebug("SearchFragmentOnCreateView");
             MainActivity.LogDebug("SearchFragmentOnCreateView - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
             this.rootView = inflater.Inflate(Resource.Layout.searches, container, false);
@@ -1124,7 +1126,7 @@ namespace AndriodApp1
         {
             //bool x = SoulSeekState.MainActivityRef.IsDestroyed;
 
-            //SearchFragment searchFragment = ((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as Android.Support.V4.View.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment;
+            //SearchFragment searchFragment = ((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment;
             SearchFragment.Instance.Search_EditorAction(sender, e);
         }
 
@@ -1139,7 +1141,7 @@ namespace AndriodApp1
                 EditText editTextSearch = SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere); //get asap to avoid nullref...
                 if (editTextSearch == null)
                 {
-                    EditText searchHere = (this.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
+                    EditText searchHere = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                     if (searchHere != null)
                     {
                         //MainActivity.LogFirebase("editTextSearch is NULL only on cached activity");//these are both real cases that occur
@@ -1275,7 +1277,7 @@ namespace AndriodApp1
                     }
                 }
                 //when coming from an intent its actually (toolbar.Menu.FindItem(Resource.Id.action_search)) that is null.  so the menu is there, just no action_search menu item.
-                Android.Support.V7.Widget.Toolbar toolbar = (this.Activity as Android.Support.V7.App.AppCompatActivity).FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+                AndroidX.AppCompat.Widget.Toolbar toolbar = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                 return toolbar.Menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable; //nullref
             }
             else
@@ -1531,7 +1533,7 @@ namespace AndriodApp1
 
             EventHandler<DialogClickEventArgs> eventHandlerClose = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
             {
-                SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
+                SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
                 if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
                 {
                     SoulSeekState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
@@ -2668,7 +2670,7 @@ namespace AndriodApp1
         //{
 
         //    base.OnResume();
-        //    searchEditText = (this.Activity as Android.Support.V7.App.AppCompatActivity).SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+        //    searchEditText = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity).SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
 
         //    searchEditText.KeyPress -= Actv_KeyPress;
         //    searchEditText.KeyPress += Actv_KeyPress;
@@ -3291,7 +3293,7 @@ namespace AndriodApp1
                 var actv = SoulSeekState.MainActivityRef.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere); // lot of nullrefs with actv before this change....
                 if (actv == null)
                 {
-                    actv = (SearchFragment.Instance.Activity as Android.Support.V7.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+                    actv = (SearchFragment.Instance.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
                     if (actv == null)
                     {
                         MainActivity.LogFirebase("actv stull null, cannot refresh adapter");

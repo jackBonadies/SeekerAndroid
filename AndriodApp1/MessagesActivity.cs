@@ -30,10 +30,14 @@ using AndroidX.ConstraintLayout.Widget;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using AndroidX.RecyclerView.Widget;
+using Android.Runtime;
+using Android.Text;
 using Google.Android.Material.Snackbar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AndriodApp1
@@ -376,7 +380,7 @@ namespace AndriodApp1
                         return;
                     }
                 }
-                Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.messages_toolbar);
+                AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
                 myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
                 myToolbar.Title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.messages);
                 this.SetSupportActionBar(myToolbar);
@@ -403,9 +407,9 @@ namespace AndriodApp1
         /// note: whenever we go back we recreate the fragment so we dont need to mess around with the adapter (in the case of delete), it will be recreated.
         /// </summary>
         /// <param name="innerFragment"></param>
-        public void SwitchToOuter(Android.Support.V4.App.Fragment innerFragment, bool forDeleteMessage)
+        public void SwitchToOuter(AndroidX.Fragment.App.Fragment innerFragment, bool forDeleteMessage)
         {
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.messages_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
@@ -476,7 +480,7 @@ namespace AndriodApp1
             SetContentView(Resource.Layout.messages_main_layout);
 
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.messages_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
@@ -985,7 +989,7 @@ namespace AndriodApp1
         /// <returns></returns>
         public static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
-            if (SoulSeekState.DayNightMode == (int)(Android.Support.V7.App.AppCompatDelegate.ModeNightFollowSystem))
+            if (SoulSeekState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
             {
                 //if we follow the system then we can just return whether our app is in night mode.
                 return DownloadDialog.InNightMode(contextToUse);
@@ -1267,7 +1271,7 @@ namespace AndriodApp1
 
 
 
-    public class MessagesInnerFragment : Android.Support.V4.App.Fragment
+    public class MessagesInnerFragment : AndroidX.Fragment.App.Fragment
     {
         private RecyclerView recyclerViewInner;
         private LinearLayoutManager recycleLayoutManager;
@@ -1303,7 +1307,7 @@ namespace AndriodApp1
             rootView = inflater.Inflate(Resource.Layout.messages_inner_layout, container, false);
 
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)MessagesActivity.MessagesActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.messages_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)MessagesActivity.MessagesActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_inner_list_menu);
             myToolbar.Title = Username;
             MessagesActivity.MessagesActivityRef.SetSupportActionBar(myToolbar);
@@ -1625,7 +1629,7 @@ namespace AndriodApp1
 
 
 
-    public class MessagesOverviewFragment : Android.Support.V4.App.Fragment
+    public class MessagesOverviewFragment : AndroidX.Fragment.App.Fragment
     {
         private RecyclerView recyclerViewOverview;
         private LinearLayoutManager recycleLayoutManager;
@@ -2096,8 +2100,8 @@ namespace AndriodApp1
         //public static int DELETED_POSITION = -1;
         //public static List<Message> DELETED_DATA = null;
         private MessagesOverviewRecyclerAdapter adapter = null;
-        private Android.Support.V4.App.Fragment containingFragment = null;
-        public ItemTouchHelperMessageOverviewCallback(MessagesOverviewRecyclerAdapter _adapter, Android.Support.V4.App.Fragment outerFrag) : base(0, ItemTouchHelper.Left) //no dragging. left swiping.
+        private AndroidX.Fragment.App.Fragment containingFragment = null;
+        public ItemTouchHelperMessageOverviewCallback(MessagesOverviewRecyclerAdapter _adapter, AndroidX.Fragment.App.Fragment outerFrag) : base(0, ItemTouchHelper.Left) //no dragging. left swiping.
         {
             containingFragment = outerFrag;
             adapter = _adapter;

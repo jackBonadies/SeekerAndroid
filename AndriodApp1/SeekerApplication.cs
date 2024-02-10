@@ -25,13 +25,12 @@ using Android.Content.PM;
 using Android.Net;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.App;
-using Android.Support.V4.Provider;
-using Android.Support.V7.App;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
-using SlskHelp;
+using AndroidX.AppCompat.App;
+using AndroidX.Core.App;
+using AndroidX.DocumentFile.Provider;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -612,7 +611,7 @@ namespace AndriodApp1
                     {
                         if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
                         {
-                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                         }
                     }
                     catch
@@ -696,7 +695,7 @@ namespace AndriodApp1
                     {
                         if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
                         {
-                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                         }
                     }
                     catch

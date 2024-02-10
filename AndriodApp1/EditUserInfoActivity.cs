@@ -127,7 +127,7 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.edit_user_info_layout);
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.edit_user_info_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.edit_user_info_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = this.GetString(Resource.String.edit_info);
             this.SetSupportActionBar(myToolbar);
@@ -209,14 +209,14 @@ namespace AndriodApp1
             {
                 if (resultCode == Result.Ok)
                 {
-                    Android.Support.V4.Provider.DocumentFile chosenFile = null;
+                    AndroidX.DocumentFile.Provider.DocumentFile chosenFile = null;
                     if (SoulSeekState.PreOpenDocumentTree())
                     {
-                        chosenFile = Android.Support.V4.Provider.DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
+                        chosenFile = AndroidX.DocumentFile.Provider.DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
                     }
                     else
                     {
-                        chosenFile = Android.Support.V4.Provider.DocumentFile.FromSingleUri(this, data.Data);
+                        chosenFile = AndroidX.DocumentFile.Provider.DocumentFile.FromSingleUri(this, data.Data);
                     }
 
                     //for samsung galaxy api 19 chosenFile.Exists() returns false, whether DF.FromFile or DF.FromSingleUri
@@ -262,10 +262,10 @@ namespace AndriodApp1
                         editor.Commit();
                     }
                     Java.IO.File fileForOurInternalStorage = new Java.IO.File(user_info_dir, name);
-                    System.IO.Stream outputStream = this.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
+                    System.IO.Stream outputStream = this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 
                     //this doesnt work btw due to the interal uri not being a SAF uri.
-                    //Android.Provider.DocumentsContract.CopyDocument(this.ContentResolver, data.Data, Android.Support.V4.Provider.DocumentFile.FromFile(f).Uri);
+                    //Android.Provider.DocumentsContract.CopyDocument(this.ContentResolver, data.Data, AndroidX.DocumentFile.Provider.DocumentFile.FromFile(f).Uri);
 
                     byte[] buffer = new byte[4096];
                     int read;

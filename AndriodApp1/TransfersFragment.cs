@@ -2,12 +2,12 @@
 using Android.Content.Res;
 using Android.Graphics;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.BottomNavigation;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -392,7 +392,7 @@ namespace AndriodApp1
                 case Resource.Id.batch_select:
                     TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                     ForceOutIfZeroSelected = false;
-                    //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+                    //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                     //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                     TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
@@ -1547,7 +1547,7 @@ namespace AndriodApp1
                             string startingDir = CommonHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
                             Action<View> action = new Action<View>((v) =>
                             {
-                                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                             });
 
                             DownloadDialog.RequestFilesApi(ttti.Username, this.View, action, startingDir);
@@ -1569,7 +1569,7 @@ namespace AndriodApp1
 
                             Action<View> action = new Action<View>((v) =>
                             {
-                                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                             });
 
                             DownloadDialog.RequestFilesApi(fi.Username, this.View, action, startingDir);
@@ -1704,7 +1704,7 @@ namespace AndriodApp1
                     case 105: //batch selection mode
                         TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                         ForceOutIfZeroSelected = true;
-                        //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
+                        //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                         //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                         TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
                         recyclerTransferAdapter.IsInBatchSelectMode = true;

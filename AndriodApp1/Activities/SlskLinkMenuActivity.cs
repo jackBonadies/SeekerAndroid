@@ -1,37 +1,10 @@
-﻿using AndriodApp1.Extensions.SearchResponseExtensions;
-using AndriodApp1.Helpers;
-using Android;
-using Android.Animation;
-using Android.App;
-using Android.Content;
-using Android.Content.PM;
-using Android.Net;
-using Android.Net.Wifi;
-using Android.OS;
-using Android.Provider;
-using Android.Runtime;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
-using Android.Support.V4.Provider;
-using Android.Support.V4.View;
-using Android.Support.V7.App;
-using Android.Util;
+﻿using Android.Content;
 using Android.Views;
 using Android.Widget;
-using Common;
-using Java.IO;
-using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using System.Threading.Tasks;
-using static Android.Provider.DocumentsContract;
-using log = Android.Util.Log;
 
 namespace AndriodApp1
 {
@@ -169,7 +142,7 @@ namespace AndriodApp1
                         Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
-                        //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
 
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);

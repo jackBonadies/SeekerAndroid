@@ -8,7 +8,7 @@ using Android.Widget;
 using System;
 namespace AndriodApp1
 {
-    public class SearchDialog : Android.Support.V4.App.DialogFragment
+    public class SearchDialog : AndroidX.Fragment.App.DialogFragment
     {
 
         public static EventHandler<bool> SearchTermFetched;

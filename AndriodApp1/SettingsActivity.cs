@@ -26,14 +26,14 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-using Android.Support.V4.Content;
-using Android.Support.V4.Provider;
-//using Android.Support.V7.Widget;
-//using Android.Support.V7.Widget.Helper;
+//using AndroidX.AppCompat.Widget;
+//using AndroidX.AppCompat.Widget.Helper;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
+using AndroidX.Core.Content;
+using AndroidX.DocumentFile.Provider;
 using AndroidX.RecyclerView.Widget;
 using Common;
 using System;
@@ -420,7 +420,7 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.settings_layout);
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.setting_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.setting_toolbar);
             myToolbar.InflateMenu(Resource.Menu.search_menu);
             myToolbar.Title = this.GetString(Resource.String.settings);
             this.SetSupportActionBar(myToolbar);
@@ -1086,7 +1086,7 @@ namespace AndriodApp1
             builder.SetTitle(Resource.String.ConfigureSmartFilters);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
-            Android.Support.V7.Widget.RecyclerView recyclerViewFiltersConfig = (Android.Support.V7.Widget.RecyclerView)viewInflated.FindViewById<Android.Support.V7.Widget.RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
+            RecyclerView recyclerViewFiltersConfig = (RecyclerView)viewInflated.FindViewById<RecyclerView>(Resource.Id.recyclerViewFiltersConfig);
             builder.SetView(viewInflated);
 
 
@@ -1095,10 +1095,10 @@ namespace AndriodApp1
 
             recyclerViewFiltersConfig.HasFixedSize = (true);
             recyclerViewFiltersConfig.SetAdapter(adapter);
-            recyclerViewFiltersConfig.SetLayoutManager(new Android.Support.V7.Widget.LinearLayoutManager(this));
+            recyclerViewFiltersConfig.SetLayoutManager(new LinearLayoutManager(this));
 
-            Android.Support.V7.Widget.Helper.ItemTouchHelper.Callback callback = new DragDropItemTouchHelper(adapter);
-            var mItemTouchHelper = new Android.Support.V7.Widget.Helper.ItemTouchHelper(callback);
+            ItemTouchHelper.Callback callback = new DragDropItemTouchHelper(adapter);
+            var mItemTouchHelper = new ItemTouchHelper(callback);
             mItemTouchHelper.AttachToRecyclerView(recyclerViewFiltersConfig);
             adapter.ItemTouchHelper = mItemTouchHelper;
 
@@ -2734,11 +2734,11 @@ namespace AndriodApp1
         {
             if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
             {
-                return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
+                return AndroidX.Core.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
             }
             else
             {
-                return Android.Support.V4.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied;
+                return AndroidX.Core.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadExternalStorage) == Android.Content.PM.Permission.Denied;
             }
         }
 
@@ -2746,11 +2746,11 @@ namespace AndriodApp1
         {
             if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
             {
-                Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadMediaAudio }, READ_EXTERNAL_FOR_MEDIA_STORE);
+                AndroidX.Core.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadMediaAudio }, READ_EXTERNAL_FOR_MEDIA_STORE);
             }
             else
             {
-                Android.Support.V4.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
+                AndroidX.Core.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadExternalStorage }, READ_EXTERNAL_FOR_MEDIA_STORE);
             }
         }
 

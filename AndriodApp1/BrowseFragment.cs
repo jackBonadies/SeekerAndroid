@@ -19,14 +19,16 @@
 
 using Android.Content;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
 using Android.Text;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Google.Android.Material.BottomNavigation;
+using Google.Android.Material.BottomSheet;
+using Google.Android.Material.FloatingActionButton;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -583,7 +585,7 @@ namespace AndriodApp1
                         BrowseFragment.Instance.RefreshOnRecieved();
                     }
                 }
-                var pager = (Android.Support.V4.View.ViewPager)SoulSeekState.MainActivityRef?.FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager.Widget.ViewPager)SoulSeekState.MainActivityRef?.FindViewById(Resource.Id.pager);
                 if (pager != null && pager.CurrentItem == 3)
                 {
                     SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
@@ -2526,7 +2528,7 @@ namespace AndriodApp1
 
             Action<View> goSnackBarAction = new Action<View>((View v) =>
             {
-                ((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>

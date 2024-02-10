@@ -4,9 +4,10 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Support.V4.App;
-using Android.Support.V4.Provider;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.App;
+using AndroidX.DocumentFile.Provider;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -586,7 +587,7 @@ namespace AndriodApp1
                     intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                     intent.AddFlags(ActivityFlags.SingleTop); //??
                     activity.StartActivity(intent);
-                    //((Android.Support.V4.View.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                    //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                 });
                 DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
                 return true;

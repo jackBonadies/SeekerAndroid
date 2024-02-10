@@ -23,18 +23,17 @@ using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
 using Android.OS;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
+using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using Java.Lang;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace AndriodApp1
 {
@@ -731,7 +730,7 @@ namespace AndriodApp1
     }
 
 
-    public class SearchTabDialog : Android.Support.V4.App.DialogFragment, ViewTreeObserver.IOnGlobalLayoutListener
+    public class SearchTabDialog : AndroidX.Fragment.App.DialogFragment, ViewTreeObserver.IOnGlobalLayoutListener
     {
         private RecyclerView recyclerViewSearches = null;
         private RecyclerView recyclerViewWishlists = null;

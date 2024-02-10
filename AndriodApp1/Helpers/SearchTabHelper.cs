@@ -127,7 +127,7 @@ namespace AndriodApp1.Helpers
             }
             string name = System.Math.Abs(wishlistSearchResultsToSave) + "_wishlist_tab";
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
-            System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
+            System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 
 
             using (System.IO.MemoryStream searchRes = new System.IO.MemoryStream())
@@ -190,7 +190,7 @@ namespace AndriodApp1.Helpers
                 return;
             }
 
-            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(Android.Support.V4.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
             {
                 MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
 

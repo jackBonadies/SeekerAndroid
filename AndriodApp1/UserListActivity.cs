@@ -159,7 +159,7 @@ namespace AndriodApp1
             SoulSeekState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.user_list_activity_layout);
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.user_list_toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.user_list_toolbar);
             myToolbar.InflateMenu(Resource.Menu.user_list_menu);
             myToolbar.Title = this.GetString(Resource.String.target_user_list);
             this.SetSupportActionBar(myToolbar);

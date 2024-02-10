@@ -24,20 +24,23 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Net;
-using Android.Net.Wifi;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
-using Android.Support.V4.Content;
-using Android.Support.V4.Provider;
-using Android.Support.V4.View;
-using Android.Support.V7.App;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.AppCompat.App;
+using AndroidX.Core.App;
+using AndroidX.Core.Content;
+using AndroidX.DocumentFile.Provider;
+using AndroidX.Fragment.App;
+using AndroidX.Lifecycle;
+using AndroidX.ViewPager.Widget;
 using Common;
+using Google.Android.Material.BottomNavigation;
+using Google.Android.Material.Snackbar;
+using Google.Android.Material.Tabs;
 using Java.IO;
 using SlskHelp;
 using Soulseek;
@@ -101,7 +104,7 @@ namespace AndriodApp1
                     {
                         if (activity is AppCompatActivity)
                         {
-                            bool foreground = (activity as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                            bool foreground = (activity as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
                             if (foreground)
                             {
                                 MainActivity.LogFirebase("FOREGROUND seeker keep alive cannot be started: " + e.Message + e.StackTrace);
@@ -959,7 +962,7 @@ namespace AndriodApp1
                 // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
                 //   in my case it did not.
                 SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
-                bool foreground = (SoulSeekState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Resumed);
+                bool foreground = (SoulSeekState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
                 MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
                 SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
@@ -1038,7 +1041,11 @@ namespace AndriodApp1
 
     //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
-    public class MainActivity : ThemeableActivity, AndriodApp1.MainActivity.DownloadCallback, ActivityCompat.IOnRequestPermissionsResultCallback, BottomNavigationView.IOnNavigationItemSelectedListener
+    public class MainActivity : 
+        ThemeableActivity, 
+        AndriodApp1.MainActivity.DownloadCallback, 
+        ActivityCompat.IOnRequestPermissionsResultCallback, 
+        BottomNavigationView.IOnNavigationItemSelectedListener
     {
         public static object SHARED_PREF_LOCK = new object();
         public const string logCatTag = "seeker";
@@ -2466,11 +2473,11 @@ namespace AndriodApp1
                         //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
                         string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                                                      //for the brose response should only be the filename!!! 
-                                                                                                      //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                                                      //bc we get a path that is:
-                                                                                                      //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
-                                                                                                      //not quite a full URI but it does add quite a bit..
+                                                                                                              //for the brose response should only be the filename!!! 
+                                                                                                              //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                                                              //bc we get a path that is:
+                                                                                                              //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
+                                                                                                              //not quite a full URI but it does add quite a bit..
 
                         //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
                         //{
@@ -2586,11 +2593,11 @@ namespace AndriodApp1
                         SoulSeekState.NumberParsed = indexNum;
                     }
                     string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
-                                                                                                  //for the brose response should only be the filename!!! 
-                                                                                                  //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                                                  //bc we get a path that is:
-                                                                                                  //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
-                                                                                                  //not quite a full URI but it does add quite a bit..
+                                                                                                          //for the brose response should only be the filename!!! 
+                                                                                                          //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
+                                                                                                          //bc we get a path that is:
+                                                                                                          //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\album\\09 Between Songs 4.mp3"
+                                                                                                          //not quite a full URI but it does add quite a bit..
 
                     //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
                     //{
@@ -3149,7 +3156,7 @@ namespace AndriodApp1
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
-        private Android.Support.V4.View.ViewPager pager = null;
+        private AndroidX.ViewPager.Widget.ViewPager pager = null;
 
         public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
         public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_Transfer = null;
@@ -3300,13 +3307,13 @@ namespace AndriodApp1
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
             SetContentView(Resource.Layout.activity_main);
 
-            //Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
+            //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
             //SetSupportActionBar(myToolbar);
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
 
 
-            Android.Support.V7.Widget.Toolbar myToolbar = (Android.Support.V7.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
+            AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
             myToolbar.Title = this.GetString(Resource.String.home_tab);
             myToolbar.InflateMenu(Resource.Menu.account_menu);
             SetSupportActionBar(myToolbar);
@@ -3335,7 +3342,7 @@ namespace AndriodApp1
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
 
-            pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+            pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
             pager.PageSelected += Pager_PageSelected;
             TabsPagerAdapter adapter = new TabsPagerAdapter(SupportFragmentManager);
 
@@ -4207,16 +4214,6 @@ namespace AndriodApp1
             // throw new NotImplementedException();
         }
 
-        private void Navigator_NavigationItemSelected(object sender, BottomNavigationView.NavigationItemSelectedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private void Navigator_NavigationItemReselected(object sender, BottomNavigationView.NavigationItemReselectedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
-
         public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
 
@@ -4995,7 +4992,7 @@ namespace AndriodApp1
         {
             try
             {
-                var pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
                 return pager.CurrentItem == 3;
             }
             catch
@@ -5014,7 +5011,7 @@ namespace AndriodApp1
             try
             {
                 //TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs); returns -1
-                var pager = (Android.Support.V4.View.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
                     relevant = BrowseFragment.Instance.BackButton();
@@ -5216,7 +5213,7 @@ namespace AndriodApp1
             }
         }
 
-        public void RecreateFragment(Android.Support.V4.App.Fragment f)
+        public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
         {
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)//Build.VERSION_CODES.N)
             {
@@ -6373,7 +6370,7 @@ namespace AndriodApp1
 
                     settings.Click -= SettingClick;
                     settings.Click += SettingClick;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 90);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 90);
                     bttn.Click -= BttnClick;
                     bttn.Click += BttnClick;
                     loggingInLayout.Visibility = ViewStates.Gone;
@@ -6383,7 +6380,7 @@ namespace AndriodApp1
                 {
                     cWelcome.Visibility = ViewStates.Visible;
                     cbttn.Visibility = ViewStates.Visible;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(cbttn, 90);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(cbttn, 90);
                     cLoading.Visibility = ViewStates.Gone;
                 }
                 else
@@ -6393,7 +6390,7 @@ namespace AndriodApp1
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                 }
 
             });
@@ -6501,7 +6498,7 @@ namespace AndriodApp1
                         logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = SoulSeekState.Username;
                         logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SoulSeekState.Password;
                     }
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
 
                     if (loading == null)
                     {
@@ -6525,7 +6522,7 @@ namespace AndriodApp1
                     welcome.Visibility = ViewStates.Gone;
                     settings.Visibility = ViewStates.Gone;
                     bttn.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(bttn, 0);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
 
 
                 }
@@ -6583,12 +6580,12 @@ namespace AndriodApp1
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
                     loggingInView.Visibility = ViewStates.Visible;
                     welcome.Visibility = ViewStates.Gone; //WE GET NULLREF HERE. FORCE connection already established exception and maybe see what is going on here...
                     logoutButton.Visibility = ViewStates.Gone;
                     settingsButton.Visibility = ViewStates.Gone;
-                    Android.Support.V4.View.ViewCompat.SetTranslationZ(logoutButton, 0);
+                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logoutButton, 0);
                 }
 
             });
@@ -7635,7 +7632,7 @@ namespace AndriodApp1
                 this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                 this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                 this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
             }
             if (e.Position == 1) //search
             {
@@ -7658,14 +7655,14 @@ namespace AndriodApp1
                 this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
                 SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
                 //this.SupportActionBar.CustomView.FindViewById<View>(Resource.Id.searchHere).FocusChange += MainActivity_FocusChange;
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                 if (goToSearchTab != int.MaxValue)
                 {
                     //if(SearchFragment.Instance == null)
                     //{
                     //    MainActivity.LogDebug("Search Frag Instance is Null");
                     //}
-                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Android.Arch.Lifecycle.Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
+                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
                     {
                         //let onresume go to the search tab..
                         MainActivity.LogDebug("Delay Go To Wishlist Search Fragment for OnResume");
@@ -7689,7 +7686,7 @@ namespace AndriodApp1
 
                 SetTransferSupportActionBarState();
 
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
             }
             else if (e.Position == 3)
             {
@@ -7706,7 +7703,7 @@ namespace AndriodApp1
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
                 }
-                this.FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
+                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
             }
         }
 
@@ -9125,12 +9122,12 @@ namespace AndriodApp1
         public const string M_SmartFilter_CountsOrder = "Momento_SmartFilterCountsOrder";
         public const string M_SmartFilter_TypesOrder = "Momento_SmartFilterTypesOrder";
 
-        public static Android.Support.V4.Provider.DocumentFile DiagnosticTextFile = null;
+        public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
         public static System.IO.StreamWriter DiagnosticStreamWriter = null;
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
-        public static Android.Support.V4.Provider.DocumentFile RootDocumentFile = null;
-        public static Android.Support.V4.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
+        public static AndroidX.DocumentFile.Provider.DocumentFile RootDocumentFile = null;
+        public static AndroidX.DocumentFile.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
         public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
         {
             BrowseResponseReceived(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
@@ -9161,10 +9158,10 @@ namespace AndriodApp1
         ///ava.lang.IllegalArgumentException: pointerIndex out of range
         ///at android.view.MotionEvent.nativeGetAxisValue(Native Method)
         ///at android.view.MotionEvent.getX(MotionEvent.java:1981)
-        ///at android.support.v4.view.MotionEventCompatEclair.getX(MotionEventCompatEclair.java:32)
-        ///at android.support.v4.view.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
-        ///at android.support.v4.view.MotionEventCompat.getX(MotionEventCompat.java:184)
-        ///at android.support.v4.view.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
+        ///atAndroidX.Core.View.MotionEventCompatEclair.getX(MotionEventCompatEclair.java:32)
+        ///atAndroidX.Core.View.MotionEventCompat$EclairMotionEventVersionImpl.getX(MotionEventCompat.java:86)
+        ///atAndroidX.Core.View.MotionEventCompat.getX(MotionEventCompat.java:184)
+        ///at AndroidX.ViewPager.Widget.ViewPager.onInterceptTouchEvent(ViewPager.java:1339)
         /// </summary>
         /// <param name="context"></param>
 
@@ -9230,7 +9227,7 @@ namespace AndriodApp1
         public static bool LoggingIn = false;
         public static bool UpdateUI = false;
         public static View RootView = null;
-        public static Android.Support.V4.App.Fragment LoginFragment = null;
+        public static AndroidX.Fragment.App.Fragment LoginFragment = null;
         public static TransfersFragment TransfersFrag = null;
     }
 

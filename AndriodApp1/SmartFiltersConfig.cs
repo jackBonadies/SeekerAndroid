@@ -1,9 +1,8 @@
 ﻿using Android.Content;
 using Android.Runtime;
-using Android.Support.V7.Widget;
-using Android.Support.V7.Widget.Helper;
 using Android.Views;
 using Android.Widget;
+using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;
 
