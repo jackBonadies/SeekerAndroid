@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
+using log = Android.Util.Log;
 using System.Text.Json.Serialization;
 
 namespace AndriodApp1
@@ -54,7 +55,7 @@ namespace AndriodApp1
             return System.Text.Json.JsonSerializer.Deserialize<T>(serializedString, options);
         }
 
-        private static string JsonSerializeToString<T>(T objectToSerialize)
+        public static string JsonSerializeToString<T>(T objectToSerialize)
         {
             var options = new JsonSerializerOptions
             {
@@ -63,7 +64,7 @@ namespace AndriodApp1
             return System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize, options);
         }
 
-        private static string BinarySerializeToString<T>(T objectToSerialize)
+        public static string BinarySerializeToString<T>(T objectToSerialize)
         {
             using (System.IO.MemoryStream userNotesStream = new System.IO.MemoryStream())
             {
@@ -226,6 +227,7 @@ namespace AndriodApp1
         }
     }
 
+
     /// <summary>
     /// TODO move PreferenceHelper to Common. Requires Moving UserListItem to common and then fixing the binary resolver
     /// </summary>
@@ -233,6 +235,35 @@ namespace AndriodApp1
     {
         public static void Test()
         {
+            //List<Message> messages = new List<Message>();
+            //for(int i = 0; i < 100; i++)
+            //{
+            //    messages.Add(new Message($"myusername{i}", i, true, DateTime.Now, DateTime.UtcNow, $"my message test {i}", false));
+            //}
+
+            //var sw = new System.Diagnostics.Stopwatch();
+            //sw.Start();
+            //var test = SerializationHelper.BinarySerializeToString(messages);
+            //var time1 = sw.ElapsedMilliseconds;
+            //log.Error("SEEKER", $"TIMER Binary Native {time1}");
+
+            //sw.Restart();
+            //var test1 = MessagePack.MessagePackSerializer.Serialize(messages);
+            //var finalString = Convert.ToBase64String(test1);
+            //var time2 = sw.ElapsedMilliseconds;
+            //log.Error("SEEKER", $"TIMER message pack {time2}");
+            
+            //// typeless serializer..
+
+            //sw.Restart();
+            //var test3 = SerializationHelper.JsonSerializeToString(messages);
+            //var time4 = sw.ElapsedMilliseconds;
+
+            ////var result13 = MessagePack.MessagePackSerializer.Deserialize<List<Message>>(test1);
+            //log.Error("SEEKER", $"TIMER json {time4}");
+
+
+
 
             Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
             var savedStateSearchTab = new SavedStateSearchTabHeader();

@@ -4,6 +4,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,19 +12,31 @@ using System.Text;
 
 namespace AndriodApp1
 {
+    [MessagePackObject]
     [System.Serializable] 
     public class Message
     {
+        [Key(0)]
         public string Username;
+        [Key(1)]
         public int Id;
+        [Key(2)]
         public bool Replayed;
+        [Key(3)]
         public DateTime LocalDateTime;
+        [Key(4)]
         public DateTime UtcDateTime;
+        [Key(5)]
         public string MessageText;
+        [Key(6)]
         public bool FromMe = false;
+        [Key(7)]
         public SentStatus SentMsgStatus = SentStatus.None;
+        [Key(8)]
         public SpecialMessageCode SpecialCode = SpecialMessageCode.None;
+        [Key(9)]
         public bool SameAsLastUser = false;
+
         public Message()
         {
             //i think this is necessary for serialization...

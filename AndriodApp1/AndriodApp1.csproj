@@ -231,6 +231,11 @@
     <PackageReference Include="MessagePack">
       <Version>2.5.140</Version>
     </PackageReference>
+    <PackageReference Include="MessagePackAnalyzer">
+      <Version>2.5.140</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.NET.StringTools">
       <Version>17.9.5</Version>
     </PackageReference>

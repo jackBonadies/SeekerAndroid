@@ -65,44 +65,6 @@ namespace AndriodApp1
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
-
-            //if (MessageController.RootMessages == null)
-            //{
-            //    var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
-            //    MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
-            //    if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
-            //    {
-            //        MessageController.MessagesUsername = SoulSeekState.Username;
-            //        if (!MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
-            //        {
-            //            MessageController.RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-            //        }
-            //        else
-            //        {
-            //            MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
-            //        }
-            //    }
-            //}
-            //else if (SoulSeekState.Username != MessageController.MessagesUsername)
-            //{
-            //    MessageController.MessagesUsername = SoulSeekState.Username;
-            //    if (SoulSeekState.Username == null || SoulSeekState.Username == string.Empty)
-            //    {
-            //        MessageController.Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-            //    }
-            //    else
-            //    {
-            //        if (MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
-            //        {
-            //            MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
-            //        }
-            //        else
-            //        {
-            //            MessageController.RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-            //            MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
-            //        }
-            //    }
-            //}
             bool startWithUserFragment = false;
 
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtChatroomInner"))
