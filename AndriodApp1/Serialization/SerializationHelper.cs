@@ -157,6 +157,17 @@ namespace AndriodApp1
         }
 
 
+        public static string SaveSavedStateHeaderDictToString(Dictionary<int, SavedStateSearchTabHeader> savedTabHeaderStates)
+        {
+            return SerializeToString(savedTabHeaderStates);
+        }
+
+        public static Dictionary<int, SavedStateSearchTabHeader> RestoreSavedStateHeaderDictFromString(string savedTabHeaderString)
+        {
+            return DeserializeFromString<Dictionary<int, SavedStateSearchTabHeader>>(savedTabHeaderString);
+        }
+
+
         public static string SaveAutoJoinRoomsListToString(ConcurrentDictionary<string, List<string>> autoJoinRoomNames)
         {
             return SerializeToString(autoJoinRoomNames);
@@ -165,7 +176,6 @@ namespace AndriodApp1
         public static ConcurrentDictionary<string, List<string>> RestoreAutoJoinRoomsListFromString(string joinedRooms)
         {
             return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(joinedRooms);
-
         }
 
 
@@ -222,6 +232,19 @@ namespace AndriodApp1
     {
         public static void Test()
         {
+
+            Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
+            var savedStateSearchTab = new SavedStateSearchTabHeader();
+            savedStateSearchTab.GetType().GetProperty("LastSearchResultsCount").SetValue(savedStateSearchTab, 123);
+            savedStateSearchTab.GetType().GetProperty("LastSearchTerm").SetValue(savedStateSearchTab, "fav artist");
+            savedStateSearchTab.GetType().GetProperty("LastRanTime").SetValue(savedStateSearchTab, 123000000L);
+            savedStates[1] = savedStateSearchTab;
+
+            var ser12 = SerializationHelper.SaveSavedStateHeaderDictToString(savedStates);
+            var restored12 = SerializationHelper.RestoreSavedStateHeaderDictFromString(ser12);
+
+            Debug.Assert(savedStates[1].LastSearchTerm == restored12[1].LastSearchTerm);
+
 
             var uploadDir = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
             uploadDir.ErrorState = UploadDirectoryError.CannotWrite;

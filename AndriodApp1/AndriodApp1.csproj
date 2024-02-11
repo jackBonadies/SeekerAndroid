@@ -146,10 +146,12 @@
     <Compile Include="Models\UploadDirectoryInfo.cs" />
     <Compile Include="SearchFragment.cs" />
     <Compile Include="SeekerApplication.cs" />
-    <Compile Include="SerializationHelper.cs" />
+    <Compile Include="Serialization\SerializationHelper.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchDialog.cs" />
+    <Compile Include="Serialization\SavedStateSearchTab.cs" />
+    <Compile Include="Serialization\SavedStateSearchTabHeader.cs" />
     <Compile Include="SettingsActivity.cs" />
     <Compile Include="SmartFiltersConfig.cs" />
     <Compile Include="TabsPagerAdapter.cs" />

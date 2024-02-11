@@ -233,12 +233,8 @@ namespace AndriodApp1.Helpers
                 {
                     savedStates.Add(tabIndex, SavedStateSearchTabHeader.GetSavedStateHeaderFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
                 }
-                using (System.IO.MemoryStream savedStateStream = new System.IO.MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(savedStateStream, savedStates);
-                    stringToSave = Convert.ToBase64String(savedStateStream.ToArray());
-                }
+
+                stringToSave = SerializationHelper.SerializeToString(savedStates);
             }
 
             lock (MainActivity.SHARED_PREF_LOCK)
@@ -285,24 +281,22 @@ namespace AndriodApp1.Helpers
 
                 MainActivity.LogDebug("HEADERS - base64 string length: " + sw.ElapsedMilliseconds);
 
-                using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
+                Dictionary<int, SavedStateSearchTabHeader> savedStateDict = SerializationHelper.RestoreSavedStateHeaderDictFromString(savedState);
+
+                int lowestID = int.MaxValue;
+                foreach (var pair in savedStateDict)
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    var savedStateDict = formatter.Deserialize(memStream) as Dictionary<int, SavedStateSearchTabHeader>;
-                    int lowestID = int.MaxValue;
-                    foreach (var pair in savedStateDict)
+                    if (pair.Key < lowestID)
                     {
-                        if (pair.Key < lowestID)
-                        {
-                            lowestID = pair.Key;
-                        }
-                        SearchTabCollection[pair.Key] = SavedStateSearchTabHeader.GetTabFromSavedState(pair.Value, null);
+                        lowestID = pair.Key;
                     }
-                    if (lowestID != int.MaxValue)
-                    {
-                        lastWishlistID = lowestID;
-                    }
+                    SearchTabCollection[pair.Key] = SavedStateSearchTabHeader.GetTabFromSavedState(pair.Value, null);
                 }
+                if (lowestID != int.MaxValue)
+                {
+                    lastWishlistID = lowestID;
+                }
+
                 sw.Stop();
                 MainActivity.LogDebug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
