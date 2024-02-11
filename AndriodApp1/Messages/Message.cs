@@ -11,7 +11,7 @@ using System.Text;
 
 namespace AndriodApp1
 {
-    [System.Serializable] //else error even with binary serializer
+    [System.Serializable] 
     public class Message
     {
         public string Username;

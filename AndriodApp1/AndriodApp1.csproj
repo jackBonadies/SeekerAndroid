@@ -172,7 +172,9 @@
     <Compile Include="UPnP\UPnPDiagStatus.cs" />
     <Compile Include="UPnP\UPnPManager.cs" />
     <Compile Include="UPnP\UPnPRunningStatus.cs" />
+    <Compile Include="Users\RecyclerUserListAdapter.cs" />
     <Compile Include="Users\UserListActivity.cs" />
+    <Compile Include="Users\UserListItem.cs" />
     <Compile Include="Utils\HtmlEntityDecoder.cs" />
     <Compile Include="Users\ViewUserInfoActivity.cs" />
   </ItemGroup>
