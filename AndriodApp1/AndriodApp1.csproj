@@ -121,24 +121,24 @@
     <Compile Include="bzip2\CRC32.cs" />
     <Compile Include="bzip2\HuffmanAllocator.cs" />
     <Compile Include="bzip2\MoveToFront.cs" />
-    <Compile Include="ChatroomActivity.cs" />
+    <Compile Include="Activities\ChatroomActivity.cs" />
     <Compile Include="ChipsAdapter.cs" />
     <Compile Include="DownloadDialog.cs" />
-    <Compile Include="EditUserInfoActivity.cs" />
+    <Compile Include="Activities\EditUserInfoActivity.cs" />
     <Compile Include="Enums\SearchEnums.cs" />
     <Compile Include="Extensions\SearchResponseExtensions.cs" />
     <Compile Include="Helpers\SearchSendIntentHelper.cs" />
     <Compile Include="Helpers\SearchTabHelper.cs" />
     <Compile Include="Helpers\CommonHelpers.cs" />
     <Compile Include="Helpers\MicroTagReader.cs" />
-    <Compile Include="ImportWizardActivity.cs" />
+    <Compile Include="Activities\ImportWizardActivity.cs" />
     <Compile Include="InternalDirectoryPickerLowAPI.cs" />
     <Compile Include="LoginFragment.cs" />
-    <Compile Include="MainActivity.cs" />
+    <Compile Include="Activities\MainActivity.cs" />
     <Compile Include="Managers\PrivilegesManager.cs" />
     <Compile Include="Managers\TransferItemManager.cs" />
     <Compile Include="Managers\TransferItemManagerWrapper.cs" />
-    <Compile Include="MessagesActivity.cs" />
+    <Compile Include="Activities\MessagesActivity.cs" />
     <Compile Include="Models\FolderItem.cs" />
     <Compile Include="Models\ITransferItem.cs" />
     <Compile Include="Models\SearchTab.cs" />
@@ -152,16 +152,16 @@
     <Compile Include="SearchDialog.cs" />
     <Compile Include="Serialization\SavedStateSearchTab.cs" />
     <Compile Include="Serialization\SavedStateSearchTabHeader.cs" />
-    <Compile Include="SettingsActivity.cs" />
+    <Compile Include="Activities\SettingsActivity.cs" />
     <Compile Include="SmartFiltersConfig.cs" />
     <Compile Include="TabsPagerAdapter.cs" />
     <Compile Include="TransfersFragment.cs" />
     <Compile Include="UPnP\UPnPDiagStatus.cs" />
     <Compile Include="UPnP\UPnPManager.cs" />
     <Compile Include="UPnP\UPnPRunningStatus.cs" />
-    <Compile Include="UserListActivity.cs" />
+    <Compile Include="Activities\UserListActivity.cs" />
     <Compile Include="Utils\HtmlEntityDecoder.cs" />
-    <Compile Include="ViewUserInfoActivity.cs" />
+    <Compile Include="Activities\ViewUserInfoActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
@@ -213,6 +213,12 @@
     </When>
   </Choose>
   <ItemGroup>
+    <PackageReference Include="MessagePack">
+      <Version>2.5.140</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.StringTools">
+      <Version>17.9.5</Version>
+    </PackageReference>
     <PackageReference Include="System.Text.Json">
       <Version>8.0.1</Version>
     </PackageReference>

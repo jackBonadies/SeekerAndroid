@@ -105,47 +105,6 @@ namespace AndriodApp1
         }
     }
 
-    public class PageFragment : Fragment
-    {
-        private static System.String ARG_PAGE_NUMBER = "page_number";
-
-        public static PageFragment newInstance(int page)
-        {
-            PageFragment fragment = new PageFragment();
-            Bundle args = new Bundle();
-            args.PutInt(ARG_PAGE_NUMBER, page);
-            fragment.Arguments = args;
-            return fragment;
-        }
-
-        public override View OnCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState)
-        {
-            int position = Arguments.GetInt(ARG_PAGE_NUMBER);
-            int resId = int.MinValue;
-            //switch (position)
-            //{
-            //    case 0:
-            resId = Resource.Layout.login;
-            //        break;
-            //    case 1:
-            //        resId = Resource.Layout.searches;
-            //        break;
-            //    case 2:
-            //        resId = Resource.Layout.transfers;
-            //        break;
-            //    default:
-            //        throw new System.Exception("Invalid Position");
-            //}
-            View rootView = inflater.Inflate(Resource.Layout.login, container, false);
-            var txt = rootView.FindViewById<TextView>(Resource.Id.textView);
-            txt.Text = "pos " + position;
-            return rootView;
-        }
-    }
-
-
-
 
     public class SearchResultComparableWishlist : SearchResultComparable
     {
@@ -178,6 +137,7 @@ namespace AndriodApp1
         //    return base.GetHashCode();
         //}
     }
+
 
     public class SearchResultComparable : IComparer<SearchResponse>
     {
@@ -739,137 +699,6 @@ namespace AndriodApp1
             return listOFIds;
         }
     }
-
-    //    private void Search_Click(object sender, EventArgs e)
-    //    {
-    //        MainActivity.LogDebug("Search_Click");
-    //        if (!SoulSeekState.currentlyLoggedIn)
-    //        {
-    //            Toast tst = Toast.MakeText(Context, "Must log in before searching", ToastLength.Long);
-    //            tst.Show();
-    //        }
-    //        else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-    //        {
-    //            Task t;
-    //            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
-    //            {
-    //                return;
-    //            }
-    //            t.ContinueWith(new Action<Task>((Task t) =>
-    //            {
-    //                if (t.IsFaulted)
-    //                {
-    //                    SoulSeekState.MainActivityRef.RunOnUiThread(() => { 
-
-    //                        Toast.MakeText(SoulSeekState.MainActivityRef, "Failed to connect.", ToastLength.Short).Show(); 
-
-    //                        });
-    //                    return;
-    //                }
-    //                SoulSeekState.MainActivityRef.RunOnUiThread(SearchLogic);
-
-    //            }));
-    //        }
-    //        else
-    //        {
-
-    //            SearchLogic();
-    //        }
-    //    }
-    //}
-
-    //public class SearchAdapter : ArrayAdapter<SearchResponse>
-    //{
-    //    List<int> oppositePositions = new List<int>();
-    //    public SearchAdapter(Context c, List<SearchResponse> items) : base(c, 0, items)
-    //    {
-    //        oppositePositions = new List<int>();
-    //    }
-
-    //    public override View GetView(int position, View convertView, ViewGroup parent)
-    //    {
-    //        ISearchItemViewBase itemView = (ISearchItemViewBase)convertView;
-    //        if (null == itemView)
-    //        {
-    //            switch (SearchFragment.SearchResultStyle)
-    //            {
-    //                case SearchResultStyleEnum.ExpandedAll:
-    //                case SearchResultStyleEnum.CollapsedAll:
-    //                    itemView = SearchItemViewExpandable.inflate(parent);
-    //                    (itemView as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
-    //                    (itemView as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
-    //                    break;
-    //                case SearchResultStyleEnum.Medium:
-    //                    itemView = SearchItemViewMedium.inflate(parent);
-    //                    break;
-    //                case SearchResultStyleEnum.Minimal:
-    //                    itemView = SearchItemViewMinimal.inflate(parent);
-    //                    break;
-    //            }
-    //        }
-    //        bool opposite = oppositePositions.Contains(position);
-    //        itemView.setItem(GetItem(position), opposite); //this will do the right thing no matter what...
-
-
-    //        //if(SearchFragment.SearchResultStyle==SearchResultStyleEnum.CollapsedAll)
-    //        //{
-    //        //    (itemView as IExpandable).Collapse();
-    //        //}
-    //        //else if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll)
-    //        //{
-    //        //    (itemView as IExpandable).Expand();
-    //        //}
-
-    //        //SETTING TOOLTIPTEXT does not allow list view item click!!! 
-    //        //itemView.TooltipText = "Queue Length: " + GetItem(position).QueueLength + System.Environment.NewLine + "Free Upload Slots: " + GetItem(position).FreeUploadSlots;
-    //        return itemView as View;
-    //        //return base.GetView(position, convertView, parent);
-    //    }
-
-    //    private void CustomAdapter_Click1(object sender, EventArgs e)
-    //    {
-    //        MainActivity.LogInfoFirebase("CustomAdapter_Click1");
-    //        int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
-    //        SearchFragment.Instance.showEditDialog(position);
-    //    }
-
-    //    private void CustomAdapter_Click(object sender, EventArgs e)
-    //    {
-    //        //throw new NotImplementedException();
-    //        int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
-    //        var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
-    //        var img = ((sender as View).Parent.Parent as View).FindViewById<ImageView>(Resource.Id.expandableClick);
-    //        if (v.Visibility == ViewStates.Gone)
-    //        {
-    //            img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
-    //            v.Visibility = ViewStates.Visible;
-    //            SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, GetItem(position));
-    //            if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
-    //            {
-    //                oppositePositions.Add(position);
-    //                oppositePositions.Sort();
-    //            }
-    //            else
-    //            {
-    //                oppositePositions.Remove(position);
-    //            }
-    //        }
-    //        else
-    //        {
-    //            img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
-    //            v.Visibility = ViewStates.Gone;
-    //            if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
-    //            {
-    //                oppositePositions.Remove(position);
-    //            }
-    //            else
-    //            {
-    //                oppositePositions.Add(position);
-    //                oppositePositions.Sort();
-    //            }
-    //        }
-    //    }
-    //}
 
     public interface ISearchItemViewBase
     {
