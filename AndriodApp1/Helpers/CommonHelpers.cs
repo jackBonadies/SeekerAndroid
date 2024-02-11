@@ -1,5 +1,6 @@
 ﻿using AndriodApp1.Helpers;
 using AndriodApp1.Managers;
+using AndriodApp1.Messages;
 using Android.App;
 using Android.Content;
 using Android.OS;

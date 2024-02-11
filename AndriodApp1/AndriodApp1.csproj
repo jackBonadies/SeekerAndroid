@@ -129,6 +129,12 @@
     <Compile Include="bzip2\HuffmanAllocator.cs" />
     <Compile Include="bzip2\MoveToFront.cs" />
     <Compile Include="Chatroom\ChatroomActivity.cs" />
+    <Compile Include="Messages\Message.cs" />
+    <Compile Include="Messages\MessageController.cs" />
+    <Compile Include="Messages\MessagesInnerFragment.cs" />
+    <Compile Include="Messages\MessagesInnerRecyclerAdapter.cs" />
+    <Compile Include="Messages\MessagesOverviewFragment.cs" />
+    <Compile Include="Messages\MessagesOverviewRecyclerAdapter.cs" />
     <Compile Include="Search\ChipsAdapter.cs" />
     <Compile Include="Search\DownloadDialog.cs" />
     <Compile Include="Users\EditUserInfoActivity.cs" />

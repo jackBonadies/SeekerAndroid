@@ -1,4 +1,5 @@
-﻿using AndriodApp1.Extensions.SearchResponseExtensions;
+﻿using AndriodApp1.Chatroom;
+using AndriodApp1.Extensions.SearchResponseExtensions;
 using AndriodApp1.Helpers;
 using Android.Animation;
 using Android.Content;

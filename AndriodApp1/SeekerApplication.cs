@@ -16,8 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+using AndriodApp1.Chatroom;
 using AndriodApp1.Helpers;
 using AndriodApp1.Managers;
+using AndriodApp1.Messages;
 using AndriodApp1.UPnP;
 using Android.App;
 using Android.Content;
