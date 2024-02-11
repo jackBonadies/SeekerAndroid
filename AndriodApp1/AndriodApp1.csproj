@@ -108,10 +108,17 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activities\CloseActivity.cs" />
-    <Compile Include="Activities\SlskLinkMenuActivity.cs" />
-    <Compile Include="Activities\ThemeableActivity.cs" />
-    <Compile Include="BrowseFragment.cs" />
+    <Compile Include="Chatroom\ChatroomController.cs" />
+    <Compile Include="Chatroom\ChatroomInnerFragment.cs" />
+    <Compile Include="Chatroom\ChatroomOverviewFragment.cs" />
+    <Compile Include="Chatroom\RoomTickerAdapter.cs" />
+    <Compile Include="Chatroom\RoomTickersDialog.cs" />
+    <Compile Include="Chatroom\RoomUserListDialog.cs" />
+    <Compile Include="Chatroom\RoomUserListRecyclerAdapter.cs" />
+    <Compile Include="Main\CloseActivity.cs" />
+    <Compile Include="Main\SlskLinkMenuActivity.cs" />
+    <Compile Include="Main\ThemeableActivity.cs" />
+    <Compile Include="Browse\BrowseFragment.cs" />
     <Compile Include="bzip2\BZip2BitInputStream.cs" />
     <Compile Include="bzip2\BZip2BlockDecompressor.cs" />
     <Compile Include="bzip2\BZip2DivSufSort.cs" />
@@ -121,47 +128,47 @@
     <Compile Include="bzip2\CRC32.cs" />
     <Compile Include="bzip2\HuffmanAllocator.cs" />
     <Compile Include="bzip2\MoveToFront.cs" />
-    <Compile Include="Activities\ChatroomActivity.cs" />
-    <Compile Include="ChipsAdapter.cs" />
-    <Compile Include="DownloadDialog.cs" />
-    <Compile Include="Activities\EditUserInfoActivity.cs" />
-    <Compile Include="Enums\SearchEnums.cs" />
-    <Compile Include="Extensions\SearchResponseExtensions.cs" />
-    <Compile Include="Helpers\SearchSendIntentHelper.cs" />
-    <Compile Include="Helpers\SearchTabHelper.cs" />
+    <Compile Include="Chatroom\ChatroomActivity.cs" />
+    <Compile Include="Search\ChipsAdapter.cs" />
+    <Compile Include="Search\DownloadDialog.cs" />
+    <Compile Include="Users\EditUserInfoActivity.cs" />
+    <Compile Include="Search\SearchEnums.cs" />
+    <Compile Include="Search\SearchResponseExtensions.cs" />
+    <Compile Include="Search\SearchSendIntentHelper.cs" />
+    <Compile Include="Search\SearchTabHelper.cs" />
     <Compile Include="Helpers\CommonHelpers.cs" />
     <Compile Include="Helpers\MicroTagReader.cs" />
-    <Compile Include="Activities\ImportWizardActivity.cs" />
-    <Compile Include="InternalDirectoryPickerLowAPI.cs" />
-    <Compile Include="LoginFragment.cs" />
-    <Compile Include="Activities\MainActivity.cs" />
-    <Compile Include="Managers\PrivilegesManager.cs" />
-    <Compile Include="Managers\TransferItemManager.cs" />
-    <Compile Include="Managers\TransferItemManagerWrapper.cs" />
-    <Compile Include="Activities\MessagesActivity.cs" />
-    <Compile Include="Models\FolderItem.cs" />
-    <Compile Include="Models\ITransferItem.cs" />
-    <Compile Include="Models\SearchTab.cs" />
-    <Compile Include="Models\TransferItem.cs" />
-    <Compile Include="Models\UploadDirectoryInfo.cs" />
-    <Compile Include="SearchFragment.cs" />
+    <Compile Include="Settings\ImportWizardActivity.cs" />
+    <Compile Include="Settings\InternalDirectoryPickerLowAPI.cs" />
+    <Compile Include="Login\LoginFragment.cs" />
+    <Compile Include="Main\MainActivity.cs" />
+    <Compile Include="Users\PrivilegesManager.cs" />
+    <Compile Include="Transfers\TransferItemManager.cs" />
+    <Compile Include="Transfers\TransferItemManagerWrapper.cs" />
+    <Compile Include="Messages\MessagesActivity.cs" />
+    <Compile Include="Transfers\FolderItem.cs" />
+    <Compile Include="Transfers\ITransferItem.cs" />
+    <Compile Include="Search\SearchTab.cs" />
+    <Compile Include="Transfers\TransferItem.cs" />
+    <Compile Include="Settings\UploadDirectoryInfo.cs" />
+    <Compile Include="Search\SearchFragment.cs" />
     <Compile Include="SeekerApplication.cs" />
     <Compile Include="Serialization\SerializationHelper.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SearchDialog.cs" />
-    <Compile Include="Serialization\SavedStateSearchTab.cs" />
-    <Compile Include="Serialization\SavedStateSearchTabHeader.cs" />
-    <Compile Include="Activities\SettingsActivity.cs" />
-    <Compile Include="SmartFiltersConfig.cs" />
-    <Compile Include="TabsPagerAdapter.cs" />
-    <Compile Include="TransfersFragment.cs" />
+    <Compile Include="Search\SearchDialog.cs" />
+    <Compile Include="Search\SavedStateSearchTab.cs" />
+    <Compile Include="Search\SavedStateSearchTabHeader.cs" />
+    <Compile Include="Settings\SettingsActivity.cs" />
+    <Compile Include="Search\SmartFiltersConfig.cs" />
+    <Compile Include="Main\TabsPagerAdapter.cs" />
+    <Compile Include="Transfers\TransfersFragment.cs" />
     <Compile Include="UPnP\UPnPDiagStatus.cs" />
     <Compile Include="UPnP\UPnPManager.cs" />
     <Compile Include="UPnP\UPnPRunningStatus.cs" />
-    <Compile Include="Activities\UserListActivity.cs" />
+    <Compile Include="Users\UserListActivity.cs" />
     <Compile Include="Utils\HtmlEntityDecoder.cs" />
-    <Compile Include="Activities\ViewUserInfoActivity.cs" />
+    <Compile Include="Users\ViewUserInfoActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
@@ -1543,6 +1550,7 @@
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File $(ProjectDir)PreBuild.ps1 "$(ProjectDir)Properties\AndroidManifest.xml" "$(ConfigurationName)"</PreBuildEvent>
