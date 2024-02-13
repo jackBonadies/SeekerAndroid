@@ -19,15 +19,12 @@ using AndroidX.ConstraintLayout.Core.Parser;
 using AndroidX.Core.Content;
 using Java.Security.Interfaces;
 using Java.IO;
+using AndriodApp1.Helpers;
 
 namespace AndriodApp1
 {
     public class SerializationHelper
     {
-        // todo soulseekstate should have a function that says MigratePrefsFromLegacyBinarySerializer
-        // it has a corresponding function for each of these functions
-        // and it does MigrateUserNotes()
-        // if(prefs.HasOldKey()) RestoreLegacy() SaveUserNotes() prefs.AddWithNewKey() prefs.RemoveOldKey())
         
         private static readonly bool useBinarySerializer = false;
         private static bool isBinaryFormatterSerialized(string base64string) // TODO is it better to just consider the old keys legacy, read them and then convert them to new keys
@@ -380,10 +377,9 @@ namespace AndriodApp1
             return false;
         }
 
-        internal static void MigrateWishlistTabs()
+        public static void MigrateWishlistTabs(Context context)
         {
-            // TODO READ EVERY WISHLIST ITEM and CONVERT
-            throw new NotImplementedException();
+            SearchTabHelper.MigrateAllSearchTabsFromDisk(context);
         }
 
         internal static bool MigrateHeaderState(ISharedPreferences sharedPreferences, string oldKey, string newKey)

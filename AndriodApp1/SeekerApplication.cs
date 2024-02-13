@@ -2090,7 +2090,7 @@ namespace AndriodApp1
                 SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
                 SerializationHelper.MigrateHeaderState(sharedPreferences, SoulSeekState.M_SearchTabsState_Headers_Legacy, SoulSeekState.M_SearchTabsState_Headers);
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
-                SerializationHelper.MigrateWishlistTabs();
+                SerializationHelper.MigrateWishlistTabs(c);
 
                 //SearchTabHelper.RestoreAllSearchTabsFromDisk(c);
 

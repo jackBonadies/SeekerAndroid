@@ -8440,6 +8440,7 @@ namespace AndriodApp1
 
         public const string M_wishlist_tab = "_wishlist_tab_v2";
         public const string M_wishlist_tab_legacy = "_wishlist_tab";
+        public const string M_wishlist_directory = "wishlist_dir";
 
         public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
         public static System.IO.StreamWriter DiagnosticStreamWriter = null;

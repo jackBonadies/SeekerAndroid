@@ -15,7 +15,7 @@ namespace AndriodApp1.Helpers
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_wishlist_directory);
             if (!wishlist_dir.Exists())
             {
                 wishlist_dir.Mkdir();
@@ -59,7 +59,7 @@ namespace AndriodApp1.Helpers
         /// So this method probably isnt needed.
         /// </summary>
         /// <param name="c"></param>
-        public static void RestoreAllSearchTabsFromDisk(Context c) // TODO MIGRATE ALL
+        public static void MigrateAllSearchTabsFromDisk(Context c)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
             string stringToSave = string.Empty;
@@ -73,59 +73,87 @@ namespace AndriodApp1.Helpers
             {
                 foreach (int tabIndex in tabsToSave)
                 {
-                    RestoreSearchResultsFromDisk(tabIndex, c);
+                    var results = RestoreSearchResultsFromDisk_Imp(tabIndex, c, true);
+                    if(results != null)
+                    {
+                        RemoveTabFromSharedPrefs(tabIndex, c, true);
+                        SaveSearchResultsToDisk_Imp(tabIndex, c, results);
+                    }
                 }
             }
             sw.Stop();
             MainActivity.LogDebug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
         }
 
-
-        public static void SaveSearchResultsToDisk(int wishlistSearchResultsToSave, Context c)
+        public static void SaveSearchResultsToDisk_Imp(int wishlistSearchResultsToSave, Context c, List<SearchResponse> searchResultsToSave)
         {
-            // todo lock file? or always on UI thread?
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_wishlist_directory);
             if (!wishlist_dir.Exists())
             {
                 wishlist_dir.Mkdir();
             }
             string name = System.Math.Abs(wishlistSearchResultsToSave) + SoulSeekState.M_wishlist_tab;
-            Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
-            System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 
-            var arr = SerializationHelper.SaveSearchResponsesToByteArray(SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses);
-            outputStream.Write(arr, 0, arr.Length);
-            outputStream.Flush();
-            outputStream.Close();
+            using (Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name))
+            {
+                using (System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w"))
+                {
+                    var arr = SerializationHelper.SaveSearchResponsesToByteArray(searchResultsToSave);
+                    outputStream.Write(arr, 0, arr.Length);
+                    outputStream.Flush();
+                    outputStream.Close();
 
-            sw.Stop();
-            MainActivity.LogDebug("HEADERS - Save Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses.Count);
+                    sw.Stop();
+                    MainActivity.LogDebug("HEADERS - Save Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses.Count);
+                }
+            }
         }
 
 
-        public static void RestoreSearchResultsFromDisk(int wishlistSearchResultsToRestore, Context c)
+        public static void SaveSearchResultsToDisk(int wishlistSearchResultsToSave, Context c)
         {
-            // todo lock file? or always on UI thread?
+            var searchResultsToSave = SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses;
+            SaveSearchResultsToDisk_Imp(wishlistSearchResultsToSave, c, searchResultsToSave);
+        }
 
+        public static List<SearchResponse> RestoreSearchResultsFromDisk_Imp(int wishlistSearchResultsToRestore, Context c, bool legacy = false)
+        {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_wishlist_directory);
             //if (!wishlist_dir.Exists())
             //{
             //    wishlist_dir.Mkdir();
             //}
-            string name = System.Math.Abs(wishlistSearchResultsToRestore) + SoulSeekState.M_wishlist_tab;
+            string name = System.Math.Abs(wishlistSearchResultsToRestore) + (legacy ? SoulSeekState.M_wishlist_tab_legacy : SoulSeekState.M_wishlist_tab);
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
 
+            if (!fileForOurInternalStorage.Exists())
+            {
+                return null;
+            }
 
-            // TODO way to detect legacy
+            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            {
+                MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
+
+                MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
+
+                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
+                return restoredSearchResponses;
+            }
+        }
+
+        public static void RestoreSearchResultsFromDisk(int wishlistSearchResultsToRestore, Context c)
+        {
+            var restoredSearchResults = RestoreSearchResultsFromDisk_Imp(wishlistSearchResultsToRestore, c);
 
             //there are two cases.
             //  1) we imported the term.  In that case there are no results yet as it hasnt been ran.  Which is fine.  
             //  2) its a bug.
-            if (!fileForOurInternalStorage.Exists())
+            if (restoredSearchResults == null)
             {
                 if (SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount == 0 || SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime == DateTime.MinValue)
                 {
@@ -152,26 +180,13 @@ namespace AndriodApp1.Helpers
                 SavedStateSearchTab tab = new SavedStateSearchTab();
                 tab.searchResponses = new List<SearchResponse>();
                 SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
-                return;
             }
-
-            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            else
             {
-                MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
-
-                MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
-
-                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
-
                 SavedStateSearchTab tab = new SavedStateSearchTab();
-                tab.searchResponses = restoredSearchResponses;
-
+                tab.searchResponses = restoredSearchResults;
                 SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
-
             }
-
-            sw.Stop();
-            MainActivity.LogDebug("HEADERS - Restore Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].SearchResponses.Count);
         }
 
 
