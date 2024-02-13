@@ -1,6 +1,7 @@
 ﻿using AndriodApp1.Chatroom;
 using AndriodApp1.Extensions.SearchResponseExtensions;
 using AndriodApp1.Helpers;
+using AndriodApp1.Search;
 using Android.Animation;
 using Android.Content;
 using Android.Graphics;

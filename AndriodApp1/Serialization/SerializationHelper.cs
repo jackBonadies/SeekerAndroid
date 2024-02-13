@@ -10,13 +10,27 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.Json;
 using log = Android.Util.Log;
 using System.Text.Json.Serialization;
+using Android.Util;
+using System.IO;
+using Soulseek;
+using Android.Preferences;
+using Android.Content;
+using AndroidX.ConstraintLayout.Core.Parser;
+using AndroidX.Core.Content;
+using Java.Security.Interfaces;
+using Java.IO;
 
 namespace AndriodApp1
 {
     public class SerializationHelper
     {
+        // todo soulseekstate should have a function that says MigratePrefsFromLegacyBinarySerializer
+        // it has a corresponding function for each of these functions
+        // and it does MigrateUserNotes()
+        // if(prefs.HasOldKey()) RestoreLegacy() SaveUserNotes() prefs.AddWithNewKey() prefs.RemoveOldKey())
+        
         private static readonly bool useBinarySerializer = false;
-        private static bool isBinaryFormatterSerialized(string base64string)
+        private static bool isBinaryFormatterSerialized(string base64string) // TODO is it better to just consider the old keys legacy, read them and then convert them to new keys
         {
             return base64string.StartsWith(@"AAEAAAD/////");
         }
@@ -34,11 +48,11 @@ namespace AndriodApp1
             }
         }
 
-        public static T DeserializeFromString<T>(string serializedString) where T : class
+        public static T DeserializeFromString<T>(string serializedString, bool legacy = false) where T : class
         {
-            if (isBinaryFormatterSerialized(serializedString))
+            if (legacy)
             {
-                return BinaryDeserializeFromString<T>(serializedString);
+                return LegacyBinaryDeserializeFromString<T>(serializedString);
             }
             else
             {
@@ -74,7 +88,7 @@ namespace AndriodApp1
             }
         }
 
-        public static T BinaryDeserializeFromString<T>(string base64String) where T : class
+        public static T LegacyBinaryDeserializeFromString<T>(string base64String) where T : class
         {
             using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64String)))
             {
@@ -94,19 +108,19 @@ namespace AndriodApp1
                 return SerializeToString(userNotes);
             }
         }
-        public static ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes)
+        public static ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes, bool legacy = false)
         {
             if (base64userNotes == string.Empty)
             {
                 return new ConcurrentDictionary<string, string>();
             }
 
-            return DeserializeFromString<ConcurrentDictionary<string, string>>(base64userNotes);
+            return DeserializeFromString<ConcurrentDictionary<string, string>>(base64userNotes, legacy);
         }
 
 
 
-        public static string SaveUserOnlineAlertsFromString(ConcurrentDictionary<string, byte> onlineAlertsDict)
+        public static string SaveUserOnlineAlertsToString(ConcurrentDictionary<string, byte> onlineAlertsDict)
         {
             if (onlineAlertsDict == null || onlineAlertsDict.Keys.Count == 0)
             {
@@ -118,14 +132,14 @@ namespace AndriodApp1
             }
         }
 
-        public static ConcurrentDictionary<string, byte> RestoreUserOnlineAlertsFromString(string base64onlineAlerts)
+        public static ConcurrentDictionary<string, byte> RestoreUserOnlineAlertsFromString(string base64onlineAlerts, bool legacy = false)
         {
             if (string.IsNullOrEmpty(base64onlineAlerts))
             {
                 return new ConcurrentDictionary<string, byte>();
             }
 
-            return DeserializeFromString<ConcurrentDictionary<string, byte>>(base64onlineAlerts);
+            return DeserializeFromString<ConcurrentDictionary<string, byte>>(base64onlineAlerts, legacy);
         }
 
 
@@ -138,23 +152,26 @@ namespace AndriodApp1
             }
             else
             {
-                return SerializeToString(userList);
+                var bytes = MessagePack.MessagePackSerializer.Serialize(userList, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+                return Convert.ToBase64String(bytes);
             }
         }
 
-        public static List<UserListItem> RestoreUserListFromString(string base64userList)
+        public static List<UserListItem> RestoreUserListFromString(string base64userList, bool restoreLegacy = false)
         {
             if (base64userList == string.Empty)
             {
                 return new List<UserListItem>();
             }
-            if (isBinaryFormatterSerialized(base64userList))
+            if (restoreLegacy)
             {
-                return BinaryDeserializeFromString<List<UserListItem>>(base64userList);
+                return LegacyBinaryDeserializeFromString<List<UserListItem>>(base64userList);
             }
             else
             {
-                return null; // TODOSERIALIZE
+                return MessagePack.MessagePackSerializer.Deserialize<List<UserListItem>>(
+                    Convert.FromBase64String(base64userList), 
+                    options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
             }
         }
 
@@ -164,9 +181,9 @@ namespace AndriodApp1
             return SerializeToString(savedTabHeaderStates);
         }
 
-        public static Dictionary<int, SavedStateSearchTabHeader> RestoreSavedStateHeaderDictFromString(string savedTabHeaderString)
+        public static Dictionary<int, SavedStateSearchTabHeader> RestoreSavedStateHeaderDictFromString(string savedTabHeaderString, bool legacy = false)
         {
-            return DeserializeFromString<Dictionary<int, SavedStateSearchTabHeader>>(savedTabHeaderString);
+            return DeserializeFromString<Dictionary<int, SavedStateSearchTabHeader>>(savedTabHeaderString, legacy);
         }
 
 
@@ -175,9 +192,9 @@ namespace AndriodApp1
             return SerializeToString(autoJoinRoomNames);
         }
 
-        public static ConcurrentDictionary<string, List<string>> RestoreAutoJoinRoomsListFromString(string joinedRooms)
+        public static ConcurrentDictionary<string, List<string>> RestoreAutoJoinRoomsListFromString(string joinedRooms, bool legacy = false)
         {
-            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(joinedRooms);
+            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(joinedRooms, legacy);
         }
 
 
@@ -186,9 +203,9 @@ namespace AndriodApp1
             return SerializeToString(notifyRoomsList);
         }
 
-        public static ConcurrentDictionary<string, List<string>> RestoreNotifyRoomsListFromString(string notifyRoomsListString)
+        public static ConcurrentDictionary<string, List<string>> RestoreNotifyRoomsListFromString(string notifyRoomsListString, bool legacy = false)
         {
-            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(notifyRoomsListString);
+            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(notifyRoomsListString, legacy);
         }
 
         public static string SaveUnreadUsernamesToString(ConcurrentDictionary<string, byte> unreadUsernames)
@@ -196,7 +213,7 @@ namespace AndriodApp1
             return SerializeToString(unreadUsernames);
         }
 
-        public static ConcurrentDictionary<string, byte> RestoreUnreadUsernamesFromString(string unreadUsernames)
+        public static ConcurrentDictionary<string, byte> RestoreUnreadUsernamesFromString(string unreadUsernames, bool legacy = false)
         {
             if (string.IsNullOrEmpty(unreadUsernames))
             {
@@ -204,26 +221,197 @@ namespace AndriodApp1
             }
             else
             {
-                return DeserializeFromString<ConcurrentDictionary<string, byte>>(unreadUsernames);
+                return DeserializeFromString<ConcurrentDictionary<string, byte>>(unreadUsernames, legacy);
             }
+        }
+
+        public static bool MigrateUnreadUsernames(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var items = RestoreUnreadUsernamesFromString(oldKeyValue, true);
+                var newString = SaveUnreadUsernamesToString(items);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
         }
 
 
         public static string SaveMessagesToString(ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> rootMessages)
         {
-            return SerializeToString(rootMessages);
+            var byteArray = MessagePack.MessagePackSerializer.Serialize(rootMessages);
+            return Convert.ToBase64String(byteArray);
         }
 
-        public static ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> RestoreMessagesFromString(string rootMessagesString)
+        public static ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> RestoreMessagesFromString(string rootMessagesString, bool useLegacy = false)
         {
-            if (isBinaryFormatterSerialized(rootMessagesString))
+            if (useLegacy)
             {
-                return BinaryDeserializeFromString<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(rootMessagesString);
+                return LegacyBinaryDeserializeFromString<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(rootMessagesString);
             }
             else
             {
-                return null; // TODOSERIALIZE
+                var bytesArray = Convert.FromBase64String(rootMessagesString);
+                return MessagePack.MessagePackSerializer.Deserialize<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(bytesArray);
             }
+        }
+
+
+        public static byte[] SaveSearchResponsesToByteArray(List<SearchResponse> responses)
+        {
+            var byteArray = MessagePack.MessagePackSerializer.Serialize(responses, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            return byteArray;
+        }
+
+        public static List<SearchResponse> RestoreSearchResponsesFromStream(System.IO.Stream inputStream, bool legacy = false)
+        {
+            if(legacy)
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                return formatter.Deserialize(inputStream) as List<SearchResponse>;
+            }
+            else
+            {
+                return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            }
+        }
+
+        private static bool AnythingToMigrate(ISharedPreferences sharedPreferences, string oldKey)
+        {
+            if (!sharedPreferences.Contains(oldKey))
+            {
+                return false;
+            }
+            var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+            if (string.IsNullOrEmpty(oldKeyValue))
+            {
+                var editor = sharedPreferences.Edit();
+                editor.Remove(oldKey);
+                editor.Commit();
+                return false;
+            }
+            return true;
+        }
+
+        private static void SaveToSharedPrefs(ISharedPreferences sharedPreferences, string newKey, string stringToSave)
+        {
+            var editor = sharedPreferences.Edit();
+            editor.PutString(newKey, stringToSave);
+            editor.Commit();
+        }
+
+        public static bool MigrateUserListIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if(AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var userListItems = RestoreUserListFromString(oldKeyValue, true);
+                var newString = SaveUserListToString(userListItems);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool MigrateUserNotesIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var userListItems = RestoreUserNotesFromString(oldKeyValue, true);
+                var newString = SaveUserNotesToString(userListItems);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool MigrateOnlineAlertsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var userListItems = RestoreUserOnlineAlertsFromString(oldKeyValue, true);
+                var newString = SaveUserOnlineAlertsToString(userListItems);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
+        }
+
+        private static void RemoveOldKey(ISharedPreferences sharedPreferences, string oldKey)
+        {
+            var editor = sharedPreferences.Edit();
+            editor.Remove(oldKey);
+            editor.Commit();
+        }
+
+        internal static bool MigrateAutoJoinRoomsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var autoJoinRooms = RestoreAutoJoinRoomsListFromString(oldKeyValue, true);
+                var newString = SaveAutoJoinRoomsListToString(autoJoinRooms);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
+        }
+
+        internal static bool MigrateNotifyRoomsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var autoJoinRooms = RestoreNotifyRoomsListFromString(oldKeyValue, true);
+                var newString = SaveNotifyRoomsListToString(autoJoinRooms);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
+        }
+
+        internal static void MigrateWishlistTabs()
+        {
+            // TODO READ EVERY WISHLIST ITEM and CONVERT
+            throw new NotImplementedException();
+        }
+
+        internal static bool MigrateHeaderState(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var items = RestoreSavedStateHeaderDictFromString(oldKeyValue, true);
+                var newString = SaveSavedStateHeaderDictToString(items);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
+        }
+
+        internal static bool MigratedMessages(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var autoJoinRooms = RestoreMessagesFromString(oldKeyValue, true);
+                var newString = SaveMessagesToString(autoJoinRooms);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -235,33 +423,48 @@ namespace AndriodApp1
     {
         public static void Test()
         {
-            //List<Message> messages = new List<Message>();
-            //for(int i = 0; i < 100; i++)
-            //{
-            //    messages.Add(new Message($"myusername{i}", i, true, DateTime.Now, DateTime.UtcNow, $"my message test {i}", false));
-            //}
+            List<Message> messages = new List<Message>();
+            for(int i = 0; i < 100; i++)
+            {
+                messages.Add(new Message($"myusername{i}", i, true, DateTime.Now, DateTime.UtcNow, $"my message test {i}", false));
+            }
 
-            //var sw = new System.Diagnostics.Stopwatch();
-            //sw.Start();
-            //var test = SerializationHelper.BinarySerializeToString(messages);
-            //var time1 = sw.ElapsedMilliseconds;
-            //log.Error("SEEKER", $"TIMER Binary Native {time1}");
+            var sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            var test = SerializationHelper.BinarySerializeToString(messages);
+            var time1 = sw.ElapsedMilliseconds;
+            log.Error("SEEKER", $"TIMER Binary Native Ser {time1}");
 
-            //sw.Restart();
-            //var test1 = MessagePack.MessagePackSerializer.Serialize(messages);
-            //var finalString = Convert.ToBase64String(test1);
-            //var time2 = sw.ElapsedMilliseconds;
-            //log.Error("SEEKER", $"TIMER message pack {time2}");
-            
-            //// typeless serializer..
+            sw.Start();
+            var obj12 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Message>>(test);
+            var time132 = sw.ElapsedMilliseconds;
+            log.Error("SEEKER", $"TIMER Binary Native Deser {time132}");
 
-            //sw.Restart();
-            //var test3 = SerializationHelper.JsonSerializeToString(messages);
-            //var time4 = sw.ElapsedMilliseconds;
+            sw.Restart();
+            var test1 = MessagePack.MessagePackSerializer.Serialize(messages);
+            var finalString = Convert.ToBase64String(test1);
+            var time2 = sw.ElapsedMilliseconds;
+            log.Error("SEEKER", $"TIMER message pack Ser {time2}");
 
-            ////var result13 = MessagePack.MessagePackSerializer.Deserialize<List<Message>>(test1);
-            //log.Error("SEEKER", $"TIMER json {time4}");
+            sw.Restart();
+            var obj9 = MessagePack.MessagePackSerializer.Deserialize<List<Message>>(test1);
+            var time42 = sw.ElapsedMilliseconds;
+            log.Error("SEEKER", $"TIMER message pack Deser {time42}");
 
+            // typeless serializer..
+
+            sw.Restart();
+            var test3 = SerializationHelper.JsonSerializeToString(messages);
+            var time4 = sw.ElapsedMilliseconds;
+
+            //var result13 = MessagePack.MessagePackSerializer.Deserialize<List<Message>>(test1);
+            log.Error("SEEKER", $"TIMER json Ser {time4}");
+
+            sw.Restart();
+            var obj4 = SerializationHelper.DeserializeFromString<List<Message>>(test3);
+            var time44 = sw.ElapsedMilliseconds;
+
+            log.Error("SEEKER", $"TIMER json Deser {time4}");
 
 
 

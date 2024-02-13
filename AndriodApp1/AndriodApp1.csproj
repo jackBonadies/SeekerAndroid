@@ -116,6 +116,8 @@
     <Compile Include="Chatroom\RoomUserListDialog.cs" />
     <Compile Include="Chatroom\RoomUserListRecyclerAdapter.cs" />
     <Compile Include="Main\CloseActivity.cs" />
+    <Compile Include="Main\DownloadForegroundService.cs" />
+    <Compile Include="Main\SeekerKeepAliveService.cs" />
     <Compile Include="Main\SlskLinkMenuActivity.cs" />
     <Compile Include="Main\ThemeableActivity.cs" />
     <Compile Include="Browse\BrowseFragment.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="bzip2\HuffmanAllocator.cs" />
     <Compile Include="bzip2\MoveToFront.cs" />
     <Compile Include="Chatroom\ChatroomActivity.cs" />
+    <Compile Include="Main\UploadForegroundService.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\MessageController.cs" />
     <Compile Include="Messages\MessagesInnerFragment.cs" />
@@ -137,6 +140,8 @@
     <Compile Include="Messages\MessagesOverviewRecyclerAdapter.cs" />
     <Compile Include="Search\ChipsAdapter.cs" />
     <Compile Include="Search\DownloadDialog.cs" />
+    <Compile Include="Search\WishlistController.cs" />
+    <Compile Include="Transfers\TransfersController.cs" />
     <Compile Include="Users\EditUserInfoActivity.cs" />
     <Compile Include="Search\SearchEnums.cs" />
     <Compile Include="Search\SearchResponseExtensions.cs" />

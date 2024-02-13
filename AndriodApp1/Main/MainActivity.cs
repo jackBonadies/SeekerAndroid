@@ -18,6 +18,7 @@
  */
 using AndriodApp1.Extensions.SearchResponseExtensions;
 using AndriodApp1.Helpers;
+using AndriodApp1.Search;
 using Android;
 using Android.Animation;
 using Android.App;
@@ -437,607 +438,6 @@ namespace AndriodApp1
     public class FaultPropagationException : System.Exception
     {
     }
-
-    // TODOORG controllers
-    public class TransfersController
-    {
-        private static System.Timers.Timer TransfersTimer = null;
-        public static bool IsInitialized = false;
-#if DEBUG
-        private const int transfersInterval = 2 * 60 * 1000; //2 mins, faster for testing..
-#else
-        private const int transfersInterval = 5 * 60 * 1000;
-
-#endif
-
-        public static void InitializeService()
-        {
-            //we run this once after our first login.
-
-            if (IsInitialized)
-            {
-                return;
-            }
-
-            if (SoulSeekState.AutoRequeueDownloadsAtStartup)
-            {
-                var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
-                if (queuedTransfers.Count > 0)
-                {
-                    MainActivity.LogDebug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
-                    MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
-                }
-            }
-
-            MainActivity.LogDebug("TransfersController InitializeService");
-            TransfersTimer = new System.Timers.Timer(transfersInterval);
-            TransfersTimer.AutoReset = true;
-            TransfersTimer.Elapsed += TransfersTimer_Elapsed;
-            TransfersTimer.Start();
-            IsInitialized = true;
-        }
-
-        private static void TransfersTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            MainActivity.LogDebug("TransfersTimerElapsed");
-            if (MainActivity.IsNotLoggedIn())
-            {
-                return;
-            }
-            var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
-            if (queuedTransfers.Count > 0)
-            {
-                MainActivity.LogDebug("TransfersTimerElapsed - Lets get position of queued transfers...");
-                MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
-            }
-
-        }
-    }
-
-    // TODOORG controllers
-    public class WishlistController
-    {
-        private static int searchIntervalMilliseconds = -1;
-        public static int SearchIntervalMilliseconds
-        {
-            get
-            {
-                return searchIntervalMilliseconds;
-            }
-            set
-            {
-                searchIntervalMilliseconds = value; //inverval of 0 means NOT ALLOWED.  In general we should also do a Min value of like 1 minute in case the server sends something not good.
-                if (!IsInitialized)
-                {
-                    Initialize();
-                }
-            }
-        }
-        public static bool IsInitialized = false;
-
-        private static System.Timers.Timer WishlistTimer = null;
-        public static System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>> OldResultsToCompare = new System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>>();
-        private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new System.Collections.Concurrent.ConcurrentDictionary<int, int>();
-
-        public static void Initialize() //we need the wishlist interval before we can init
-        {
-            if (IsInitialized)
-            {
-                return;
-            }
-            if (searchIntervalMilliseconds == 0)
-            {
-                IsInitialized = true;
-                MainActivity.LogFirebase("Wishlist not allowed");
-                return;
-            }
-            if (searchIntervalMilliseconds == -1)
-            {
-                IsInitialized = true;
-                MainActivity.LogFirebase("Wishlist interval is -1");
-                return;
-            }
-            if (searchIntervalMilliseconds < 1000 * 60 * 2)
-            {
-                MainActivity.LogFirebase("Wishlist interval is: " + searchIntervalMilliseconds);
-                searchIntervalMilliseconds = 2 * 60 * 1000; //min of 2 mins...
-            }
-
-#if DEBUG
-            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
-#endif
-
-            WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
-            WishlistTimer.AutoReset = true;
-            WishlistTimer.Elapsed += WishlistTimer_Elapsed;
-            WishlistTimer.Start();
-            IsInitialized = true;
-        }
-        public const string CHANNEL_ID = "Wishlist Controller ID";
-        public const string CHANNEL_NAME = "Wishlists";
-        public const string FromWishlistString = "FromWishlistTabID";
-        public const string FromWishlistStringID = "FromWishlistTabIDToGoTo";
-        public static void SearchCompleted(int id)
-        {
-            //a search that we initiated completed...
-            //var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch)).ToList();
-            OldResultsToCompare.TryRemove(id, out _); //save memory. wont always exist if the tab got deleted during the search.  exceptions thrown here dont crash anything tho.
-            int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
-
-            if (newUniqueResults >= 1)
-            {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    try
-                    {
-                        string description = string.Empty;
-                        if (newUniqueResults > 1)
-                        {
-                            description = newUniqueResults + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.new_results);
-                        }
-                        else
-                        {
-                            description = newUniqueResults + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.new_result);
-                        }
-                        string lastTerm = SearchTabHelper.SearchTabCollection[id].LastSearchTerm;
-
-                        CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
-                        Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
-                        notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                        notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
-                        notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
-                        PendingIntent pendingIntent =
-                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                        Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
-                        NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
-                        // notificationId is a unique int for each notification that you must define
-                        notificationManager.Notify(lastTerm.GetHashCode(), n);
-                    }
-                    catch (System.Exception e)
-                    {
-                        MainActivity.LogFirebase("ShowNotification For Wishlist failed: " + e.Message + e.StackTrace);
-                    }
-                });
-            }
-            SearchTabHelper.SaveHeadersToSharedPrefs();
-            SearchTabHelper.SaveSearchResultsToDisk(id, SoulSeekState.ActiveActivityRef);
-        }
-
-        private static void WishlistTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (SearchTabHelper.SearchTabCollection != null)
-            {
-                var wishlistPairs = SearchTabHelper.SearchTabCollection.Where(pair => pair.Value.SearchTarget == SearchTarget.Wishlist);
-                if (wishlistPairs.Count() == 0)
-                {
-                    return;
-                }
-                else
-                {
-                    MainActivity.LogInfoFirebase("wishlist search ran " + searchIntervalMilliseconds);
-                    DateTime oldest = DateTime.MaxValue;
-                    int oldestId = int.MaxValue;
-                    foreach (var pair in wishlistPairs)
-                    {
-                        if (pair.Value.LastRanTime < oldest)
-                        {
-                            oldest = pair.Value.LastRanTime;
-                            oldestId = pair.Key;
-                        }
-                    }
-                    //oldestId is the one we want to autosearch
-
-                    //search response count: 4220 hashSet count: 1000 time 102 ms
-                    //search response count: 13880 hashSet count: 1000 time 71 ms
-                    //search response count: 14655 hashSet count: 1000 time 174 ms
-                    //search response count: 2615 hashSet count: 999 time 21 ms
-                    //search response count: 15758 hashSet count: 1000 time 124 ms
-                    //search response count: 937 hashSet count: 937 time 4 ms
-
-                    //this is incase someone is privileged (searching every 2 mins) and perhaps they only have 1 wishlist search.  we dont want the second to begin when the first hasnt even ended.
-                    //there arent really any downsides if this happens actually....
-
-                    if (!SearchTabHelper.SearchTabCollection[oldestId].IsLoaded())
-                    {
-                        SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SoulSeekState.ActiveActivityRef);
-                    }
-
-
-                    if (!OldResultsToCompare.ContainsKey(oldestId)) //this is better than setting currentlySearching bc currentlySearching changes UI components like the transition drawable, which I think is just too much happening for the user.
-                    {
-#if DEBUG
-                        var sw = System.Diagnostics.Stopwatch.StartNew();
-                        sw.Start();
-#endif
-                        OldNumResults[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count;
-                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch));
-#if DEBUG
-                        sw.Stop();
-                        MainActivity.LogDebug($"search response count: {SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count} hashSet count: {OldResultsToCompare[oldestId].Count} time {sw.ElapsedMilliseconds} ms");
-                        MainActivity.LogDebug("now searching " + oldestId);
-#endif
-                        //SearchTabHelper.SearchTabCollection[oldestId].CurrentlySearching = true;
-                        SearchFragment.SearchAPI((new CancellationTokenSource()).Token, null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
-                    }
-                    else
-                    {
-                        MainActivity.LogDebug("was already searching " + oldestId);
-                    }
-
-                }
-            }
-        }
-    }
-
-
-
-    // TODOORG seperate class
-    //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
-    [Service(Name = "com.companyname.andriodapp1.DownloadService")]
-    public class DownloadForegroundService : Service
-    {
-        public const int NOTIF_ID = 111;
-        public const string CHANNEL_ID = "my channel id";
-        public const string CHANNEL_NAME = "Foreground Download Service";
-        public const string FromTransferString = "FromTransfer";
-        public const int NonZeroRequestCode = 7672;
-        public override IBinder OnBind(Intent intent)
-        {
-            return null; //does not allow binding. 
-        }
-
-
-
-        public static Notification CreateNotification(Context context, String contentText)
-        {
-            Intent notifIntent = new Intent(context, typeof(MainActivity));
-            notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(FromTransferString, 2);
-            PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
-        }
-
-
-        public static string PluralDownloadsRemaining
-        {
-            get
-            {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.downloads_remaining);
-            }
-        }
-
-        public static string SingularDownloadRemaining
-        {
-            get
-            {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.download_remaining);
-            }
-        }
-
-
-        [return: GeneratedEnum]
-        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
-        {
-            if (SeekerApplication.IsShuttingDown(intent))
-            {
-                this.StopSelf();
-                return StartCommandResult.NotSticky;
-            }
-            SoulSeekState.DownloadKeepAliveServiceRunning = true;
-
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
-            Notification notification = null;
-            int cnt = SeekerApplication.DL_COUNT;
-            if (cnt == -1)
-            {
-                notification = CreateNotification(this, this.GetString(Resource.String.transfers_in_progress));
-            }
-            else
-            {
-                if (cnt == 1)
-                {
-                    notification = CreateNotification(this, string.Format(SingularDownloadRemaining, 1));
-                }
-                else
-                {
-                    notification = CreateNotification(this, string.Format(PluralDownloadsRemaining, cnt));
-                }
-            }
-
-            try
-            {
-                SeekerApplication.AcquireTransferLocksAndResetTimer();
-            }
-            catch (System.Exception e)
-            {
-                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
-            }
-            //.setContentTitle(getText(R.string.notification_title))
-            //.setContentText(getText(R.string.notification_message))
-            //.setSmallIcon(R.drawable.icon)
-            //.setContentIntent(pendingIntent)
-            //.setTicker(getText(R.string.ticker_text))
-            //.build();
-            StartForeground(NOTIF_ID, notification);
-            //runs indefinitely until stop.
-
-            return StartCommandResult.Sticky;
-        }
-
-        public override void OnDestroy()
-        {
-            SoulSeekState.DownloadKeepAliveServiceRunning = false;
-            SeekerApplication.ReleaseTransferLocksIfServicesComplete();
-            //save once complete
-            TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 0);
-            base.OnDestroy();
-        }
-
-        public override void OnCreate()
-        {
-            base.OnCreate();
-        }
-    }
-
-
-    // TODOORG seperate class
-    //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
-    [Service(Name = "com.companyname.andriodapp1.UploadService")]
-    public class UploadForegroundService : Service
-    {
-        public const int NOTIF_ID = 1112;
-        public const int NonZeroRequestCode = 7671;
-        public const string CHANNEL_ID = "my channel id - upload";
-        public const string CHANNEL_NAME = "Foreground Upload Service";
-        public const string FromTransferUploadString = "FromTransfer_UPLOAD"; //todo update for onclick...
-        public override IBinder OnBind(Intent intent)
-        {
-            return null; //does not allow binding. 
-        }
-
-
-
-        public static Notification CreateNotification(Context context, String contentText)
-        {
-            Intent notifIntent = new Intent(context, typeof(MainActivity));
-            //notifIntent.
-            notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(FromTransferUploadString, 2);
-
-            PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
-        }
-
-
-        public static string PluralUploadsRemaining
-        {
-            get
-            {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.uploads_remaining);
-            }
-        }
-
-        public static string SingularUploadRemaining
-        {
-            get
-            {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.upload_remaining);
-            }
-        }
-
-
-        [return: GeneratedEnum]
-        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
-        {
-            if (SeekerApplication.IsShuttingDown(intent))
-            {
-                this.StopSelf();
-                return StartCommandResult.NotSticky;
-            }
-
-            SoulSeekState.UploadKeepAliveServiceRunning = true;
-
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
-            Notification notification = null;
-            int cnt = SeekerApplication.UPLOAD_COUNT;
-            if (cnt == -1)
-            {
-                notification = CreateNotification(this, this.GetString(Resource.String.transfers_in_progress));
-            }
-            else
-            {
-                if (cnt == 1)
-                {
-                    notification = CreateNotification(this, string.Format(SingularUploadRemaining, 1));
-                }
-                else
-                {
-                    notification = CreateNotification(this, string.Format(PluralUploadsRemaining, cnt));
-                }
-            }
-
-            try
-            {
-                SeekerApplication.AcquireTransferLocksAndResetTimer();
-            }
-            catch (System.Exception e)
-            {
-                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
-            }
-            //.setContentTitle(getText(R.string.notification_title))
-            //.setContentText(getText(R.string.notification_message))
-            //.setSmallIcon(R.drawable.icon)
-            //.setContentIntent(pendingIntent)
-            //.setTicker(getText(R.string.ticker_text))
-            //.build();
-            StartForeground(NOTIF_ID, notification);
-            //runs indefinitely until stop.
-
-            return StartCommandResult.Sticky;
-        }
-
-        public override void OnDestroy()
-        {
-            SoulSeekState.UploadKeepAliveServiceRunning = false;
-            SeekerApplication.ReleaseTransferLocksIfServicesComplete();
-
-            base.OnDestroy();
-        }
-
-        public override void OnCreate()
-        {
-            base.OnCreate();
-        }
-    }
-
-
-
-
-
-
-    //TODOORG seperate class
-    //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
-    [Service(Name = "com.companyname.andriodapp1.SeekerKeepAliveService")]
-    public class SeekerKeepAliveService : Service
-    {
-        public const int NOTIF_ID = 121;
-        public const string CHANNEL_ID = "seeker keep alive id";
-        public const string CHANNEL_NAME = "Seeker Keep Alive Service";
-
-        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_FullService = null;
-        public static PowerManager.WakeLock CpuKeepAlive_FullService = null;
-
-
-        public override IBinder OnBind(Intent intent)
-        {
-            return null; //does not allow binding. 
-        }
-
-
-
-        public static Notification CreateNotification(Context context)
-        {
-            Intent notifIntent = new Intent(context, typeof(MainActivity));
-            notifIntent.AddFlags(ActivityFlags.SingleTop);
-            PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, 0, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
-        }
-
-
-        [return: GeneratedEnum]
-        public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
-        {
-            if (SeekerApplication.IsShuttingDown(intent))
-            {
-                this.StopSelf();
-                return StartCommandResult.NotSticky;
-            }
-            MainActivity.LogInfoFirebase("keep alive service started...");
-            SoulSeekState.IsStartUpServiceCurrentlyRunning = true;
-
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
-            Notification notification = CreateNotification(this);
-
-
-            //System.Threading.Thread.Sleep(4000); // bug exposer - does help reproduce on samsung galaxy
-
-            //if (foreground)
-            //{
-            try
-            {
-                StartForeground(NOTIF_ID, notification); // this can crash if started in background... (and firebase does say they started in background)
-            }
-            catch (Exception e)
-            {
-                // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
-                //   in my case it did not.
-                SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
-                bool foreground = (SoulSeekState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
-                MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
-#if DEBUG
-                SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
-#endif
-            }
-
-            try
-            {
-                if (CpuKeepAlive_FullService != null && !CpuKeepAlive_FullService.IsHeld)
-                {
-                    CpuKeepAlive_FullService.Acquire();
-                    MainActivity.LogInfoFirebase("CpuKeepAlive acquire");
-                }
-                if (WifiKeepAlive_FullService != null && !WifiKeepAlive_FullService.IsHeld)
-                {
-                    WifiKeepAlive_FullService.Acquire();
-                    MainActivity.LogInfoFirebase("WifiKeepAlive acquire");
-                }
-            }
-            catch (System.Exception e)
-            {
-                MainActivity.LogInfoFirebase("keepalive issue: " + e.Message + e.StackTrace);
-                MainActivity.LogFirebase("keepalive issue: " + e.Message + e.StackTrace);
-            }
-            //}
-            //runs indefinitely until stop.
-
-            return StartCommandResult.Sticky;
-        }
-
-        public override void OnDestroy()
-        {
-            SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
-            if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
-            {
-                CpuKeepAlive_FullService.Release();
-                MainActivity.LogInfoFirebase("CpuKeepAlive release");
-            }
-            else if (CpuKeepAlive_FullService == null)
-            {
-                MainActivity.LogFirebase("CpuKeepAlive is null");
-            }
-            else if (!CpuKeepAlive_FullService.IsHeld)
-            {
-                MainActivity.LogFirebase("CpuKeepAlive not held");
-            }
-            if (WifiKeepAlive_FullService != null && WifiKeepAlive_FullService.IsHeld)
-            {
-                WifiKeepAlive_FullService.Release();
-                MainActivity.LogInfoFirebase("WifiKeepAlive release");
-            }
-            else if (WifiKeepAlive_FullService == null)
-            {
-                MainActivity.LogFirebase("WifiKeepAlive is null");
-            }
-            else if (!WifiKeepAlive_FullService.IsHeld)
-            {
-                MainActivity.LogFirebase("WifiKeepAlive not held");
-            }
-
-            base.OnDestroy();
-        }
-
-        public override void OnCreate()
-        {
-            base.OnCreate();
-        }
-    }
-
-
-
-
-
-
-
 
     //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
@@ -8908,8 +8308,10 @@ namespace AndriodApp1
         public const string M_TransferList_v2 = "Momento_UpdatedTransferListWithFolders";
         public const string M_TransferListUpload = "Momento_Upload_List";
         public const string M_TransferListUpload_v2 = "Momento_Upload_UpdatedTransferListWithFolders";
-        public const string M_Messages = "Momento_Messages";
-        public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames";
+        public const string M_Messages_Legacy = "Momento_Messages";
+        public const string M_Messages = "Momento_Messages_v2";
+        public const string M_UnreadMessageUsernames_Legacy = "Momento_UnreadMessageUsernames";
+        public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames_v2";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
 
         public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";
@@ -8957,16 +8359,21 @@ namespace AndriodApp1
         public const string M_FilterSticky = "Momento_FilterSticky";
         public const string M_FilterStickyString = "Momento_FilterStickyString";
         public const string M_SearchResultStyle = "Momento_SearchResStyle";
-        public const string M_UserList = "Cache_UserList";
+        public const string M_UserList_Legacy = "Cache_UserList";
+        public const string M_UserList= "Cache_UserList_v2";
         public const string M_RecentUsersList = "Momento_RecentUsersList";
-        public const string M_IgnoreUserList = "Cache_IgnoreUserList";
-        public const string M_JoinedRooms = "Cache_JoinedRooms";
+        public const string M_IgnoreUserList_Legacy = "Cache_IgnoreUserList";
+        public const string M_IgnoreUserList= "Cache_IgnoreUserList_v2";
+        public const string M_AutoJoinRooms_Legacy = "Cache_JoinedRooms";
+        public const string M_AutoJoinRooms = "Cache_JoinedRooms_v2";
         public const string M_AllowPrivateRooomInvitations = "Momento_AllowPrivateRoomInvitations";
         public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
         public const string M_ShowSmartFilters = "Momento_ShowSmartFilters";
-        public const string M_chatroomsToNotify = "Momento_chatroomsToNotify";
+        public const string M_chatroomsToNotify_Legacy = "Momento_chatroomsToNotify";
+        public const string M_chatroomsToNotify = "Momento_chatroomsToNotify_v2";
         public const string M_SearchTabsState_LEGACY = "Momento_SearchTabsState";
-        public const string M_SearchTabsState_Headers = "Momento_SearchTabsState_Headers";
+        public const string M_SearchTabsState_Headers_Legacy = "Momento_SearchTabsState_Headers";
+        public const string M_SearchTabsState_Headers= "Momento_SearchTabsState_Headers_v2";
 
         public const string M_UploadSpeed = "Momento_UploadSpeed";
         public const string M_UploadDirectoryUri = "Momento_UploadDirectoryUri";
@@ -9011,8 +8418,10 @@ namespace AndriodApp1
 
         public const string M_UserInfoBio = "Momento_UserInfoBio";
         public const string M_UserInfoPicture = "Momento_UserInfoPicture";
-        public const string M_UserNotes = "Momento_UserNotes";
-        public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts";
+        public const string M_UserNotes_Legacy = "Momento_UserNotes";
+        public const string M_UserNotes = "Momento_UserNotes_v2";
+        public const string M_UserOnlineAlerts_Legacy = "Momento_UserOnlineAlerts";
+        public const string M_UserOnlineAlerts = "Momento_UserOnlineAlerts_v2";
 
         public const string M_ManualIncompleteDirectoryUri = "Momento_ManualIncompleteDirectoryUri";
         public const string M_ManualIncompleteDirectoryUriIsFromTree = "Momento_ManualIncompleteDirectoryUriIsFromTree";
@@ -9028,6 +8437,9 @@ namespace AndriodApp1
         public const string M_SmartFilter_KeywordsOrder = "Momento_SmartFilterKeywordsOrder";
         public const string M_SmartFilter_CountsOrder = "Momento_SmartFilterCountsOrder";
         public const string M_SmartFilter_TypesOrder = "Momento_SmartFilterTypesOrder";
+
+        public const string M_wishlist_tab = "_wishlist_tab_v2";
+        public const string M_wishlist_tab_legacy = "_wishlist_tab";
 
         public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
         public static System.IO.StreamWriter DiagnosticStreamWriter = null;

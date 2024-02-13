@@ -41,8 +41,10 @@ namespace AndriodApp1.Messages
             SoulSeekState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             lock (MessageListLockObject)
             {
+                SerializationHelper.MigratedMessages(SoulSeekState.SharedPreferences, SoulSeekState.M_Messages_Legacy, SoulSeekState.M_Messages);
                 RestoreMessagesFromSharedPrefs(SoulSeekState.SharedPreferences);
             }
+            SerializationHelper.MigrateUnreadUsernames(SoulSeekState.SharedPreferences, SoulSeekState.M_UnreadMessageUsernames_Legacy, SoulSeekState.M_UnreadMessageUsernames);
             RestoreUnreadStateDict(SoulSeekState.SharedPreferences);
             IsInitialized = true;
         }
@@ -539,7 +541,6 @@ namespace AndriodApp1.Messages
 
         public static void RestoreMessagesFromSharedPrefs(ISharedPreferences sharedPrefs)
         {
-            //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
             string messages = sharedPrefs.GetString(SoulSeekState.M_Messages, string.Empty);
             if (messages == string.Empty)
             {

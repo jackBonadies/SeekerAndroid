@@ -477,7 +477,7 @@ namespace AndriodApp1.Chatroom
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
                     var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_JoinedRooms, joinedRoomsString);
+                    editor.PutString(SoulSeekState.M_AutoJoinRooms, joinedRoomsString);
                     bool success = editor.Commit();
                 }
             }
@@ -486,7 +486,7 @@ namespace AndriodApp1.Chatroom
         public static void RestoreAutoJoinRoomsFromSharedPrefs(ISharedPreferences sharedPreferences)
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
-            string joinedRooms = sharedPreferences.GetString(SoulSeekState.M_JoinedRooms, string.Empty);
+            string joinedRooms = sharedPreferences.GetString(SoulSeekState.M_AutoJoinRooms, string.Empty);
             if (joinedRooms == string.Empty)
             {
                 RootAutoJoinRoomNames = new System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>();
@@ -571,7 +571,9 @@ namespace AndriodApp1.Chatroom
 
         public static void Initialize()
         {
+            SerializationHelper.MigrateAutoJoinRoomsIfApplicable(SoulSeekState.SharedPreferences, SoulSeekState.M_AutoJoinRooms_Legacy, SoulSeekState.M_AutoJoinRooms);
             RestoreAutoJoinRoomsFromSharedPrefs(SoulSeekState.SharedPreferences);
+            SerializationHelper.MigrateNotifyRoomsIfApplicable(SoulSeekState.SharedPreferences, SoulSeekState.M_chatroomsToNotify_Legacy, SoulSeekState.M_chatroomsToNotify);
             RestoreNotifyRoomsToSharedPrefs(SoulSeekState.SharedPreferences);
             //if auto join rooms list...
             SoulSeekState.SoulseekClient.PrivateRoomMembershipAdded += SoulseekClient_PrivateRoomMembershipAdded;

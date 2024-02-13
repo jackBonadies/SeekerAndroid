@@ -1,5 +1,6 @@
 ﻿using Android.Content;
 using Android.Widget;
+using Java.IO;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -10,43 +11,7 @@ namespace AndriodApp1.Helpers
 {
     public class SearchTabHelper
     {
-        public static void SaveStateToSharedPreferencesFullLegacy()
-        {
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            string stringToSave = string.Empty;
-            //we should only save things we need for the wishlist searches.
-            List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
-            if (tabsToSave.Count == 0)
-            {
-                MainActivity.LogDebug("Nothing to Save");
-            }
-            else
-            {
-                Dictionary<int, SavedStateSearchTab> savedStates = new Dictionary<int, SavedStateSearchTab>();
-                foreach (int tabIndex in tabsToSave)
-                {
-                    savedStates.Add(tabIndex, SavedStateSearchTab.GetSavedStateFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
-                }
-                using (System.IO.MemoryStream savedStateStream = new System.IO.MemoryStream())
-                {
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    formatter.Serialize(savedStateStream, savedStates);
-                    stringToSave = Convert.ToBase64String(savedStateStream.ToArray());
-                }
-            }
-
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_SearchTabsState_LEGACY, stringToSave);
-                editor.Commit();
-            }
-
-            sw.Stop();
-            MainActivity.LogDebug("OLD STYLE: " + sw.ElapsedMilliseconds);
-        }
-
-        public static void RemoveTabFromSharedPrefs(int wishlistSearchResultsToRemove, Context c)
+        public static void RemoveTabFromSharedPrefs(int wishlistSearchResultsToRemove, Context c, bool legacy = false)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -55,7 +20,7 @@ namespace AndriodApp1.Helpers
             {
                 wishlist_dir.Mkdir();
             }
-            string name = System.Math.Abs(wishlistSearchResultsToRemove) + "_wishlist_tab";
+            string name = System.Math.Abs(wishlistSearchResultsToRemove) + (legacy ? SoulSeekState.M_wishlist_tab_legacy : SoulSeekState.M_wishlist_tab);
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
             if (!fileForOurInternalStorage.Delete())
             {
@@ -94,7 +59,7 @@ namespace AndriodApp1.Helpers
         /// So this method probably isnt needed.
         /// </summary>
         /// <param name="c"></param>
-        public static void RestoreAllSearchTabsFromDisk(Context c)
+        public static void RestoreAllSearchTabsFromDisk(Context c) // TODO MIGRATE ALL
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
             string stringToSave = string.Empty;
@@ -118,6 +83,7 @@ namespace AndriodApp1.Helpers
 
         public static void SaveSearchResultsToDisk(int wishlistSearchResultsToSave, Context c)
         {
+            // todo lock file? or always on UI thread?
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
@@ -125,20 +91,14 @@ namespace AndriodApp1.Helpers
             {
                 wishlist_dir.Mkdir();
             }
-            string name = System.Math.Abs(wishlistSearchResultsToSave) + "_wishlist_tab";
+            string name = System.Math.Abs(wishlistSearchResultsToSave) + SoulSeekState.M_wishlist_tab;
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
             System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 
-
-            using (System.IO.MemoryStream searchRes = new System.IO.MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(searchRes, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses);
-                byte[] arr = searchRes.ToArray();
-                outputStream.Write(arr, 0, arr.Length);
-                outputStream.Flush();
-                outputStream.Close();
-            }
+            var arr = SerializationHelper.SaveSearchResponsesToByteArray(SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses);
+            outputStream.Write(arr, 0, arr.Length);
+            outputStream.Flush();
+            outputStream.Close();
 
             sw.Stop();
             MainActivity.LogDebug("HEADERS - Save Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses.Count);
@@ -147,6 +107,8 @@ namespace AndriodApp1.Helpers
 
         public static void RestoreSearchResultsFromDisk(int wishlistSearchResultsToRestore, Context c)
         {
+            // todo lock file? or always on UI thread?
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, "wishlist_dir");
@@ -154,8 +116,11 @@ namespace AndriodApp1.Helpers
             //{
             //    wishlist_dir.Mkdir();
             //}
-            string name = System.Math.Abs(wishlistSearchResultsToRestore) + "_wishlist_tab";
+            string name = System.Math.Abs(wishlistSearchResultsToRestore) + SoulSeekState.M_wishlist_tab;
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
+
+
+            // TODO way to detect legacy
 
             //there are two cases.
             //  1) we imported the term.  In that case there are no results yet as it hasnt been ran.  Which is fine.  
@@ -194,19 +159,15 @@ namespace AndriodApp1.Helpers
             {
                 MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
 
-                using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
-                {
-                    inputStream.CopyTo(ms);
-                    ms.Position = 0;
-                    MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
-                    BinaryFormatter formatter = new BinaryFormatter();
-                    //SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].SearchResponses = formatter.Deserialize(ms) as List<SearchResponse>;
-                    SavedStateSearchTab tab = new SavedStateSearchTab();
-                    tab.searchResponses = formatter.Deserialize(ms) as List<SearchResponse>;
-                    SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
 
-                    //SearchTabCollection[pair.Key] = SavedStateSearchTab.GetTabFromSavedState(pair.Value);
-                }
+                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
+
+                SavedStateSearchTab tab = new SavedStateSearchTab();
+                tab.searchResponses = restoredSearchResponses;
+
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+
             }
 
             sw.Stop();
