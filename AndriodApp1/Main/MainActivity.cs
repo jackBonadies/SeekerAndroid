@@ -1281,11 +1281,35 @@ namespace AndriodApp1
         }
 
 
-        // TODO org models
+        // TODO org models  OR move into Sharing Folder
         public class CachedParseResults
         {
+             public CachedParseResults(
+                Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys, 
+                int directoryCount, 
+                BrowseResponse browseResponse, 
+                List<Directory> browseResponseHiddenPortion, 
+                List<Tuple<string, string>> friendlyDirNameToUriMapping, 
+                Dictionary<string, List<int>> tokenIndex, 
+                Dictionary<int, string> helperIndex, 
+                int nonHiddenFileCount)
+            {
+                this.keys = keys;
+                this.directoryCount = directoryCount;
+                this.browseResponse = browseResponse;
+                this.browseResponseHiddenPortion = browseResponseHiddenPortion;
+                this.friendlyDirNameToUriMapping = friendlyDirNameToUriMapping;
+                this.tokenIndex = tokenIndex;
+                this.helperIndex = helperIndex;
+                this.nonHiddenFileCount = nonHiddenFileCount;
+            }
+
+            public CachedParseResults()
+            {
+            }
+
             public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys = null;
-            public int direcotryCount = -1;
+            public int directoryCount = -1;
             public BrowseResponse browseResponse = null;
             public List<Soulseek.Directory> browseResponseHiddenPortion = null;
             public List<Tuple<string, string>> friendlyDirNameToUriMapping = null;
@@ -1294,24 +1318,23 @@ namespace AndriodApp1
             public int nonHiddenFileCount = -1;
         }
 
-        public static void ClearParsedCacheResults()
+        public static void ClearLegacyParsedCacheResults()
         {
             try
             {
                 lock (SHARED_PREF_LOCK)
                 {
                     var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_CACHE_stringUriPairs, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_browseResponse, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_auxDupList, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_stringUriPairs_v2, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_stringUriPairs_v3, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_browseResponse_v2, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
-                    editor.PutString(SoulSeekState.M_CACHE_tokenIndex_v2, string.Empty);
-                    editor.PutInt(SoulSeekState.M_CACHE_nonHiddenFileCount_v3, 0);
-                    editor.PutString(SoulSeekState.M_CACHE_intHelperIndex_v2, string.Empty);
+                    editor.Remove(SoulSeekState.M_CACHE_stringUriPairs);
+                    editor.Remove(SoulSeekState.M_CACHE_browseResponse);
+                    editor.Remove(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping);
+                    editor.Remove(SoulSeekState.M_CACHE_auxDupList);
+                    editor.Remove(SoulSeekState.M_CACHE_stringUriPairs_v2);
+                    editor.Remove(SoulSeekState.M_CACHE_stringUriPairs_v3);
+                    editor.Remove(SoulSeekState.M_CACHE_browseResponse_v2);
+                    editor.Remove(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2);
+                    editor.Remove(SoulSeekState.M_CACHE_tokenIndex_v2);
+                    editor.Remove(SoulSeekState.M_CACHE_intHelperIndex_v2);
                     editor.Commit();
                 }
             }
@@ -1322,10 +1345,9 @@ namespace AndriodApp1
             }
         }
 
-        public static CachedParseResults GetCachedParseResults()
+
+        public static CachedParseResults GetLegacyCachedParseResult()
         {
-
-
             bool convertFrom2to3 = false;
 
             string s_stringUriPairs = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_stringUriPairs_v3, string.Empty);
@@ -1341,6 +1363,7 @@ namespace AndriodApp1
             int nonHiddenFileCount = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_CACHE_nonHiddenFileCount_v3, -1);
             string s_tokenIndex = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_tokenIndex_v2, string.Empty);
             string s_BrowseResponse_hiddenPortion = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_CACHE_browseResponse_hidden_portion, string.Empty); //this one can be empty.
+
             if (s_intHelperIndex == string.Empty || s_tokenIndex == string.Empty || s_stringUriPairs == string.Empty || s_BrowseResponse == string.Empty || s_FriendlyDirNameMapping == string.Empty)
             {
                 return null;
@@ -1350,9 +1373,6 @@ namespace AndriodApp1
                 //deserialize..
                 try
                 {
-
-
-
                     System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                     sw.Start();
                     byte[] b_stringUriPairs = Convert.FromBase64String(s_stringUriPairs);
@@ -1422,7 +1442,7 @@ namespace AndriodApp1
 
 
                         cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
-                        cachedParseResults.direcotryCount = cachedParseResults.browseResponse.DirectoryCount;
+                        cachedParseResults.directoryCount = cachedParseResults.browseResponse.DirectoryCount;
                         cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
                         cachedParseResults.tokenIndex = binaryFormatter.Deserialize(m_tokenIndex) as Dictionary<string, List<int>>;
                         cachedParseResults.nonHiddenFileCount = nonHiddenFileCount;
@@ -2077,19 +2097,27 @@ namespace AndriodApp1
                 CachedParseResults cachedParseResults = null;
                 if (checkCache)
                 {
-                    cachedParseResults = GetCachedParseResults();
+                    // migrate if applicable
+                    cachedParseResults = GetLegacyCachedParseResult();
+                    if(cachedParseResults != null)
+                    {
+                        StoreCachedParseResults(SoulSeekState.ActiveActivityRef, cachedParseResults);
+                        ClearLegacyParsedCacheResults();
+                    }
+
+                    cachedParseResults = GetCachedParseResults(SoulSeekState.ActiveActivityRef);
                 }
 
                 if (cachedParseResults == null)
                 {
-                    int directoryCount = 0;
                     System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                     s.Start();
-                    Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> stringUriPairs = null;
+                    Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys = null;
                     BrowseResponse browseResponse = null;
                     List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
                     List<Soulseek.Directory> hiddenDirectories = null;
-                    Dictionary<int, string> index = null;
+                    Dictionary<int, string> helperIndex = null;
+                    int directoryCount = 0;
 
 
                     //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
@@ -2101,25 +2129,25 @@ namespace AndriodApp1
                     }
                     if (SoulSeekState.PreOpenDocumentTree() || UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        stringUriPairs = ParseSharedDirectoryLegacy(null, SoulSeekState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index, out hiddenDirectories);
+                        keys = ParseSharedDirectoryLegacy(null, SoulSeekState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out helperIndex, out hiddenDirectories);
                     }
                     else
                     {
-                        stringUriPairs = ParseSharedDirectoryFastDocContract(null, SoulSeekState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out index, out hiddenDirectories);
+                        keys = ParseSharedDirectoryFastDocContract(null, SoulSeekState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out helperIndex, out hiddenDirectories);
                     }
 
-                    int nonHiddenCountForServer = stringUriPairs.Count(pair1 => !pair1.Value.Item5);
+                    int nonHiddenCountForServer = keys.Count(pair1 => !pair1.Value.Item5);
                     MainActivity.LogDebug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
                     SoulSeekState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
                     s.Stop();
-                    MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds", stringUriPairs.Keys.Count, s.ElapsedMilliseconds));
+                    MainActivity.LogDebug(string.Format("{0} Files parsed in {1} milliseconds", keys.Keys.Count, s.ElapsedMilliseconds));
                     s.Reset();
                     s.Start();
 
                     Dictionary<string, List<int>> tokenIndex = new Dictionary<string, List<int>>();
-                    var reversed = index.ToDictionary(x => x.Value, x => x.Key);
-                    foreach (string presentableName in stringUriPairs.Keys)
+                    var reversed = helperIndex.ToDictionary(x => x.Value, x => x.Key);
+                    foreach (string presentableName in keys.Keys)
                     {
                         string searchableName = CommonHelpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
@@ -2153,70 +2181,19 @@ namespace AndriodApp1
                     //s.Stop();
                     //LogDebug("ParseSharedDirectory: " + s.ElapsedMilliseconds);
 
-                    //put into cache.
-                    using (System.IO.MemoryStream bResponsememoryStream = new System.IO.MemoryStream())
-                    using (System.IO.MemoryStream bHiddenPortion = new System.IO.MemoryStream())
-                    using (System.IO.MemoryStream stringUrimemoryStream = new System.IO.MemoryStream())
-                    using (System.IO.MemoryStream friendlyDirNamememoryStream = new System.IO.MemoryStream())
-                    using (System.IO.MemoryStream intIndexStream = new System.IO.MemoryStream())
-                    using (System.IO.MemoryStream tokenIndexStream = new System.IO.MemoryStream())
-                    {
-                        BinaryFormatter formatter = new BinaryFormatter();
-                        formatter.Serialize(bResponsememoryStream, browseResponse);
+                    var newCachedResults = new CachedParseResults(
+                        keys,
+                        browseResponse.DirectoryCount, // todo?
+                        browseResponse,
+                        hiddenDirectories,
+                        dirMappingFriendlyNameToUri,
+                        tokenIndex,
+                        helperIndex,
+                        nonHiddenCountForServer);
+                    StoreCachedParseResults(SoulSeekState.ActiveActivityRef, newCachedResults);
 
-                        MainActivity.LogDebug(string.Format("Browse Response is {0} bytes", bResponsememoryStream.Length));
+                    UploadDirectoryManager.SaveToSharedPreferences(SoulSeekState.SharedPreferences); //TODO migrate these if applicable...
 
-                        string bResponse = Convert.ToBase64String(bResponsememoryStream.ToArray());
-
-                        formatter.Serialize(bHiddenPortion, hiddenDirectories);
-                        MainActivity.LogDebug(string.Format("Browse Response (hidden portion only) is {0} bytes", bHiddenPortion.Length));
-
-                        string bHiddenPortionResponse = Convert.ToBase64String(bHiddenPortion.ToArray());
-
-                        formatter.Serialize(stringUrimemoryStream, stringUriPairs);
-                        string bstringUriPairs = Convert.ToBase64String(stringUrimemoryStream.ToArray());
-
-                        MainActivity.LogDebug(string.Format("File Dictionary is {0} bytes", stringUrimemoryStream.Length));
-
-                        formatter.Serialize(friendlyDirNamememoryStream, dirMappingFriendlyNameToUri);
-                        string bfriendlyDirName = Convert.ToBase64String(friendlyDirNamememoryStream.ToArray());
-
-                        MainActivity.LogDebug(string.Format("Directory Dictionary is {0} bytes", friendlyDirNamememoryStream.Length));
-
-                        formatter.Serialize(intIndexStream, index);
-                        string bIntIndex = Convert.ToBase64String(intIndexStream.ToArray());
-
-                        MainActivity.LogDebug(string.Format("int (helper) index is {0} bytes", intIndexStream.Length));
-
-                        formatter.Serialize(tokenIndexStream, tokenIndex);
-                        string bTokenIndex = Convert.ToBase64String(tokenIndexStream.ToArray());
-
-                        MainActivity.LogDebug(string.Format("token index is {0} bytes", tokenIndexStream.Length));
-
-
-                        lock (SHARED_PREF_LOCK)
-                        {
-                            var editor = SoulSeekState.SharedPreferences.Edit();
-                            editor.PutString(SoulSeekState.M_CACHE_stringUriPairs_v3, bstringUriPairs);
-                            editor.PutString(SoulSeekState.M_CACHE_browseResponse_v2, bResponse);
-                            editor.PutString(SoulSeekState.M_CACHE_browseResponse_hidden_portion, bHiddenPortionResponse);
-                            editor.PutString(SoulSeekState.M_CACHE_friendlyDirNameToUriMapping_v2, bfriendlyDirName);
-                            editor.PutString(SoulSeekState.M_CACHE_intHelperIndex_v2, bIntIndex);
-                            editor.PutString(SoulSeekState.M_CACHE_tokenIndex_v2, bTokenIndex);
-                            editor.PutInt(SoulSeekState.M_CACHE_nonHiddenFileCount_v3, nonHiddenCountForServer);
-                            //editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
-                            //editor.PutBoolean(SoulSeekState.M_UploadDirectoryUriIsFromTree, SoulSeekState.UploadDataDirectoryUriIsFromTree);
-
-
-                            //TODO TODO save upload dirs
-
-                            //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
-                            //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
-                            editor.Commit();
-
-                            UploadDirectoryManager.SaveToSharedPreferences(SoulSeekState.SharedPreferences);
-                        }
-                    }
 
                     ////5 searches a second = 18,000 per hour.
                     //System.Random rand = new System.Random();
@@ -2258,8 +2235,10 @@ namespace AndriodApp1
                     //sw.Stop();
                     //MainActivity.LogDebug(string.Format("term index search .5 million: {0}", sw.ElapsedMilliseconds));
 
+                    // TODO we do not save the directoryCount ?? and so subsequent times its just browseResponse.Count?
+                    // would it ever be different?
 
-                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(stringUriPairs, directoryCount, browseResponse, dirMappingFriendlyNameToUri, tokenIndex, index, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
+                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(keys, directoryCount, browseResponse, dirMappingFriendlyNameToUri, tokenIndex, helperIndex, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
                     SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer != -1 ? nonHiddenCountForServer : sharedFileCache.FileCount));
                     SoulSeekState.SharedFileCache = sharedFileCache;
 
@@ -2308,8 +2287,8 @@ namespace AndriodApp1
                     }
                     else
                     {
-                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys,
-                            cachedParseResults.direcotryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping,
+                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys, // todo new constructor
+                            cachedParseResults.directoryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping,
                             cachedParseResults.tokenIndex, cachedParseResults.helperIndex, cachedParseResults.browseResponseHiddenPortion,
                             cachedParseResults.nonHiddenFileCount);
 
@@ -2382,6 +2361,120 @@ namespace AndriodApp1
             return success;
             //SoulSeekState.SoulseekClient.SearchResponseDelivered += SoulseekClient_SearchResponseDelivered;
             //SoulSeekState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
+        }
+
+        private static void SaveToDisk(Context c, byte[] data, Java.IO.File dir, string name)
+        {
+            using (Java.IO.File fileForOurInternalStorage = new Java.IO.File(dir, name))
+            {
+                using (System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w"))
+                {
+                    outputStream.Write(data, 0, data.Length);
+                    outputStream.Flush();
+                    outputStream.Close();
+                }
+            }
+        }
+
+        static T deserializeFromDisk<T>(Context c, Java.IO.File dir, string filename, MessagePack.MessagePackSerializerOptions options = null) where T : class
+        {
+            Java.IO.File fileForOurInternalStorage = new Java.IO.File(dir, filename);
+
+            if (!fileForOurInternalStorage.Exists())
+            {
+                return null;
+            }
+
+            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
+            {
+                return MessagePack.MessagePackSerializer.Deserialize<T>(inputStream, options);
+            }
+        }
+
+        private static CachedParseResults GetCachedParseResults(Context c)
+        {
+            Java.IO.File fileshare_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_fileshare_cache_dir);
+            if (!fileshare_dir.Exists())
+            {
+                return null;
+            }
+
+            var helperIndex = deserializeFromDisk<Dictionary<int, string>>(c, fileshare_dir, SoulSeekState.M_HelperIndex_Filename);
+            var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(c, fileshare_dir, SoulSeekState.M_TokenIndex_Filename);
+            var keys = deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(c, fileshare_dir, SoulSeekState.M_Keys_Filename);
+            var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, SoulSeekState.M_BrowseResponse_Filename);
+            var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, SoulSeekState.M_BrowseResponse_Hidden_Filename);
+            var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir, SoulSeekState.M_FriendlyDirNameToUri_Filename);
+
+            int nonHiddenFileCount = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_CACHE_nonHiddenFileCount_v3, -1);
+
+            var cachedParseResults = new CachedParseResults(
+                keys,
+                browseResponse.DirectoryCount, //todo
+                browseResponse,
+                browseResponseHidden,
+                friendlyDirToUri,
+                tokenIndex,
+                helperIndex,
+                nonHiddenFileCount);
+            return cachedParseResults;
+        }
+
+        public static void ClearParsedCacheResults(Context c)
+        {
+            Java.IO.File fileshare_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_fileshare_cache_dir);
+            if (!fileshare_dir.Exists())
+            {
+                return;
+            }
+            foreach(var file in fileshare_dir.ListFiles())
+            {
+                file.Delete();
+            }
+        }
+
+        private static void StoreCachedParseResults(Context c, CachedParseResults cachedParseResults)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            Java.IO.File fileShareCachedDir = new Java.IO.File(c.FilesDir, SoulSeekState.M_fileshare_cache_dir);
+            if (!fileShareCachedDir.Exists())
+            {
+                fileShareCachedDir.Mkdir();
+            }
+
+            byte[] data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.helperIndex);
+            SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_HelperIndex_Filename);
+
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.tokenIndex);
+            SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_TokenIndex_Filename);
+
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.keys); //TODO directoryCount
+            SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_Keys_Filename);
+
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponse, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_BrowseResponse_Filename);
+
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_BrowseResponse_Hidden_Filename);
+
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
+            SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_FriendlyDirNameToUri_Filename);
+
+            lock (SHARED_PREF_LOCK)
+            {
+                var editor = SoulSeekState.SharedPreferences.Edit();
+                editor.PutInt(SoulSeekState.M_CACHE_nonHiddenFileCount_v3, cachedParseResults.nonHiddenFileCount);
+                //editor.PutString(SoulSeekState.M_UploadDirectoryUri, SoulSeekState.UploadDataDirectoryUri);
+                //editor.PutBoolean(SoulSeekState.M_UploadDirectoryUriIsFromTree, SoulSeekState.UploadDataDirectoryUriIsFromTree);
+
+
+                //TODO TODO save upload dirs ---- do this now might as well....
+
+                //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
+                //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
+                editor.Commit();
+            }
         }
 
         private static string ShowCodePoints(string str)
@@ -2547,7 +2640,7 @@ namespace AndriodApp1
 
         public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
         public const int SETTINGS_EXTERNAL = 0x430;
-        public const int DEFAULT_SEARCH_RESULTS = 100;
+        public const int DEFAULT_SEARCH_RESULTS = 250;
         private const int WRITE_EXTERNAL = 9999;
         private const int NEW_WRITE_EXTERNAL = 0x428;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
@@ -2908,7 +3001,7 @@ namespace AndriodApp1
             //if we have all the conditions to share, then set sharing up.
             if (MeetsSharingConditions() && !SoulSeekState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
             {
-                SetUpSharing();
+                SetUpSharing(); //TODO why is this tied to the MainActivity !!
             }
             else if (SoulSeekState.NumberOfSharedDirectoriesIsStale)
             {
@@ -7271,6 +7364,7 @@ namespace AndriodApp1
             }
             return true;
         }
+
     }
 
     public class DownloadAddedEventArgs : EventArgs
@@ -8301,6 +8395,9 @@ namespace AndriodApp1
         //    DownloadAdded(null,new DownloadAddedEventArgs(dlInfo));
         //}
 
+
+        //TODOORG Serialization Consts
+
         public const string M_CurrentlyLoggedIn = "Momento_LoggedIn";
         public const string M_Username = "Momento_Username";
         public const string M_Password = "Momento_Password";
@@ -8384,7 +8481,8 @@ namespace AndriodApp1
         public const string M_LastSetUpnpRuleTicks = "Momento_LastSetUpnpRuleTicks";
         public const string M_LifetimeSeconds = "Momento_LifetimeSeconds";
         public const string M_LastSetLocalIP = "Momento_LastSetLocalIP";
-        public const string M_SharedDirectoryInfo = "Momento_SharedDirectoryInfo";
+        public const string M_SharedDirectoryInfo_Legacy = "Momento_SharedDirectoryInfo";
+        public const string M_SharedDirectoryInfo = "Momento_SharedDirectoryInfo_v2";
 
 
         public const string M_CACHE_stringUriPairs = "Cache_stringUriPairs";
@@ -8441,6 +8539,18 @@ namespace AndriodApp1
         public const string M_wishlist_tab = "_wishlist_tab_v2";
         public const string M_wishlist_tab_legacy = "_wishlist_tab";
         public const string M_wishlist_directory = "wishlist_dir";
+
+        public const string M_fileshare_cache_dir = "fileshare_cache_dir";
+
+
+        public const string M_HelperIndex_Filename = "helperindex.mpk";
+        public const string M_TokenIndex_Filename = "tokenindex.mpk";
+        public const string M_Keys_Filename = "keys.mpk";
+        public const string M_BrowseResponse_Filename = "browseresponse.mpk";
+        public const string M_BrowseResponse_Hidden_Filename = "browseresponse_hidden.mpk";
+        public const string M_FriendlyDirNameToUri_Filename = "friendlydirtouri.mpk";
+
+        //TODOORG end serialization consts.
 
         public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
         public static System.IO.StreamWriter DiagnosticStreamWriter = null;

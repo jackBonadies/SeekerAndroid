@@ -59,7 +59,7 @@
     /// </summary>
     public class SharedFileCache : ISharedFileCache
     {
-        
+        // TODO constructor that takes parsed results....
 
         public SharedFileCache(Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>, bool, bool>> fullInfo, 
             int direcotryCount, BrowseResponse browseResponse, List<Tuple<string, string>> friendlyDirNameToUriMapping, 

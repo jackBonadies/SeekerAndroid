@@ -3313,7 +3313,8 @@ namespace AndriodApp1
                     SoulSeekState.IsParsing = false;
                     //SoulSeekState.UploadDataDirectoryUri = null;
                     //SoulSeekState.UploadDataDirectoryUriIsFromTree = true;
-                    MainActivity.ClearParsedCacheResults();
+                    MainActivity.ClearLegacyParsedCacheResults();
+                    MainActivity.ClearParsedCacheResults(SoulSeekState.ActiveActivityRef);
                     MainActivity.SetUnsetSharingBasedOnConditions(true);
                     if (!(e is MainActivity.DirectoryAccessFailure))
                     {

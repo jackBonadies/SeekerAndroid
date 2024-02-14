@@ -27,7 +27,7 @@ namespace AndriodApp1
     {
         
         private static readonly bool useBinarySerializer = false;
-        private static bool isBinaryFormatterSerialized(string base64string) // TODO is it better to just consider the old keys legacy, read them and then convert them to new keys
+        private static bool isBinaryFormatterSerialized(string base64string) 
         {
             return base64string.StartsWith(@"AAEAAAD/////");
         }
@@ -407,6 +407,21 @@ namespace AndriodApp1
                 RemoveOldKey(sharedPreferences, oldKey);
                 return true;
             }
+            return false;
+        }
+
+        public static bool MigrateUploadDirectoryInfoIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                string sharedDirInfo = sharedPreferences.GetString(SoulSeekState.M_SharedDirectoryInfo, string.Empty);
+                var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo, true);
+                var newString = SerializationHelper.SerializeToString(infos);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            
             return false;
         }
     }

@@ -2049,6 +2049,7 @@ namespace AndriodApp1
 
 
 
+                SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, SoulSeekState.M_SharedDirectoryInfo_Legacy, SoulSeekState.M_SharedDirectoryInfo);
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
