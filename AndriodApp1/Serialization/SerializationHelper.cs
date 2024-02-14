@@ -259,7 +259,7 @@ namespace AndriodApp1
 
         public static byte[] SaveSearchResponsesToByteArray(List<SearchResponse> responses)
         {
-            var byteArray = MessagePack.MessagePackSerializer.Serialize(responses, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            var byteArray = MessagePack.MessagePackSerializer.Serialize(responses, options: MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Options);
             return byteArray;
         }
 
@@ -272,7 +272,7 @@ namespace AndriodApp1
             }
             else
             {
-                return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+                return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Options);
             }
         }
 
@@ -414,7 +414,7 @@ namespace AndriodApp1
         {
             if (AnythingToMigrate(sharedPreferences, oldKey))
             {
-                string sharedDirInfo = sharedPreferences.GetString(SoulSeekState.M_SharedDirectoryInfo, string.Empty);
+                string sharedDirInfo = sharedPreferences.GetString(oldKey, string.Empty);
                 var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo, true);
                 var newString = SerializationHelper.SerializeToString(infos);
                 SaveToSharedPrefs(sharedPreferences, newKey, newString);
@@ -476,8 +476,6 @@ namespace AndriodApp1
             var time44 = sw.ElapsedMilliseconds;
 
             log.Error("SEEKER", $"TIMER json Deser {time4}");
-
-
 
             Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
             var savedStateSearchTab = new SavedStateSearchTabHeader();
@@ -558,6 +556,19 @@ namespace AndriodApp1
 
             var userSer = SerializationHelper.SaveUserListToString(list);
             var restoredList = SerializationHelper.RestoreUserListFromString(userSer);
+
+
+            var searchResponsesBytes = SerializationHelper.SaveSearchResponsesToByteArray(
+                new List<SearchResponse>()
+                    { 
+                        new SearchResponse("username", 2, 3, 567, 45L, null, null) 
+                    }
+                );
+
+            var ms = new MemoryStream();
+            ms.Write(searchResponsesBytes);
+            ms.Position = 0;
+            var searchRes = SerializationHelper.RestoreSearchResponsesFromStream(ms);
         }
 
     }

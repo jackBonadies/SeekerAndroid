@@ -104,9 +104,7 @@ namespace AndriodApp1.Helpers
                     outputStream.Write(arr, 0, arr.Length);
                     outputStream.Flush();
                     outputStream.Close();
-
                     sw.Stop();
-                    MainActivity.LogDebug("HEADERS - Save Search Results: " + sw.ElapsedMilliseconds + " count " + SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses.Count);
                 }
             }
         }
@@ -141,7 +139,7 @@ namespace AndriodApp1.Helpers
 
                 MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
 
-                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
+                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream, legacy);
                 return restoredSearchResponses;
             }
         }
