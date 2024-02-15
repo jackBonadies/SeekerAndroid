@@ -20,6 +20,10 @@ using AndroidX.Core.Content;
 using Java.Security.Interfaces;
 using Java.IO;
 using AndriodApp1.Helpers;
+using MessagePack;
+using MessagePack.Formatters;
+using MessagePack.Resolvers;
+using AndriodApp1.Serialization;
 
 namespace AndriodApp1
 {
@@ -27,6 +31,47 @@ namespace AndriodApp1
     {
         
         private static readonly bool useBinarySerializer = false;
+
+        public static MessagePackSerializerOptions BrowseResponseOptions
+        {
+            get
+            {
+                var browseResponseResolver = MessagePack.Resolvers.CompositeResolver.Create(
+                    new IMessagePackFormatter[]
+                    {
+                        new BrowseResponseFormatter(),
+                        new DirectoryItemFormatter(),
+                        new FileItemFormatter(),
+                        MessagePack.Formatters.TypelessFormatter.Instance
+
+                    },
+                    new IFormatterResolver[]
+                    {
+                        ContractlessStandardResolver.Instance
+                    });
+                return MessagePackSerializerOptions.Standard.WithResolver(browseResponseResolver);
+            }
+        }
+
+        public static MessagePackSerializerOptions SearchResponseOptions
+        {
+            get
+            {
+                var searchResponseResolver = MessagePack.Resolvers.CompositeResolver.Create(
+                    new IMessagePackFormatter[]
+                    {
+                        new SearchResponseFormatter(),
+                        new FileItemFormatter(),
+                        MessagePack.Formatters.TypelessFormatter.Instance
+                    },
+                    new IFormatterResolver[]
+                    {
+                        ContractlessStandardResolver.Instance
+                    });
+                return MessagePackSerializerOptions.Standard.WithResolver(searchResponseResolver);
+            }
+        }
+
         private static bool isBinaryFormatterSerialized(string base64string) 
         {
             return base64string.StartsWith(@"AAEAAAD/////");
@@ -36,7 +81,7 @@ namespace AndriodApp1
         {
             if(useBinarySerializer)
             {
-                return BinarySerializeToString<T>(objectToSerialize);
+                return LegacyBinarySerializeToString<T>(objectToSerialize);
             }
             else
             {
@@ -75,13 +120,13 @@ namespace AndriodApp1
             return System.Text.Json.JsonSerializer.Serialize<T>(objectToSerialize, options);
         }
 
-        public static string BinarySerializeToString<T>(T objectToSerialize)
+        public static string LegacyBinarySerializeToString<T>(T objectToSerialize)
         {
-            using (System.IO.MemoryStream userNotesStream = new System.IO.MemoryStream())
+            using (System.IO.MemoryStream memStream = new System.IO.MemoryStream())
             {
                 BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(userNotesStream, objectToSerialize);
-                return Convert.ToBase64String(userNotesStream.ToArray());
+                formatter.Serialize(memStream, objectToSerialize);
+                return Convert.ToBase64String(memStream.ToArray());
             }
         }
 
@@ -259,7 +304,8 @@ namespace AndriodApp1
 
         public static byte[] SaveSearchResponsesToByteArray(List<SearchResponse> responses)
         {
-            var byteArray = MessagePack.MessagePackSerializer.Serialize(responses, options: MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Options);
+
+            var byteArray = MessagePack.MessagePackSerializer.Serialize(responses, options: SearchResponseOptions);
             return byteArray;
         }
 
@@ -272,7 +318,7 @@ namespace AndriodApp1
             }
             else
             {
-                return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Options);
+                return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: SearchResponseOptions);
             }
         }
 
@@ -424,152 +470,5 @@ namespace AndriodApp1
             
             return false;
         }
-    }
-
-
-    /// <summary>
-    /// TODO move PreferenceHelper to Common. Requires Moving UserListItem to common and then fixing the binary resolver
-    /// </summary>
-    public class SerializationHelperTests
-    {
-        public static void Test()
-        {
-            List<Message> messages = new List<Message>();
-            for(int i = 0; i < 100; i++)
-            {
-                messages.Add(new Message($"myusername{i}", i, true, DateTime.Now, DateTime.UtcNow, $"my message test {i}", false));
-            }
-
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-            var test = SerializationHelper.BinarySerializeToString(messages);
-            var time1 = sw.ElapsedMilliseconds;
-            log.Error("SEEKER", $"TIMER Binary Native Ser {time1}");
-
-            sw.Start();
-            var obj12 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Message>>(test);
-            var time132 = sw.ElapsedMilliseconds;
-            log.Error("SEEKER", $"TIMER Binary Native Deser {time132}");
-
-            sw.Restart();
-            var test1 = MessagePack.MessagePackSerializer.Serialize(messages);
-            var finalString = Convert.ToBase64String(test1);
-            var time2 = sw.ElapsedMilliseconds;
-            log.Error("SEEKER", $"TIMER message pack Ser {time2}");
-
-            sw.Restart();
-            var obj9 = MessagePack.MessagePackSerializer.Deserialize<List<Message>>(test1);
-            var time42 = sw.ElapsedMilliseconds;
-            log.Error("SEEKER", $"TIMER message pack Deser {time42}");
-
-            // typeless serializer..
-
-            sw.Restart();
-            var test3 = SerializationHelper.JsonSerializeToString(messages);
-            var time4 = sw.ElapsedMilliseconds;
-
-            //var result13 = MessagePack.MessagePackSerializer.Deserialize<List<Message>>(test1);
-            log.Error("SEEKER", $"TIMER json Ser {time4}");
-
-            sw.Restart();
-            var obj4 = SerializationHelper.DeserializeFromString<List<Message>>(test3);
-            var time44 = sw.ElapsedMilliseconds;
-
-            log.Error("SEEKER", $"TIMER json Deser {time4}");
-
-            Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
-            var savedStateSearchTab = new SavedStateSearchTabHeader();
-            savedStateSearchTab.GetType().GetProperty("LastSearchResultsCount").SetValue(savedStateSearchTab, 123);
-            savedStateSearchTab.GetType().GetProperty("LastSearchTerm").SetValue(savedStateSearchTab, "fav artist");
-            savedStateSearchTab.GetType().GetProperty("LastRanTime").SetValue(savedStateSearchTab, 123000000L);
-            savedStates[1] = savedStateSearchTab;
-
-            var ser12 = SerializationHelper.SaveSavedStateHeaderDictToString(savedStates);
-            var restored12 = SerializationHelper.RestoreSavedStateHeaderDictFromString(ser12);
-
-            Debug.Assert(savedStates[1].LastSearchTerm == restored12[1].LastSearchTerm);
-
-
-            var uploadDir = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
-            uploadDir.ErrorState = UploadDirectoryError.CannotWrite;
-            uploadDir.IsSubdir = true;
-
-            List<UploadDirectoryInfo> uploadDirectoryInfos = new List<UploadDirectoryInfo>();
-            uploadDirectoryInfos.Add(uploadDir);
-
-            var serInfos = SerializationHelper.SerializeToString(uploadDirectoryInfos);
-            var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(serInfos);
-
-            Debug.Assert(infos.Count == uploadDirectoryInfos.Count);
-            Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirectoryInfos[0].UploadDataDirectoryUri);
-            Debug.Assert(infos[0].ErrorState != uploadDirectoryInfos[0].ErrorState);
-
-            ConcurrentDictionary<string, byte> unreadUsernames = new ConcurrentDictionary<string, byte>();
-            unreadUsernames["testuser1"] = 0;
-            unreadUsernames["testuser2"] = 0;
-            unreadUsernames["testuser3"] = 1;
-            unreadUsernames["testuser4"] = 0;
-
-            var ser = SerializationHelper.SaveUnreadUsernamesToString(unreadUsernames);
-            var restored = SerializationHelper.RestoreUnreadUsernamesFromString(ser);
-
-            Debug.Assert(unreadUsernames.Count == restored.Count);
-            Debug.Assert(unreadUsernames["testuser1"] == restored["testuser1"]);
-
-            ConcurrentDictionary<string, List<string>> notifyRooms = new ConcurrentDictionary<string, List<string>>();
-            notifyRooms["testuser1"] = new List<string>() { "music", "music2", "music3" };
-            notifyRooms["testuser2"] = new List<string>() { "musically", "musically2", "musically3" };
-
-            var ser1 = SerializationHelper.SaveNotifyRoomsListToString(notifyRooms);
-            var restored1 = SerializationHelper.RestoreNotifyRoomsListFromString(ser1);
-
-            Debug.Assert(restored1.Count == notifyRooms.Count);
-            Debug.Assert(restored1["testuser1"].Count == notifyRooms["testuser1"].Count);
-            Debug.Assert(restored1["testuser1"].First() == notifyRooms["testuser1"].First());
-
-            List<UserListItem> list = new List<UserListItem>();
-            list.Add(new UserListItem()
-            {
-                DoesNotExist = true,
-                Role = UserRole.Friend,
-                Username = "helloworld",
-                UserStatus = new Soulseek.UserStatus(Soulseek.UserPresence.Offline, true),
-                UserData = new Soulseek.UserData("hellowworld", Soulseek.UserPresence.Online, 100, 11, 12, 14, "en", 4),
-                UserInfo = new Soulseek.UserInfo("testing", 1, 3, true)
-            });
-            list.Add(new UserListItem()
-            {
-                DoesNotExist = false,
-                Role = UserRole.Ignored,
-                Username = "helloworld1",
-                UserStatus = null,
-                UserData = new Soulseek.UserData("hellowworld", Soulseek.UserPresence.Online, 100, 11, 12, 14, "en")
-            });
-            list.Add(new UserListItem()
-            {
-                DoesNotExist = true,
-                Role = UserRole.Friend,
-                Username = "helloworld2",
-                UserStatus = null,
-                UserData = null,
-            });
-
-            var userSer = SerializationHelper.SaveUserListToString(list);
-            var restoredList = SerializationHelper.RestoreUserListFromString(userSer);
-
-
-            var searchResponsesBytes = SerializationHelper.SaveSearchResponsesToByteArray(
-                new List<SearchResponse>()
-                    { 
-                        new SearchResponse("username", 2, 3, 567, 45L, null, null) 
-                    }
-                );
-
-            var ms = new MemoryStream();
-            ms.Write(searchResponsesBytes);
-            ms.Position = 0;
-            var searchRes = SerializationHelper.RestoreSearchResponsesFromStream(ms);
-        }
-
     }
 }

@@ -21,6 +21,7 @@ using AndriodApp1.Helpers;
 using AndriodApp1.Managers;
 using AndriodApp1.Messages;
 using AndriodApp1.Search;
+using AndriodApp1.Serialization;
 using AndriodApp1.Transfers;
 using AndriodApp1.UPnP;
 using Android.App;
@@ -59,7 +60,7 @@ namespace AndriodApp1
         public override void OnCreate()
         {
 #if DEBUG
-            SerializationHelperTests.Test();
+            SerializationTests.Test();
 #endif
 
             base.OnCreate();

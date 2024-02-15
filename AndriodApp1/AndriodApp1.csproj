@@ -141,6 +141,8 @@
     <Compile Include="Search\ChipsAdapter.cs" />
     <Compile Include="Search\DownloadDialog.cs" />
     <Compile Include="Search\WishlistController.cs" />
+    <Compile Include="Serialization\CustomMessagePackFormatters.cs" />
+    <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Transfers\TransfersController.cs" />
     <Compile Include="Users\EditUserInfoActivity.cs" />
     <Compile Include="Search\SearchEnums.cs" />

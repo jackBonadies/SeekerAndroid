@@ -2402,8 +2402,8 @@ namespace AndriodApp1
             var helperIndex = deserializeFromDisk<Dictionary<int, string>>(c, fileshare_dir, SoulSeekState.M_HelperIndex_Filename);
             var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(c, fileshare_dir, SoulSeekState.M_TokenIndex_Filename);
             var keys = deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(c, fileshare_dir, SoulSeekState.M_Keys_Filename);
-            var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, SoulSeekState.M_BrowseResponse_Filename);
-            var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, SoulSeekState.M_BrowseResponse_Hidden_Filename);
+            var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, SoulSeekState.M_BrowseResponse_Filename, SerializationHelper.BrowseResponseOptions);
+            var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, SoulSeekState.M_BrowseResponse_Hidden_Filename, SerializationHelper.BrowseResponseOptions);
             var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir, SoulSeekState.M_FriendlyDirNameToUri_Filename);
 
             int nonHiddenFileCount = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_CACHE_nonHiddenFileCount_v3, -1);
@@ -2452,10 +2452,10 @@ namespace AndriodApp1
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.keys); //TODO directoryCount
             SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_Keys_Filename);
 
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponse, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponse, options: SerializationHelper.BrowseResponseOptions);
             SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_BrowseResponse_Filename);
 
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, options: SerializationHelper.BrowseResponseOptions);
             SaveToDisk(c, data, fileShareCachedDir, SoulSeekState.M_BrowseResponse_Hidden_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
