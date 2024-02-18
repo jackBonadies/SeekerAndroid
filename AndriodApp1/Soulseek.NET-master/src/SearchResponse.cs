@@ -26,11 +26,6 @@ namespace Soulseek
     [System.Serializable]
     public class SearchResponse
     {
-        public SearchResponse()
-        {
-            // default constructor for message pack
-        }
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="SearchResponse"/> class.
         /// </summary>

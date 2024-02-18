@@ -24,6 +24,8 @@ using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using static Java.Util.Jar.Attributes;
+using System.Xml;
+using System.Text;
 
 
 namespace AndriodApp1.Serialization
@@ -161,6 +163,8 @@ namespace AndriodApp1.Serialization
             TestCustomSearchResponseSerialization();
 
             TestCustomBrowseResponseSerialization();
+
+            TestCustomDirListSerialization();
         }
 
         public static void TestCustomSearchResponseSerialization()
@@ -187,6 +191,77 @@ namespace AndriodApp1.Serialization
 
             var dir123 = SerializationHelper.LegacyBinarySerializeToString<BrowseResponse>(browseResponse);
             var dir1234 = SerializationHelper.LegacyBinaryDeserializeFromString<BrowseResponse>(dir123);
+        }
+
+
+        public static void TestCustomDirListSerialization()
+        {
+            var dirList = GetDirectories(false);
+
+            var dirBytes = MessagePack.MessagePackSerializer.Serialize(dirList, options: SerializationHelper.BrowseResponseOptions);
+            var dirDeser1 = MessagePack.MessagePackSerializer.Deserialize<List<Soulseek.Directory>>(dirBytes, options: SerializationHelper.BrowseResponseOptions);
+
+            var dir123 = SerializationHelper.LegacyBinarySerializeToString<List<Soulseek.Directory>>(dirList);
+            var dir1234 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Soulseek.Directory>>(dir123);
+        }
+
+        public static void PopulateSharedPreferencesFromFile(Context c, ISharedPreferences sharedPrefs)
+        {
+
+            var contents = sharedPrefs.All;
+            var cnt = contents.Count;
+            sharedPrefs.All.Clear();
+            var editor1 = sharedPrefs.Edit();
+            editor1.Clear();
+            editor1.Apply();
+            editor1.Commit();
+
+
+            XmlDocument doc = null;
+            var javaFile = new Java.IO.File(c.FilesDir, "SoulSeekPrefs.xml"); // this is not the same as the actual shared preferences location
+            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(javaFile).Uri))
+            {
+                string text = null;
+                using (StreamReader reader = new StreamReader(inputStream, Encoding.UTF8, true, 1024, true))
+                {
+                    text = reader.ReadToEnd();
+                }
+                doc = new XmlDocument();
+                doc.LoadXml(text);
+            }
+
+
+            XmlNodeList nameAttributes = doc.SelectNodes("//@name");
+            if (nameAttributes != null)
+            {
+                foreach (XmlAttribute attr in nameAttributes)
+                {
+                    switch (attr.OwnerElement.Name)
+                    {
+                        case "boolean":
+                            editor1.PutBoolean(attr.Value, bool.Parse(attr.OwnerElement.Attributes[1].Value));
+                            break;
+                        case "string":
+                            if (attr.OwnerElement.Attributes.Count > 1)
+                            {
+                                editor1.PutString(attr.Value, attr.OwnerElement.Attributes[1].Value);
+                            }
+                            else
+                            {
+                                editor1.PutString(attr.Value, attr.OwnerElement.InnerText);
+                            }
+                            break;
+                        case "int":
+                            editor1.PutInt(attr.Value, int.Parse(attr.OwnerElement.Attributes[1].Value));
+                            break;
+                        case "long":
+                            editor1.PutLong(attr.Value, long.Parse(attr.OwnerElement.Attributes[1].Value));
+                            break;
+                    }
+                }
+            }
+            editor1.Apply();
+            editor1.Commit();
         }
 
         public static List<FileAttribute> GetFileAttributes()
@@ -257,10 +332,10 @@ namespace AndriodApp1.Serialization
             return new Soulseek.Directory(dirName, fileList, true);
         }
 
-        static List<Soulseek.Directory> GetDirectories()
+        static List<Soulseek.Directory> GetDirectories(bool allowNull = true)
         {
             var length = new Random().Next(0, 1000);
-            if(new Random().Next(0, 100) == 0)
+            if(new Random().Next(0, 100) == 0 && allowNull)
             {
                 return null;
             }

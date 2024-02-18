@@ -2192,7 +2192,7 @@ namespace AndriodApp1
                         nonHiddenCountForServer);
                     StoreCachedParseResults(SoulSeekState.ActiveActivityRef, newCachedResults);
 
-                    UploadDirectoryManager.SaveToSharedPreferences(SoulSeekState.SharedPreferences); //TODO migrate these if applicable...
+                    UploadDirectoryManager.SaveToSharedPreferences(SoulSeekState.SharedPreferences); 
 
 
                     ////5 searches a second = 18,000 per hour.

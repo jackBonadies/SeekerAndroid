@@ -73,8 +73,18 @@ namespace AndriodApp1.Helpers
             {
                 foreach (int tabIndex in tabsToSave)
                 {
-                    var results = RestoreSearchResultsFromDisk_Imp(tabIndex, c, true);
-                    if(results != null)
+                    List<SearchResponse> results = null;
+                    try
+                    {
+                        results = RestoreSearchResultsFromDisk_Imp(tabIndex, c, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        MainActivity.LogFirebase("Error Migrating Seach Tabs: " + ex.Message + ex.StackTrace);
+                        RemoveTabFromSharedPrefs(tabIndex, c, true);
+                    }
+
+                    if (results != null)
                     {
                         RemoveTabFromSharedPrefs(tabIndex, c, true);
                         SaveSearchResultsToDisk_Imp(tabIndex, c, results);
