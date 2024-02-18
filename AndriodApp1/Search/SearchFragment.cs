@@ -97,7 +97,7 @@ namespace AndriodApp1
             //this is necessary if programmatically moving to a tab from another activity..
             if (menuVisible)
             {
-                var navigator = SoulSeekState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 if (navigator != null)
                 {
                     navigator.Menu.GetItem(1).SetCheckable(true);
@@ -217,8 +217,8 @@ namespace AndriodApp1
             }
             else
             {
-                c = SoulSeekState.MainActivityRef;
-                imgView = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<ImageView>(Resource.Id.search_tabs);
+                c = SeekerState.MainActivityRef;
+                imgView = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<ImageView>(Resource.Id.search_tabs);
             }
 
             SetCustomViewTabNumberInner(imgView, c);
@@ -237,7 +237,7 @@ namespace AndriodApp1
             }
             else
             {
-                var editText = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+                var editText = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
                 if (editText == null)
                 {
 
@@ -295,7 +295,7 @@ namespace AndriodApp1
 
                     if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.search_tab_error, ToastLength.Long).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.search_tab_error, ToastLength.Long).Show();
                         SearchTabHelper.CurrentTab = lastTab;
                         fromTab = lastTab;
                         return;
@@ -305,7 +305,7 @@ namespace AndriodApp1
                     {
                         if (!SearchTabHelper.SearchTabCollection[fromTab].IsLoaded())
                         {
-                            SearchTabHelper.RestoreSearchResultsFromDisk(tabToGoTo, SoulSeekState.ActiveActivityRef);
+                            SearchTabHelper.RestoreSearchResultsFromDisk(tabToGoTo, SeekerState.ActiveActivityRef);
                         }
                     }
 
@@ -382,11 +382,11 @@ namespace AndriodApp1
                         SetTransitionDrawableState();
                     }
                 });
-                if (SoulSeekState.MainActivityRef == null)
+                if (SeekerState.MainActivityRef == null)
                 {
                     MainActivity.LogFirebase("mainActivityRef is null GoToTab");
                 }
-                SoulSeekState.MainActivityRef?.RunOnUiThread(a);
+                SeekerState.MainActivityRef?.RunOnUiThread(a);
             }
         }
 
@@ -425,7 +425,7 @@ namespace AndriodApp1
                         MainActivity.LogDebug("START TRANSITION");
                         SearchTabHelper.CurrentlySearching = true;
                         SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
-                        EditText editText = SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
+                        EditText editText = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                         string searchText = string.Empty;
                         if (editText == null)
                         {
@@ -466,7 +466,7 @@ namespace AndriodApp1
 
         public static SearchFragment GetSearchFragment()
         {
-            foreach (Fragment frag in SoulSeekState.MainActivityRef.SupportFragmentManager.Fragments)
+            foreach (Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
             {
                 if (frag is SearchFragment sfrag)
                 {
@@ -478,7 +478,7 @@ namespace AndriodApp1
 
         public static SearchFragment GetSearchFragmentMoreDiag()
         {
-            if (SoulSeekState.ActiveActivityRef is MainActivity)
+            if (SeekerState.ActiveActivityRef is MainActivity)
             {
                 MainActivity.LogInfoFirebase("current activity is Main");
             }
@@ -486,7 +486,7 @@ namespace AndriodApp1
             {
                 MainActivity.LogInfoFirebase("current activity is NOT Main");
             }
-            foreach (Fragment frag in SoulSeekState.MainActivityRef.SupportFragmentManager.Fragments)
+            foreach (Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
             {
                 if (frag is SearchFragment sfrag)
                 {
@@ -501,12 +501,12 @@ namespace AndriodApp1
         public void ShowSearchTabsDialog()
         {
             SearchTabDialog searchTabDialog = new SearchTabDialog();
-            //bool isAdded = (((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
+            //bool isAdded = (((SeekerState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
             if (!this.IsAdded || this.Activity == null) //then child fragment manager will likely be null
             {
                 MainActivity.LogInfoFirebase("ShowSearchTabsDialog, fragment no longer attached...");
 
-                //foreach(Fragment frag in SoulSeekState.MainActivityRef.SupportFragmentManager.Fragments)
+                //foreach(Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
                 //{
                 //    if(frag is SearchFragment sfrag)
                 //    {
@@ -514,7 +514,7 @@ namespace AndriodApp1
                 //    }
                 //}
 
-                searchTabDialog.Show(SoulSeekState.MainActivityRef.SupportFragmentManager, "search tab dialog");
+                searchTabDialog.Show(SeekerState.MainActivityRef.SupportFragmentManager, "search tab dialog");
                 //I tested this many times (outside of this clause).  Works very well.x
                 //But I dont know if not attached fragment will just cause other issues later on... yes it will as for example adding a new search tab, there are methods that rely on this.Activity and this.rootView etc.
                 return;
@@ -530,12 +530,12 @@ namespace AndriodApp1
             }
             else
             {
-                var cancel = ContextCompat.GetDrawable(SoulSeekState.MainActivityRef, Resource.Drawable.ic_cancel_black_24dp);
+                var cancel = ContextCompat.GetDrawable(SeekerState.MainActivityRef, Resource.Drawable.ic_cancel_black_24dp);
                 cancel.SetBounds(0, 0, cancel.IntrinsicWidth, cancel.IntrinsicHeight);
                 if (purple)
                 {
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
-                    cancel.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
+                    cancel.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
                 actv.SetCompoundDrawables(null, null, cancel, null);
             }
@@ -551,7 +551,7 @@ namespace AndriodApp1
                 actv.Text = SearchingText; //this works with string.Empty and emojis so I dont think its here...
                 UpdateDrawableState(actv);
                 actv.Touch += Actv_Touch;
-                //ContextCompat.GetDrawable(SoulSeekState.MainActivityRef,Resource.Drawable.ic_cancel_black_24dp);
+                //ContextCompat.GetDrawable(SeekerState.MainActivityRef,Resource.Drawable.ic_cancel_black_24dp);
             }
             catch (System.ArgumentException e)
             {
@@ -569,7 +569,7 @@ namespace AndriodApp1
             iv.Click += Iv_Click;
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
-            string searchHistoryXML = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchHistory, string.Empty);
+            string searchHistoryXML = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchHistory, string.Empty);
             if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
             {
                 if (searchHistoryXML == string.Empty)
@@ -590,15 +590,15 @@ namespace AndriodApp1
 
             SetSearchHintTarget(SearchTabHelper.SearchTarget, actv);
 
-            Context contextToUse = SoulSeekState.ActiveActivityRef;
-            //if (SoulSeekState.ActiveActivityRef==null)
+            Context contextToUse = SeekerState.ActiveActivityRef;
+            //if (SeekerState.ActiveActivityRef==null)
             //{
             //    MainActivity.LogFirebase("Active ActivityRef is null!!!");
             //    //contextToUse = contextJustInCase;
             //}
             //else
             //{
-            //    contextToUse = SoulSeekState.ActiveActivityRef;
+            //    contextToUse = SeekerState.ActiveActivityRef;
             //}
 
             actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.autoSuggestionRow, searchHistory);
@@ -651,7 +651,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
             catch (System.Exception err)
             {
@@ -776,7 +776,7 @@ namespace AndriodApp1
             //}
             //catch(Java.Lang.Exception ex)
             //{
-            //    string currentMainState = SoulSeekState.MainActivityRef.Lifecycle.CurrentState.ToString();
+            //    string currentMainState = SeekerState.MainActivityRef.Lifecycle.CurrentState.ToString();
             //    string currentFragState = SearchFragment.Instance.Lifecycle.CurrentState.ToString();
             //    string diagMessage = string.Format("Last Stopped: {0} Last Started: {1} currentMainState: {2} currentFragState: {3}", ForegroundLifecycleTracker.DiagLastStopped,ForegroundLifecycleTracker.DiagLastStarted, currentMainState, currentFragState);
             //    System.Exception diagException = new System.Exception(diagMessage);
@@ -784,7 +784,7 @@ namespace AndriodApp1
             //}
             //catch(System.Exception ex)
             //{
-            //    string currentMainState = SoulSeekState.MainActivityRef.Lifecycle.CurrentState.ToString();
+            //    string currentMainState = SeekerState.MainActivityRef.Lifecycle.CurrentState.ToString();
             //    string currentFragState = SearchFragment.Instance.Lifecycle.CurrentState.ToString();
             //    string diagMessage = string.Format("Last Stopped: {0} Last Started: {1} currentMainState: {2} currentFragState: {3}", ForegroundLifecycleTracker.DiagLastStopped, ForegroundLifecycleTracker.DiagLastStarted, currentMainState, currentFragState);
             //    System.Exception diagException = new System.Exception(diagMessage, ex);
@@ -796,7 +796,7 @@ namespace AndriodApp1
         {
             BSDF_Menu bsdf = new BSDF_Menu();
             bsdf.HasOptionsMenu = true;
-            bsdf.ShowNow(SoulSeekState.MainActivityRef.SupportFragmentManager, "options");
+            bsdf.ShowNow(SeekerState.MainActivityRef.SupportFragmentManager, "options");
         }
 
         public static volatile SearchFragment Instance = null;
@@ -806,8 +806,8 @@ namespace AndriodApp1
         {
             Instance = this;
             HasOptionsMenu = true;
-            //SoulSeekState.MainActivityRef.SupportActionBar.SetDisplayShowCustomEnabled(true);
-            //SoulSeekState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
+            //SeekerState.MainActivityRef.SupportActionBar.SetDisplayShowCustomEnabled(true);
+            //SeekerState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
             MainActivity.LogDebug("SearchFragmentOnCreateView");
             MainActivity.LogDebug("SearchFragmentOnCreateView - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
             this.rootView = inflater.Inflate(Resource.Layout.searches, container, false);
@@ -824,7 +824,7 @@ namespace AndriodApp1
             //this.listView = rootView.FindViewById<ListView>(Resource.Id.listView1);
 
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
-            //if(SoulSeekState.ShowSmartFilters)
+            //if(SeekerState.ShowSmartFilters)
             //{
             recyclerViewChips.Visibility = ViewStates.Visible;
             //}
@@ -873,7 +873,7 @@ namespace AndriodApp1
             //Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
             //clearFilter.Click += ClearFilter_Click;
 
-            string searchHistoryXML = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchHistory, string.Empty);
+            string searchHistoryXML = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchHistory, string.Empty);
             if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
             {
                 if (searchHistoryXML == string.Empty)
@@ -933,13 +933,13 @@ namespace AndriodApp1
             //listView.ItemClick += Lv_ItemClick;
             //listView.Clickable = true;
             //listView.Focusable = true;
-            SoulSeekState.ClearSearchHistoryEventsFromTarget(this);
-            SoulSeekState.ClearSearchHistory += SoulSeekState_ClearSearchHistory;
-            SoulSeekState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
-            //SoulSeekState.SoulseekClient.SearchResponseReceived -= SoulseekClient_SearchResponseReceived;
-            int x = SoulSeekState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
+            SeekerState.ClearSearchHistoryEventsFromTarget(this);
+            SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
+            SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
+            //SeekerState.SoulseekClient.SearchResponseReceived -= SoulseekClient_SearchResponseReceived;
+            int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
             MainActivity.LogDebug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
-            //SoulSeekState.SoulseekClient.SearchResponseReceived += SoulseekClient_SearchResponseReceived;
+            //SeekerState.SoulseekClient.SearchResponseReceived += SoulseekClient_SearchResponseReceived;
             MainActivity.LogDebug("SearchFragmentOnCreateViewEnd - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
@@ -954,7 +954,7 @@ namespace AndriodApp1
             UpdateDrawableState(filterText, true);
 
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
+            showHideSmartFilters.Text = SeekerState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
             showHideSmartFilters.Click += ShowHideSmartFilters_Click;
 
             return rootView;
@@ -962,10 +962,10 @@ namespace AndriodApp1
 
         private void ShowHideSmartFilters_Click(object sender, EventArgs e)
         {
-            SoulSeekState.ShowSmartFilters = !SoulSeekState.ShowSmartFilters;
+            SeekerState.ShowSmartFilters = !SeekerState.ShowSmartFilters;
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SoulSeekState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
-            if (SoulSeekState.ShowSmartFilters)
+            showHideSmartFilters.Text = SeekerState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
+            if (SeekerState.ShowSmartFilters)
             {
                 if (SearchTabHelper.CurrentlySearching)
                 {
@@ -973,9 +973,9 @@ namespace AndriodApp1
                 }
                 if ((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
                 {
-                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
+                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, SeekerState.SmartFilterOptions);
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
                         SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1016,7 +1016,7 @@ namespace AndriodApp1
         /// <returns></returns>
         private bool AreChipsFiltering()
         {
-            if (!SoulSeekState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
+            if (!SeekerState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
                 return false;
             }
@@ -1030,7 +1030,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustResize);
+                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustResize);
             }
             catch (System.Exception err)
             {
@@ -1088,7 +1088,7 @@ namespace AndriodApp1
                     try
                     {
 
-                        //SoulSeekState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
+                        //SeekerState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)Context.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                         test.ClearFocus();
@@ -1126,9 +1126,9 @@ namespace AndriodApp1
 
         private static void Search_EditorActionHELPER(object sender, TextView.EditorActionEventArgs e)
         {
-            //bool x = SoulSeekState.MainActivityRef.IsDestroyed;
+            //bool x = SeekerState.MainActivityRef.IsDestroyed;
 
-            //SearchFragment searchFragment = ((SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment;
+            //SearchFragment searchFragment = ((SeekerState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment;
             SearchFragment.Instance.Search_EditorAction(sender, e);
         }
 
@@ -1140,7 +1140,7 @@ namespace AndriodApp1
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
             {
                 string editSearchText = null;
-                EditText editTextSearch = SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere); //get asap to avoid nullref...
+                EditText editTextSearch = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere); //get asap to avoid nullref...
                 if (editTextSearch == null)
                 {
                     EditText searchHere = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
@@ -1165,7 +1165,7 @@ namespace AndriodApp1
                 //overriding this, the keyboard fails to go down by default for some reason.....
                 try
                 {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
                     imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                 }
                 catch (System.Exception ex)
@@ -1226,7 +1226,7 @@ namespace AndriodApp1
         {
             if (actv == null)
             {
-                actv = SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+                actv = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
             }
             if (actv != null)
             {
@@ -1292,7 +1292,7 @@ namespace AndriodApp1
 
         public static void ClearFocusSearchEditText()
         {
-            SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<View>(Resource.Id.searchHere)?.ClearFocus();
+            SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<View>(Resource.Id.searchHere)?.ClearFocus();
         }
 
 
@@ -1326,7 +1326,7 @@ namespace AndriodApp1
 
         public void ShowChangeSortOrderDialog()
         {
-            Context toUse = this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef;
+            Context toUse = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.sort_results_by_);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeresultsortorder, this.rootView as ViewGroup, false); //TODO replace rootView with ActiveActivity.GetContent()
@@ -1365,14 +1365,14 @@ namespace AndriodApp1
 
                 if (checkBoxSetAsDefault.Checked)
                 {
-                    var old = SoulSeekState.DefaultSearchResultSortAlgorithm;
-                    SoulSeekState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
-                    if (old != SoulSeekState.DefaultSearchResultSortAlgorithm)
+                    var old = SeekerState.DefaultSearchResultSortAlgorithm;
+                    SeekerState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
+                    if (old != SeekerState.DefaultSearchResultSortAlgorithm)
                     {
                         lock (MainActivity.SHARED_PREF_LOCK)
                         {
-                            var editor = SoulSeekState.SharedPreferences.Edit();
-                            editor.PutInt(SoulSeekState.M_DefaultSearchResultSortAlgorithm, (int)SoulSeekState.DefaultSearchResultSortAlgorithm);
+                            var editor = SeekerState.SharedPreferences.Edit();
+                            editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)SeekerState.DefaultSearchResultSortAlgorithm);
                             editor.Commit();
                         }
                     }
@@ -1468,7 +1468,7 @@ namespace AndriodApp1
         private LinearLayout targetRoomLayout = null;
         public void ShowChangeTargetDialog()
         {
-            Context toUse = this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef;
+            Context toUse = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.search_target_);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
@@ -1487,8 +1487,8 @@ namespace AndriodApp1
             {
                 possibleRooms = ChatroomController.JoinedRoomNames.ToList();
             }
-            possibleRooms.Add(SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_));
-            roomListSpinner.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.support_simple_spinner_dropdown_item, possibleRooms.ToArray());
+            possibleRooms.Add(SeekerState.ActiveActivityRef.GetString(Resource.String.custom_));
+            roomListSpinner.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.support_simple_spinner_dropdown_item, possibleRooms.ToArray());
             SetRoomSpinnerAndEditTextInitial(roomListSpinner, customRoomName);
             chooseUserInput.Text = SearchTabHelper.SearchTargetChosenUser;
             switch (SearchTabHelper.SearchTarget)
@@ -1513,7 +1513,7 @@ namespace AndriodApp1
                     room.Checked = true;
                     chooseUserInput.Visibility = ViewStates.Gone;
                     targetRoomLayout.Visibility = ViewStates.Visible;
-                    if (roomListSpinner.SelectedItem.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
+                    if (roomListSpinner.SelectedItem.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.custom_))
                     {
                         customRoomName.Visibility = ViewStates.Visible;
                         customRoomName.Text = SearchTabHelper.SearchTargetChosenRoom;
@@ -1538,7 +1538,7 @@ namespace AndriodApp1
                 SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
                 if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
                 {
-                    SoulSeekState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
+                    SeekerState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
                 }
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -1563,7 +1563,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -1611,7 +1611,7 @@ namespace AndriodApp1
 
         private string GetRoomListSpinnerSelection()
         {
-            if (roomListSpinner.SelectedItem.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
+            if (roomListSpinner.SelectedItem.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.custom_))
             {
                 return SearchTabHelper.SearchTargetChosenRoom;
             }
@@ -1627,7 +1627,7 @@ namespace AndriodApp1
             SearchTabHelper.SearchTarget = SearchTarget.Room;
             targetRoomLayout.Visibility = customRoomName.Visibility = ViewStates.Visible;
             chooseUserInput.Visibility = ViewStates.Gone;
-            if (roomListSpinner.SelectedItem.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.custom_))
+            if (roomListSpinner.SelectedItem.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.custom_))
             {
                 customRoomName.Visibility = ViewStates.Visible;
             }
@@ -1653,7 +1653,7 @@ namespace AndriodApp1
                 //overriding this, the keyboard fails to go down by default for some reason.....
                 try
                 {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
                     imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                 }
                 catch (System.Exception ex)
@@ -1677,8 +1677,8 @@ namespace AndriodApp1
         //            try
         //            {
 
-        //                //SoulSeekState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
-        //                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+        //                //SeekerState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
+        //                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
         //                imm.HideSoftInputFromWindow(bottomSheet.WindowToken, 0);
         //            }
         //            catch
@@ -1982,7 +1982,7 @@ namespace AndriodApp1
             MainActivity.LogDebug("Words To Include: " + searchTab.WordsToInclude.ToString());
             MainActivity.LogDebug("Whether to Filer: " + searchTab.FilteredResults);
             MainActivity.LogDebug("FilterString: " + searchTab.FilterString);
-            bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
+            bool hideLocked = SeekerState.HideLockedResultsInSearch;
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
@@ -2207,30 +2207,30 @@ namespace AndriodApp1
 
         //private void Actv_Click(object sender, EventArgs e)
         //{
-        //    Android.Views.InputMethods.InputMethodManager im = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+        //    Android.Views.InputMethods.InputMethodManager im = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
         //    im.ShowSoftInput(sender as View, 0);
         //    (sender as View).RequestFocus();
         //}
 
-        private void SoulSeekState_ClearSearchHistory(object sender, EventArgs e)
+        private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
         {
             searchHistory = new List<string>();
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_SearchHistory, string.Empty);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
                 editor.Commit();
             }
-            if (SoulSeekState.MainActivityRef?.SupportActionBar?.CustomView != null)
+            if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
             {
-                AutoCompleteTextView actv = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+                AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
                 actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.autoSuggestionRow, searchHistory);
             }
         }
 
         private void UpdateForScreenSize()
         {
-            if (!SoulSeekState.IsLowDpi()) return;
+            if (!SeekerState.IsLowDpi()) return;
             try
             {
                 //this.rootView.FindViewById<TextView>(Resource.Id.searchesQueue).SetTextSize(ComplexUnitType.Dip,8);
@@ -2256,14 +2256,14 @@ namespace AndriodApp1
             }
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_SearchHistory, listOfSearchItems);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchHistory, listOfSearchItems);
                 if (FilterSticky)
                 {
-                    editor.PutBoolean(SoulSeekState.M_FilterSticky, FilterSticky);
-                    editor.PutString(SoulSeekState.M_FilterStickyString, SearchTabHelper.FilterString);
+                    editor.PutBoolean(KeyConsts.M_FilterSticky, FilterSticky);
+                    editor.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
                 }
-                editor.PutInt(SoulSeekState.M_SearchResultStyle, (int)SearchResultStyle);
+                editor.PutInt(KeyConsts.M_SearchResultStyle, (int)SearchResultStyle);
                 editor.Commit();
             }
         }
@@ -2275,7 +2275,7 @@ namespace AndriodApp1
 
         public static void PerformSearchLogicFromSearchDialog(string searchTerm)
         {
-            EditText editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+            EditText editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             editTextSearch.Text = searchTerm;
             SearchFragment.Instance.PeformSearchLogic(null);
         }
@@ -2298,7 +2298,7 @@ namespace AndriodApp1
                 SearchTabHelper.CurrentlySearching = true;
             }
             SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
-            EditText editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+            EditText editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
             if (sender != null)
             {
@@ -2343,14 +2343,14 @@ namespace AndriodApp1
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
-            if (e.Response.FileCount == 0 && SoulSeekState.HideLockedResultsInSearch || !SoulSeekState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
+            if (e.Response.FileCount == 0 && SeekerState.HideLockedResultsInSearch || !SeekerState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
             {
                 MainActivity.LogDebug("Skipping Locked or 0/0");
                 return;
             }
             //MainActivity.LogDebug("SEARCH RESPONSE RECEIVED");
             refreshListView(e.Response, fromTab, fromWishlist);
-            //SoulSeekState.MainActivityRef.RunOnUiThread(action);
+            //SeekerState.MainActivityRef.RunOnUiThread(action);
 
         }
 
@@ -2393,7 +2393,7 @@ namespace AndriodApp1
         {
             try
             {
-                bool hideLocked = SoulSeekState.HideLockedResultsInSearch;
+                bool hideLocked = SeekerState.HideLockedResultsInSearch;
                 if (origResponse.Files.Count != 0 || (!hideLocked && origResponse.LockedFiles.Count != 0))
                 {
                     Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
@@ -2870,7 +2870,7 @@ namespace AndriodApp1
                     //MainActivity.LogDebug("END _ ui thread response received - search collection: " + total);
                 });
 
-                SoulSeekState.MainActivityRef?.RunOnUiThread(a);
+                SeekerState.MainActivityRef?.RunOnUiThread(a);
 
             }
 
@@ -2928,8 +2928,8 @@ namespace AndriodApp1
                 }
 
                 MainActivity.LogFirebase(msg + " showEditDialog" + e.Message);
-                Action a = new Action(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, "Error, please try again: " + msg, ToastLength.Long).Show(); });
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(a);
+                Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, "Error, please try again: " + msg, ToastLength.Long).Show(); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(a);
             }
         }
 
@@ -2971,23 +2971,23 @@ namespace AndriodApp1
             {
                 //all click event handlers occur on UI thread.
                 clearListView(fromWishlist);
-                //editTextSearch = SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
+                //editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             }
             catch (System.Exception e)
             {
-                //if(SoulSeekState.MainActivityRef==null)
+                //if(SeekerState.MainActivityRef==null)
                 //{
                 //    MainActivity.LogFirebase("Search Logic: MainActivityRef is null");
                 //}
-                //else if(SoulSeekState.MainActivityRef.SupportActionBar==null)
+                //else if(SeekerState.MainActivityRef.SupportActionBar==null)
                 //{
                 //    MainActivity.LogFirebase("Search Logic: Support Action Bar");
                 //}
-                //else if(SoulSeekState.MainActivityRef.SupportActionBar.CustomView == null)
+                //else if(SeekerState.MainActivityRef.SupportActionBar.CustomView == null)
                 //{
                 //    MainActivity.LogFirebase("Search Logic: SupportActionBar.CustomView");
                 //}
-                //else if(SoulSeekState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere)==null)
+                //else if(SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere)==null)
                 //{
                 //    MainActivity.LogFirebase("Search Logic: searchHere");
                 //}
@@ -3003,7 +3003,7 @@ namespace AndriodApp1
                 SoulseekClient_SearchResponseReceived(null, e, fromTab, fromWishlist);
             });
 
-            SearchOptions searchOptions = new SearchOptions(responseLimit: SoulSeekState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: SoulSeekState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
+            SearchOptions searchOptions = new SearchOptions(responseLimit: SeekerState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: SeekerState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
             SearchScope scope = null;
             if (fromWishlist)
             {
@@ -3015,24 +3015,24 @@ namespace AndriodApp1
             }
             else if (SearchTabHelper.SearchTarget == SearchTarget.UserList)
             {
-                if (SoulSeekState.UserList == null || SoulSeekState.UserList.Count == 0)
+                if (SeekerState.UserList == null || SeekerState.UserList.Count == 0)
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.user_list_empty, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.MainActivityRef, Resource.String.user_list_empty, ToastLength.Short).Show();
                     }
                     ));
                     return;
                 }
-                scope = new SearchScope(SearchScopeType.User, SoulSeekState.UserList.Select(item => item.Username).ToArray());
+                scope = new SearchScope(SearchScopeType.User, SeekerState.UserList.Select(item => item.Username).ToArray());
             }
             else if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser)
             {
                 if (SearchTabHelper.SearchTargetChosenUser == string.Empty)
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_user, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.MainActivityRef, Resource.String.no_user, ToastLength.Short).Show();
                     }));
                     return;
                 }
@@ -3042,9 +3042,9 @@ namespace AndriodApp1
             {
                 if (SearchTabHelper.SearchTargetChosenRoom == string.Empty)
                 {
-                    SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_room, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.MainActivityRef, Resource.String.no_room, ToastLength.Short).Show();
                     }));
                     return;
                 }
@@ -3058,7 +3058,7 @@ namespace AndriodApp1
                     //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
                     oldList?.Clear();
                 }
-                t = SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
+                t = SeekerState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
                 //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
@@ -3079,7 +3079,7 @@ namespace AndriodApp1
                     else
                     {
 
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                         {
                             try
                             {
@@ -3111,9 +3111,9 @@ namespace AndriodApp1
                     }
                     if ((!t.IsCanceled) && t.Result.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                         {
-                            Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();
                         }));
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
@@ -3127,18 +3127,18 @@ namespace AndriodApp1
                         //this is if the search was not automatic (i.e. wishlist timer elapsed) but was performed in the wishlist tab..
                         //therefore save the new results...
                         SearchTabHelper.SaveHeadersToSharedPrefs();
-                        SearchTabHelper.SaveSearchResultsToDisk(fromTab, SoulSeekState.ActiveActivityRef);
+                        SearchTabHelper.SaveSearchResultsToDisk(fromTab, SeekerState.ActiveActivityRef);
                     }
 
                     if (fromTab == SearchTabHelper.CurrentTab)
                     {
-                        if (SoulSeekState.ShowSmartFilters)
+                        if (SeekerState.ShowSmartFilters)
                         {
 #if DEBUG
                             try
                             {
-                                var df = SoulSeekState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ', '_'));
-                                var outputStream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
+                                var df = SeekerState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ', '_'));
+                                var outputStream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
                                 foreach (var sr in SearchTabHelper.SearchTabCollection[fromTab].SearchResponses)
                                 {
                                     byte[] bytesText = System.Text.Encoding.ASCII.GetBytes(sr.Files.First().Filename + System.Environment.NewLine);
@@ -3152,9 +3152,9 @@ namespace AndriodApp1
                             }
 
 #endif
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SoulSeekState.SmartFilterOptions);
+                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SeekerState.SmartFilterOptions);
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                            SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                             {
                                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -3173,7 +3173,7 @@ namespace AndriodApp1
                     t.ContinueWith(new Action<Task>(
                         (Task t) =>
                         {
-                            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+                            SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                             {
 
                                 RelativeLayout rel = SearchFragment.Instance.rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
@@ -3218,15 +3218,15 @@ namespace AndriodApp1
             }
             catch (ArgumentNullException ane)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
-                    string errorMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_search_text);
+                    string errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_search_text);
                     if (fromWishlist)
                     {
-                        errorMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
+                        errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
 
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
@@ -3240,16 +3240,16 @@ namespace AndriodApp1
             }
             catch (ArgumentException ae)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                    string errorMsg = SoulSeekState.MainActivityRef.GetString(Resource.String.no_search_text);
+                    string errorMsg = SeekerState.MainActivityRef.GetString(Resource.String.no_search_text);
                     if (fromWishlist)
                     {
-                        errorMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
+                        errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
                         transitionDrawable.ResetTransition();
@@ -3262,17 +3262,17 @@ namespace AndriodApp1
             //    //this means that we lost connection to the client.  lets re-login and try search again..
             //    //idealy we do this on a separate thread but for testing..
 
-            //    //SoulSeekState.SoulseekClient.SearchAsync(SearchQuery.FromText(editTextSearch.Text), options: searchOptions);
+            //    //SeekerState.SoulseekClient.SearchAsync(SearchQuery.FromText(editTextSearch.Text), options: searchOptions);
             //}
             catch (System.Exception ue)
             {
 
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
 
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
                     MainActivity.LogFirebase("tabpageradapter searchclick: " + ue.Message);
 
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
@@ -3285,14 +3285,14 @@ namespace AndriodApp1
             if (!fromWishlist)
             {
                 //add a new item to our search history
-                if (SoulSeekState.RememberSearchHistory)
+                if (SeekerState.RememberSearchHistory)
                 {
                     if (!searchHistory.Contains(searchString))
                     {
                         searchHistory.Add(searchString);
                     }
                 }
-                var actv = SoulSeekState.MainActivityRef.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere); // lot of nullrefs with actv before this change....
+                var actv = SeekerState.MainActivityRef.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere); // lot of nullrefs with actv before this change....
                 if (actv == null)
                 {
                     actv = (SearchFragment.Instance.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
@@ -3317,11 +3317,11 @@ namespace AndriodApp1
                 MainActivity.LogDebug("Search_Click");
             }
             //#if !DEBUG
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
                 if (!fromWishlist)
                 {
-                    Toast tst = Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_to_search, ToastLength.Long);
+                    Toast tst = Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_search, ToastLength.Long);
                     tst.Show();
                     MainActivity.LogDebug("transitionDrawable: RESET transition");
                     transitionDrawable.ResetTransition();
@@ -3339,7 +3339,7 @@ namespace AndriodApp1
                 //    return;
                 //}
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, fromWishlist, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, fromWishlist, out t))
                 {
                     return;
                 }
@@ -3349,14 +3349,14 @@ namespace AndriodApp1
                     {
                         if (!fromWishlist)
                         {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                             {
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                             });
                         }
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
 
                 }));
             }

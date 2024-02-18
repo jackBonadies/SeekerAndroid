@@ -22,10 +22,10 @@ namespace AndriodApp1
         /// <param name="searchTerm"></param>
         /// <param name="smartFilterOptions"></param>
         /// <returns></returns>
-        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SoulSeekState.SmartFilterState smartFilterOptions)
+        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SeekerState.SmartFilterState smartFilterOptions)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-            bool hideHidden = SoulSeekState.HideLockedResultsInSearch;
+            bool hideHidden = SeekerState.HideLockedResultsInSearch;
 
             //this is relevant to both
             if (smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)

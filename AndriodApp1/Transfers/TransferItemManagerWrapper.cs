@@ -107,20 +107,20 @@ namespace AndriodApp1
             {
                 DocumentFile parent = null;
                 Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);
-                if (SoulSeekState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentIncompleteUri.Scheme == "file")
+                if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentIncompleteUri.Scheme == "file")
                 {
                     parent = DocumentFile.FromFile(new Java.IO.File(parentIncompleteUri.Path));
                 }
                 else
                 {
-                    parent = DocumentFile.FromTreeUri(SoulSeekState.ActiveActivityRef, parentIncompleteUri); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
+                    parent = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentIncompleteUri); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
                 }
 
                 DocumentFile df = parent.FindFile(ti.Filename);
                 if (df == null || !df.Exists())
                 {
                     MainActivity.LogDebug("delete failed - null or not exist");
-                    MainActivity.LogInfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SoulSeekState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
+                    MainActivity.LogInfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SeekerState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
                 }
                 if (!df.Delete()) //nullref
                 {

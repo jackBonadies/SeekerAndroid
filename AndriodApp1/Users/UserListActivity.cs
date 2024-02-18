@@ -96,7 +96,7 @@ namespace AndriodApp1
                     //do browse thing...
                     Action<View> action = new Action<View>((v) =>
                     {
-                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
                     });
@@ -107,7 +107,7 @@ namespace AndriodApp1
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
                     return true;
@@ -120,7 +120,7 @@ namespace AndriodApp1
                     this.NotifyItemRemoved(PopUpMenuOwnerHack);
                     return true;
                 case Resource.Id.messageUser:
-                    Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
+                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
                     intentMsg.AddFlags(ActivityFlags.SingleTop);
                     intentMsg.PutExtra(MessageController.FromUserName, PopUpMenuOwnerHack); //so we can go to this user..
                     intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
@@ -158,7 +158,7 @@ namespace AndriodApp1
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            SoulSeekState.ActiveActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.user_list_activity_layout);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.user_list_toolbar);
@@ -169,10 +169,10 @@ namespace AndriodApp1
             this.SupportActionBar.SetHomeButtonEnabled(true);
             this.SupportActionBar.SetDisplayShowHomeEnabled(true);
 
-            if (SoulSeekState.UserList == null)
+            if (SeekerState.UserList == null)
             {
                 var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
-                SoulSeekState.UserList = SerializationHelper.RestoreUserListFromString(sharedPref.GetString(SoulSeekState.M_UserList, ""));
+                SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPref.GetString(KeyConsts.M_UserList, ""));
             }
 
             //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
@@ -282,24 +282,24 @@ namespace AndriodApp1
         private static List<UserListItem> ParseUserListForPresentation()
         {
             List<UserListItem> forAdapter = new List<UserListItem>();
-            if (SoulSeekState.UserList.Count != 0)
+            if (SeekerState.UserList.Count != 0)
             {
-                forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.friends), UserRole.Category));
-                forAdapter.AddRange(GetSortedUserList(SoulSeekState.UserList, false));
+                forAdapter.Add(new UserListItem(SeekerState.ActiveActivityRef.GetString(Resource.String.friends), UserRole.Category));
+                forAdapter.AddRange(GetSortedUserList(SeekerState.UserList, false));
             }
-            if (SoulSeekState.IgnoreUserList.Count != 0)
+            if (SeekerState.IgnoreUserList.Count != 0)
             {
-                forAdapter.Add(new UserListItem(SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignored), UserRole.Category));
-                forAdapter.AddRange(GetSortedUserList(SoulSeekState.IgnoreUserList, true));
+                forAdapter.Add(new UserListItem(SeekerState.ActiveActivityRef.GetString(Resource.String.ignored), UserRole.Category));
+                forAdapter.AddRange(GetSortedUserList(SeekerState.IgnoreUserList, true));
             }
             return forAdapter;
         }
 
         public void RefreshUserList()
         {
-            if (SoulSeekState.UserList != null)
+            if (SeekerState.UserList != null)
             {
-                lock (SoulSeekState.UserList) //shouldnt we also lock IgnoreList?
+                lock (SeekerState.UserList) //shouldnt we also lock IgnoreList?
                 {
                     recyclerAdapter = new RecyclerUserListAdapter(this, ParseUserListForPresentation());
                     recyclerViewUserList.SetAdapter(recyclerAdapter);
@@ -378,7 +378,7 @@ namespace AndriodApp1
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { OnUserStatusChanged(null, username); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => { OnUserStatusChanged(null, username); });
             }
         }
 
@@ -416,14 +416,14 @@ namespace AndriodApp1
                     //failed to add user
                     if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.ToLower().Contains("the wait timed out"))
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
                             Toast.MakeText(c, Resource.String.error_adding_user_timeout, ToastLength.Short).Show();
                         });
                     }
                     else if (t.Exception != null && t.Exception != null && t.Exception.InnerException is Soulseek.UserNotFoundException)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
                             if (!massImportCase)
                             {
@@ -441,25 +441,25 @@ namespace AndriodApp1
                     MainActivity.UserListAddUser(t.Result);
                     if (!massImportCase)
                     {
-                        if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
+                        if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
                         {
                             lock (MainActivity.SHARED_PREF_LOCK)
                             {
-                                var editor = SoulSeekState.SharedPreferences.Edit();
-                                editor.PutString(SoulSeekState.M_UserList, SerializationHelper.SaveUserListToString(SoulSeekState.UserList));
+                                var editor = SeekerState.SharedPreferences.Edit();
+                                editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
                                 editor.Commit();
                             }
                         }
                     }
                     if (UIaction != null)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(UIaction);
+                        SeekerState.ActiveActivityRef.RunOnUiThread(UIaction);
                     }
                 }
             };
 
             //Add User Logic...
-            SoulSeekState.SoulseekClient.AddUserAsync(username).ContinueWith(continueWithAction);
+            SeekerState.SoulseekClient.AddUserAsync(username).ContinueWith(continueWithAction);
         }
 
         public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
@@ -471,7 +471,7 @@ namespace AndriodApp1
                 return;
             }
 
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
                 Toast.MakeText(c, Resource.String.must_be_logged_to_add_or_remove_user, ToastLength.Short).Show();
                 return;
@@ -491,11 +491,11 @@ namespace AndriodApp1
                     MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                     }
                     throw new FaultPropagationException();
                 }
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
             });
 
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -597,8 +597,8 @@ namespace AndriodApp1
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutInt(SoulSeekState.M_UserListSortOrder, (int)UserListSortOrder);
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutInt(KeyConsts.M_UserListSortOrder, (int)UserListSortOrder);
                     editor.Commit();
                 }
                 this.RefreshUserList();
@@ -635,20 +635,20 @@ namespace AndriodApp1
                 {
                     if (string.IsNullOrEmpty(input.Text))
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
                         return;
                     }
 
-                    SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, input.Text.ToString());
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { RefreshUserList(); }));
+                    SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, input.Text.ToString());
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { RefreshUserList(); }));
                 }
                 else
                 {
                     if (input.Text != String.Empty)
                     {
-                        SoulSeekState.RecentUsersManager.AddUserToTop(input.Text, true);
+                        SeekerState.RecentUsersManager.AddUserToTop(input.Text, true);
                     }
-                    AddUserAPI(SoulSeekState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
+                    AddUserAPI(SeekerState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
                 }
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
@@ -669,7 +669,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -691,7 +691,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -726,7 +726,7 @@ namespace AndriodApp1
         //    try
         //    {
         //        PopUpMenuOwnerHack = ((sender as View).Parent as ViewGroup).FindViewById<TextView>(Resource.Id.textViewUser).Text; //this is a hack.....
-        //        PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
+        //        PopupMenu popup = new PopupMenu(SeekerState.MainActivityRef, sender as View);
         //        popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
         //        popup.Inflate(Resource.Menu.selected_ignored_user_menu);
         //        popup.Show();
@@ -745,7 +745,7 @@ namespace AndriodApp1
         //    try
         //    {
         //        PopUpMenuOwnerHack = ((sender as View).Parent as ViewGroup).FindViewById<TextView>(Resource.Id.textViewUser).Text; //this is a hack.....
-        //        PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
+        //        PopupMenu popup = new PopupMenu(SeekerState.MainActivityRef, sender as View);
         //        popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
         //        popup.Inflate(Resource.Menu.selected_user_options);
         //        Helpers.AddUserNoteMenuItem(popup.Menu, -1, -1, -1, PopUpMenuOwnerHack);

@@ -154,12 +154,12 @@ namespace AndriodApp1.Users
 
             if (isIgnored)
             {
-                SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
+                SeekerState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
                 CommonHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
+                SeekerState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
                 CommonHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
                 CommonHelpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
                 CommonHelpers.AddGivePrivilegesIfApplicable(menu, -1);
@@ -238,7 +238,7 @@ namespace AndriodApp1.Users
 
         public void ViewUserStatus_LongClick(object sender, View.LongClickEventArgs e)
         {
-            Toast.MakeText(SoulSeekState.ActiveActivityRef, (sender as ImageView).TooltipText, ToastLength.Short).Show();
+            Toast.MakeText(SeekerState.ActiveActivityRef, (sender as ImageView).TooltipText, ToastLength.Short).Show();
         }
 
         //both item.UserStatus and item.UserData have status
@@ -274,19 +274,19 @@ namespace AndriodApp1.Users
                     viewStatsLayout.Visibility = ViewStates.Visible;
                 }
 
-                if (SoulSeekState.UserNotes.ContainsKey(item.Username))
+                if (SeekerState.UserNotes.ContainsKey(item.Username))
                 {
                     viewNoteLayout.Visibility = ViewStates.Visible;
                     string note = null;
-                    SoulSeekState.UserNotes.TryGetValue(item.Username, out note);
-                    viewNote.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.note) + ": " + note;
+                    SeekerState.UserNotes.TryGetValue(item.Username, out note);
+                    viewNote.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.note) + ": " + note;
                 }
                 else
                 {
                     viewNoteLayout.Visibility = ViewStates.Gone;
                 }
 
-                if (SoulSeekState.UserOnlineAlerts.ContainsKey(item.Username))
+                if (SeekerState.UserOnlineAlerts.ContainsKey(item.Username))
                 {
                     viewOnlineAlerts.Visibility = ViewStates.Visible;
                 }
@@ -299,7 +299,7 @@ namespace AndriodApp1.Users
 
                 if (item.Role == UserRole.Ignored)
                 {
-                    string ignoredString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignored);
+                    string ignoredString = SeekerState.ActiveActivityRef.GetString(Resource.String.ignored);
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
                     {
                         viewUserStatus.TooltipText = ignoredString; //api26+ otherwise crash...
@@ -317,7 +317,7 @@ namespace AndriodApp1.Users
                     {
                         case Soulseek.UserPresence.Away:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.away));
-                            string awayString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.away);
+                            string awayString = SeekerState.ActiveActivityRef.GetString(Resource.String.away);
                             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
                             {
                                 viewUserStatus.TooltipText = awayString; //api26+ otherwise crash...
@@ -329,7 +329,7 @@ namespace AndriodApp1.Users
                             break;
                         case Soulseek.UserPresence.Online:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.online)); //added in api 8 :) SetTint made it a weird dark color..
-                            string onlineString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.online);
+                            string onlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.online);
                             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
                             {
                                 viewUserStatus.TooltipText = onlineString; //api26+ otherwise crash...
@@ -341,7 +341,7 @@ namespace AndriodApp1.Users
                             break;
                         case Soulseek.UserPresence.Offline:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
-                            string offlineString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.offline);
+                            string offlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.offline);
                             if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
                             {
                                 viewUserStatus.TooltipText = offlineString; //api26+ otherwise crash...
@@ -381,7 +381,7 @@ namespace AndriodApp1.Users
 
                 if (userDataExists)
                 {
-                    viewNumFiles.Text = item.UserData.FileCount.ToString("N0") + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.files);
+                    viewNumFiles.Text = item.UserData.FileCount.ToString("N0") + " " + SeekerState.ActiveActivityRef.GetString(Resource.String.files);
                     viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SlskHelp.CommonHelpers.STRINGS_KBS;
                 }
                 else

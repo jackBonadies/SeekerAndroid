@@ -146,9 +146,9 @@ namespace AndriodApp1.Messages
 
         public static void BroadcastFriendlyRunOnUiThread(Action action)
         {
-            if (SoulSeekState.ActiveActivityRef != null)
+            if (SeekerState.ActiveActivityRef != null)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(action);
+                SeekerState.ActiveActivityRef.RunOnUiThread(action);
             }
             else
             {
@@ -161,10 +161,10 @@ namespace AndriodApp1.Messages
             //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
             //then soulseekclient will be good, but the activeActivityRef will be null. so use the broadcastContext.
 
-            Android.Content.Context contextToUse = broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext;
+            Android.Content.Context contextToUse = broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext;
 
-            MainActivity.LogDebug("is soulseekclient null: " + (SoulSeekState.SoulseekClient == null).ToString());
-            MainActivity.LogDebug("is ActiveActivityRef null: " + (SoulSeekState.ActiveActivityRef == null).ToString());
+            MainActivity.LogDebug("is soulseekclient null: " + (SeekerState.SoulseekClient == null).ToString());
+            MainActivity.LogDebug("is ActiveActivityRef null: " + (SeekerState.ActiveActivityRef == null).ToString());
 
 
             if (string.IsNullOrEmpty(msg.MessageText))
@@ -176,7 +176,7 @@ namespace AndriodApp1.Messages
                 }
                 return;
             }
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
                 MainActivity.LogDebug("not currently logged in");
                 Toast.MakeText(contextToUse, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
@@ -251,7 +251,7 @@ namespace AndriodApp1.Messages
                 MessageController.Messages[usernameToMessage] = new List<Message>(); //our first message to them..
                 MessageController.Messages[usernameToMessage].Add(msg);
             }
-            MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
             MessageController.RaiseMessageReceived(msg);
             Action<Task> continueWithAction = new Action<Task>((Task t) =>
             {
@@ -260,7 +260,7 @@ namespace AndriodApp1.Messages
                     MainActivity.LogDebug("faulted " + t.Exception.ToString());
                     MainActivity.LogDebug("faulted " + t.Exception.InnerException.Message.ToString());
                     msg.SentMsgStatus = SentStatus.Failed;
-                    Toast.MakeText(broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext, Resource.String.failed_to_send_message, ToastLength.Long).Show(); //TODO
+                    Toast.MakeText(broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext, Resource.String.failed_to_send_message, ToastLength.Long).Show(); //TODO
 
                     if (fromDirectReplyAction)
                     {
@@ -277,11 +277,11 @@ namespace AndriodApp1.Messages
                         MessageController.ShowNotification(msg, true, false, string.Empty, broadcastContext);
                     }
                 }
-                MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+                MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                 MessageController.RaiseMessageReceived(msg);
             });
             MainActivity.LogDebug("useranme to mesasge " + usernameToMessage);
-            SoulSeekState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
+            SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
         }
 
 
@@ -330,7 +330,7 @@ namespace AndriodApp1.Messages
             {
                 MainActivity.LogDebug("remove the notification history");
                 //remove the now possibly void notification
-                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                 // notificationId is a unique int for each notification that you must define
                 notificationManager.Cancel(Username.GetHashCode());
             }

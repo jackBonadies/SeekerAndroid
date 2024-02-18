@@ -81,11 +81,11 @@ namespace AndriodApp1
         {
             if (connectOrDisconnect == SpecialMessageCode.Disconnect)
             {
-                MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
+                MessageText = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
             }
             else
             {
-                MessageText = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
+                MessageText = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
             }
         }
     }

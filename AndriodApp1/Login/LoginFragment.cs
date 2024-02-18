@@ -58,7 +58,7 @@ namespace AndriodApp1
             }
             try
             {
-                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
             catch (System.Exception err)
             {
@@ -97,7 +97,7 @@ namespace AndriodApp1
             StaticHacks.LoginFragment = this;
             if (MainActivity.IsNotLoggedIn())//you are not logged in if username or password is null
             {
-                SoulSeekState.currentlyLoggedIn = false;
+                SeekerState.currentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
 
                 SetUpLogInLayout();
@@ -108,24 +108,24 @@ namespace AndriodApp1
             }
             else
             {
-                if (!SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn) && !StaticHacks.LoggingIn)
+                if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn) && !StaticHacks.LoggingIn)
                 {
-                    SoulSeekState.ManualResetEvent.Reset();
+                    SeekerState.ManualResetEvent.Reset();
                     Task login = null;
                     try
                     {
                         //there is a bug where we reach here with an empty Username and Password...
-                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
+                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
                     }
                     catch (InvalidOperationException)
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
                         MainActivity.LogFirebase("We are already logging in");
                     }
-                    //Task login = SoulSeekState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SoulSeekState.Username, SoulSeekState.Password);
+                    //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SeekerState.Username, SeekerState.Password);
                     login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
                     login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                    SoulSeekState.MainActivityRef.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
+                    SeekerState.MainActivityRef.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
                 }
                 else if (!StaticHacks.LoggingIn || StaticHacks.UpdateUI)
                 {
@@ -140,7 +140,7 @@ namespace AndriodApp1
 
                 bttn.Click += LogoutClick;
                 var welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                welcome.Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.welcome), SoulSeekState.Username);
+                welcome.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.welcome), SeekerState.Username);
                 welcome.Visibility = ViewStates.Gone;
                 bttn.Visibility = ViewStates.Gone;
 
@@ -208,15 +208,15 @@ namespace AndriodApp1
         /// <param name="e"></param>
         public void Settings_Click(object sender, EventArgs e)
         {
-            Intent intent = new Intent(SoulSeekState.MainActivityRef, typeof(SettingsActivity));
-            //intent.PutExtra("SaveDataDirectoryUri", SoulSeekState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
-            SoulSeekState.MainActivityRef.StartActivityForResult(intent, 140);
+            Intent intent = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
+            //intent.PutExtra("SaveDataDirectoryUri", SeekerState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
+            SeekerState.MainActivityRef.StartActivityForResult(intent, 140);
         }
 
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
-            SoulSeekState.ManualResetEvent.Set(); //the UI is ready for any modifications
+            SeekerState.ManualResetEvent.Set(); //the UI is ready for any modifications
             if (refreshView)
             {
                 refreshView = false;
@@ -236,10 +236,10 @@ namespace AndriodApp1
             {
                 var action = new Action(() =>
                 {
-                    Toast.MakeText(SoulSeekState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
+                    Toast.MakeText(SeekerState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
                     //MainActivity.LogFirebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
-                SoulSeekState.MainActivityRef.RunOnUiThread(action);
+                SeekerState.MainActivityRef.RunOnUiThread(action);
                 SoulseekClient.DNS_LOOKUP_FAILED = false; // dont have to keep showing this... wait for next failure for it to be set...
             }
 
@@ -262,15 +262,15 @@ namespace AndriodApp1
                         //"The server rejected login attempt: INVALIDUSERNAME"
                         if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDUSERNAME"))
                         {
-                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.invalid_username);
+                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_username);
                         }
                         else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDPASS"))
                         {
-                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.invalid_password);
+                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_password);
                         }
                         else
                         {
-                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
+                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
                         }
                     }
                     else if (t.Exception.InnerExceptions[0] is Soulseek.SoulseekClientException)
@@ -279,19 +279,19 @@ namespace AndriodApp1
                         {
                             cannotLogin = true;
                             clearUserPass = false;
-                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
+                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
                         }
                         else if (t.Exception.InnerExceptions[0].Message.Contains("Connection refused"))
                         {
                             cannotLogin = true;
                             clearUserPass = false;
-                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
+                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
                         }
                         else
                         {
                             cannotLogin = true;
                             clearUserPass = false;
-                            msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login);
+                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
                             msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
 
                         }
@@ -302,14 +302,14 @@ namespace AndriodApp1
                         //this happens at work where slsk is banned. technically its due to connection RST. the timeout is not the tcp handshake timeout its instead a wait timeout in the connect async code. so this could probably be improved.
                         cannotLogin = true;
                         clearUserPass = false;
-                        msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
                     }
                     else
                     {
                         msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
                         cannotLogin = true;
                         clearUserPass = false;
-                        msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login);
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
                     }
                 }
                 else
@@ -319,7 +319,7 @@ namespace AndriodApp1
                         msgToLog = t.Exception.Message + t.Exception.StackTrace;
                     }
                     cannotLogin = true;
-                    msg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.cannot_login);
+                    msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
                 }
 
                 if (msgToLog != string.Empty)
@@ -335,15 +335,15 @@ namespace AndriodApp1
 
 
             MainActivity.LogDebug("Login Status: " + cannotLogin);
-            //SoulSeekState.ManualResetEvent.WaitOne();
+            //SeekerState.ManualResetEvent.WaitOne();
 
             if (cannotLogin == false)
             {
                 StaticHacks.UpdateUI = true;
-                SoulSeekState.currentlyLoggedIn = true; //when we recreate we lose the statics as they get overwritten by bundle
+                SeekerState.currentlyLoggedIn = true; //when we recreate we lose the statics as they get overwritten by bundle
                 StaticHacks.LoggingIn = false;
-                //SoulSeekState.currentSessionLoggedIn = true;
-                //var tabLayout = (Android.Support.Design.Widget.TabLayout)SoulSeekState.MainActivityRef.FindViewById(Resource.Id.tabs);
+                //SeekerState.currentSessionLoggedIn = true;
+                //var tabLayout = (Android.Support.Design.Widget.TabLayout)SeekerState.MainActivityRef.FindViewById(Resource.Id.tabs);
                 //tabLayout.RemoveTabAt(0);
 
                 MainActivity.AddLoggedInLayout(this.rootView);
@@ -357,15 +357,15 @@ namespace AndriodApp1
                 var action = new Action(() =>
                 {
                     string message = msg;
-                    Toast.MakeText(SoulSeekState.MainActivityRef, msg, ToastLength.Long).Show();
-                    SoulSeekState.currentlyLoggedIn = false; //this should maybe be removed???
-                    SoulSeekState.Username = null;
-                    SoulSeekState.Password = null;
+                    Toast.MakeText(SeekerState.MainActivityRef, msg, ToastLength.Long).Show();
+                    SeekerState.currentlyLoggedIn = false; //this should maybe be removed???
+                    SeekerState.Username = null;
+                    SeekerState.Password = null;
                     //this.Activity.Recreate();
-                    //SoulSeekState.MainActivityRef.Recreate();
+                    //SeekerState.MainActivityRef.Recreate();
                 });
 
-                SoulSeekState.MainActivityRef.RunOnUiThread(action);
+                SeekerState.MainActivityRef.RunOnUiThread(action);
             }
         }
 
@@ -373,17 +373,17 @@ namespace AndriodApp1
         {//logout
             try
             {
-                SoulSeekState.logoutClicked = true;
-                SoulSeekState.SoulseekClient.Disconnect();
+                SeekerState.logoutClicked = true;
+                SeekerState.SoulseekClient.Disconnect();
             }
             catch
             {
 
             }
-            SoulSeekState.Username = null;
-            SoulSeekState.Password = null;
-            SoulSeekState.currentlyLoggedIn = false;
-            SoulSeekState.MainActivityRef.Recreate();
+            SeekerState.Username = null;
+            SeekerState.Password = null;
+            SeekerState.currentlyLoggedIn = false;
+            SeekerState.MainActivityRef.Recreate();
 
         }
 
@@ -423,13 +423,13 @@ namespace AndriodApp1
                 //catch(AddressException)
                 //{
                 //    Toast.MakeText(this.Activity, "Failed to resolve soulseek server ip address from name. Trying hardcoded ip.", ToastLength.Long).Show();
-                //    login = SoulSeekState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, user.Text, pass.Text);
+                //    login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, user.Text, pass.Text);
                 //}
             }
             catch (AddressException)
             {
                 Toast.MakeText(this.Activity, Resource.String.dns_failed_2, ToastLength.Long).Show();
-                SoulSeekState.currentlyLoggedIn = false;
+                SeekerState.currentlyLoggedIn = false;
                 return;
             }
             catch (InvalidOperationException err)
@@ -437,20 +437,20 @@ namespace AndriodApp1
                 if (err.Message.Equals("The client is already connected"))
                 {
                     alreadyConnected = true;
-                    SoulSeekState.currentlyLoggedIn = true;
+                    SeekerState.currentlyLoggedIn = true;
                     MainActivity.AddLoggedInLayout(this.rootView, true);
                     MainActivity.UpdateUIForLoggedIn(this.rootView);
                 }
                 else
                 {
                     Toast.MakeText(this.Activity, err.Message, ToastLength.Long).Show();
-                    SoulSeekState.currentlyLoggedIn = false;
+                    SeekerState.currentlyLoggedIn = false;
                     return;
                 }
             }
             try
             {
-                //SoulSeekState.currentlyLoggedIn = true;
+                //SeekerState.currentlyLoggedIn = true;
                 //LayoutInflater inflater = (LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService);
                 //View rootView = inflater.Inflate(Resource.Layout.loggedin,null);
                 MainActivity.AddLoggedInLayout(this.rootView); //i.e. if not already
@@ -458,17 +458,17 @@ namespace AndriodApp1
                 {
                     MainActivity.UpdateUIForLoggingInLoading(this.rootView);
                 }
-                SoulSeekState.Username = this.usernameTextEdit.Text;
-                SoulSeekState.Password = this.passwordTextEdit.Text;
+                SeekerState.Username = this.usernameTextEdit.Text;
+                SeekerState.Password = this.passwordTextEdit.Text;
                 if (!alreadyConnected)
                 {
                     StaticHacks.LoggingIn = true;
                 }
-                SoulSeekState.ManualResetEvent.Reset();
+                SeekerState.ManualResetEvent.Reset();
                 //if(login.IsCompleted)
                 //{
                 //    StaticHacks.UpdateUI = true;
-                //    SoulSeekState.currentlyLoggedIn = true;
+                //    SeekerState.currentlyLoggedIn = true;
                 //    StaticHacks.LoggingIn = false;
                 //    Activity.Recreate();
                 //}
@@ -487,14 +487,14 @@ namespace AndriodApp1
                 string message = string.Empty;
                 if (ex?.InnerException is Soulseek.LoginRejectedException)
                 {
-                    message = SoulSeekState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
+                    message = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
                 }
                 else
                 {
                     message = ex.Message;
                 }
                 Toast.MakeText(this.Activity, message, ToastLength.Long).Show();
-                SoulSeekState.currentlyLoggedIn = false;
+                SeekerState.currentlyLoggedIn = false;
             }
 
             //Activity.Recreate();

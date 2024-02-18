@@ -56,7 +56,7 @@ namespace AndriodApp1.Chatroom
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
 
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);
             this.Dialog.SetTitle(OurRoomName);

@@ -108,6 +108,8 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browse\BrowseAdapter.cs" />
+    <Compile Include="Browse\TreePathRecyclerAdapter.cs" />
     <Compile Include="Chatroom\ChatroomController.cs" />
     <Compile Include="Chatroom\ChatroomInnerFragment.cs" />
     <Compile Include="Chatroom\ChatroomOverviewFragment.cs" />
@@ -118,6 +120,7 @@
     <Compile Include="Main\CloseActivity.cs" />
     <Compile Include="Main\DownloadForegroundService.cs" />
     <Compile Include="Main\SeekerKeepAliveService.cs" />
+    <Compile Include="Main\SeekerState.cs" />
     <Compile Include="Main\SlskLinkMenuActivity.cs" />
     <Compile Include="Main\ThemeableActivity.cs" />
     <Compile Include="Browse\BrowseFragment.cs" />
@@ -143,6 +146,7 @@
     <Compile Include="Search\WishlistController.cs" />
     <Compile Include="Serialization\CustomMessagePackFormatters.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
+    <Compile Include="Settings\KeyConsts.cs" />
     <Compile Include="Transfers\TransfersController.cs" />
     <Compile Include="Users\EditUserInfoActivity.cs" />
     <Compile Include="Search\SearchEnums.cs" />
@@ -325,12 +329,6 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\transfer_row.xml">
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-      <SubType>Designer</SubType>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\layout\transfer_row_dummy.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
       <SubType>Designer</SubType>
     </AndroidResource>

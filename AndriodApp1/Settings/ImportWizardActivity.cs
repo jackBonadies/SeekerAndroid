@@ -259,21 +259,21 @@ namespace AndriodApp1
         {
             foreach (string uname in selectedData.IgnoredBanned)
             {
-                lock (SoulSeekState.IgnoreUserList)
+                lock (SeekerState.IgnoreUserList)
                 {
-                    SoulSeekState.IgnoreUserList.Add(new UserListItem(uname, UserRole.Ignored));
+                    SeekerState.IgnoreUserList.Add(new UserListItem(uname, UserRole.Ignored));
                 }
             }
             foreach (string uname in selectedData.UserList)
             {
-                lock (SoulSeekState.UserList)
+                lock (SeekerState.UserList)
                 {
                     UserListActivity.AddUserAPI(this, uname, null, true);
                 }
             }
             foreach (var unote in selectedData.UserNotes)
             {
-                SoulSeekState.UserNotes[unote.Item1] = unote.Item2;
+                SeekerState.UserNotes[unote.Item1] = unote.Item2;
             }
             foreach (var wish in selectedData.Wishlist)
             {
@@ -281,23 +281,23 @@ namespace AndriodApp1
                 SearchTabHelper.AddWishlistSearchTabFromString(wish);
             }
             SearchTabHelper.SaveHeadersToSharedPrefs();
-            //SearchTabHelper.SaveAllSearchTabsToDisk(SoulSeekState.ActiveActivityRef); //there are no additional results...
+            //SearchTabHelper.SaveAllSearchTabsToDisk(SeekerState.ActiveActivityRef); //there are no additional results...
             CommonHelpers.SaveUserNotes();
-            if (SoulSeekState.SharedPreferences != null && SoulSeekState.UserList != null)
+            if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_UserList, SerializationHelper.SaveUserListToString(SoulSeekState.UserList));
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
                     editor.Commit();
                 }
             }
-            if (SoulSeekState.SharedPreferences != null && SoulSeekState.IgnoreUserList != null)
+            if (SeekerState.SharedPreferences != null && SeekerState.IgnoreUserList != null)
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
                     editor.Commit();
                 }
             }
@@ -395,7 +395,7 @@ namespace AndriodApp1
         private void ImportButton_Click(object sender, EventArgs e)
         {
             //nullref for this.Activity ??
-            (SoulSeekState.ActiveActivityRef as ImportWizardActivity).LaunchImportIntent();
+            (SeekerState.ActiveActivityRef as ImportWizardActivity).LaunchImportIntent();
         }
         private static bool isLoading = false;
         public static StartPageFragment Instance = null; //needed for rotation.
@@ -624,7 +624,7 @@ namespace AndriodApp1
             toggleAll = this.rootView.FindViewById<Button>(Resource.Id.toggleAllButton);
             toggleAll.Click += ToggleAll_Click;
 
-            (SoulSeekState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
+            (SeekerState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
             Console.WriteLine("OnCreateView: " + importListType.ToString() + " " + guid.ToString());
             return rootView;
         }
@@ -650,8 +650,8 @@ namespace AndriodApp1
         public override void OnResume()
         {
             Console.WriteLine("OnResume: " + importListType.ToString() + " " + guid.ToString());
-            (SoulSeekState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
-            if ((SoulSeekState.ActiveActivityRef as ImportWizardActivity).IsCurrentStep(this))
+            (SeekerState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
+            if ((SeekerState.ActiveActivityRef as ImportWizardActivity).IsCurrentStep(this))
             {
                 SetState(ImportWizardActivity.fullImportedData.Value, this.importListType);
             }
@@ -731,7 +731,7 @@ namespace AndriodApp1
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHave = SoulSeekState.UserList.Select(item => item.Username).ToList();
+                    var currentlyHave = SeekerState.UserList.Select(item => item.Username).ToList();
                     var notYetAdded = data.UserList.Except(currentlyHave).ToList();
                     var alreadyAddedList = data.UserList.Except(notYetAdded).ToList();
                     if (alreadyAddedList.Count == 0)
@@ -781,7 +781,7 @@ namespace AndriodApp1
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHaveIgnored = SoulSeekState.IgnoreUserList.Select(item => item.Username).ToList();
+                    var currentlyHaveIgnored = SeekerState.IgnoreUserList.Select(item => item.Username).ToList();
                     var notYetIgnored = data.IgnoredBanned.Except(currentlyHaveIgnored).ToList();
                     var alreadyIgnoredList = data.IgnoredBanned.Except(notYetIgnored).ToList();
                     if (alreadyIgnoredList.Count == 0)
@@ -828,7 +828,7 @@ namespace AndriodApp1
                     }
                     //todo already present
                     //maybe do asterick
-                    var currentlyHaveNoted = SoulSeekState.UserNotes.Select(item => item.Key).ToList();
+                    var currentlyHaveNoted = SeekerState.UserNotes.Select(item => item.Key).ToList();
                     var notYetNoted = data.UserNotes.Select(item => item.Item1).Except(currentlyHaveNoted).ToList();
                     var alreadyNotedList = data.UserNotes.Select(item => item.Item1).Except(notYetNoted).ToList();
                     if (alreadyNotedList.Count == 0)
@@ -1001,16 +1001,16 @@ namespace AndriodApp1
         //    switch (position)
         //    {
         //        case 0:
-        //            title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.account_tab));
+        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.account_tab));
         //            break;
         //        case 1:
-        //            title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.searches_tab));
+        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.searches_tab));
         //            break;
         //        case 2:
-        //            title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_tab));
+        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_tab));
         //            break;
         //        case 3:
-        //            title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_tab));
+        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.browse_tab));
         //            break;
         //        default:
         //            throw new System.Exception("Invalid Tab");

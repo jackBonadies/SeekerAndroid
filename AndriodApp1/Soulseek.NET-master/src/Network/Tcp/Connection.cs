@@ -101,7 +101,7 @@ namespace Soulseek.Network.Tcp
 
                     //its night and day with this code.  it really does seem to fix it.
                     //with it you get a timeout around 10 seconds after doze mode.
-                    //another solution is to register the enter idle mode broadcast. can also check (SoulSeekState.ActiveActivityRef.GetSystemService(PowerService) as PowerManager).IsDeviceIdleMode
+                    //another solution is to register the enter idle mode broadcast. can also check (SeekerState.ActiveActivityRef.GetSystemService(PowerService) as PowerManager).IsDeviceIdleMode
                     int size = 4;
                     byte[] keepAlive = new byte[size * 3];
                     

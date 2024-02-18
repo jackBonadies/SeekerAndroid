@@ -87,16 +87,16 @@ namespace AndriodApp1
             switch (position)
             {
                 case 0:
-                    title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.account_tab));
+                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.account_tab));
                     break;
                 case 1:
-                    title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.searches_tab));
+                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.searches_tab));
                     break;
                 case 2:
-                    title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.transfer_tab));
+                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_tab));
                     break;
                 case 3:
-                    title = new Java.Lang.String(SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_tab));
+                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.browse_tab));
                     break;
                 default:
                     throw new System.Exception("Invalid Tab");
@@ -248,8 +248,8 @@ namespace AndriodApp1
             else if (searchResultSorting == SearchResultSorting.BitRate)
             {
                 //for fastest, only speed matters. if they pick this then even locked files are in the running.
-                x.GetDominantFileType(SoulSeekState.HideLockedResultsInSearch, out double xbitRate);
-                y.GetDominantFileType(SoulSeekState.HideLockedResultsInSearch, out double ybitRate);
+                x.GetDominantFileType(SeekerState.HideLockedResultsInSearch, out double xbitRate);
+                y.GetDominantFileType(SeekerState.HideLockedResultsInSearch, out double ybitRate);
                 if (xbitRate != ybitRate)
                 {
                     if (xbitRate > ybitRate)
@@ -434,7 +434,7 @@ namespace AndriodApp1
             if (isWishlist)
             {
                 SearchTabHelper.SaveHeadersToSharedPrefs();
-                SearchTabHelper.RemoveTabFromSharedPrefs(tabToRemove, SoulSeekState.ActiveActivityRef);
+                SearchTabHelper.RemoveTabFromSharedPrefs(tabToRemove, SeekerState.ActiveActivityRef);
             }
             SearchFragment.Instance.SetCustomViewTabNumberImageViewState();
         }
@@ -601,7 +601,7 @@ namespace AndriodApp1
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
             //Dialog.SetTitle("File Info"); //is this needed in any way??
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
             this.SetStyle((int)Android.App.DialogFragmentStyle.NoTitle, 0);
             //this.Dialog.SetTitle("Search Tab");
             recyclerViewSearches = view.FindViewById<RecyclerView>(Resource.Id.searchesRecyclerView);
@@ -795,7 +795,7 @@ namespace AndriodApp1
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SoulSeekState.HideLockedResultsInSearch;
+            hideLocked = SeekerState.HideLockedResultsInSearch;
         }
 
         public void setItem(SearchResponse item, int noop)
@@ -890,16 +890,16 @@ namespace AndriodApp1
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SoulSeekState.HideLockedResultsInSearch;
+            hideLocked = SeekerState.HideLockedResultsInSearch;
         }
         private bool hideLocked = false;
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach (Soulseek.File f in item.GetFiles(SoulSeekState.HideLockedResultsInSearch))
+            foreach (Soulseek.File f in item.GetFiles(SeekerState.HideLockedResultsInSearch))
             {
-                TextView tv = new TextView(SoulSeekState.MainActivityRef);
-                SetTextColor(tv, SoulSeekState.MainActivityRef);
+                TextView tv = new TextView(SeekerState.MainActivityRef);
+                SetTextColor(tv, SeekerState.MainActivityRef);
                 tv.Text = CommonHelpers.GetFileNameFromFile(f.Filename);
                 viewToHideShow.AddView(tv);
             }
@@ -1532,7 +1532,7 @@ namespace AndriodApp1
         {
             if (timeSpan == null)
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.unknown);
+                return SeekerState.ActiveActivityRef.GetString(Resource.String.unknown);
             }
             else
             {
@@ -1596,7 +1596,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    viewStatusAdditionalInfo.Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                    viewStatusAdditionalInfo.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
                 }
             }
             else if (item is TransferItem && state.HasFlag(TransferStates.Rejected))

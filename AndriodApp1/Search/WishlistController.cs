@@ -82,36 +82,36 @@ namespace AndriodApp1.Search
         {
             //a search that we initiated completed...
             //var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch)).ToList();
+            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SeekerState.HideLockedResultsInSearch)).ToList();
             OldResultsToCompare.TryRemove(id, out _); //save memory. wont always exist if the tab got deleted during the search.  exceptions thrown here dont crash anything tho.
             int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
 
             if (newUniqueResults >= 1)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
                     try
                     {
                         string description = string.Empty;
                         if (newUniqueResults > 1)
                         {
-                            description = newUniqueResults + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.new_results);
+                            description = newUniqueResults + " " + SeekerState.ActiveActivityRef.GetString(Resource.String.new_results);
                         }
                         else
                         {
-                            description = newUniqueResults + " " + SoulSeekState.ActiveActivityRef.GetString(Resource.String.new_result);
+                            description = newUniqueResults + " " + SeekerState.ActiveActivityRef.GetString(Resource.String.new_result);
                         }
                         string lastTerm = SearchTabHelper.SearchTabCollection[id].LastSearchTerm;
 
-                        CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
-                        Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                        CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                        Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                         notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
-                            PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                        Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SoulSeekState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
-                        NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                            PendingIntent.GetActivity(SeekerState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                        Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SeekerState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
+                        NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                         // notificationId is a unique int for each notification that you must define
                         notificationManager.Notify(lastTerm.GetHashCode(), n);
                     }
@@ -122,7 +122,7 @@ namespace AndriodApp1.Search
                 });
             }
             SearchTabHelper.SaveHeadersToSharedPrefs();
-            SearchTabHelper.SaveSearchResultsToDisk(id, SoulSeekState.ActiveActivityRef);
+            SearchTabHelper.SaveSearchResultsToDisk(id, SeekerState.ActiveActivityRef);
         }
 
         private static void WishlistTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -161,7 +161,7 @@ namespace AndriodApp1.Search
 
                     if (!SearchTabHelper.SearchTabCollection[oldestId].IsLoaded())
                     {
-                        SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SoulSeekState.ActiveActivityRef);
+                        SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SeekerState.ActiveActivityRef);
                     }
 
 
@@ -172,7 +172,7 @@ namespace AndriodApp1.Search
                         sw.Start();
 #endif
                         OldNumResults[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count;
-                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SoulSeekState.HideLockedResultsInSearch));
+                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SeekerState.HideLockedResultsInSearch));
 #if DEBUG
                         sw.Stop();
                         MainActivity.LogDebug($"search response count: {SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count} hashSet count: {OldResultsToCompare[oldestId].Count} time {sw.ElapsedMilliseconds} ms");

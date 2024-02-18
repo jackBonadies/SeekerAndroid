@@ -63,19 +63,19 @@ namespace AndriodApp1.Messages
         public override void OnResume()
         {
             base.OnResume();
-            SoulSeekState.ActiveActivityRef.InvalidateOptionsMenu();
+            SeekerState.ActiveActivityRef.InvalidateOptionsMenu();
             if (MessagesActivity.FromDeleteMessage)
             {
                 MessagesActivity.FromDeleteMessage = false;
-                Snackbar sb = Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
-                        string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+                Snackbar sb = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
+                        string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                         MessagesActivity.DELETED_USERNAME),
                         Snackbar.LengthLong)
                     .SetAction(Resource.String.undo, ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true))
                     .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
 
                 (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView)
-                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
                 sb.Show();
             }
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;

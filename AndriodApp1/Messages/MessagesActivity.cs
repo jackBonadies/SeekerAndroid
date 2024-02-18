@@ -133,14 +133,14 @@ namespace AndriodApp1
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = MessagesInnerFragment.Username;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.action_browse_files:
                     Action<View> action = new Action<View>((v) =>
                     {
-                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
                     });
@@ -154,7 +154,7 @@ namespace AndriodApp1
                     DELETED_USERNAME = MessagesInnerFragment.Username;
                     DELETED_POSITION = int.MaxValue;
                     MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out DELETED_DATA);
-                    MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+                    MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                     this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
                     return true;
                 case Resource.Id.action_delete_all_messages:
@@ -165,10 +165,10 @@ namespace AndriodApp1
                     }
                     DELETED_DICTIONARY = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
                     MessageController.Messages.Clear();
-                    MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+                    MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                     this.GetOverviewFragment().RefreshAdapter();
-                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", GetUndoDeleteAllSnackBarAction()).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                    (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", GetUndoDeleteAllSnackBarAction()).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+                    (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
                     sb.Show();
                     return true;
 
@@ -197,8 +197,8 @@ namespace AndriodApp1
                     MessageController.Messages[entry.Key] = entry.Value;
                 }
 
-                MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
-                (SoulSeekState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
+                MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
                 MessagesActivity.DELETED_DICTIONARY = null;
             });
             return undoSnackBarAction;
@@ -220,7 +220,7 @@ namespace AndriodApp1
             }
 
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(SoulSeekState.ActiveActivityRef.GetString(Resource.String.msg_user) + ":");
+            builder.SetTitle(SeekerState.ActiveActivityRef.GetString(Resource.String.msg_user) + ":");
             // I'm using fragment here so I'm using getView() to provide ViewGroup
             // but you can provide here any other instance of ViewGroup from your Fragment / Activity
             var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
@@ -249,7 +249,7 @@ namespace AndriodApp1
                     return;
                 }
 
-                SoulSeekState.RecentUsersManager.AddUserToTop(userToMessage, true);
+                SeekerState.RecentUsersManager.AddUserToTop(userToMessage, true);
 
                 //Do Logic of going to Username View
                 this.ChangeToInnerFragment(userToMessage);
@@ -314,7 +314,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -347,7 +347,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
             catch (System.Exception err)
             {
@@ -383,7 +383,7 @@ namespace AndriodApp1
                 }
                 AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
                 myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
-                myToolbar.Title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.messages);
+                myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
                 this.SetSupportActionBar(myToolbar);
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                 this.SupportActionBar.SetHomeButtonEnabled(true);
@@ -412,7 +412,7 @@ namespace AndriodApp1
         {
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
-            myToolbar.Title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.messages);
+            myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
@@ -452,10 +452,10 @@ namespace AndriodApp1
 
         protected override void OnResume()
         {
-            if (SoulSeekState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
+            if (SeekerState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
             {
-                MessageController.MessagesUsername = SoulSeekState.Username;
-                MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username]; //username can be null here... perhaps restarting the app without internet or such...
+                MessageController.MessagesUsername = SeekerState.Username;
+                MessageController.Messages = MessageController.RootMessages[SeekerState.Username]; //username can be null here... perhaps restarting the app without internet or such...
             }
             base.OnResume();
         }
@@ -477,13 +477,13 @@ namespace AndriodApp1
             }
 
             MessagesActivityRef = this;
-            SoulSeekState.ActiveActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.messages_main_layout);
 
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
-            myToolbar.Title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.messages);
+            myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
@@ -493,36 +493,36 @@ namespace AndriodApp1
             {
                 var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
                 MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
-                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
+                if (SeekerState.Username != null && SeekerState.Username != string.Empty)
                 {
-                    MessageController.MessagesUsername = SoulSeekState.Username;
-                    if (!MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
+                    MessageController.MessagesUsername = SeekerState.Username;
+                    if (!MessageController.RootMessages.ContainsKey(SeekerState.Username))
                     {
-                        MessageController.RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessageController.RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                     }
                     else
                     {
-                        MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
+                        MessageController.Messages = MessageController.RootMessages[SeekerState.Username];
                     }
                 }
             }
-            else if (SoulSeekState.Username != MessageController.MessagesUsername)
+            else if (SeekerState.Username != MessageController.MessagesUsername)
             {
-                MessageController.MessagesUsername = SoulSeekState.Username;
-                if (SoulSeekState.Username == null || SoulSeekState.Username == string.Empty)
+                MessageController.MessagesUsername = SeekerState.Username;
+                if (SeekerState.Username == null || SeekerState.Username == string.Empty)
                 {
                     MessageController.Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                 }
                 else
                 {
-                    if (MessageController.RootMessages.ContainsKey(SoulSeekState.Username))
+                    if (MessageController.RootMessages.ContainsKey(SeekerState.Username))
                     {
-                        MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
+                        MessageController.Messages = MessageController.RootMessages[SeekerState.Username];
                     }
                     else
                     {
-                        MessageController.RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessageController.Messages = MessageController.RootMessages[SoulSeekState.Username];
+                        MessageController.RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessageController.Messages = MessageController.RootMessages[SeekerState.Username];
                     }
                 }
             }
@@ -641,7 +641,7 @@ namespace AndriodApp1
                 if (remoteInputBundle != null)
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");
-                    //Message msg = new Message(SoulSeekState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
+                    //Message msg = new Message(SeekerState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     MainActivity.LogDebug("direct reply " + replyText + " " + uname);
                     MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 

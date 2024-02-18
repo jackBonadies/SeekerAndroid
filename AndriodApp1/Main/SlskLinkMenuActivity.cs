@@ -20,7 +20,7 @@ namespace AndriodApp1
             {
                 if (!CommonHelpers.ParseSlskLinkString(CommonHelpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
                     base.OnCreateContextMenu(menu, v, menuInfo);
                     return;
                 }
@@ -79,16 +79,16 @@ namespace AndriodApp1
                         msgToToast = "Failed to follow link";
                     }
                     MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
                     });
                 }
                 MainActivity.LogDebug("DirectoryReceivedContAction faulted");
             }
             else
             {
-                List<BrowseFragment.FullFileInfo> fullFileInfos = new List<BrowseFragment.FullFileInfo>();
+                List<FullFileInfo> fullFileInfos = new List<FullFileInfo>();
 
                 //the filenames for these files are NOT the fullname.
                 //the fullname is dirTask.Result.Name "\\" f.Filename
@@ -98,14 +98,14 @@ namespace AndriodApp1
                     string fullFilename = directory.Name + "\\" + f.Filename;
                     if (thisFileOnly == null)
                     {
-                        fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
+                        fullFileInfos.Add(new FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                     }
                     else
                     {
                         if (fullFilename == thisFileOnly)
                         {
                             //add
-                            fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
+                            fullFileInfos.Add(new FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                             break;
                         }
                     }
@@ -116,11 +116,11 @@ namespace AndriodApp1
                 {
                     if (thisFileOnly == null)
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short).Show();
                     }
                     else
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short).Show();
                     }
                     return;
                 }
@@ -139,16 +139,16 @@ namespace AndriodApp1
                     CommonHelpers.ParseSlskLinkString(CommonHelpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
                     Action<View> action = new Action<View>((v) =>
                     {
-                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
-                        //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
 
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);
                     return true;
                 case FromSlskLinkCopyLink:
-                    CommonHelpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, CommonHelpers.SlskLinkClickedData);
+                    CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, CommonHelpers.SlskLinkClickedData);
                     return true;
                 case FromSlskLinkDownloadFiles:
                     CommonHelpers.ParseSlskLinkString(CommonHelpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);

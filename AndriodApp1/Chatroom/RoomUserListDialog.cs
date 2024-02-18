@@ -226,10 +226,10 @@ namespace AndriodApp1.Chatroom
         private static RoomUserListDialog RoomDialogInstance;
         public static void ShowSortRoomUserListDialog()
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(Resource.String.SortUsersBy);
 
-            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.change_sort_room_user_list_dialog, SoulSeekState.ActiveActivityRef.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
+            View viewInflated = LayoutInflater.From(SeekerState.ActiveActivityRef).Inflate(Resource.Layout.change_sort_room_user_list_dialog, SeekerState.ActiveActivityRef.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
 
             //AndroidX.AppCompat.Widget.AppCompatRadioButton onlineStatus = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.onlineStatus);
             AndroidX.AppCompat.Widget.AppCompatRadioButton alphaOrder = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.alphaOrder);
@@ -282,8 +282,8 @@ namespace AndriodApp1.Chatroom
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutBoolean(SoulSeekState.M_RoomUserListShowFriendsAtTop, ChatroomController.PutFriendsOnTop);
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, ChatroomController.PutFriendsOnTop);
                     editor.Commit();
                 }
                 RoomDialogInstance.RefreshUserListFull();
@@ -307,8 +307,8 @@ namespace AndriodApp1.Chatroom
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutInt(SoulSeekState.M_RoomUserListSortOrder, (int)ChatroomController.SortChatroomUsersBy);
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutInt(KeyConsts.M_RoomUserListSortOrder, (int)ChatroomController.SortChatroomUsersBy);
                     editor.Commit();
                 }
                 RoomDialogInstance.RefreshUserListFull();
@@ -327,7 +327,7 @@ namespace AndriodApp1.Chatroom
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
 
             this.SetStyle((int)DialogFragmentStyle.Normal, 0);
             this.Dialog.SetTitle(OurRoomName);
@@ -493,7 +493,7 @@ namespace AndriodApp1.Chatroom
             var userdata = longClickedUserData;
             if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SoulSeekState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
+                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
                     MainActivity.LogDebug("Handled by commons");
                     return base.OnContextItemSelected(item);
@@ -503,20 +503,20 @@ namespace AndriodApp1.Chatroom
             {
                 case 0: //"Remove User"
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, false, true);
-                    //                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
+                    //                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 1: //"Remove Moderator Privilege"
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, true);
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 2:
                     ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, false);
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 3: //browse user
                     Action<View> action = new Action<View>((v) =>
                     {
-                        Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                         this.StartActivity(intent);
                     });
@@ -527,12 +527,12 @@ namespace AndriodApp1.Chatroom
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = userdata.Username;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
                     return true;
                 case 7: //message user
-                    Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
+                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
                     intentMsg.AddFlags(ActivityFlags.SingleTop);
                     intentMsg.PutExtra(MessageController.FromUserName, userdata.Username); //so we can go to this user..
                     intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..

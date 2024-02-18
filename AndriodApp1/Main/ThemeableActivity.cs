@@ -16,12 +16,12 @@ namespace AndriodApp1
             if (SeekerApplication.Activities.Count == 0)
             {
                 MainActivity.LogDebug("----- On Destory ------ Last Activity ------");
-                TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, true);
+                TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, true);
             }
             else
             {
                 MainActivity.LogDebug("----- On Destory ------ NOT Last Activity ------");
-                TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 0);
+                TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);
             }
         }
 
@@ -36,10 +36,10 @@ namespace AndriodApp1
 
         protected override void AttachBaseContext(Context @base)
         {
-            if (!SeekerApplication.HasProperPerAppLanguageSupport() && SoulSeekState.Language != SoulSeekState.FieldLangAuto)
+            if (!SeekerApplication.HasProperPerAppLanguageSupport() && SeekerState.Language != SeekerState.FieldLangAuto)
             {
                 var config = new Android.Content.Res.Configuration();
-                config.Locale = SeekerApplication.LocaleFromString(SoulSeekState.Language);
+                config.Locale = SeekerApplication.LocaleFromString(SeekerState.Language);
                 var baseContext = @base.CreateConfigurationContext(config);
                 base.AttachBaseContext(baseContext);
             }

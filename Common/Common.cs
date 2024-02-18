@@ -283,13 +283,13 @@ namespace Common
             }
 
             //logging code for unit tests / diagnostic..
-            //var root2 = DocumentFile.FromTreeUri(SoulSeekState.MainActivityRef, Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri));
+            //var root2 = DocumentFile.FromTreeUri(SeekerState.MainActivityRef, Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri));
             //DocumentFile exists2 = root.FindFile(username + "_parsed_answer");
             //if (exists2 == null || !exists2.Exists())
             //{
             //    DocumentFile f = root2.CreateFile(@"custom\binary", username + "_parsed_answer");
 
-            //    System.IO.Stream stream = SoulSeekState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
+            //    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
             //    //Java.IO.File musicFile = new Java.IO.File(filePath);
             //    //FileOutputStream stream = new FileOutputStream(mFile);
             //    using (System.IO.MemoryStream userListStream = new System.IO.MemoryStream())

@@ -14,7 +14,7 @@ namespace AndriodApp1
             MainActivity.LogInfoFirebase("shutting down");
 
             //stop all soulseek connection.
-            if (SoulSeekState.SoulseekClient != null)
+            if (SeekerState.SoulseekClient != null)
             {
                 //closes server socket, distributed connections, and peer connections. cancels searches, stops listener.
                 //this shutdown cleanly closes tcp connections. 
@@ -22,8 +22,8 @@ namespace AndriodApp1
                 //       know that you are no longer there and set the status to "Aborted".
                 //       compared to just killing service and "swiping up" which will uncleanly close the connection, QT will continue
                 //       writing bytes with no one receiving them for several seconds.
-                SoulSeekState.SoulseekClient.Dispose();
-                SoulSeekState.SoulseekClient = null;
+                SeekerState.SoulseekClient.Dispose();
+                SeekerState.SoulseekClient = null;
             }
 
             //stop the 3 potential foreground services.

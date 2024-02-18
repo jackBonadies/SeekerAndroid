@@ -89,12 +89,12 @@ namespace AndriodApp1.Chatroom
         public void OnCurrentConnectedCleared(object sender, List<string> rooms)
         {
             MainActivity.LogDebug("OnCurrentConnectedCleared");
-            SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusesChanged(rooms); });
+            SeekerState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusesChanged(rooms); });
         }
 
         public void OnRoomNowHasUnreadMessages(object sender, string room)
         {
-            SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
+            SeekerState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace AndriodApp1.Chatroom
         public void OnCurrentConnectedChanged(object sender, string room)
         {
             MainActivity.LogDebug("OnCurrentConnectedChanged");
-            SoulSeekState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
+            SeekerState.ActiveActivityRef?.RunOnUiThread(() => { this.recyclerAdapter?.notifyRoomStatusChanged(room); });
         }
 
         public void OnJoinedRoomsHaveUpdated(object sender, EventArgs e)

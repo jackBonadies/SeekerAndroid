@@ -128,7 +128,7 @@ namespace AndriodApp1.Messages
             {
                 ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewReceived).DataItem;
             }
-            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
+            menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
         }
 
     }
@@ -235,16 +235,16 @@ namespace AndriodApp1.Messages
             {
                 case SentStatus.Pending:
                 case SentStatus.Success:
-                    return SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainPurple);
+                    return SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
                 case SentStatus.Failed:
                     resourceIntColor = Resource.Color.hardErrorRed;
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
                     {
-                        return GetColorFromInteger(ContextCompat.GetColor(SoulSeekState.ActiveActivityRef, resourceIntColor));
+                        return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
                     }
                     else
                     {
-                        return SoulSeekState.ActiveActivityRef.Resources.GetColor(resourceIntColor);
+                        return SeekerState.ActiveActivityRef.Resources.GetColor(resourceIntColor);
                     }
                 case SentStatus.None:
                     throw new Exception("Sent status should not be none");
@@ -258,11 +258,11 @@ namespace AndriodApp1.Messages
             cardView.CardBackgroundColor = Android.Content.Res.ColorStateList.ValueOf(GetColorFromMsgStatus(msg.SentMsgStatus));
             if (msg.SentMsgStatus == SentStatus.Pending)
             {
-                viewTimeStamp.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.pending_);
+                viewTimeStamp.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.pending_);
             }
             else if (msg.SentMsgStatus == SentStatus.Failed)
             {
-                viewTimeStamp.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed);
+                viewTimeStamp.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.failed);
             }
             else
             {
