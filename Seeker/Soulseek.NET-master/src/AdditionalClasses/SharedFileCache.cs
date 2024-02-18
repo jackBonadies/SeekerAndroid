@@ -183,7 +183,7 @@
             {
                 var fullInfoFile = FullInfo[fName];
                 
-                //should we skip it
+                // should we skip it
                 if(fullInfoFile.Item5)
                 {
                     if(!inUserList.HasValue)
@@ -194,6 +194,12 @@
                     {
                         continue;
                     }
+                }
+
+                // filter from server list of excluded files
+                if(SearchUtil.ShouldExcludeFile(fName))
+                {
+                    continue;
                 }
 
                 Soulseek.File f = new Soulseek.File(1, fName, fullInfoFile.Item1, System.IO.Path.GetExtension(fName), GetFileAttributesFromTuple(fullInfoFile.Item3));
@@ -427,4 +433,41 @@
             }
         }
     }
+
+    public static class SearchUtil
+    {
+        public static IReadOnlyCollection<string> ExcludedSearchPhrases { get; set; }
+
+        /// <summary>
+        /// Filter DMCA'd terms.
+        /// </summary>
+        /// <remarks>
+        /// https://github.com/JurgenR/aioslsk/issues/180#issuecomment-1942375613
+        /// Basically the only thing the client needs to do is make sure that search results that
+        ///   contain any of the strings in message 160 in either their folder or file name aren't 
+        ///   returned to other users.
+        /// Expected (QT) behavior https://github.com/JurgenR/aioslsk/issues/180#issuecomment-1925713690
+        /// Before this behavior one could, of course, search Album name.  This (partially) prevents that.
+        /// </remarks>
+        /// <param name="fullFileName">full filename including folder.</param>
+        /// <returns> If one should exclude this file.</returns>
+        public static bool ShouldExcludeFile(string fullFileName)
+        {
+            if (ExcludedSearchPhrases == null)
+            {
+                return false;
+            }
+
+            foreach(var bannedPhrase in ExcludedSearchPhrases)
+            {
+                if(fullFileName.IndexOf(bannedPhrase, StringComparison.OrdinalIgnoreCase) != -1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
 }

@@ -43,6 +43,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using SlskHelp;
 
 namespace Seeker
 {
@@ -153,6 +154,7 @@ namespace Seeker
                 SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
 
                 SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
+                SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
 
                 MessageController.Initialize();
                 ChatroomController.Initialize();
@@ -177,6 +179,11 @@ namespace Seeker
             //shouldnt we also connect??? TODO TODO
 
 
+        }
+
+        private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
+        {
+            SearchUtil.ExcludedSearchPhrases = exludedPhrasesList;
         }
 
         public static string GetLegacyLanguageString()

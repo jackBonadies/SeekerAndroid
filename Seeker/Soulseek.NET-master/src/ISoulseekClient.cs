@@ -77,6 +77,11 @@ namespace Soulseek
         event EventHandler<string> GlobalMessageReceived;
 
         /// <summary>
+        ///     Occurs when the server sends a list of excluded ("banned") search phrases.
+        /// </summary>
+        event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
+
+        /// <summary>
         ///     Occurs when the client is logged in.
         /// </summary>
         event EventHandler LoggedIn;

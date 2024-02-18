@@ -31,7 +31,12 @@ namespace Soulseek.Messaging.Handlers
         event EventHandler<string> GlobalMessageReceived;
 
         /// <summary>
-        ///     Occurs when a global message is received.
+        ///     Occurs when the server sends a list of excluded ("banned") search phrases.
+        /// </summary>
+        event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
+
+        /// <summary>
+        ///     Occurs when user data is received
         /// </summary>
         event EventHandler<UserData> UserDataReceived;
 

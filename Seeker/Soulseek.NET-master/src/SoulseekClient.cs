@@ -172,6 +172,7 @@ namespace Soulseek
             ServerMessageHandler.DiagnosticGenerated += (sender, e) => DiagnosticGenerated?.Invoke(sender, e);
             ServerMessageHandler.GlobalMessageReceived += (sender, e) => GlobalMessageReceived?.Invoke(this, e);
             ServerMessageHandler.UserDataReceived += (sender, e) => UserDataReceived?.Invoke(this, e);
+            ServerMessageHandler.ExcludedSearchPhrasesReceived += (sender, e) => ExcludedSearchPhrasesReceived?.Invoke(this, e);
 
             ServerMessageHandler.KickedFromServer += (sender, e) =>
             {
@@ -225,6 +226,11 @@ namespace Soulseek
         ///     Occurs when the parent is disconnected.
         /// </summary>
         public event EventHandler<DistributedParentEventArgs> DistributedParentDisconnected;
+
+        /// <summary>
+        ///     Occurs when the server sends a list of excluded ("banned") search phrases.
+        /// </summary>
+        public event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
 
         /// <summary>
         ///     Occurs when a global message is received.
