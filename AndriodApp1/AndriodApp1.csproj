@@ -108,6 +108,8 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browse\BrowseAdapter.cs" />
+    <Compile Include="Browse\TreePathRecyclerAdapter.cs" />
     <Compile Include="Chatroom\ChatroomController.cs" />
     <Compile Include="Chatroom\ChatroomInnerFragment.cs" />
     <Compile Include="Chatroom\ChatroomOverviewFragment.cs" />

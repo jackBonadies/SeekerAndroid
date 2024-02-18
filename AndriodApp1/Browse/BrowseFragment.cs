@@ -1802,35 +1802,12 @@ namespace AndriodApp1
                     bool alreadySelected = (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains<int>(e.Position);
                     if (!alreadySelected)
                     {
-
-#pragma warning disable 0618
-                        if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                        {
-                            e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
-                            //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                        }
-                        else
-                        {
-                            e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                            //e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                        }
-#pragma warning restore 0618
+                        (e.View as BrowseResponseItemView).SetSelectedBackground(true);
                         (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Add(e.Position);
                     }
                     else
                     {
-#pragma warning disable 0618
-                        if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                        {
-                            e.View.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                            //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                        }
-                        else
-                        {
-                            e.View.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                            //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                        }
-#pragma warning restore 0618
+                        (e.View as BrowseResponseItemView).SetSelectedBackground(false);
                         (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Remove(e.Position);
                     }
 
@@ -1875,7 +1852,7 @@ namespace AndriodApp1
         /// 
         /// </summary>
         /// <returns>whether we can successfully go up.</returns>
-        private bool GoUpDirectory(int additionalLevels = 0)
+        public bool GoUpDirectory(int additionalLevels = 0)
         {
             cachedFilteredDataItemsForListView = null;
             bool filteredResults = FilteredResults;
@@ -1990,16 +1967,7 @@ namespace AndriodApp1
 
         }
 
-        public class PathItem
-        {
-            public string DisplayName;
-            public bool IsLastNode;
-            public PathItem(string displayName, bool isLastNode)
-            {
-                DisplayName = displayName;
-                IsLastNode = isLastNode;
-            }
-        }
+
 
         public static List<PathItem> GetPathItems(List<DataItem> nonFilteredDataItemsForListView)
         {
@@ -2243,269 +2211,7 @@ namespace AndriodApp1
         }
 
 
-        public class FullFileInfo
-        {
-            public long Size = 0;
-            public string FileName = string.Empty;
-            public string FullFileName = string.Empty;
-            public int Depth = 1;
-            public bool wasFilenameLatin1Decoded = false;
-            public bool wasFolderLatin1Decoded = false;
-        }
-
-        public class DataItem
-        {
-            private string Name = "";
-            public Directory Directory;
-            public Soulseek.File File;
-            public TreeNode<Directory> Node;
-            public DataItem(Directory d, TreeNode<Directory> n)
-            {
-                Name = d.Name; //this is the full name (other than file).. i.e. primary:Music\\Soulseek Complete
-                Directory = d;
-                Node = n;
-            }
-            public DataItem(Soulseek.File f, TreeNode<Directory> n)
-            {
-                Name = f.Filename;
-                File = f;
-                Node = n;
-            }
-            public bool IsDirectory()
-            {
-                return Directory != null;
-            }
-            public string GetDisplayName()
-            {
-                if (IsDirectory())
-                {
-                    if (this.Node.IsLocked)
-                    {
-                        return new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFileNameFromFile(Name);
-                    }
-                    else
-                    {
-                        return CommonHelpers.GetFileNameFromFile(Name);
-                    }
-                }
-                else
-                {
-                    if (this.Node.IsLocked)
-                    {
-                        return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Name;
-                    }
-                    else
-                    {
-                        return Name;
-                    }
-                }
-            }
-        }
-
-
-        public class TreePathRecyclerAdapter : RecyclerView.Adapter
-        {
-            private List<PathItem> localDataSet; //tab id's
-            public override int ItemCount => localDataSet.Count;
-            private int position = -1;
-            public BrowseFragment Owner;
-            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
-            {
-
-                TreePathItemView view = TreePathItemView.inflate(parent);
-                view.setupChildren();
-                view.ViewFolderName.Click += View_Click;
-                // .inflate(R.layout.text_row_item, viewGroup, false);
-                //(view as SearchTabView).searchTabLayout.Click += SearchTabLayout_Click;
-                //(view as SearchTabView).removeSearch.Click += RemoveSearch_Click;
-                return new TreePathItemViewHolder(view as View);
-
-
-            }
-
-            private void View_Click(object sender, EventArgs e)
-            {
-                int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.AdapterPosition;
-                Owner.GoUpDirectory(localDataSet.Count - pos - 2);
-            }
-
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            {
-                (holder as TreePathItemViewHolder).pathItemView.setItem(localDataSet[position]);
-            }
-
-
-            //private void SearchTabLayout_Click(object sender, EventArgs e)
-            //{
-            //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
-            //    int tabToGoTo = localDataSet[position];
-            //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
-            //    SearchTabDialog.Instance.Dismiss();
-            //}
-
-            public TreePathRecyclerAdapter(List<PathItem> ti, BrowseFragment owner)
-            {
-                Owner = owner;
-                localDataSet = ti;
-            }
-
-        }
-
-        public class TreePathItemViewHolder : RecyclerView.ViewHolder
-        {
-            public TreePathItemView pathItemView;
-
-
-            public TreePathItemViewHolder(View view) : base(view)
-            {
-                //super(view);
-                // Define click listener for the ViewHolder's View
-
-                pathItemView = (TreePathItemView)view;
-                pathItemView.ViewHolder = this;
-                //(ChatroomOverviewView as View).SetOnCreateContextMenuListener(this);
-            }
-
-            public TreePathItemView getUnderlyingView()
-            {
-                return pathItemView;
-            }
-        }
-
-
-
-        public class TreePathItemView : LinearLayout
-        {
-            //public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
-            private ImageView viewSeparator;
-            public TextView ViewFolderName;
-            public PathItem InnerPathItem { get; set; }
-            public TreePathItemViewHolder ViewHolder;
-
-            public TreePathItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.tree_path_item_view, this, true);
-                setupChildren();
-            }
-            public TreePathItemView(Context context, IAttributeSet attrs) : base(context, attrs)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.tree_path_item_view, this, true);
-                setupChildren();
-            }
-
-            public static TreePathItemView inflate(ViewGroup parent)
-            {
-                TreePathItemView itemView = (TreePathItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.tree_path_item_view_dummy, parent, false);
-                return itemView;
-            }
-
-            public void setupChildren()
-            {
-                viewSeparator = FindViewById<ImageView>(Resource.Id.folderSeparator);
-                ViewFolderName = FindViewById<TextView>(Resource.Id.folderName);
-            }
-
-            public void setItem(PathItem item)
-            {
-                InnerPathItem = item;
-                ViewFolderName.Text = item.DisplayName;
-                if (item.IsLastNode)
-                {
-                    ViewFolderName.Clickable = false;
-                    viewSeparator.Visibility = ViewStates.Gone;
-                }
-                else
-                {
-                    ViewFolderName.Clickable = true;
-                    viewSeparator.Visibility = ViewStates.Visible;
-                }
-            }
-        }
-
-
-
-        public class BrowseAdapter : ArrayAdapter<DataItem>
-        {
-            public List<int> SelectedPositions = new List<int>();
-            public BrowseFragment Owner = null;
-            public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner) : base(c, 0, items)
-            {
-                Owner = owner;
-            }
-
-            public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner, int[]? selectedPos) : base(c, 0, items)
-            {
-                Owner = owner;
-                if (selectedPos != null && selectedPos.Count() != 0)
-                {
-                    SelectedPositions = selectedPos.ToList();
-                }
-            }
-
-            public override View GetView(int position, View convertView, ViewGroup parent)
-            {
-                BrowseResponseItemView itemView = (BrowseResponseItemView)convertView;
-                if (null == itemView) //we do this once
-                {
-                    itemView = BrowseResponseItemView.inflate(parent);
-                    itemView.setupChildren();
-                    if (SeekerState.InDarkModeCache)
-                    {
-                        itemView.DisplayName.SetTextColor(Android.Graphics.Color.White);
-                    }
-                    else
-                    {
-                        itemView.DisplayName.SetTextColor(Android.Graphics.Color.Black);
-                    }
-                }
-                if (SelectedPositions.Contains(position)) //we do this every time.
-                {
-#pragma warning disable 0618
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                    {
-                        itemView.DisplayName.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                    }
-                    else
-                    {
-                        itemView.DisplayName.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    }
-#pragma warning restore 0618
-                }
-                else
-                {
-                    //REMEMBER: itemViews get reused.  and so if you set the background on tap
-                    //it will be set for every nth item.. and so reseting the background (as we do here)
-                    //is necessary!
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                    {
-                        itemView.DisplayName.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                                                               //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                    }
-                    else
-                    {
-                        itemView.DisplayName.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                                                               //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                    }
-                }
-                var dataItem = GetItem(position);
-                if (dataItem.IsDirectory())
-                {
-                    itemView.FolderIndicator.Visibility = ViewStates.Visible;
-                    itemView.FileDetails.Visibility = ViewStates.Gone;
-                    //itemView.ContainingViewGroup.SetPadding(0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom), 0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom));
-                }
-                else
-                {
-                    itemView.FolderIndicator.Visibility = ViewStates.Gone;
-                    itemView.FileDetails.Visibility = ViewStates.Visible;
-                    itemView.FileDetails.Text = CommonHelpers.GetSizeLengthAttrString(dataItem.File);
-                    //itemView.ContainingViewGroup.SetPadding(0,SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
-                }
-                itemView.DisplayName.Text = dataItem.GetDisplayName();
-                return itemView;
-                //return base.GetView(position, convertView, parent);
-            }
-        }
+ 
 
         private static AndroidX.AppCompat.App.AlertDialog browseUserDialog = null;
 
@@ -2680,70 +2386,76 @@ namespace AndriodApp1
             }
         }
 
-        //private void Input_EditorAction(object sender, TextView.EditorActionEventArgs e)
-        //{
-        //     if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-        //         e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-        //         e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-        //         e.ActionId == Android.Views.InputMethods.ImeAction.Search)
-        //     {
-        //         MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-        //         //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-        //         //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-        //         //overriding this, the keyboard fails to go down by default for some reason.....
-        //         try
-        //         {
-        //             Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-        //             imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-        //         }
-        //         catch (System.Exception ex)
-        //         {
-        //             MainActivity.LogFirebase(new Java.Lang.Throwable(ex.Message + " error closing keyboard"));
-        //         }
-        //        //Do the Browse Logic...
-        //        string usernameToBrowse = input.Text;
-        //        if (usernameToBrowse == null || usernameToBrowse == string.Empty)
-        //        {
-        //            Toast.MakeText(SeekerState.MainActivityRef, "Must type User to Browse.", ToastLength.Short);
-        //            (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-        //            return;
-        //        }
-        //        DownloadDialog.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
-        //        (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-        //    }
-        //}
+    }
+
+    public class PathItem
+    {
+        public string DisplayName;
+        public bool IsLastNode;
+        public PathItem(string displayName, bool isLastNode)
+        {
+            DisplayName = displayName;
+            IsLastNode = isLastNode;
+        }
     }
 
 
-    public class BrowseResponseItemView : LinearLayout
+    public class FullFileInfo
     {
-        public TextView DisplayName;
-        public TextView FileDetails;
-        public ImageView FolderIndicator;
-        public LinearLayout ContainingViewGroup;
-        public BrowseResponseItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.browse_response_item, this, true);
-            setupChildren();
-        }
-        public BrowseResponseItemView(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.browse_response_item, this, true);
-            setupChildren();
-        }
+        public long Size = 0;
+        public string FileName = string.Empty;
+        public string FullFileName = string.Empty;
+        public int Depth = 1;
+        public bool wasFilenameLatin1Decoded = false;
+        public bool wasFolderLatin1Decoded = false;
+    }
 
-        public static BrowseResponseItemView inflate(ViewGroup parent)
+    public class DataItem
+    {
+        private string Name = "";
+        public Directory Directory;
+        public Soulseek.File File;
+        public TreeNode<Directory> Node;
+        public DataItem(Directory d, TreeNode<Directory> n)
         {
-            BrowseResponseItemView itemView = (BrowseResponseItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.browse_response_item_dummy, parent, false);
-            return itemView;
+            Name = d.Name; //this is the full name (other than file).. i.e. primary:Music\\Soulseek Complete
+            Directory = d;
+            Node = n;
         }
-
-        public void setupChildren()
+        public DataItem(Soulseek.File f, TreeNode<Directory> n)
         {
-            DisplayName = FindViewById<TextView>(Resource.Id.displayName);
-            FolderIndicator = FindViewById<ImageView>(Resource.Id.folderIndicator);
-            FileDetails = FindViewById<TextView>(Resource.Id.fileDetails);
-            ContainingViewGroup = FindViewById<LinearLayout>(Resource.Id.containingViewGroup);
+            Name = f.Filename;
+            File = f;
+            Node = n;
+        }
+        public bool IsDirectory()
+        {
+            return Directory != null;
+        }
+        public string GetDisplayName()
+        {
+            if (IsDirectory())
+            {
+                if (this.Node.IsLocked)
+                {
+                    return new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFileNameFromFile(Name);
+                }
+                else
+                {
+                    return CommonHelpers.GetFileNameFromFile(Name);
+                }
+            }
+            else
+            {
+                if (this.Node.IsLocked)
+                {
+                    return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Name;
+                }
+                else
+                {
+                    return Name;
+                }
+            }
         }
     }
 }

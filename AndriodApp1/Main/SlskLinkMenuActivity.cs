@@ -88,7 +88,7 @@ namespace AndriodApp1
             }
             else
             {
-                List<BrowseFragment.FullFileInfo> fullFileInfos = new List<BrowseFragment.FullFileInfo>();
+                List<FullFileInfo> fullFileInfos = new List<FullFileInfo>();
 
                 //the filenames for these files are NOT the fullname.
                 //the fullname is dirTask.Result.Name "\\" f.Filename
@@ -98,14 +98,14 @@ namespace AndriodApp1
                     string fullFilename = directory.Name + "\\" + f.Filename;
                     if (thisFileOnly == null)
                     {
-                        fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
+                        fullFileInfos.Add(new FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                     }
                     else
                     {
                         if (fullFilename == thisFileOnly)
                         {
                             //add
-                            fullFileInfos.Add(new BrowseFragment.FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
+                            fullFileInfos.Add(new FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                             break;
                         }
                     }

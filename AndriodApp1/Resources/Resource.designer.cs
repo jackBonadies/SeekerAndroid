@@ -14189,8 +14189,8 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0B00BA
 			public const int ticker_item_dummy = 2131427514;
 			
-			// aapt resource value: 0x7F0B00C5
-			public const int transfers = 2131427525;
+			// aapt resource value: 0x7F0B00C4
+			public const int transfers = 2131427524;
 			
 			// aapt resource value: 0x7F0B00BB
 			public const int transfer_item_detailed = 2131427515;
@@ -14219,47 +14219,44 @@ namespace AndriodApp1
 			// aapt resource value: 0x7F0B00C3
 			public const int transfer_row = 2131427523;
 			
-			// aapt resource value: 0x7F0B00C4
-			public const int transfer_row_dummy = 2131427524;
+			// aapt resource value: 0x7F0B00C5
+			public const int tree_path_item_view = 2131427525;
 			
 			// aapt resource value: 0x7F0B00C6
-			public const int tree_path_item_view = 2131427526;
+			public const int tree_path_item_view_dummy = 2131427526;
 			
 			// aapt resource value: 0x7F0B00C7
-			public const int tree_path_item_view_dummy = 2131427527;
+			public const int upload_folder_options = 2131427527;
 			
 			// aapt resource value: 0x7F0B00C8
-			public const int upload_folder_options = 2131427528;
+			public const int upload_folder_row = 2131427528;
 			
 			// aapt resource value: 0x7F0B00C9
-			public const int upload_folder_row = 2131427529;
+			public const int upload_folder_row_dummy = 2131427529;
 			
 			// aapt resource value: 0x7F0B00CA
-			public const int upload_folder_row_dummy = 2131427530;
+			public const int user_list_activity_layout = 2131427530;
 			
 			// aapt resource value: 0x7F0B00CB
-			public const int user_list_activity_layout = 2131427531;
+			public const int user_note_dialog = 2131427531;
 			
 			// aapt resource value: 0x7F0B00CC
-			public const int user_note_dialog = 2131427532;
+			public const int user_row = 2131427532;
 			
 			// aapt resource value: 0x7F0B00CD
-			public const int user_row = 2131427533;
+			public const int user_row_dummy = 2131427533;
 			
 			// aapt resource value: 0x7F0B00CE
-			public const int user_row_dummy = 2131427534;
+			public const int user_status_update_item = 2131427534;
 			
 			// aapt resource value: 0x7F0B00CF
-			public const int user_status_update_item = 2131427535;
+			public const int user_status_update_item_dummy = 2131427535;
 			
 			// aapt resource value: 0x7F0B00D0
-			public const int user_status_update_item_dummy = 2131427536;
+			public const int view_user_info_layout = 2131427536;
 			
 			// aapt resource value: 0x7F0B00D1
-			public const int view_user_info_layout = 2131427537;
-			
-			// aapt resource value: 0x7F0B00D2
-			public const int wizard_activity_layout = 2131427538;
+			public const int wizard_activity_layout = 2131427537;
 			
 			static Layout()
 			{
