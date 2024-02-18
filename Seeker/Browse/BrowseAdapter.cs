@@ -117,18 +117,18 @@ namespace Seeker
                 if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                 {
                     this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                    this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
+                    //this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
                 }
                 else
                 {
                     this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
+                    //this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
                 }
             }
             else
             {
                 this.Background = null;
-                this.DisplayName.Background = null;
+                //this.DisplayName.Background = null;
             }
 #pragma warning restore 0618
         }

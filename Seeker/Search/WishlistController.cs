@@ -65,7 +65,7 @@ namespace Seeker.Search
             }
 
 #if DEBUG
-            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
+//            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
 #endif
 
             WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
