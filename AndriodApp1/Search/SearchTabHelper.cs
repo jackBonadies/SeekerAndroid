@@ -15,12 +15,12 @@ namespace AndriodApp1.Helpers
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_wishlist_directory);
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_wishlist_directory);
             if (!wishlist_dir.Exists())
             {
                 wishlist_dir.Mkdir();
             }
-            string name = System.Math.Abs(wishlistSearchResultsToRemove) + (legacy ? SoulSeekState.M_wishlist_tab_legacy : SoulSeekState.M_wishlist_tab);
+            string name = System.Math.Abs(wishlistSearchResultsToRemove) + (legacy ? KeyConsts.M_wishlist_tab_legacy : KeyConsts.M_wishlist_tab);
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
             if (!fileForOurInternalStorage.Delete())
             {
@@ -99,12 +99,12 @@ namespace AndriodApp1.Helpers
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_wishlist_directory);
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_wishlist_directory);
             if (!wishlist_dir.Exists())
             {
                 wishlist_dir.Mkdir();
             }
-            string name = System.Math.Abs(wishlistSearchResultsToSave) + SoulSeekState.M_wishlist_tab;
+            string name = System.Math.Abs(wishlistSearchResultsToSave) + KeyConsts.M_wishlist_tab;
 
             using (Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name))
             {
@@ -130,12 +130,12 @@ namespace AndriodApp1.Helpers
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
-            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, SoulSeekState.M_wishlist_directory);
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_wishlist_directory);
             //if (!wishlist_dir.Exists())
             //{
             //    wishlist_dir.Mkdir();
             //}
-            string name = System.Math.Abs(wishlistSearchResultsToRestore) + (legacy ? SoulSeekState.M_wishlist_tab_legacy : SoulSeekState.M_wishlist_tab);
+            string name = System.Math.Abs(wishlistSearchResultsToRestore) + (legacy ? KeyConsts.M_wishlist_tab_legacy : KeyConsts.M_wishlist_tab);
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
 
             if (!fileForOurInternalStorage.Exists())
@@ -223,8 +223,8 @@ namespace AndriodApp1.Helpers
 
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_SearchTabsState_Headers, stringToSave);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchTabsState_Headers, stringToSave);
                 editor.Commit();
             }
 
@@ -235,7 +235,7 @@ namespace AndriodApp1.Helpers
         //load legacy, and then save new to shared prefs and disk
         public static void ConvertLegacyWishlistsIfApplicable(Context c)
         {
-            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_LEGACY, string.Empty);
+            string savedState = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_LEGACY, string.Empty);
             if (savedState == string.Empty)
             {
                 //nothing to do...
@@ -245,8 +245,8 @@ namespace AndriodApp1.Helpers
             {
                 MainActivity.LogDebug("Converting Wishlists to New Format...");
                 RestoreStateFromSharedPreferencesLegacy();
-                SoulSeekState.SharedPreferences.Edit().Remove(SoulSeekState.M_SearchTabsState_LEGACY).Commit();
-                //string x = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_LEGACY, string.Empty); //works, string is empty.
+                SeekerState.SharedPreferences.Edit().Remove(KeyConsts.M_SearchTabsState_LEGACY).Commit();
+                //string x = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_LEGACY, string.Empty); //works, string is empty.
                 SaveHeadersToSharedPrefs();
                 SaveAllSearchTabsToDisk(c);
             }
@@ -254,7 +254,7 @@ namespace AndriodApp1.Helpers
 
         public static void RestoreHeadersFromSharedPreferences()
         {
-            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_Headers, string.Empty);
+            string savedState = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_Headers, string.Empty);
             if (savedState == string.Empty)
             {
                 return;
@@ -284,12 +284,12 @@ namespace AndriodApp1.Helpers
                 sw.Stop();
                 MainActivity.LogDebug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
-            //SoulSeekState.SharedPreferences.Edit().Remove
+            //SeekerState.SharedPreferences.Edit().Remove
         }
 
         public static void RestoreStateFromSharedPreferencesLegacy()
         {
-            string savedState = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_SearchTabsState_LEGACY, string.Empty);
+            string savedState = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_LEGACY, string.Empty);
             if (savedState == string.Empty)
             {
                 return;
@@ -364,7 +364,7 @@ namespace AndriodApp1.Helpers
             SearchTabCollection[lastWishlistID].CurrentlySearching = false;
 
             //*********************
-            SearchTabHelper.SaveSearchResultsToDisk(lastWishlistID, SoulSeekState.ActiveActivityRef);
+            SearchTabHelper.SaveSearchResultsToDisk(lastWishlistID, SeekerState.ActiveActivityRef);
             SearchTabHelper.SaveHeadersToSharedPrefs();
         }
 

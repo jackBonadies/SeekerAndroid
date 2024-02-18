@@ -35,9 +35,9 @@ namespace AndriodApp1.Managers
             lock (PrivilegedUsersLock)
             {
                 PrivilegedUsers = privUsers;
-                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty)
+                if (SeekerState.Username != null && SeekerState.Username != string.Empty)
                 {
-                    IsPrivileged = CheckIfPrivileged(SoulSeekState.Username);
+                    IsPrivileged = CheckIfPrivileged(SeekerState.Username);
                     if (IsPrivileged)
                     {
                         GetPrivilegesAPI(false);
@@ -151,7 +151,7 @@ namespace AndriodApp1.Managers
 
         private void GetPrivilegesLogic(bool feedback)
         {
-            SoulSeekState.SoulseekClient.GetPrivilegesAsync().ContinueWith(new Action<Task<int>>
+            SeekerState.SoulseekClient.GetPrivilegesAsync().ContinueWith(new Action<Task<int>>
                 ((Task<int> t) =>
                 {
                     if (t.IsFaulted)
@@ -193,15 +193,15 @@ namespace AndriodApp1.Managers
 
         public void GetPrivilegesAPI(bool feedback)
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_check_privileges, ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_check_privileges, ToastLength.Short).Show();
                 return;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -209,15 +209,15 @@ namespace AndriodApp1.Managers
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
 
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
 
                         });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });
 
                 }));
             }

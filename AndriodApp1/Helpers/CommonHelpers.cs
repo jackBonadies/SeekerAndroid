@@ -34,20 +34,20 @@ namespace AndriodApp1
 
         public static bool CompleteIncompleteDifferentVolume()
         {
-            if (SettingsActivity.UseIncompleteManualFolder() && SoulSeekState.RootIncompleteDocumentFile != null && SoulSeekState.RootDocumentFile != null)
+            if (SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootIncompleteDocumentFile != null && SeekerState.RootDocumentFile != null)
             {
-                //if(!SoulSeekState.UseLegacyStorage())
+                //if(!SeekerState.UseLegacyStorage())
                 //{
                 //    //this method is only for API29+
-                //    //var sm = (SoulSeekState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);
-                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(SoulSeekState.RootDocumentFile.Uri); //fails if not media store uri
+                //    //var sm = (SeekerState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);
+                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(SeekerState.RootDocumentFile.Uri); //fails if not media store uri
                 //    //string uuid1 = sv1.Uuid;
-                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(SoulSeekState.RootIncompleteDocumentFile.Uri);
+                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(SeekerState.RootIncompleteDocumentFile.Uri);
                 //    //string uuid2 = sv2.Uuid;
 
 
-                //    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, out _);
-                //    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume2 = MainActivity.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
 
                 //    return uuid1 != uuid2;
                 //}
@@ -55,21 +55,21 @@ namespace AndriodApp1
                 //{
                 try
                 {
-                    string volume1 = MainActivity.GetVolumeName(SoulSeekState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
+                    string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
                     if (everything)
                     {
-                        volume1 = SoulSeekState.RootDocumentFile.Uri.LastPathSegment;
+                        volume1 = SeekerState.RootDocumentFile.Uri.LastPathSegment;
                     }
-                    string volume2 = MainActivity.GetVolumeName(SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
+                    string volume2 = MainActivity.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
                     if (everything)
                     {
-                        volume2 = SoulSeekState.RootIncompleteDocumentFile.Uri.LastPathSegment;
+                        volume2 = SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
                     }
                     return volume1 != volume2;
                 }
                 catch (Exception e)
                 {
-                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SoulSeekState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SoulSeekState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
+                    MainActivity.LogFirebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SeekerState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SeekerState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
                     return false;
                 }
                 //}
@@ -131,7 +131,7 @@ namespace AndriodApp1
             }
             if (dt.Date == CommonHelpers.GetDateTimeNowSafe().Date)
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
+                return SeekerState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
             }
             else
             {
@@ -241,13 +241,13 @@ namespace AndriodApp1
         public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             string title = null;
-            if (SoulSeekState.UserNotes.ContainsKey(username))
+            if (SeekerState.UserNotes.ContainsKey(username))
             {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note);
+                title = SeekerState.ActiveActivityRef.GetString(Resource.String.edit_note);
             }
             else
             {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note);
+                title = SeekerState.ActiveActivityRef.GetString(Resource.String.add_note);
             }
             if (i != -1)
             {
@@ -262,13 +262,13 @@ namespace AndriodApp1
         public static void AddUserOnlineAlertMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             string title = null;
-            if (SoulSeekState.UserOnlineAlerts.ContainsKey(username))
+            if (SeekerState.UserOnlineAlerts.ContainsKey(username))
             {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_online_alert);
+                title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_online_alert);
             }
             else
             {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.set_online_alert);
+                title = SeekerState.ActiveActivityRef.GetString(Resource.String.set_online_alert);
             }
             if (i != -1)
             {
@@ -286,14 +286,14 @@ namespace AndriodApp1
             {
                 if (SeekerApplication.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
                 {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user))
+                    if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.ignore_user))
                     {
                         menuItem.SetTitle(Resource.String.remove_from_ignored);
                     }
                 }
                 else
                 {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored))
+                    if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored))
                     {
                         menuItem.SetTitle(Resource.String.ignore_user);
                     }
@@ -307,22 +307,22 @@ namespace AndriodApp1
             {
                 if (MainActivity.UserListContainsUser(username)) //if we already have added said user, change title add to remove..
                 {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
+                    if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
                     {
                         menuItem.SetTitle(Resource.String.remove_from_user_list);
                     }
-                    else if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_user))
+                    else if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_user))
                     {
                         menuItem.SetTitle(Resource.String.remove_user);
                     }
                 }
                 else
                 {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list))
+                    if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list))
                     {
                         menuItem.SetTitle(Resource.String.add_to_user_list);
                     }
-                    else if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user))
+                    else if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.remove_user))
                     {
                         menuItem.SetTitle(Resource.String.add_user);
                     }
@@ -334,9 +334,9 @@ namespace AndriodApp1
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (SoulSeekState.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
+                if (SeekerState.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
                 {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_note))
+                    if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_note))
                     {
                         menuItem.SetTitle(Resource.String.edit_note);
                     }
@@ -344,7 +344,7 @@ namespace AndriodApp1
                 }
                 else
                 {
-                    if (menuItem.TitleFormatted.ToString() == SoulSeekState.ActiveActivityRef.GetString(Resource.String.edit_note))
+                    if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.edit_note))
                     {
                         menuItem.SetTitle(Resource.String.add_note);
                     }
@@ -398,22 +398,22 @@ namespace AndriodApp1
             {
                 if (full_title)
                 {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_to_user_list);
+                    title = SeekerState.ActiveActivityRef.GetString(Resource.String.add_to_user_list);
                 }
                 else
                 {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_user);
+                    title = SeekerState.ActiveActivityRef.GetString(Resource.String.add_user);
                 }
             }
             else
             {
                 if (full_title)
                 {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list);
+                    title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_from_user_list);
                 }
                 else
                 {
-                    title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user);
+                    title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_user);
                 }
             }
             if (i != -1)
@@ -436,11 +436,11 @@ namespace AndriodApp1
             string title = null;
             if (!SeekerApplication.IsUserInIgnoreList(username))
             {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ignore_user);
+                title = SeekerState.ActiveActivityRef.GetString(Resource.String.ignore_user);
             }
             else
             {
-                title = SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored);
+                title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored);
             }
             if (i != -1)
             {
@@ -532,18 +532,18 @@ namespace AndriodApp1
         {
             if (activity == null)
             {
-                activity = SoulSeekState.ActiveActivityRef;
+                activity = SeekerState.ActiveActivityRef;
             }
             if (contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
                 SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
             {
                 SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.msg_user))
@@ -558,15 +558,15 @@ namespace AndriodApp1
             else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.add_user))
             {
-                UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
+                UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
-                MainActivity.ToastUI_short(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
+                MainActivity.ToastUI_short(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
                 MainActivity.UserListRemoveUser(usernameInQuestion);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
+                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
@@ -584,11 +584,11 @@ namespace AndriodApp1
             {
                 Action<View> action = new Action<View>((v) =>
                 {
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
                     intent.AddFlags(ActivityFlags.SingleTop); //??
                     activity.StartActivity(intent);
-                    //((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                    //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                 });
                 DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
                 return true;
@@ -611,13 +611,13 @@ namespace AndriodApp1
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
             {
-                SoulSeekState.UserOnlineAlerts[usernameInQuestion] = 0;
+                SeekerState.UserOnlineAlerts[usernameInQuestion] = 0;
                 CommonHelpers.SaveOnlineAlerts();
                 uiUpdateSetResetOnlineAlert();
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
             {
-                SoulSeekState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
+                SeekerState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
                 CommonHelpers.SaveOnlineAlerts();
                 uiUpdateSetResetOnlineAlert();
 
@@ -1032,7 +1032,7 @@ namespace AndriodApp1
         {
             int numFiles = 0;
             long totalBytes = -1;
-            if (SoulSeekState.HideLockedResultsInSearch)
+            if (SeekerState.HideLockedResultsInSearch)
             {
                 numFiles = searchResponse.FileCount;
                 totalBytes = searchResponse.Files.Sum(f => f.Size);
@@ -1047,7 +1047,7 @@ namespace AndriodApp1
             string sizeString = GetHumanReadableSize(totalBytes);
 
             var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
-            if (!SoulSeekState.HideLockedResultsInSearch)
+            if (!SeekerState.HideLockedResultsInSearch)
             {
                 filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
             }
@@ -1297,18 +1297,18 @@ namespace AndriodApp1
             }
             if (PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
             {
-                MainActivity.ToastUI(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
+                MainActivity.ToastUI(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
                 return false;
             }
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
                 return false;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }
@@ -1316,15 +1316,15 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
 
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
 
                         });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
                 }));
                 return true;
             }
@@ -1338,20 +1338,20 @@ namespace AndriodApp1
 
         private static void GivePrivilegesLogic(string username, int numDaysInt)
         {
-            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
-            SoulSeekState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
+            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
+            SeekerState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
                 ((Task t) =>
                 {
                     if (t.IsFaulted)
                     {
                         if (t.Exception.InnerException is TimeoutException)
                         {
-                            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
                         }
                         else
                         {
-                            MainActivity.LogFirebase(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
-                            SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
+                            MainActivity.LogFirebase(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
+                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
                         }
                         return;
                     }
@@ -1360,7 +1360,7 @@ namespace AndriodApp1
                         //now there is a chance the user does not exist or something happens.  in which case our days will be incorrect...
                         PrivilegesManager.Instance.SubtractDays(numDaysInt);
 
-                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
+                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
 
                         //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
                         //in the rare case that it fails they do get a message so they can figure it out
@@ -1370,14 +1370,14 @@ namespace AndriodApp1
 
         public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction = null)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.note_title), username));
-            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.user_note_dialog, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+            builder.SetTitle(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.note_title), username));
+            View viewInflated = LayoutInflater.From(SeekerState.ActiveActivityRef).Inflate(Resource.Layout.user_note_dialog, (ViewGroup)SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
             // Set up the input
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.editUserNote);
 
             string existingNote = null;
-            SoulSeekState.UserNotes.TryGetValue(username, out existingNote);
+            SeekerState.UserNotes.TryGetValue(username, out existingNote);
             if (existingNote != null)
             {
                 input.Text = existingNote;
@@ -1401,19 +1401,19 @@ namespace AndriodApp1
                     if (!wasEmpty && isEmpty)
                     {
                         //we removed the note
-                        SoulSeekState.UserNotes.TryRemove(username, out _);
+                        SeekerState.UserNotes.TryRemove(username, out _);
                         SaveUserNotes();
 
                     }
                     else
                     {
                         //we added a note
-                        SoulSeekState.UserNotes[username] = newText;
+                        SeekerState.UserNotes[username] = newText;
                         SaveUserNotes();
                     }
                     if (uiUpdateAction != null)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
+                        SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                     }
 
                 }
@@ -1431,7 +1431,7 @@ namespace AndriodApp1
                     else
                     {
                         //update note and save prefs..
-                        SoulSeekState.UserNotes[username] = newText;
+                        SeekerState.UserNotes[username] = newText;
                         SaveUserNotes();
                     }
                 }
@@ -1453,8 +1453,8 @@ namespace AndriodApp1
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserNotes, SerializationHelper.SaveUserNotesToString(SoulSeekState.UserNotes));
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserNotes, SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
                 editor.Commit();
             }
         }
@@ -1464,8 +1464,8 @@ namespace AndriodApp1
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsToString(SoulSeekState.UserOnlineAlerts));
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));
                 editor.Commit();
             }
         }
@@ -1473,9 +1473,9 @@ namespace AndriodApp1
 
         public static void ShowGivePrilegesDialog(string username)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.give_to_), username));
-            View viewInflated = LayoutInflater.From(SoulSeekState.ActiveActivityRef).Inflate(Resource.Layout.give_privileges_layout, (ViewGroup)SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+            builder.SetTitle(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.give_to_), username));
+            View viewInflated = LayoutInflater.From(SeekerState.ActiveActivityRef).Inflate(Resource.Layout.give_privileges_layout, (ViewGroup)SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), false);
             // Set up the input
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.givePrivilegesEditText);
 
@@ -1506,8 +1506,8 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(SoulSeekState.ActiveActivityRef.Window.DecorView.WindowToken, 0);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(SeekerState.ActiveActivityRef.Window.DecorView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
                     {

@@ -60,10 +60,10 @@ namespace AndriodApp1
                     //System.Threading.Tasks.Task t = new System.Threading.Tasks.Task(() => {System.Threading.Thread.Sleep(5000); });
                     //t.Start();
                     //t.ContinueWith((System.Threading.Tasks.Task t) => {
-                    //    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => {
-                    //    Google.Android.Material.Snackbar.Snackbar sb = Google.Android.Material.Snackbar.Snackbar.Make(SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), "Test anywhere snackbar", Google.Android.Material.Snackbar.Snackbar.LengthLong).SetAction("Go", (View v)=>{
+                    //    SeekerState.ActiveActivityRef.RunOnUiThread(() => {
+                    //    Google.Android.Material.Snackbar.Snackbar sb = Google.Android.Material.Snackbar.Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), "Test anywhere snackbar", Google.Android.Material.Snackbar.Snackbar.LengthLong).SetAction("Go", (View v)=>{
 
-                    //        RequestedUserInfoHelper.LaunchUserInfoView(SoulSeekState.Username);
+                    //        RequestedUserInfoHelper.LaunchUserInfoView(SeekerState.Username);
 
 
 
@@ -82,19 +82,19 @@ namespace AndriodApp1
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = this.UserToView;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.messageUser:
-                    Intent intentMsg = new Intent(SoulSeekState.ActiveActivityRef, typeof(MessagesActivity));
+                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
                     intentMsg.AddFlags(ActivityFlags.SingleTop);
                     intentMsg.PutExtra(MessageController.FromUserName, this.UserToView); //so we can go to this user..
                     intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
                     this.StartActivity(intentMsg);
                     return true;
                 case Resource.Id.addUser:
-                    UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, this.UserToView, null);
+                    UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressed();
@@ -199,7 +199,7 @@ namespace AndriodApp1
 
             base.OnCreate(savedInstanceState);
 
-            SoulSeekState.ActiveActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.view_user_info_layout);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.view_user_info_toolbar);
@@ -217,10 +217,10 @@ namespace AndriodApp1
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
 
-            if (UserToView == SoulSeekState.Username)
+            if (UserToView == SeekerState.Username)
             {
                 //for UserData we only care about Online Status, upload speed, file count, and dir count
-                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, SoulSeekState.UploadSpeed, 0, SoulSeekState.SharedFileCache?.FileCount ?? 0, SoulSeekState.SharedFileCache?.DirectoryCount ?? 0, "");
+                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, SeekerState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = SeekerApplication.UserInfoResponseHandler(UserToView, null).Result; //the task is already completed.  (task.fromresult).
             }
             else if (UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
@@ -339,7 +339,7 @@ namespace AndriodApp1
                 //  which doesnt, a .txt, etc.). Nicotine for example allows any file to be selected.
                 if (loadedBitmap == null)
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
                     string uname = userData != null ? userData.Username : "no user";
                     MainActivity.LogFirebase("FAILURE TO DECODE USERS PICTURE " + uname);
                     return;

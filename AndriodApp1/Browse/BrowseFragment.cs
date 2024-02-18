@@ -146,11 +146,11 @@ namespace AndriodApp1
         private void DebounceTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             UpdateFilteredResponses(); // this is the expensive function...
-            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
                 lock (filteredDataItemsForListView)
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SoulSeekState.MainActivityRef, filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
+                    BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
                     ListView lv = rootView?.FindViewById<ListView>(Resource.Id.listViewDirectories);
                     if (lv != null)
                     {
@@ -211,7 +211,7 @@ namespace AndriodApp1
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, null))
+                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -247,8 +247,8 @@ namespace AndriodApp1
                 case Resource.Id.action_copy_folder_url:
                     string fullDirName = dataItemsForListView[0].Node.Data.Name;
                     string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
-                    CommonHelpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
+                    CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
+                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
@@ -256,7 +256,7 @@ namespace AndriodApp1
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
-                    UserListActivity.AddUserAPI(SoulSeekState.MainActivityRef, username, null);
+                    UserListActivity.AddUserAPI(SeekerState.MainActivityRef, username, null);
                     return true;
                 case Resource.Id.action_get_user_info:
                     RequestedUserInfoHelper.RequestUserInfoApi(username);
@@ -270,7 +270,7 @@ namespace AndriodApp1
             //this is necessary if programmatically moving to a tab from another activity..
             if (menuVisible)
             {
-                var navigator = SoulSeekState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 if (navigator != null)
                 {
                     navigator.Menu.GetItem(3).SetCheckable(true);
@@ -306,7 +306,7 @@ namespace AndriodApp1
         {
             Instance = this;
             this.HasOptionsMenu = true;
-            SoulSeekState.InDarkModeCache = DownloadDialog.InNightMode(this.Context);
+            SeekerState.InDarkModeCache = DownloadDialog.InNightMode(this.Context);
             MainActivity.LogDebug("BrowseFragmentOnCreateView");
             this.rootView = inflater.Inflate(Resource.Layout.browse, container, false);
             UpdateForScreenSize();
@@ -428,7 +428,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustResize);
+                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustResize);
             }
             catch (System.Exception err)
             {
@@ -487,7 +487,7 @@ namespace AndriodApp1
                     try
                     {
 
-                        //SoulSeekState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
+                        //SeekerState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)Context.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                         test.ClearFocus();
@@ -528,7 +528,7 @@ namespace AndriodApp1
                 //overriding this, the keyboard fails to go down by default for some reason.....
                 try
                 {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
                     imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                 }
                 catch (System.Exception ex)
@@ -571,7 +571,7 @@ namespace AndriodApp1
         public void BrowseResponseReceivedUI_Handler(object sender, EventArgs args)
         {
             //if the fragment was never created then this.Context will be null
-            SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+            SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
 
                 lock (dataItemsForListView)
@@ -585,11 +585,11 @@ namespace AndriodApp1
                         BrowseFragment.Instance.RefreshOnRecieved();
                     }
                 }
-                var pager = (AndroidX.ViewPager.Widget.ViewPager)SoulSeekState.MainActivityRef?.FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
                 if (pager != null && pager.CurrentItem == 3)
                 {
-                    SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
-                    SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
+                    SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                    SeekerState.MainActivityRef.InvalidateOptionsMenu();
                 }
 
             });
@@ -598,11 +598,11 @@ namespace AndriodApp1
         public override void OnResume()
         {
             base.OnResume();
-            if (SoulSeekState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
-                && !SoulSeekState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername)
-                && SoulSeekState.MainActivityRef.OnBrowseTab())
+            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
+                && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername)
+                && SeekerState.MainActivityRef.OnBrowseTab())
             {
-                SoulSeekState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
             }
             BrowseResponseReceivedUI += BrowseResponseReceivedUI_Handler;
             if (currentUsernameUI != CurrentUsername)
@@ -717,7 +717,7 @@ namespace AndriodApp1
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
                 //UpdateFilteredResponses(); // this is the expensive function...
-                //BrowseAdapter customAdapter = new BrowseAdapter(SoulSeekState.MainActivityRef, filteredDataItemsForListView);
+                //BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, filteredDataItemsForListView);
                 //ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
                 //lv.Adapter = (customAdapter);
             }
@@ -727,7 +727,7 @@ namespace AndriodApp1
                 FilteredResults = false;
                 lock (dataItemsForListView) //collection was modified exception here...
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SoulSeekState.MainActivityRef, dataItemsForListView, this);
+                    BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, dataItemsForListView, this);
                     ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
                     lv.Adapter = (customAdapter);
                 }
@@ -1071,7 +1071,7 @@ namespace AndriodApp1
 
         private void UpdateForScreenSize()
         {
-            if (!SoulSeekState.IsLowDpi()) return;
+            if (!SeekerState.IsLowDpi()) return;
             try
             {
                 //this.rootView.FindViewById<TextView>(Resource.Id.browseQueue).SetTextSize(ComplexUnitType.Dip, 8);
@@ -1151,7 +1151,7 @@ namespace AndriodApp1
                     }
                     linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
                 }
-                CommonHelpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, linkToCopy);
+                CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
                 if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
                 {
                     Toast.MakeText(this.Context, Resource.String.LinksCopied, ToastLength.Short).Show();
@@ -1235,12 +1235,12 @@ namespace AndriodApp1
                     {
                         if (t.IsFaulted)
                         {
-                            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                             {
                                 //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-                                //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
+                                //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                Toast.MakeText(SeekerState.ActiveActivityRef, Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
 
                             });
                             return;
@@ -1267,7 +1267,7 @@ namespace AndriodApp1
             {
                 if (recusiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                     return;
                 }
                 DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
@@ -1276,7 +1276,7 @@ namespace AndriodApp1
             {
                 if (topLevelFullFileInfoOnly.Count == 0)
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                     return;
                 }
                 DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
@@ -1287,7 +1287,7 @@ namespace AndriodApp1
         {
             if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                 return;
             }
 
@@ -1359,7 +1359,7 @@ namespace AndriodApp1
             if (containsSubDirs)
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
                 string topLevelStr = string.Empty;
@@ -1489,13 +1489,13 @@ namespace AndriodApp1
 
             if (dataItemsForDownload.Count == 0)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                 return;
             }
             if (FilteredResults && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SoulSeekState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
                 b.SetTitle(Resource.String.filter_is_on);
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -1531,7 +1531,7 @@ namespace AndriodApp1
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1540,12 +1540,12 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
                             //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-                            //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
+                            //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
 
                         });
                         return;
@@ -1602,11 +1602,11 @@ namespace AndriodApp1
         //            t.ContinueWith(new Action<Task>((Task t) => {
         //                if (t.IsFaulted)
         //                {
-        //                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { 
+        //                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { 
         //                        //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-        //                        //so best to use SoulSeekState.MainActivityRef which is static and so not null after MainActivity.OnCreate
+        //                        //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
 
-        //                        Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
+        //                        Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
 
         //                        });
         //                    return;
@@ -1626,9 +1626,9 @@ namespace AndriodApp1
 
         public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string _username)
         {
-            if (_username == SoulSeekState.Username)
+            if (_username == SeekerState.Username)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long).Show(); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long).Show(); });
                 return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
             }
             MainActivity.LogDebug("CreateDownloadAllTask");
@@ -1652,7 +1652,7 @@ namespace AndriodApp1
                 {
                     toast1 = new Action(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show();
                     });
 
                 }
@@ -1662,17 +1662,17 @@ namespace AndriodApp1
                     {
                         if (queuePaused)
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.QueuedForDownload, ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.QueuedForDownload, ToastLength.Short).Show();
                         }
                         else
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.download_is_starting, ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.download_is_starting, ToastLength.Short).Show();
                         }
 
                     });
                 }
 
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(toast1);
+                SeekerState.ActiveActivityRef.RunOnUiThread(toast1);
             });
             return task;
         }
@@ -1717,7 +1717,7 @@ namespace AndriodApp1
             {
                 e.Handled = true;
                 //show options
-                //SoulSeekState.ActiveActivityRef.Open
+                //SeekerState.ActiveActivityRef.Open
                 //this.RegisterForContextMenu(e.View);
                 ItemPositionLongClicked = e.Position;
                 this.listViewDirectories.ShowContextMenu();
@@ -1781,7 +1781,7 @@ namespace AndriodApp1
                     if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
                     {
                         //dont let them do this... if this happens then there is no way to get back up...
-                        Toast.MakeText(SoulSeekState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short).Show();
                         return;
                     }
                     SaveScrollPosition();
@@ -2075,8 +2075,8 @@ namespace AndriodApp1
                         DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
                         //bool isDir = itemSelected.IsDirectory();
                         string slskLink = CommonHelpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
-                        CommonHelpers.CopyTextToClipboard(SoulSeekState.ActiveActivityRef, slskLink);
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
+                        CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
+                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
                         return true;
                 }
             }
@@ -2111,7 +2111,7 @@ namespace AndriodApp1
                 System.Environment.NewLine +
                 lengthTime).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
-            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
         public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
@@ -2143,7 +2143,7 @@ namespace AndriodApp1
             //FilterSpecialFlags.Clear();
             if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
-                SoulSeekState.MainActivityRef.RunOnUiThread(() =>
+                SeekerState.MainActivityRef.RunOnUiThread(() =>
                 {
                     EditText filterText = BrowseFragment.Instance.rootView.FindViewById<EditText>(Resource.Id.filterText);
                     filterText.Text = string.Empty;
@@ -2152,7 +2152,7 @@ namespace AndriodApp1
             }
         }
 
-        public static void SoulSeekState_BrowseResponseReceived(object sender, BrowseResponseEvent e)
+        public static void SeekerState_BrowseResponseReceived(object sender, BrowseResponseEvent e)
         {
             ClearFilterStringAndCached();
             ScrollPositionRestore?.Clear();
@@ -2174,8 +2174,8 @@ namespace AndriodApp1
 
                     if (staringPoint == null)
                     {
-                        MainActivity.LogFirebase("SoulSeekState_BrowseResponseReceived: startingPoint is null");
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long).Show(); });
+                        MainActivity.LogFirebase("SeekerState_BrowseResponseReceived: startingPoint is null");
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long).Show(); });
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
@@ -2449,7 +2449,7 @@ namespace AndriodApp1
                 {
                     itemView = BrowseResponseItemView.inflate(parent);
                     itemView.setupChildren();
-                    if (SoulSeekState.InDarkModeCache)
+                    if (SeekerState.InDarkModeCache)
                     {
                         itemView.DisplayName.SetTextColor(Android.Graphics.Color.White);
                     }
@@ -2463,7 +2463,7 @@ namespace AndriodApp1
 #pragma warning disable 0618
                     if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
                     {
-                        itemView.DisplayName.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SoulSeekState.ActiveActivityRef.Theme);
+                        itemView.DisplayName.Background = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
                     }
                     else
                     {
@@ -2492,14 +2492,14 @@ namespace AndriodApp1
                 {
                     itemView.FolderIndicator.Visibility = ViewStates.Visible;
                     itemView.FileDetails.Visibility = ViewStates.Gone;
-                    //itemView.ContainingViewGroup.SetPadding(0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom), 0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom));
+                    //itemView.ContainingViewGroup.SetPadding(0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom), 0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom));
                 }
                 else
                 {
                     itemView.FolderIndicator.Visibility = ViewStates.Gone;
                     itemView.FileDetails.Visibility = ViewStates.Visible;
                     itemView.FileDetails.Text = CommonHelpers.GetSizeLengthAttrString(dataItem.File);
-                    //itemView.ContainingViewGroup.SetPadding(0,SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SoulSeekState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
+                    //itemView.ContainingViewGroup.SetPadding(0,SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
                 }
                 itemView.DisplayName.Text = dataItem.GetDisplayName();
                 return itemView;
@@ -2512,7 +2512,7 @@ namespace AndriodApp1
         public void ShowEditTextBrowseUserDialog()
         {
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
-            FragmentActivity c = this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef;
+            FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             MainActivity.LogInfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(c.Resources.GetString(Resource.String.browse_user_files));
@@ -2528,7 +2528,7 @@ namespace AndriodApp1
 
             Action<View> goSnackBarAction = new Action<View>((View v) =>
             {
-                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -2537,7 +2537,7 @@ namespace AndriodApp1
                 string usernameToBrowse = input.Text;
                 if (usernameToBrowse == null || usernameToBrowse == string.Empty)
                 {
-                    Toast.MakeText(this.Activity != null ? this.Activity : SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
+                    Toast.MakeText(this.Activity != null ? this.Activity : SeekerState.MainActivityRef, SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
                     if (sender is AndroidX.AppCompat.App.AlertDialog aDiag1) //actv
                     {
                         aDiag1.Dismiss();
@@ -2548,7 +2548,7 @@ namespace AndriodApp1
                     }
                     return;
                 }
-                SoulSeekState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
+                SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
                 DownloadDialog.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -2584,7 +2584,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -2606,7 +2606,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -2639,26 +2639,26 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if (SoulSeekState.MainActivityRef == null || this.Activity == null)
+                if (SeekerState.MainActivityRef == null || this.Activity == null)
                 {
                     MainActivity.LogFirebase("WindowManagerBadTokenException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.MainActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.Activity.IsFinishing;
                     MainActivity.LogFirebase("WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
-                if (SoulSeekState.MainActivityRef == null || this.Activity == null)
+                if (SeekerState.MainActivityRef == null || this.Activity == null)
                 {
                     MainActivity.LogFirebase("Exception null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.MainActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.MainActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.Activity.IsFinishing;
                     MainActivity.LogFirebase("Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
@@ -2672,7 +2672,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
             catch (System.Exception err)
             {
@@ -2693,7 +2693,7 @@ namespace AndriodApp1
         //         //overriding this, the keyboard fails to go down by default for some reason.....
         //         try
         //         {
-        //             Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.MainActivityRef.GetSystemService(Context.InputMethodService);
+        //             Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
         //             imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
         //         }
         //         catch (System.Exception ex)
@@ -2704,7 +2704,7 @@ namespace AndriodApp1
         //        string usernameToBrowse = input.Text;
         //        if (usernameToBrowse == null || usernameToBrowse == string.Empty)
         //        {
-        //            Toast.MakeText(SoulSeekState.MainActivityRef, "Must type User to Browse.", ToastLength.Short);
+        //            Toast.MakeText(SeekerState.MainActivityRef, "Must type User to Browse.", ToastLength.Short);
         //            (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
         //            return;
         //        }

@@ -42,7 +42,7 @@ namespace AndriodApp1
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            if (PendingText == SoulSeekState.UserInfoBio)
+            if (PendingText == SeekerState.UserInfoBio)
             {
                 menu.FindItem(Resource.Id.save_user_action).SetVisible(false);
             }
@@ -58,7 +58,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case Resource.Id.save_user_action:
-                    if (PendingText == SoulSeekState.UserInfoBio)
+                    if (PendingText == SeekerState.UserInfoBio)
                     {
                         Toast.MakeText(this, this.Resources.GetString(Resource.String.no_changes_to_save), ToastLength.Short).Show();
                     }
@@ -70,7 +70,7 @@ namespace AndriodApp1
                     }
                     return true;
                 case Resource.Id.view_self_info_action:
-                    RequestedUserInfoHelper.LaunchUserInfoView(SoulSeekState.Username);
+                    RequestedUserInfoHelper.LaunchUserInfoView(SeekerState.Username);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressed();
@@ -81,11 +81,11 @@ namespace AndriodApp1
 
         public void SaveBio()
         {
-            SoulSeekState.UserInfoBio = PendingText;
+            SeekerState.UserInfoBio = PendingText;
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserInfoBio, PendingText);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserInfoBio, PendingText);
                 editor.Commit();
             }
         }
@@ -106,7 +106,7 @@ namespace AndriodApp1
         //private AlertDialog diag = null;
         public override void OnBackPressed()
         {
-            if (!force && PendingText != SoulSeekState.UserInfoBio)
+            if (!force && PendingText != SeekerState.UserInfoBio)
             {
                 force = false;
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -124,7 +124,7 @@ namespace AndriodApp1
         {
             base.OnCreate(savedInstanceState);
 
-            SoulSeekState.ActiveActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.edit_user_info_layout);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.edit_user_info_toolbar);
@@ -135,14 +135,14 @@ namespace AndriodApp1
             this.SupportActionBar.SetHomeButtonEnabled(true);
 
             EditText editText = this.FindViewById<EditText>(Resource.Id.editTextBio);
-            PendingText = SoulSeekState.UserInfoBio ?? string.Empty;
-            editText.Text = SoulSeekState.UserInfoBio ?? string.Empty;
+            PendingText = SeekerState.UserInfoBio ?? string.Empty;
+            editText.Text = SeekerState.UserInfoBio ?? string.Empty;
             editText.TextChanged += EditText_TextChanged;
 
             pictureText = this.FindViewById<TextView>(Resource.Id.user_info_picture_textview);
-            if (SoulSeekState.UserInfoPictureName != null && SoulSeekState.UserInfoPictureName != string.Empty)
+            if (SeekerState.UserInfoPictureName != null && SeekerState.UserInfoPictureName != string.Empty)
             {
-                pictureText.Text = SoulSeekState.UserInfoPictureName;
+                pictureText.Text = SeekerState.UserInfoPictureName;
             }
 
             Button selectImage = this.FindViewById<Button>(Resource.Id.buttonSelectImage);
@@ -163,15 +163,15 @@ namespace AndriodApp1
 
         private void ClearImage_Click(object sender, EventArgs e)
         {
-            if (SoulSeekState.UserInfoPictureName != null && SoulSeekState.UserInfoPictureName != string.Empty)
+            if (SeekerState.UserInfoPictureName != null && SeekerState.UserInfoPictureName != string.Empty)
             {
-                DeleteImage(SoulSeekState.UserInfoPictureName);
-                SoulSeekState.UserInfoPictureName = string.Empty;
+                DeleteImage(SeekerState.UserInfoPictureName);
+                SeekerState.UserInfoPictureName = string.Empty;
                 pictureText.Text = this.GetString(Resource.String.no_image_chosen);
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_UserInfoPicture, SoulSeekState.UserInfoPictureName);
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutString(KeyConsts.M_UserInfoPicture, SeekerState.UserInfoPictureName);
                     editor.Commit();
                 }
             }
@@ -210,7 +210,7 @@ namespace AndriodApp1
                 if (resultCode == Result.Ok)
                 {
                     AndroidX.DocumentFile.Provider.DocumentFile chosenFile = null;
-                    if (SoulSeekState.PreOpenDocumentTree())
+                    if (SeekerState.PreOpenDocumentTree())
                     {
                         chosenFile = AndroidX.DocumentFile.Provider.DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
                     }
@@ -222,7 +222,7 @@ namespace AndriodApp1
                     //for samsung galaxy api 19 chosenFile.Exists() returns false, whether DF.FromFile or DF.FromSingleUri
                     //even tho it returns false it still works completely fine..
 
-                    if (chosenFile == null || (!SoulSeekState.PreOpenDocumentTree() && !chosenFile.Exists())) //i.e. its not an error if <21 and does not exist.
+                    if (chosenFile == null || (!SeekerState.PreOpenDocumentTree() && !chosenFile.Exists())) //i.e. its not an error if <21 and does not exist.
                     {
                         MainActivity.LogFirebase("selected image does not exist !!!!");
                         Toast.MakeText(this, this.GetString(Resource.String.error_image_doesnt_exist), ToastLength.Long).Show();
@@ -248,17 +248,17 @@ namespace AndriodApp1
                         user_info_dir.Mkdir();
                     }
 
-                    string oldImage = SoulSeekState.UserInfoPictureName;
-                    if (SoulSeekState.UserInfoPictureName != string.Empty && SoulSeekState.UserInfoPictureName != null)
+                    string oldImage = SeekerState.UserInfoPictureName;
+                    if (SeekerState.UserInfoPictureName != string.Empty && SeekerState.UserInfoPictureName != null)
                     {
                         DeleteImage(oldImage);  //delete old image in our internal storage.
                     }
 
-                    SoulSeekState.UserInfoPictureName = name;
+                    SeekerState.UserInfoPictureName = name;
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
-                        var editor = SoulSeekState.SharedPreferences.Edit();
-                        editor.PutString(SoulSeekState.M_UserInfoPicture, SoulSeekState.UserInfoPictureName);
+                        var editor = SeekerState.SharedPreferences.Edit();
+                        editor.PutString(KeyConsts.M_UserInfoPicture, SeekerState.UserInfoPictureName);
                         editor.Commit();
                     }
                     Java.IO.File fileForOurInternalStorage = new Java.IO.File(user_info_dir, name);
@@ -285,11 +285,11 @@ namespace AndriodApp1
                     {
                         MainActivity.LogFirebase("files.Count!=1");
                     }
-                    else if (files[0].Name != SoulSeekState.UserInfoPictureName)
+                    else if (files[0].Name != SeekerState.UserInfoPictureName)
                     {
-                        MainActivity.LogFirebase("files[0].Name != SoulSeekState.UserInfoPictureName");
+                        MainActivity.LogFirebase("files[0].Name != SeekerState.UserInfoPictureName");
                     }
-                    pictureText.Text = SoulSeekState.UserInfoPictureName;
+                    pictureText.Text = SeekerState.UserInfoPictureName;
                     pictureText.Invalidate();
                     Toast.MakeText(this, this.GetString(Resource.String.success_set_pic), ToastLength.Long).Show();
                 }
@@ -306,9 +306,9 @@ namespace AndriodApp1
         public static string PendingText = string.Empty;
         private void EditText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            bool wasSame = (PendingText == SoulSeekState.UserInfoBio);
+            bool wasSame = (PendingText == SeekerState.UserInfoBio);
             PendingText = e.Text.ToString();
-            bool isSame = (PendingText == SoulSeekState.UserInfoBio);
+            bool isSame = (PendingText == SeekerState.UserInfoBio);
             if (isSame != wasSame)
             {
                 this.InvalidateOptionsMenu();

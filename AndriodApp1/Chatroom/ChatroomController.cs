@@ -150,12 +150,12 @@ namespace AndriodApp1.Chatroom
 
         public static bool AreWeMod(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(SoulSeekState.Username);
+            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(SeekerState.Username);
         }
 
         public static bool AreWeOwner(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Owner == SoulSeekState.Username;
+            return ChatroomController.JoinedRoomData[roomname].Owner == SeekerState.Username;
         }
 
         public static bool PutFriendsOnTop = false;
@@ -214,7 +214,7 @@ namespace AndriodApp1.Chatroom
 
             ChatroomController.AddMessage(roomName, msg); //ui thread.
 
-            //MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+            //MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
             ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, true, false, msg));
             Action<Task> continueWithAction = new Action<Task>((Task t) =>
             {
@@ -224,16 +224,16 @@ namespace AndriodApp1.Chatroom
                 if (t.IsFaulted)
                 {
                     msg.SentMsgStatus = SentStatus.Failed;
-                    SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
+                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
                 }
                 else
                 {
                     msg.SentMsgStatus = SentStatus.Success;
                 }
-                //MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+                //MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                 ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, false, true, msg));
             });
-            SoulSeekState.SoulseekClient.SendRoomMessageAsync(roomName, msg.MessageText).ContinueWith(continueWithAction);
+            SeekerState.SoulseekClient.SendRoomMessageAsync(roomName, msg.MessageText).ContinueWith(continueWithAction);
         }
 
 
@@ -265,7 +265,7 @@ namespace AndriodApp1.Chatroom
 
             if (JoinedRoomNames.Count != 0)
             {
-                allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
+                allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
                 //find the rooms and add them...
                 foreach (string roomName in JoinedRoomNames)
                 {
@@ -295,7 +295,7 @@ namespace AndriodApp1.Chatroom
                 List<Soulseek.RoomInfo> filteredOwned = ownedList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 if (filteredOwned.Count > 0)
                 {
-                    allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
+                    allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
                     filteredOwned.Sort(new RoomCountComparer());
                     allRooms.AddRange(filteredOwned);
                 }
@@ -306,7 +306,7 @@ namespace AndriodApp1.Chatroom
                 List<Soulseek.RoomInfo> filtered = privateList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 if (filtered.Count > 0)
                 {
-                    allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
+                    allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
                     filtered.Sort(new RoomCountComparer());
                     allRooms.AddRange(filtered);
                 }
@@ -314,7 +314,7 @@ namespace AndriodApp1.Chatroom
 
             if (roomList.PublicCount != 0)
             {
-                allRooms.Add(new Soulseek.RoomInfoCategory(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
+                allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
                 List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !SpamList.Contains(roomInfo.Name) && !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 noSpam.Sort(new RoomCountComparer());
                 allRooms.AddRange(noSpam);
@@ -425,7 +425,7 @@ namespace AndriodApp1.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short).Show();
+                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short).Show();
                 }
                 AutoJoinRoomNames.Remove(roomName);
             }
@@ -433,7 +433,7 @@ namespace AndriodApp1.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short).Show();
+                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short).Show();
                 }
                 AutoJoinRoomNames.Add(roomName);
             }
@@ -446,7 +446,7 @@ namespace AndriodApp1.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_off), roomName), ToastLength.Short).Show();
+                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_off), roomName), ToastLength.Short).Show();
                 }
                 NotifyRoomNames.Remove(roomName);
             }
@@ -454,7 +454,7 @@ namespace AndriodApp1.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_on), roomName), ToastLength.Short).Show();
+                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_on), roomName), ToastLength.Short).Show();
                 }
                 NotifyRoomNames.Add(roomName);
             }
@@ -468,7 +468,7 @@ namespace AndriodApp1.Chatroom
             {
                 return;
             }
-            RootAutoJoinRoomNames[SoulSeekState.Username] = AutoJoinRoomNames;
+            RootAutoJoinRoomNames[SeekerState.Username] = AutoJoinRoomNames;
 
             var joinedRoomsString = SerializationHelper.SaveAutoJoinRoomsListToString(RootAutoJoinRoomNames);
 
@@ -476,8 +476,8 @@ namespace AndriodApp1.Chatroom
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_AutoJoinRooms, joinedRoomsString);
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
                     bool success = editor.Commit();
                 }
             }
@@ -486,7 +486,7 @@ namespace AndriodApp1.Chatroom
         public static void RestoreAutoJoinRoomsFromSharedPrefs(ISharedPreferences sharedPreferences)
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
-            string joinedRooms = sharedPreferences.GetString(SoulSeekState.M_AutoJoinRooms, string.Empty);
+            string joinedRooms = sharedPreferences.GetString(KeyConsts.M_AutoJoinRooms, string.Empty);
             if (joinedRooms == string.Empty)
             {
                 RootAutoJoinRoomNames = new System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>();
@@ -495,15 +495,15 @@ namespace AndriodApp1.Chatroom
             else
             {
                 RootAutoJoinRoomNames = SerializationHelper.RestoreAutoJoinRoomsListFromString(joinedRooms);
-                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SoulSeekState.Username))
+                if (SeekerState.Username != null && SeekerState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SeekerState.Username))
                 {
-                    AutoJoinRoomNames = RootAutoJoinRoomNames[SoulSeekState.Username];
-                    CurrentUsername = SoulSeekState.Username;
+                    AutoJoinRoomNames = RootAutoJoinRoomNames[SeekerState.Username];
+                    CurrentUsername = SeekerState.Username;
                 }
                 else
                 {
                     AutoJoinRoomNames = new List<string>();
-                    CurrentUsername = SoulSeekState.Username;
+                    CurrentUsername = SeekerState.Username;
                 }
             }
         }
@@ -519,7 +519,7 @@ namespace AndriodApp1.Chatroom
             {
                 return;
             }
-            RootNotifyRoomNames[SoulSeekState.Username] = NotifyRoomNames;
+            RootNotifyRoomNames[SeekerState.Username] = NotifyRoomNames;
 
             string notifyRoomsString = SerializationHelper.SaveNotifyRoomsListToString(RootNotifyRoomNames);
 
@@ -527,8 +527,8 @@ namespace AndriodApp1.Chatroom
             {
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
-                    var editor = SoulSeekState.SharedPreferences.Edit();
-                    editor.PutString(SoulSeekState.M_chatroomsToNotify, notifyRoomsString);
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);
                     bool success = editor.Commit();
                 }
             }
@@ -537,7 +537,7 @@ namespace AndriodApp1.Chatroom
         public static void RestoreNotifyRoomsToSharedPrefs(ISharedPreferences sharedPreferences)
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
-            string notifyRooms = sharedPreferences.GetString(SoulSeekState.M_chatroomsToNotify, string.Empty);
+            string notifyRooms = sharedPreferences.GetString(KeyConsts.M_chatroomsToNotify, string.Empty);
             if (notifyRooms == string.Empty)
             {
                 RootNotifyRoomNames = new System.Collections.Concurrent.ConcurrentDictionary<string, List<string>>();
@@ -546,15 +546,15 @@ namespace AndriodApp1.Chatroom
             else
             {
                 RootNotifyRoomNames = SerializationHelper.RestoreNotifyRoomsListFromString(notifyRooms);
-                if (SoulSeekState.Username != null && SoulSeekState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SoulSeekState.Username))
+                if (SeekerState.Username != null && SeekerState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SeekerState.Username))
                 {
-                    NotifyRoomNames = RootNotifyRoomNames[SoulSeekState.Username];
-                    CurrentUsername = SoulSeekState.Username;
+                    NotifyRoomNames = RootNotifyRoomNames[SeekerState.Username];
+                    CurrentUsername = SeekerState.Username;
                 }
                 else
                 {
                     NotifyRoomNames = new List<string>();
-                    CurrentUsername = SoulSeekState.Username;
+                    CurrentUsername = SeekerState.Username;
                 }
             }
         }
@@ -571,26 +571,26 @@ namespace AndriodApp1.Chatroom
 
         public static void Initialize()
         {
-            SerializationHelper.MigrateAutoJoinRoomsIfApplicable(SoulSeekState.SharedPreferences, SoulSeekState.M_AutoJoinRooms_Legacy, SoulSeekState.M_AutoJoinRooms);
-            RestoreAutoJoinRoomsFromSharedPrefs(SoulSeekState.SharedPreferences);
-            SerializationHelper.MigrateNotifyRoomsIfApplicable(SoulSeekState.SharedPreferences, SoulSeekState.M_chatroomsToNotify_Legacy, SoulSeekState.M_chatroomsToNotify);
-            RestoreNotifyRoomsToSharedPrefs(SoulSeekState.SharedPreferences);
+            SerializationHelper.MigrateAutoJoinRoomsIfApplicable(SeekerState.SharedPreferences, KeyConsts.M_AutoJoinRooms_Legacy, KeyConsts.M_AutoJoinRooms);
+            RestoreAutoJoinRoomsFromSharedPrefs(SeekerState.SharedPreferences);
+            SerializationHelper.MigrateNotifyRoomsIfApplicable(SeekerState.SharedPreferences, KeyConsts.M_chatroomsToNotify_Legacy, KeyConsts.M_chatroomsToNotify);
+            RestoreNotifyRoomsToSharedPrefs(SeekerState.SharedPreferences);
             //if auto join rooms list...
-            SoulSeekState.SoulseekClient.PrivateRoomMembershipAdded += SoulseekClient_PrivateRoomMembershipAdded;
-            SoulSeekState.SoulseekClient.PrivateRoomMembershipRemoved += SoulseekClient_PrivateRoomMembershipRemoved;
-            SoulSeekState.SoulseekClient.PrivateRoomModeratedUserListReceived += SoulseekClient_PrivateRoomModeratedUserListReceived;
-            SoulSeekState.SoulseekClient.PrivateRoomModerationAdded += SoulseekClient_PrivateRoomModerationAdded;
-            SoulSeekState.SoulseekClient.PrivateRoomModerationRemoved += SoulseekClient_PrivateRoomModerationRemoved;
-            SoulSeekState.SoulseekClient.PrivateRoomUserListReceived += SoulseekClient_PrivateRoomUserListReceived;
-            // SoulSeekState.SoulseekClient.
-            SoulSeekState.SoulseekClient.RoomJoined += SoulseekClient_RoomJoined;
-            SoulSeekState.SoulseekClient.RoomLeft += SoulseekClient_RoomLeft;
-            //SoulSeekState.SoulseekClient.RoomListReceived
-            SoulSeekState.SoulseekClient.RoomMessageReceived += SoulseekClient_RoomMessageReceived;
-            SoulSeekState.SoulseekClient.RoomTickerAdded += SoulseekClient_RoomTickerAdded;
-            SoulSeekState.SoulseekClient.OperatorInPrivateRoomAddedRemoved += SoulseekClient_OperatorInPrivateRoomAddedRemoved;
-            SoulSeekState.SoulseekClient.RoomTickerRemoved += SoulseekClient_RoomTickerRemoved;
-            SoulSeekState.SoulseekClient.RoomTickerListReceived += SoulseekClient_RoomTickerListReceived;
+            SeekerState.SoulseekClient.PrivateRoomMembershipAdded += SoulseekClient_PrivateRoomMembershipAdded;
+            SeekerState.SoulseekClient.PrivateRoomMembershipRemoved += SoulseekClient_PrivateRoomMembershipRemoved;
+            SeekerState.SoulseekClient.PrivateRoomModeratedUserListReceived += SoulseekClient_PrivateRoomModeratedUserListReceived;
+            SeekerState.SoulseekClient.PrivateRoomModerationAdded += SoulseekClient_PrivateRoomModerationAdded;
+            SeekerState.SoulseekClient.PrivateRoomModerationRemoved += SoulseekClient_PrivateRoomModerationRemoved;
+            SeekerState.SoulseekClient.PrivateRoomUserListReceived += SoulseekClient_PrivateRoomUserListReceived;
+            // SeekerState.SoulseekClient.
+            SeekerState.SoulseekClient.RoomJoined += SoulseekClient_RoomJoined;
+            SeekerState.SoulseekClient.RoomLeft += SoulseekClient_RoomLeft;
+            //SeekerState.SoulseekClient.RoomListReceived
+            SeekerState.SoulseekClient.RoomMessageReceived += SoulseekClient_RoomMessageReceived;
+            SeekerState.SoulseekClient.RoomTickerAdded += SoulseekClient_RoomTickerAdded;
+            SeekerState.SoulseekClient.OperatorInPrivateRoomAddedRemoved += SoulseekClient_OperatorInPrivateRoomAddedRemoved;
+            SeekerState.SoulseekClient.RoomTickerRemoved += SoulseekClient_RoomTickerRemoved;
+            SeekerState.SoulseekClient.RoomTickerListReceived += SoulseekClient_RoomTickerListReceived;
 
             SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
 
@@ -817,7 +817,7 @@ namespace AndriodApp1.Chatroom
             MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
             Message msg = new Message(e.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
-            if (e.Username == SoulSeekState.Username)
+            if (e.Username == SeekerState.Username)
             {
                 //we already logged it..
                 return;
@@ -851,7 +851,7 @@ namespace AndriodApp1.Chatroom
                 var oldRoomData = JoinedRoomData[e.RoomName];
                 JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users.Append(e.UserData), oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
             }
-            else if (e.Username == SoulSeekState.Username)
+            else if (e.Username == SeekerState.Username)
             {
                 //this is when we first join..
             }
@@ -962,7 +962,7 @@ namespace AndriodApp1.Chatroom
 
         public static void ShowNotification(Message msg, string roomName)
         {
-            if (msg.Username == SoulSeekState.Username)
+            if (msg.Username == SeekerState.Username)
             {
                 return;
             }
@@ -971,19 +971,19 @@ namespace AndriodApp1.Chatroom
             {
                 return;
             }
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
-                    Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(ChatroomActivity));
+                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                    Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(ChatroomActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop);
                     notifIntent.PutExtra(FromRoomName, roomName); //so we can go to this user..
                     notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(roomName.GetHashCode(), n);
                 }
@@ -996,24 +996,24 @@ namespace AndriodApp1.Chatroom
 
         public static void GetRoomListApi(bool feedback = false)
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
                 if (feedback)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short).Show();
                     });
                 }
                 return;
             }
             if (feedback)
             {
-                if (SoulSeekState.ActiveActivityRef != null)
+                if (SeekerState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.requesting_room_list), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.requesting_room_list), ToastLength.Short).Show();
                     });
                 }
             }
@@ -1022,7 +1022,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1030,10 +1030,10 @@ namespace AndriodApp1.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
                 }));
             }
             else
@@ -1047,7 +1047,7 @@ namespace AndriodApp1.Chatroom
             Task<Soulseek.RoomList> task = null;
             try
             {
-                task = SoulSeekState.SoulseekClient.GetRoomListAsync();
+                task = SeekerState.SoulseekClient.GetRoomListAsync();
             }
             catch (Exception e)
             {
@@ -1065,9 +1065,9 @@ namespace AndriodApp1.Chatroom
                     RoomListParsed = GetParsedList(RoomList);
                     if (feedback)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.room_list_received), ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.room_list_received), ToastLength.Short).Show();
                         });
                     }
                     RoomListReceived?.Invoke(null, new EventArgs());
@@ -1082,24 +1082,24 @@ namespace AndriodApp1.Chatroom
 
         public static void CreateRoomApi(string roomName, bool isPrivate, bool feedback)
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short).Show();
                 return;
             }
             if (feedback)
             {
-                if (SoulSeekState.ActiveActivityRef != null)
+                if (SeekerState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
                         if (isPrivate)
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
                         }
                         else
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.publicRoomCreation), ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.publicRoomCreation), ToastLength.Short).Show();
                         }
                     });
                 }
@@ -1109,7 +1109,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1117,10 +1117,10 @@ namespace AndriodApp1.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { CreateRoomLogic(roomName, isPrivate, feedback); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { CreateRoomLogic(roomName, isPrivate, feedback); }));
                 }));
             }
             else
@@ -1131,37 +1131,37 @@ namespace AndriodApp1.Chatroom
 
         public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead = false)
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short).Show();
                 return;
             }
             if (feedback)
             {
-                if (SoulSeekState.ActiveActivityRef != null)
+                if (SeekerState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
 
 
                         string msg = string.Empty;
                         if (asMod && removeInstead)
                         {
-                            msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.removing_mod);
+                            msg = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.removing_mod);
                         }
                         else if (asMod && !removeInstead)
                         {
-                            msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.adding_mod);
+                            msg = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.adding_mod);
                         }
                         else if (!asMod && !removeInstead)
                         {
-                            msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.inviting_user_to);
+                            msg = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.inviting_user_to);
                         }
                         else if (!asMod && removeInstead)
                         {
-                            msg = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.removing_user_from);
+                            msg = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.removing_user_from);
                         }
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(msg, roomName), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(msg, roomName), ToastLength.Short).Show();
 
                     });
                 }
@@ -1171,7 +1171,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1179,10 +1179,10 @@ namespace AndriodApp1.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead); }));
                 }));
             }
             else
@@ -1201,34 +1201,34 @@ namespace AndriodApp1.Chatroom
             {
                 if (asMod && !removeInstead)
                 {
-                    successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_added_mod);
-                    failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_added_mod);
-                    task = SoulSeekState.SoulseekClient.AddPrivateRoomModeratorAsync(roomName, userToAdd);
+                    successMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.success_added_mod);
+                    failureMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.failed_added_mod);
+                    task = SeekerState.SoulseekClient.AddPrivateRoomModeratorAsync(roomName, userToAdd);
                 }
                 else if (!asMod && !removeInstead)
                 {
-                    successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_invite_user);
-                    failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_invite_user);
-                    task = SoulSeekState.SoulseekClient.AddPrivateRoomMemberAsync(roomName, userToAdd);
+                    successMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.success_invite_user);
+                    failureMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.failed_invite_user);
+                    task = SeekerState.SoulseekClient.AddPrivateRoomMemberAsync(roomName, userToAdd);
                 }
                 else if (asMod && removeInstead)
                 {
-                    successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_remove_mod);
-                    failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_remove_mod);
-                    task = SoulSeekState.SoulseekClient.RemovePrivateRoomModeratorAsync(roomName, userToAdd);
+                    successMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.success_remove_mod);
+                    failureMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.failed_remove_mod);
+                    task = SeekerState.SoulseekClient.RemovePrivateRoomModeratorAsync(roomName, userToAdd);
                 }
                 else if (!asMod && removeInstead)
                 {
-                    successMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.success_removed_user);
-                    failureMsg = SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_removed_user);
-                    task = SoulSeekState.SoulseekClient.RemovePrivateRoomMemberAsync(roomName, userToAdd);
+                    successMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.success_removed_user);
+                    failureMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.failed_removed_user);
+                    task = SeekerState.SoulseekClient.RemovePrivateRoomMemberAsync(roomName, userToAdd);
                 }
             }
             catch (Exception e)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
                 });
                 return;
             }
@@ -1238,9 +1238,9 @@ namespace AndriodApp1.Chatroom
                 {
                     //TODO
 
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
                     });
 
                 }
@@ -1250,9 +1250,9 @@ namespace AndriodApp1.Chatroom
 
                     if (feedback)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, successMsg, ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, successMsg, ToastLength.Short).Show();
                         });
                     }
 
@@ -1268,7 +1268,7 @@ namespace AndriodApp1.Chatroom
             Task<Soulseek.RoomData> task = null;
             try
             {
-                task = SoulSeekState.SoulseekClient.JoinRoomAsync(roomName, isPrivate); //this will create it if it does not exist..
+                task = SeekerState.SoulseekClient.JoinRoomAsync(roomName, isPrivate); //this will create it if it does not exist..
             }
             catch (Exception e)
             {
@@ -1286,9 +1286,9 @@ namespace AndriodApp1.Chatroom
 
                     if (feedback)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.create_and_refresh), ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.create_and_refresh), ToastLength.Short).Show();
                         });
                     }
                     if (!JoinedRoomNames.Contains(roomName))
@@ -1310,22 +1310,22 @@ namespace AndriodApp1.Chatroom
 
         public static void DropMembershipOrOwnershipApi(string roomName, bool ownership, bool feedback)
         {
-            string ownershipString = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.ownership);
-            string membershipString = SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.membership);
-            if (!SoulSeekState.currentlyLoggedIn)
+            string ownershipString = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.ownership);
+            string membershipString = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.membership);
+            if (!SeekerState.currentlyLoggedIn)
             {
                 string membership = ownership ? ownershipString : membershipString;
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short).Show();
                 return;
             }
             if (feedback)
             {
-                if (SoulSeekState.ActiveActivityRef != null)
+                if (SeekerState.ActiveActivityRef != null)
                 {
                     string membership = ownership ? ownershipString : membershipString;
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short).Show();
                     });
                 }
             }
@@ -1334,7 +1334,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1342,10 +1342,10 @@ namespace AndriodApp1.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { DropMembershipOrOwnershipLogic(roomName, ownership, feedback); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { DropMembershipOrOwnershipLogic(roomName, ownership, feedback); }));
                 }));
             }
             else
@@ -1361,35 +1361,35 @@ namespace AndriodApp1.Chatroom
             {
                 if (ownership)
                 {
-                    task = SoulSeekState.SoulseekClient.DropPrivateRoomOwnershipAsync(roomName); //this will create it if it does not exist..
+                    task = SeekerState.SoulseekClient.DropPrivateRoomOwnershipAsync(roomName); //this will create it if it does not exist..
                 }
                 else
                 {
-                    task = SoulSeekState.SoulseekClient.DropPrivateRoomMembershipAsync(roomName); //this will create it if it does not exist..
+                    task = SeekerState.SoulseekClient.DropPrivateRoomMembershipAsync(roomName); //this will create it if it does not exist..
                 }
             }
             catch (Exception e)
             {
                 if (feedback)
                 {
-                    string ownershipString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ownership);
-                    string membershipString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.membership);
+                    string ownershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.ownership);
+                    string membershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.membership);
                     string membership = ownership ? ownershipString : membershipString;
-                    SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                    SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
                     MainActivity.LogFirebase("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
                 }
                 return;
             }
             task.ContinueWith((Task task) =>
             {
-                string ownershipString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.ownership);
-                string membershipString = SoulSeekState.ActiveActivityRef.GetString(Resource.String.membership);
+                string ownershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.ownership);
+                string membershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.membership);
                 string membership = ownership ? ownershipString : membershipString;
                 if (task.IsFaulted)
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
                     }
                     MainActivity.LogFirebase("DropMembershipOrOwnershipLogic " + task.Exception);
                 }
@@ -1398,7 +1398,7 @@ namespace AndriodApp1.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
+                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
                     }
 
                 }
@@ -1407,18 +1407,18 @@ namespace AndriodApp1.Chatroom
 
         public static void SetTickerApi(string roomName, string tickerMessage, bool feedback)
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short).Show();
                 return;
             }
             if (feedback)
             {
-                if (SoulSeekState.ActiveActivityRef != null)
+                if (SeekerState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.setting_ticker), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.setting_ticker), ToastLength.Short).Show();
                     });
                 }
             }
@@ -1427,7 +1427,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1435,10 +1435,10 @@ namespace AndriodApp1.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { SetTickerLogic(roomName, tickerMessage, feedback); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { SetTickerLogic(roomName, tickerMessage, feedback); }));
                 }));
             }
             else
@@ -1452,13 +1452,13 @@ namespace AndriodApp1.Chatroom
             Task task = null;
             try
             {
-                task = SoulSeekState.SoulseekClient.SetRoomTickerAsync(roomName, tickerMessage); //this will create it if it does not exist..
+                task = SeekerState.SoulseekClient.SetRoomTickerAsync(roomName, tickerMessage); //this will create it if it does not exist..
             }
             catch (Exception e)
             {
                 if (feedback)
                 {
-                    SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                 }
                 return;
             }
@@ -1468,7 +1468,7 @@ namespace AndriodApp1.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                     }
                 }
                 else
@@ -1476,7 +1476,7 @@ namespace AndriodApp1.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
+                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
                     }
                 }
             });
@@ -1487,18 +1487,18 @@ namespace AndriodApp1.Chatroom
         public static void JoinRoomApi(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)
         {
             MainActivity.LogDebug("JOINING ROOM" + roomName);
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {   //since this happens on startup its no good to have this logic...
                 MainActivity.LogDebug("CANT JOIN NOT LOGGED IN:" + roomName);
                 return;
             }
             if (feedback && !joining)
             {
-                if (SoulSeekState.ActiveActivityRef != null)
+                if (SeekerState.ActiveActivityRef != null)
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
+                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
                     });
                 }
             }
@@ -1507,7 +1507,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1515,10 +1515,10 @@ namespace AndriodApp1.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() => { JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin); }));
                 }));
             }
             else
@@ -1534,11 +1534,11 @@ namespace AndriodApp1.Chatroom
             {
                 if (joining)
                 {
-                    task = SoulSeekState.SoulseekClient.JoinRoomAsync(roomName); //this will create it if it does not exist..
+                    task = SeekerState.SoulseekClient.JoinRoomAsync(roomName); //this will create it if it does not exist..
                 }
                 else
                 {
-                    task = SoulSeekState.SoulseekClient.LeaveRoomAsync(roomName); //this will create it if it does not exist..
+                    task = SeekerState.SoulseekClient.LeaveRoomAsync(roomName); //this will create it if it does not exist..
                 }
 
             }

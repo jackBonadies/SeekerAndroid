@@ -38,14 +38,14 @@ namespace AndriodApp1.Messages
 
         public static void Initialize()
         {
-            SoulSeekState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
+            SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             lock (MessageListLockObject)
             {
-                SerializationHelper.MigratedMessages(SoulSeekState.SharedPreferences, SoulSeekState.M_Messages_Legacy, SoulSeekState.M_Messages);
-                RestoreMessagesFromSharedPrefs(SoulSeekState.SharedPreferences);
+                SerializationHelper.MigratedMessages(SeekerState.SharedPreferences, KeyConsts.M_Messages_Legacy, KeyConsts.M_Messages);
+                RestoreMessagesFromSharedPrefs(SeekerState.SharedPreferences);
             }
-            SerializationHelper.MigrateUnreadUsernames(SoulSeekState.SharedPreferences, SoulSeekState.M_UnreadMessageUsernames_Legacy, SoulSeekState.M_UnreadMessageUsernames);
-            RestoreUnreadStateDict(SoulSeekState.SharedPreferences);
+            SerializationHelper.MigrateUnreadUsernames(SeekerState.SharedPreferences, KeyConsts.M_UnreadMessageUsernames_Legacy, KeyConsts.M_UnreadMessageUsernames);
+            RestoreUnreadStateDict(SeekerState.SharedPreferences);
             IsInitialized = true;
         }
 
@@ -63,19 +63,19 @@ namespace AndriodApp1.Messages
                 Message msg = new Message(e.Username, e.Id, e.Replayed, e.Timestamp.ToLocalTime(), e.Timestamp, e.Message, false);
                 lock (MessageListLockObject)
                 {
-                    if (SoulSeekState.Username == null || SoulSeekState.Username == string.Empty)
+                    if (SeekerState.Username == null || SeekerState.Username == string.Empty)
                     {
                         MainActivity.LogFirebase("we received a message while our username is still null");
                     }
-                    else if (!RootMessages.ContainsKey(SoulSeekState.Username))
+                    else if (!RootMessages.ContainsKey(SeekerState.Username))
                     {
-                        RootMessages[SoulSeekState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessagesUsername = SoulSeekState.Username;
-                        Messages = RootMessages[SoulSeekState.Username];
+                        RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessagesUsername = SeekerState.Username;
+                        Messages = RootMessages[SeekerState.Username];
                     }
-                    else if (RootMessages.ContainsKey(SoulSeekState.Username))
+                    else if (RootMessages.ContainsKey(SeekerState.Username))
                     {
-                        Messages = RootMessages[SoulSeekState.Username];
+                        Messages = RootMessages[SeekerState.Username];
                     }
 
                     if (Messages.ContainsKey(e.Username))
@@ -95,7 +95,7 @@ namespace AndriodApp1.Messages
                 SetAsUnreadAndSaveIfApplicable(e.Username);
 
                 //save to prefs
-                SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+                SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
 
                 try
                 {
@@ -109,7 +109,7 @@ namespace AndriodApp1.Messages
 
                 try
                 {
-                    SoulSeekState.SoulseekClient.AcknowledgePrivateMessageAsync(msg.Id).ContinueWith((Action<Task>)LogIfFaulted);
+                    SeekerState.SoulseekClient.AcknowledgePrivateMessageAsync(msg.Id).ContinueWith((Action<Task>)LogIfFaulted);
                 }
                 catch (Exception err)
                 {
@@ -150,11 +150,11 @@ namespace AndriodApp1.Messages
             {
                 if (useNightColors)
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SeekerState.ActiveActivityRef.Theme);
                 }
                 else
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SeekerState.ActiveActivityRef.Theme);
                 }
             }
             else
@@ -184,11 +184,11 @@ namespace AndriodApp1.Messages
             {
                 if (useNightColors)
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SeekerState.ActiveActivityRef.Theme);
                 }
                 else
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SoulSeekState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SeekerState.ActiveActivityRef.Theme);
                 }
             }
             else
@@ -259,7 +259,7 @@ namespace AndriodApp1.Messages
 
 
             ssb.Append(spannableString);
-            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
             string msgToShow = "\n" + messageNotifExtended.MessageText;
             var spannableString2 = new Android.Text.SpannableString(msgToShow);
             //spannableString2.SetSpan(textColorSubdued, 0, msgToShow.Length, SpanTypes.InclusiveInclusive);
@@ -333,7 +333,7 @@ namespace AndriodApp1.Messages
                 {
                     spannableString2 = new Android.Text.SpannableString(msg.MessageText);
                 }
-                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
                 //spannableString2.SetSpan(textColorSubdued, 0, msg.MessageText.Length, SpanTypes.InclusiveInclusive);
                 ssb.Append(spannableString2);
 
@@ -350,7 +350,7 @@ namespace AndriodApp1.Messages
         /// <returns></returns>
         public static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
-            if (SoulSeekState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
+            if (SeekerState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
             {
                 //if we follow the system then we can just return whether our app is in night mode.
                 return DownloadDialog.InNightMode(contextToUse);
@@ -382,7 +382,7 @@ namespace AndriodApp1.Messages
         {
             try
             {
-                Context contextToUse = broadcastContext == null ? SoulSeekState.ActiveActivityRef : broadcastContext;
+                Context contextToUse = broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext;
                 if (contextToUse == null)
                 {
                     contextToUse = SeekerApplication.ApplicationContext;
@@ -533,7 +533,7 @@ namespace AndriodApp1.Messages
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
                     var editor = sharedPrefs.Edit();
-                    editor.PutString(SoulSeekState.M_Messages, messagesString);
+                    editor.PutString(KeyConsts.M_Messages, messagesString);
                     bool success = editor.Commit();
                 }
             }
@@ -541,7 +541,7 @@ namespace AndriodApp1.Messages
 
         public static void RestoreMessagesFromSharedPrefs(ISharedPreferences sharedPrefs)
         {
-            string messages = sharedPrefs.GetString(SoulSeekState.M_Messages, string.Empty);
+            string messages = sharedPrefs.GetString(KeyConsts.M_Messages, string.Empty);
             if (messages == string.Empty)
             {
                 RootMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>>();
@@ -550,17 +550,17 @@ namespace AndriodApp1.Messages
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
-                if (!string.IsNullOrEmpty(SoulSeekState.Username) && RootMessages.ContainsKey(SoulSeekState.Username))
+                if (!string.IsNullOrEmpty(SeekerState.Username) && RootMessages.ContainsKey(SeekerState.Username))
                 {
-                    Messages = RootMessages[SoulSeekState.Username];
-                    MessagesUsername = SoulSeekState.Username;
+                    Messages = RootMessages[SeekerState.Username];
+                    MessagesUsername = SeekerState.Username;
                 }
             }
         }
 
         public static void RestoreUnreadStateDict(ISharedPreferences sharedPrefs)
         {
-            string unreadMessageUsernames = sharedPrefs.GetString(SoulSeekState.M_UnreadMessageUsernames, string.Empty);
+            string unreadMessageUsernames = sharedPrefs.GetString(KeyConsts.M_UnreadMessageUsernames, string.Empty);
             UnreadUsernames = SerializationHelper.RestoreUnreadUsernamesFromString(unreadMessageUsernames);
         }
 
@@ -576,7 +576,7 @@ namespace AndriodApp1.Messages
                 lock (MainActivity.SHARED_PREF_LOCK)
                 {
                     var editor = sharedPrefs.Edit();
-                    editor.PutString(SoulSeekState.M_UnreadMessageUsernames, String.Empty);
+                    editor.PutString(KeyConsts.M_UnreadMessageUsernames, String.Empty);
                     bool success = editor.Commit();
                 }
             }
@@ -588,7 +588,7 @@ namespace AndriodApp1.Messages
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
                         var editor = sharedPrefs.Edit();
-                        editor.PutString(SoulSeekState.M_UnreadMessageUsernames, messagesString);
+                        editor.PutString(KeyConsts.M_UnreadMessageUsernames, messagesString);
                         bool success = editor.Commit();
                     }
                 }
@@ -610,7 +610,7 @@ namespace AndriodApp1.Messages
                 }
                 MainActivity.LogDebug("set");
                 UnreadUsernames.TryAdd(username, 0);
-                SaveUnreadStateDict(SoulSeekState.SharedPreferences);
+                SaveUnreadStateDict(SeekerState.SharedPreferences);
             }
         }
 
@@ -624,7 +624,7 @@ namespace AndriodApp1.Messages
             {
                 MainActivity.LogDebug("unset");
                 UnreadUsernames.TryRemove(username, out _);
-                SaveUnreadStateDict(SoulSeekState.SharedPreferences);
+                SaveUnreadStateDict(SeekerState.SharedPreferences);
             }
         }
     }

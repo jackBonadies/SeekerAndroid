@@ -28,11 +28,11 @@ namespace AndriodApp1.UPnP
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutLong(SoulSeekState.M_LastSetUpnpRuleTicks, LastSetTime.Ticks);
-                editor.PutInt(SoulSeekState.M_LifetimeSeconds, LastSetLifeTime);
-                editor.PutInt(SoulSeekState.M_PortMapped, LastSetPort);
-                editor.PutString(SoulSeekState.M_LastSetLocalIP, LastSetLocalIP);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutLong(KeyConsts.M_LastSetUpnpRuleTicks, LastSetTime.Ticks);
+                editor.PutInt(KeyConsts.M_LifetimeSeconds, LastSetLifeTime);
+                editor.PutInt(KeyConsts.M_PortMapped, LastSetPort);
+                editor.PutString(KeyConsts.M_LastSetLocalIP, LastSetLocalIP);
                 editor.Commit();
             }
         }
@@ -41,10 +41,10 @@ namespace AndriodApp1.UPnP
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                LastSetTime = new DateTime(SoulSeekState.SharedPreferences.GetLong(SoulSeekState.M_LastSetUpnpRuleTicks, 0));
-                LastSetLifeTime = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_LifetimeSeconds, -1);
-                LastSetPort = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_PortMapped, -1);
-                LastSetLocalIP = SoulSeekState.SharedPreferences.GetString(SoulSeekState.M_LastSetLocalIP, string.Empty);
+                LastSetTime = new DateTime(SeekerState.SharedPreferences.GetLong(KeyConsts.M_LastSetUpnpRuleTicks, 0));
+                LastSetLifeTime = SeekerState.SharedPreferences.GetInt(KeyConsts.M_LifetimeSeconds, -1);
+                LastSetPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_PortMapped, -1);
+                LastSetLocalIP = SeekerState.SharedPreferences.GetString(KeyConsts.M_LastSetLocalIP, string.Empty);
             }
         }
 
@@ -83,11 +83,11 @@ namespace AndriodApp1.UPnP
 
         public Tuple<ListeningIcon, string> GetIconAndMessage()
         {
-            if (!SoulSeekState.ListenerUPnpEnabled)
+            if (!SeekerState.ListenerUPnpEnabled)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_off));
             }
-            else if (!SoulSeekState.ListenerEnabled)
+            else if (!SeekerState.ListenerEnabled)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.listener_off));
             }
@@ -167,7 +167,7 @@ namespace AndriodApp1.UPnP
             }
             if (Feedback)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
                     if (DiagStatus == UPnPDiagStatus.NoUpnpDevicesFound)
                     {
@@ -194,14 +194,14 @@ namespace AndriodApp1.UPnP
         {
             try
             {
-                if (!SoulSeekState.ListenerEnabled || !SoulSeekState.ListenerUPnpEnabled)
+                if (!SeekerState.ListenerEnabled || !SeekerState.ListenerUPnpEnabled)
                 {
                     MainActivity.LogDebug("Upnp is off...");
                     SearchFinished?.Invoke(null, new EventArgs());
                     Feedback = false;
                     return;
                 }
-                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SoulSeekState.ListenerPort && IsLocalIPsame())
+                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SeekerState.ListenerPort && IsLocalIPsame())
                 {
                     MainActivity.LogDebug("Renew Mapping Later... we already have a good one..");
                     RunningStatus = UPnPRunningStatus.AlreadyMapped;
@@ -275,7 +275,7 @@ namespace AndriodApp1.UPnP
         {
             try
             {
-                if (!SoulSeekState.ListenerEnabled || !SoulSeekState.ListenerUPnpEnabled)
+                if (!SeekerState.ListenerEnabled || !SeekerState.ListenerUPnpEnabled)
                 {
                     DiagStatus = UPnPDiagStatus.UpnpDisabled;
                     RunningStatus = UPnPRunningStatus.Finished;
@@ -350,7 +350,7 @@ namespace AndriodApp1.UPnP
                 if (ipOurs)
                 {
                     int oneWeek = 60 * 60 * 24 * 7; // == 604800.  on my home router I request 1 week, I get back 604800 in the mapping. but then on getting it again its 22 hours (which is probably the real time)
-                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort, SoulSeekState.ListenerPort, oneWeek, "Android Seeker"));
+                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SeekerState.ListenerPort, SeekerState.ListenerPort, oneWeek, "Android Seeker"));
                     try
                     {
                         bool timeOutCreateMapping = !(t.Wait(5000));
@@ -366,7 +366,7 @@ namespace AndriodApp1.UPnP
 
                         if (ex.InnerException is Mono.Nat.MappingException && ex.InnerException.Message != null && ex.InnerException.Message.Contains("Error 725: OnlyPermanentLeasesSupported")) //happened on my tablet... connected to my other 192.168.1.1 router
                         {
-                            System.Threading.Tasks.Task<Mono.Nat.Mapping> t0 = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort, SoulSeekState.ListenerPort, 0, "Android Seeker"));
+                            System.Threading.Tasks.Task<Mono.Nat.Mapping> t0 = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SeekerState.ListenerPort, SeekerState.ListenerPort, 0, "Android Seeker"));
                             try
                             {
                                 bool timeOutCreateMapping0lease = !(t0.Wait(5000));
@@ -402,7 +402,7 @@ namespace AndriodApp1.UPnP
                     int privatePort = mapping.PrivatePort;
                     int publicPort = mapping.PublicPort;
 
-                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t2 = e.Device.GetSpecificMappingAsync(Mono.Nat.Protocol.Tcp, SoulSeekState.ListenerPort);
+                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t2 = e.Device.GetSpecificMappingAsync(Mono.Nat.Protocol.Tcp, SeekerState.ListenerPort);
                     try
                     {
                         bool timeOutGetMapping = !(t2.Wait(5000));

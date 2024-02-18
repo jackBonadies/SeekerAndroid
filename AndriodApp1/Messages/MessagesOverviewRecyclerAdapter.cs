@@ -28,7 +28,7 @@ namespace AndriodApp1.Messages
         {
             containingFragment = outerFrag;
             adapter = _adapter;
-            iconDrawable = ContextCompat.GetDrawable(SoulSeekState.ActiveActivityRef, Resource.Drawable.baseline_delete_outline_white_24);
+            iconDrawable = ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.baseline_delete_outline_white_24);
             clipDrawable = new ClipDrawable(iconDrawable, GravityFlags.Right, ClipDrawableOrientation.Horizontal);
         }
         private Android.Graphics.Drawables.ColorDrawable colorDrawable = new Android.Graphics.Drawables.ColorDrawable(Color.ParseColor("#ed4a51"));
@@ -53,14 +53,14 @@ namespace AndriodApp1.Messages
                     return;
                 }
                 MessageController.Messages[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_DATA;
-                MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+                MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                 if (!fromOptionMenu)
                 {
                     adapter.RestoreAt(MessagesActivity.DELETED_POSITION, MessagesActivity.DELETED_USERNAME);
                 }
                 else
                 {
-                    (SoulSeekState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
+                    (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
                 }
                 MessagesActivity.DELETED_USERNAME = string.Empty; MessagesActivity.DELETED_DATA = null; MessagesActivity.DELETED_POSITION = -1;
             });
@@ -75,13 +75,13 @@ namespace AndriodApp1.Messages
             MessagesActivity.DELETED_USERNAME = adapter.At(MessagesActivity.DELETED_POSITION);
             adapter.RemoveAt(MessagesActivity.DELETED_POSITION); //removes from adapter data and notifies.
             MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out MessagesActivity.DELETED_DATA);
-            MessageController.SaveMessagesToSharedPrefs(SoulSeekState.SharedPreferences);
+            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
 
-            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                 MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong)
                 .SetAction(Resource.String.undo, GetSnackBarAction(this.adapter, false))
                 .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
             sb.Show();
         }
 
@@ -259,9 +259,9 @@ namespace AndriodApp1.Messages
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Bold);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Bold);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Bold);
-                viewUsername.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
-                viewDateTimeAgo.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
-                viewMessage.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewUsername.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewDateTimeAgo.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewMessage.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
             }
             else
             {
@@ -269,9 +269,9 @@ namespace AndriodApp1.Messages
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Normal);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Normal);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Normal);
-                viewUsername.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewDateTimeAgo.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewMessage.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewUsername.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewDateTimeAgo.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewMessage.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
             }
 
             string msgText = m.MessageText;

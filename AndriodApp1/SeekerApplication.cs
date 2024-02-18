@@ -60,7 +60,7 @@ namespace AndriodApp1
         public override void OnCreate()
         {
 #if DEBUG
-            SerializationTests.Test();
+            //SerializationTests.Test();
 #endif
 
             base.OnCreate();
@@ -77,43 +77,43 @@ namespace AndriodApp1
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));
             var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
-            SoulSeekState.SharedPreferences = sharedPrefs;
-            RestoreSoulSeekState(sharedPrefs, this);
+            SeekerState.SharedPreferences = sharedPrefs;
+            RestoreSeekerState(sharedPrefs, this);
             RestoreListeningState();
             UPnpManager.RestoreUpnpState();
 
-            SoulSeekState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
+            SeekerState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
 
-            SoulSeekState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
+            SeekerState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
 
             if (HasProperPerAppLanguageSupport())
             {
-                if (!SoulSeekState.LegacyLanguageMigrated)
+                if (!SeekerState.LegacyLanguageMigrated)
                 {
-                    SoulSeekState.LegacyLanguageMigrated = true;
+                    SeekerState.LegacyLanguageMigrated = true;
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
                         var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                        editor.PutBoolean(SoulSeekState.M_LegacyLanguageMigrated, SoulSeekState.LegacyLanguageMigrated);
+                        editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated);
                         editor.Commit();
                     }
-                    SetLanguage(SoulSeekState.Language);
+                    SetLanguage(SeekerState.Language);
                 }
             }
             else
             {
-                SetLanguageLegacy(SoulSeekState.Language, false);
+                SetLanguageLegacy(SeekerState.Language, false);
             }
 
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
             //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
             //this does not restart Android.App.Application. so putting it here is a much better place... in MainActivity.OnCreate it would restart the activity every time.
-            if (AppCompatDelegate.DefaultNightMode != SoulSeekState.DayNightMode)
+            if (AppCompatDelegate.DefaultNightMode != SeekerState.DayNightMode)
             {
-                AppCompatDelegate.DefaultNightMode = SoulSeekState.DayNightMode;
+                AppCompatDelegate.DefaultNightMode = SeekerState.DayNightMode;
             }
 
-            //SoulSeekState.SharedPreferences = sharedPrefs;
+            //SeekerState.SharedPreferences = sharedPrefs;
 
             if (SeekerKeepAliveService.CpuKeepAlive_FullService == null)
             {
@@ -127,29 +127,29 @@ namespace AndriodApp1
 
             SeekerApplication.SetNetworkState(this);
 
-            if (SoulSeekState.SoulseekClient == null)
+            if (SeekerState.SoulseekClient == null)
             {
                 //need search response and enqueue download action...
-                //SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SoulSeekState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SoulSeekState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SoulSeekState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: SoulSeekState.AllowPrivateRoomInvitations, listenPort: SoulSeekState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
+                //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SeekerState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
+                SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SeekerState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: SeekerState.AllowPrivateRoomInvitations, listenPort: SeekerState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
-                SoulSeekState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
-                SoulSeekState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
+                SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
+                SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
                 SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
-                //SoulSeekState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
-                SoulSeekState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
+                //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
+                SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
-                SoulSeekState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
-                SoulSeekState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
+                SeekerState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
+                SeekerState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
 
-                SoulSeekState.SoulseekClient.Connected += SoulseekClient_Connected;
-                SoulSeekState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
-                SoulSeekState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
-                SoulSeekState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
-                SoulSeekState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
-                SoulSeekState.BrowseResponseReceived += BrowseFragment.SoulSeekState_BrowseResponseReceived;
+                SeekerState.SoulseekClient.Connected += SoulseekClient_Connected;
+                SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
+                SeekerState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
+                SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
+                SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
+                SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
 
-                SoulSeekState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
+                SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
 
                 MessageController.Initialize();
                 ChatroomController.Initialize();
@@ -184,7 +184,7 @@ namespace AndriodApp1
                 LocaleList appLocales = lm.ApplicationLocales;
                 if (appLocales.IsEmpty)
                 {
-                    return SoulSeekState.FieldLangAuto;
+                    return SeekerState.FieldLangAuto;
                 }
                 else
                 {
@@ -192,14 +192,14 @@ namespace AndriodApp1
                     string lang = locale.Language; // ex. fr, uk
                     if (lang == "pt")
                     {
-                        return SoulSeekState.FieldLangPtBr;
+                        return SeekerState.FieldLangPtBr;
                     }
                     return lang;
                 }
             }
             else
             {
-                return SoulSeekState.Language;
+                return SeekerState.Language;
             }
         }
 
@@ -247,7 +247,7 @@ namespace AndriodApp1
             {
                 var lm = (LocaleManager)ApplicationContext.GetSystemService(Context.LocaleService);
 
-                if (language == SoulSeekState.FieldLangAuto)
+                if (language == SeekerState.FieldLangAuto)
                 {
                     lm.ApplicationLocales = LocaleList.EmptyLocaleList;
                 }
@@ -258,7 +258,7 @@ namespace AndriodApp1
             }
             else
             {
-                SetLanguageLegacy(SoulSeekState.Language, true);
+                SetLanguageLegacy(SeekerState.Language, true);
             }
         }
 
@@ -276,13 +276,13 @@ namespace AndriodApp1
                 return;
             }
 
-            if (language == SoulSeekState.FieldLangAuto && SoulSeekState.SystemLanguage == LocaleToString(currentLocale))
+            if (language == SeekerState.FieldLangAuto && SeekerState.SystemLanguage == LocaleToString(currentLocale))
             {
                 return;
             }
 
 
-            Java.Util.Locale locale = language != SoulSeekState.FieldLangAuto ? LocaleFromString(localeString) : LocaleFromString(SoulSeekState.SystemLanguage);
+            Java.Util.Locale locale = language != SeekerState.FieldLangAuto ? LocaleFromString(localeString) : LocaleFromString(SeekerState.SystemLanguage);
 
             Java.Util.Locale.Default = locale;
             config.SetLocale(locale);
@@ -332,10 +332,10 @@ namespace AndriodApp1
 
                 if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
                 {
-                    bool oldState = SoulSeekState.CurrentConnectionIsUnmetered;
-                    SoulSeekState.CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
-                    MainActivity.LogDebug("SetNetworkState is metered " + !SoulSeekState.CurrentConnectionIsUnmetered);
-                    return oldState != SoulSeekState.CurrentConnectionIsUnmetered;
+                    bool oldState = SeekerState.CurrentConnectionIsUnmetered;
+                    SeekerState.CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
+                    MainActivity.LogDebug("SetNetworkState is metered " + !SeekerState.CurrentConnectionIsUnmetered);
+                    return oldState != SeekerState.CurrentConnectionIsUnmetered;
                 }
                 return false;
             }
@@ -370,12 +370,12 @@ namespace AndriodApp1
         {
             if (log_diagnostics)
             {
-                SoulSeekState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
+                SeekerState.SoulseekClient.DiagnosticGenerated += SoulseekClient_DiagnosticGenerated;
                 AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
             }
             else
             {
-                SoulSeekState.SoulseekClient.DiagnosticGenerated -= SoulseekClient_DiagnosticGenerated;
+                SeekerState.SoulseekClient.DiagnosticGenerated -= SoulseekClient_DiagnosticGenerated;
                 AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
             }
         }
@@ -420,35 +420,35 @@ namespace AndriodApp1
         {
             try
             {
-                if (SoulSeekState.DiagnosticTextFile == null)
+                if (SeekerState.DiagnosticTextFile == null)
                 {
-                    if (SoulSeekState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
+                    if (SeekerState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
                     {
-                        SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
-                        if (SoulSeekState.DiagnosticTextFile == null)
+                        SeekerState.DiagnosticTextFile = SeekerState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
+                        if (SeekerState.DiagnosticTextFile == null)
                         {
-                            SoulSeekState.DiagnosticTextFile = SoulSeekState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
-                            if (SoulSeekState.DiagnosticTextFile == null)
+                            SeekerState.DiagnosticTextFile = SeekerState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
+                            if (SeekerState.DiagnosticTextFile == null)
                             {
                                 return;
                             }
                         }
                     }
-                    else if (SoulSeekState.UseLegacyStorage() || !SoulSeekState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+                    else if (SeekerState.UseLegacyStorage() || !SeekerState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
                     {
                         //when the directory is unset.
                         string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                        if (!string.IsNullOrEmpty(SoulSeekState.SaveDataDirectoryUri))
+                        if (!string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
                         {
-                            fullPath = Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri).Path;
+                            fullPath = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri).Path;
                         }
 
                         var containingDir = new Java.IO.File(fullPath);
 
                         var javaDiagFile = new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt");
                         DocumentFile rootDir = DocumentFile.FromFile(new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt"));
-                        //DocumentFile.FromSingleUri(SoulSeekState.ActiveActivityRef, Android.Net.Uri.Parse(new Java.IO.File(fullPath).ToURI().ToString()));
-                        //SoulSeekState.DiagnosticTextFile = rootDir;//.FindFile("seeker_diagnostics.txt");
+                        //DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse(new Java.IO.File(fullPath).ToURI().ToString()));
+                        //SeekerState.DiagnosticTextFile = rootDir;//.FindFile("seeker_diagnostics.txt");
                         if (!javaDiagFile.Exists())
                         {
                             if (containingDir.CanWrite())
@@ -456,7 +456,7 @@ namespace AndriodApp1
                                 bool success = javaDiagFile.CreateNewFile();
                                 if (success)
                                 {
-                                    SoulSeekState.DiagnosticTextFile = rootDir;
+                                    SeekerState.DiagnosticTextFile = rootDir;
                                 }
                                 else
                                 {
@@ -470,7 +470,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            SoulSeekState.DiagnosticTextFile = rootDir;
+                            SeekerState.DiagnosticTextFile = rootDir;
                         }
                     }
                     else //if api >29 and they did not set it. nothing we can do.
@@ -479,22 +479,22 @@ namespace AndriodApp1
                     }
                 }
 
-                if (SoulSeekState.DiagnosticStreamWriter == null)
+                if (SeekerState.DiagnosticStreamWriter == null)
                 {
-                    System.IO.Stream outputStream = SeekerApplication.ApplicationContext.ContentResolver.OpenOutputStream(SoulSeekState.DiagnosticTextFile.Uri, "wa");
+                    System.IO.Stream outputStream = SeekerApplication.ApplicationContext.ContentResolver.OpenOutputStream(SeekerState.DiagnosticTextFile.Uri, "wa");
                     if (outputStream == null)
                     {
                         return;
                     }
-                    SoulSeekState.DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
-                    if (SoulSeekState.DiagnosticStreamWriter == null)
+                    SeekerState.DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
+                    if (SeekerState.DiagnosticStreamWriter == null)
                     {
                         return;
                     }
                 }
 
-                SoulSeekState.DiagnosticStreamWriter.WriteLine(line);
-                SoulSeekState.DiagnosticStreamWriter.Flush();
+                SeekerState.DiagnosticStreamWriter.WriteLine(line);
+                SeekerState.DiagnosticStreamWriter.Flush();
             }
             catch (Exception ex)
             {
@@ -556,7 +556,7 @@ namespace AndriodApp1
         public static void ReleaseTransferLocksIfServicesComplete()
         {
             //if all transfers are done..
-            if (!SoulSeekState.UploadKeepAliveServiceRunning && !SoulSeekState.DownloadKeepAliveServiceRunning)
+            if (!SeekerState.UploadKeepAliveServiceRunning && !SeekerState.DownloadKeepAliveServiceRunning)
             {
                 if (MainActivity.CpuKeepAlive_Transfer != null)
                 {
@@ -596,16 +596,16 @@ namespace AndriodApp1
 
         private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
-            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.AbortAllWasPressedDebouncer) < 750;
+            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
             if (e.Count == 0 || abortAll)
             {
                 UPLOAD_COUNT = -1;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 MainActivity.LogDebug("Stop Service");
                 this.StopService(uploadServiceIntent);
-                SoulSeekState.UploadKeepAliveServiceRunning = false;
+                SeekerState.UploadKeepAliveServiceRunning = false;
             }
-            else if (!SoulSeekState.UploadKeepAliveServiceRunning)
+            else if (!SeekerState.UploadKeepAliveServiceRunning)
             {
                 UPLOAD_COUNT = e.Count;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
@@ -614,9 +614,9 @@ namespace AndriodApp1
                     bool isForeground = false;
                     try
                     {
-                        if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
+                        if (SeekerState.ActiveActivityRef?.Lifecycle.CurrentState != null)
                         {
-                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
+                            isForeground = SeekerState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                         }
                     }
                     catch
@@ -641,9 +641,9 @@ namespace AndriodApp1
                     //even when targetting and compiling for api 31, old devices can still do this just fine.
                     this.StartService(uploadServiceIntent); //this will throw if the app is in background.
                 }
-                SoulSeekState.UploadKeepAliveServiceRunning = true;
+                SeekerState.UploadKeepAliveServiceRunning = true;
             }
-            else if (SoulSeekState.UploadKeepAliveServiceRunning && e.Count != 0)
+            else if (SeekerState.UploadKeepAliveServiceRunning && e.Count != 0)
             {
                 UPLOAD_COUNT = e.Count;
                 //for two downloads, this notification will go up before the service is started...
@@ -674,12 +674,12 @@ namespace AndriodApp1
         private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
             //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
-            //SoulSeekState.MainActivityRef.RunOnUiThread(()=>
+            //SeekerState.MainActivityRef.RunOnUiThread(()=>
             //{
             MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
             MainActivity.LogDebug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
-            bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SoulSeekState.CancelAndClearAllWasPressedDebouncer) < 750;
+            bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer) < 750;
             MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
             if (e.Count == 0 || cancelAndClear)
             {
@@ -687,9 +687,9 @@ namespace AndriodApp1
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 MainActivity.LogDebug("Stop Service");
                 this.StopService(downloadServiceIntent);
-                SoulSeekState.DownloadKeepAliveServiceRunning = false;
+                SeekerState.DownloadKeepAliveServiceRunning = false;
             }
-            else if (!SoulSeekState.DownloadKeepAliveServiceRunning)
+            else if (!SeekerState.DownloadKeepAliveServiceRunning)
             {
                 DL_COUNT = e.Count;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
@@ -698,9 +698,9 @@ namespace AndriodApp1
                     bool isForeground = false;
                     try
                     {
-                        if (SoulSeekState.ActiveActivityRef?.Lifecycle.CurrentState != null)
+                        if (SeekerState.ActiveActivityRef?.Lifecycle.CurrentState != null)
                         {
-                            isForeground = SoulSeekState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
+                            isForeground = SeekerState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
                         }
                     }
                     catch
@@ -725,9 +725,9 @@ namespace AndriodApp1
                     //even when targetting and compiling for api 31, old devices can still do this just fine.
                     this.StartService(downloadServiceIntent); //this will throw if the app is in background.
                 }
-                SoulSeekState.DownloadKeepAliveServiceRunning = true;
+                SeekerState.DownloadKeepAliveServiceRunning = true;
             }
-            else if (SoulSeekState.DownloadKeepAliveServiceRunning && e.Count != 0)
+            else if (SeekerState.DownloadKeepAliveServiceRunning && e.Count != 0)
             {
                 DL_COUNT = e.Count;
                 //for two downloads, this notification will go up before the service is started...
@@ -775,7 +775,7 @@ namespace AndriodApp1
             {
                 try
                 {
-                    if (SoulSeekState.SpeedLimitDownloadOn)
+                    if (SeekerState.SpeedLimitDownloadOn)
                     {
 
                         if (DownloadUserDelays.TryGetValue(username, out double msDelay))
@@ -793,7 +793,7 @@ namespace AndriodApp1
                             DownloadLastAvgSpeed[username] = currentSpeed;
 
                             double avgSpeed = currentSpeed;
-                            if (!SoulSeekState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
+                            if (!SeekerState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
                             {
 
                                 //its threadsafe when using linq on concurrent dict itself.
@@ -803,7 +803,7 @@ namespace AndriodApp1
 #endif
                             }
 
-                            if (avgSpeed > SoulSeekState.SpeedLimitDownloadBytesSec)
+                            if (avgSpeed > SeekerState.SpeedLimitDownloadBytesSec)
                             {
 #if DEBUG
                                 //System.Console.WriteLine("speed too high " + currentSpeed + "   " + msDelay);
@@ -828,7 +828,7 @@ namespace AndriodApp1
 #endif
                             //first time we need to guess a decent value
                             //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                            double msDelaySeed = 1000 * 16384.0 / SoulSeekState.SpeedLimitDownloadBytesSec;
+                            double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitDownloadBytesSec;
                             DownloadUserDelays[username] = msDelaySeed;
                             DownloadLastAvgSpeed[username] = currentSpeed;
                             return Task.Delay((int)msDelaySeed, cts);
@@ -852,7 +852,7 @@ namespace AndriodApp1
             {
                 try
                 {
-                    if (SoulSeekState.SpeedLimitUploadOn)
+                    if (SeekerState.SpeedLimitUploadOn)
                     {
 
                         if (UploadUserDelays.TryGetValue(username, out double msDelay))
@@ -870,7 +870,7 @@ namespace AndriodApp1
                             UploadLastAvgSpeed[username] = currentSpeed;
 
                             double avgSpeed = currentSpeed;
-                            if (!SoulSeekState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
+                            if (!SeekerState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
                             {
 
                                 //its threadsafe when using linq on concurrent dict itself.
@@ -880,7 +880,7 @@ namespace AndriodApp1
 #endif
                             }
 
-                            if (avgSpeed > SoulSeekState.SpeedLimitUploadBytesSec)
+                            if (avgSpeed > SeekerState.SpeedLimitUploadBytesSec)
                             {
 #if DEBUG
                                 //System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
@@ -905,7 +905,7 @@ namespace AndriodApp1
 #endif
                             //first time we need to guess a decent value
                             //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                            double msDelaySeed = 1000 * 16384.0 / SoulSeekState.SpeedLimitUploadBytesSec;
+                            double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitUploadBytesSec;
                             UploadUserDelays[username] = msDelaySeed;
                             UploadLastAvgSpeed[username] = currentSpeed;
                             return Task.Delay((int)msDelaySeed, cts);
@@ -1058,7 +1058,7 @@ namespace AndriodApp1
                 {
                     //clear queued flag...
                     SeekerApplication.TransfersDownloadsCompleteStale = true;
-                    TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 120);
+                    TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 120);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
@@ -1072,7 +1072,7 @@ namespace AndriodApp1
 
                 if (e.Transfer.State.HasFlag(TransferStates.Succeeded))
                 {
-                    if (SoulSeekState.NotifyOnFolderCompleted && !isUpload)
+                    if (SeekerState.NotifyOnFolderCompleted && !isUpload)
                     {
                         if (TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
                         {
@@ -1118,7 +1118,7 @@ namespace AndriodApp1
 
                     fileStream.Close();
                     bool useDownloadDir = false;
-                    if (SoulSeekState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+                    if (SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
                     {
                         useDownloadDir = true;
                     }
@@ -1126,7 +1126,7 @@ namespace AndriodApp1
                     var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
 
                     // this is the only time we do legacy.
-                    bool isLegacyCase = SoulSeekState.UseLegacyStorage() && (SoulSeekState.RootDocumentFile == null && useDownloadDir);
+                    bool isLegacyCase = SeekerState.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir);
                     if (isLegacyCase)
                     {
                         newStream = new System.IO.FileStream(incompleteUri.Path, System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);
@@ -1134,7 +1134,7 @@ namespace AndriodApp1
                     else
                     {
 
-                        newStream = SoulSeekState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wt");
+                        newStream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wt");
                     }
 
                     relevantItem.Progress = 0;
@@ -1193,7 +1193,7 @@ namespace AndriodApp1
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
 
                 // int indexRemoved = -1;
-                if (((SoulSeekState.AutoClearCompleteDownloads && !isUpload) || (SoulSeekState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear //todo: autoclear on upload
+                if (((SeekerState.AutoClearCompleteDownloads && !isUpload) || (SeekerState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear //todo: autoclear on upload
                 {
 
                     Action action = new Action(() =>
@@ -1204,9 +1204,9 @@ namespace AndriodApp1
                         //int after = TransfersFragment.transferItems.Count;
                         //MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
-                    if (SoulSeekState.ActiveActivityRef != null)
+                    if (SeekerState.ActiveActivityRef != null)
                     {
-                        SoulSeekState.ActiveActivityRef?.RunOnUiThread(action);
+                        SeekerState.ActiveActivityRef?.RunOnUiThread(action);
                     }
 
                     fullRefresh = true;
@@ -1237,7 +1237,7 @@ namespace AndriodApp1
         {
             try
             {
-                PackageInfo pInfo = SoulSeekState.ActiveActivityRef.PackageManager.GetPackageInfo(SoulSeekState.ActiveActivityRef.PackageName, 0);
+                PackageInfo pInfo = SeekerState.ActiveActivityRef.PackageManager.GetPackageInfo(SeekerState.ActiveActivityRef.PackageName, 0);
                 return pInfo.VersionName;
             }
             catch (Exception e)
@@ -1256,12 +1256,12 @@ namespace AndriodApp1
             {
                 return Task.FromResult(new UserInfo(string.Empty, 0, 0, false));
             }
-            string bio = SoulSeekState.UserInfoBio ?? string.Empty;
+            string bio = SeekerState.UserInfoBio ?? string.Empty;
             byte[] picture = GetUserInfoPicture();
             int uploadSlots = 1;
             int queueLength = 0;
             bool hasFreeSlots = true;
-            if (!SoulSeekState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
+            if (!SeekerState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
             {
                 uploadSlots = 0;
                 queueLength = 0;
@@ -1273,7 +1273,7 @@ namespace AndriodApp1
 
         private static byte[] GetUserInfoPicture()
         {
-            if (SoulSeekState.UserInfoPictureName == null || SoulSeekState.UserInfoPictureName == string.Empty)
+            if (SeekerState.UserInfoPictureName == null || SeekerState.UserInfoPictureName == string.Empty)
             {
                 return null;
             }
@@ -1284,7 +1284,7 @@ namespace AndriodApp1
                 return null;
             }
 
-            Java.IO.File userInfoPic = new Java.IO.File(userInfoPicDir, SoulSeekState.UserInfoPictureName);
+            Java.IO.File userInfoPic = new Java.IO.File(userInfoPicDir, SeekerState.UserInfoPictureName);
             if (!userInfoPic.Exists())
             {
                 //I could imagine a race condition causing this...
@@ -1336,9 +1336,9 @@ namespace AndriodApp1
                 if (e.Exception is KickedFromServerException)
                 {
                     MainActivity.LogDebug("Kicked Kicked Kicked");
-                    if (SoulSeekState.ActiveActivityRef != null)
+                    if (SeekerState.ActiveActivityRef != null)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show(); });
                     }
                     return; //DO NOT RETRY!!! or will do an infinite loop!
                 }
@@ -1352,11 +1352,11 @@ namespace AndriodApp1
                 //this is a "true" connected to disconnected
                 ChatroomController.ClearAndCacheJoined();
                 MainActivity.LogDebug("disconnected " + DateTime.UtcNow.ToString());
-                if (SoulSeekState.logoutClicked)
+                if (SeekerState.logoutClicked)
                 {
-                    SoulSeekState.logoutClicked = false;
+                    SeekerState.logoutClicked = false;
                 }
-                else if (AUTO_CONNECT_ON && SoulSeekState.currentlyLoggedIn)
+                else if (AUTO_CONNECT_ON && SeekerState.currentlyLoggedIn)
                 {
                     Thread reconnectRetrier = new Thread(ReconnectSteppedBackOffThreadTask);
                     reconnectRetrier.Start();
@@ -1381,18 +1381,18 @@ namespace AndriodApp1
             ChatroomController.JoinAutoJoinRoomsAndPreviousJoined();
             //ChatroomController.ConnectionLapse.Add(new Tuple<bool, DateTime>(true, DateTime.UtcNow)); //just testing obv remove later...
             MainActivity.LogDebug("logged in " + DateTime.UtcNow.ToString());
-            MainActivity.LogDebug("Listening State: " + SoulSeekState.SoulseekClient.GetListeningState());
-            if (SoulSeekState.ListenerEnabled && !SoulSeekState.SoulseekClient.GetListeningState())
+            MainActivity.LogDebug("Listening State: " + SeekerState.SoulseekClient.GetListeningState());
+            if (SeekerState.ListenerEnabled && !SeekerState.SoulseekClient.GetListeningState())
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("SoulSeekState.ActiveActivityRef null SoulseekClient_LoggedIn");
+                    MainActivity.LogFirebase("SeekerState.ActiveActivityRef null SoulseekClient_LoggedIn");
                 }
                 else
                 {
-                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.port_already_in_use), ToastLength.Short).Show(); //todo is this supposed to be here...
+                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.port_already_in_use), ToastLength.Short).Show(); //todo is this supposed to be here...
                     });
                 }
             }
@@ -1410,7 +1410,7 @@ namespace AndriodApp1
         //    ChatroomController.ConnectionLapse.Add(new Tuple<bool,DateTime>(false,DateTime.UtcNow));
         //    MainActivity.LogDebug("disconnected " + DateTime.UtcNow.ToString());
         //    bool AUTO_CONNECT = true;
-        //    if(AUTO_CONNECT && SoulSeekState.currentlyLoggedIn)
+        //    if(AUTO_CONNECT && SeekerState.currentlyLoggedIn)
         //    {
         //        Thread reconnectRetrier = new Thread(ReconnectExponentialBackOffThreadTask);
         //        reconnectRetrier.Start();
@@ -1419,13 +1419,13 @@ namespace AndriodApp1
 
         public static void ShowToast(string msg, ToastLength toastLength)
         {
-            if (SoulSeekState.ActiveActivityRef == null)
+            if (SeekerState.ActiveActivityRef == null)
             {
                 MainActivity.LogDebug("cant show toast, active activity ref is null");
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, msg, toastLength).Show(); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, msg, toastLength).Show(); });
             }
         }
 
@@ -1436,19 +1436,19 @@ namespace AndriodApp1
 
         public static bool ShouldWeTryToConnect()
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
                 //we logged out on purpose
                 return false;
             }
 
-            if (SoulSeekState.SoulseekClient == null)
+            if (SeekerState.SoulseekClient == null)
             {
                 //too early
                 return false;
             }
 
-            if (SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) && SoulSeekState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
+            if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) && SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 //already connected
                 return false;
@@ -1491,7 +1491,7 @@ namespace AndriodApp1
                         //you have to re-AddUser them.  This is what SoulSeekQt does (wireshark message code 5 for each user in list).
                         //and what Nicotine does (userlist.server_login()).
                         //and reconnecting means every single time, including toggling from wifi to data / vice versa.
-                        Task t = ConnectAndPerformPostConnectTasks(SoulSeekState.Username, SoulSeekState.Password);
+                        Task t = ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
                         t.Wait();
                         if (t.IsCompletedSuccessfully)
                         {
@@ -1528,7 +1528,7 @@ namespace AndriodApp1
         public static object OurCurrentLoginTaskSyncObject = new object();
         public static Task ConnectAndPerformPostConnectTasks(string username, string password)
         {
-            Task t = SoulSeekState.SoulseekClient.ConnectAsync(username, password);
+            Task t = SeekerState.SoulseekClient.ConnectAsync(username, password);
             OurCurrentLoginTask = t;
             t.ContinueWith(PerformPostConnectTasks);
             return t;
@@ -1540,12 +1540,12 @@ namespace AndriodApp1
             {
                 try
                 {
-                    lock (SoulSeekState.UserList)
+                    lock (SeekerState.UserList)
                     {
-                        foreach (UserListItem item in SoulSeekState.UserList)
+                        foreach (UserListItem item in SeekerState.UserList)
                         {
                             MainActivity.LogDebug("adding user: " + item.Username);
-                            SoulSeekState.SoulseekClient.AddUserAsync(item.Username).ContinueWith(UpdateUserInfo);
+                            SeekerState.SoulseekClient.AddUserAsync(item.Username).ContinueWith(UpdateUserInfo);
                         }
                     }
 
@@ -1554,23 +1554,23 @@ namespace AndriodApp1
                         foreach (string userDownloadOffline in TransfersFragment.UsersWhereDownloadFailedDueToOffline.Keys)
                         {
                             MainActivity.LogDebug("adding user (due to a download we wanted from them when they were offline): " + userDownloadOffline);
-                            SoulSeekState.SoulseekClient.AddUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
+                            SeekerState.SoulseekClient.AddUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
                         }
                     }
 
                     //this is if we wanted to change the status earlier but could not. note that when we first login, our status is Online by default.
                     //so no need to change it to online.
-                    if (SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.OnlinePending)
+                    if (SeekerState.PendingStatusChangeToAwayOnline == SeekerState.PendingStatusChange.OnlinePending)
                     {
                         //we just did this by logging in...
                         MainActivity.LogDebug("online was pending");
-                        SoulSeekState.PendingStatusChangeToAwayOnline = SoulSeekState.PendingStatusChange.NothingPending;
+                        SeekerState.PendingStatusChangeToAwayOnline = SeekerState.PendingStatusChange.NothingPending;
                     }
-                    else if (((SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending || SoulSeekState.OurCurrentStatusIsAway)))
+                    else if (((SeekerState.PendingStatusChangeToAwayOnline == SeekerState.PendingStatusChange.AwayPending || SeekerState.OurCurrentStatusIsAway)))
                     {
                         MainActivity.LogDebug("a change to away was pending / our status is away. lets set it now");
 
-                        if (SoulSeekState.PendingStatusChangeToAwayOnline == SoulSeekState.PendingStatusChange.AwayPending)
+                        if (SeekerState.PendingStatusChangeToAwayOnline == SeekerState.PendingStatusChange.AwayPending)
                         {
                             MainActivity.LogDebug("pending that is....");
                         }
@@ -1594,7 +1594,7 @@ namespace AndriodApp1
                     //then tell the server here.
                     //this makes it so that we tell the server once when Seeker first launches, and when things change, but not every time
                     //we log in.
-                    if (SoulSeekState.NumberOfSharedDirectoriesIsStale && SoulSeekState.AttemptedToSetUpSharing)
+                    if (SeekerState.NumberOfSharedDirectoriesIsStale && SeekerState.AttemptedToSetUpSharing)
                     {
                         MainActivity.LogDebug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
                         MainActivity.InformServerOfSharedFiles();
@@ -1616,7 +1616,7 @@ namespace AndriodApp1
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
             if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
             {
-                return c.Resources.GetDrawable(drawableRes, SoulSeekState.ActiveActivityRef.Theme);
+                return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
             }
             else
             {
@@ -1702,11 +1702,11 @@ namespace AndriodApp1
             //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
             if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
             {
-                a.SetTheme(ThemeHelper.ToNightThemeProper(SoulSeekState.NightModeVarient));
+                a.SetTheme(ThemeHelper.ToNightThemeProper(SeekerState.NightModeVarient));
             }
             else
             {
-                a.SetTheme(ThemeHelper.ToDayThemeProper(SoulSeekState.DayModeVarient));
+                a.SetTheme(ThemeHelper.ToDayThemeProper(SeekerState.DayModeVarient));
             }
         }
 
@@ -1726,21 +1726,21 @@ namespace AndriodApp1
                 MainActivity.UserListRemoveUser(username);
             }
 
-            lock (SoulSeekState.IgnoreUserList)
+            lock (SeekerState.IgnoreUserList)
             {
-                if (SoulSeekState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
+                if (SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
                 {
                     return false;
                 }
                 else
                 {
-                    SoulSeekState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
+                    SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
                 editor.Commit();
             }
             return true;
@@ -1765,21 +1765,21 @@ namespace AndriodApp1
         /// <returns></returns>
         public static bool RemoveFromIgnoreList(string username)
         {
-            lock (SoulSeekState.IgnoreUserList)
+            lock (SeekerState.IgnoreUserList)
             {
-                if (!SoulSeekState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
+                if (!SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
                 {
                     return false;
                 }
                 else
                 {
-                    SoulSeekState.IgnoreUserList = SoulSeekState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
+                    SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SoulSeekState.IgnoreUserList));
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
                 editor.Commit();
             }
             return true;
@@ -1787,9 +1787,9 @@ namespace AndriodApp1
 
         public static bool IsUserInIgnoreList(string username)
         {
-            lock (SoulSeekState.IgnoreUserList)
+            lock (SeekerState.IgnoreUserList)
             {
-                return SoulSeekState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
+                return SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
             }
         }
 
@@ -1843,10 +1843,10 @@ namespace AndriodApp1
                     return;
                 }
                 MainActivity.LogDebug("sending avg speed of " + e.Transfer.AverageSpeed.ToString());
-                SoulSeekState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
+                SeekerState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SoulSeekState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
+                    CommonHelpers.CreateNotificationChannel(SeekerState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
                     NotifInfo notifInfo = null;
                     string directory = CommonHelpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
@@ -1864,8 +1864,8 @@ namespace AndriodApp1
                         NotificationUploadTracker.Add(e.Transfer.Username, notifInfo);
                     }
 
-                    Notification n = MainActivity.CreateUploadNotification(SoulSeekState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
-                    NotificationManagerCompat nmc = NotificationManagerCompat.From(SoulSeekState.MainActivityRef);
+                    Notification n = MainActivity.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
+                    NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.MainActivityRef);
                     nmc.Notify(e.Transfer.Username.GetHashCode(), n);
                 }
                 catch (Exception err)
@@ -1887,10 +1887,10 @@ namespace AndriodApp1
         {
             UserPresence? prevStatus = UserPresence.Offline;
             bool found = false;
-            lock (SoulSeekState.UserList)
+            lock (SeekerState.UserList)
             {
 
-                foreach (UserListItem item in SoulSeekState.UserList)
+                foreach (UserListItem item in SeekerState.UserList)
                 {
                     if (item.Username == username)
                     {
@@ -1914,7 +1914,7 @@ namespace AndriodApp1
             if (found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline)))
             {
                 MainActivity.LogDebug("from offline to online " + username);
-                if (SoulSeekState.UserOnlineAlerts != null && SoulSeekState.UserOnlineAlerts.ContainsKey(username))
+                if (SeekerState.UserOnlineAlerts != null && SeekerState.UserOnlineAlerts.ContainsKey(username))
                 {
                     //show notification.
                     ShowNotificationForUserOnlineAlert(username);
@@ -1931,7 +1931,7 @@ namespace AndriodApp1
         {
             bool useDownloadDialogFragment = false;
             View v = null;
-            if (SoulSeekState.ActiveActivityRef is MainActivity mar)
+            if (SeekerState.ActiveActivityRef is MainActivity mar)
             {
                 var f = mar.SupportFragmentManager.FindFragmentByTag("tag_download_test");
                 //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
@@ -1943,7 +1943,7 @@ namespace AndriodApp1
             }
             if (!useDownloadDialogFragment)
             {
-                v = SoulSeekState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
+                v = SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
             }
             return v;
         }
@@ -1953,18 +1953,18 @@ namespace AndriodApp1
         public const string FromUserOnlineAlert = "FromUserOnlineAlert";
         public static void ShowNotificationForUserOnlineAlert(string username)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
-                    Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(UserListActivity));
+                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
+                    Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(UserListActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop);
                     notifIntent.PutExtra(FromUserOnlineAlert, true);
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(username.GetHashCode(), n);
                 }
@@ -1983,20 +1983,20 @@ namespace AndriodApp1
         public const string FromFolderAlertFoldername = "FromFolderAlertFoldername";
         public static void ShowNotificationForCompletedFolder(string foldername, string username)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SoulSeekState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
-                    Intent notifIntent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
+                    Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                     notifIntent.PutExtra(FromFolderAlert, 2);
                     notifIntent.PutExtra(FromFolderAlertUsername, username);
                     notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SoulSeekState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SoulSeekState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SoulSeekState.ActiveActivityRef);
+                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify((foldername + username).GetHashCode(), n);
                 }
@@ -2007,90 +2007,90 @@ namespace AndriodApp1
             });
         }
 
-        public static void RestoreSoulSeekState(ISharedPreferences sharedPreferences, Context c) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
-        {   //day night mode sets the static, saves to shared preferences the new value, sets appcompat value, which recreates everything and calls restoreSoulSEekstate(bundle) where the bundle was older than shared prefs
-            //because saveSoulSeekstate was not called in the meantime...
+        public static void RestoreSeekerState(ISharedPreferences sharedPreferences, Context c) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
+        {   //day night mode sets the static, saves to shared preferences the new value, sets appcompat value, which recreates everything and calls restoreSeekerState(bundle) where the bundle was older than shared prefs
+            //because saveSeekerState was not called in the meantime...
             if (sharedPreferences != null)
             {
-                SoulSeekState.currentlyLoggedIn = sharedPreferences.GetBoolean(SoulSeekState.M_CurrentlyLoggedIn, false);
-                SoulSeekState.Username = sharedPreferences.GetString(SoulSeekState.M_Username, "");
-                SoulSeekState.Password = sharedPreferences.GetString(SoulSeekState.M_Password, "");
-                SoulSeekState.SaveDataDirectoryUri = sharedPreferences.GetString(SoulSeekState.M_SaveDataDirectoryUri, "");
-                SoulSeekState.SaveDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(SoulSeekState.M_SaveDataDirectoryUriIsFromTree, true);
-                SoulSeekState.NumberSearchResults = sharedPreferences.GetInt(SoulSeekState.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
-                SoulSeekState.DayNightMode = sharedPreferences.GetInt(SoulSeekState.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
-                SoulSeekState.Language = sharedPreferences.GetString(SoulSeekState.M_Lanuage, SoulSeekState.FieldLangAuto);
-                SoulSeekState.LegacyLanguageMigrated = sharedPreferences.GetBoolean(SoulSeekState.M_LegacyLanguageMigrated, false);
-                SoulSeekState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(SoulSeekState.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
-                SoulSeekState.DayModeVarient = (ThemeHelper.DayThemeType)(sharedPreferences.GetInt(SoulSeekState.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple));
-                SoulSeekState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearComplete, false);
-                SoulSeekState.AutoClearCompleteUploads = sharedPreferences.GetBoolean(SoulSeekState.M_AutoClearCompleteUploads, false);
-                SoulSeekState.RememberSearchHistory = sharedPreferences.GetBoolean(SoulSeekState.M_RememberSearchHistory, true);
-                SoulSeekState.ShowRecentUsers = sharedPreferences.GetBoolean(SoulSeekState.M_RememberUserHistory, true);
-                SoulSeekState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(SoulSeekState.M_OnlyFreeUploadSlots, true);
-                SoulSeekState.HideLockedResultsInBrowse = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedBrowse, true);
-                SoulSeekState.HideLockedResultsInSearch = sharedPreferences.GetBoolean(SoulSeekState.M_HideLockedSearch, true);
+                SeekerState.currentlyLoggedIn = sharedPreferences.GetBoolean(KeyConsts.M_CurrentlyLoggedIn, false);
+                SeekerState.Username = sharedPreferences.GetString(KeyConsts.M_Username, "");
+                SeekerState.Password = sharedPreferences.GetString(KeyConsts.M_Password, "");
+                SeekerState.SaveDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_SaveDataDirectoryUri, "");
+                SeekerState.SaveDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
+                SeekerState.NumberSearchResults = sharedPreferences.GetInt(KeyConsts.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
+                SeekerState.DayNightMode = sharedPreferences.GetInt(KeyConsts.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
+                SeekerState.Language = sharedPreferences.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
+                SeekerState.LegacyLanguageMigrated = sharedPreferences.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
+                SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(KeyConsts.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
+                SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)(sharedPreferences.GetInt(KeyConsts.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple));
+                SeekerState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(KeyConsts.M_AutoClearComplete, false);
+                SeekerState.AutoClearCompleteUploads = sharedPreferences.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
+                SeekerState.RememberSearchHistory = sharedPreferences.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
+                SeekerState.ShowRecentUsers = sharedPreferences.GetBoolean(KeyConsts.M_RememberUserHistory, true);
+                SeekerState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(KeyConsts.M_OnlyFreeUploadSlots, true);
+                SeekerState.HideLockedResultsInBrowse = sharedPreferences.GetBoolean(KeyConsts.M_HideLockedBrowse, true);
+                SeekerState.HideLockedResultsInSearch = sharedPreferences.GetBoolean(KeyConsts.M_HideLockedSearch, true);
 
-                SoulSeekState.TransferViewShowSizes = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSizes, true);
-                SoulSeekState.TransferViewShowSpeed = sharedPreferences.GetBoolean(SoulSeekState.M_TransfersShowSpeed, true);
+                SeekerState.TransferViewShowSizes = sharedPreferences.GetBoolean(KeyConsts.M_TransfersShowSizes, true);
+                SeekerState.TransferViewShowSpeed = sharedPreferences.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);
 
-                SoulSeekState.SpeedLimitUploadOn = sharedPreferences.GetBoolean(SoulSeekState.M_UploadLimitEnabled, false);
-                SoulSeekState.SpeedLimitDownloadOn = sharedPreferences.GetBoolean(SoulSeekState.M_DownloadLimitEnabled, false);
-                SoulSeekState.SpeedLimitUploadIsPerTransfer = sharedPreferences.GetBoolean(SoulSeekState.M_UploadPerTransfer, true);
-                SoulSeekState.SpeedLimitDownloadIsPerTransfer = sharedPreferences.GetBoolean(SoulSeekState.M_DownloadPerTransfer, true);
-                SoulSeekState.SpeedLimitUploadBytesSec = sharedPreferences.GetInt(SoulSeekState.M_UploadSpeedLimitBytes, 4 * 1024 * 1024);
-                SoulSeekState.SpeedLimitDownloadBytesSec = sharedPreferences.GetInt(SoulSeekState.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
+                SeekerState.SpeedLimitUploadOn = sharedPreferences.GetBoolean(KeyConsts.M_UploadLimitEnabled, false);
+                SeekerState.SpeedLimitDownloadOn = sharedPreferences.GetBoolean(KeyConsts.M_DownloadLimitEnabled, false);
+                SeekerState.SpeedLimitUploadIsPerTransfer = sharedPreferences.GetBoolean(KeyConsts.M_UploadPerTransfer, true);
+                SeekerState.SpeedLimitDownloadIsPerTransfer = sharedPreferences.GetBoolean(KeyConsts.M_DownloadPerTransfer, true);
+                SeekerState.SpeedLimitUploadBytesSec = sharedPreferences.GetInt(KeyConsts.M_UploadSpeedLimitBytes, 4 * 1024 * 1024);
+                SeekerState.SpeedLimitDownloadBytesSec = sharedPreferences.GetInt(KeyConsts.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
 
-                SoulSeekState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(SoulSeekState.M_DisableToastNotifications, true);
-                SoulSeekState.MemoryBackedDownload = sharedPreferences.GetBoolean(SoulSeekState.M_MemoryBackedDownload, false);
-                SearchFragment.FilterSticky = sharedPreferences.GetBoolean(SoulSeekState.M_FilterSticky, false);
-                SearchFragment.FilterStickyString = sharedPreferences.GetString(SoulSeekState.M_FilterStickyString, string.Empty);
-                SearchFragment.SetSearchResultStyle(sharedPreferences.GetInt(SoulSeekState.M_SearchResultStyle, 1));
-                SoulSeekState.UploadSpeed = sharedPreferences.GetInt(SoulSeekState.M_UploadSpeed, -1);
+                SeekerState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
+                SeekerState.MemoryBackedDownload = sharedPreferences.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
+                SearchFragment.FilterSticky = sharedPreferences.GetBoolean(KeyConsts.M_FilterSticky, false);
+                SearchFragment.FilterStickyString = sharedPreferences.GetString(KeyConsts.M_FilterStickyString, string.Empty);
+                SearchFragment.SetSearchResultStyle(sharedPreferences.GetInt(KeyConsts.M_SearchResultStyle, 1));
+                SeekerState.UploadSpeed = sharedPreferences.GetInt(KeyConsts.M_UploadSpeed, -1);
 
 
 
-                SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, SoulSeekState.M_SharedDirectoryInfo_Legacy, SoulSeekState.M_SharedDirectoryInfo);
+                SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, KeyConsts.M_SharedDirectoryInfo_Legacy, KeyConsts.M_SharedDirectoryInfo);
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
-                SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
-                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, SoulSeekState.M_UserList_Legacy, SoulSeekState.M_UserList);
-                SoulSeekState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
+                SeekerState.SharingOn = sharedPreferences.GetBoolean(KeyConsts.M_SharingOn, false);
+                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_UserList_Legacy, KeyConsts.M_UserList);
+                SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
 
-                RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
-                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, SoulSeekState.M_IgnoreUserList_Legacy, SoulSeekState.M_IgnoreUserList);
-                SoulSeekState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
-                SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
-                SoulSeekState.StartServiceOnStartup = sharedPreferences.GetBoolean(SoulSeekState.M_ServiceOnStartup, true);
+                RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
+                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_IgnoreUserList_Legacy, KeyConsts.M_IgnoreUserList);
+                SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
+                SeekerState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
+                SeekerState.StartServiceOnStartup = sharedPreferences.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
 
-                SoulSeekState.ShowSmartFilters = sharedPreferences.GetBoolean(SoulSeekState.M_ShowSmartFilters, false);
+                SeekerState.ShowSmartFilters = sharedPreferences.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
                 RestoreSmartFilterState(sharedPreferences);
 
-                SoulSeekState.UserInfoBio = sharedPreferences.GetString(SoulSeekState.M_UserInfoBio, string.Empty);
-                SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
+                SeekerState.UserInfoBio = sharedPreferences.GetString(KeyConsts.M_UserInfoBio, string.Empty);
+                SeekerState.UserInfoPictureName = sharedPreferences.GetString(KeyConsts.M_UserInfoPicture, string.Empty);
 
-                SerializationHelper.MigrateUserNotesIfApplicable(sharedPreferences, SoulSeekState.M_UserNotes_Legacy, SoulSeekState.M_UserNotes);
-                SoulSeekState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
-                SerializationHelper.MigrateOnlineAlertsIfApplicable(sharedPreferences, SoulSeekState.M_UserOnlineAlerts_Legacy, SoulSeekState.M_UserOnlineAlerts);
-                SoulSeekState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
+                SerializationHelper.MigrateUserNotesIfApplicable(sharedPreferences, KeyConsts.M_UserNotes_Legacy, KeyConsts.M_UserNotes);
+                SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
+                SerializationHelper.MigrateOnlineAlertsIfApplicable(sharedPreferences, KeyConsts.M_UserOnlineAlerts_Legacy, KeyConsts.M_UserOnlineAlerts);
+                SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
 
-                SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
-                SoulSeekState.AutoRetryBackOnline = sharedPreferences.GetBoolean(SoulSeekState.M_AutoRetryBackOnline, true);
+                SeekerState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(KeyConsts.M_AutoSetAwayOnInactivity, false);
+                SeekerState.AutoRetryBackOnline = sharedPreferences.GetBoolean(KeyConsts.M_AutoRetryBackOnline, true);
 
-                SoulSeekState.NotifyOnFolderCompleted = sharedPreferences.GetBoolean(SoulSeekState.M_NotifyFolderComplete, true);
-                SoulSeekState.AllowUploadsOnMetered = sharedPreferences.GetBoolean(SoulSeekState.M_AllowUploadsOnMetered, true);
+                SeekerState.NotifyOnFolderCompleted = sharedPreferences.GetBoolean(KeyConsts.M_NotifyFolderComplete, true);
+                SeekerState.AllowUploadsOnMetered = sharedPreferences.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
 
-                UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(SoulSeekState.M_UserListSortOrder, 0));
-                SoulSeekState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(sharedPreferences.GetInt(SoulSeekState.M_DefaultSearchResultSortAlgorithm, 0));
+                UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(KeyConsts.M_UserListSortOrder, 0));
+                SeekerState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(sharedPreferences.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
 
-                SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(SoulSeekState.M_LimitSimultaneousDownloads, false), sharedPreferences.GetInt(SoulSeekState.M_MaxSimultaneousLimit, 1));
+                SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false), sharedPreferences.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1));
 
                 //SearchTabHelper.RestoreStateFromSharedPreferencesLegacy();
 
                 //SearchTabHelper.SaveHeadersToSharedPrefs();
                 //SearchTabHelper.SaveAllSearchTabsToDisk(c);
                 SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
-                SerializationHelper.MigrateHeaderState(sharedPreferences, SoulSeekState.M_SearchTabsState_Headers_Legacy, SoulSeekState.M_SearchTabsState_Headers);
+                SerializationHelper.MigrateHeaderState(sharedPreferences, KeyConsts.M_SearchTabsState_Headers_Legacy, KeyConsts.M_SearchTabsState_Headers);
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
                 SerializationHelper.MigrateWishlistTabs(c);
 
@@ -2098,12 +2098,12 @@ namespace AndriodApp1
 
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
 
-                ChatroomActivity.ShowStatusesView = sharedPreferences.GetBoolean(SoulSeekState.M_ShowStatusesView, true);
-                ChatroomActivity.ShowTickerView = sharedPreferences.GetBoolean(SoulSeekState.M_ShowTickerView, false);
-                ChatroomController.SortChatroomUsersBy = (ChatroomController.SortOrderChatroomUsers)(sharedPreferences.GetInt(SoulSeekState.M_RoomUserListSortOrder, 2)); //default is 2 = alphabetical..
-                ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(SoulSeekState.M_RoomUserListShowFriendsAtTop, false);
+                ChatroomActivity.ShowStatusesView = sharedPreferences.GetBoolean(KeyConsts.M_ShowStatusesView, true);
+                ChatroomActivity.ShowTickerView = sharedPreferences.GetBoolean(KeyConsts.M_ShowTickerView, false);
+                ChatroomController.SortChatroomUsersBy = (ChatroomController.SortOrderChatroomUsers)(sharedPreferences.GetInt(KeyConsts.M_RoomUserListSortOrder, 2)); //default is 2 = alphabetical..
+                ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, false);
 
-                SeekerApplication.LOG_DIAGNOSTICS = sharedPreferences.GetBoolean(SoulSeekState.M_LOG_DIAGNOSTICS, false);
+                SeekerApplication.LOG_DIAGNOSTICS = sharedPreferences.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
 
 
                 if (TransfersFragment.TransferItemManagerDL == null)
@@ -2119,9 +2119,9 @@ namespace AndriodApp1
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                SoulSeekState.ListenerEnabled = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_ListenerEnabled, true);
-                SoulSeekState.ListenerPort = SoulSeekState.SharedPreferences.GetInt(SoulSeekState.M_ListenerPort, 33939);
-                SoulSeekState.ListenerUPnpEnabled = SoulSeekState.SharedPreferences.GetBoolean(SoulSeekState.M_ListenerUPnpEnabled, true);
+                SeekerState.ListenerEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerEnabled, true);
+                SeekerState.ListenerPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_ListenerPort, 33939);
+                SeekerState.ListenerUPnpEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerUPnpEnabled, true);
             }
         }
 
@@ -2129,10 +2129,10 @@ namespace AndriodApp1
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutBoolean(SoulSeekState.M_ListenerEnabled, SoulSeekState.ListenerEnabled);
-                editor.PutInt(SoulSeekState.M_ListenerPort, SoulSeekState.ListenerPort);
-                editor.PutBoolean(SoulSeekState.M_ListenerUPnpEnabled, SoulSeekState.ListenerUPnpEnabled);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_ListenerEnabled, SeekerState.ListenerEnabled);
+                editor.PutInt(KeyConsts.M_ListenerPort, SeekerState.ListenerPort);
+                editor.PutBoolean(KeyConsts.M_ListenerUPnpEnabled, SeekerState.ListenerUPnpEnabled);
                 editor.Commit();
             }
         }
@@ -2141,14 +2141,14 @@ namespace AndriodApp1
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutBoolean(SoulSeekState.M_DownloadLimitEnabled, SoulSeekState.SpeedLimitDownloadOn);
-                editor.PutBoolean(SoulSeekState.M_DownloadPerTransfer, SoulSeekState.SpeedLimitDownloadIsPerTransfer);
-                editor.PutInt(SoulSeekState.M_DownloadSpeedLimitBytes, SoulSeekState.SpeedLimitDownloadBytesSec);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, SeekerState.SpeedLimitDownloadOn);
+                editor.PutBoolean(KeyConsts.M_DownloadPerTransfer, SeekerState.SpeedLimitDownloadIsPerTransfer);
+                editor.PutInt(KeyConsts.M_DownloadSpeedLimitBytes, SeekerState.SpeedLimitDownloadBytesSec);
 
-                editor.PutBoolean(SoulSeekState.M_UploadLimitEnabled, SoulSeekState.SpeedLimitUploadOn);
-                editor.PutBoolean(SoulSeekState.M_UploadPerTransfer, SoulSeekState.SpeedLimitUploadIsPerTransfer);
-                editor.PutInt(SoulSeekState.M_UploadSpeedLimitBytes, SoulSeekState.SpeedLimitUploadBytesSec);
+                editor.PutBoolean(KeyConsts.M_UploadLimitEnabled, SeekerState.SpeedLimitUploadOn);
+                editor.PutBoolean(KeyConsts.M_UploadPerTransfer, SeekerState.SpeedLimitUploadIsPerTransfer);
+                editor.PutInt(KeyConsts.M_UploadSpeedLimitBytes, SeekerState.SpeedLimitUploadBytesSec);
 
                 editor.Commit();
             }
@@ -2158,50 +2158,50 @@ namespace AndriodApp1
 
         public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
         {
-            if (SoulSeekState.ShowRecentUsers)
+            if (SeekerState.ShowRecentUsers)
             {
                 if (forAddingUser)
                 {
                     //dont show people that we have already added...
-                    var recents = SoulSeekState.RecentUsersManager.GetRecentUserList();
-                    lock (SoulSeekState.UserList)
+                    var recents = SeekerState.RecentUsersManager.GetRecentUserList();
+                    lock (SeekerState.UserList)
                     {
-                        foreach (var uli in SoulSeekState.UserList)
+                        foreach (var uli in SeekerState.UserList)
                         {
                             recents.Remove(uli.Username);
                         }
                     }
-                    actv.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, recents);
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, recents);
                 }
                 else
                 {
-                    actv.Adapter = new ArrayAdapter<string>(SoulSeekState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, SoulSeekState.RecentUsersManager.GetRecentUserList());
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, SeekerState.RecentUsersManager.GetRecentUserList());
                 }
             }
         }
 
         public static void RestoreSmartFilterState(ISharedPreferences sharedPreferences)
         {
-            SoulSeekState.SmartFilterOptions = new SoulSeekState.SmartFilterState();
-            SoulSeekState.SmartFilterOptions.KeywordsEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_KeywordsEnabled, true);
-            SoulSeekState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_KeywordsOrder, 0);
-            SoulSeekState.SmartFilterOptions.FileTypesEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_TypesEnabled, true);
-            SoulSeekState.SmartFilterOptions.FileTypesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_TypesOrder, 1);
-            SoulSeekState.SmartFilterOptions.NumFilesEnabled = sharedPreferences.GetBoolean(SoulSeekState.M_SmartFilter_CountsEnabled, true);
-            SoulSeekState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(SoulSeekState.M_SmartFilter_CountsOrder, 2);
+            SeekerState.SmartFilterOptions = new SeekerState.SmartFilterState();
+            SeekerState.SmartFilterOptions.KeywordsEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true);
+            SeekerState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0);
+            SeekerState.SmartFilterOptions.FileTypesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true);
+            SeekerState.SmartFilterOptions.FileTypesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1);
+            SeekerState.SmartFilterOptions.NumFilesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true);
+            SeekerState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2);
         }
 
         public static void SaveSmartFilterState()
         {
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutBoolean(SoulSeekState.M_SmartFilter_KeywordsEnabled, SoulSeekState.SmartFilterOptions.KeywordsEnabled);
-                editor.PutBoolean(SoulSeekState.M_SmartFilter_TypesEnabled, SoulSeekState.SmartFilterOptions.FileTypesEnabled);
-                editor.PutBoolean(SoulSeekState.M_SmartFilter_CountsEnabled, SoulSeekState.SmartFilterOptions.NumFilesEnabled);
-                editor.PutInt(SoulSeekState.M_SmartFilter_KeywordsOrder, SoulSeekState.SmartFilterOptions.KeywordsOrder);
-                editor.PutInt(SoulSeekState.M_SmartFilter_TypesOrder, SoulSeekState.SmartFilterOptions.FileTypesOrder);
-                editor.PutInt(SoulSeekState.M_SmartFilter_CountsOrder, SoulSeekState.SmartFilterOptions.NumFilesOrder);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, SeekerState.SmartFilterOptions.FileTypesEnabled);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, SeekerState.SmartFilterOptions.NumFilesEnabled);
+                editor.PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, SeekerState.SmartFilterOptions.KeywordsOrder);
+                editor.PutInt(KeyConsts.M_SmartFilter_TypesOrder, SeekerState.SmartFilterOptions.FileTypesOrder);
+                editor.PutInt(KeyConsts.M_SmartFilter_CountsOrder, SeekerState.SmartFilterOptions.NumFilesOrder);
                 editor.Commit();
             }
         }
@@ -2209,17 +2209,17 @@ namespace AndriodApp1
         public static void RestoreRecentUsersManagerFromString(string xmlRecentUsersList)
         {
             //if empty then this is the first time creating it.  initialize it with our list of added users.
-            SoulSeekState.RecentUsersManager = new RecentUserManager();
+            SeekerState.RecentUsersManager = new RecentUserManager();
             if (xmlRecentUsersList == string.Empty)
             {
-                int count = SoulSeekState.UserList?.Count ?? 0;
+                int count = SeekerState.UserList?.Count ?? 0;
                 if (count > 0)
                 {
-                    SoulSeekState.RecentUsersManager.SetRecentUserList(SoulSeekState.UserList.Select(uli => uli.Username).ToList());
+                    SeekerState.RecentUsersManager.SetRecentUserList(SeekerState.UserList.Select(uli => uli.Username).ToList());
                 }
                 else
                 {
-                    SoulSeekState.RecentUsersManager.SetRecentUserList(new List<string>());
+                    SeekerState.RecentUsersManager.SetRecentUserList(new List<string>());
                 }
             }
             else
@@ -2228,7 +2228,7 @@ namespace AndriodApp1
                 using (var stream = new System.IO.StringReader(xmlRecentUsersList))
                 {
                     var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType()); //this happens too often not allowing new things to be properly stored..
-                    SoulSeekState.RecentUsersManager.SetRecentUserList(serializer.Deserialize(stream) as List<string>);
+                    SeekerState.RecentUsersManager.SetRecentUserList(serializer.Deserialize(stream) as List<string>);
                 }
             }
         }
@@ -2236,7 +2236,7 @@ namespace AndriodApp1
         public static void SaveRecentUsers()
         {
             string recentUsersStr;
-            List<string> recentUsers = SoulSeekState.RecentUsersManager.GetRecentUserList();
+            List<string> recentUsers = SeekerState.RecentUsersManager.GetRecentUserList();
             using (var writer = new System.IO.StringWriter())
             {
                 var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType());
@@ -2245,8 +2245,8 @@ namespace AndriodApp1
             }
             lock (MainActivity.SHARED_PREF_LOCK)
             {
-                var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_RecentUsersList, recentUsersStr);
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_RecentUsersList, recentUsersStr);
                 editor.Commit();
             }
         }
@@ -2262,13 +2262,13 @@ namespace AndriodApp1
         private void SoulseekClient_UserDataReceived(object sender, UserData e)
         {
             MainActivity.LogDebug("User Data Received: " + e.Username);
-            if (e.Username == SoulSeekState.Username)
+            if (e.Username == SeekerState.Username)
             {
-                SoulSeekState.UploadSpeed = e.AverageSpeed; //bytes
+                SeekerState.UploadSpeed = e.AverageSpeed; //bytes
             }
             else
             {
-                if (SoulSeekState.UserList == null)
+                if (SeekerState.UserList == null)
                 {
                     MainActivity.LogFirebase("UserList is null on user data receive");
                 }
@@ -2304,7 +2304,7 @@ namespace AndriodApp1
         {
             if (status != UserPresence.Offline)
             {
-                if (SoulSeekState.AutoRetryBackOnline)
+                if (SeekerState.AutoRetryBackOnline)
                 {
                     if (TransfersFragment.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
                     {
@@ -2340,14 +2340,14 @@ namespace AndriodApp1
         public static EventHandler<string> UserStatusChangedUIEvent;
         private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
         {
-            if (e.Username == SoulSeekState.Username)
+            if (e.Username == SeekerState.Username)
             {
                 //not sure this will ever happen
             }
             else
             {
                 //we get user status changed for those we are in the same room as us
-                if (SoulSeekState.UserList != null)
+                if (SeekerState.UserList != null)
                 {
                     bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
                     if (found)

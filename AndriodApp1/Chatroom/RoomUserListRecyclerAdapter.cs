@@ -154,24 +154,24 @@ namespace AndriodApp1.Chatroom
 
             if (canRemoveUser)
             {
-                menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_user));
+                menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.GetString(Resource.String.remove_user));
             }
             if (canRemoveModPriviledgesAndApplicable)
             {
-                menu.Add(0, 1, 1, SoulSeekState.ActiveActivityRef.GetString(Resource.String.remove_mod_priv));
+                menu.Add(0, 1, 1, SeekerState.ActiveActivityRef.GetString(Resource.String.remove_mod_priv));
             }
             if (canAddModPriviledgesAndApplicable)
             {
-                menu.Add(0, 2, 2, SoulSeekState.ActiveActivityRef.GetString(Resource.String.add_mod_priv));
+                menu.Add(0, 2, 2, SeekerState.ActiveActivityRef.GetString(Resource.String.add_mod_priv));
             }
 
 
             //normal - add to user list, browse, etc...
-            menu.Add(1, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.browse_user));
-            menu.Add(1, 4, 4, SoulSeekState.ActiveActivityRef.GetString(Resource.String.search_user_files));
+            menu.Add(1, 3, 3, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user));
+            menu.Add(1, 4, 4, SeekerState.ActiveActivityRef.GetString(Resource.String.search_user_files));
             CommonHelpers.AddAddRemoveUserMenuItem(menu, 1, 5, 5, roomUserItemView.DataItem.Username, true);
             CommonHelpers.AddIgnoreUnignoreUserMenuItem(menu, 1, 6, 6, roomUserItemView.DataItem.Username);
-            menu.Add(1, 7, 7, SoulSeekState.ActiveActivityRef.GetString(Resource.String.msg_user));
+            menu.Add(1, 7, 7, SeekerState.ActiveActivityRef.GetString(Resource.String.msg_user));
             CommonHelpers.AddUserNoteMenuItem(menu, 1, 8, 8, roomUserItemView.DataItem.Username);
 
             var hackFixDialogContext = new FixForDialogFragmentContext();
@@ -248,19 +248,19 @@ namespace AndriodApp1.Chatroom
                 else if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = string.Format("({0})", SoulSeekState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper());
+                    viewOperatorStatus.Text = string.Format("({0})", SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper());
                 }
                 else
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = string.Format("({0})", SoulSeekState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper());
+                    viewOperatorStatus.Text = string.Format("({0})", SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper());
                 }
             }
             else
             {
                 viewOperatorStatus.Visibility = ViewStates.Gone;
             }
-            if (SoulSeekState.UserNotes.ContainsKey(userData.Username))
+            if (SeekerState.UserNotes.ContainsKey(userData.Username))
             {
                 imageNoted.Visibility = ViewStates.Visible;
             }

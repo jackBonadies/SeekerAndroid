@@ -43,7 +43,7 @@ namespace AndriodApp1
                 }
                 try
                 {
-                    SoulSeekState.SoulseekClient.AddUserAsync(username);
+                    SeekerState.SoulseekClient.AddUserAsync(username);
                 }
                 catch (System.Exception)
                 {
@@ -96,7 +96,7 @@ namespace AndriodApp1
             //this is necessary if programmatically moving to a tab from another activity..
             if (menuVisible)
             {
-                var navigator = SoulSeekState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 if (navigator != null)
                 {
                     navigator.Menu.GetItem(2).SetCheckable(true);
@@ -221,7 +221,7 @@ namespace AndriodApp1
                 }
             }
 
-            if (SoulSeekState.TransferViewShowSizes)
+            if (SeekerState.TransferViewShowSizes)
             {
                 menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.HideSize);
             }
@@ -230,7 +230,7 @@ namespace AndriodApp1
                 menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.ShowSize);
             }
 
-            if (SoulSeekState.TransferViewShowSpeed)
+            if (SeekerState.TransferViewShowSpeed)
             {
                 menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.HideSpeed);
             }
@@ -245,7 +245,7 @@ namespace AndriodApp1
         public void RefreshForModeSwitch()
         {
             SetRecyclerAdapter();
-            SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
+            SeekerState.MainActivityRef.SetTransferSupportActionBarState();
             SetNoTransfersMessage();
         }
 
@@ -254,7 +254,7 @@ namespace AndriodApp1
             switch (item.ItemId)
             {
                 case Android.Resource.Id.Home:
-                    SoulSeekState.MainActivityRef.OnBackPressed();
+                    SeekerState.MainActivityRef.OnBackPressed();
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
                     MainActivity.LogInfoFirebase("Clear All Complete Pressed");
@@ -273,11 +273,11 @@ namespace AndriodApp1
                     SetRecyclerAdapter();
                     return true;
                 case Resource.Id.action_show_size:
-                    SoulSeekState.TransferViewShowSizes = !SoulSeekState.TransferViewShowSizes;
+                    SeekerState.TransferViewShowSizes = !SeekerState.TransferViewShowSizes;
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_show_speed:
-                    SoulSeekState.TransferViewShowSpeed = !SoulSeekState.TransferViewShowSpeed;
+                    SeekerState.TransferViewShowSpeed = !SeekerState.TransferViewShowSpeed;
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
@@ -298,7 +298,7 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     MainActivity.LogInfoFirebase("action_cancel_and_clear_all Pressed");
-                    SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.CancelAll(true);
@@ -313,7 +313,7 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_abort_all: //abort all
                     MainActivity.LogInfoFirebase("action_abort_all_pressed");
-                    SoulSeekState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    SeekerState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedUploadFolder == null)
                     {
                         TransferItemManagerUploads.CancelAll();
@@ -326,7 +326,7 @@ namespace AndriodApp1
                     return true;
                 case Resource.Id.action_pause_all:
                     MainActivity.LogInfoFirebase("pause all Pressed");
-                    SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.CancelAll();
@@ -350,7 +350,7 @@ namespace AndriodApp1
                         {
                             if (t.IsFaulted)
                             {
-                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                                 {
                                     if (Context != null)
                                     {
@@ -358,7 +358,7 @@ namespace AndriodApp1
                                     }
                                     else
                                     {
-                                        Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                     }
 
                                 });
@@ -366,7 +366,7 @@ namespace AndriodApp1
                             }
                             if (CurrentlySelectedDLFolder == null)
                             {
-                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
                             }
                             else
                             {
@@ -392,9 +392,9 @@ namespace AndriodApp1
                 case Resource.Id.batch_select:
                     TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                     ForceOutIfZeroSelected = false;
-                    //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
+                    //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                     //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
-                    TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                    TransfersActionMode = SeekerState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
                     TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), 0);
                     TransfersActionMode.Invalidate();
@@ -420,7 +420,7 @@ namespace AndriodApp1
                 {
                     if (t.IsFaulted)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                         {
                             if (Context != null)
                             {
@@ -428,7 +428,7 @@ namespace AndriodApp1
                             }
                             else
                             {
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                             }
 
                         });
@@ -436,11 +436,11 @@ namespace AndriodApp1
                     }
                     if (CurrentlySelectedDLFolder == null)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
                     }
                     else
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
                     }
                 }));
             }
@@ -477,7 +477,7 @@ namespace AndriodApp1
 
         public static void RestoreUploadTransferItems(ISharedPreferences sharedPreferences)
         {
-            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_Upload_TransferList_v2, string.Empty); //TODO !!! replace !!!
+            string transferListv2 = string.Empty;//sharedPreferences.GetString(KeyConsts.M_Upload_TransferList_v2, string.Empty); //TODO !!! replace !!!
             if (transferListv2 == string.Empty)
             {
                 RestoreUploadTransferItemsLegacy(sharedPreferences);
@@ -498,7 +498,7 @@ namespace AndriodApp1
 
         public static void RestoreUploadTransferItemsLegacy(ISharedPreferences sharedPreferences)
         {
-            string transferList = sharedPreferences.GetString(SoulSeekState.M_TransferListUpload, string.Empty);
+            string transferList = sharedPreferences.GetString(KeyConsts.M_TransferListUpload, string.Empty);
             if (transferList == string.Empty)
             {
                 TransferItemManagerUploads = new TransferItemManager(true);
@@ -528,7 +528,7 @@ namespace AndriodApp1
 
         public static void RestoreDownloadTransferItems(ISharedPreferences sharedPreferences)
         {
-            string transferListv2 = string.Empty;//sharedPreferences.GetString(SoulSeekState.M_TransferList_v2, string.Empty);
+            string transferListv2 = string.Empty;//sharedPreferences.GetString(KeyConsts.M_TransferList_v2, string.Empty);
             if (transferListv2 == string.Empty)
             {
                 RestoreDownloadTransferItemsLegacy(sharedPreferences);
@@ -551,7 +551,7 @@ namespace AndriodApp1
 
         public static void RestoreDownloadTransferItemsLegacy(ISharedPreferences sharedPreferences)
         {
-            string transferList = sharedPreferences.GetString(SoulSeekState.M_TransferList, string.Empty);
+            string transferList = sharedPreferences.GetString(KeyConsts.M_TransferList, string.Empty);
             if (transferList == string.Empty)
             {
                 TransferItemManagerDL = new TransferItemManager();
@@ -633,12 +633,12 @@ namespace AndriodApp1
                     noTransfers.Visibility = ViewStates.Visible;
                     if (MainActivity.MeetsSharingConditions())
                     {
-                        noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
+                        noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
                         setupUpSharing.Visibility = ViewStates.Gone;
                     }
                     else
                     {
-                        noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_not_sharing);
+                        noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_not_sharing);
                         setupUpSharing.Visibility = ViewStates.Visible;
                     }
                 }
@@ -653,7 +653,7 @@ namespace AndriodApp1
                 else
                 {
                     noTransfers.Visibility = ViewStates.Visible;
-                    noTransfers.Text = SoulSeekState.ActiveActivityRef.GetString(Resource.String.no_transfers_yet);
+                    noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_transfers_yet);
                 }
             }
         }
@@ -682,7 +682,7 @@ namespace AndriodApp1
             //View transferOptions = rootView.FindViewById<View>(Resource.Id.transferOptions);
             //transferOptions.Click += TransferOptions_Click;
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
-            sharedPreferences = SoulSeekState.SharedPreferences;
+            sharedPreferences = SeekerState.SharedPreferences;
             //if (TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             //{
             //    RestoreDownloadTransferItems(sharedPreferences);
@@ -724,17 +724,17 @@ namespace AndriodApp1
 
 
 
-            MainActivity.LogInfoFirebase("AutoClear: " + SoulSeekState.AutoClearCompleteDownloads);
-            MainActivity.LogInfoFirebase("AutoRetry: " + SoulSeekState.AutoRetryDownload);
+            MainActivity.LogInfoFirebase("AutoClear: " + SeekerState.AutoClearCompleteDownloads);
+            MainActivity.LogInfoFirebase("AutoRetry: " + SeekerState.AutoRetryDownload);
 
             return rootView;
         }
 
         private void SetupUpSharing_Click(object sender, EventArgs e)
         {
-            Intent intent2 = new Intent(SoulSeekState.MainActivityRef, typeof(SettingsActivity));
+            Intent intent2 = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
             intent2.PutExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, SettingsActivity.SCROLL_TO_SHARING_SECTION);
-            SoulSeekState.MainActivityRef.StartActivityForResult(intent2, 140);
+            SeekerState.MainActivityRef.StartActivityForResult(intent2, 140);
         }
 
         public void SaveScrollPositionOnMovingIntoFolder()
@@ -808,7 +808,7 @@ namespace AndriodApp1
         /// <param name="e"></param>
         private void TranferQueueStateChanged(object sender, TransferItem e)
         {
-            SoulSeekState.MainActivityRef.RunOnUiThread(new Action(() =>
+            SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
             {
                 UpdateQueueState(e.FullFilename);
             }));
@@ -818,7 +818,7 @@ namespace AndriodApp1
         {
             try
             {
-                PopupMenu popup = new PopupMenu(SoulSeekState.MainActivityRef, sender as View);
+                PopupMenu popup = new PopupMenu(SeekerState.MainActivityRef, sender as View);
                 popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
                 popup.Inflate(Resource.Menu.transfers_options);
                 popup.Show();
@@ -857,7 +857,7 @@ namespace AndriodApp1
             //    case Resource.Id.cancelAndClearAll:
             //        lock (transferItems)
             //        {
-            //            SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            //            SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             //            for (int i = 0; i < transferItems.Count; i++)
             //            {
             //                //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
@@ -875,28 +875,28 @@ namespace AndriodApp1
             //    //    //actionview - no apps can perform this action.
             //    //    //chooser.AddCategory(Intent.CategoryOpenable);
 
-            //    //    if (SoulSeekState.UseLegacyStorage())
+            //    //    if (SeekerState.UseLegacyStorage())
             //    //    {
-            //    //        if (SoulSeekState.SaveDataDirectoryUri == null || SoulSeekState.SaveDataDirectoryUri == string.Empty)
+            //    //        if (SeekerState.SaveDataDirectoryUri == null || SeekerState.SaveDataDirectoryUri == string.Empty)
             //    //        {
             //    //            string rootDir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
             //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(rootDir), "*/*");
             //    //        }
             //    //        else
             //    //        {
-            //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri), "*/*");
+            //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri), "*/*");
             //    //        }
             //    //    }
             //    //    else
             //    //    {
-            //    //        if (SoulSeekState.SaveDataDirectoryUri==null || SoulSeekState.SaveDataDirectoryUri==string.Empty)
+            //    //        if (SeekerState.SaveDataDirectoryUri==null || SeekerState.SaveDataDirectoryUri==string.Empty)
             //    //        {
             //    //            Toast tst = Toast.MakeText(Context, "Download Directory is not set.  Please set it to enable downloading.", ToastLength.Short);
             //    //            tst.Show();
             //    //            return true;
             //    //        }
 
-            //    //        chooser.SetData(Android.Net.Uri.Parse(SoulSeekState.SaveDataDirectoryUri));
+            //    //        chooser.SetData(Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri));
             //    //    }
 
             //    //    try
@@ -920,8 +920,8 @@ namespace AndriodApp1
         //{
         //    try
         //    {
-        //        SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-        //        SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
+        //        SeekerState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
+        //        SeekerState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
         //        MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
         //    }
         //    catch (System.Exception)
@@ -933,9 +933,9 @@ namespace AndriodApp1
 
         //public override void OnDestroy()
         //{
-        //    //SoulSeekState.DownloadAdded -= SoulSeekState_DownloadAdded;
-        //    //SoulSeekState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-        //    //SoulSeekState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
+        //    //SeekerState.DownloadAdded -= SeekerState_DownloadAdded;
+        //    //SeekerState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
+        //    //SeekerState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
         //    base.OnDestroy();
         //}
 
@@ -957,7 +957,7 @@ namespace AndriodApp1
             CurrentlySelectedDLFolder = null;
             CurrentlySelectedUploadFolder = null;
             this.RefreshForModeSwitch();
-            SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
+            SeekerState.MainActivityRef.InvalidateOptionsMenu();
         }
 
         public override void OnPause()
@@ -1003,8 +1003,8 @@ namespace AndriodApp1
                     lock (TransferStateSaveLock)
                     {
                         var editor = sharedPreferences.Edit();
-                        editor.PutString(SoulSeekState.M_TransferList, listOfDownloadItems);
-                        editor.PutString(SoulSeekState.M_TransferListUpload, listOfUploadItems);
+                        editor.PutString(KeyConsts.M_TransferList, listOfDownloadItems);
+                        editor.PutString(KeyConsts.M_TransferListUpload, listOfUploadItems);
                         editor.Commit();
                     }
 
@@ -1114,7 +1114,7 @@ namespace AndriodApp1
                 }
                 catch (System.Exception error)
                 {
-                    Action a = new Action(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, SoulSeekState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
+                    Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
                     if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                     {
 
@@ -1125,13 +1125,13 @@ namespace AndriodApp1
                     }
                     if (!exceptionShown)
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(a);
+                        SeekerState.ActiveActivityRef.RunOnUiThread(a);
                         exceptionShown = true;
                     }
                     return; //otherwise null ref with task!
                 }
                 //save to disk, update ui.
-                //task.ContinueWith(SoulSeekState.MainActivityRef.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username,item1.FullFilename,item1.Size,task, cancellationTokenSource))));
+                //task.ContinueWith(SeekerState.MainActivityRef.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username,item1.FullFilename,item1.Size,task, cancellationTokenSource))));
                 item.Progress = 0; //no longer red... some good user feedback
                 item.Failed = false;
 
@@ -1139,7 +1139,7 @@ namespace AndriodApp1
 
             var refreshOnlySelected = new Action(() =>
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(
+                SeekerState.ActiveActivityRef.RunOnUiThread(
                     () =>
                     {
 
@@ -1211,7 +1211,7 @@ namespace AndriodApp1
             //MainActivity.LogDebug("targetView is null? " + (targetView == null).ToString());
             //if (targetView == null)
             //{
-            //    SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
+            //    SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
             //    return;
             //}
             string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
@@ -1222,12 +1222,12 @@ namespace AndriodApp1
             MainActivity.LogDebug("item1 is null?" + (item1 == null).ToString());//tested
             if (item1 == null || indexToRefresh == -1)
             {
-                SeekerApplication.ShowToast(SoulSeekState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
+                SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
                 return;
             }
 
             //int tokenNum = int.MinValue;
-            if (SoulSeekState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
+            if (SeekerState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
             {
                 MainActivity.LogDebug("transfer is in Downloads !!! " + item1.FullFilename);
                 item1.CancelAndRetryFlag = true;
@@ -1254,7 +1254,7 @@ namespace AndriodApp1
                 Android.Net.Uri incompleteUri = null;
                 SetupCancellationToken(item1, cancellationTokenSource, out _);
                 Task task = DownloadDialog.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
-                //SoulSeekState.SoulseekClient.DownloadAsync(
+                //SeekerState.SoulseekClient.DownloadAsync(
                 //username: item1.Username,
                 //filename: item1.FullFilename,
                 //size: item1.Size,
@@ -1268,7 +1268,7 @@ namespace AndriodApp1
             }
             catch (System.Exception error)
             {
-                Action a = new Action(() => { Toast.MakeText(SoulSeekState.MainActivityRef, SoulSeekState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                Action a = new Action(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
                 if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                 {
 
@@ -1277,7 +1277,7 @@ namespace AndriodApp1
                 {
                     MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
                 }
-                SoulSeekState.MainActivityRef.RunOnUiThread(a);
+                SeekerState.MainActivityRef.RunOnUiThread(a);
                 return; //otherwise null ref with task!
             }
             ClearTransferForRetry(item1, indexToRefresh);
@@ -1305,9 +1305,9 @@ namespace AndriodApp1
 
         private bool NotLoggedInShowMessageGaurd(string msg)
         {
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Must be logged in to " + msg, ToastLength.Short).Show();
+                Toast.MakeText(SeekerState.ActiveActivityRef, "Must be logged in to " + msg, ToastLength.Short).Show();
                 return true;
             }
             return false;
@@ -1334,11 +1334,11 @@ namespace AndriodApp1
 
                 if (position == -1)
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                     return base.OnContextItemSelected(item);
                 }
 
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SoulSeekState.ActiveActivityRef, this.View))
+                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SeekerState.ActiveActivityRef, this.View))
                 {
                     MainActivity.LogDebug("handled by commons");
                     return base.OnContextItemSelected(item);
@@ -1364,7 +1364,7 @@ namespace AndriodApp1
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                                     {
                                         if (Context != null)
                                         {
@@ -1372,13 +1372,13 @@ namespace AndriodApp1
                                         }
                                         else
                                         {
-                                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                         }
 
                                     });
                                     return;
                                 }
-                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
                             }));
                         }
                         else
@@ -1407,7 +1407,7 @@ namespace AndriodApp1
                             catch (ArgumentOutOfRangeException)
                             {
                                 //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                                Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                                 return base.OnContextItemSelected(item);
                             }
                             recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
@@ -1425,7 +1425,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         if (tItem is TransferItem tti)
@@ -1476,7 +1476,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
 
@@ -1508,7 +1508,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         try
@@ -1516,7 +1516,7 @@ namespace AndriodApp1
                             //tested on API25 and API30
                             //AndroidX.Core.Content.FileProvider
                             Android.Net.Uri uriToUse = null;
-                            if (SoulSeekState.UseLegacyStorage() && CommonHelpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
+                            if (SeekerState.UseLegacyStorage() && CommonHelpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
                             {
                                 uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
                             }
@@ -1547,7 +1547,7 @@ namespace AndriodApp1
                             string startingDir = CommonHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
                             Action<View> action = new Action<View>((v) =>
                             {
-                                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                             });
 
                             DownloadDialog.RequestFilesApi(ttti.Username, this.View, action, startingDir);
@@ -1557,7 +1557,7 @@ namespace AndriodApp1
                             if (fi.IsEmpty())
                             {
                                 //since if auto clear is on, and the menu is already up, the final item in this folder can clear before we end up selecting something.
-                                Toast.MakeText(SoulSeekState.ActiveActivityRef, "Folder is empty.", ToastLength.Short).Show();
+                                Toast.MakeText(SeekerState.ActiveActivityRef, "Folder is empty.", ToastLength.Short).Show();
                                 return true;
                             }
                             string startingDir = CommonHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
@@ -1569,7 +1569,7 @@ namespace AndriodApp1
 
                             Action<View> action = new Action<View>((v) =>
                             {
-                                ((AndroidX.ViewPager.Widget.ViewPager)(SoulSeekState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                             });
 
                             DownloadDialog.RequestFilesApi(fi.Username, this.View, action, startingDir);
@@ -1592,7 +1592,7 @@ namespace AndriodApp1
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                                     {
                                         if (Context != null)
                                         {
@@ -1600,13 +1600,13 @@ namespace AndriodApp1
                                         }
                                         else
                                         {
-                                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                         }
 
                                     });
                                     return;
                                 }
-                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
                             }));
                         }
                         else
@@ -1636,7 +1636,7 @@ namespace AndriodApp1
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                                     {
                                         if (Context != null)
                                         {
@@ -1644,13 +1644,13 @@ namespace AndriodApp1
                                         }
                                         else
                                         {
-                                            Toast.MakeText(SoulSeekState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
                                         }
 
                                     });
                                     return;
                                 }
-                                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
                             }));
                         }
                         else
@@ -1668,7 +1668,7 @@ namespace AndriodApp1
                         catch (ArgumentOutOfRangeException)
                         {
                             //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
                         TransferItem uploadToCancel = tItem as TransferItem;
@@ -1699,14 +1699,14 @@ namespace AndriodApp1
                                 }
                             }
                         }
-                        SeekerApplication.AddToIgnoreListFeedback(SoulSeekState.ActiveActivityRef, ti.GetUsername());
+                        SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
                         break;
                     case 105: //batch selection mode
                         TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                         ForceOutIfZeroSelected = true;
-                        //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SoulSeekState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
+                        //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                         //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
-                        TransfersActionMode = SoulSeekState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                        TransfersActionMode = SeekerState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
                         recyclerTransferAdapter.IsInBatchSelectMode = true;
                         ToggleItemBatchSelect(recyclerTransferAdapter, position);
                         break;
@@ -1862,7 +1862,7 @@ namespace AndriodApp1
                     //this is the only option that uploads gets
                     case Resource.Id.action_cancel_and_clear_all_batch:
                         MainActivity.LogInfoFirebase("action_cancel_and_clear_batch Pressed");
-                        SoulSeekState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         TransferItemManagerWrapped.CancelSelectedItems(true);
                         TransferItemManagerWrapped.ClearSelectedItemsAndClean();
                         var selected = BatchSelectedItems.ToArray();
@@ -1969,11 +1969,11 @@ namespace AndriodApp1
                     {
                         if (queueLenOld == int.MaxValue)
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, "Position in queue is unknown.", ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, "Position in queue is unknown.", ToastLength.Short).Show();
                         }
                         else
                         {
-                            Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
+                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
                         }
                     }
                     else
@@ -2107,7 +2107,7 @@ namespace AndriodApp1
                         }
                         else
                         {
-                            v.GetAdditionalStatusInfoView().Text = string.Format(SoulSeekState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                            v.GetAdditionalStatusInfoView().Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
                         }
                     }
                     else
@@ -2144,12 +2144,12 @@ namespace AndriodApp1
             //TransferAdapter customAdapter = null;
             if (Context == null)
             {
-                if (SoulSeekState.MainActivityRef == null)
+                if (SeekerState.MainActivityRef == null)
                 {
                     MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
                 }
-                //customAdapter = new TransferAdapter(SoulSeekState.MainActivityRef, transferItems);
+                //customAdapter = new TransferAdapter(SeekerState.MainActivityRef, transferItems);
             }
             else
             {
@@ -2179,7 +2179,7 @@ namespace AndriodApp1
             //TransferAdapter customAdapter = null;
             if (Context == null)
             {
-                if (SoulSeekState.MainActivityRef == null)
+                if (SeekerState.MainActivityRef == null)
                 {
                     MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
@@ -2314,8 +2314,8 @@ namespace AndriodApp1
 
                     TransfersFragment.SaveScrollPositionOnMovingIntoFolder();
                     TransfersFragment.SetRecyclerAdapter();
-                    SoulSeekState.MainActivityRef.SetTransferSupportActionBarState();
-                    SoulSeekState.MainActivityRef.InvalidateOptionsMenu();
+                    SeekerState.MainActivityRef.SetTransferSupportActionBarState();
+                    SeekerState.MainActivityRef.InvalidateOptionsMenu();
                 }
             }
 
@@ -2421,8 +2421,8 @@ namespace AndriodApp1
             public TransferAdapterRecyclerVersion(System.Collections.IList tranfersList)
             {
                 localDataSet = tranfersList;
-                showSpeed = SoulSeekState.TransferViewShowSpeed;
-                showSizes = SoulSeekState.TransferViewShowSizes;
+                showSpeed = SeekerState.TransferViewShowSpeed;
+                showSizes = SeekerState.TransferViewShowSizes;
             }
 
         }
@@ -2786,7 +2786,7 @@ namespace AndriodApp1
                 refreshListViewSpecificItem(index);
 
             });
-            SoulSeekState.MainActivityRef.RunOnUiThread(action);
+            SeekerState.MainActivityRef.RunOnUiThread(action);
         }
 
         private void TransferStateChanged(object sender, int index)
@@ -2797,7 +2797,7 @@ namespace AndriodApp1
                 refreshListViewSpecificItem(index);
 
             });
-            SoulSeekState.MainActivityRef.RunOnUiThread(action);
+            SeekerState.MainActivityRef.RunOnUiThread(action);
         }
 
 
@@ -2844,7 +2844,7 @@ namespace AndriodApp1
             }
             else
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { MainActivity_TransferAddedUINotify(null, e); });
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => { MainActivity_TransferAddedUINotify(null, e); });
             }
         }
 
@@ -2865,7 +2865,7 @@ namespace AndriodApp1
         {
 
             MainActivity.ClearDownloadAddedEventsFromTarget(this);
-            MainActivity.DownloadAddedUINotify += SoulSeekState_DownloadAddedUINotify;
+            MainActivity.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
             //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
             //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
             //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
@@ -2875,9 +2875,9 @@ namespace AndriodApp1
         }
 
 
-        private void SoulSeekState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)
+        private void SeekerState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
                 //occurs on nonUI thread...
                 //if there is any deadlock due to this, then do Thread.Start().

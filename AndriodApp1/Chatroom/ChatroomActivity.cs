@@ -54,7 +54,7 @@ namespace AndriodApp1
             base.OnCreate(savedInstanceState);
 
             ChatroomActivityRef = this;
-            SoulSeekState.ActiveActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.chatroom_main_layout);
 
 
@@ -390,7 +390,7 @@ namespace AndriodApp1
                     SearchTabHelper.SearchTarget = SearchTarget.Room;
                     SearchTabHelper.SearchTargetChosenRoom = ChatroomInnerFragment.OurRoomInfo.Name;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SoulSeekState.ActiveActivityRef, typeof(MainActivity));
+                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(UserListActivity.IntentSearchRoom, 1);
                     this.StartActivity(intent);
                     return true;
@@ -407,8 +407,8 @@ namespace AndriodApp1
                     }
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
-                        var editor = SoulSeekState.SharedPreferences.Edit();
-                        editor.PutBoolean(SoulSeekState.M_ShowTickerView, ChatroomActivity.ShowTickerView);
+                        var editor = SeekerState.SharedPreferences.Edit();
+                        editor.PutBoolean(KeyConsts.M_ShowTickerView, ChatroomActivity.ShowTickerView);
                         editor.Commit();
                     }
                     return true;
@@ -418,8 +418,8 @@ namespace AndriodApp1
                     f1.SetStatusesView();
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
-                        var editor = SoulSeekState.SharedPreferences.Edit();
-                        editor.PutBoolean(SoulSeekState.M_ShowStatusesView, ChatroomActivity.ShowStatusesView);
+                        var editor = SeekerState.SharedPreferences.Edit();
+                        editor.PutBoolean(KeyConsts.M_ShowStatusesView, ChatroomActivity.ShowStatusesView);
                         editor.Commit();
                     }
                     return true;
@@ -467,11 +467,11 @@ namespace AndriodApp1
                 string userToAdd = input.Text;
                 if (userToAdd == null || userToAdd == string.Empty)
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short).Show();
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
-                SoulSeekState.RecentUsersManager.AddUserToTop(userToAdd, true);
+                SeekerState.RecentUsersManager.AddUserToTop(userToAdd, true);
                 ChatroomController.AddRemoveUserToPrivateRoomAPI(roomToInvite, userToAdd, true, false);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -508,7 +508,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -530,7 +530,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -562,26 +562,26 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("invite WindowManagerBadTokenException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("invite WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("invite Exception null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
@@ -632,7 +632,7 @@ namespace AndriodApp1
                 string tickerText = input.Text;
                 if (tickerText == null || tickerText == string.Empty)
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
@@ -672,7 +672,7 @@ namespace AndriodApp1
                     //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SoulSeekState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
                         imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
                     }
                     catch (System.Exception ex)
@@ -699,26 +699,26 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("ticker WindowManagerBadTokenException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("ticker WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("tickerException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("tickerException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
@@ -765,7 +765,7 @@ namespace AndriodApp1
                 bool isPrivate = chatPrivateCheckBox.Checked;
                 if (chatname == null || chatname == string.Empty)
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_chatroom_name), ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_chatroom_name), ToastLength.Short).Show();
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
@@ -808,26 +808,26 @@ namespace AndriodApp1
             }
             catch (WindowManagerBadTokenException e)
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("createroomWindowManagerBadTokenException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("createroomWindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
-                if (SoulSeekState.ActiveActivityRef == null)
+                if (SeekerState.ActiveActivityRef == null)
                 {
                     MainActivity.LogFirebase("createroomException null activities");
                 }
                 else
                 {
-                    bool isCachedMainActivityFinishing = SoulSeekState.ActiveActivityRef.IsFinishing;
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
                     MainActivity.LogFirebase("createroomException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
@@ -839,7 +839,7 @@ namespace AndriodApp1
         {
             try
             {
-                SoulSeekState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
             }
             catch (System.Exception err)
             {
@@ -883,7 +883,7 @@ namespace AndriodApp1
         private void SetMessageText(TextView userStatus, ChatroomController.StatusMessageUpdate data)
         {
             string statusMessage = null;
-            DateTime dateTimeLocal = data.DateTimeUtc.Add(SoulSeekState.OffsetFromUtcCached);
+            DateTime dateTimeLocal = data.DateTimeUtc.Add(SeekerState.OffsetFromUtcCached);
             string timePrefix = $"[{CommonHelpers.GetNiceDateTimeGroupChat(dateTimeLocal)}]";
             switch (data.StatusType)
             {
@@ -1100,10 +1100,10 @@ namespace AndriodApp1
                 MainActivity.LogFirebase("sender for GroupMessageInnerViewReceivedHolder.GroupMessageInnerViewReceived is " + v.GetType().Name);
             }
 
-            menu.Add(0, 0, 0, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
-            menu.Add(1, 1, 1, SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
+            menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
+            menu.Add(1, 1, 1, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
             CommonHelpers.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
-            var subMenu = menu.AddSubMenu(3, 3, 3, SoulSeekState.ActiveActivityRef.GetString(Resource.String.more_options));
+            var subMenu = menu.AddSubMenu(3, 3, 3, SeekerState.ActiveActivityRef.GetString(Resource.String.more_options));
             subMenu.Add(4, 4, 4, Resource.String.search_user_files);
             subMenu.Add(5, 5, 5, Resource.String.browse_user);
             subMenu.Add(6, 6, 6, Resource.String.get_user_info);
@@ -1390,9 +1390,9 @@ namespace AndriodApp1
                 //allow user to leave even if offline.
                 //just remove it from list so that they do not rejoin when logging back in.
                 ChatroomController.RemoveRoomFromJoinedAndOthers(roomName);
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, string.Format(SoulSeekState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
                 });
                 ChatroomController.UpdateJoinedRooms();
             }
@@ -1619,8 +1619,8 @@ namespace AndriodApp1
 
                 viewRoomName.SetTypeface(null, TypefaceStyle.Bold);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Bold);
-                viewRoomName.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
-                viewUsersInRoom.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SoulSeekState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewRoomName.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewUsersInRoom.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
             }
             else
             {
@@ -1630,8 +1630,8 @@ namespace AndriodApp1
                 // this had side effects due to reusing views. the bold would stay!
                 viewRoomName.SetTypeface(null, TypefaceStyle.Normal);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Normal);
-                viewRoomName.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewUsersInRoom.SetTextColor(SoulSeekState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewRoomName.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewUsersInRoom.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
             }
 
             if (ChatroomController.CurrentlyJoinedRoomNames.ContainsKey(roomInfo.Name))

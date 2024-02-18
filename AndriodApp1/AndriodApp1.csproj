@@ -118,6 +118,7 @@
     <Compile Include="Main\CloseActivity.cs" />
     <Compile Include="Main\DownloadForegroundService.cs" />
     <Compile Include="Main\SeekerKeepAliveService.cs" />
+    <Compile Include="Main\SeekerState.cs" />
     <Compile Include="Main\SlskLinkMenuActivity.cs" />
     <Compile Include="Main\ThemeableActivity.cs" />
     <Compile Include="Browse\BrowseFragment.cs" />
@@ -143,6 +144,7 @@
     <Compile Include="Search\WishlistController.cs" />
     <Compile Include="Serialization\CustomMessagePackFormatters.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
+    <Compile Include="Settings\KeyConsts.cs" />
     <Compile Include="Transfers\TransfersController.cs" />
     <Compile Include="Users\EditUserInfoActivity.cs" />
     <Compile Include="Search\SearchEnums.cs" />

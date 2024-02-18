@@ -45,7 +45,7 @@ namespace AndriodApp1
         {
             get
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.downloads_remaining);
+                return SeekerState.ActiveActivityRef.GetString(Resource.String.downloads_remaining);
             }
         }
 
@@ -53,7 +53,7 @@ namespace AndriodApp1
         {
             get
             {
-                return SoulSeekState.ActiveActivityRef.GetString(Resource.String.download_remaining);
+                return SeekerState.ActiveActivityRef.GetString(Resource.String.download_remaining);
             }
         }
 
@@ -66,7 +66,7 @@ namespace AndriodApp1
                 this.StopSelf();
                 return StartCommandResult.NotSticky;
             }
-            SoulSeekState.DownloadKeepAliveServiceRunning = true;
+            SeekerState.DownloadKeepAliveServiceRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
@@ -109,10 +109,10 @@ namespace AndriodApp1
 
         public override void OnDestroy()
         {
-            SoulSeekState.DownloadKeepAliveServiceRunning = false;
+            SeekerState.DownloadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
             //save once complete
-            TransfersFragment.SaveTransferItems(SoulSeekState.SharedPreferences, false, 0);
+            TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);
             base.OnDestroy();
         }
 

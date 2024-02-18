@@ -32,7 +32,7 @@ namespace AndriodApp1.Transfers
                 return;
             }
 
-            if (SoulSeekState.AutoRequeueDownloadsAtStartup)
+            if (SeekerState.AutoRequeueDownloadsAtStartup)
             {
                 var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
                 if (queuedTransfers.Count > 0)

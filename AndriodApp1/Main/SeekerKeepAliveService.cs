@@ -54,7 +54,7 @@ namespace AndriodApp1
                 return StartCommandResult.NotSticky;
             }
             MainActivity.LogInfoFirebase("keep alive service started...");
-            SoulSeekState.IsStartUpServiceCurrentlyRunning = true;
+            SeekerState.IsStartUpServiceCurrentlyRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
@@ -72,8 +72,8 @@ namespace AndriodApp1
             {
                 // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
                 //   in my case it did not.
-                SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
-                bool foreground = (SoulSeekState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
+                SeekerState.IsStartUpServiceCurrentlyRunning = false;
+                bool foreground = (SeekerState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
                 MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
                 SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
@@ -106,7 +106,7 @@ namespace AndriodApp1
 
         public override void OnDestroy()
         {
-            SoulSeekState.IsStartUpServiceCurrentlyRunning = false;
+            SeekerState.IsStartUpServiceCurrentlyRunning = false;
             if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
             {
                 CpuKeepAlive_FullService.Release();

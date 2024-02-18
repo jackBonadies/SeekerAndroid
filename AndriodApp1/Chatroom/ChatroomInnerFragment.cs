@@ -61,7 +61,7 @@ namespace AndriodApp1.Chatroom
         {
             if (ChatroomController.ModeratedRoomData.ContainsKey(OurRoomInfo.Name))
             {
-                return ChatroomController.ModeratedRoomData[OurRoomInfo.Name].Users.Contains(SoulSeekState.Username);
+                return ChatroomController.ModeratedRoomData[OurRoomInfo.Name].Users.Contains(SeekerState.Username);
             }
             return false;
         }
@@ -145,7 +145,7 @@ namespace AndriodApp1.Chatroom
             //}
             //MainActivity.LogDebug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
             string username = MessagesLongClickData.Username;
-            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SoulSeekState.ActiveActivityRef, this.View))
+            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, this.View))
             {
                 MainActivity.LogDebug("Handled by commons");
                 return base.OnContextItemSelected(item);
@@ -159,7 +159,7 @@ namespace AndriodApp1.Chatroom
                     SeekerApplication.AddToIgnoreListFeedback(this.Activity, username);
                     break;
                 case 2://"Add User"
-                    UserListActivity.AddUserAPI(SoulSeekState.ActiveActivityRef, username, null);
+                    UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, username, null);
                     break;
 
             }
@@ -255,10 +255,10 @@ namespace AndriodApp1.Chatroom
 
         private void AddStatusMessageUI(string user, ChatroomController.StatusMessageUpdate statusMessage)
         {
-            SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
                 //MainActivity.LogDebug("UI event handler for status view " + e.Joined);
-                if (user == SoulSeekState.Username && UI_statusMessagesInternal.Count > 0)
+                if (user == SeekerState.Username && UI_statusMessagesInternal.Count > 0)
                 {
                     //this is to correct an issue where:
                     //  (non UI thread) we join and are added to the room data
@@ -435,7 +435,7 @@ namespace AndriodApp1.Chatroom
             else
             {
                 MainActivity.LogDebug("joining room " + OurRoomInfo.Name);
-                if (SoulSeekState.currentlyLoggedIn)
+                if (SeekerState.currentlyLoggedIn)
                 {
                     ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, false, false);
                 }
@@ -673,7 +673,7 @@ namespace AndriodApp1.Chatroom
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SeekerState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -688,7 +688,7 @@ namespace AndriodApp1.Chatroom
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SeekerState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -775,29 +775,29 @@ namespace AndriodApp1.Chatroom
                     MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
-                        SoulSeekState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                     }
                     throw new FaultPropagationException();
                 }
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
                     ChatroomController.SendChatroomMessageLogic(roomName, msg);
                 }));
             });
 
-            if (!SoulSeekState.currentlyLoggedIn)
+            if (!SeekerState.currentlyLoggedIn)
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
                 });
                 return;
             }
             if (string.IsNullOrEmpty(msg.MessageText))
             {
-                SoulSeekState.ActiveActivityRef.RunOnUiThread(() =>
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
-                    Toast.MakeText(SoulSeekState.ActiveActivityRef, this.Resources.GetString(Resource.String.empty_message_error), ToastLength.Short).Show();
+                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.empty_message_error), ToastLength.Short).Show();
                 });
                 return;
             }
@@ -807,7 +807,7 @@ namespace AndriodApp1.Chatroom
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SoulSeekState.ActiveActivityRef, false, out t))
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -832,7 +832,7 @@ namespace AndriodApp1.Chatroom
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SoulSeekState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SeekerState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
