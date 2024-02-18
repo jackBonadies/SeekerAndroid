@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+    <FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="android.PageFragment"
+    android:layout_width="match_parent"
+    android:id="@+id/loggedInLoggingInLayout"
+    android:layout_height="match_parent">
+    <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/loggingInLayout">
+        >
+
+               <Seeker.MaterialProgressBarPassThrough
+            android:id="@+id/loggingInLoadingCircle"
+            android:layout_marginTop="140dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+
+
+                <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/connectingToServer"
+            android:layout_below="@id/loggingInLoadingCircle"
+            android:layout_marginTop="20dp"
+            android:textColor="?attr/normalTextColor"
+            android:text="@string/ConnectingToServer"
+            android:layout_centerHorizontal="true"
+            />
+                <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+                        android:layout_below="@id/connectingToServer"
+
+            android:id="@+id/pleaseWait"
+            android:textColor="?attr/normalTextColor"
+            android:text="@string/PleaseWait_"
+            android:layout_centerHorizontal="true"
+            />
+
+        </RelativeLayout>
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/loggedInLayout">
+        >
+      <TextView
+      android:layout_width = "wrap_content"
+      android:layout_height = "wrap_content"
+      android:text = "@string/username"
+      android:layout_marginTop = "25dp"
+      android:id = "@+id/userNameView"
+      android:layout_centerHorizontal = "true"
+      android:textColor = "?attr/mainTextColor"
+      android:textSize = "35dp" />
+       <Button
+        android:foreground="@drawable/button"
+      android:layout_centerHorizontal="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/logout"
+      android:layout_marginTop = "35dp"
+style="@style/SeekerButtonStyle"
+      android:id="@+id/buttonLogout"
+      android:layout_below="@+id/userNameView" />
+       
+      <Button
+      android:layout_centerHorizontal="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/choose_a_download_folder"
+        android:foreground="@drawable/button"
+      android:layout_marginStart="10dp"
+      android:layout_marginEnd="10dp"
+      android:layout_marginTop = "260dp"
+      android:layout_marginBottom = "40dp"
+style="@style/SeekerButtonStyle"
+      android:id="@+id/mustSelectDirectory"
+                android:visibility="gone"
+       />
+      <Button
+      android:layout_centerHorizontal="true"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/settings"
+      android:layout_marginStart="10dp"
+      android:layout_marginEnd="10dp"
+        android:foreground="@drawable/button"
+      android:layout_marginTop = "50dp"
+      android:layout_marginBottom = "50dp"
+       style="@style/SeekerButtonStyle"
+      android:layout_alignParentBottom="true"
+      android:id="@+id/settingsButton"
+       />
+</RelativeLayout>
+</FrameLayout>
