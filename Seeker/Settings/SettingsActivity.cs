@@ -1464,7 +1464,7 @@ namespace Seeker
 
         private void CheckStatus_Click(object sender, EventArgs e)
         {
-            Android.Net.Uri uri = Android.Net.Uri.Parse("http://tools.slsknet.org/porttest.php?port=" + SeekerState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
+            Android.Net.Uri uri = Android.Net.Uri.Parse("http://www.slsknet.org/porttest.php?port=" + SeekerState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
             CommonHelpers.ViewUri(uri, this);
         }
         private static AndroidX.AppCompat.App.AlertDialog changeDialog = null;
