@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AndriodApp1\Soulseek.NET-master\src\Soulseek_Source.csproj" />
+    <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek_Source.csproj" />
   </ItemGroup>
 
 </Project>
