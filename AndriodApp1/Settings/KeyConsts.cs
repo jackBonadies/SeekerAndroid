@@ -13,8 +13,6 @@ namespace AndriodApp1
 {
     public class KeyConsts
     {
-        //TODOORG Serialization Consts
-
         public const string M_CurrentlyLoggedIn = "Momento_LoggedIn";
         public const string M_Username = "Momento_Username";
         public const string M_Password = "Momento_Password";
@@ -166,7 +164,5 @@ namespace AndriodApp1
         public const string M_BrowseResponse_Filename = "browseresponse.mpk";
         public const string M_BrowseResponse_Hidden_Filename = "browseresponse_hidden.mpk";
         public const string M_FriendlyDirNameToUri_Filename = "friendlydirtouri.mpk";
-
-        //TODOORG end serialization consts.
     }
 }

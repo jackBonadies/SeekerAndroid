@@ -26,6 +26,8 @@ using MessagePack.Resolvers;
 using static Java.Util.Jar.Attributes;
 using System.Xml;
 using System.Text;
+using Android.Views;
+using System.Reflection;
 
 
 namespace AndriodApp1.Serialization
@@ -353,5 +355,139 @@ namespace AndriodApp1.Serialization
             return new BrowseResponse(GetDirectories(), GetDirectories());
         }
     }
+
+// layout inflation tests - TODO unit test. blocking: .NET
+//    var resourcesLayoutIds = new List<int>()
+//            {
+//    Resource.Layout.activity_main                                     ,
+//    Resource.Layout.add_user_to_userlist                              ,
+//    Resource.Layout.all_ticker_dialog                                 ,
+//    Resource.Layout.autoSuggestionRow                                 ,
+//    Resource.Layout.browse                                            ,
+//    Resource.Layout.browse_chosen_user                                ,
+//    Resource.Layout.browse_response_item                              ,
+//    Resource.Layout.browse_response_item_dummy                        ,
+//    Resource.Layout.changeresultsortorder                             ,
+//    Resource.Layout.changeusertarget                                  ,
+//    Resource.Layout.change_sort_order_dialog                          ,
+//    Resource.Layout.change_sort_room_user_list_dialog                 ,
+//    Resource.Layout.chatroom_connect_disconnect_item                  ,
+//    Resource.Layout.chatroom_connect_disconnect_item_dummy            ,
+//    Resource.Layout.chatroom_inner_layout                             ,
+//    Resource.Layout.chatroom_main_layout                              ,
+//    Resource.Layout.chatroom_overview                                 ,
+//    Resource.Layout.chatroom_overview_category_item                   ,
+//    Resource.Layout.chatroom_overview_category_item_dummy             ,
+//    Resource.Layout.chatroom_overview_item                            ,
+//    Resource.Layout.chatroom_overview_item_dummy                      ,
+//    Resource.Layout.chatroom_overview_joined_item                     ,
+//    Resource.Layout.chatroom_overview_joined_item_dummy               ,
+//    //Resource.Layout.chip_item_view                                    ,
+//    //Resource.Layout.chip_item_view_dummy                              ,
+//    Resource.Layout.choose_port                                       ,
+//    Resource.Layout.create_chatroom_dialog                            ,
+//    Resource.Layout.custom_menu_layout                                ,
+//    Resource.Layout.custom_spinner_item_smaller                       ,
+//    Resource.Layout.downloaddialog                                    ,
+//    Resource.Layout.download_row                                      ,
+//    Resource.Layout.download_view_row_dummy                           ,
+//    Resource.Layout.drop_down_item                                    ,
+//    Resource.Layout.edit_user_info_layout                             ,
+//    Resource.Layout.give_privileges_layout                            ,
+//    Resource.Layout.group_messages_inner_item_toMe                    ,
+//    Resource.Layout.group_messages_inner_item_toMe_dummy              ,
+//    Resource.Layout.import_item_view                                  ,
+//    Resource.Layout.import_item_view_dummy                            ,
+//    Resource.Layout.import_list_layout                                ,
+//    Resource.Layout.import_start_page                                 ,
+//    Resource.Layout.invite_user_dialog_content                        ,
+//    Resource.Layout.loggedin                                          ,
+//    Resource.Layout.login                                             ,
+//    Resource.Layout.material_progress_bar_pass_through                ,
+//    //Resource.Layout.material_progress_bar_pass_through_dummy          ,
+//    Resource.Layout.messages_inner_item_fromMe                        ,
+//    Resource.Layout.messages_inner_item_fromMe_dummy                  ,
+//    Resource.Layout.messages_inner_item_toMe                          ,
+//    Resource.Layout.messages_inner_item_toMe_dummy                    ,
+//    Resource.Layout.messages_inner_layout                             ,
+//    Resource.Layout.messages_main_layout                              ,
+//    Resource.Layout.messages_overview                                 ,
+//    Resource.Layout.message_chosen_user                               ,
+//    Resource.Layout.message_overview_item                             ,
+//    Resource.Layout.message_overview_item_dummy                       ,
+//    Resource.Layout.room_users_dialog                                 ,
+//    Resource.Layout.room_user_list_item                               ,
+//    Resource.Layout.room_user_list_item_dummy                         ,
+//    Resource.Layout.row_item_view                                     ,
+//    Resource.Layout.searches                                          ,
+//    Resource.Layout.searchitemviewmedium_dummy                        ,
+//    Resource.Layout.searchitemviewminimal_dummy                       ,
+//    Resource.Layout.search_intent_dialog                              ,
+//    Resource.Layout.search_results_expandablexml                      ,
+//    Resource.Layout.search_result_exampandable_dummy                  ,
+//    Resource.Layout.search_result_expandable                          ,
+//    Resource.Layout.search_result_medium                              ,
+//    Resource.Layout.search_result_medium_splitter                     ,
+//    Resource.Layout.search_tab_layout                                 ,
+//    Resource.Layout.settings_layout                                   ,
+//    Resource.Layout.set_ticker_dialog_content                         ,
+//    Resource.Layout.simple_custom_notification                        ,
+//    Resource.Layout.smart_filter_config_item                          ,
+//    Resource.Layout.smart_filter_config_layout                        ,
+//    Resource.Layout.tab_page_item                                     ,
+//    Resource.Layout.tab_page_item_dummy                               ,
+//    Resource.Layout.test_row                                          ,
+//    Resource.Layout.ticker_item                                       ,
+//    Resource.Layout.ticker_item_dummy                                 ,
+//    Resource.Layout.transfers                                         ,
+//    Resource.Layout.transfer_item_detailed                            ,
+//    Resource.Layout.transfer_item_detailed_sizeProgressBar            ,
+//    Resource.Layout.transfer_item_details_dummy                       ,
+//    Resource.Layout.transfer_item_details_dummy_showProgressSize      ,
+//    Resource.Layout.transfer_item_folder                              ,
+//    Resource.Layout.transfer_item_folder_showProgressSize             ,
+//    Resource.Layout.transfer_item_view_folder_dummy                   ,
+//    Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress  ,
+//    Resource.Layout.transfer_row                                      ,
+//    Resource.Layout.transfer_row_dummy                                , // not used remove?
+//    Resource.Layout.tree_path_item_view                               ,
+//    Resource.Layout.tree_path_item_view_dummy                         ,
+//    Resource.Layout.upload_folder_options                             ,
+//    Resource.Layout.upload_folder_row                                 ,
+//    Resource.Layout.upload_folder_row_dummy                           ,
+//    Resource.Layout.user_list_activity_layout                         ,
+//    Resource.Layout.user_note_dialog                                  ,
+//    Resource.Layout.user_row                                          ,
+//    Resource.Layout.user_row_dummy                                    ,
+//    Resource.Layout.user_status_update_item                           ,
+//    Resource.Layout.user_status_update_item_dummy                     ,
+//    Resource.Layout.view_user_info_layout                             ,
+//    Resource.Layout.wizard_activity_layout                            ,
+//            };
+
+
+
+
+
+//    var layoutType = typeof(Resource.Layout);
+
+//    var layoutFields = layoutType.GetFields(BindingFlags.Public | BindingFlags.Static)
+//                                  .Where(field => field.FieldType == typeof(int)); 
+
+//            for (int i=0;i<resourcesLayoutIds.Count; i++)
+//            {
+//                try
+//                {
+//                    var field = resourcesLayoutIds[i];
+//    int layoutId = field;
+//    var vg = FindViewById<ViewGroup>(Android.Resource.Id.Content);
+//    var v1 = LayoutInflater.Inflate(layoutId, vg);
+//    //var v2 = LayoutInflater.Inflate(Resource.Layout.room_user_list_item_dummy, vg);
+//}
+//                catch (Exception ex)
+//                {
+//                    string failed1 = ex.Message;
+//                }
+//            }
 
 }
