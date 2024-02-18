@@ -249,6 +249,8 @@ namespace Soulseek.Network.Tcp
 
         private TaskCompletionSource<string> DisconnectTaskCompletionSource { get; } = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
 
+        private SemaphoreSlim WriteSemaphore { get; set; } = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+
         /// <summary>
         ///     Asynchronously connects the client to the configured <see cref="IPEndPoint"/>.
         /// </summary>
@@ -747,6 +749,9 @@ namespace Soulseek.Network.Tcp
 
         private async Task WriteInternalAsync(long length, Stream inputStream, Func<CancellationToken, Task> governor, CancellationToken cancellationToken)
         {
+            // obtain the write semaphore for this connection.  this keeps concurrent writes
+            // from interleaving, which will mangle the messages on the receiving end
+            await WriteSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             ResetInactivityTime();
 
             var inputBuffer = new byte[Options.WriteBufferSize];
@@ -795,6 +800,10 @@ namespace Soulseek.Network.Tcp
                 }
 
                 throw new ConnectionWriteException($"Failed to write {length} bytes to {IPEndPoint}: {ex.Message}", ex);
+            }
+            finally
+            {
+                WriteSemaphore.Release();
             }
         }
     }
