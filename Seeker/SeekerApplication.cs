@@ -79,7 +79,7 @@ namespace Seeker
             var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
             SeekerState.SharedPreferences = sharedPrefs;
 
-            SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
+            //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
 
             RestoreSeekerState(sharedPrefs, this);
             RestoreListeningState();

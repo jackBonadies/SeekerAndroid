@@ -54,6 +54,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Android.Provider.DocumentsContract;
 using log = Android.Util.Log;
+using Seeker.Serialization;
 
 //using System.IO;
 //readme:
@@ -2399,25 +2400,33 @@ namespace Seeker
                 return null;
             }
 
-            var helperIndex = deserializeFromDisk<Dictionary<int, string>>(c, fileshare_dir, KeyConsts.M_HelperIndex_Filename);
-            var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(c, fileshare_dir, KeyConsts.M_TokenIndex_Filename);
-            var keys = deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(c, fileshare_dir, KeyConsts.M_Keys_Filename);
-            var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Filename, SerializationHelper.BrowseResponseOptions);
-            var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Hidden_Filename, SerializationHelper.BrowseResponseOptions);
-            var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir, KeyConsts.M_FriendlyDirNameToUri_Filename);
+            try
+            {
+                var helperIndex = deserializeFromDisk<Dictionary<int, string>>(c, fileshare_dir, KeyConsts.M_HelperIndex_Filename);
+                var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(c, fileshare_dir, KeyConsts.M_TokenIndex_Filename);
+                var keys = deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(c, fileshare_dir, KeyConsts.M_Keys_Filename);
+                var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Filename, SerializationHelper.BrowseResponseOptions);
+                var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Hidden_Filename, SerializationHelper.BrowseResponseOptions);
+                var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir, KeyConsts.M_FriendlyDirNameToUri_Filename);
 
-            int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
+                int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
 
-            var cachedParseResults = new CachedParseResults(
-                keys,
-                browseResponse.DirectoryCount, //todo
-                browseResponse,
-                browseResponseHidden,
-                friendlyDirToUri,
-                tokenIndex,
-                helperIndex,
-                nonHiddenFileCount);
-            return cachedParseResults;
+                var cachedParseResults = new CachedParseResults(
+                    keys,
+                    browseResponse.DirectoryCount, //todo
+                    browseResponse,
+                    browseResponseHidden,
+                    friendlyDirToUri,
+                    tokenIndex,
+                    helperIndex,
+                    nonHiddenFileCount);
+                return cachedParseResults;
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("FAILED to restore sharing parse results: " + e.Message + e.StackTrace);
+                return null;
+            }
         }
 
         public static void ClearParsedCacheResults(Context c)
@@ -2799,6 +2808,8 @@ namespace Seeker
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
             SetContentView(Resource.Layout.activity_main);
+
+            //SerializationTests.TestInflateAll(this);
 
             //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
             //SetSupportActionBar(myToolbar);

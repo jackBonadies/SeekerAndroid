@@ -156,7 +156,16 @@ namespace Seeker.Helpers
 
         public static void RestoreSearchResultsFromDisk(int wishlistSearchResultsToRestore, Context c)
         {
-            var restoredSearchResults = RestoreSearchResultsFromDisk_Imp(wishlistSearchResultsToRestore, c);
+            List<SearchResponse> restoredSearchResults = null;
+            try
+            {
+                restoredSearchResults = RestoreSearchResultsFromDisk_Imp(wishlistSearchResultsToRestore, c);
+            }
+            catch(Exception e)
+            {
+                MainActivity.LogFirebase("FAILED to restore search results from disk " + e.Message + e.StackTrace);
+            }
+
 
             //there are two cases.
             //  1) we imported the term.  In that case there are no results yet as it hasnt been ran.  Which is fine.  
