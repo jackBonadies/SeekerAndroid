@@ -339,9 +339,11 @@ namespace AndriodApp1.Chatroom
             toolbar.SetOnMenuItemClickListener(tmicl);
             toolbar.InflateMenu(Resource.Menu.room_user_dialog_menu);
             toolbar.Title = OurRoomName;
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as AndroidX.AppCompat.Widget.SearchView).QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as AndroidX.AppCompat.Widget.SearchView).QueryTextChange += RoomUserListDialog_QueryTextChange;
-            (toolbar.Menu.FindItem(Resource.Id.search_room_action).ActionView as AndroidX.AppCompat.Widget.SearchView).QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
+            var searchRoomMenuItem = toolbar.Menu.FindItem(Resource.Id.search_room_action);
+            var searchView = searchRoomMenuItem.ActionView as AndroidX.AppCompat.Widget.SearchView;
+            searchView.QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
+            searchView.QueryTextChange += RoomUserListDialog_QueryTextChange;
+            searchView.QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
 
 
             recyclerViewUsers = view.FindViewById<RecyclerView>(Resource.Id.recyclerViewUsers);
