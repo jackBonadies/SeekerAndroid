@@ -24,6 +24,7 @@ using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using AndriodApp1.Serialization;
+using System.Runtime.Serialization;
 
 namespace AndriodApp1
 {
@@ -62,6 +63,26 @@ namespace AndriodApp1
                     {
                         new SearchResponseFormatter(),
                         new FileItemFormatter(),
+                        MessagePack.Formatters.TypelessFormatter.Instance
+                    },
+                    new IFormatterResolver[]
+                    {
+                        ContractlessStandardResolver.Instance
+                    });
+                return MessagePackSerializerOptions.Standard.WithResolver(searchResponseResolver);
+            }
+        }
+
+        public static MessagePackSerializerOptions UserListOptions
+        {
+            get
+            {
+                var searchResponseResolver = MessagePack.Resolvers.CompositeResolver.Create(
+                    new IMessagePackFormatter[]
+                    {
+                        new UserListItemFormatter(),
+                        new UserStatusFormatter(),
+                        new UserInfoFormatter(),
                         MessagePack.Formatters.TypelessFormatter.Instance
                     },
                     new IFormatterResolver[]
@@ -194,7 +215,7 @@ namespace AndriodApp1
             }
             else
             {
-                var bytes = MessagePack.MessagePackSerializer.Serialize(userList, options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+                var bytes = MessagePack.MessagePackSerializer.Serialize(userList, options: UserListOptions);
                 return Convert.ToBase64String(bytes);
             }
         }
@@ -213,7 +234,7 @@ namespace AndriodApp1
             {
                 return MessagePack.MessagePackSerializer.Deserialize<List<UserListItem>>(
                     Convert.FromBase64String(base64userList), 
-                    options: MessagePack.Resolvers.TypelessContractlessStandardResolver.Options);
+                    options: UserListOptions);
             }
         }
 

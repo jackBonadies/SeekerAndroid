@@ -132,6 +132,17 @@ namespace AndriodApp1.Serialization
             Debug.Assert(restored1["testuser1"].Count == notifyRooms["testuser1"].Count);
             Debug.Assert(restored1["testuser1"].First() == notifyRooms["testuser1"].First());
 
+            TestCustomUserListSerialization();
+
+            TestCustomSearchResponseSerialization();
+
+            TestCustomBrowseResponseSerialization();
+
+            TestCustomDirListSerialization();
+        }
+
+        public static void TestCustomUserListSerialization()
+        {
             List<UserListItem> list = new List<UserListItem>();
             list.Add(new UserListItem()
             {
@@ -141,6 +152,15 @@ namespace AndriodApp1.Serialization
                 UserStatus = new Soulseek.UserStatus(Soulseek.UserPresence.Offline, true),
                 UserData = new Soulseek.UserData("hellowworld", Soulseek.UserPresence.Online, 100, 11, 12, 14, "en", 4),
                 UserInfo = new Soulseek.UserInfo("testing", 1, 3, true)
+            });
+            list.Add(new UserListItem()
+            {
+                DoesNotExist = true,
+                Role = UserRole.Friend,
+                Username = "helloworld",
+                UserStatus = new Soulseek.UserStatus(Soulseek.UserPresence.Offline, true),
+                UserData = new Soulseek.UserData("hellowworld", Soulseek.UserPresence.Online, 100, 11, 12, 14, "en", 4),
+                UserInfo = new Soulseek.UserInfo("testing", true, new byte[] { 0x10, 0x11, 0x12 }, 1, 3, true)
             });
             list.Add(new UserListItem()
             {
@@ -161,12 +181,6 @@ namespace AndriodApp1.Serialization
 
             var userSer = SerializationHelper.SaveUserListToString(list);
             var restoredList = SerializationHelper.RestoreUserListFromString(userSer);
-
-            TestCustomSearchResponseSerialization();
-
-            TestCustomBrowseResponseSerialization();
-
-            TestCustomDirListSerialization();
         }
 
         public static void TestCustomSearchResponseSerialization()

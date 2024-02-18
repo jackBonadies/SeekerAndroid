@@ -8,6 +8,7 @@ using MessagePack;
 using MessagePack.Formatters;
 using Soulseek;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -246,8 +247,8 @@ namespace AndriodApp1.Serialization
                         break;
                     case 1:
                         var length = reader.ReadArrayHeader();
-                        var classBFormatter = options.Resolver.GetFormatterWithVerify<File>();
-                        files = new List<File>(length);
+                        var classBFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.File>();
+                        files = new List<Soulseek.File>(length);
                         for (int j = 0; j < length; j++)
                         {
                             var file1 = classBFormatter.Deserialize(ref reader, options);
@@ -379,6 +380,226 @@ namespace AndriodApp1.Serialization
 
             reader.Depth--;
             return new SearchResponse(username, token, freeUploadSlots, uploadSpeed, queueLength, files, lockedFiles);
+        }
+    }
+
+    public class UserListItemFormatter : IMessagePackFormatter<UserListItem>
+    {
+        public void Serialize(ref MessagePackWriter writer, UserListItem value, MessagePackSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
+
+            writer.WriteArrayHeader(6);
+            writer.Write(value.Username);
+            writer.WriteInt32((int)value.Role);
+            writer.Write(value.DoesNotExist);
+
+            var userStatusFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserStatus>();
+            userStatusFormatter.Serialize(ref writer, value.UserStatus, options);
+
+            var userDataFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserData>(); // this does not need a custom formatter...
+            userDataFormatter.Serialize(ref writer, value.UserData, options);
+
+            var userInfoFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserInfo>();
+            userInfoFormatter.Serialize(ref writer, value.UserInfo, options);
+        }
+
+        UserListItem IMessagePackFormatter<UserListItem>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            if (reader.TryReadNil())
+            {
+                return null;
+            }
+
+            string username = null;
+            UserRole role = UserRole.Friend;
+            bool doesNotExist = false;
+            Soulseek.UserStatus userStatus = null;
+            Soulseek.UserData userData = null;
+            Soulseek.UserInfo userInfo = null;
+
+            int count = reader.ReadArrayHeader();
+            for (int i = 0; i < count; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        username = reader.ReadString();
+                        break;
+                    case 1:
+                        role = (UserRole)reader.ReadInt32();
+                        break;
+                    case 2:
+                        doesNotExist = reader.ReadBoolean();
+                        break;
+                    case 3:
+                        var userStatusFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserStatus>();
+                        userStatus = userStatusFormatter.Deserialize(ref reader, options);
+                        break;
+                    case 4:
+                        var userDataFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserData>();
+                        userData = userDataFormatter.Deserialize(ref reader, options);
+                        break;
+                    case 5:
+                        var userInfoFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserInfo>();
+                        userInfo = userInfoFormatter.Deserialize(ref reader, options);
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+
+
+            options.Security.DepthStep(ref reader);
+
+
+            reader.Depth--;
+
+            var userListItem = new UserListItem(username, role);
+            userListItem.DoesNotExist = doesNotExist;
+            userListItem.UserStatus = userStatus;
+            userListItem.UserInfo = userInfo;
+            userListItem.UserData = userData;
+            return userListItem;
+        }
+    }
+
+    public class UserStatusFormatter : IMessagePackFormatter<Soulseek.UserStatus>
+    {
+        public void Serialize(ref MessagePackWriter writer, Soulseek.UserStatus value, MessagePackSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
+
+            writer.WriteArrayHeader(2);
+            writer.Write(value.IsPrivileged);
+            writer.WriteInt32((int)value.Presence);
+        }
+
+        Soulseek.UserStatus IMessagePackFormatter<Soulseek.UserStatus>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            if (reader.TryReadNil())
+            {
+                return null;
+            }
+
+            bool isPrivileged = false;
+            UserPresence presence = UserPresence.Online;
+
+            int count = reader.ReadArrayHeader();
+            for (int i = 0; i < count; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        isPrivileged = reader.ReadBoolean();
+                        break;
+                    case 1:
+                        presence = (UserPresence)reader.ReadInt32();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+
+
+            options.Security.DepthStep(ref reader);
+
+
+            reader.Depth--;
+            return new Soulseek.UserStatus(presence, isPrivileged);
+        }
+    }
+
+
+    public class UserInfoFormatter : IMessagePackFormatter<Soulseek.UserInfo>
+    {
+        public void Serialize(ref MessagePackWriter writer, Soulseek.UserInfo value, MessagePackSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
+
+            writer.WriteArrayHeader(6);
+            writer.Write(value.QueueLength);
+            writer.Write(value.Picture);
+            writer.Write(value.Description);
+            writer.Write(value.HasFreeUploadSlot);
+            writer.Write(value.HasPicture);
+            writer.Write(value.UploadSlots);
+        }
+
+        Soulseek.UserInfo IMessagePackFormatter<Soulseek.UserInfo>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            if (reader.TryReadNil())
+            {
+                return null;
+            }
+
+            int queueLength = 0;
+            byte[] picture = null;
+            string description = null;
+            bool hasFreeUploadSlot = false;
+            bool hasPicture = false;
+            int uploadSlots = 0;
+
+            int count = reader.ReadArrayHeader();
+            for (int i = 0; i < count; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        queueLength = reader.ReadInt32();
+                        break;
+                    case 1:
+                        var byteSpan = reader.ReadBytes();
+                        if (byteSpan.HasValue)
+                        {
+                            picture = byteSpan.Value.ToArray<byte>();
+                        }
+                        else
+                        {
+                            picture = null;
+                        }
+                        break;
+                    case 2:
+                        description = reader.ReadString();
+                        break;
+                    case 3:
+                        hasFreeUploadSlot = reader.ReadBoolean();
+                        break;
+                    case 4:
+                        hasPicture = reader.ReadBoolean();
+                        break;
+                    case 5:
+                        uploadSlots = reader.ReadInt32();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+
+
+            options.Security.DepthStep(ref reader);
+
+
+            reader.Depth--;
+            return new Soulseek.UserInfo(description, hasPicture, picture, uploadSlots, queueLength, hasFreeUploadSlot);
         }
     }
 
