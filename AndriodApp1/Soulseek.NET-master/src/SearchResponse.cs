@@ -19,7 +19,7 @@ namespace Soulseek
 {
     using System.Collections.Generic;
     using System.Linq;
-    
+
     /// <summary>
     ///     A response to a file search.
     /// </summary>

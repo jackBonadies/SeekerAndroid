@@ -16,8 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+using AndriodApp1.Chatroom;
 using AndriodApp1.Helpers;
 using AndriodApp1.Managers;
+using AndriodApp1.Messages;
+using AndriodApp1.Search;
+using AndriodApp1.Serialization;
+using AndriodApp1.Transfers;
 using AndriodApp1.UPnP;
 using Android.App;
 using Android.Content;
@@ -55,7 +60,7 @@ namespace AndriodApp1
         public override void OnCreate()
         {
 #if DEBUG
-            SerializationHelperTests.Test();
+            SerializationTests.Test();
 #endif
 
             base.OnCreate();
@@ -2045,12 +2050,15 @@ namespace AndriodApp1
 
 
 
+                SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, SoulSeekState.M_SharedDirectoryInfo_Legacy, SoulSeekState.M_SharedDirectoryInfo);
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
                 SoulSeekState.SharingOn = sharedPreferences.GetBoolean(SoulSeekState.M_SharingOn, false);
+                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, SoulSeekState.M_UserList_Legacy, SoulSeekState.M_UserList);
                 SoulSeekState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_UserList, string.Empty));
 
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(SoulSeekState.M_RecentUsersList, string.Empty));
+                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, SoulSeekState.M_IgnoreUserList_Legacy, SoulSeekState.M_IgnoreUserList);
                 SoulSeekState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(SoulSeekState.M_IgnoreUserList, string.Empty));
                 SoulSeekState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(SoulSeekState.M_AllowPrivateRooomInvitations, false);
                 SoulSeekState.StartServiceOnStartup = sharedPreferences.GetBoolean(SoulSeekState.M_ServiceOnStartup, true);
@@ -2061,7 +2069,9 @@ namespace AndriodApp1
                 SoulSeekState.UserInfoBio = sharedPreferences.GetString(SoulSeekState.M_UserInfoBio, string.Empty);
                 SoulSeekState.UserInfoPictureName = sharedPreferences.GetString(SoulSeekState.M_UserInfoPicture, string.Empty);
 
+                SerializationHelper.MigrateUserNotesIfApplicable(sharedPreferences, SoulSeekState.M_UserNotes_Legacy, SoulSeekState.M_UserNotes);
                 SoulSeekState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(SoulSeekState.M_UserNotes, string.Empty));
+                SerializationHelper.MigrateOnlineAlertsIfApplicable(sharedPreferences, SoulSeekState.M_UserOnlineAlerts_Legacy, SoulSeekState.M_UserOnlineAlerts);
                 SoulSeekState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(SoulSeekState.M_UserOnlineAlerts, string.Empty));
 
                 SoulSeekState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(SoulSeekState.M_AutoSetAwayOnInactivity, false);
@@ -2080,7 +2090,10 @@ namespace AndriodApp1
                 //SearchTabHelper.SaveHeadersToSharedPrefs();
                 //SearchTabHelper.SaveAllSearchTabsToDisk(c);
                 SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
+                SerializationHelper.MigrateHeaderState(sharedPreferences, SoulSeekState.M_SearchTabsState_Headers_Legacy, SoulSeekState.M_SearchTabsState_Headers);
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
+                SerializationHelper.MigrateWishlistTabs(c);
+
                 //SearchTabHelper.RestoreAllSearchTabsFromDisk(c);
 
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();

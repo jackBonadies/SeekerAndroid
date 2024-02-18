@@ -1,5 +1,6 @@
 ﻿using AndriodApp1.Helpers;
 using AndriodApp1.Managers;
+using AndriodApp1.Messages;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -1464,7 +1465,7 @@ namespace AndriodApp1
             lock (MainActivity.SHARED_PREF_LOCK)
             {
                 var editor = SoulSeekState.SharedPreferences.Edit();
-                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsFromString(SoulSeekState.UserOnlineAlerts));
+                editor.PutString(SoulSeekState.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsToString(SoulSeekState.UserOnlineAlerts));
                 editor.Commit();
             }
         }
