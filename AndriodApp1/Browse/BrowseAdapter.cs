@@ -56,18 +56,6 @@ namespace AndriodApp1
             else
             {
                 itemView.SetSelectedBackground(false);
-
-                //itemViews get reused, so reset background to unselected
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
-                {
-                    itemView.DisplayName.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                                                           //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                }
-                else
-                {
-                    itemView.DisplayName.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                                                           //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                }
             }
             var dataItem = GetItem(position);
             if (dataItem.IsDirectory())
