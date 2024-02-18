@@ -51,6 +51,11 @@ namespace Soulseek.Messaging.Handlers
         public event EventHandler<DiagnosticEventArgs> DiagnosticGenerated;
 
         /// <summary>
+        ///     Occurs when the server sends a list of excluded ("banned") search phrases.
+        /// </summary>
+        public event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
+
+        /// <summary>
         ///     Occurs when a global message is received.
         /// </summary>
         public event EventHandler<string> GlobalMessageReceived;
@@ -242,6 +247,12 @@ namespace Soulseek.Messaging.Handlers
                     case MessageCode.Server.PrivateRoomToggle:
                         var acceptInvitations = PrivateRoomToggle.FromByteArray(message).AcceptInvitations;
                         SoulseekClient.Waiter.Complete(new WaitKey(code), acceptInvitations);
+                        break;
+
+                    case MessageCode.Server.ExcludedSearchPhrases:
+                        var excludedSearchPhraseList = ExcludedSearchPhrasesNotification.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code), excludedSearchPhraseList);
+                        ExcludedSearchPhrasesReceived?.Invoke(this, excludedSearchPhraseList);
                         break;
 
                     case MessageCode.Server.GlobalAdminMessage:

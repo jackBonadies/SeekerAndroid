@@ -598,6 +598,11 @@ namespace Soulseek.Messaging
             RelatedSearch = 153,
 
             /// <summary>
+            ///     160
+            /// </summary>
+            ExcludedSearchPhrases = 160,
+
+            /// <summary>
             ///     1001
             /// </summary>
             CannotConnect = 1001,
