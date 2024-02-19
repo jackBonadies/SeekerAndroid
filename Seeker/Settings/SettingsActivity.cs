@@ -725,6 +725,9 @@ namespace Seeker
             Button editUserInfo = FindViewById<Button>(Resource.Id.editUserInfoButton);
             editUserInfo.Click += EditUserInfo_Click;
 
+            Button changePassword = FindViewById<Button>(Resource.Id.changePassword);
+            changePassword.Click += ChangePassword_Click;
+
             useUPnPCheckBox = FindViewById<CheckBox>(Resource.Id.useUPnPCheckBox);
             useUPnPCheckBox.Checked = SeekerState.ListenerUPnpEnabled;
             useUPnPCheckBox.CheckedChange += UseUPnPCheckBox_CheckedChange;
@@ -1413,6 +1416,14 @@ namespace Seeker
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(EditUserInfoActivity));
             this.StartActivity(intent);
         }
+
+        private void ChangePassword_Click(object sender, EventArgs e)
+        {
+            // show dialog
+            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
+            PrivilegesManager.Instance.GetPrivilegesAPI(true);
+        }
+
 
         private void UseUPnPCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
