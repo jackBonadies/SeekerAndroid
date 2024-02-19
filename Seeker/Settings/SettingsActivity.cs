@@ -922,7 +922,7 @@ namespace Seeker
             SetSharedFolderView();
             SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
             MainActivity.SharedFileCache_Refreshed(null, (0, 0));
-
+            this.UpdateShareImageView();
         }
 
         private void ShowFolderDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)

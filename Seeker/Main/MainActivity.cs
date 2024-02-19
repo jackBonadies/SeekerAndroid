@@ -2364,18 +2364,6 @@ namespace Seeker
             //SeekerState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
         }
 
-        private static void SaveToDisk(Context c, byte[] data, Java.IO.File dir, string name)
-        {
-            using (Java.IO.File fileForOurInternalStorage = new Java.IO.File(dir, name))
-            {
-                using (System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w"))
-                {
-                    outputStream.Write(data, 0, data.Length);
-                    outputStream.Flush();
-                    outputStream.Close();
-                }
-            }
-        }
 
         static T deserializeFromDisk<T>(Context c, Java.IO.File dir, string filename, MessagePack.MessagePackSerializerOptions options = null) where T : class
         {
@@ -2453,22 +2441,22 @@ namespace Seeker
             }
 
             byte[] data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.helperIndex);
-            SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_HelperIndex_Filename);
+            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_HelperIndex_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.tokenIndex);
-            SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_TokenIndex_Filename);
+            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_TokenIndex_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.keys); //TODO directoryCount
-            SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_Keys_Filename);
+            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_Keys_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponse, options: SerializationHelper.BrowseResponseOptions);
-            SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Filename);
+            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, options: SerializationHelper.BrowseResponseOptions);
-            SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Hidden_Filename);
+            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Hidden_Filename);
 
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
-            SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_FriendlyDirNameToUri_Filename);
+            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_FriendlyDirNameToUri_Filename);
 
             lock (SHARED_PREF_LOCK)
             {

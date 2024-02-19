@@ -1,6 +1,7 @@
 ﻿using Android.Content;
 using Android.Widget;
 using Java.IO;
+using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -106,17 +107,8 @@ namespace Seeker.Helpers
             }
             string name = System.Math.Abs(wishlistSearchResultsToSave) + KeyConsts.M_wishlist_tab;
 
-            using (Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name))
-            {
-                using (System.IO.Stream outputStream = c.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w"))
-                {
-                    var arr = SerializationHelper.SaveSearchResponsesToByteArray(searchResultsToSave);
-                    outputStream.Write(arr, 0, arr.Length);
-                    outputStream.Flush();
-                    outputStream.Close();
-                    sw.Stop();
-                }
-            }
+            var arr = SerializationHelper.SaveSearchResponsesToByteArray(searchResultsToSave);
+            CommonHelpers.SaveToDisk(c, arr, wishlist_dir, name);
         }
 
 

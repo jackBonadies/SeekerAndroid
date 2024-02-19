@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AndroidX.Core.Util;
 
 namespace Seeker
 {
@@ -1525,6 +1526,20 @@ namespace Seeker
             // Set up the buttons
 
             builder.Show();
+        }
+
+
+        public static void SaveToDisk(Context c, byte[] data, Java.IO.File dir, string name)
+        {
+            using (Java.IO.File fileForOurInternalStorage = new Java.IO.File(dir, name))
+            {
+                // Atomic file guarantees file integrity by ensuring that a file has been completely written and sync'd
+                //   to disk before renaming it to the original file.
+                var atomicFile = new AtomicFile(fileForOurInternalStorage);
+                var fileStream = atomicFile.StartWrite();
+                fileStream.Write(data, 0, data.Length);
+                atomicFile.FinishWrite(fileStream);
+            }
         }
     }
 
