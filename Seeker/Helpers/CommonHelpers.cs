@@ -524,6 +524,136 @@ namespace Seeker
             input.AfterTextChanged += Input_AfterTextChanged;
         }
 
+
+        public static AndroidX.AppCompat.App.AlertDialog _dialogInstance;
+        public static void ShowSimpleDialog(
+            Activity owner,
+            int dialogContentId,
+            string title,
+            string hint,
+            Action<object, string> okayAction,
+            Action<object> cancelAction,
+            string okayString,
+            string cancelString = null,
+            string emptyTextErrorString = null,
+            bool textRequired = true)
+        {
+            //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(owner, Resource.Style.MyAlertDialogTheme); //failed to bind....
+            builder.SetTitle(title);
+            // I'm using fragment here so I'm using getView() to provide ViewGroup
+            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+            View viewInflated = LayoutInflater.From(owner).Inflate(dialogContentId, (ViewGroup)owner.FindViewById(Android.Resource.Id.Content).RootView, false);
+            // Set up the input
+            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.innerEditText);
+
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            builder.SetView(viewInflated);
+
+            void eventHandlerOkay(object sender, DialogClickEventArgs e)
+            {
+                okayAction(sender, input.Text);
+                _dialogInstance = null;
+            }
+
+            void eventHandlerCancel(object sender, DialogClickEventArgs e)
+            {
+                cancelAction(sender);
+                _dialogInstance = null;
+            }
+
+            void inputEditorAction(object sender, TextView.EditorActionEventArgs e)
+            {
+                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
+                {
+                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(owner.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    }
+
+                    if (string.IsNullOrEmpty(input.Text) && textRequired)
+                    {
+                        if (emptyTextErrorString == null)
+                        {
+                            emptyTextErrorString = "Input Required";
+                        }
+                        SeekerApplication.ShowToast(emptyTextErrorString, ToastLength.Short);
+                    }
+                    else
+                    {
+                        eventHandlerOkay(sender, null);
+                    }
+                }
+            };
+
+            void inputFocusChange(object sender, View.FocusChangeEventArgs e)
+            {
+                try
+                {
+                    SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                }
+                catch (System.Exception err)
+                {
+                    MainActivity.LogFirebase("simpleDialog_FocusChange" + err.Message);
+                }
+            }
+
+            input.EditorAction += inputEditorAction;
+            input.FocusChange += inputFocusChange;
+
+            builder.SetPositiveButton(okayString, eventHandlerOkay);
+            builder.SetNegativeButton(cancelString, eventHandlerCancel);
+            // Set up the buttons
+
+            _dialogInstance = builder.Create();
+
+            try
+            {
+                _dialogInstance.Show();
+                CommonHelpers.DoNotEnablePositiveUntilText(_dialogInstance, input);
+            }
+            catch (WindowManagerBadTokenException e)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    MainActivity.LogFirebase("commonDialog WindowManagerBadTokenException null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = owner.IsFinishing;
+                    MainActivity.LogFirebase("commonDialog WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+            catch (Exception err)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    MainActivity.LogFirebase("commonDialogException null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = owner.IsFinishing;
+                    MainActivity.LogFirebase("commonDialogException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+        }
+
+
         /// <summary>
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>

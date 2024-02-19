@@ -900,5 +900,6 @@ The standard way of requesting folder access does not always persist permissions
 
 	<string name="setUpSharing">Set up Sharing</string>
 
+	<string name="change_password">Change Password</string>
 
 </resources>
