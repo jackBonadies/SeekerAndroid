@@ -452,13 +452,12 @@ namespace Seeker
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.invite_user));
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.invite_user_dialog_content, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
-            // Set up the input
+
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.inviteUserTextEdit);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+
             builder.SetView(viewInflated);
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -617,46 +616,27 @@ namespace Seeker
 
             void OkayAction(object sender, string textInput)
             {
-                string tickerText = textInput;
-                if (tickerText == null || tickerText == string.Empty)
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
-                    (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-                    return;
-                }
-                ChatroomController.SetTickerApi(roomToInvite, tickerText, true);
+                ChatroomController.SetTickerApi(roomToInvite, textInput, true);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
                 }
                 else
                 {
-                    CommonHelpers._dialogInstance.Dismiss();
+                    CommonHelpers._dialogInstance?.Dismiss(); // TODO why?
                 }
             }
 
 
-            void CancelAction(object sender)
-            {
-                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                {
-                    aDiag.Dismiss();
-                }
-                else
-                {
-                    CommonHelpers._dialogInstance.Dismiss();
-                }
-
-            }
 
             CommonHelpers.ShowSimpleDialog(
                 this,
                 Resource.Layout.edit_text_dialog_content,
                 this.Resources.GetString(Resource.String.set_ticker),
-                this.Resources.GetString(Resource.String.type_chatroom_ticker_message),
                 OkayAction,
-                CancelAction,
                 this.Resources.GetString(Resource.String.send),
+                null,
+                this.Resources.GetString(Resource.String.type_chatroom_ticker_message),
                 this.Resources.GetString(Resource.String.cancel),
                 this.Resources.GetString(Resource.String.must_type_ticker_text),
                 true);
@@ -684,14 +664,12 @@ namespace Seeker
             Context c = this;
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.create_chatroom_));
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+
             View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.create_chatroom_dialog, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
-            // Set up the input
+
             EditText chatNameInput = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.createChatroomName);
             CheckBox chatPrivateCheckBox = (CheckBox)viewInflated.FindViewById<CheckBox>(Resource.Id.createChatroomPrivate);
 
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
