@@ -907,6 +907,8 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="cannot_be_empty">Cannot be empty</string>
 
 	<string name="must_be_logged_in_generic">Must be logged in to perform this action</string>
+	<string name="must_be_logged_in_to_change_password">Must be logged in to change password</string>
+
 	<string name="failed_to_change_password">Failed to change password</string>
 	<string name="password_successfully_updated">Password successfully updated</string>
 

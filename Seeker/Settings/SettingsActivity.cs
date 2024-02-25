@@ -1419,12 +1419,18 @@ namespace Seeker
 
         private void ChangePassword_Click(object sender, EventArgs e)
         {
+            if (!SeekerState.currentlyLoggedIn)
+            {
+                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short).Show();
+                return;
+            }
+
             // show dialog
             MainActivity.LogInfoFirebase("ChangePasswordDialog" + this.IsFinishing + this.IsDestroyed);
 
             void OkayAction(object sender, string textInput)
             {
-                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput));
+                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput), SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password));
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
