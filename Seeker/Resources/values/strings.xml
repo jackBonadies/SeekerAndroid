@@ -614,6 +614,7 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
   <string name="no_uploads_yet">No uploads currently, as you upload files they will appear here</string>
   <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
+  <string name="no_uploads_yet_failed_to_set_up_shared_files">No uploads currently, failed to set up shares</string>
 
   <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
   <string name="auto_clear_complete_uploads">Auto Clear Complete Uploads</string>
@@ -757,6 +758,7 @@ The standard way of requesting folder access does not always persist permissions
 
 	<string name="PermissionErrorShared">Permission Error, cannot write (Please reselect).</string>
 	<string name="FolderNoExistShared">Folder does not exist.</string>
+	<string name="FolderNotAccessible">Folder is not accessible (Please reselect).</string>
 	<string name="UnknownErrorShared">Unknown Error. See dev.</string>
 	<string name="MessagesWithUser">Messages with {0}</string>
 

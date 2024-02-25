@@ -636,6 +636,11 @@ namespace Seeker
                         noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
                         setupUpSharing.Visibility = ViewStates.Gone;
                     }
+                    else if(SeekerState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && UploadDirectoryManager.AreAllFailed())
+                    {
+                        noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_failed_to_set_up_shared_files);
+                        setupUpSharing.Visibility = ViewStates.Visible;
+                    }
                     else
                     {
                         noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_not_sharing);

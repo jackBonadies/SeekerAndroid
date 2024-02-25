@@ -1484,7 +1484,7 @@ namespace Seeker
         //for the pre-indexed media store (note: its possible for one to revoke the photos&media permission and for seeker to work right in all places by querying mediastore)
         //  api 29+ we have duration
         //  api 30+ we have bit rate
-        //  api 31+ (Android 12) we have sample rate and bit depth
+        //  api 31+ (Android 12) we have sample rate and bit depth - proposed change?  I dont think this made it in..
 
         //for the built in media retreiver (which requires actually reading the file) we have duration, bit rate, with sample rate and bit depth for api31+
 
@@ -1501,15 +1501,16 @@ namespace Seeker
             return (int)Android.OS.Build.VERSION.SdkInt >= 30;
         }
 
-        private static bool HasMediaStoreSampleRateBitDepthColumn()
-        {
-            return (int)Android.OS.Build.VERSION.SdkInt >= 31;
-        }
+        // never made it into Android 12
+        //private static bool HasMediaStoreSampleRateBitDepthColumn()
+        //{
+        //    return (int)Android.OS.Build.VERSION.SdkInt >= 31;
+        //}
 
-        private static bool HasMediaRetreiverSampleRateBitDepth()
-        {
-            return (int)Android.OS.Build.VERSION.SdkInt >= 31;
-        }
+        //private static bool HasMediaRetreiverSampleRateBitDepth()
+        //{
+        //    return (int)Android.OS.Build.VERSION.SdkInt >= 31;
+        //}
 
         private static bool IsUncompressed(string name)
         {
@@ -7728,7 +7729,9 @@ namespace Seeker
                 case UploadDirectoryError.CannotWrite:
                     return SeekerApplication.GetString(Resource.String.PermissionErrorShared);
                 case UploadDirectoryError.DoesNotExist:
-                    return SeekerApplication.GetString(Resource.String.FolderNoExistShared);
+                    // this is a permission error the overwhelming majority of the time.
+                    // hence "not accessible" rather than "does not exist"
+                    return SeekerApplication.GetString(Resource.String.FolderNotAccessible);
                 case UploadDirectoryError.Unknown:
                     return SeekerApplication.GetString(Resource.String.UnknownErrorShared);
                 case UploadDirectoryError.NoError:
