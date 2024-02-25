@@ -531,56 +531,28 @@ namespace Seeker
             Activity owner,
             int dialogContentId,
             string title,
+            string hint,
             Action<object, string> okayAction,
+            Action<object> cancelAction,
             string okayString,
-            Action<object> cancelAction = null,
-            string hint = null,
             string cancelString = null,
             string emptyTextErrorString = null,
             bool textRequired = true)
         {
-            if (string.IsNullOrEmpty(cancelString))
-            {
-                cancelString = SeekerState.ActiveActivityRef.GetString(Resource.String.cancel);
-            }
-
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(owner, Resource.Style.MyAlertDialogTheme); 
+            //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(owner, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(title);
-
+            // I'm using fragment here so I'm using getView() to provide ViewGroup
+            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
             View viewInflated = LayoutInflater.From(owner).Inflate(dialogContentId, (ViewGroup)owner.FindViewById(Android.Resource.Id.Content).RootView, false);
-
+            // Set up the input
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.innerEditText);
-            if (!string.IsNullOrEmpty(hint))
-            {
-                input.Hint = hint;
-            }
 
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
-
-            if (cancelAction == null)
-            {
-                cancelAction = (object sender) =>
-                {
-                    if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                    {
-                        aDiag.Dismiss();
-                    }
-                    else
-                    {
-                        CommonHelpers._dialogInstance.Dismiss();
-                    }
-                };
-            }
 
             void eventHandlerOkay(object sender, DialogClickEventArgs e)
             {
-                string txt = input.Text;
-                if (string.IsNullOrEmpty(txt) && textRequired)
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
-                    //(sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-                    return;
-                }
                 okayAction(sender, input.Text);
                 _dialogInstance = null;
             }
@@ -615,7 +587,7 @@ namespace Seeker
 
                     if (string.IsNullOrEmpty(input.Text) && textRequired)
                     {
-                        if (string.IsNullOrEmpty(emptyTextErrorString))
+                        if (emptyTextErrorString == null)
                         {
                             emptyTextErrorString = "Input Required";
                         }
@@ -1432,86 +1404,6 @@ namespace Seeker
                 notification = builder.Build();
             }
             return notification;
-
-        }
-
-        /// <summary>
-        /// TODO everything should probably use this wrapper
-        /// </summary>
-        /// <returns></returns>
-        public static bool PerformConnectionRequiredAction(Action action, string notLoggedInToast = null)
-        {
-            if (!SeekerState.currentlyLoggedIn)
-            {
-                if(string.IsNullOrEmpty(notLoggedInToast))
-                {
-                    notLoggedInToast = SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_in_generic);
-                }
-                Toast.MakeText(SeekerState.ActiveActivityRef, notLoggedInToast, ToastLength.Short).Show();
-                return false;
-            }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
-                {
-                    return false; //if we get here we already did a toast message.
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                        });
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { action(); });
-                }));
-                return true;
-            }
-            else
-            {
-                action();
-                return true;
-            }
-        }
-
-        public static void ChangePasswordLogic(string newPassword)
-        {
-            SeekerState.SoulseekClient.ChangePasswordAsync(newPassword).ContinueWith(new Action<Task>
-                ((Task t) =>
-                {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            if (t.Exception.InnerException is TimeoutException)
-                            {
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
-                            }
-                            else
-                            {
-                                MainActivity.LogFirebase("Failed to change password" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
-                            }
-                            return;
-                        }
-                        else
-                        {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
-                            SeekerState.Password = newPassword;
-                            lock (MainActivity.SHARED_PREF_LOCK)
-                            {
-                                var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_Password, SeekerState.Password);
-                                editor.Commit();
-                            }
-                        }
-                    });
-                }
-                ));
 
         }
 

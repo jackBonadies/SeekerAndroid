@@ -2222,12 +2222,14 @@ namespace Seeker
             MainActivity.LogInfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(c.Resources.GetString(Resource.String.browse_user_files));
-
+            // I'm using fragment here so I'm using getView() to provide ViewGroup
+            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
             View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.browse_chosen_user, (ViewGroup)this.View, false);
-
+            // Set up the input
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
 
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
             Action<View> goSnackBarAction = new Action<View>((View v) =>
