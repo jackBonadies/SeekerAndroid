@@ -1791,8 +1791,25 @@
 
                     </LinearLayout>
 
-            <Button
+                        <Button
                 android:layout_below="@id/forceManageStoragePermissionLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/change_password"
+                android:layout_marginStart="10dp"
+                android:foreground="@drawable/button"
+                style="@style/SeekerButtonStyle"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop = "10dp"
+                android:layout_marginBottom = "10dp"
+                android:id="@+id/changePassword"
+       />
+
+
+            <Button
+                android:layout_below="@id/changePassword"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/edit_your_user_info"

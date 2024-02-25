@@ -452,13 +452,12 @@ namespace Seeker
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.invite_user));
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.invite_user_dialog_content, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
-            // Set up the input
+
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.inviteUserTextEdit);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+
             builder.SetView(viewInflated);
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -614,116 +613,31 @@ namespace Seeker
         public void ShowSetTickerDialog(string roomToInvite)
         {
             MainActivity.LogInfoFirebase("ShowSetTickerDialog" + this.IsFinishing + this.IsDestroyed);
-            //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-            builder.SetTitle(this.Resources.GetString(Resource.String.set_ticker));
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.set_ticker_dialog_content, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
-            // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.setTickerEditText);
 
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-            builder.SetView(viewInflated);
-
-            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            void OkayAction(object sender, string textInput)
             {
-                //Do the Browse Logic...
-                string tickerText = input.Text;
-                if (tickerText == null || tickerText == string.Empty)
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
-                    (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-                    return;
-                }
-                ChatroomController.SetTickerApi(roomToInvite, tickerText, true);
+                ChatroomController.SetTickerApi(roomToInvite, textInput, true);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
                 }
                 else
                 {
-                    ChatroomActivity.dialogInstance.Dismiss();
-                }
-            });
-            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
-            {
-                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                {
-                    aDiag.Dismiss();
-                }
-                else
-                {
-                    ChatroomActivity.dialogInstance.Dismiss();
-                }
-            });
-
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
-                {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-            };
-
-            input.EditorAction += editorAction;
-            input.FocusChange += Input_FocusChange;
-
-            builder.SetPositiveButton(this.Resources.GetString(Resource.String.send), eventHandler);
-            builder.SetNegativeButton(this.Resources.GetString(Resource.String.cancel), eventHandlerCancel);
-            // Set up the buttons
-
-            dialogInstance = builder.Create();
-            try
-            {
-                dialogInstance.Show();
-                CommonHelpers.DoNotEnablePositiveUntilText(dialogInstance, input);
-            }
-            catch (WindowManagerBadTokenException e)
-            {
-                if (SeekerState.ActiveActivityRef == null)
-                {
-                    MainActivity.LogFirebase("ticker WindowManagerBadTokenException null activities");
-                }
-                else
-                {
-                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
-                    bool isOurActivityFinishing = this.IsFinishing;
-                    MainActivity.LogFirebase("ticker WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
-                }
-            }
-            catch (Exception err)
-            {
-                if (SeekerState.ActiveActivityRef == null)
-                {
-                    MainActivity.LogFirebase("tickerException null activities");
-                }
-                else
-                {
-                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
-                    bool isOurActivityFinishing = this.IsFinishing;
-                    MainActivity.LogFirebase("tickerException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    CommonHelpers._dialogInstance?.Dismiss(); // TODO why?
                 }
             }
 
+            CommonHelpers.ShowSimpleDialog(
+                this,
+                Resource.Layout.edit_text_dialog_content,
+                this.Resources.GetString(Resource.String.set_ticker),
+                OkayAction,
+                this.Resources.GetString(Resource.String.send),
+                null,
+                this.Resources.GetString(Resource.String.type_chatroom_ticker_message),
+                this.Resources.GetString(Resource.String.cancel),
+                this.Resources.GetString(Resource.String.must_type_ticker_text),
+                true);
         }
 
 
@@ -748,14 +662,12 @@ namespace Seeker
             Context c = this;
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.create_chatroom_));
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+
             View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.create_chatroom_dialog, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
-            // Set up the input
+
             EditText chatNameInput = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.createChatroomName);
             CheckBox chatPrivateCheckBox = (CheckBox)viewInflated.FindViewById<CheckBox>(Resource.Id.createChatroomPrivate);
 
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>

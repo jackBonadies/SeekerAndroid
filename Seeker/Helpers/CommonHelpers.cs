@@ -525,6 +525,164 @@ namespace Seeker
             input.AfterTextChanged += Input_AfterTextChanged;
         }
 
+
+        public static AndroidX.AppCompat.App.AlertDialog _dialogInstance;
+        public static void ShowSimpleDialog(
+            Activity owner,
+            int dialogContentId,
+            string title,
+            Action<object, string> okayAction,
+            string okayString,
+            Action<object> cancelAction = null,
+            string hint = null,
+            string cancelString = null,
+            string emptyTextErrorString = null,
+            bool textRequired = true)
+        {
+            if (string.IsNullOrEmpty(cancelString))
+            {
+                cancelString = SeekerState.ActiveActivityRef.GetString(Resource.String.cancel);
+            }
+
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(owner, Resource.Style.MyAlertDialogTheme); 
+            builder.SetTitle(title);
+
+            View viewInflated = LayoutInflater.From(owner).Inflate(dialogContentId, (ViewGroup)owner.FindViewById(Android.Resource.Id.Content).RootView, false);
+
+            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.innerEditText);
+            if (!string.IsNullOrEmpty(hint))
+            {
+                input.Hint = hint;
+            }
+
+            builder.SetView(viewInflated);
+
+            if (cancelAction == null)
+            {
+                cancelAction = (object sender) =>
+                {
+                    if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                    {
+                        aDiag.Dismiss();
+                    }
+                    else
+                    {
+                        CommonHelpers._dialogInstance.Dismiss();
+                    }
+                };
+            }
+
+            void eventHandlerOkay(object sender, DialogClickEventArgs e)
+            {
+                string txt = input.Text;
+                if (string.IsNullOrEmpty(txt) && textRequired)
+                {
+                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
+                    //(sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+                    return;
+                }
+                okayAction(sender, input.Text);
+                _dialogInstance = null;
+            }
+
+            void eventHandlerCancel(object sender, DialogClickEventArgs e)
+            {
+                cancelAction(sender);
+                _dialogInstance = null;
+            }
+
+            void inputEditorAction(object sender, TextView.EditorActionEventArgs e)
+            {
+                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
+                {
+                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
+                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
+                    //overriding this, the keyboard fails to go down by default for some reason.....
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(owner.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    }
+
+                    if (string.IsNullOrEmpty(input.Text) && textRequired)
+                    {
+                        if (string.IsNullOrEmpty(emptyTextErrorString))
+                        {
+                            emptyTextErrorString = "Input Required";
+                        }
+                        SeekerApplication.ShowToast(emptyTextErrorString, ToastLength.Short);
+                    }
+                    else
+                    {
+                        eventHandlerOkay(sender, null);
+                    }
+                }
+            };
+
+            void inputFocusChange(object sender, View.FocusChangeEventArgs e)
+            {
+                try
+                {
+                    SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+                }
+                catch (System.Exception err)
+                {
+                    MainActivity.LogFirebase("simpleDialog_FocusChange" + err.Message);
+                }
+            }
+
+            input.EditorAction += inputEditorAction;
+            input.FocusChange += inputFocusChange;
+
+            builder.SetPositiveButton(okayString, eventHandlerOkay);
+            builder.SetNegativeButton(cancelString, eventHandlerCancel);
+            // Set up the buttons
+
+            _dialogInstance = builder.Create();
+
+            try
+            {
+                _dialogInstance.Show();
+                CommonHelpers.DoNotEnablePositiveUntilText(_dialogInstance, input);
+            }
+            catch (WindowManagerBadTokenException e)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    MainActivity.LogFirebase("commonDialog WindowManagerBadTokenException null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = owner.IsFinishing;
+                    MainActivity.LogFirebase("commonDialog WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+            catch (Exception err)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    MainActivity.LogFirebase("commonDialogException null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = owner.IsFinishing;
+                    MainActivity.LogFirebase("commonDialogException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+        }
+
+
         /// <summary>
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
@@ -1274,6 +1432,86 @@ namespace Seeker
                 notification = builder.Build();
             }
             return notification;
+
+        }
+
+        /// <summary>
+        /// TODO everything should probably use this wrapper
+        /// </summary>
+        /// <returns></returns>
+        public static bool PerformConnectionRequiredAction(Action action, string notLoggedInToast = null)
+        {
+            if (!SeekerState.currentlyLoggedIn)
+            {
+                if(string.IsNullOrEmpty(notLoggedInToast))
+                {
+                    notLoggedInToast = SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_in_generic);
+                }
+                Toast.MakeText(SeekerState.ActiveActivityRef, notLoggedInToast, ToastLength.Short).Show();
+                return false;
+            }
+            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                {
+                    return false; //if we get here we already did a toast message.
+                }
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                        {
+                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
+                        });
+                        return;
+                    }
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { action(); });
+                }));
+                return true;
+            }
+            else
+            {
+                action();
+                return true;
+            }
+        }
+
+        public static void ChangePasswordLogic(string newPassword)
+        {
+            SeekerState.SoulseekClient.ChangePasswordAsync(newPassword).ContinueWith(new Action<Task>
+                ((Task t) =>
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            if (t.Exception.InnerException is TimeoutException)
+                            {
+                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                            }
+                            else
+                            {
+                                MainActivity.LogFirebase("Failed to change password" + t.Exception.InnerException.Message);
+                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
+                            }
+                            return;
+                        }
+                        else
+                        {
+                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
+                            SeekerState.Password = newPassword;
+                            lock (MainActivity.SHARED_PREF_LOCK)
+                            {
+                                var editor = SeekerState.SharedPreferences.Edit();
+                                editor.PutString(KeyConsts.M_Password, SeekerState.Password);
+                                editor.Commit();
+                            }
+                        }
+                    });
+                }
+                ));
 
         }
 

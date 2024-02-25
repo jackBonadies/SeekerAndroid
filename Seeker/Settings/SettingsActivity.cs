@@ -725,6 +725,9 @@ namespace Seeker
             Button editUserInfo = FindViewById<Button>(Resource.Id.editUserInfoButton);
             editUserInfo.Click += EditUserInfo_Click;
 
+            Button changePassword = FindViewById<Button>(Resource.Id.changePassword);
+            changePassword.Click += ChangePassword_Click;
+
             useUPnPCheckBox = FindViewById<CheckBox>(Resource.Id.useUPnPCheckBox);
             useUPnPCheckBox.Checked = SeekerState.ListenerUPnpEnabled;
             useUPnPCheckBox.CheckedChange += UseUPnPCheckBox_CheckedChange;
@@ -1413,6 +1416,38 @@ namespace Seeker
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(EditUserInfoActivity));
             this.StartActivity(intent);
         }
+
+        private void ChangePassword_Click(object sender, EventArgs e)
+        {
+            // show dialog
+            MainActivity.LogInfoFirebase("ChangePasswordDialog" + this.IsFinishing + this.IsDestroyed);
+
+            void OkayAction(object sender, string textInput)
+            {
+                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput));
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    CommonHelpers._dialogInstance?.Dismiss(); // todo: why?
+                }
+            }
+
+            CommonHelpers.ShowSimpleDialog(
+                this,
+                Resource.Layout.edit_text_password_dialog_content,
+                this.Resources.GetString(Resource.String.change_password),
+                OkayAction,
+                this.Resources.GetString(Resource.String.okay),
+                null,
+                this.Resources.GetString(Resource.String.new_password),
+                this.Resources.GetString(Resource.String.cancel),
+                this.Resources.GetString(Resource.String.cannot_be_empty),
+                true);
+        }
+
 
         private void UseUPnPCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
