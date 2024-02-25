@@ -627,8 +627,6 @@ namespace Seeker
                 }
             }
 
-
-
             CommonHelpers.ShowSimpleDialog(
                 this,
                 Resource.Layout.edit_text_dialog_content,

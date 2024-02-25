@@ -1442,8 +1442,8 @@ namespace Seeker
                 OkayAction,
                 this.Resources.GetString(Resource.String.okay),
                 null,
-                this.Resources.GetString(Resource.String.cancel),
                 this.Resources.GetString(Resource.String.new_password),
+                this.Resources.GetString(Resource.String.cancel),
                 this.Resources.GetString(Resource.String.cannot_be_empty),
                 true);
         }
