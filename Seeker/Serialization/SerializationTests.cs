@@ -446,7 +446,7 @@ namespace Seeker.Serialization
                 Resource.Layout.search_result_medium_splitter                     ,
                 Resource.Layout.search_tab_layout                                 ,
                 Resource.Layout.settings_layout                                   ,
-                Resource.Layout.set_ticker_dialog_content                         ,
+                Resource.Layout.edit_text_dialog_content                         ,
                 Resource.Layout.simple_custom_notification                        ,
                 Resource.Layout.smart_filter_config_item                          ,
                 Resource.Layout.smart_filter_config_layout                        ,
