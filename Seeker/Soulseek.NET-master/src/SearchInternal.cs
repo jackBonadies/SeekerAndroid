@@ -185,7 +185,7 @@ namespace Soulseek
                 Interlocked.Add(ref lockedFileCount, response.LockedFileCount);
 
                 ResponseReceived?.Invoke(response);
-                SearchTimeoutTimer.Reset();
+                SearchTimeoutTimer.Reset(); // TODO firebase this is disposed
 
                 if (responseCount >= Options.ResponseLimit)
                 {

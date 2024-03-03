@@ -1180,6 +1180,15 @@ namespace Seeker
             }
         }
 
+        private void stopRefreshing()
+        {
+            if (this.swipeRefreshLayout != null)
+            {
+                this.swipeRefreshLayout.Refreshing = false;
+            }
+        }
+
+
         public void DirectoryReceivedContAction(Task<Directory> dirTask)
         {
 
@@ -1190,11 +1199,7 @@ namespace Seeker
             }
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
-
-                if (this.swipeRefreshLayout != null)
-                {
-                    this.swipeRefreshLayout.Refreshing = false;
-                }
+                stopRefreshing();
 
                 if (this.View == null)
                 {
@@ -1237,19 +1242,29 @@ namespace Seeker
 
         public void GetFolderContents()
         {
-            var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0);
-            string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
-            if (dirname == string.Empty)
+            try
             {
-                MainActivity.LogFirebase("The dirname is empty!!");
-                return;
+                var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0);
+                string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
+                if (dirname == string.Empty)
+                {
+                    MainActivity.LogFirebase("The dirname is empty!!");
+                    stopRefreshing();
+                    return;
+                }
+                if (!SeekerState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+                {
+                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
+                    stopRefreshing();
+                    return;
+                }
+                GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
-            if (!SeekerState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+            catch (Exception ex)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
-                return;
+                CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
+                MainActivity.LogFirebaseError($"{SeekerState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
             }
-            GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
         }
 
         public bool OnMenuItemClick(IMenuItem item)

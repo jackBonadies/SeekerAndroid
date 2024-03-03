@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Lifecycle;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +74,7 @@ namespace Seeker
                 // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
                 //   in my case it did not.
                 SeekerState.IsStartUpServiceCurrentlyRunning = false;
-                bool foreground = (SeekerState.ActiveActivityRef as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
+                bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
                 MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
                 SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);

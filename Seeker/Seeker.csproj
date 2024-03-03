@@ -117,6 +117,7 @@
     <Compile Include="Chatroom\RoomTickersDialog.cs" />
     <Compile Include="Chatroom\RoomUserListDialog.cs" />
     <Compile Include="Chatroom\RoomUserListRecyclerAdapter.cs" />
+    <Compile Include="Helpers\CommonExtensions.cs" />
     <Compile Include="Main\CloseActivity.cs" />
     <Compile Include="Main\DownloadForegroundService.cs" />
     <Compile Include="Main\SeekerKeepAliveService.cs" />
@@ -1570,6 +1571,11 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\edit_text_password_dialog_content.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\error_dialog_layout.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

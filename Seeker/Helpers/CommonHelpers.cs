@@ -1607,6 +1607,44 @@ namespace Seeker
                 }));
         }
 
+        public static void ShowReportErrorDialog(Context c, string message)
+        {
+            Dialog dialog = new Dialog(c);
+            dialog.SetContentView(Resource.Layout.error_dialog_layout);
+
+            Button btnReport = dialog.FindViewById(Resource.Id.btnReport) as Button;
+            Button btnClose = dialog.FindViewById(Resource.Id.btnClose) as Button;
+
+            void BtnReport_Click(object sender, EventArgs e)
+            {
+                Intent intent = new Intent(Intent.ActionSendto);
+                intent.SetData(Android.Net.Uri.Parse("mailto:"));
+                intent.PutExtra(Intent.ExtraEmail, new String[] { "jbonadies6@gmail.com" });
+                intent.PutExtra(Intent.ExtraSubject, $"Seeker Bug: {message}");
+                intent.PutExtra(Intent.ExtraText, "Please describe the issue here...");
+                SeekerState.ActiveActivityRef.StartActivity(Intent.CreateChooser(intent, "Email:"));
+                dialog?.Dismiss();
+            }
+
+            btnReport.Click += BtnReport_Click;
+            btnClose.Click += (object sender, EventArgs e) => { dialog?.Dismiss(); };
+
+            dialog.Show();
+        }
+
+        private static void BtnReport_Click(object sender, EventArgs e)
+        {
+            Intent intent = new Intent(Intent.ActionSendto);
+            intent.SetData(Android.Net.Uri.Parse("mailto:"));
+            intent.PutExtra(Intent.ExtraEmail, new String[] { "your_email@example.com" });
+            intent.PutExtra(Intent.ExtraSubject, "Issue Report");
+            intent.PutExtra(Intent.ExtraText, "Please describe the issue here...");
+            if (intent.ResolveActivity(SeekerState.ActiveActivityRef.PackageManager) != null)
+            {
+                SeekerState.ActiveActivityRef.StartActivity(intent);
+            }
+        }
+
         public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction = null)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);

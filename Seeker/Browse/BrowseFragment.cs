@@ -1482,6 +1482,12 @@ namespace Seeker
                 //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
                 dataItemsForDownload = new List<DataItem>();
                 DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, FilteredResults);
+                itemSelected = null;
+                if (itemSelected == null)
+                {
+                    CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
+                    return; //else nullref
+                }
                 PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
                 filteredDataItemsForDownload = FilterBrowseList(dataItemsForDownload.ToList());
             }
@@ -1693,14 +1699,25 @@ namespace Seeker
                 }
                 catch (IndexOutOfRangeException) //this did happen to me.... when filtering...
                 {
-                    MainActivity.LogFirebase("ListViewDirectories_ItemClick position: " + position + "filteredDataItemsForListView.Count: " + filteredDataItemsForListView.Count);
-                    MainActivity.LogDebug("ListViewDirectories_ItemClick position: " + position + "filteredDataItemsForListView.Count: " + filteredDataItemsForListView.Count);
+                    string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count}";
+                    MainActivity.LogFirebase(logMsg);
                     return null;
                 }
             }
             else
             {
-                itemSelected = dataItemsForListView[position]; //out of bounds here...
+                //!! firebase -- OnContextItemSelected --- DownloadUserFilesEntry
+                //!! firebase -- ListViewDirectories_ItemClick
+                try
+                {
+                    itemSelected = dataItemsForListView[position]; //out of bounds here...
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count} isFilter {filteredResults}";
+                    MainActivity.LogFirebase(logMsg);
+                    return null;
+                }
             }
             return itemSelected;
         }
@@ -1720,6 +1737,7 @@ namespace Seeker
                 //SeekerState.ActiveActivityRef.Open
                 //this.RegisterForContextMenu(e.View);
                 ItemPositionLongClicked = e.Position;
+                MainActivity.LogInfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
                 this.listViewDirectories.ShowContextMenu();
                 //BrowseFragment.Instance.Context
 

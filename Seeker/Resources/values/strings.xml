@@ -445,6 +445,7 @@ Directory Count: {5}"</string>
   <string name="invite">Invite</string>
   <string name="cancel">Cancel</string>
   <string name="close">Close</string>
+  <string name="report">Report</string>
   <string name="create_chatroom">Create Room</string>
   <string name="refresh_room_list">Refresh Room List</string>
 
@@ -911,6 +912,6 @@ The standard way of requesting folder access does not always persist permissions
 
 	<string name="failed_to_change_password">Failed to change password</string>
 	<string name="password_successfully_updated">Password successfully updated</string>
-
+	<string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
 
 </resources>

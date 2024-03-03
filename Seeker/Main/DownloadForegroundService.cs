@@ -4,6 +4,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Lifecycle;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,7 +102,21 @@ namespace Seeker
             //.setContentIntent(pendingIntent)
             //.setTicker(getText(R.string.ticker_text))
             //.build();
-            StartForeground(NOTIF_ID, notification);
+
+            try
+            {
+                // can throw ForegroundServiceStartNotAllowedException
+                StartForeground(NOTIF_ID, notification);
+            }
+            catch(System.Exception e)
+            {
+                // its okay to just not promote this service to foreground.
+                // you will still get notifications, it will just be a lower priority process
+                // also, next time this gets hit (i.e. if a user starts another set of downloads)
+                // the service can then maybe successfully get promoted.
+                MainActivity.LogFirebaseError($"Download service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
+
+            }
             //runs indefinitely until stop.
 
             return StartCommandResult.Sticky;

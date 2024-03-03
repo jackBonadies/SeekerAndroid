@@ -621,21 +621,10 @@ namespace Seeker
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
                 {
-                    bool isForeground = false;
-                    try
-                    {
-                        if (SeekerState.ActiveActivityRef?.Lifecycle.CurrentState != null)
-                        {
-                            isForeground = SeekerState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
-                        }
-                    }
-                    catch
-                    {
-                        MainActivity.LogFirebase("Exception thrown while checking lifecycle");
-                    }
+                    bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
 
                     //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
-                    if (isForeground)
+                    if (isForeground ?? false)
                     {
                         this.StartService(uploadServiceIntent); //this will throw if the app is in background.
                     }
@@ -705,21 +694,10 @@ namespace Seeker
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
                 {
-                    bool isForeground = false;
-                    try
-                    {
-                        if (SeekerState.ActiveActivityRef?.Lifecycle.CurrentState != null)
-                        {
-                            isForeground = SeekerState.ActiveActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
-                        }
-                    }
-                    catch
-                    {
-                        MainActivity.LogFirebase("Exception thrown while checking lifecycle");
-                    }
+                    bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
 
                     //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
-                    if (isForeground)
+                    if (isForeground ?? false)
                     {
                         this.StartService(downloadServiceIntent); //this will throw if the app is in background.
                     }

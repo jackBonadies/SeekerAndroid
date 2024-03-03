@@ -104,10 +104,14 @@ namespace Seeker
                                     //its just that sometimes this almost gets like forced.... but not sure how to reproudce...
                     try
                     {
-                        if (activity is AppCompatActivity)
+                        if (activity is AppCompatActivity appCompatActivity)
                         {
-                            bool foreground = (activity as AppCompatActivity).Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
-                            if (foreground)
+                            bool? foreground = appCompatActivity.IsResumed(); 
+                            if (foreground == null)
+                            {
+                                MainActivity.LogFirebase("Unknown seeker keep alive cannot be started: " + e.Message + e.StackTrace);
+                            }
+                            else if (foreground.Value)
                             {
                                 MainActivity.LogFirebase("FOREGROUND seeker keep alive cannot be started: " + e.Message + e.StackTrace);
                             }
@@ -255,6 +259,11 @@ namespace Seeker
             //{
             MainActivity.SetStatusApi(true);
             //}
+        }
+
+        public static bool IsBackground()
+        {
+            return NumberOfActiveActivities == 0;
         }
 
         public volatile static string DiagLastStarted = string.Empty;
@@ -462,6 +471,12 @@ namespace Seeker
             log.Debug(logCatTag, msg);
 #endif
         }
+
+        public static void LogFirebaseError(string msg, Exception e)
+        {
+            LogFirebase($"{msg} msg: {e.Message} stack: {e.StackTrace}");
+        }
+
         public static void LogFirebase(string msg)
         {
             if (SeekerApplication.LOG_DIAGNOSTICS)
@@ -5562,7 +5577,7 @@ namespace Seeker
                                     {
                                         if (task.Exception.InnerException.StackTrace.Length > 1201)
                                         {
-                                            MainActivity.LogFirebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1200).ToString());
+                                            MainActivity.LogFirebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1000).ToString());
                                         }
                                         MainActivity.LogFirebase("xml Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
                                     }
