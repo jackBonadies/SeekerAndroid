@@ -1062,7 +1062,16 @@ namespace Soulseek
                     search.Cancel();
                 });
 
-                Searches.RemoveAndDisposeAll();
+                try
+                {
+                    Searches.RemoveAndDisposeAll();
+                }
+                catch(Exception)
+                {
+                    // Concurrency issue where key is removed between IsEmpty and Keys.First() causing exception.
+                    // if the exception occurs that means that we already disposed all searches and so it can be
+                    // safely ignored.
+                }
 
                 Username = null;
 

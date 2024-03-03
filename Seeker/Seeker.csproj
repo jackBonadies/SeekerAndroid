@@ -144,10 +144,15 @@
     <Compile Include="Messages\MessagesOverviewRecyclerAdapter.cs" />
     <Compile Include="Search\ChipsAdapter.cs" />
     <Compile Include="Search\DownloadDialog.cs" />
+    <Compile Include="Search\SearchItemViews.cs" />
+    <Compile Include="Search\SearchResultComparable.cs" />
+    <Compile Include="Search\SearchTabAdapter.cs" />
+    <Compile Include="Search\SearchTabDialog.cs" />
     <Compile Include="Search\WishlistController.cs" />
     <Compile Include="Serialization\CustomMessagePackFormatters.cs" />
     <Compile Include="Serialization\SerializationTests.cs" />
     <Compile Include="Settings\KeyConsts.cs" />
+    <Compile Include="Transfers\TransferItemViews.cs" />
     <Compile Include="Transfers\TransfersController.cs" />
     <Compile Include="Users\EditUserInfoActivity.cs" />
     <Compile Include="Search\SearchEnums.cs" />

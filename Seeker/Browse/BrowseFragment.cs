@@ -1482,7 +1482,6 @@ namespace Seeker
                 //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
                 dataItemsForDownload = new List<DataItem>();
                 DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, FilteredResults);
-                itemSelected = null;
                 if (itemSelected == null)
                 {
                     CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");

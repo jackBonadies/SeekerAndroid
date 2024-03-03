@@ -5,6 +5,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,16 +31,7 @@ namespace Seeker.Chatroom
         {
             base.OnResume();
 
-            Window window = Dialog.Window;//  getDialog().getWindow();
-            Point size = new Point();
-
-            Display display = window.WindowManager.DefaultDisplay;
-            display.GetSize(size);
-
-            int width = size.X;
-
-            window.SetLayout((int)(width * 0.90), Android.Views.WindowManagerLayoutParams.WrapContent);//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
-            window.SetGravity(GravityFlags.Center);
+            Dialog.SetSizeProportional(.9, -1);
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)

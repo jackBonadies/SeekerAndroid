@@ -1629,21 +1629,11 @@ namespace Seeker
             btnReport.Click += BtnReport_Click;
             btnClose.Click += (object sender, EventArgs e) => { dialog?.Dismiss(); };
 
+            dialog.SetSizeProportional(.9, -1);
+
             dialog.Show();
         }
 
-        private static void BtnReport_Click(object sender, EventArgs e)
-        {
-            Intent intent = new Intent(Intent.ActionSendto);
-            intent.SetData(Android.Net.Uri.Parse("mailto:"));
-            intent.PutExtra(Intent.ExtraEmail, new String[] { "your_email@example.com" });
-            intent.PutExtra(Intent.ExtraSubject, "Issue Report");
-            intent.PutExtra(Intent.ExtraText, "Please describe the issue here...");
-            if (intent.ResolveActivity(SeekerState.ActiveActivityRef.PackageManager) != null)
-            {
-                SeekerState.ActiveActivityRef.StartActivity(intent);
-            }
-        }
 
         public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction = null)
         {

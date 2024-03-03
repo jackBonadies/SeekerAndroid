@@ -36,6 +36,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log = Android.Util.Log;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -100,17 +101,8 @@ namespace Seeker
             base.OnResume();
             MainActivity.LogDebug("OnResume Start");
 
-            Window window = Dialog.Window;//  getDialog().getWindow();
-            Point size = new Point();
+            Dialog?.SetSizeProportional(.9, .9);
 
-            Display display = window.WindowManager.DefaultDisplay;
-            display.GetSize(size);
-
-            int width = size.X;
-            int height = size.Y;
-
-            window.SetLayout((int)(width * 0.90), (int)(height * 0.90));//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
-            window.SetGravity(GravityFlags.Center);
             MainActivity.LogDebug("OnResume End");
         }
 

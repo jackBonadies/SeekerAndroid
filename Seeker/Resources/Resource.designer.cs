@@ -14372,13 +14372,7 @@ namespace Seeker
 			public const int ic_launcher_foreground = 2131623937;
 			
 			// aapt resource value: 0x7F0E0002
-			public const int ic_launcher_icon = 2131623938;
-			
-			// aapt resource value: 0x7F0E0003
-			public const int ic_launcher_round = 2131623939;
-			
-			// aapt resource value: 0x7F0E0004
-			public const int ic_launcher_round_icon = 2131623940;
+			public const int ic_launcher_round = 2131623938;
 			
 			static Mipmap()
 			{

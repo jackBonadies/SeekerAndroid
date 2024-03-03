@@ -80,7 +80,7 @@ namespace Soulseek
         {
             while (!concurrentDictionary.IsEmpty)
             {
-                if (concurrentDictionary.TryRemove(concurrentDictionary.Keys.First(), out var value))
+                if (concurrentDictionary.TryRemove(concurrentDictionary.Keys.First(), out var value)) // diag: First() - sequence contains no elements
                 {
                     value.Dispose();
                 }

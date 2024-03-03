@@ -807,6 +807,12 @@ namespace Seeker
 
         public static string GetPresentableName(Android.Net.Uri uri, string folderToStripForPresentableNames, string volName)
         {
+            if(uri.LastPathSegment == null)
+            {
+                MainActivity.LogFirebase($"{uri} has null last path segment");
+                // next line throws
+            }
+
             string presentableName = uri.LastPathSegment.Replace('/', '\\');
 
             if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\

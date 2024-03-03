@@ -47,16 +47,8 @@ namespace Seeker.Chatroom
             ChatroomController.RoomModeratorsChanged += OnRoomModeratorsChanged;
             ChatroomController.UserJoinedOrLeft += OnUserJoinedOrLeft;
             ChatroomController.UserRoomStatusChanged += OnUserRoomStatusChanged;
-            Window window = Dialog.Window;//  getDialog().getWindow();
-            Point size = new Point();
 
-            Display display = window.WindowManager.DefaultDisplay;
-            display.GetSize(size);
-
-            int width = size.X;
-
-            window.SetLayout((int)(width * 0.90), Android.Views.WindowManagerLayoutParams.WrapContent);//  window.WindowManager   WindowManager.LayoutParams.WRAP_CONTENT);
-            window.SetGravity(GravityFlags.Center);
+            Dialog.SetSizeProportional(.9, -1);
         }
         public override void OnPause()
         {

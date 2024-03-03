@@ -4,6 +4,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Seeker.Search;
 using Soulseek;
 using System;
 using System.Collections.Generic;
