@@ -1,0 +1,5 @@
+New faster, safer serialization.
+Migrate to AndroidX, preparation for Android 14.
+Small bug fixes and cleanup.
+
+**Full Changelog**: https://github.com/jackBonadies/SeekerAndroid/compare/v2.9.18...v2.10.5

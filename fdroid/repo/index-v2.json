@@ -14,18 +14,18 @@
       }
     },
     "address": "https://raw.githubusercontent.com/jackBonadies/SeekerAndroid/fdroid/fdroid/repo",
-    "timestamp": 1692665359000
+    "timestamp": 1709681425000
   },
   "packages": {
     "com.companyname.andriodapp1": {
       "metadata": {
-        "added": 1692665351000,
+        "added": 1709681419000,
         "categories": [
           "Internet"
         ],
         "changelog": "https://github.com/jackBonadies/SeekerAndroid/releases",
         "issueTracker": "https://github.com/jackBonadies/SeekerAndroid/issues",
-        "lastUpdated": 1692665351000,
+        "lastUpdated": 1709681419000,
         "license": "GPL-3.0",
         "sourceCode": "https://github.com/jackBonadies/SeekerAndroid",
         "screenshots": {
@@ -77,28 +77,28 @@
         },
         "icon": {
           "en-US": {
-            "name": "/icons/com.companyname.andriodapp1.98.png",
-            "sha256": "196e93d312276869e14fd0db39e83dd206443218d2df88aa07c786234ba32d14",
-            "size": 1290
+            "name": "/icons/com.companyname.andriodapp1.104.png",
+            "sha256": "dc1e9a6009e228c32dd75b0e5eedc0aec9372d33d16ff390271d941ba754f77c",
+            "size": 1282
           }
         },
         "preferredSigner": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2"
       },
       "versions": {
-        "c6cbdd4bd95baf6e6be0e18c239f16311945202c69692ee6b2743a1e58561c0f": {
-          "added": 1692665351000,
+        "b9d259e392f3e653ea2f7ca52d2491adad95d35d3a1276745b177ff3be9813ec": {
+          "added": 1709681419000,
           "file": {
-            "name": "/seeker_v2.9.18.apk",
-            "sha256": "c6cbdd4bd95baf6e6be0e18c239f16311945202c69692ee6b2743a1e58561c0f",
-            "size": 15523900
+            "name": "/seeker_v2.10.5.apk",
+            "sha256": "b9d259e392f3e653ea2f7ca52d2491adad95d35d3a1276745b177ff3be9813ec",
+            "size": 18494187
           },
           "manifest": {
             "nativecode": [
               "arm64-v8a",
               "armeabi-v7a"
             ],
-            "versionName": "2.9.19",
-            "versionCode": 98,
+            "versionName": "2.10.5",
+            "versionCode": 104,
             "usesSdk": {
               "minSdkVersion": 19,
               "targetSdkVersion": 33
@@ -140,7 +140,7 @@
                 "name": "android.permission.READ_MEDIA_AUDIO"
               },
               {
-                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
+                "name": "com.companyname.andriodapp1.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
               },
               {
                 "name": "android.permission.READ_EXTERNAL_STORAGE"

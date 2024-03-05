@@ -5,8 +5,8 @@ AuthorName: jackBonadies
 Categories:
     - Internet
 Changelog: https://github.com/jackBonadies/SeekerAndroid/releases
-CurrentVersion: 2.9.19
-CurrentVersionCode: 98
+CurrentVersion: 2.10.5
+CurrentVersionCode: 104
 Description: |
     Android client for the Soulseek peer-to-peer network
 

@@ -1,6 +1,6 @@
 {
   "repo": {
-    "timestamp": 1692665359000,
+    "timestamp": 1709681425000,
     "version": 20002,
     "name": "Seeker slsk client",
     "icon": "icon.png",
@@ -22,18 +22,18 @@
         "Internet"
       ],
       "changelog": "https://github.com/jackBonadies/SeekerAndroid/releases",
-      "suggestedVersionName": "2.9.19",
-      "suggestedVersionCode": "98",
+      "suggestedVersionName": "2.10.5",
+      "suggestedVersionCode": "104",
       "description": "Android client for the Soulseek peer-to-peer network\n\n\nSeeker is a Soulseek client for Android written in C# (with Xamarin) supporting downloading, searching (including wishlist and filters), sharing, messages, chatrooms, port forwarding, user info, privileges, and more.\n\nThis work uses the Soulseek.NET library for communicating with Soulseek server and network peers. It also references the unofficial Soulseek Protocol Documentation implemented by the developers of the Nicotine+ client.\n\n- The Soulseek server, which makes this app possible, relies on donations. Donate: at https://www.slsknet.org/donate.php\n- Please help translate: https://crowdin.com/project/seeker\n- Official release is through Google Play store: https://play.google.com/store/apps/details?id=com.companyname.andriodapp1\n\nThis app will always be completely free and open source software, no ads, no 'premium' versions or paid features, etc.\n",
       "issueTracker": "https://github.com/jackBonadies/SeekerAndroid/issues",
       "license": "GPL-3.0",
       "name": "Seeker",
       "sourceCode": "https://github.com/jackBonadies/SeekerAndroid",
       "summary": "Android client for the Soulseek peer-to-peer network",
-      "added": 1692665351000,
-      "icon": "com.companyname.andriodapp1.98.png",
+      "added": 1709681419000,
+      "icon": "com.companyname.andriodapp1.104.png",
       "packageName": "com.companyname.andriodapp1",
-      "lastUpdated": 1692665351000,
+      "lastUpdated": 1709681419000,
       "localized": {
         "en-US": {
           "phoneScreenshots": [
@@ -44,7 +44,7 @@
             "5.png",
             "6.png"
           ],
-          "whatsNew": "Update Translations"
+          "whatsNew": "New faster, safer serialization.\nMigrate to AndroidX, preparation for Android 14.\nSmall bug fixes and cleanup.\n\n**Full Changelog**: https://github.com/jackBonadies/SeekerAndroid/compare/v2.9.18...v2.10.5"
         }
       }
     }
@@ -52,9 +52,9 @@
   "packages": {
     "com.companyname.andriodapp1": [
       {
-        "added": 1692665351000,
-        "apkName": "seeker_v2.9.18.apk",
-        "hash": "c6cbdd4bd95baf6e6be0e18c239f16311945202c69692ee6b2743a1e58561c0f",
+        "added": 1709681419000,
+        "apkName": "seeker_v2.10.5.apk",
+        "hash": "b9d259e392f3e653ea2f7ca52d2491adad95d35d3a1276745b177ff3be9813ec",
         "hashType": "sha256",
         "minSdkVersion": 19,
         "nativecode": [
@@ -64,7 +64,7 @@
         "packageName": "com.companyname.andriodapp1",
         "sig": "d22a36e154c97d17f1186735d768534b",
         "signer": "73345e7d43feb55939450de4497d64c001d2ae764265b69c2cbf3ea03677a8a2",
-        "size": 15523900,
+        "size": 18494187,
         "targetSdkVersion": 33,
         "uses-permission": [
           [
@@ -108,7 +108,7 @@
             null
           ],
           [
-            "android.permission.RECEIVE_BOOT_COMPLETED",
+            "com.companyname.andriodapp1.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
             null
           ],
           [
@@ -116,8 +116,8 @@
             null
           ]
         ],
-        "versionCode": 98,
-        "versionName": "2.9.19"
+        "versionCode": 104,
+        "versionName": "2.10.5"
       }
     ]
   }
