@@ -23,6 +23,9 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Activity;
+using Java.Lang;
+using Seeker.Helpers;
 using System;
 using System.Linq;
 
@@ -73,7 +76,7 @@ namespace Seeker
                     RequestedUserInfoHelper.LaunchUserInfoView(SeekerState.Username);
                     return true;
                 case Android.Resource.Id.Home:
-                    OnBackPressed();
+                    OnBackPressedDispatcher.OnBackPressed();
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -103,8 +106,7 @@ namespace Seeker
         }
 
         private bool force = false;
-        //private AlertDialog diag = null;
-        public override void OnBackPressed()
+        private void backPressedAction(OnBackPressedCallback callback)
         {
             if (!force && PendingText != SeekerState.UserInfoBio)
             {
@@ -115,7 +117,9 @@ namespace Seeker
             }
             else
             {
-                base.OnBackPressed();
+                callback.Enabled = false;
+                OnBackPressedDispatcher.OnBackPressed();
+                callback.Enabled = true;
             }
         }
 
@@ -151,7 +155,8 @@ namespace Seeker
             Button clearImage = this.FindViewById<Button>(Resource.Id.buttonClearImage);
             clearImage.Click += ClearImage_Click;
 
-
+            var editUserInfoOnBackPressed = new GenericOnBackPressedCallback(true, this.backPressedAction);
+            OnBackPressedDispatcher.AddCallback(editUserInfoOnBackPressed);
         }
 
         private void DeleteImage(string image)

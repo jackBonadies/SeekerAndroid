@@ -1,7 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="104" android:versionName="2.10.5" package="com.companyname.andriodapp1" android:installLocation="auto" android:requestLegacyExternalStorage="true">
-	<uses-sdk android:minSdkVersion="19" android:targetSdkVersion="33" />
-	<application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="false" android:theme="@style/AppTheme" android:name="com.companyname.Seeker.SeekerApplication" android:localeConfig="@xml/locales_config">
+	<uses-sdk android:minSdkVersion="19" android:targetSdkVersion="34" />
+	<application android:allowBackup="true" android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:supportsRtl="false" android:enableOnBackInvokedCallback="true"
+ android:theme="@style/AppTheme" android:name="com.companyname.Seeker.SeekerApplication" android:localeConfig="@xml/locales_config">
 		<service android:name="com.companyname.Seeker.DownloadService" android:stopWithTask="true"></service>
 		<service android:name="com.companyname.Seeker.SeekerKeepAliveService"></service>
 		<activity android:name="com.companyname.androidapp1.MainActivity" android:windowSoftInputMode="adjustPan"></activity>
@@ -15,9 +16,11 @@
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 	<uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 	<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 </manifest>

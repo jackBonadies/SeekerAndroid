@@ -371,7 +371,7 @@ namespace Seeker.Serialization
         }
 
 #if DEBUG
-        public static void TestInflateAll(Activity activity)
+        public static void TestInflateAll(Android.App.Activity activity)
         {
                 var resourcesLayoutIds = new List<int>()
                         {

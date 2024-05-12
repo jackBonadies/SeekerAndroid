@@ -147,7 +147,7 @@ namespace Seeker
                     ShowSortUserListDialog();
                     return true;
                 case Android.Resource.Id.Home:
-                    OnBackPressed();
+                    OnBackPressedDispatcher.OnBackPressed();
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -397,7 +397,7 @@ namespace Seeker
 
         public override bool OnNavigateUp()
         {
-            OnBackPressed();
+            OnBackPressedDispatcher.OnBackPressed();
             return true;
             //return base.OnNavigateUp();
         }

@@ -44,6 +44,7 @@ namespace Soulseek.Network.Tcp
             Options = options ?? new ConnectionOptions();
 
             TcpClient = tcpClient ?? new TcpClientAdapter(new TcpClient(AddressFamily.InterNetworkV6));
+            TcpClient.Client.DualMode = true;
 
             if (Options.InactivityTimeout > 0)
             {

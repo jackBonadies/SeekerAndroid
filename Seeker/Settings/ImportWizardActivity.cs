@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
+using AndroidX.Activity;
 
 namespace Seeker
 {
@@ -65,6 +66,11 @@ namespace Seeker
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+
+
+            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            OnBackPressedDispatcher.AddCallback(backPressedCallback);
+
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 
             SetContentView(Resource.Layout.wizard_activity_layout);
@@ -104,7 +110,7 @@ namespace Seeker
             return f == (this.pager.Adapter as WizardPagerAdapter).GetItem(this.pager.CurrentItem);
         }
 
-        public override void OnBackPressed()
+        private void onBackPressedAction(OnBackPressedCallback callback)
         {
             PrevButton_Click(null, new EventArgs());
         }
