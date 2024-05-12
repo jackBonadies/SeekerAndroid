@@ -237,8 +237,6 @@ namespace Seeker.Chatroom
         {
             MainActivity.LogDebug("handler remove from " + room);
 
-
-
             if (OurRoomInfo != null && OurRoomInfo.Name == room)
             {
                 this.Activity?.RunOnUiThread(new Action(() =>
@@ -246,7 +244,7 @@ namespace Seeker.Chatroom
                     if (this.IsVisible)
                     {
                         MainActivity.LogDebug("pressed back from " + room);
-                        this.Activity.OnBackPressed();
+                        this.Activity.OnBackPressedDispatcher.OnBackPressed();
                     }
                     ChatroomController.GetRoomListApi();
                 }));

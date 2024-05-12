@@ -87,7 +87,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Android.Resource.Id.Home:
-                    OnBackPressed();
+                    OnBackPressedDispatcher.OnBackPressed();
                     return true;
             }
             return base.OnOptionsItemSelected(item);

@@ -47,7 +47,7 @@ using SlskHelp;
 
 namespace Seeker
 {
-    [Application]
+    [Application()]
     public class SeekerApplication : Application
     {
         public static Context ApplicationContext = null;

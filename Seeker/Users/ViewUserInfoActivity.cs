@@ -97,7 +97,7 @@ namespace Seeker
                     UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
                     return true;
                 case Android.Resource.Id.Home:
-                    OnBackPressed();
+                    OnBackPressedDispatcher.OnBackPressed();
                     return true;
             }
             return base.OnOptionsItemSelected(item);

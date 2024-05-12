@@ -55,6 +55,7 @@ using System.Threading.Tasks;
 using static Android.Provider.DocumentsContract;
 using log = Android.Util.Log;
 using Seeker.Serialization;
+using AndroidX.Activity;
 
 //using System.IO;
 //readme:
@@ -2834,7 +2835,8 @@ namespace Seeker
             myToolbar.InflateMenu(Resource.Menu.account_menu); //twice??
 
 
-
+            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             System.Console.WriteLine("Testing.....");
 
@@ -4516,10 +4518,11 @@ namespace Seeker
             return false;
         }
 
+
         /// <summary>
         /// 
         /// </summary>
-        public override void OnBackPressed()
+        private void onBackPressedAction(OnBackPressedCallback callback)
         {
             bool relevant = false;
             try
@@ -4559,7 +4562,9 @@ namespace Seeker
             }
             if (!relevant)
             {
-                base.OnBackPressed();
+                callback.Enabled = false;
+                OnBackPressedDispatcher.OnBackPressed();
+                callback.Enabled = true;
             }
         }
 

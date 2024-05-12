@@ -40,6 +40,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using Seeker.Messages;
+using AndroidX.Activity;
 
 namespace Seeker
 {
@@ -148,7 +149,7 @@ namespace Seeker
                     DownloadDialog.RequestFilesApi(MessagesInnerFragment.Username, snackView, action, null);
                     return true;
                 case Android.Resource.Id.Home:
-                    OnBackPressed();
+                    OnBackPressedDispatcher.OnBackPressed();
                     return true;
                 case Resource.Id.action_delete_messages:
                     DELETED_USERNAME = MessagesInnerFragment.Username;
@@ -356,7 +357,7 @@ namespace Seeker
         }
 
 
-        public override void OnBackPressed()
+        private void onBackPressedAction(OnBackPressedCallback callback)
         {
             //if f is non null and f is visible then that means you are backing out from the inner user fragment..
             var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
@@ -377,7 +378,9 @@ namespace Seeker
                     }
                     else
                     {
-                        base.OnBackPressed();
+                        callback.Enabled = false;
+                        OnBackPressedDispatcher.OnBackPressed();
+                        callback.Enabled = true;
                         return;
                     }
                 }
@@ -391,7 +394,9 @@ namespace Seeker
 
                 //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
             }
-            base.OnBackPressed();
+            callback.Enabled = false;
+            OnBackPressedDispatcher.OnBackPressed();
+            callback.Enabled = true;
         }
 
 
@@ -464,6 +469,8 @@ namespace Seeker
         {
             base.OnCreate(savedInstanceState);
 
+            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             bool reborn = false;
             if (savedInstanceState == null)

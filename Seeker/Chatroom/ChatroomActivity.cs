@@ -35,6 +35,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Javax.Security.Auth;
+using AndroidX.Activity;
 
 namespace Seeker
 {
@@ -66,6 +68,9 @@ namespace Seeker
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
             bool startWithUserFragment = false;
+
+            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtChatroomInner"))
             {
@@ -111,6 +116,34 @@ namespace Seeker
             //ListView userList = this.FindViewById<ListView>(Resource.Id.userList);
 
             //RefreshUserList();
+        }
+
+
+        private void onBackPressedAction(OnBackPressedCallback callback)
+        {
+            //if f is non null and f is visible then that means you are backing out from the inner user fragment..
+            var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment");
+            if (f != null && f.IsVisible)
+            {
+                if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
+                {
+                    callback.Enabled = false;
+                    OnBackPressedDispatcher.OnBackPressed();
+                    callback.Enabled = true;
+                    return;
+                }
+                AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
+                myToolbar.InflateMenu(Resource.Menu.chatroom_overview_list_menu);
+                myToolbar.Title = this.Resources.GetString(Resource.String.chatrooms);
+                this.SetSupportActionBar(myToolbar);
+                this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+                this.SupportActionBar.SetHomeButtonEnabled(true);
+                SupportFragmentManager.BeginTransaction().Remove(f).Commit();
+                //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomOverviewFragment(), "OuterListChatroomFragment").Commit();
+            }
+            callback.Enabled = false;
+            OnBackPressedDispatcher.OnBackPressed();
+            callback.Enabled = true;
         }
 
         protected override void OnNewIntent(Intent intent)
@@ -196,28 +229,6 @@ namespace Seeker
         }
 
 
-        public override void OnBackPressed()
-        {
-            //if f is non null and f is visible then that means you are backing out from the inner user fragment..
-            var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment");
-            if (f != null && f.IsVisible)
-            {
-                if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
-                {
-                    base.OnBackPressed();
-                    return;
-                }
-                AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.chatroom_toolbar);
-                myToolbar.InflateMenu(Resource.Menu.chatroom_overview_list_menu);
-                myToolbar.Title = this.Resources.GetString(Resource.String.chatrooms);
-                this.SetSupportActionBar(myToolbar);
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-                this.SupportActionBar.SetHomeButtonEnabled(true);
-                SupportFragmentManager.BeginTransaction().Remove(f).Commit();
-                //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomOverviewFragment(), "OuterListChatroomFragment").Commit();
-            }
-            base.OnBackPressed();
-        }
 
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -357,7 +368,7 @@ namespace Seeker
                     ShowEditCreateChatroomDialog();
                     return true;
                 case Android.Resource.Id.Home:
-                    OnBackPressed();
+                    this.OnBackPressedDispatcher.OnBackPressed();
                     return true;
                 case Resource.Id.toggle_autojoin_action:
                     ChatroomController.ToggleAutoJoin(ChatroomInnerFragment.OurRoomInfo.Name, true, this);
