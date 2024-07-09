@@ -86,11 +86,11 @@ namespace Seeker
             string albumFolderName = null;
             if (depth == 1)
             {
-                albumFolderName = CommonHelpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
             }
             else
             {
-                albumFolderName = CommonHelpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
                 albumFolderName = albumFolderName.Replace('\\', '_');
             }
             string incompleteFolderName = username + "_" + albumFolderName;
@@ -1092,62 +1092,15 @@ namespace Seeker
         {
             if (item.FileCount > 0)
             {
-                return CommonHelpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+                return Common.Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
             }
             else if (item.LockedFileCount > 0)
             {
-                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFolderNameFromFile(GetLockedFileName(item));
+                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Common.Helpers.GetFolderNameFromFile(GetLockedFileName(item));
             }
             else
             {
                 return "\\Locked\\";
-            }
-        }
-
-        public static string GetFolderNameFromFile(string filename, int levels = 1)
-        {
-            try
-            {
-                int folderCount = 0;
-                int index = -1; //-1 is important.  i.e. in the case of Folder\test.mp3, it can be Folder.
-                int firstIndex = int.MaxValue;
-                for (int i = filename.Length - 1; i >= 0; i--)
-                {
-                    if (filename[i] == '\\')
-                    {
-                        folderCount++;
-                        if (firstIndex == int.MaxValue)
-                        {
-                            //strip off the file name
-                            firstIndex = i;
-                        }
-                        if (folderCount == (levels + 1))
-                        {
-                            index = i;
-                            break;
-                        }
-                    }
-                }
-                return filename.Substring(index + 1, firstIndex - index - 1);
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        public static string GetParentFolderNameFromFile(string filename)
-        {
-            try
-            {
-                string parent = filename.Substring(0, filename.LastIndexOf('\\'));
-                parent = parent.Substring(0, parent.LastIndexOf('\\'));
-                parent = parent.Substring(parent.LastIndexOf('\\') + 1);
-                return parent;
-            }
-            catch
-            {
-                return "";
             }
         }
 

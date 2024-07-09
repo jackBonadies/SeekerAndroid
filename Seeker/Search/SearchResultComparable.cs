@@ -184,20 +184,20 @@ namespace Seeker.Search
                 string yFolder = null;
                 if (x.Files.Count != 0)
                 {
-                    xFolder = CommonHelpers.GetFolderNameFromFile(x.Files.First().Filename);
+                    xFolder = Common.Helpers.GetFolderNameFromFile(x.Files.First().Filename);
                 }
                 else if (x.LockedFiles.Count != 0)
                 {
-                    xFolder = CommonHelpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
+                    xFolder = Common.Helpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
                 }
 
                 if (y.Files.Count != 0)
                 {
-                    yFolder = CommonHelpers.GetFolderNameFromFile(y.Files.First().Filename);
+                    yFolder = Common.Helpers.GetFolderNameFromFile(y.Files.First().Filename);
                 }
                 else if (y.LockedFiles.Count != 0)
                 {
-                    yFolder = CommonHelpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
+                    yFolder = Common.Helpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
                 }
 
                 if (xFolder != null && yFolder != null)

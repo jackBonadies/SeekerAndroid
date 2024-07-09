@@ -1836,7 +1836,7 @@ namespace Seeker
                 {
                     CommonHelpers.CreateNotificationChannel(SeekerState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
                     NotifInfo notifInfo = null;
-                    string directory = CommonHelpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
+                    string directory = Common.Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
                     {
                         notifInfo = NotificationUploadTracker[e.Transfer.Username];

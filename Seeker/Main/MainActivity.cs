@@ -1171,7 +1171,7 @@ namespace Seeker
                     {
 
                         string fname = CommonHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string folderName = CommonHelpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string folderName = Common.Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
                         string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                                                                                //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                //bc we get a path that is:
@@ -1898,7 +1898,7 @@ namespace Seeker
                         }
 
 
-                        string searchableName = CommonHelpers.GetFolderNameFromFile(presentableName) + @"\" + CommonHelpers.GetFileNameFromFile(presentableName);
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + @"\" + CommonHelpers.GetFileNameFromFile(presentableName);
 
                         Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
                         if (attributes != null)
@@ -2173,7 +2173,7 @@ namespace Seeker
                     var reversed = helperIndex.ToDictionary(x => x.Value, x => x.Key);
                     foreach (string presentableName in keys.Keys)
                     {
-                        string searchableName = CommonHelpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                         int code = reversed[presentableName];
                         foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
@@ -2617,7 +2617,7 @@ namespace Seeker
                         string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
                         string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
-                        string searchableName = CommonHelpers.GetFolderNameFromFile(fullPath) + @"\" + CommonHelpers.GetFileNameFromFile(fullPath);
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(fullPath) + @"\" + CommonHelpers.GetFileNameFromFile(fullPath);
                         if (isRootCase && (volName != null))
                         {
                             if (searchableName.Substring(0, volName.Length) == volName)
@@ -4897,7 +4897,7 @@ namespace Seeker
             transferItem.Username = username;
             transferItem.FullFilename = filename;
             transferItem.Filename = CommonHelpers.GetFileNameFromFile(filename);
-            transferItem.FolderName = CommonHelpers.GetFolderNameFromFile(filename);
+            transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(filename);
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
@@ -6476,7 +6476,7 @@ namespace Seeker
             out string finalUri)
         {
             string name = CommonHelpers.GetFileNameFromFile(fullfilename);
-            string dir = CommonHelpers.GetFolderNameFromFile(fullfilename, depth);
+            string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
             if (memoryMode && (bytes == null || bytes.Length == 0))

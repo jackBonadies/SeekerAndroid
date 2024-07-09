@@ -937,7 +937,7 @@ namespace Seeker
 
                 transferItem = new TransferItem();
                 transferItem.Filename = CommonHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = CommonHelpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
+                transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
