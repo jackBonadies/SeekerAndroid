@@ -1,4 +1,5 @@
-﻿using Soulseek;
+﻿using Seeker.Transfers;
+using Soulseek;
 using System;
 using System.Linq;
 using System.Threading;
@@ -8,6 +9,47 @@ namespace Seeker
     [Serializable]
     public class TransferItem : ITransferItem
     {
+        public string Filename;
+        public string Username;
+        public string FolderName;
+        public string FullFilename;
+        public int Progress;
+        public bool Failed;
+        public TransferStates State;
+        public long Size;
+
+        public bool isUpload;
+        private int queuelength = int.MaxValue;
+        public bool CancelAndRetryFlag = false;
+        public bool WasFilenameLatin1Decoded = false;
+        public bool WasFolderLatin1Decoded = false;
+        public string FinalUri = string.Empty; //final uri of downloaded item
+        public string IncompleteParentUri = null; //incomplete uri of item.  will be null if successfully downloaded or not yet created.
+        public TransferItemExtras TransferItemExtra;
+
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public TimeSpan? RemainingTime;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public double AvgSpeed = 0;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool CancelAndClearFlag = false;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public bool InProcessing = false; //whether its currently a task in Soulseek.Net.  so from Intialized / Queued to the end of the main download continuation task...
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public CancellationTokenSource CancellationTokenSource = null;
+
+        public int QueueLength
+        {
+            get
+            {
+                return queuelength;
+            }
+            set
+            {
+                queuelength = value;
+            }
+        }
+
         public string GetDisplayName()
         {
             return Filename;
@@ -88,24 +130,6 @@ namespace Seeker
             }
         }
 
-        public string Filename;
-        public string Username;
-        public string FolderName;
-        public string FullFilename;
-        public int Progress;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public TimeSpan? RemainingTime;
-        public bool Failed;
-        public TransferStates State;
-        public long Size;
-
-        public bool isUpload;
-        private int queuelength = int.MaxValue;
-        public bool CancelAndRetryFlag = false;
-        public bool WasFilenameLatin1Decoded = false;
-        public bool WasFolderLatin1Decoded = false;
-        //public bool TryUndoMojibake = false;
-
         public bool ShouldEncodeFolderLatin1()
         {
             return WasFolderLatin1Decoded;
@@ -115,27 +139,5 @@ namespace Seeker
         {
             return WasFilenameLatin1Decoded;
         }
-
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public double AvgSpeed = 0;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public bool CancelAndClearFlag = false;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public bool InProcessing = false; //whether its currently a task in Soulseek.Net.  so from Intialized / Queued to the end of the main download continuation task...
-        public int QueueLength
-        {
-            get
-            {
-                return queuelength;
-            }
-            set
-            {
-                queuelength = value;
-            }
-        }
-        public string FinalUri = string.Empty; //final uri of downloaded item
-        public string IncompleteParentUri = null; //incomplete uri of item.  will be null if successfully downloaded or not yet created.
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public CancellationTokenSource CancellationTokenSource = null;
     }
 }

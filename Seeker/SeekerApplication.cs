@@ -1836,7 +1836,7 @@ namespace Seeker
                 {
                     CommonHelpers.CreateNotificationChannel(SeekerState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
                     NotifInfo notifInfo = null;
-                    string directory = CommonHelpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
+                    string directory = Common.Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
                     {
                         notifInfo = NotificationUploadTracker[e.Transfer.Username];
@@ -2050,6 +2050,7 @@ namespace Seeker
                 SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
                 SeekerState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
                 SeekerState.StartServiceOnStartup = sharedPreferences.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
+                SeekerState.NoSubfolderForSingle = sharedPreferences.GetBoolean(KeyConsts.M_NoSubfolderForSingle, false);
 
                 SeekerState.ShowSmartFilters = sharedPreferences.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
                 RestoreSmartFilterState(sharedPreferences);

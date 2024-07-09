@@ -62,6 +62,7 @@ namespace Seeker
         public static bool AllowPrivateRoomInvitations = false;
         public static bool StartServiceOnStartup = true;
         public static bool IsStartUpServiceCurrentlyRunning = false;
+        public static bool NoSubfolderForSingle { get; set; } = false;
 
         public static bool AllowUploadsOnMetered = true;
         public static bool CurrentConnectionIsUnmetered = true;
@@ -328,6 +329,7 @@ namespace Seeker
                 NumberParsed = 0; //reset
             }
         }
+
 
         public static int NumberParsed = 0;
 

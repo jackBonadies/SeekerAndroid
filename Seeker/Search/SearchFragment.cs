@@ -1905,8 +1905,8 @@ namespace Seeker
                 string fullFname = s.Files.FirstOrDefault()?.Filename ?? s.LockedFiles.FirstOrDefault().Filename;
                 foreach (string keyword in chipFilter.Keywords)
                 {
-                    if (!CommonHelpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
-                        !CommonHelpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    if (!Common.Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
+                        !Common.Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                     {
                         return false;
                     }
@@ -1917,8 +1917,8 @@ namespace Seeker
                     bool anyMatch = false;
                     foreach (string keyword in keywordsInvar)
                     {
-                        if (CommonHelpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
-                            CommonHelpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                        if (Common.Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
+                            Common.Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                         {
                             anyMatch = true;
                             break;
@@ -1943,7 +1943,7 @@ namespace Seeker
         {
             foreach (File f in s.GetFiles(hideLocked))
             {
-                string dirString = CommonHelpers.GetFolderNameFromFile(f.Filename);
+                string dirString = Common.Helpers.GetFolderNameFromFile(f.Filename);
                 string fileString = CommonHelpers.GetFileNameFromFile(f.Filename);
                 foreach (string avoid in SearchTabHelper.WordsToAvoid)
                 {
@@ -2384,92 +2384,6 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="origResponse"></param>
-        /// <returns>Whether we need to split, and if true then the split search responses</returns>
-        private static Tuple<bool, List<SearchResponse>> SplitMultiDirResponse(SearchResponse origResponse)
-        {
-            try
-            {
-                bool hideLocked = SeekerState.HideLockedResultsInSearch;
-                if (origResponse.Files.Count != 0 || (!hideLocked && origResponse.LockedFiles.Count != 0))
-                {
-                    Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
-                    foreach (File f in origResponse.Files)
-                    {
-                        string folderName = CommonHelpers.GetFolderNameFromFile(f.Filename);
-                        if (folderFilePairs.ContainsKey(folderName))
-                        {
-                            //MainActivity.LogDebug("Split Foldername: " + folderName);
-                            folderFilePairs[folderName].Add(f);
-                        }
-                        else
-                        {
-                            List<File> tempF = new List<File>();
-                            tempF.Add(f);
-                            folderFilePairs.Add(folderName, tempF);
-                        }
-                    }
-
-                    //I'm not sure if locked files and unlocked files can appear in the same folder,
-                    //but regardless, split them up into separate folders.
-                    //even if they both have the same foldername, they will have the lock symbol to differentiate them.
-                    Dictionary<string, List<File>> lockedFolderFilePairs = new Dictionary<string, List<File>>();
-                    if (!hideLocked)
-                    {
-                        foreach (File f in origResponse.LockedFiles)
-                        {
-                            string folderName = CommonHelpers.GetFolderNameFromFile(f.Filename);
-                            if (lockedFolderFilePairs.ContainsKey(folderName))
-                            {
-                                //MainActivity.LogDebug("Split Foldername: " + folderName);
-                                lockedFolderFilePairs[folderName].Add(f);
-                            }
-                            else
-                            {
-                                List<File> tempF = new List<File>();
-                                tempF.Add(f);
-                                lockedFolderFilePairs.Add(folderName, tempF);
-                            }
-                        }
-                    }
-
-                    //we took the search response and split it into more than one folder.
-                    if ((folderFilePairs.Keys.Count + lockedFolderFilePairs.Keys.Count) > 1)
-                    {
-                        //split them
-                        List<SearchResponse> splitSearchResponses = new List<SearchResponse>();
-                        foreach (var pair in folderFilePairs)
-                        {
-                            splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, pair.Value, null));
-                        }
-                        foreach (var pair in lockedFolderFilePairs)
-                        {
-                            splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, null, pair.Value));
-                        }
-                        //MainActivity.LogDebug("User: " + origResponse.Username + " got split into " + folderFilePairs.Keys.Count);
-                        return new Tuple<bool, List<SearchResponse>>(true, splitSearchResponses);
-                    }
-                    else
-                    {
-                        //no need to split it.
-                        return new Tuple<bool, List<SearchResponse>>(false, null);
-                    }
-
-                }
-                else
-                {
-                    return new Tuple<bool, List<SearchResponse>>(false, null);
-                }
-            }
-            catch (System.Exception e)
-            {
-                MainActivity.LogFirebase(e.Message + " splitmultidirresponse");
-                return new Tuple<bool, List<SearchResponse>>(false, null);
-            }
-        }
 
         public override void OnDetach() //happens whenever the fragment gets recreated.  (i.e. on rotating device).
         {
@@ -2715,7 +2629,16 @@ namespace Seeker
 
             lock (SearchTabHelper.SearchTabCollection[fromTab].SortHelperLockObject) //lock object for the sort helper in question. this used to be the current tab one. I think thats wrong.
             {
-                Tuple<bool, List<SearchResponse>> splitResponses = SplitMultiDirResponse(resp);
+                Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
+                try
+                {
+                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(SeekerState.HideLockedResultsInSearch, resp);
+                }
+                catch (System.Exception e)
+                {
+                    MainActivity.LogFirebase(e.Message + " splitmultidirresponse");
+                }
+
                 try
                 {
 

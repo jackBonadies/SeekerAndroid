@@ -313,7 +313,7 @@ namespace Seeker
                     string foldername = ti.FolderName;
                     if (foldername == null)
                     {
-                        foldername = CommonHelpers.GetFolderNameFromFile(ti.FullFilename);
+                        foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
                     }
                     return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
@@ -371,7 +371,7 @@ namespace Seeker
                     string foldername = ti.FolderName;
                     if (foldername == null)
                     {
-                        foldername = CommonHelpers.GetFolderNameFromFile(ti.FullFilename);
+                        foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
                     }
                     return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
@@ -516,7 +516,7 @@ namespace Seeker
                 string foldername = string.Empty;
                 if (string.IsNullOrEmpty(ti.FolderName))
                 {
-                    foldername = CommonHelpers.GetFolderNameFromFile(ti.FullFilename);
+                    foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
                 }
                 else
                 {
@@ -623,7 +623,7 @@ namespace Seeker
         {
             if (string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
             {
-                return CommonHelpers.GetFolderNameFromFile(ti.FullFilename);
+                return Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
             }
             else
             {

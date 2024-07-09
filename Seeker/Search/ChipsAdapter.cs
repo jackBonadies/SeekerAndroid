@@ -74,7 +74,7 @@ namespace Seeker
 
                     //TODO: keywords
 #if DEBUG
-                    Console.WriteLine(CommonHelpers.GetFolderNameFromFile(searchResponse.GetElementAtAdapterPosition(false, 0).Filename));
+                    Console.WriteLine(Common.Helpers.GetFolderNameFromFile(searchResponse.GetElementAtAdapterPosition(false, 0).Filename));
 #endif
                 }
 
@@ -404,7 +404,7 @@ namespace Seeker
                 int totalCount = responses.Count();
                 for (int i = 0; i < totalCount; i++)
                 {
-                    string fline = CommonHelpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    string fline = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                     //fline = fline.Replace(" - ", " ");
                     //fline = fline.Replace(", ", " ");
@@ -495,7 +495,7 @@ namespace Seeker
                 for (int i = 0; i < totalCount; i++)
                 {
                     //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
-                    string fline = CommonHelpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    string fline = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                     //fline = fline.Replace(" - ", " ");
                     //fline = fline.Replace(", ", " ");

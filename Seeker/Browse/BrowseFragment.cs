@@ -1640,17 +1640,14 @@ namespace Seeker
             bool allExist = true; //only show the transfer exists if all transfers in question do already exist
             Task task = new Task(() =>
             {
+                var isSingle = files.Count() == 1;
                 foreach (FullFileInfo file in files)
                 {
-
-                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, out bool transferExists);
+                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, out bool transferExists);
                     if (!transferExists)
                     {
                         allExist = false;
                     }
-
-
-
                 }
                 Action toast1 = null;
                 if (allExist)

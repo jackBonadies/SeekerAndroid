@@ -656,11 +656,12 @@ namespace Seeker
             try
             {
                 List<Task> tsks = new List<Task>();
+                bool isSingle = this.customAdapter.SelectedPositions.Count() == 1;
                 foreach (int position in this.customAdapter.SelectedPositions) //nullref?
                 {
                     try
                     {
-                        Task tsk = CreateDownloadTask(searchResponse.GetElementAtAdapterPosition(hideLocked, position), queuePaused);
+                        Task tsk = CreateDownloadTask(searchResponse.GetElementAtAdapterPosition(hideLocked, position), isSingle, queuePaused);
                         if (tsk == null)
                         {
                             Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_duplicate), ToastLength.Long).Show(); });
@@ -892,7 +893,7 @@ namespace Seeker
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }
 
-        private Task CreateDownloadTask(Soulseek.File file, bool queuePaused)
+        private Task CreateDownloadTask(Soulseek.File file, bool isSingle, bool queuePaused)
         {
             //TODO TODO downloadInfoList is stale..... not what you want to use....
             //TransfersFragment frag = (StaticHacks.TransfersFrag as TransfersFragment);
@@ -913,14 +914,14 @@ namespace Seeker
             MainActivity.LogDebug("CreateDownloadTask");
             Task task = new Task(() =>
             {
-                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, out _);
+                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, isSingle, out _);
 
             });
             return task;
         }
 
 
-        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, out bool errorExists)
+        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
         {
             errorExists = false;
             Task dlTask = null;
@@ -936,13 +937,17 @@ namespace Seeker
 
                 transferItem = new TransferItem();
                 transferItem.Filename = CommonHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = CommonHelpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
+                transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
                 transferItem.QueueLength = downloadInfo.QueueLength;
                 transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
                 transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
+                if (isSingle && SeekerState.NoSubfolderForSingle)
+                {
+                    transferItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
+                }
 
                 if (!queuePaused)
                 {
@@ -1135,9 +1140,11 @@ namespace Seeker
             MainActivity.LogDebug("CreateDownloadAllTask");
             Task task = new Task(() =>
             {
-                foreach (Soulseek.File file in searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch))
+                var files = searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch).ToList();
+                bool isSingle = files.Count() == 1;
+                foreach (Soulseek.File file in files)
                 {
-                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, out _);
+                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, isSingle, out _);
                 }
             });
             return task;

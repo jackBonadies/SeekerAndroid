@@ -208,6 +208,7 @@ namespace Seeker
         //private string SaveDataDirectoryUri = string.Empty;
 
         private CheckBox createUsernameSubfoldersView;
+        private CheckBox doNotCreateSubfoldersForSingleDownloads;
         private CheckBox createCompleteAndIncompleteFoldersView;
         private CheckBox manuallyChooseIncompleteFolderView;
         private TextView currentCompleteFolderView;
@@ -773,6 +774,9 @@ namespace Seeker
             createUsernameSubfoldersView = this.FindViewById<CheckBox>(Resource.Id.createUsernameSubfolders);
             createUsernameSubfoldersView.Checked = SeekerState.CreateUsernameSubfolders;
             createUsernameSubfoldersView.CheckedChange += CreateUsernameSubfoldersView_CheckedChange;
+            doNotCreateSubfoldersForSingleDownloads = this.FindViewById<CheckBox>(Resource.Id.doNotCreateSubfoldersForSingleDownloads);
+            doNotCreateSubfoldersForSingleDownloads.Checked = SeekerState.NoSubfolderForSingle;
+            doNotCreateSubfoldersForSingleDownloads.CheckedChange += DoNotCreateSubfoldersForSingleDownloads_CheckedChange;
             createCompleteAndIncompleteFoldersView = this.FindViewById<CheckBox>(Resource.Id.createCompleteAndIncompleteDirectories);
             createCompleteAndIncompleteFoldersView.Checked = SeekerState.CreateCompleteAndIncompleteFolders;
             createCompleteAndIncompleteFoldersView.CheckedChange += CreateCompleteAndIncompleteFoldersView_CheckedChange;
@@ -1384,6 +1388,11 @@ namespace Seeker
         private void CreateUsernameSubfoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             SeekerState.CreateUsernameSubfolders = e.IsChecked;
+        }
+
+        private void DoNotCreateSubfoldersForSingleDownloads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        {
+            SeekerState.NoSubfolderForSingle = e.IsChecked;
         }
 
         private void PrivHelp_Click(object sender, EventArgs e)
@@ -3631,6 +3640,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, SeekerState.CreateCompleteAndIncompleteFolders);
                 editor.PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, SeekerState.OverrideDefaultIncompleteLocations);
                 editor.PutBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, SeekerState.CreateUsernameSubfolders);
+                editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle, SeekerState.NoSubfolderForSingle);
                 editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, SeekerState.ManualIncompleteDataDirectoryUri);
                 editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree);
                 bool success = editor.Commit();
