@@ -5659,13 +5659,15 @@ namespace Seeker
                     string finalUri = string.Empty;
                     if (task is Task<byte[]> tbyte)
                     {
-                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, out finalUri);
+                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
                         SaveFileToMediaStore(path);
                     }
                     else if (task is Task<Tuple<string, string>> tString)
                     {
                         //move file...
-                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, out finalUri);
+                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, noSubfolder, out finalUri);
                         SaveFileToMediaStore(path);
                     }
                     else
@@ -6462,12 +6464,16 @@ namespace Seeker
             return string.Empty;
         }
 
-
-
-
-
-
-        private static string SaveToFile(string fullfilename, string username, byte[] bytes, Android.Net.Uri uriOfIncomplete, Android.Net.Uri parentUriOfIncomplete, bool memoryMode, int depth, out string finalUri)
+        private static string SaveToFile(
+            string fullfilename, 
+            string username, 
+            byte[] bytes, 
+            Android.Net.Uri uriOfIncomplete, 
+            Android.Net.Uri parentUriOfIncomplete, 
+            bool memoryMode, 
+            int depth, 
+            bool noSubFolder,
+            out string finalUri)
         {
             string name = CommonHelpers.GetFileNameFromFile(fullfilename);
             string dir = CommonHelpers.GetFolderNameFromFile(fullfilename, depth);
@@ -6512,7 +6518,7 @@ namespace Seeker
                 {
                     intermediateFolder = intermediateFolder + username + @"/"; //TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
                 }
-                string fullDir = rootdir + intermediateFolder + dir; //+ @"/" + name;
+                string fullDir = rootdir + intermediateFolder + (noSubFolder ? "" : dir); //+ @"/" + name;
                 Java.IO.File musicDir = new Java.IO.File(fullDir);
                 musicDir.Mkdirs();
                 filePath = fullDir + @"/" + name;
@@ -6560,18 +6566,6 @@ namespace Seeker
 
                 }
 
-
-
-
-
-
-
-
-
-
-
-
-
                 DocumentFile folderDir1 = null; //this is the desired location.
                 DocumentFile rootdir = null;
 
@@ -6581,11 +6575,6 @@ namespace Seeker
                 bool rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
                 try
                 {
-
-
-
-
-
                     rootdir = SeekerState.RootDocumentFile;
 
                     if (useLegacyDocFileToJavaFileOverride)
@@ -6659,17 +6648,24 @@ namespace Seeker
 
                     if (depth == 1)
                     {
-                        lock (string.Intern("IfNotExistCreateAtomic_2"))
+                        if(noSubFolder)
                         {
-                            folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
-                            if (folderDir1 == null || !folderDir1.Exists())
+                            folderDir1 = slskDir1;
+                        }
+                        else
+                        {
+                            lock (string.Intern("IfNotExistCreateAtomic_2"))
                             {
-                                LogDebug("Creating " + dir);
-                                folderDir1 = slskDir1.CreateDirectory(dir);
-                            }
-                            if (folderDir1 == null || !folderDir1.Exists())
-                            {
-                                LogFirebase("folderDir is null or does not exists");
+                                folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
+                                if (folderDir1 == null || !folderDir1.Exists())
+                                {
+                                    LogDebug("Creating " + dir);
+                                    folderDir1 = slskDir1.CreateDirectory(dir);
+                                }
+                                if (folderDir1 == null || !folderDir1.Exists())
+                                {
+                                    LogFirebase("folderDir is null or does not exists");
+                                }
                             }
                         }
                     }

@@ -155,7 +155,6 @@
                     android:layout_marginBottom = "10dp"/>
 
                 <CheckBox
-                    
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -170,6 +169,21 @@
                     android:id="@+id/createUsernameSubfolders"
                     android:layout_marginBottom = "10dp"/>
 
+
+                <CheckBox
+                    android:theme="@style/checkBoxStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/DoNotCreateSubfoldersForSingleDownloads"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="10dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop = "10dp"
+                    android:id="@+id/doNotCreateSubfoldersForSingleDownloads"
+                    android:layout_marginBottom = "10dp"/>
 
 
 

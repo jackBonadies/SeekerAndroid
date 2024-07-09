@@ -773,6 +773,7 @@ The standard way of requesting folder access does not always persist permissions
 	<string name="CurrentDownloadFolder_">Current Download Folder: </string>
 	<string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete Directories</string>
 	<string name="CreateUsernameSubfolders">Create Username Subfolders</string>
+	<string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
 	<string name="ShowSmartFilters">Show Smart Filters</string>
 	<string name="ShowPrivateLockedSearch">Show Private (Locked) Files in Search Results</string>
 	<string name="ShowPrivateLockedBrowse">Show Private (Locked) Files in Browse Response</string>
