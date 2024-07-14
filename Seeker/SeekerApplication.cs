@@ -60,10 +60,6 @@ namespace Seeker
 
         public override void OnCreate()
         {
-#if DEBUG
-            //SerializationTests.Test();
-#endif
-
             base.OnCreate();
             ApplicationContext = this;
 #if !IzzySoft

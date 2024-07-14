@@ -6,7 +6,7 @@
     <AndroidAapt2LinkExtraArgs>--no-version-vectors</AndroidAapt2LinkExtraArgs>
     <MonoSymbolArchive>true</MonoSymbolArchive>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
-    <TargetFrameworks>net7.0-android</TargetFrameworks>
+    <TargetFrameworks>net8.0-android</TargetFrameworks>
     <AssemblyTitle>AndriodApp1</AssemblyTitle>
     <Product>AndriodApp1</Product>
     <Copyright>Copyright ©  2018</Copyright>
