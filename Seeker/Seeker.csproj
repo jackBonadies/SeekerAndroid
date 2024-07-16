@@ -6,7 +6,7 @@
     <AndroidAapt2LinkExtraArgs>--no-version-vectors</AndroidAapt2LinkExtraArgs>
     <MonoSymbolArchive>true</MonoSymbolArchive>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
-    <TargetFrameworks>net8.0-android</TargetFrameworks>
+    <TargetFramework>net8.0-android</TargetFramework>
     <AssemblyTitle>AndriodApp1</AssemblyTitle>
     <Product>AndriodApp1</Product>
     <Copyright>Copyright ©  2018</Copyright>
@@ -73,7 +73,7 @@
       <Version>17.9.5</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>8.0.1</Version>
+      <Version>8.0.4</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.AndroidX.ConstraintLayout">
       <Version>2.1.4.5</Version>
