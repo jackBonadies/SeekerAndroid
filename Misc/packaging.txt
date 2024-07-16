@@ -1,0 +1,4 @@
+# packaging from command line
+dotnet publish -c Release -f net8.0-android -r android-x64 --self-contained .\Seeker\Seeker.csproj
+# then with the unsigned aab (this will sign in place)
+& "C:\Program Files\Android\Android Studio\jbr\bin\jarsigner.exe" -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore "$Env:KeystorePath" .\com.companyname.andriodapp1.aab "$Env:KeyAlias" 
