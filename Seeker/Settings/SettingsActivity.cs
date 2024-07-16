@@ -117,7 +117,7 @@ namespace Seeker
             // ("onItemSelected method is also invoked when the view is being build")
             Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
             languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština" };
+            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština", "italiano" };
             ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
             SetSpinnerPositionLangauge(languageSpinner);
@@ -2686,6 +2686,9 @@ namespace Seeker
                 case SeekerState.FieldLangCs:
                     s.SetSelection(8);
                     break;
+                case SeekerState.FieldLangIt:
+                    s.SetSelection(9);
+                    break;
                 default:
                     s.SetSelection(0);
                     break;
@@ -2714,6 +2717,8 @@ namespace Seeker
                     return SeekerState.FieldLangNl;
                 case 8:
                     return SeekerState.FieldLangCs;
+                case 9:
+                    return SeekerState.FieldLangIt;
                 default:
                     return SeekerState.FieldLangAuto;
             }

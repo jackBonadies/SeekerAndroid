@@ -90,6 +90,7 @@ namespace Seeker
         public const string FieldLangEs = "es";
         public const string FieldLangUk = "uk"; //ukrainian
         public const string FieldLangCs = "cs"; //czech
+        public const string FieldLangIt = "it";
         public const string FieldLangNl = "nl"; //dutch
 
 

@@ -29,7 +29,7 @@
 \n\nНа практике это означает, что до тех пор, пока мы успешно прослушиваем (отображается в \"Проверить Статус\"), мы получим больше результатов поиска, быть в состоянии загрузить от других людей, загружать для большего количества пользователей и т. д.
 \n\nSeeker будет пытаться автоматически пересылать порты через UPnP (именно это делает официальный клиент для рабочего стола). Если вы НЕ используете Wifi - он не будет работать. Если вы используете VPN, то, пожалуйста, найдите способ перенаправления портов для вашего конкретного VPN. Если ваш маршрутизатор не включен UPnP, то вам будет необходимо указать порт вручную.</string>
     <string name="sharing_dialog">Несколько замечаний по поводу обмена файлами.  Когда каталог загрузки создается впервые, приложение должно прочитать файлы и разобрать их таким образом, чтобы это было удобно для последующего поиска и просмотра.  Это может занять до нескольких минут.  Убедитесь, что файлы, которыми вы делитесь, не содержат никакой частной или конфиденциальной информации (в основном используйте те же суждения, что и для официального клиента soulseek).</string>
-    <string name="privileges_more_info">Привилегии позволяют поддерживать создателя Soulseek (Нира) и центральный сервер, от которого зависит это приложение.
+    <string name="privileges_more_info">Привилегии позволяют поддерживать создателя Soulseek (Nir) и центральный сервер, от которого зависит это приложение.
 \n\nЭто также позволяет опережать в очереди на загрузку пользователей, не имеющих привилегий.
 \n\n\nПримечание: любые пожертвования не идут создателю этого неофициального клиента для андроид, Seeker. В настоящее время я не принимаю пожертвования.</string>
     <string name="no_messages">Нет сообщений. Нажмите «+», чтобы начать.</string>
@@ -38,7 +38,7 @@
     <string name="chatroomListLoading">Запрашиваем список доступных чат комнат. Пожалуйста, подождите...</string>
     <string name="privateRoomCreation">Создаем новую приватную комнату...</string>
     <string name="requesting_room_list">Обновить список комнат</string>
-    <string name="requesting_user_info">Запрос информации пользователя</string>
+    <string name="requesting_user_info">Запрос информации о пользователе</string>
     <string name="room_list_received">Список комнат получен</string>
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
@@ -52,12 +52,12 @@
     <string name="unsaved_changes_body">У вас есть несохраненные изменения.
 Вы уверены, что хотите отказаться от них?</string>
     <string name="user_status_string">
-		Загрузка слотов: {0}
-		\nБесплатно для загрузки: {1}
-		\nОчереди загрузок: {2}
-		\nСкорость загрузки: {3}
-		\nЧисло файлов: {4}
-		\nЧисло директорий: {5}</string>
+Загрузка слотов: {0}
+\nБесплатно для загрузки: {1}
+\nОчереди загрузок: {2}
+\nСкорость загрузки: {3}
+\nЧисло файлов: {4}
+\nЧисло директорий: {5}</string>
     <string name="add_user">Добавить пользователя</string>
     <string name="empty_browse_directory">Эта вкладка используется для обзора пользовательских директорий.\n\nДля начала работы поищите что-нибудь в \"Поиске\" или нажмите кнопку \'+\'.</string>
     <string name="clear">Очистить</string>
@@ -68,14 +68,14 @@
     <!--
   These are search targets
   -->
-    <string name="all_target">Все Пользователи</string>
-    <string name="target_user_list">Список Пользователей</string>
+    <string name="all_target">Все пользователи</string>
+    <string name="target_user_list">Список пользователей</string>
     <string name="target_room">Комната</string>
-    <string name="target_room_joined">Зарегистрирован:</string>
+    <string name="target_room_joined">Присоединился:</string>
     <string name="target_room_name">Название комнаты</string>
     <string name="target_choose_user">Выбрать пользователя</string>
     <string name="username">Имя пользователя</string>
-    <string name="search_target_">Цель поиска:</string>
+    <string name="search_target_">Область поиска:</string>
     <string name="custom_">Выбор:</string>
     <string name="friends">Друзья</string>
     <string name="ignored">Игнорировать</string>
@@ -94,8 +94,8 @@
     <string name="seeker_needs_dl_dir">Seeker нуждается в доступе к каталогу для сохранения загруженных файлов</string>
     <string name="seeker_needs_dl_dir_content">Пожалуйста, выберите директорию загрузки (по умолчанию это папка с музыкой)</string>
     <string name="seeker_needs_dl_dir_error">Необходимо выбрать каталог для размещения загрузок. Это необходимо для размещения загруженных файлов.</string>
-    <string name="seeker_needs_dl_dir_choose_settings">Пожалуйста, установите директорию для загрузки в настройках.</string>
-    <string name="seeker_cannot_access_files">Невозможно получить доступ к файловой системе. Вы должны выбрать каталог загрузки либо на странице входа в систему, либо в настройках.</string>
+    <string name="seeker_needs_dl_dir_choose_settings">Пожалуйста, укажите директорию для загрузок в настройках.</string>
+    <string name="seeker_cannot_access_files">Нет доступа к файловой системе. Выберите директорию для загрузок либо на странице входа в систему, либо в настройках.</string>
     <!--
   Download Dialog Columns
   -->
@@ -112,17 +112,17 @@
     <string name="add_about_me">Нажмите, чтобы добавить информацию о себе</string>
     <string name="select_image">Выбрать изображение</string>
     <string name="clear_image">Очистить изображение</string>
-    <string name="no_image_chosen">Отсутствует(ют)</string>
+    <string name="no_image_chosen">Отсутствует</string>
     <string name="enter_user_to_invite_to_room">Введите имя пользователя для приглашения</string>
     <string name="inviteuser">Пригласить пользователя</string>
     <string name="invite_user">Пригласить пользователя:</string>
-    <string name="give_up_room">Сдать комнату</string>
+    <string name="give_up_room">Распустить комнату</string>
     <string name="give_up_membership">Выйти из комнаты</string>
     <string name="logout">Выйти</string>
     <string name="login">Войти</string>
     <string name="password">Пароль</string>
     <string name="submit">Продолжить</string>
-    <string name="ConnectingToServer">Подключение к серверу</string>
+    <string name="ConnectingToServer">Подключаемся к серверу...</string>
     <string name="PleaseWait_">Пожалуйста, подождите...</string>
     <string name="choose_a_download_folder">Выберите папку для загрузок</string>
     <string name="settings">Настройки</string>
@@ -695,7 +695,8 @@
     <string name="HideSize">Скрыть размер</string>
     <string name="HideSpeed">Скрыть скорость</string>
     <string name="Num_Selected">{0} Выбрано</string>
-    <string name="ExportClientData">Export Client Data</string>
-    <string name="export_more_info">Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.</string>
-    <string name="successfully_exported">Successfully exported Seeker client data.</string>
+    <string name="ExportClientData">Экспорт данных</string>
+    <string name="export_more_info">Экспортировать список пользователей, список заблокированных/заглушенных пользователей, комментарии к пользователям и список избранных запросов в формате XML.
+Полезно при бэкапе данных или их переносе на другой телефон</string>
+    <string name="successfully_exported">Данные успешно экспортированы</string>
 </resources>

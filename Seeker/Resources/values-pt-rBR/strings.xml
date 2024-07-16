@@ -6,7 +6,7 @@
     <string name="transfer_tab">Transferências</string>
     <string name="browse_tab">Explorar</string>
     <string name="account_tab">Conta</string>
-    <string name="searches_tab">Buscas</string>
+    <string name="searches_tab">Pesquisas</string>
     <string name="searches_tab2">Pesquisar</string>
     <string name="new_result">novo resultado</string>
     <string name="new_results">novos resultados</string>
@@ -557,8 +557,8 @@
     <string name="HideStatusView">Ocultar visualização de status</string>
     <string name="ShowStatusView">Mostrar visualização de status</string>
     <string name="theUserJoined">entrou</string>
-    <string name="theUserLeft">esquerda</string>
-    <string name="theUserWentAway">se afastou</string>
+    <string name="theUserLeft">saiu</string>
+    <string name="theUserWentAway">foi embora</string>
     <string name="theUserCameBack">voltou</string>
     <string name="messageWillSendOnReConnect">A mensagem será enviada no restabelecimento da conexão</string>
     <string name="SortUsersBy">Classificar usuários por</string>
