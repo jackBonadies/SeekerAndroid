@@ -100,27 +100,32 @@ namespace Seeker
 
         public static string SerializeToString<T>(T objectToSerialize)
         {
+            #if BinaryFormatterAvailable
+
             if(useBinarySerializer)
             {
                 return LegacyBinarySerializeToString<T>(objectToSerialize);
             }
-            else
-            {
-                return JsonSerializeToString<T>(objectToSerialize);
 
-            }
-        }
+            #endif
 
-        public static T DeserializeFromString<T>(string serializedString, bool legacy = false) where T : class
+            return JsonSerializeToString<T>(objectToSerialize);
+    }
+
+        public static T DeserializeFromString<T>(string serializedString) where T : class
         {
-            if (legacy)
-            {
-                return LegacyBinaryDeserializeFromString<T>(serializedString);
-            }
-            else
-            {
+//            if (legacy)
+//            {
+//#if BinaryFormatterAvailable
+//                return LegacyBinaryDeserializeFromString<T>(serializedString);
+//#else
+//                throw new Exception("Attempted to Deserialize Legacy BinaryFormatter");
+//#endif
+//            }
+//            else
+//            {
                 return JsonDeserializeFromString<T>(serializedString);
-            }
+            //}
         }
 
         private static T JsonDeserializeFromString<T>(string serializedString)
@@ -154,6 +159,7 @@ namespace Seeker
             }
         }
 
+#if BinaryFormatterAvailable
 
         public static string LegacyBinarySerializeToString<T>(T objectToSerialize)
         {
@@ -174,6 +180,8 @@ namespace Seeker
             }
         }
 
+#endif
+
         public static string SaveUserNotesToString(ConcurrentDictionary<string, string> userNotes)
         {
             if (userNotes == null || userNotes.Keys.Count == 0)
@@ -185,14 +193,15 @@ namespace Seeker
                 return SerializeToString(userNotes);
             }
         }
-        public static ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes, bool legacy = false)
+
+        public static ConcurrentDictionary<string, string> RestoreUserNotesFromString(string base64userNotes)
         {
             if (base64userNotes == string.Empty)
             {
                 return new ConcurrentDictionary<string, string>();
             }
 
-            return DeserializeFromString<ConcurrentDictionary<string, string>>(base64userNotes, legacy);
+            return DeserializeFromString<ConcurrentDictionary<string, string>>(base64userNotes);
         }
 
 
@@ -209,14 +218,14 @@ namespace Seeker
             }
         }
 
-        public static ConcurrentDictionary<string, byte> RestoreUserOnlineAlertsFromString(string base64onlineAlerts, bool legacy = false)
+        public static ConcurrentDictionary<string, byte> RestoreUserOnlineAlertsFromString(string base64onlineAlerts)
         {
             if (string.IsNullOrEmpty(base64onlineAlerts))
             {
                 return new ConcurrentDictionary<string, byte>();
             }
 
-            return DeserializeFromString<ConcurrentDictionary<string, byte>>(base64onlineAlerts, legacy);
+            return DeserializeFromString<ConcurrentDictionary<string, byte>>(base64onlineAlerts);
         }
 
 
@@ -234,22 +243,15 @@ namespace Seeker
             }
         }
 
-        public static List<UserListItem> RestoreUserListFromString(string base64userList, bool restoreLegacy = false)
+        public static List<UserListItem> RestoreUserListFromString(string base64userList)
         {
             if (base64userList == string.Empty)
             {
                 return new List<UserListItem>();
             }
-            if (restoreLegacy)
-            {
-                return LegacyBinaryDeserializeFromString<List<UserListItem>>(base64userList);
-            }
-            else
-            {
-                return MessagePack.MessagePackSerializer.Deserialize<List<UserListItem>>(
-                    Convert.FromBase64String(base64userList), 
-                    options: UserListOptions);
-            }
+            return MessagePack.MessagePackSerializer.Deserialize<List<UserListItem>>(
+                Convert.FromBase64String(base64userList), 
+                options: UserListOptions);
         }
 
 
@@ -258,9 +260,9 @@ namespace Seeker
             return SerializeToString(savedTabHeaderStates);
         }
 
-        public static Dictionary<int, SavedStateSearchTabHeader> RestoreSavedStateHeaderDictFromString(string savedTabHeaderString, bool legacy = false)
+        public static Dictionary<int, SavedStateSearchTabHeader> RestoreSavedStateHeaderDictFromString(string savedTabHeaderString)
         {
-            return DeserializeFromString<Dictionary<int, SavedStateSearchTabHeader>>(savedTabHeaderString, legacy);
+            return DeserializeFromString<Dictionary<int, SavedStateSearchTabHeader>>(savedTabHeaderString);
         }
 
 
@@ -269,9 +271,9 @@ namespace Seeker
             return SerializeToString(autoJoinRoomNames);
         }
 
-        public static ConcurrentDictionary<string, List<string>> RestoreAutoJoinRoomsListFromString(string joinedRooms, bool legacy = false)
+        public static ConcurrentDictionary<string, List<string>> RestoreAutoJoinRoomsListFromString(string joinedRooms)
         {
-            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(joinedRooms, legacy);
+            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(joinedRooms);
         }
 
 
@@ -280,9 +282,9 @@ namespace Seeker
             return SerializeToString(notifyRoomsList);
         }
 
-        public static ConcurrentDictionary<string, List<string>> RestoreNotifyRoomsListFromString(string notifyRoomsListString, bool legacy = false)
+        public static ConcurrentDictionary<string, List<string>> RestoreNotifyRoomsListFromString(string notifyRoomsListString)
         {
-            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(notifyRoomsListString, legacy);
+            return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(notifyRoomsListString);
         }
 
         public static string SaveUnreadUsernamesToString(ConcurrentDictionary<string, byte> unreadUsernames)
@@ -290,7 +292,7 @@ namespace Seeker
             return SerializeToString(unreadUsernames);
         }
 
-        public static ConcurrentDictionary<string, byte> RestoreUnreadUsernamesFromString(string unreadUsernames, bool legacy = false)
+        public static ConcurrentDictionary<string, byte> RestoreUnreadUsernamesFromString(string unreadUsernames)
         {
             if (string.IsNullOrEmpty(unreadUsernames))
             {
@@ -298,24 +300,9 @@ namespace Seeker
             }
             else
             {
-                return DeserializeFromString<ConcurrentDictionary<string, byte>>(unreadUsernames, legacy);
+                return DeserializeFromString<ConcurrentDictionary<string, byte>>(unreadUsernames);
             }
         }
-
-        public static bool MigrateUnreadUsernames(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var items = RestoreUnreadUsernamesFromString(oldKeyValue, true);
-                var newString = SaveUnreadUsernamesToString(items);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
 
         public static string SaveMessagesToString(ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> rootMessages)
         {
@@ -323,17 +310,10 @@ namespace Seeker
             return Convert.ToBase64String(byteArray);
         }
 
-        public static ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> RestoreMessagesFromString(string rootMessagesString, bool useLegacy = false)
+        public static ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> RestoreMessagesFromString(string rootMessagesString)
         {
-            if (useLegacy)
-            {
-                return LegacyBinaryDeserializeFromString<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(rootMessagesString);
-            }
-            else
-            {
-                var bytesArray = Convert.FromBase64String(rootMessagesString);
-                return MessagePack.MessagePackSerializer.Deserialize<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(bytesArray);
-            }
+            var bytesArray = Convert.FromBase64String(rootMessagesString);
+            return MessagePack.MessagePackSerializer.Deserialize<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(bytesArray);
         }
 
 
@@ -344,17 +324,22 @@ namespace Seeker
             return byteArray;
         }
 
-        public static List<SearchResponse> RestoreSearchResponsesFromStream(System.IO.Stream inputStream, bool legacy = false)
+        public static List<SearchResponse> RestoreSearchResponsesFromStream(System.IO.Stream inputStream)
         {
-            if(legacy)
-            {
-                BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
-                return formatter.Deserialize(inputStream) as List<SearchResponse>;
-            }
-            else
-            {
+//            if(legacy)
+//            {
+//#if BinaryFormatterAvailable
+
+//                BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
+//                return formatter.Deserialize(inputStream) as List<SearchResponse>;
+//#else
+//                throw new Exception("Attempted to Deserialize Legacy BinaryFormatter");
+//#endif
+//            }
+//            else
+//            {
                 return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: SearchResponseOptions);
-            }
+            //}
         }
 
         private static bool AnythingToMigrate(ISharedPreferences sharedPreferences, string oldKey)
@@ -379,6 +364,29 @@ namespace Seeker
             var editor = sharedPreferences.Edit();
             editor.PutString(newKey, stringToSave);
             editor.Commit();
+        }
+
+
+        private static void RemoveOldKey(ISharedPreferences sharedPreferences, string oldKey)
+        {
+            var editor = sharedPreferences.Edit();
+            editor.Remove(oldKey);
+            editor.Commit();
+        }
+#if BinaryFormatterAvailable
+
+        public static bool MigrateUnreadUsernames(ISharedPreferences sharedPreferences, string oldKey, string newKey)
+        {
+            if (AnythingToMigrate(sharedPreferences, oldKey))
+            {
+                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
+                var items = RestoreUnreadUsernamesFromString(oldKeyValue, true);
+                var newString = SaveUnreadUsernamesToString(items);
+                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                RemoveOldKey(sharedPreferences, oldKey);
+                return true;
+            }
+            return false;
         }
 
         public static bool MigrateUserListIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
@@ -421,13 +429,6 @@ namespace Seeker
                 return true;
             }
             return false;
-        }
-
-        private static void RemoveOldKey(ISharedPreferences sharedPreferences, string oldKey)
-        {
-            var editor = sharedPreferences.Edit();
-            editor.Remove(oldKey);
-            editor.Commit();
         }
 
         internal static bool MigrateAutoJoinRoomsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
@@ -512,5 +513,6 @@ namespace Seeker
             bf.Binder = new UpdatedNamespaceSerializationBinder();
             return bf;
         }
+#endif
     }
 }

@@ -1371,6 +1371,9 @@ namespace Seeker
 
         public static CachedParseResults GetLegacyCachedParseResult()
         {
+#if !BinaryFormatterAvailable
+            return null;
+#else
             bool convertFrom2to3 = false;
 
             string s_stringUriPairs = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v3, string.Empty);
@@ -1489,6 +1492,7 @@ namespace Seeker
                     return null;
                 }
             }
+#endif
         }
 
         //Pretty much all clients send "attributes" or limited metadata.

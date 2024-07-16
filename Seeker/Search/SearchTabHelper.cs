@@ -55,6 +55,8 @@ namespace Seeker.Helpers
             MainActivity.LogDebug("HEADERS - Save ALL Search Results: " + sw.ElapsedMilliseconds);
         }
 
+#if BinaryFormatterAvailable
+
         /// <summary>
         /// Restoring them when someone taps them is fast enough even for 1000 results...
         /// So this method probably isnt needed.
@@ -95,6 +97,7 @@ namespace Seeker.Helpers
             sw.Stop();
             MainActivity.LogDebug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
         }
+#endif
 
         public static void SaveSearchResultsToDisk_Imp(int wishlistSearchResultsToSave, Context c, List<SearchResponse> searchResultsToSave)
         {
@@ -118,7 +121,7 @@ namespace Seeker.Helpers
             SaveSearchResultsToDisk_Imp(wishlistSearchResultsToSave, c, searchResultsToSave);
         }
 
-        public static List<SearchResponse> RestoreSearchResultsFromDisk_Imp(int wishlistSearchResultsToRestore, Context c, bool legacy = false)
+        public static List<SearchResponse> RestoreSearchResultsFromDisk_Imp(int wishlistSearchResultsToRestore, Context c)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -127,7 +130,7 @@ namespace Seeker.Helpers
             //{
             //    wishlist_dir.Mkdir();
             //}
-            string name = System.Math.Abs(wishlistSearchResultsToRestore) + (legacy ? KeyConsts.M_wishlist_tab_legacy : KeyConsts.M_wishlist_tab);
+            string name = System.Math.Abs(wishlistSearchResultsToRestore) + KeyConsts.M_wishlist_tab;
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
 
             if (!fileForOurInternalStorage.Exists())
@@ -141,7 +144,7 @@ namespace Seeker.Helpers
 
                 MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
 
-                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream, legacy);
+                var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
                 return restoredSearchResponses;
             }
         }
@@ -233,6 +236,8 @@ namespace Seeker.Helpers
             MainActivity.LogDebug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);
         }
 
+#if BinaryFormatterAvailable
+
         //load legacy, and then save new to shared prefs and disk
         public static void ConvertLegacyWishlistsIfApplicable(Context c)
         {
@@ -252,6 +257,8 @@ namespace Seeker.Helpers
                 SaveAllSearchTabsToDisk(c);
             }
         }
+
+#endif
 
         public static void RestoreHeadersFromSharedPreferences()
         {
@@ -288,6 +295,7 @@ namespace Seeker.Helpers
             //SeekerState.SharedPreferences.Edit().Remove
         }
 
+#if BinaryFormatterAvailable
         public static void RestoreStateFromSharedPreferencesLegacy()
         {
             string savedState = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_LEGACY, string.Empty);
@@ -323,7 +331,7 @@ namespace Seeker.Helpers
                 MainActivity.LogDebug("RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
         }
-
+#endif
 
 
 

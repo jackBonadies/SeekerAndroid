@@ -33,6 +33,7 @@ using Android.App;
 
 namespace Seeker.Serialization
 {
+#if BinaryFormatterAvailable
     /// <summary>
     /// TODO move PreferenceHelper to Common. Requires Moving UserListItem to common and then fixing the binary resolver
     /// </summary>
@@ -508,6 +509,5 @@ namespace Seeker.Serialization
 #endif
     }
 
-
-
+    #endif
 }

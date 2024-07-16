@@ -41,10 +41,10 @@ namespace Seeker.Messages
             SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             lock (MessageListLockObject)
             {
-                SerializationHelper.MigratedMessages(SeekerState.SharedPreferences, KeyConsts.M_Messages_Legacy, KeyConsts.M_Messages);
+                //SerializationHelper.MigratedMessages(SeekerState.SharedPreferences, KeyConsts.M_Messages_Legacy, KeyConsts.M_Messages);
                 RestoreMessagesFromSharedPrefs(SeekerState.SharedPreferences);
             }
-            SerializationHelper.MigrateUnreadUsernames(SeekerState.SharedPreferences, KeyConsts.M_UnreadMessageUsernames_Legacy, KeyConsts.M_UnreadMessageUsernames);
+            //SerializationHelper.MigrateUnreadUsernames(SeekerState.SharedPreferences, KeyConsts.M_UnreadMessageUsernames_Legacy, KeyConsts.M_UnreadMessageUsernames);
             RestoreUnreadStateDict(SeekerState.SharedPreferences);
             IsInitialized = true;
         }

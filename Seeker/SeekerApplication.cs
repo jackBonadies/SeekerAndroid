@@ -2034,15 +2034,15 @@ namespace Seeker
 
 
 
-                SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, KeyConsts.M_SharedDirectoryInfo_Legacy, KeyConsts.M_SharedDirectoryInfo);
+                //SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, KeyConsts.M_SharedDirectoryInfo_Legacy, KeyConsts.M_SharedDirectoryInfo);
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
                 SeekerState.SharingOn = sharedPreferences.GetBoolean(KeyConsts.M_SharingOn, false);
-                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_UserList_Legacy, KeyConsts.M_UserList);
+                //SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_UserList_Legacy, KeyConsts.M_UserList);
                 SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
 
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
-                SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_IgnoreUserList_Legacy, KeyConsts.M_IgnoreUserList);
+                //SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_IgnoreUserList_Legacy, KeyConsts.M_IgnoreUserList);
                 SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
                 SeekerState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
                 SeekerState.StartServiceOnStartup = sharedPreferences.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
@@ -2054,9 +2054,9 @@ namespace Seeker
                 SeekerState.UserInfoBio = sharedPreferences.GetString(KeyConsts.M_UserInfoBio, string.Empty);
                 SeekerState.UserInfoPictureName = sharedPreferences.GetString(KeyConsts.M_UserInfoPicture, string.Empty);
 
-                SerializationHelper.MigrateUserNotesIfApplicable(sharedPreferences, KeyConsts.M_UserNotes_Legacy, KeyConsts.M_UserNotes);
+                //SerializationHelper.MigrateUserNotesIfApplicable(sharedPreferences, KeyConsts.M_UserNotes_Legacy, KeyConsts.M_UserNotes);
                 SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
-                SerializationHelper.MigrateOnlineAlertsIfApplicable(sharedPreferences, KeyConsts.M_UserOnlineAlerts_Legacy, KeyConsts.M_UserOnlineAlerts);
+                //SerializationHelper.MigrateOnlineAlertsIfApplicable(sharedPreferences, KeyConsts.M_UserOnlineAlerts_Legacy, KeyConsts.M_UserOnlineAlerts);
                 SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
 
                 SeekerState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(KeyConsts.M_AutoSetAwayOnInactivity, false);
@@ -2074,10 +2074,10 @@ namespace Seeker
 
                 //SearchTabHelper.SaveHeadersToSharedPrefs();
                 //SearchTabHelper.SaveAllSearchTabsToDisk(c);
-                SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
-                SerializationHelper.MigrateHeaderState(sharedPreferences, KeyConsts.M_SearchTabsState_Headers_Legacy, KeyConsts.M_SearchTabsState_Headers);
+                //SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
+                //SerializationHelper.MigrateHeaderState(sharedPreferences, KeyConsts.M_SearchTabsState_Headers_Legacy, KeyConsts.M_SearchTabsState_Headers);
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
-                SerializationHelper.MigrateWishlistTabs(c);
+                //SerializationHelper.MigrateWishlistTabs(c);
 
                 //SearchTabHelper.RestoreAllSearchTabsFromDisk(c);
 

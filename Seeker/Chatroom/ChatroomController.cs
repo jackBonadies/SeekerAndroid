@@ -571,9 +571,9 @@ namespace Seeker.Chatroom
 
         public static void Initialize()
         {
-            SerializationHelper.MigrateAutoJoinRoomsIfApplicable(SeekerState.SharedPreferences, KeyConsts.M_AutoJoinRooms_Legacy, KeyConsts.M_AutoJoinRooms);
+            //SerializationHelper.MigrateAutoJoinRoomsIfApplicable(SeekerState.SharedPreferences, KeyConsts.M_AutoJoinRooms_Legacy, KeyConsts.M_AutoJoinRooms);
             RestoreAutoJoinRoomsFromSharedPrefs(SeekerState.SharedPreferences);
-            SerializationHelper.MigrateNotifyRoomsIfApplicable(SeekerState.SharedPreferences, KeyConsts.M_chatroomsToNotify_Legacy, KeyConsts.M_chatroomsToNotify);
+            //SerializationHelper.MigrateNotifyRoomsIfApplicable(SeekerState.SharedPreferences, KeyConsts.M_chatroomsToNotify_Legacy, KeyConsts.M_chatroomsToNotify);
             RestoreNotifyRoomsToSharedPrefs(SeekerState.SharedPreferences);
             //if auto join rooms list...
             SeekerState.SoulseekClient.PrivateRoomMembershipAdded += SoulseekClient_PrivateRoomMembershipAdded;
