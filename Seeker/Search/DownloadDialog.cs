@@ -37,6 +37,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log = Android.Util.Log;
 using Seeker.Helpers;
+using Seeker.Transfers;
 
 namespace Seeker
 {
@@ -187,11 +188,11 @@ namespace Seeker
             this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
             log.Debug(MainActivity.logCatTag, "Is dl null: " + (dl == null).ToString());
-            dl.Click += DlAll_Click;
+            dl.Click += DownloadAll_Click;
             Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
             cancel.Click += Cancel_Click;
             downloadSelectedButton = view.FindViewById<Button>(Resource.Id.buttonDownloadSelected);
-            downloadSelectedButton.Click += DlSelected_Click;
+            downloadSelectedButton.Click += DownloadSelected_Click;
             Button reqFiles = view.FindViewById<Button>(Resource.Id.buttonRequestDirectories);
             reqFiles.Click += ReqFiles_Click;
             //selectedPositions.Clear();
@@ -644,113 +645,6 @@ namespace Seeker
         }
 
 
-        private void DownloadSelectedLogic_NotQueued()
-        {
-            DownloadSelectedLogic(false);
-        }
-
-
-        private void DownloadSelectedLogic(bool queuePaused)
-        {
-            bool hideLocked = SeekerState.HideLockedResultsInSearch;
-            try
-            {
-                List<Task> tsks = new List<Task>();
-                bool isSingle = this.customAdapter.SelectedPositions.Count() == 1;
-                foreach (int position in this.customAdapter.SelectedPositions) //nullref?
-                {
-                    try
-                    {
-                        Task tsk = CreateDownloadTask(searchResponse.GetElementAtAdapterPosition(hideLocked, position), isSingle, queuePaused);
-                        if (tsk == null)
-                        {
-                            Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_duplicate), ToastLength.Long).Show(); });
-                            this.activity?.RunOnUiThread(a);
-                            return;
-                        }
-                        tsk.Start();
-                        tsks.Add(tsk);
-                    }
-                    catch (Exception error)
-                    {
-                        Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
-                        MainActivity.LogFirebase(error.Message + " DlSelected_Click");
-                        this.activity.RunOnUiThread(a);
-                    }
-
-                }
-                if (!queuePaused)
-                {
-                    Toast.MakeText(Context, Resource.String.download_is_starting, ToastLength.Short).Show();
-                }
-                else
-                {
-                    Toast.MakeText(Context, Resource.String.DownloadIsQueued, ToastLength.Short).Show();
-                }
-                foreach (Task tsk in tsks)
-                {
-                    tsk.Wait();
-                }
-                Dismiss();
-
-            }
-            catch (DuplicateTransferException)
-            {
-                string dupMsg = this.activity.GetString(Resource.String.error_duplicates);
-                Action a = new Action(() => { Toast.MakeText(this.activity, dupMsg, ToastLength.Long).Show(); });
-                MainActivity.LogFirebase(dupMsg + " DlSelected_Click");
-                this.activity.RunOnUiThread(a);
-            }
-            catch (AggregateException age)
-            {
-                if (age.InnerException is DuplicateTransferException)
-                {
-                    string dupMsg = this.activity.GetString(Resource.String.error_duplicates);
-                    Action a = new Action(() => { Toast.MakeText(this.activity, dupMsg, ToastLength.Long).Show(); });
-                    MainActivity.LogFirebase(dupMsg + " DlSelected_Click");
-                    this.activity.RunOnUiThread(a);
-                }
-                else
-                {
-                    Action a = new Action(() => { Toast.MakeText(this.activity, age.Message, ToastLength.Long).Show(); });
-                    MainActivity.LogFirebase(age.Message + " DlSelected_Click");
-                    this.activity.RunOnUiThread(a);
-                }
-            }
-        }
-
-        private void DlSelected_Click(object sender, EventArgs e)
-        {
-            MainActivity.LogDebug("DownloadDialog DlSelected_Click");
-            MainActivity.LogDebug("this.customAdapter.SelectedPositions.Count = " + this.customAdapter.SelectedPositions.Count);
-            if (this.customAdapter.SelectedPositions.Count == 0)
-            {
-                Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
-                return;
-            }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
-                        return;
-                    }
-                    SeekerState.MainActivityRef.RunOnUiThread(DownloadSelectedLogic_NotQueued);
-                }));
-            }
-            else
-            {
-                DownloadSelectedLogic(false);
-            }
-
-        }
 
         private void ListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
@@ -831,9 +725,24 @@ namespace Seeker
             Dismiss();
         }
 
-        private void DlAll_Click(object sender, EventArgs e)
+        private void DownloadAll_Click(object sender, EventArgs e)
         {
+            DownloadWithContinuation(GetFilesToDownload(false), this.searchResponse.Username);
+        }
 
+        private void DownloadSelected_Click(object sender, EventArgs e)
+        {
+            if (this.customAdapter.SelectedPositions.Count == 0)
+            {
+                Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                return;
+            }
+
+            DownloadWithContinuation(GetFilesToDownload(true), this.searchResponse.Username);
+        }
+
+        private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
+        {
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
@@ -851,7 +760,7 @@ namespace Seeker
                         return;
                     }
                     MainActivity.LogDebug("DownloadDialog Dl_Click");
-                    DownloadAll(false);
+                    DownloadFiles(filesToDownload, username, false);
 
                 }));
                 try
@@ -861,7 +770,7 @@ namespace Seeker
                 }
                 catch (Exception exx)
                 {
-                    MainActivity.LogDebug("DownloadDialog DlAll_Click: " + exx.Message);
+                    MainActivity.LogDebug("DownloadDialog DownloadWithContinuation: " + exx.Message);
                     return; //dont dismiss dialog.  that only happens on success..
                 }
                 Dismiss();
@@ -869,14 +778,37 @@ namespace Seeker
             else
             {
                 MainActivity.LogDebug("DownloadDialog Dl_Click");
-                DownloadAll(false);
+                DownloadFiles(filesToDownload, username, false);
                 Dismiss();
             }
         }
 
-        private void DownloadAll(bool queuePaused)
+        private FullFileInfo[] GetFullFileInfos(IEnumerable<Soulseek.File> files)
         {
-            var task = CreateDownloadAllTask(queuePaused);
+            return files.Select(it=>new FullFileInfo() { Size = it.Size, FileName = it.Filename, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
+        }
+
+        private FullFileInfo[] GetFilesToDownload(bool selectedOnly)
+        {
+            if (selectedOnly)
+            {
+                List<File> selectedFiles = new List<File>();
+                foreach (int position in this.customAdapter.SelectedPositions)
+                {
+                    var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, position);
+                    selectedFiles.Add(file);
+                }
+                return GetFullFileInfos(selectedFiles.ToArray());
+            }
+            else
+            {
+                return GetFullFileInfos(searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch));
+            }
+        }
+
+        private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
+        {
+            var task = TransfersUtil.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
@@ -893,236 +825,6 @@ namespace Seeker
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }
 
-        private Task CreateDownloadTask(Soulseek.File file, bool isSingle, bool queuePaused)
-        {
-            //TODO TODO downloadInfoList is stale..... not what you want to use....
-            //TransfersFragment frag = (StaticHacks.TransfersFrag as TransfersFragment);
-            if (TransfersFragment.TransferItemManagerDL != null)
-            {
-                bool dup = TransfersFragment.TransferItemManagerDL.Exists(file.Filename, searchResponse.Username, file.Size);
-                if (dup)
-                {
-                    string msg = "Duplicate Detected: user:" + searchResponse.Username + "filename: " + file.Filename; //internal
-                    MainActivity.LogDebug("CreateDownloadTask " + msg);
-                    MainActivity.LogFirebase(msg);
-                    Action a = new Action(() => { Toast.MakeText(this.activity, this.activity.GetString(Resource.String.error_duplicate), ToastLength.Long); });
-                    SeekerState.MainActivityRef.RunOnUiThread(a);
-                    return null;
-                }
-            }
-
-            MainActivity.LogDebug("CreateDownloadTask");
-            Task task = new Task(() =>
-            {
-                SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, isSingle, out _);
-
-            });
-            return task;
-        }
-
-
-        public static void SetupAndDownloadFile(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
-        {
-            errorExists = false;
-            Task dlTask = null;
-            System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
-            bool exists = false;
-            TransferItem transferItem = null;
-            DownloadInfo downloadInfo = null;
-            System.Threading.CancellationTokenSource oldCts = null;
-            try
-            {
-
-                downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
-
-                transferItem = new TransferItem();
-                transferItem.Filename = CommonHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
-                transferItem.Username = downloadInfo.username;
-                transferItem.FullFilename = downloadInfo.fullFilename;
-                transferItem.Size = downloadInfo.Size;
-                transferItem.QueueLength = downloadInfo.QueueLength;
-                transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
-                transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
-                if (isSingle && SeekerState.NoSubfolderForSingle)
-                {
-                    transferItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
-                }
-
-                if (!queuePaused)
-                {
-                    try
-                    {
-                        TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
-                    }
-                    catch (Exception errr)
-                    {
-                        MainActivity.LogFirebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
-                    }
-                }
-                transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
-
-                if (queuePaused)
-                {
-                    transferItem.State = TransferStates.Cancelled;
-                    MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null)); //otherwise the ui will not refresh.
-                    return;
-                }
-
-                downloadInfo.TransferItemReference = transferItem;
-
-
-
-
-                dlTask = DownloadFileAsync(username, fname, size, cancellationTokenSource, depth, wasLatin1Decoded, wasFolderLatin1Decoded);
-
-                var e = new DownloadAddedEventArgs(downloadInfo);
-                downloadInfo.downloadTask = dlTask;
-                Action<Task> continuationActionSaveFile = MainActivity.DownloadContinuationActionUI(e);
-                dlTask.ContinueWith(continuationActionSaveFile);
-                MainActivity.InvokeDownloadAddedUINotify(e);
-
-
-
-
-            }
-            catch (Exception e)
-            {
-                if (!exists)
-                {
-                    TransfersFragment.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
-                }
-                else
-                {
-                    errorExists = exists;
-                }
-                if (oldCts != null)
-                {
-                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
-                }
-            }
-        }
-
-        /// <summary>
-        /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
-        /// its the same as the old SeekerState.SoulseekClient.DownloadAsync but with a few bells and whistles...
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="fullfilename"></param>
-        /// <param name="size"></param>
-        /// <param name="cts"></param>
-        /// <param name="incompleteUri"></param>
-        /// <returns></returns>
-        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
-        {
-            MainActivity.LogDebug("DownloadFileAsync - " + fullfilename);
-            Task dlTask = null;
-            if (SeekerState.MemoryBackedDownload)
-            {
-                dlTask =
-                    SeekerState.SoulseekClient.DownloadAsync(
-                        username: username,
-                        filename: fullfilename,
-                        size: size,
-                        options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
-                        cancellationToken: cts.Token,
-                        isLegacy: isFileDecodedLegacy,
-                        isFolderDecodedLegacy: isFolderDecodedLegacy);
-            }
-            else
-            {
-
-
-
-                long partialLength = 0;
-
-                dlTask = SeekerState.SoulseekClient.DownloadAsync(
-                        username: username,
-                        filename: fullfilename,
-                        null,
-                        size: size,
-                        startOffset: partialLength, //this will get populated
-                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner),
-                        cancellationToken: cts.Token,
-                        streamTask: GetStreamTask(username, fullfilename, depth),
-                        isFilenameDecodedLegacy: isFileDecodedLegacy,
-                        isFolderDecodedLegacy: isFolderDecodedLegacy);
-
-
-                //System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, out incompleteUri, out partialLength);
-
-
-                //dlTask = SeekerState.SoulseekClient.DownloadAsync(
-                //        username: username,
-                //        filename: fullfilename,
-                //        streamToWriteTo,
-                //        size: size,
-                //        startOffset:partialLength, //this will get populated
-                //        options: new TransferOptions(disposeOutputStreamOnCompletion: true),
-                //        cancellationToken: cts.Token);
-
-
-
-            }
-            return dlTask;
-        }
-
-        public static Task<Tuple<System.IO.Stream, long, string, string>> GetStreamTask(string username, string fullfilename, int depth = 1) //there has to be something extra here for args, bc we need to denote just how much of the fullFilename to use....
-        {
-            Task<Tuple<System.IO.Stream, long, string, string>> task = new Task<Tuple<System.IO.Stream, long, string, string>>(
-                () =>
-                {
-                    long partialLength = 0;
-                    Android.Net.Uri incompleteUri = null;
-                    Android.Net.Uri incompleteUriDirectory = null;
-                    System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength); //something here to denote...
-                    return new Tuple<System.IO.Stream, long, string, string>(streamToWriteTo, partialLength, incompleteUri.ToString(), incompleteUriDirectory.ToString());
-                });
-            return task;
-        }
-
-
-        ///// <summary>
-        ///// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
-        ///// its the same as the old SeekerState.SoulseekClient.DownloadAsync but with a few bells and whistles...
-        ///// </summary>
-        ///// <param name="username"></param>
-        ///// <param name="fullfilename"></param>
-        ///// <param name="size"></param>
-        ///// <param name="cts"></param>
-        ///// <param name="incompleteUri"></param>
-        ///// <returns></returns>
-        //public static async Task DownloadFileAsync2(string username, string fullfilename, long size, CancellationTokenSource cts)
-        //{
-        //    Task dlTask = null;
-        //    if (SeekerState.MemoryBackedDownload)
-        //    {
-        //        dlTask =
-        //            SeekerState.SoulseekClient.DownloadAsync(
-        //                username: username,
-        //                filename: fullfilename,
-        //                size: size,
-        //                cancellationToken: cts.Token);
-        //        //incompleteUri = null;
-        //    }
-        //    else
-        //    {
-        //        long partialLength = 0;
-        //        System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, out _, out partialLength);
-
-        //        dlTask = SeekerState.SoulseekClient.DownloadAsync(
-        //                username: username,
-        //                filename: fullfilename,
-        //                streamToWriteTo,
-        //                size: size,
-        //                startOffset: partialLength,
-        //                options: new TransferOptions(disposeOutputStreamOnCompletion: true),
-        //                cancellationToken: cts.Token);
-        //    }
-        //    return dlTask;
-        //}
-
-
         public static int GetQueueLength(SearchResponse s)
         {
             if (s.FreeUploadSlots > 0)
@@ -1133,21 +835,6 @@ namespace Seeker
             {
                 return (int)(s.QueueLength);
             }
-        }
-
-        private Task CreateDownloadAllTask(bool queuePaused)
-        {
-            MainActivity.LogDebug("CreateDownloadAllTask");
-            Task task = new Task(() =>
-            {
-                var files = searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch).ToList();
-                bool isSingle = files.Count() == 1;
-                foreach (Soulseek.File file in files)
-                {
-                    SetupAndDownloadFile(searchResponse.Username, file.Filename, file.Size, GetQueueLength(searchResponse), 1, queuePaused, file.IsLatin1Decoded, file.IsDirectoryLatin1Decoded, isSingle, out _);
-                }
-            });
-            return task;
         }
 
         public void OnCloseClick(object sender, DialogClickEventArgs d)
@@ -1313,16 +1000,23 @@ namespace Seeker
                     RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
                     return true;
                 case Resource.Id.download_folder_as_queued:
-                    DownloadAll(true);
-                    Dismiss();
+                    {
+                        var filesToDownload = GetFilesToDownload(false);
+                        DownloadFiles(filesToDownload, this.searchResponse.Username, true);
+                        Dismiss();
+                    }
                     return true;
                 case Resource.Id.download_selected_as_queued:
-                    if (this.customAdapter.SelectedPositions.Count == 0)
                     {
-                        Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
-                        return true;
+                        if (this.customAdapter.SelectedPositions.Count == 0)
+                        {
+                            Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                            return true;
+                        }
+                        var filesToDownload = GetFilesToDownload(true);
+                        DownloadFiles(filesToDownload, this.searchResponse.Username, true);
+                        Dismiss();
                     }
-                    DownloadSelectedLogic(true);
                     return true;
                 default:
                     return false;

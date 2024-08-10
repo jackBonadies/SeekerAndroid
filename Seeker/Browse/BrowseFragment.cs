@@ -29,6 +29,7 @@ using Common;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -1235,28 +1236,15 @@ namespace Seeker
                     {
                         if (t.IsFaulted)
                         {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            {
-                                //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-                                //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
-
-                                Toast.MakeText(SeekerState.ActiveActivityRef, Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-
-                            });
+                            SeekerApplication.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                             return;
                         }
-                        //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                        CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
+                        TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                     }));
                 }
                 else
                 {
-                    //foreach(var f in slskFile.ToArray())
-                    //{
-                    //    MainActivity.LogDebug(f.FileName);
-                    //}
-
-                    CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
+                    TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                 }
             }
         }
@@ -1555,128 +1543,13 @@ namespace Seeker
                         });
                         return;
                     }
-                    //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                    CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
+                    TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
                 }));
             }
             else
             {
-                //CreateDownloadAllTask(slskFile.ToArray()).Start();
-                CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
+                TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
             }
-        }
-
-        //private void DownloadUserFiles()
-        //{
-        //    if(dataItemsForListView.Count == 0)
-        //    {
-        //        Toast.MakeText(this.Context,this.Resources.GetString(Resource.String.nothing_to_download),ToastLength.Long).Show();
-        //    }
-        //    else if(dataItemsForListView[0].IsDirectory())
-        //    {
-        //        Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.not_recursive_dirs_avaialbe_to_download), ToastLength.Long).Show();
-        //    }
-        //    else
-        //    {
-        //        //List<Soulseek.File> slskFile = new List<File>();
-        //        //List<UserFilename> = new List<UserFilename>();
-        //        List<FullFileInfo> slskFile = new List<FullFileInfo>();
-        //        lock(dataItemsForListView)
-        //        {
-        //        foreach(DataItem d in dataItemsForListView)
-        //        {
-        //            //d.Node.Data.Name is complete dirname "@@uwtsp\\music\\electronica\\manual - lost days, open skies and streaming tides [2007]"
-        //            //d.File.Filename is filename "1. track 1.mp3"
-        //            FullFileInfo f = new FullFileInfo();
-        //            f.FileName = d.File.Filename;
-        //            f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-        //            f.Size = d.File.Size;
-        //            slskFile.Add(f);
-        //        }
-        //        }
-        //        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-        //        {
-        //            //we disconnected. login then do the rest.
-        //            //this is due to temp lost connection
-        //            Task t;
-        //            if(!MainActivity.ShowMessageAndCreateReconnectTask(this.Context,out t))
-        //            {
-        //                return;
-        //            }
-
-        //            t.ContinueWith(new Action<Task>((Task t) => {
-        //                if (t.IsFaulted)
-        //                {
-        //                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { 
-        //                        //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-        //                        //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
-
-        //                        Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); 
-
-        //                        });
-        //                    return;
-        //                }
-        //                //CreateDownloadAllTask(slskFile.ToArray()).Start();
-        //                CreateDownloadAllTask(slskFile.ToArray()).Start();
-        //            }));
-        //        }
-        //        else
-        //        {
-        //            //CreateDownloadAllTask(slskFile.ToArray()).Start();
-        //            CreateDownloadAllTask(slskFile.ToArray()).Start();
-        //        }
-        //    }
-        //}
-
-
-        public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string _username)
-        {
-            if (_username == SeekerState.Username)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long).Show(); });
-                return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
-            }
-            MainActivity.LogDebug("CreateDownloadAllTask");
-            bool allExist = true; //only show the transfer exists if all transfers in question do already exist
-            Task task = new Task(() =>
-            {
-                var isSingle = files.Count() == 1;
-                foreach (FullFileInfo file in files)
-                {
-                    DownloadDialog.SetupAndDownloadFile(_username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, out bool transferExists);
-                    if (!transferExists)
-                    {
-                        allExist = false;
-                    }
-                }
-                Action toast1 = null;
-                if (allExist)
-                {
-                    toast1 = new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short).Show();
-                    });
-
-                }
-                else
-                {
-                    toast1 = new Action(() =>
-                    {
-                        if (queuePaused)
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.QueuedForDownload, ToastLength.Short).Show();
-                        }
-                        else
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.download_is_starting, ToastLength.Short).Show();
-                        }
-
-                    });
-                }
-
-                SeekerState.ActiveActivityRef.RunOnUiThread(toast1);
-            });
-            return task;
         }
 
         private void UpDirectory(object sender, System.EventArgs e)
@@ -2253,7 +2126,7 @@ namespace Seeker
             {
                 //Do the Browse Logic...
                 string usernameToBrowse = input.Text;
-                if (usernameToBrowse == null || usernameToBrowse == string.Empty)
+                if (string.IsNullOrWhiteSpace(usernameToBrowse))
                 {
                     Toast.MakeText(this.Activity != null ? this.Activity : SeekerState.MainActivityRef, SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
                     if (sender is AndroidX.AppCompat.App.AlertDialog aDiag1) //actv

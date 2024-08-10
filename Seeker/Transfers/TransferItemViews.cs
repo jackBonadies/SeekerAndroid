@@ -542,6 +542,7 @@ namespace Seeker
                 //otherwise they will be whatever the view they recycled was.
                 //so they may end up being Failed, Completed, etc.
                 viewStatus.Text = "None";
+                // TODO "Not Started"
             }
         }
 
