@@ -785,7 +785,7 @@ namespace Seeker
 
         private FullFileInfo[] GetFullFileInfos(IEnumerable<Soulseek.File> files)
         {
-            return files.Select(it=>new FullFileInfo() { Size = it.Size, FileName = it.Filename, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
+            return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
         }
 
         private FullFileInfo[] GetFilesToDownload(bool selectedOnly)

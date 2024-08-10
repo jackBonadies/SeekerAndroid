@@ -892,7 +892,6 @@ namespace Seeker
             if (d.File != null)
             {
                 FullFileInfo f = new FullFileInfo();
-                f.FileName = d.File.Filename;
                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                 f.Size = d.File.Size;
                 f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
@@ -905,7 +904,6 @@ namespace Seeker
                 foreach (Soulseek.File slskFile in d.Directory.Files) //files in dir
                 {
                     FullFileInfo f = new FullFileInfo();
-                    f.FileName = slskFile.Filename;
                     f.FullFileName = d.Node.Data.Name + @"\" + slskFile.Filename;
                     f.Size = slskFile.Size;
                     f.wasFilenameLatin1Decoded = slskFile.IsLatin1Decoded;
@@ -1107,7 +1105,6 @@ namespace Seeker
                             {
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
-                                f.FileName = d.File.Filename;
                                 f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
                                 f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
@@ -1130,7 +1127,6 @@ namespace Seeker
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
-                                f.FileName = d.File.Filename;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
                                 f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
@@ -1189,7 +1185,6 @@ namespace Seeker
                             {
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
-                                f.FileName = d.File.Filename;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
                                 f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
@@ -1212,7 +1207,6 @@ namespace Seeker
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
-                                f.FileName = d.File.Filename;
                                 f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                                 f.Size = d.File.Size;
                                 f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
@@ -1297,7 +1291,6 @@ namespace Seeker
                         else
                         {
                             FullFileInfo f = new FullFileInfo();
-                            f.FileName = d.File.Filename;
                             f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                             f.Size = d.File.Size;
                             f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
@@ -1326,7 +1319,6 @@ namespace Seeker
                         else
                         {
                             FullFileInfo f = new FullFileInfo();
-                            f.FileName = d.File.Filename;
                             f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
                             f.Size = d.File.Size;
                             f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
@@ -2288,7 +2280,6 @@ namespace Seeker
     public class FullFileInfo
     {
         public long Size = 0;
-        public string FileName = string.Empty;
         public string FullFileName = string.Empty;
         public int Depth = 1;
         public bool wasFilenameLatin1Decoded = false;
