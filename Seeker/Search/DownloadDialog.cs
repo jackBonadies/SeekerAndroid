@@ -810,18 +810,6 @@ namespace Seeker
         {
             var task = TransfersUtil.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
-            SeekerState.MainActivityRef.RunOnUiThread(() =>
-            {
-                if (!queuePaused)
-                {
-                    Toast.MakeText(Context, Resource.String.download_is_starting, ToastLength.Short).Show();
-                }
-                else
-                {
-                    Toast.MakeText(Context, Resource.String.DownloadIsQueued, ToastLength.Short).Show();
-                }
-
-            });
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }
 
