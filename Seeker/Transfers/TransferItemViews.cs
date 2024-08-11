@@ -541,7 +541,9 @@ namespace Seeker
                 //these views are recycled, so NEVER dont set them.
                 //otherwise they will be whatever the view they recycled was.
                 //so they may end up being Failed, Completed, etc.
-                viewStatus.Text = "None";
+                //viewStatus.Text = "None";
+                
+                viewStatus.SetText(Resource.String.not_started);
             }
         }
 

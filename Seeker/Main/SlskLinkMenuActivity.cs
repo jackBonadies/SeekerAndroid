@@ -98,14 +98,14 @@ namespace Seeker
                     string fullFilename = directory.Name + "\\" + f.Filename;
                     if (thisFileOnly == null)
                     {
-                        fullFileInfos.Add(new FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
+                        fullFileInfos.Add(new FullFileInfo() { Depth = 1, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                     }
                     else
                     {
                         if (fullFilename == thisFileOnly)
                         {
                             //add
-                            fullFileInfos.Add(new FullFileInfo() { Depth = 1, FileName = f.Filename, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
+                            fullFileInfos.Add(new FullFileInfo() { Depth = 1, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
                             break;
                         }
                     }
