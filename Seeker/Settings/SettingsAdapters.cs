@@ -11,7 +11,7 @@ namespace Seeker
 {
     public partial class SettingsActivity
     {
-        public enum ChangeDialogType
+        private enum ChangeDialogType
         {
             ChangePort = 0,
             ChangeDL = 1,

@@ -820,7 +820,7 @@ namespace Seeker
             }
             if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
-                SeekerApplication.SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
+                SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;
@@ -860,7 +860,7 @@ namespace Seeker
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed))
             {
-                SeekerApplication.SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
+                SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;

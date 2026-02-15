@@ -68,12 +68,9 @@ using Seeker.Transfers;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace Seeker
 {
-
-    //, WindowSoftInputMode = SoftInput.StateAlwaysHidden) didnt change anything..
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
     public partial class MainActivity :
         ThemeableActivity, 
-        Seeker.MainActivity.DownloadCallback, 
         ActivityCompat.IOnRequestPermissionsResultCallback, 
         BottomNavigationView.IOnNavigationItemSelectedListener
     {
@@ -134,119 +131,6 @@ namespace Seeker
             }
         }
 
-        private void setKeyboardVisibilityListener()
-        {
-            //this creates problems.  we dont really need this anymore with the new "adjust nothing if edittext is at top" fix.
-            //the only down side is on clicking the two filters there will be the nav bar.  but thats worth it since
-            //this incorrectly hides navbar all the time and its very tough to get it back...
-
-
-            //View parentView = ((ViewGroup)this.FindViewById(Android.Resource.Id.Content)).GetChildAt(0);
-            //KeyBoardVisibilityChanged -= KeyboardChanged;
-            //KeyBoardVisibilityChanged += KeyboardChanged;
-            //parentView.ViewTreeObserver.AddOnGlobalLayoutListener(new ListenerKeyboard(parentView));
-
-        }
-        //           View parentView = ((ViewGroup)this.FindViewById(android.R.id.content)).GetChildAt(0);
-        //            parentView.ViewTreeObserver.AddOnGlobalLayoutListener()
-
-        //                getViewTreeObserver().addOnGlobalLayoutListener
-        //            {
-
-        //        private boolean alreadyOpen;
-        //        private final int defaultKeyboardHeightDP = 100;
-        //        private final int EstimatedKeyboardDP = defaultKeyboardHeightDP + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? 48 : 0);
-        //        private final Rect rect = new Rect();
-
-        //        @Override
-        //        public void onGlobalLayout()
-        //        {
-        //            int estimatedKeyboardHeight = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, EstimatedKeyboardDP, parentView.getResources().getDisplayMetrics());
-        //            parentView.getWindowVisibleDisplayFrame(rect);
-        //            int heightDiff = parentView.getRootView().getHeight() - (rect.bottom - rect.top);
-        //            boolean isShown = heightDiff >= estimatedKeyboardHeight;
-
-        //            if (isShown == alreadyOpen)
-        //            {
-        //                Log.i("Keyboard state", "Ignoring global layout change...");
-        //                return;
-        //            }
-        //            alreadyOpen = isShown;
-        //            onKeyboardVisibilityListener.onVisibilityChanged(isShown);
-        //        }
-        //    });
-        //}
-
-        //private static void NatUtility_DeviceFound(object sender, Mono.Nat.DeviceEventArgs e)
-        //{
-        //    Logger.Debug("Device Found");
-        //    INatDevice device = e.Device;
-        //    Logger.Debug(e.Device.NatProtocol.ToString());
-        //    Logger.Debug(e.Device.GetExternalIP().ToString());
-        //    e.Device.CreatePortMap(new Mapping(Protocol.Tcp, 4367, 4367, 600, "android"));
-        //    //Console.WriteLine(e.Device.Get)
-        //    foreach (Mapping portMap in device.GetAllMappings())
-        //    {
-        //        Logger.Debug(portMap.ToString());
-        //    }
-
-        //    // Set the TcpListener on port 13000.
-        //    //Int32 port = 4234;
-        //    //IPAddress localAddr = IPAddress.Parse("192.168.0.105");
-
-        //    //// TcpListener server = new TcpListener(port);
-        //    //var server = new TcpListener(localAddr, port);
-        //    //server.Start();
-        //    //while (true)
-        //    //{
-        //    //    System.Console.Write("Waiting for a connection... ");
-
-        //    //    // Perform a blocking call to accept requests.
-        //    //    // You could also use server.AcceptSocket() here.
-        //    //    TcpClient client = server.AcceptTcpClient();
-        //    //    System.Console.WriteLine("Connected!");
-        //    //}
-        //}
-
-
-        //public static String getIPAddress(bool useIPv4)
-        //{
-        //    try
-        //    {
-
-        //        var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-        //        foreach (NetworkInterface intf in interfaces)
-        //        {
-        //            var addrs = intf.GetIPProperties().
-        //            addrs.
-        //            foreach (InetAddress addr in addrs)
-        //            {
-        //                if (!addr.isLoopbackAddress())
-        //                {
-        //                    String sAddr = addr.getHostAddress();
-        //                    //boolean isIPv4 = InetAddressUtils.isIPv4Address(sAddr);
-        //                    boolean isIPv4 = sAddr.indexOf(':') < 0;
-
-        //                    if (useIPv4)
-        //                    {
-        //                        if (isIPv4)
-        //                            return sAddr;
-        //                    }
-        //                    else
-        //                    {
-        //                        if (!isIPv4)
-        //                        {
-        //                            int delim = sAddr.indexOf('%'); // drop ip6 zone suffix
-        //                            return delim < 0 ? sAddr.toUpperCase() : sAddr.substring(0, delim).toUpperCase();
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ignored) { } // for now eat exceptions
-        //    return "";
-        //}
         /// <summary>
         /// Presentable Filename, Uri.ToString(), length
         /// </summary>
@@ -269,23 +153,6 @@ namespace Seeker
                 }
             }
         }
-
-        private List<string> GetRootDirs(DocumentFile dir)
-        {
-            List<string> dirUris = new List<string>();
-            DocumentFile[] files = dir.ListFiles(); //doesnt need to be sorted
-            for (int i = 0; i < files.Length; ++i)
-            {
-                DocumentFile file = files[i];
-                if (file.IsDirectory)
-                {
-                    dirUris.Add(file.Uri.ToString());
-                }
-            }
-            return dirUris;
-        }
-
-
 
         private void SoulseekClient_SearchResponseDeliveryFailed(object sender, SearchRequestResponseEventArgs e)
         {
@@ -859,14 +726,6 @@ namespace Seeker
                     res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
                 }
 
-                //string path  = res.Path; 
-                //string lastPath = res.LastPathSegment;
-                //var segs = res.PathSegments;
-                //DocumentFile f = DocumentFile.FromTreeUri(this, res);
-                //string name = f.Name;
-                //bool isEmulated = Android.OS.Environment.IsExternalStorageEmulated;
-                //bool isRemovable = Android.OS.Environment.IsExternalStorageRemovable;
-
                 bool canWrite = false;
                 try
                 {
@@ -1016,89 +875,7 @@ namespace Seeker
                         }
                     }
                 }
-
-
-
-
             }
-
-
-
-            //testing
-
-            //var s = System.IO.Path.GetInvalidFileNameChars();
-            //var s2 = System.IO.Path.GetInvalidPathChars();
-            //DocumentFile d = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri)).CreateDirectory("-+\\/\0");
-            //if(d==null)
-            //{
-
-            //}
-            //else
-            //{
-            //    bool x = d.Exists();
-            //}
-
-
-
-            //    //logging code for unit tests / diagnostic..
-            //    var root = DocumentFile.FromTreeUri(SeekerState.MainActivityRef , Android.Net.Uri.Parse( SeekerState.SaveDataDirectoryUri) );
-            //    DocumentFile f = root.FindFile("" + "_dir_response");
-
-            //    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(f.Uri);
-            //    BrowseResponse br = null;
-
-            //    System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //    br = formatter.Deserialize(stream) as BrowseResponse;
-
-            ////var br = SeekerState.SoulseekClient.BrowseAsync("");
-            ////br.Wait();
-
-            //    DownloadDialog.CreateTree(br,false, null, null, "",out _);
-
-            //if(b.DirectoryCount==0&&b.LockedDirectoryCount!=0)
-            //{
-            //    errorMsgToToast = "User is only sharing locked directories";
-            //    return null;
-            //}
-            //else if(b.DirectoryCount==0&&b.LockedDirectoryCount==0)
-            //{
-            //    errorMsgToToast = "User is not sharing any directories";
-            //    return null;
-            //}
-
-
-            //setKeyboardVisibilityListener();
-
-            //OneTimeWorkRequest otwr = OneTimeWorkRequest.Builder.From<DownloadWorkerTest>().Build();
-            //WorkManager.GetInstance(this).Enqueue(otwr); //will this keep use alive for 30 mins....  FAILURE - does not keep alive connections.
-
-
-            //TEST CODE //TEST CODE
-            //SERVICE STARTED BUT THREAD IS STILL AN ACTIVITY THREAD: 36+ mins. :) - after killing it it went on for 20+ mins (ps -A shows it + you get notifications). after restarting device its gone :(
-
-
-            //Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-            //this.StartService(downloadServiceIntent);
-
-
-            //In the non service case it still goes on for 19+ mins..  but after you kill it by swiping up then its gone (no more notifications and ps -A shows nothing)
-            //Thread t1 = new Thread(() => { 
-            //    while(true)
-            //    {
-            //        this.RunOnUiThread(() => {Toast.MakeText(this,"we are running",ToastLength.Long).Show(); });
-            //        System.Threading.Thread.Sleep(1000*30);
-            //    }
-
-            //    });
-            //t1.Start();
-
-            //END TEST
-            //AndroidEnvironment.UnhandledExceptionRaiser += AndroidEnvironment_UnhandledExceptionRaiser;
-            //string pkgname = this.ApplicationInfo.PackageName; //these all return com.companyname.androidapp1
-            //string pkgnameunique = this.PackageName;
-            //string pkgnameunique2 = Application.Context.PackageName;
-
-            // GetIncompleteStream(@"testdir\testdir1\testfname.mp3", out Android.Net.Uri int2);
         }
 
         public void FallbackFileSelection(int requestCode)
@@ -2582,35 +2359,6 @@ namespace Seeker
             }
         }
 
-
-        //private void restoreSeekerState(Bundle savedInstanceState) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
-        //{   //day night mode sets the static, saves to shared preferences the new value, sets appcompat value, which recreates everything and calls restoreSeekerState(bundle) where the bundle was older than shared prefs
-        //    //because saveSeekerState was not called in the meantime...
-        //    if(sharedPreferences != null)
-        //    {
-        //        SeekerState.currentlyLoggedIn = sharedPreferences.GetBoolean(KeyConsts.M_CurrentlyLoggedIn,false);
-        //        SeekerState.Username = sharedPreferences.GetString(KeyConsts.M_Username,"");
-        //        SeekerState.Password = sharedPreferences.GetString(KeyConsts.M_Password,"");
-        //        SeekerState.SaveDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_SaveDataDirectoryUri,"");
-        //        SeekerState.NumberSearchResults = sharedPreferences.GetInt(KeyConsts.M_NumberSearchResults, DEFAULT_SEARCH_RESULTS);
-        //        SeekerState.DayNightMode = sharedPreferences.GetInt(KeyConsts.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
-        //        SeekerState.AutoClearComplete = sharedPreferences.GetBoolean(KeyConsts.M_AutoClearComplete, false);
-        //        SeekerState.RememberSearchHistory = sharedPreferences.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
-        //        SeekerState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(KeyConsts.M_OnlyFreeUploadSlots, true);
-        //        SeekerState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(KeyConsts.M_DisableToastNotifications, false);
-        //        SeekerState.MemoryBackedDownload = sharedPreferences.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
-        //        SearchFragment.FilterSticky = sharedPreferences.GetBoolean(KeyConsts.M_FilterSticky, false);
-        //        SearchFragment.FilterString = sharedPreferences.GetString(KeyConsts.M_FilterStickyString, string.Empty);
-        //        SearchFragment.SetSearchResultStyle(sharedPreferences.GetInt(KeyConsts.M_SearchResultStyle, 1));
-        //        SeekerState.UploadSpeed = sharedPreferences.GetInt(KeyConsts.M_UploadSpeed, -1);
-        //        SeekerState.UploadDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_UploadDirectoryUri, "");
-        //        SeekerState.SharingOn = sharedPreferences.GetBoolean(KeyConsts.M_SharingOn,false);
-        //        SeekerState.UserList = RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
-        //    }
-        //}
-
-
-
         protected override void OnPause()
         {
             //Logger.Debug(".view is null " + (StaticHacks.LoginFragment.View==null).ToString()); it is null
@@ -2650,8 +2398,6 @@ namespace Seeker
                 {
                     editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
                 }
-
-
 
                 //editor.Apply();
                 editor.Commit();
@@ -2717,86 +2463,77 @@ namespace Seeker
                 TransfersFragment.TransfersActionMode.Finish();
             }
             //in addition each fragment is responsible for expanding their menu...
-            if (e.Position == 0)
+            switch (e.Position)
             {
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
+                case 0:
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                    this.SupportActionBar.SetHomeButtonEnabled(false);
 
-                this.SupportActionBar.SetDisplayShowCustomEnabled(false);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
-            }
-            if (e.Position == 1) //search
-            {
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
+                    this.SupportActionBar.SetDisplayShowCustomEnabled(false);
+                    this.SupportActionBar.SetDisplayShowTitleEnabled(true);
+                    this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
+                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
+                    break;
+                case 1:
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                    this.SupportActionBar.SetHomeButtonEnabled(false);
 
-                //string initText = string.Empty;
-                //if (this.SupportActionBar?.CustomView != null) //it is null on device rotation...
-                //{
-                //    AutoCompleteTextView v = this.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                //    if(v!=null)
-                //    {
-                //        initText = v.Text;
-                //    }
-                //}
-                //the SupportActionBar.CustomView will still be here if we leave tabs and come back.. so just set the text on it again.
-
-                this.SupportActionBar.SetDisplayShowCustomEnabled(true);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(false);
-                this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
-                SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
-                //this.SupportActionBar.CustomView.FindViewById<View>(Resource.Id.searchHere).FocusChange += MainActivity_FocusChange;
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
-                if (goToSearchTab != int.MaxValue)
-                {
-                    //if(SearchFragment.Instance == null)
+                    //string initText = string.Empty;
+                    //if (this.SupportActionBar?.CustomView != null) //it is null on device rotation...
                     //{
-                    //    Logger.Debug("Search Frag Instance is Null");
+                    //    AutoCompleteTextView v = this.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+                    //    if(v!=null)
+                    //    {
+                    //        initText = v.Text;
+                    //    }
                     //}
-                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
+                    //the SupportActionBar.CustomView will still be here if we leave tabs and come back.. so just set the text on it again.
+
+                    this.SupportActionBar.SetDisplayShowCustomEnabled(true);
+                    this.SupportActionBar.SetDisplayShowTitleEnabled(false);
+                    this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
+                    SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
+                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
+                    if (goToSearchTab != int.MaxValue)
                     {
-                        //let onresume go to the search tab..
-                        Logger.Debug("Delay Go To Wishlist Search Fragment for OnResume");
+                        if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
+                        {
+                            //let onresume go to the search tab..
+                            Logger.Debug("Delay Go To Wishlist Search Fragment for OnResume");
+                        }
+                        else
+                        {
+                            //can we do this now??? or should we pass this down to the search fragment for when it gets created...  maybe we should put this in a like "OnResume"
+                            Logger.Debug("Do Go To Wishlist in page selected");
+                            SearchFragment.Instance.GoToTab(goToSearchTab, false, true);
+                            goToSearchTab = int.MaxValue;
+                        }
+                    }
+                    break;
+                case 2:
+                    this.SupportActionBar.SetDisplayShowCustomEnabled(false);
+                    this.SupportActionBar.SetDisplayShowTitleEnabled(true);
+
+                    SetTransferSupportActionBarState();
+
+                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
+                    break;
+                case 3:
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                    this.SupportActionBar.SetHomeButtonEnabled(false);
+
+                    this.SupportActionBar.SetDisplayShowCustomEnabled(false);
+                    this.SupportActionBar.SetDisplayShowTitleEnabled(true);
+                    if (string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
+                    {
+                        this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
                     }
                     else
                     {
-                        //can we do this now??? or should we pass this down to the search fragment for when it gets created...  maybe we should put this in a like "OnResume"
-                        Logger.Debug("Do Go To Wishlist in page selected");
-                        SearchFragment.Instance.GoToTab(goToSearchTab, false, true);
-                        goToSearchTab = int.MaxValue;
+                        this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
                     }
-                }
-            }
-            else if (e.Position == 2)
-            {
-
-
-                this.SupportActionBar.SetDisplayShowCustomEnabled(false);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-
-
-                SetTransferSupportActionBarState();
-
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
-            }
-            else if (e.Position == 3)
-            {
-                this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                this.SupportActionBar.SetHomeButtonEnabled(false);
-
-                this.SupportActionBar.SetDisplayShowCustomEnabled(false);
-                this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                if (string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
-                {
-                    this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
-                }
-                else
-                {
-                    this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
-                }
-                this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
+                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
+                    break;
             }
         }
 
@@ -2834,44 +2571,11 @@ namespace Seeker
             }
         }
 
-        //private void MainActivity_Click(object sender, EventArgs e)
-        //{
-        //    this.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-        //}
-
-        private void B_Click(object sender, EventArgs e)
-        {
-            //Works Perfectly
-            //SoulseekClient client = new SoulseekClient();
-            //task.Wait();
-            //var task1 = client.SearchAsync(SearchQuery.FromText("Danse Manatee"));
-            //task1.Wait();
-            //IEnumerable<SearchResponse> responses = task1.Result;
-
-
-        }
-
-        internal interface DownloadCallback
-        {
-        }
-
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             //MenuInflater.Inflate(Resource.Menu.menu_main, menu);
             return base.OnCreateOptionsMenu(menu);
         }
-
-        //public override bool OnOptionsItemSelected(IMenuItem item)
-        //{
-        //    int id = item.ItemId;
-        //    if (id == Resource.Id.action_settings)
-        //    {
-        //        return true;
-        //    }
-
-        //    return base.OnOptionsItemSelected(item);
-        //}
-
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

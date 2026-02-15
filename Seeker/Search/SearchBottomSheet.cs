@@ -8,16 +8,8 @@ namespace Seeker
 {
     public partial class SearchFragment
     {
-        public class BSDF_Menu : BottomSheetDialogFragment
+        private class BottomSheetDialogFragmentMenu : BottomSheetDialogFragment
         {
-            //public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
-            //{
-            //    inflater.Inflate(Resource.Menu.transfers_menu, menu);
-            //    base.OnCreateOptionsMenu(menu, inflater);
-            //}
-
-            //public override int Theme => Resource.Style.BottomSheetDialogTheme;
-
             public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
             {
 

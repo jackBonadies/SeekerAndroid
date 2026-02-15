@@ -209,7 +209,7 @@ namespace Seeker.Transfers
                         username: username,
                         filename: fullfilename,
                         size: size,
-                        options: new TransferOptions(governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner, stateChanged: updateForEnqueue),
+                        options: new TransferOptions(governor: SpeedLimitHelper.OurDownloadGoverner, stateChanged: updateForEnqueue),
                         cancellationToken: cts.Token,
                         isLegacy: isFileDecodedLegacy,
                         isFolderDecodedLegacy: isFolderDecodedLegacy);
@@ -224,7 +224,7 @@ namespace Seeker.Transfers
                         null,
                         size: size,
                         startOffset: partialLength, //this will get populated
-                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SeekerApplication.SpeedLimitHelper.OurDownloadGoverner, stateChanged: updateForEnqueue),
+                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SpeedLimitHelper.OurDownloadGoverner, stateChanged: updateForEnqueue),
                         cancellationToken: cts.Token,
                         streamTask: GetStreamTask(username, fullfilename, depth),
                         isFilenameDecodedLegacy: isFileDecodedLegacy,

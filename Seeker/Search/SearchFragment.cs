@@ -728,7 +728,7 @@ namespace Seeker
 
         public static void ShowChangeResultStyleBottomDialog()
         {
-            BSDF_Menu bsdf = new BSDF_Menu();
+            BottomSheetDialogFragmentMenu bsdf = new BottomSheetDialogFragmentMenu();
             bsdf.HasOptionsMenu = true;
             bsdf.ShowNow(SeekerState.MainActivityRef.SupportFragmentManager, "options");
         }
