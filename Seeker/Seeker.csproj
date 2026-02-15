@@ -62,7 +62,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="MessagePack">
-      <Version>2.5.140</Version>
+      <Version>2.5.198</Version>
     </PackageReference>
     <PackageReference Include="MessagePackAnalyzer">
       <Version>2.5.140</Version>
@@ -73,7 +73,7 @@
       <Version>17.9.5</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>8.0.4</Version>
+      <Version>8.0.6</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.AndroidX.ConstraintLayout">
       <Version>2.1.4.5</Version>
