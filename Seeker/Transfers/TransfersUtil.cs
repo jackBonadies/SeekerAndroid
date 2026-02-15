@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
 namespace Seeker.Transfers
 {
@@ -140,11 +141,11 @@ namespace Seeker.Transfers
                     }
                     catch (Exception errr)
                     {
-                        MainActivity.LogFirebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                        Logger.Firebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
                     }
                 }
                 transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
-                MainActivity.LogDebug($"Adding Transfer To Database: {transferItem.Filename}");
+                Logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
                 downloadInfo.TransferItemReference = transferItem;
 
                 if (queuePaused)
@@ -190,13 +191,13 @@ namespace Seeker.Transfers
         {
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            MainActivity.LogDebug($"DownloadFileAsync: {fullfilename}");
+            Logger.Debug($"DownloadFileAsync: {fullfilename}");
             Task dlTask = null;
             Action<TransferStateChangedEventArgs> updateForEnqueue = new Action<TransferStateChangedEventArgs>( (args) =>
             {
                 if (args.Transfer.State.HasFlag(TransferStates.Queued) || args.Transfer.State == TransferStates.Initializing)
                 {
-                    MainActivity.LogDebug($"Queued / Init: {fullfilename} We can proceed to download next file.");
+                    Logger.Debug($"Queued / Init: {fullfilename} We can proceed to download next file.");
                     waitUntilEnqueue.TrySetResult(true);
                 }
             });

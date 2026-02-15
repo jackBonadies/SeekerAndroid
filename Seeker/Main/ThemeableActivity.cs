@@ -2,6 +2,7 @@
 using Android.OS;
 using AndroidX.AppCompat.App;
 using System;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -15,12 +16,12 @@ namespace Seeker
             SeekerApplication.Activities.Remove(ourWeakRef);
             if (SeekerApplication.Activities.Count == 0)
             {
-                MainActivity.LogDebug("----- On Destory ------ Last Activity ------");
+                Logger.Debug("----- On Destory ------ Last Activity ------");
                 TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, true);
             }
             else
             {
-                MainActivity.LogDebug("----- On Destory ------ NOT Last Activity ------");
+                Logger.Debug("----- On Destory ------ NOT Last Activity ------");
                 TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);
             }
         }

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -95,7 +96,7 @@ namespace Seeker
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
+                Logger.Firebase("timer issue: " + e.Message + e.StackTrace);
             }
             //.setContentTitle(getText(R.string.notification_title))
             //.setContentText(getText(R.string.notification_message))

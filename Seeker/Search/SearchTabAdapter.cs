@@ -60,7 +60,7 @@ namespace Seeker
 
                     //go to search tab instead (there is always one)
                     string listOfKeys2 = System.String.Join(",", SearchTabHelper.SearchTabCollection.Keys);
-                    MainActivity.LogInfoFirebase("list of Keys: " + listOfKeys2);
+                    Logger.InfoFirebase("list of Keys: " + listOfKeys2);
                     int tabToGoTo = SearchTabHelper.SearchTabCollection.Keys.Where(key => key >= 0).First();
                     SearchFragment.Instance.GoToTab(tabToGoTo, true);
                 }

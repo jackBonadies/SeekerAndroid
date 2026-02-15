@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
 namespace Seeker.Managers
 {
@@ -164,7 +165,7 @@ namespace Seeker.Managers
                             }
                             else
                             {
-                                MainActivity.LogFirebase("Failed to get privileges" + t.Exception.InnerException.Message);
+                                Logger.Firebase("Failed to get privileges" + t.Exception.InnerException.Message);
                                 SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed), ToastLength.Long);
                             }
                         }

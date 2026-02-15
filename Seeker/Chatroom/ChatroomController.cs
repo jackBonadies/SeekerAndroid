@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
 namespace Seeker.Chatroom
 {
@@ -627,7 +628,7 @@ namespace Seeker.Chatroom
                         ChatroomController.StatusMessageUpdate statusMessageUpdate = new ChatroomController.StatusMessageUpdate(e.Status == Soulseek.UserPresence.Away ? ChatroomController.StatusMessageType.WentAway : ChatroomController.StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
                         ChatroomController.AddStatusMessage(kvp.Key, statusMessageUpdate);
                         UserRoomStatusChanged?.Invoke(sender, new UserRoomStatusChangedEventArgs(kvp.Key, e.Username, e.Status, statusMessageUpdate));
-                        MainActivity.LogDebug("room user status updated: " + e.Username + " " + e.Status.ToString() + " " + kvp.Key);
+                        Logger.Debug("room user status updated: " + e.Username + " " + e.Status.ToString() + " " + kvp.Key);
                     }
                 }
             }
@@ -635,7 +636,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_OperatorInPrivateRoomAddedRemoved(object sender, Soulseek.OperatorAddedRemovedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_OperatorInPrivateRoomAddedRemoved " + e.RoomName + " " + e.Username + " " + e.Added);
+            Logger.Debug("SoulseekClient_OperatorInPrivateRoomAddedRemoved " + e.RoomName + " " + e.Username + " " + e.Added);
 
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
@@ -662,22 +663,22 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_PrivateRoomUserListReceived(object sender, Soulseek.RoomInfo e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModerationRemoved " + e.UserCount); //this is the same as the normal user list received event as far as I can tell...
+            Logger.Debug("SoulseekClient_PrivateRoomModerationRemoved " + e.UserCount); //this is the same as the normal user list received event as far as I can tell...
         }
 
         private static void SoulseekClient_PrivateRoomModerationRemoved(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModerationRemoved " + e); //this only happens on change... not useful I dont think...
+            Logger.Debug("SoulseekClient_PrivateRoomModerationRemoved " + e); //this only happens on change... not useful I dont think...
         }
 
         private static void SoulseekClient_PrivateRoomModerationAdded(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModerationAdded " + e); //this only happens on change... not useful I dont think...
+            Logger.Debug("SoulseekClient_PrivateRoomModerationAdded " + e); //this only happens on change... not useful I dont think...
         }
 
         private static void SoulseekClient_PrivateRoomModeratedUserListReceived(object sender, Soulseek.RoomInfo e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModeratedUserListReceived " + e.UserCount);
+            Logger.Debug("SoulseekClient_PrivateRoomModeratedUserListReceived " + e.UserCount);
             ModeratedRoomData[e.Name] = e; //this is WHO ARE THE OPERATORS. and it will show everyone who is an OPERATOR but not an OWNER. So if your name is here you are an operator.. also this gets called every change.
             //update the room data
             if (JoinedRoomData.ContainsKey(e.Name))
@@ -690,7 +691,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_PrivateRoomMembershipRemoved(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomMembershipRemoved " + e);
+            Logger.Debug("SoulseekClient_PrivateRoomMembershipRemoved " + e);
             //if we remove ourselves or someone else removes us, then we need to back out of the room (and also refresh the list for good feedback).
 
             //removing should go here, that way we will not autojoin a room we are no longer part of.
@@ -712,7 +713,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_PrivateRoomMembershipAdded(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomMembershipAdded " + e);
+            Logger.Debug("SoulseekClient_PrivateRoomMembershipAdded " + e);
         }
 
         //public static void UpdateSameUserFlagIfApplicable(string roomName, Message msg)
@@ -810,11 +811,11 @@ namespace Seeker.Chatroom
         {
             if (SeekerApplication.IsUserInIgnoreList(e.Username))
             {
-                MainActivity.LogDebug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
+                Logger.Debug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
                 return;
             }
 
-            MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
+            Logger.Debug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
             Message msg = new Message(e.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
             if (e.Username == SeekerState.Username)
@@ -845,7 +846,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomJoined(object sender, Soulseek.RoomJoinedEventArgs e)
         {
-            MainActivity.LogDebug("User Joined" + e.Username);
+            Logger.Debug("User Joined" + e.Username);
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
                 var oldRoomData = JoinedRoomData[e.RoomName];
@@ -867,7 +868,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomTickerAdded(object sender, Soulseek.RoomTickerAddedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_RoomTickerAdded");
+            Logger.Debug("SoulseekClient_RoomTickerAdded");
             if (JoinedRoomTickers.ContainsKey(e.RoomName))
             {
                 JoinedRoomTickers[e.RoomName].Add(e.Ticker);
@@ -881,14 +882,14 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomTickerRemoved(object sender, Soulseek.RoomTickerRemovedEventArgs e)
         {
-            MainActivity.LogDebug("RoomTickerRemovedEventArgs");
+            Logger.Debug("RoomTickerRemovedEventArgs");
             //idk what to do here
             RoomTickerRemoved?.Invoke(null, e);
         }
 
         private static void SoulseekClient_RoomTickerListReceived(object sender, Soulseek.RoomTickerListReceivedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_RoomTickerListReceived");
+            Logger.Debug("SoulseekClient_RoomTickerListReceived");
             JoinedRoomTickers[e.RoomName] = e.Tickers.ToList();
             RoomTickerListReceived?.Invoke(null, e);
         }
@@ -934,7 +935,7 @@ namespace Seeker.Chatroom
             //if we got killed.
             if (StartingState != null && StartingState != string.Empty)
             {
-                MainActivity.LogDebug("starting state is not null " + StartingState);
+                Logger.Debug("starting state is not null " + StartingState);
                 JoinRoomApi(StartingState, true, false, false, false);
                 StartingState = null;
             }
@@ -966,7 +967,7 @@ namespace Seeker.Chatroom
             {
                 return;
             }
-            MainActivity.LogDebug("currently in room: " + currentlyInsideRoomName);
+            Logger.Debug("currently in room: " + currentlyInsideRoomName);
             if (roomName == currentlyInsideRoomName)
             {
                 return;
@@ -989,7 +990,7 @@ namespace Seeker.Chatroom
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogFirebase("ShowNotification failed: " + e.Message + e.StackTrace);
+                    Logger.Firebase("ShowNotification failed: " + e.Message + e.StackTrace);
                 }
             });
         }
@@ -1376,7 +1377,7 @@ namespace Seeker.Chatroom
                     string membershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.membership);
                     string membership = ownership ? ownershipString : membershipString;
                     SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
-                    MainActivity.LogFirebase("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
+                    Logger.Firebase("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
                 }
                 return;
             }
@@ -1391,7 +1392,7 @@ namespace Seeker.Chatroom
                     {
                         SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
                     }
-                    MainActivity.LogFirebase("DropMembershipOrOwnershipLogic " + task.Exception);
+                    Logger.Firebase("DropMembershipOrOwnershipLogic " + task.Exception);
                 }
                 else
                 {
@@ -1486,10 +1487,10 @@ namespace Seeker.Chatroom
 
         public static void JoinRoomApi(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)
         {
-            MainActivity.LogDebug("JOINING ROOM" + roomName);
+            Logger.Debug("JOINING ROOM" + roomName);
             if (!SeekerState.currentlyLoggedIn)
             {   //since this happens on startup its no good to have this logic...
-                MainActivity.LogDebug("CANT JOIN NOT LOGGED IN:" + roomName);
+                Logger.Debug("CANT JOIN NOT LOGGED IN:" + roomName);
                 return;
             }
             if (feedback && !joining)
@@ -1550,16 +1551,16 @@ namespace Seeker.Chatroom
             {
                 if (task.IsFaulted)
                 {
-                    MainActivity.LogDebug(task.Exception.GetType().Name);
-                    MainActivity.LogDebug(task.Exception.Message);
+                    Logger.Debug(task.Exception.GetType().Name);
+                    Logger.Debug(task.Exception.Message);
                     if (fromAutoJoin)
                     {
                         if (task.Exception != null && task.Exception.InnerException != null && task.Exception.InnerException.InnerException != null)
                         {
                             if (task.Exception.InnerException.InnerException is Soulseek.RoomJoinForbiddenException)
                             {
-                                MainActivity.LogDebug("forbidden room exception!! remove it from autojoin.." + joining);
-                                MainActivity.LogFirebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
+                                Logger.Debug("forbidden room exception!! remove it from autojoin.." + joining);
+                                Logger.Firebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
                                 if (AutoJoinRoomNames != null && AutoJoinRoomNames.Contains(roomName))
                                 {
                                     AutoJoinRoomNames.Remove(roomName);
@@ -1569,10 +1570,10 @@ namespace Seeker.Chatroom
                         }
                         else
                         {
-                            MainActivity.LogDebug("failed to join autojoin... join?" + joining);
+                            Logger.Debug("failed to join autojoin... join?" + joining);
                         }
                     }
-                    MainActivity.LogDebug("join / leave task failed... join?" + joining);
+                    Logger.Debug("join / leave task failed... join?" + joining);
                 }
                 else
                 {
@@ -1600,7 +1601,7 @@ namespace Seeker.Chatroom
                     {
                         if (joining)
                         {
-                            MainActivity.LogDebug("WRONG TASK TYPE");
+                            Logger.Debug("WRONG TASK TYPE");
                         }
                         else
                         {
@@ -1615,7 +1616,7 @@ namespace Seeker.Chatroom
                     {
                         //this one will just update the existing list 
                         // marking the now joined rooms as such.
-                        MainActivity.LogDebug("FULL JOINED CHANGED");
+                        Logger.Debug("FULL JOINED CHANGED");
                         ChatroomController.UpdateJoinedRooms();
                     }
                     else if (isCurrentChanged)

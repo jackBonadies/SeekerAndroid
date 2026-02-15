@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -93,7 +94,7 @@ namespace Seeker
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
+                Logger.Firebase("timer issue: " + e.Message + e.StackTrace);
             }
             //.setContentTitle(getText(R.string.notification_title))
             //.setContentText(getText(R.string.notification_message))
@@ -113,7 +114,7 @@ namespace Seeker
                 // you will still get notifications, it will just be a lower priority process
                 // also, next time this gets hit (i.e. if a user starts another set of downloads)
                 // the service can then maybe successfully get promoted.
-                MainActivity.LogFirebaseError($"Download service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
+                Logger.FirebaseError($"Download service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
 
             }
             //runs indefinitely until stop.

@@ -49,18 +49,18 @@ namespace Seeker.Search
             if (searchIntervalMilliseconds == 0)
             {
                 IsInitialized = true;
-                MainActivity.LogFirebase("Wishlist not allowed");
+                Logger.Firebase("Wishlist not allowed");
                 return;
             }
             if (searchIntervalMilliseconds == -1)
             {
                 IsInitialized = true;
-                MainActivity.LogFirebase("Wishlist interval is -1");
+                Logger.Firebase("Wishlist interval is -1");
                 return;
             }
             if (searchIntervalMilliseconds < 1000 * 60 * 2)
             {
-                MainActivity.LogFirebase("Wishlist interval is: " + searchIntervalMilliseconds);
+                Logger.Firebase("Wishlist interval is: " + searchIntervalMilliseconds);
                 searchIntervalMilliseconds = 2 * 60 * 1000; //min of 2 mins...
             }
 
@@ -117,7 +117,7 @@ namespace Seeker.Search
                     }
                     catch (System.Exception e)
                     {
-                        MainActivity.LogFirebase("ShowNotification For Wishlist failed: " + e.Message + e.StackTrace);
+                        Logger.Firebase("ShowNotification For Wishlist failed: " + e.Message + e.StackTrace);
                     }
                 });
             }
@@ -136,7 +136,7 @@ namespace Seeker.Search
                 }
                 else
                 {
-                    MainActivity.LogInfoFirebase("wishlist search ran " + searchIntervalMilliseconds);
+                    Logger.InfoFirebase("wishlist search ran " + searchIntervalMilliseconds);
                     DateTime oldest = DateTime.MaxValue;
                     int oldestId = int.MaxValue;
                     foreach (var pair in wishlistPairs)
@@ -175,15 +175,15 @@ namespace Seeker.Search
                         OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SeekerState.HideLockedResultsInSearch));
 #if DEBUG
                         sw.Stop();
-                        MainActivity.LogDebug($"search response count: {SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count} hashSet count: {OldResultsToCompare[oldestId].Count} time {sw.ElapsedMilliseconds} ms");
-                        MainActivity.LogDebug("now searching " + oldestId);
+                        Logger.Debug($"search response count: {SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count} hashSet count: {OldResultsToCompare[oldestId].Count} time {sw.ElapsedMilliseconds} ms");
+                        Logger.Debug("now searching " + oldestId);
 #endif
                         //SearchTabHelper.SearchTabCollection[oldestId].CurrentlySearching = true;
                         SearchFragment.SearchAPI((new CancellationTokenSource()).Token, null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
                     }
                     else
                     {
-                        MainActivity.LogDebug("was already searching " + oldestId);
+                        Logger.Debug("was already searching " + oldestId);
                     }
 
                 }

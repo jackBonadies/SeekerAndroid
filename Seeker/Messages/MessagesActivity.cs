@@ -188,7 +188,7 @@ namespace Seeker
                 {
                     //error
                     bool isNull = MessagesActivity.DELETED_DICTIONARY == null;
-                    MainActivity.LogFirebase("failure on undo delete all. dict was null");
+                    Logger.Firebase("failure on undo delete all. dict was null");
                     Toast.MakeText(v.Context, Resource.String.failed_to_undo, ToastLength.Short).Show();
                     return;
                 }
@@ -286,7 +286,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -297,7 +297,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Message User logic
                     eventHandler(sender, null);
@@ -309,7 +309,7 @@ namespace Seeker
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
-                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -320,7 +320,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -352,7 +352,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -366,7 +366,7 @@ namespace Seeker
                 if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
                 {
                     bool root = IsTaskRoot;
-                    MainActivity.LogDebug("IS TASK ROOT: " + root); //returns false if there is in fact a task behind it (such as the main activity task).
+                    Logger.Debug("IS TASK ROOT: " + root); //returns false if there is in fact a task behind it (such as the main activity task).
                     if (IsTaskRoot) //it is TRUE if we swiped seeker from task list and then later followed a notification..
                     {
                         Intent intent = new Intent(this, typeof(MainActivity));
@@ -443,7 +443,7 @@ namespace Seeker
                 string goToUsersMessages = intent.GetStringExtra(MessageController.FromUserName);
                 if (goToUsersMessages == string.Empty)
                 {
-                    MainActivity.LogFirebase("empty goToUsersMessages");
+                    Logger.Firebase("empty goToUsersMessages");
                 }
                 else
                 {
@@ -475,12 +475,12 @@ namespace Seeker
             bool reborn = false;
             if (savedInstanceState == null)
             {
-                MainActivity.LogDebug("Messages Activity On Create NEW");
+                Logger.Debug("Messages Activity On Create NEW");
             }
             else
             {
                 reborn = true;
-                MainActivity.LogDebug("Messages Activity On Create REBORN");
+                Logger.Debug("Messages Activity On Create REBORN");
             }
 
             MessagesActivityRef = this;
@@ -498,7 +498,7 @@ namespace Seeker
 
             if (MessageController.RootMessages == null)
             {
-                var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
+                var sharedPref = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
                 MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
                 if (SeekerState.Username != null && SeekerState.Username != string.Empty)
                 {
@@ -545,11 +545,11 @@ namespace Seeker
             {
                 if (Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
                 {
-                    MainActivity.LogDebug("coming from message tapped");
+                    Logger.Debug("coming from message tapped");
                     string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
                     if (goToUsersMessages == string.Empty)
                     {
-                        MainActivity.LogFirebase("empty goToUsersMessages");
+                        Logger.Firebase("empty goToUsersMessages");
                     }
                     else
                     {
@@ -618,7 +618,7 @@ namespace Seeker
             bool markAsRead = intent.Action == "seeker_mark_as_read";
             bool directReply = intent.Action == "seeker_direct_reply";
 
-            MainActivity.LogDebug(intent.Action == null ? "MessagesBroadcastReceiver null" : ("MessagesBroadcastReceiver " + intent.Action));
+            Logger.Debug(intent.Action == null ? "MessagesBroadcastReceiver null" : ("MessagesBroadcastReceiver " + intent.Action));
 
             if (delete)
             {
@@ -649,7 +649,7 @@ namespace Seeker
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");
                     //Message msg = new Message(SeekerState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
-                    MainActivity.LogDebug("direct reply " + replyText + " " + uname);
+                    Logger.Debug("direct reply " + replyText + " " + uname);
                     MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
 

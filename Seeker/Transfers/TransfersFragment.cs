@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -258,7 +259,7 @@ namespace Seeker
                     SeekerState.MainActivityRef.OnBackPressed();
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
-                    MainActivity.LogInfoFirebase("Clear All Complete Pressed");
+                    Logger.InfoFirebase("Clear All Complete Pressed");
                     if (CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.ClearAllComplete();
@@ -282,7 +283,7 @@ namespace Seeker
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
-                    MainActivity.LogInfoFirebase("Clear All Complete Pressed");
+                    Logger.InfoFirebase("Clear All Complete Pressed");
                     if (CurrentlySelectedUploadFolder == null)
                     {
                         TransferItemManagerUploads.ClearAllComplete();
@@ -298,7 +299,7 @@ namespace Seeker
                     RefreshForModeSwitch();
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
-                    MainActivity.LogInfoFirebase("action_cancel_and_clear_all Pressed");
+                    Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedDLFolder == null)
                     {
@@ -313,7 +314,7 @@ namespace Seeker
                     refreshListView();
                     return true;
                 case Resource.Id.action_abort_all: //abort all
-                    MainActivity.LogInfoFirebase("action_abort_all_pressed");
+                    Logger.InfoFirebase("action_abort_all_pressed");
                     SeekerState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedUploadFolder == null)
                     {
@@ -326,7 +327,7 @@ namespace Seeker
                     refreshListView();
                     return true;
                 case Resource.Id.action_pause_all:
-                    MainActivity.LogInfoFirebase("pause all Pressed");
+                    Logger.InfoFirebase("pause all Pressed");
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (CurrentlySelectedDLFolder == null)
                     {
@@ -339,7 +340,7 @@ namespace Seeker
                     refreshListView();
                     return true;
                 case Resource.Id.action_resume_all:
-                    MainActivity.LogInfoFirebase("resume all Pressed");
+                    Logger.InfoFirebase("resume all Pressed");
                     if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                     {
                         Task t;
@@ -409,7 +410,7 @@ namespace Seeker
             //get the batch selected transfer items ahead of time, because the next thing we do is clear the batch selected indices
             //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
             var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
-            MainActivity.LogInfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
+            Logger.InfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
@@ -669,7 +670,7 @@ namespace Seeker
         {
             StaticHacks.TransfersFrag = this;
             HasOptionsMenu = true;
-            MainActivity.LogDebug("TransfersFragment OnCreateView");
+            Logger.Debug("TransfersFragment OnCreateView");
             if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
             {
                 AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
@@ -730,8 +731,8 @@ namespace Seeker
 
 
 
-            MainActivity.LogInfoFirebase("AutoClear: " + SeekerState.AutoClearCompleteDownloads);
-            MainActivity.LogInfoFirebase("AutoRetry: " + SeekerState.AutoRetryDownload);
+            Logger.InfoFirebase("AutoClear: " + SeekerState.AutoClearCompleteDownloads);
+            Logger.InfoFirebase("AutoRetry: " + SeekerState.AutoRetryDownload);
 
             return rootView;
         }
@@ -834,7 +835,7 @@ namespace Seeker
                 //in response to a crash android.view.WindowManager.BadTokenException
                 //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
                 //in this case not showing it is probably best... as opposed to a crash...
-                MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
+                Logger.Firebase(error.Message + " POPUP BAD ERROR");
             }
         }
 
@@ -969,7 +970,7 @@ namespace Seeker
         public override void OnPause()
         {
             base.OnPause();
-            MainActivity.LogDebug("TransferFragment OnPause");  //this occurs when we move to the Account Tab or if we press the home button (i.e. to later kill the process)
+            Logger.Debug("TransferFragment OnPause");  //this occurs when we move to the Account Tab or if we press the home button (i.e. to later kill the process)
                                                                 //so this is a good place to do it.
             SaveTransferItems(sharedPreferences);
         }
@@ -978,7 +979,7 @@ namespace Seeker
 
         public static void SaveTransferItems(ISharedPreferences sharedPreferences, bool force = true, int maxSecondsUpdate = 0)
         {
-            MainActivity.LogDebug("---- saving transfer items enter ----");
+            Logger.Debug("---- saving transfer items enter ----");
 #if DEBUG
             var sw = System.Diagnostics.Stopwatch.StartNew();
             sw.Start();
@@ -986,7 +987,7 @@ namespace Seeker
 
             if (force || (SeekerApplication.TransfersDownloadsCompleteStale && DateTime.UtcNow.Subtract(SeekerApplication.TransfersLastSavedTime).TotalSeconds > maxSecondsUpdate)) //stale and we havent updated too recently..
             {
-                MainActivity.LogDebug("---- saving transfer items actual save ----");
+                Logger.Debug("---- saving transfer items actual save ----");
                 if (TransferItemManagerDL?.AllTransferItems == null)
                 {
                     return;
@@ -1020,7 +1021,7 @@ namespace Seeker
 
 #if DEBUG
             sw.Stop();
-            MainActivity.LogDebug("saving time: " + sw.ElapsedMilliseconds);
+            Logger.Debug("saving time: " + sw.ElapsedMilliseconds);
 #endif
 
 
@@ -1127,7 +1128,7 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
+                        Logger.Firebase(error.Message + " OnContextItemSelected");
                     }
                     if (!exceptionShown)
                     {
@@ -1160,14 +1161,14 @@ namespace Seeker
                             int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti);
                             if (pos == -1)
                             {
-                                MainActivity.LogDebug("pos == -1!!");
+                                Logger.Debug("pos == -1!!");
                                 continue;
                             }
 
                             if (indicesToUpdate.Contains(pos))
                             {
                                 //this is for if we are in a folder.  since previously we would update a folder of 10 items, 10 times which looked quite glitchy...
-                                MainActivity.LogDebug($"skipping same pos {pos}");
+                                Logger.Debug($"skipping same pos {pos}");
                             }
                             else
                             {
@@ -1180,7 +1181,7 @@ namespace Seeker
                         }
                         foreach (int i in indicesToUpdate)
                         {
-                            MainActivity.LogDebug($"updating {i}");
+                            Logger.Debug($"updating {i}");
                             if (StaticHacks.TransfersFrag != null)
                             {
                                 StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
@@ -1214,7 +1215,7 @@ namespace Seeker
             //ITransferItemView targetView = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(position) as ITransferItemView;
 
             //TransferItem item1 = null;
-            //MainActivity.LogDebug("targetView is null? " + (targetView == null).ToString());
+            //Logger.Debug("targetView is null? " + (targetView == null).ToString());
             //if (targetView == null)
             //{
             //    SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
@@ -1222,10 +1223,10 @@ namespace Seeker
             //}
             string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
-            MainActivity.LogDebug("chosenFname? " + chosenFname);
+            Logger.Debug("chosenFname? " + chosenFname);
             TransferItem item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
             int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1);
-            MainActivity.LogDebug("item1 is null?" + (item1 == null).ToString());//tested
+            Logger.Debug("item1 is null?" + (item1 == null).ToString());//tested
             if (item1 == null || indexToRefresh == -1)
             {
                 SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
@@ -1235,7 +1236,7 @@ namespace Seeker
             //int tokenNum = int.MinValue;
             if (SeekerState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
             {
-                MainActivity.LogDebug("transfer is in Downloads !!! " + item1.FullFilename);
+                Logger.Debug("transfer is in Downloads !!! " + item1.FullFilename);
                 item1.CancelAndRetryFlag = true;
                 ClearTransferForRetry(item1, indexToRefresh);
                 if (item1.CancellationTokenSource != null)
@@ -1247,7 +1248,7 @@ namespace Seeker
                 }
                 else
                 {
-                    MainActivity.LogFirebase("CTS is null. this should not happen. we should always set it before downloading.");
+                    Logger.Firebase("CTS is null. this should not happen. we should always set it before downloading.");
                 }
                 return; //the dl continuation method will take care of it....
             }
@@ -1281,7 +1282,7 @@ namespace Seeker
                 }
                 else
                 {
-                    MainActivity.LogFirebase(error.Message + " OnContextItemSelected");
+                    Logger.Firebase(error.Message + " OnContextItemSelected");
                 }
                 SeekerState.MainActivityRef.RunOnUiThread(a);
                 return; //otherwise null ref with task!
@@ -1297,7 +1298,7 @@ namespace Seeker
             var refreshOnlySelected = new Action(() =>
             {
 
-                MainActivity.LogDebug("notifyItemChanged " + position);
+                Logger.Debug("notifyItemChanged " + position);
 
                 recyclerTransferAdapter.NotifyItemChanged(position);
 
@@ -1325,14 +1326,14 @@ namespace Seeker
             {
                 if (recyclerTransferAdapter == null)
                 {
-                    MainActivity.LogInfoFirebase("recyclerTransferAdapter is null");
+                    Logger.InfoFirebase("recyclerTransferAdapter is null");
                 }
 
                 ITransferItem ti = recyclerTransferAdapter.getSelectedItem();
 
                 if (ti == null)
                 {
-                    MainActivity.LogInfoFirebase("ti is null");
+                    Logger.InfoFirebase("ti is null");
                 }
 
                 int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
@@ -1346,7 +1347,7 @@ namespace Seeker
 
                 if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SeekerState.ActiveActivityRef, this.View))
                 {
-                    MainActivity.LogDebug("handled by commons");
+                    Logger.Debug("handled by commons");
                     return base.OnContextItemSelected(item);
                 }
 
@@ -1396,7 +1397,7 @@ namespace Seeker
                     case 1:
                         //clear complete?
                         //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-                        MainActivity.LogInfoFirebase("Clear Complete item pressed");
+                        Logger.InfoFirebase("Clear Complete item pressed");
                         lock (TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
                         {
                             try
@@ -1412,7 +1413,7 @@ namespace Seeker
                             }
                             catch (ArgumentOutOfRangeException)
                             {
-                                //MainActivity.LogFirebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                                //Logger.Firebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                                 Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                                 return base.OnContextItemSelected(item);
                             }
@@ -1422,7 +1423,7 @@ namespace Seeker
                         break;
                     case 2: //cancel and clear (downloads) OR abort and clear (uploads)
                         //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-                        MainActivity.LogInfoFirebase("Cancel and Clear item pressed");
+                        Logger.InfoFirebase("Cancel and Clear item pressed");
                         ITransferItem tItem = null;
                         try
                         {
@@ -1430,7 +1431,7 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            //Logger.Firebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
@@ -1466,7 +1467,7 @@ namespace Seeker
                         }
                         else
                         {
-                            MainActivity.LogInfoFirebase("Cancel and Clear item pressed - bad item");
+                            Logger.InfoFirebase("Cancel and Clear item pressed - bad item");
                         }
                         break;
                     case 3:
@@ -1481,7 +1482,7 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //MainActivity.LogFirebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            //Logger.Firebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
@@ -1513,7 +1514,7 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //MainActivity.LogFirebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            //Logger.Firebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
@@ -1539,7 +1540,7 @@ namespace Seeker
                         }
                         catch (System.Exception e)
                         {
-                            MainActivity.LogFirebase(e.Message + e.StackTrace);
+                            Logger.Firebase(e.Message + e.StackTrace);
                             Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
                         }
                         break;
@@ -1586,7 +1587,7 @@ namespace Seeker
                         {
                             return true;
                         }
-                        MainActivity.LogInfoFirebase("resume folder Pressed");
+                        Logger.InfoFirebase("resume folder Pressed");
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
@@ -1630,7 +1631,7 @@ namespace Seeker
                         {
                             return true;
                         }
-                        MainActivity.LogInfoFirebase("retry folder Pressed");
+                        Logger.InfoFirebase("retry folder Pressed");
                         if (MainActivity.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
@@ -1665,7 +1666,7 @@ namespace Seeker
                         }
                         break;
                     case 103: //abort upload
-                        MainActivity.LogInfoFirebase("Abort Upload item pressed");
+                        Logger.InfoFirebase("Abort Upload item pressed");
                         tItem = null;
                         try
                         {
@@ -1673,7 +1674,7 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //MainActivity.LogFirebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
+                            //Logger.Firebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
                             return base.OnContextItemSelected(item);
                         }
@@ -1689,7 +1690,7 @@ namespace Seeker
                         }
                         break;
                     case 104: //ignore (unshare) user
-                        MainActivity.LogInfoFirebase("Unshare User item pressed");
+                        Logger.InfoFirebase("Unshare User item pressed");
                         IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
                         foreach (var tiToCancel in tItems)
                         {
@@ -1755,10 +1756,10 @@ namespace Seeker
             if (userPostionBeingRemoved == -1)
             {
                 //it is not currently on our screen, perhaps it is in uploads (and we are in downloads) or we are inside a folder (and it is outside)
-                MainActivity.LogDebug("batch on, different screen item removed");
+                Logger.Debug("batch on, different screen item removed");
                 return;
             }
-            MainActivity.LogDebug("batch on, updating: " + userPostionBeingRemoved);
+            Logger.Debug("batch on, updating: " + userPostionBeingRemoved);
             //adjust numbers
             int cnt = BatchSelectedItems.Count;
             for (int i = cnt - 1; i >= 0; i--)
@@ -1867,7 +1868,7 @@ namespace Seeker
                 {
                     //this is the only option that uploads gets
                     case Resource.Id.action_cancel_and_clear_all_batch:
-                        MainActivity.LogInfoFirebase("action_cancel_and_clear_batch Pressed");
+                        Logger.InfoFirebase("action_cancel_and_clear_batch Pressed");
                         SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         TransferItemManagerWrapped.CancelSelectedItems(true);
                         TransferItemManagerWrapped.ClearSelectedItemsAndClean();
@@ -1994,7 +1995,7 @@ namespace Seeker
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogFirebase("actionOnComplete" + e.Message + e.StackTrace);
+                    Logger.Firebase("actionOnComplete" + e.Message + e.StackTrace);
                 }
 
                 return null;
@@ -2012,13 +2013,13 @@ namespace Seeker
                     return;
                 }
                 int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename);
-                MainActivity.LogDebug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
-                MainActivity.LogDebug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
+                Logger.Debug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
+                Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
                 if (recyclerTransferAdapter.ItemCount == indexOfItem)
                 {
 
                 }
-                MainActivity.LogDebug("UI thread: " + Looper.MainLooper.IsCurrentThread);
+                Logger.Debug("UI thread: " + Looper.MainLooper.IsCurrentThread);
                 recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
             }
             catch (System.Exception)
@@ -2152,7 +2153,7 @@ namespace Seeker
             {
                 if (SeekerState.MainActivityRef == null)
                 {
-                    MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
+                    Logger.Firebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
                 }
                 //customAdapter = new TransferAdapter(SeekerState.MainActivityRef, transferItems);
@@ -2163,13 +2164,13 @@ namespace Seeker
             }
             if (this.noTransfers == null)
             {
-                MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
+                Logger.Firebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
                 return;
             }
             SetNoTransfersMessage();
-            MainActivity.LogDebug("NotifyItemChanged" + indexOfItem);
-            MainActivity.LogDebug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: ");
-            MainActivity.LogDebug("UI thread: " + Looper.MainLooper.IsCurrentThread);
+            Logger.Debug("NotifyItemChanged" + indexOfItem);
+            Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: ");
+            Logger.Debug("UI thread: " + Looper.MainLooper.IsCurrentThread);
             if (recyclerTransferAdapter.ItemCount == indexOfItem)
             {
 
@@ -2187,7 +2188,7 @@ namespace Seeker
             {
                 if (SeekerState.MainActivityRef == null)
                 {
-                    MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
+                    Logger.Firebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
                 }
             }
@@ -2196,7 +2197,7 @@ namespace Seeker
             }
             if (this.noTransfers == null)
             {
-                MainActivity.LogFirebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
+                Logger.Firebase("cannot refreshListView on TransferStateUpdated, noTransfers is null");
                 return;
             }
             SetNoTransfersMessage();
@@ -2206,7 +2207,7 @@ namespace Seeker
 
                 //int oldCount = recyclerTransferAdapter.ItemCount;
                 //int newCount = transferItems.Count;
-                //MainActivity.LogDebug("!!! recyclerTransferAdapter.NotifyDataSetChanged() old:: " + oldCount + " new: " + newCount);
+                //Logger.Debug("!!! recyclerTransferAdapter.NotifyDataSetChanged() old:: " + oldCount + " new: " + newCount);
                 ////old 73, new 73...
                 //recyclerTransferAdapter.NotifyItemRangeRemoved(0,oldCount);
                 //recyclerTransferAdapter.NotifyItemRangeInserted(0,newCount);
@@ -2391,7 +2392,7 @@ namespace Seeker
             {
 
                 int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
-                MainActivity.LogDebug($"position: {position} ti name: {iti.GetDisplayName()}");
+                Logger.Debug($"position: {position} ti name: {iti.GetDisplayName()}");
 
             }
 #endif
@@ -2404,7 +2405,7 @@ namespace Seeker
 #endif
                 if (this.selectedItem == null)
                 {
-                    MainActivity.LogInfoFirebase("selected item was set as null");
+                    Logger.InfoFirebase("selected item was set as null");
                 }
             }
 
@@ -2702,7 +2703,7 @@ namespace Seeker
 
                     //    var refreshOnlySelected = new Action(() => {
 
-                    //        MainActivity.LogDebug("notifyItemRemoved " + indexRemoved + "count: " + recyclerTransferAdapter.ItemCount);
+                    //        Logger.Debug("notifyItemRemoved " + indexRemoved + "count: " + recyclerTransferAdapter.ItemCount);
                     //        if(indexRemoved == recyclerTransferAdapter.ItemCount)
                     //        {
 
@@ -2750,7 +2751,7 @@ namespace Seeker
                         //partial refresh just update progress..
                         //TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.ti.FullFilename, out index);
 
-                        //MainActivity.LogDebug("Index is "+index+" TransferProgressUpdated"); //tested!
+                        //Logger.Debug("Index is "+index+" TransferProgressUpdated"); //tested!
 
                         //int indexToUpdate = transferItems.IndexOf(relevantItem);
 
@@ -2760,10 +2761,10 @@ namespace Seeker
                             index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
                             if (index == -1)
                             {
-                                MainActivity.LogDebug("Index is -1 TransferProgressUpdated");
+                                Logger.Debug("Index is -1 TransferProgressUpdated");
                                 return;
                             }
-                            MainActivity.LogDebug("UI THREAD TRANSFER PROGRESS UPDATED"); //this happens every 20ms.  so less often then tranfer progress updated.  usually 6 of those can happen before 2 of these.
+                            Logger.Debug("UI THREAD TRANSFER PROGRESS UPDATED"); //this happens every 20ms.  so less often then tranfer progress updated.  usually 6 of those can happen before 2 of these.
                             refreshItemProgress(index, e.ti.Progress, e.ti, e.wasFailed, e.avgspeedBytes);
 
                         });
@@ -2773,7 +2774,7 @@ namespace Seeker
                     }
                     catch (System.Exception error)
                     {
-                        MainActivity.LogFirebase(error.Message + " partial update");
+                        Logger.Firebase(error.Message + " partial update");
                     }
                 }
             }

@@ -107,7 +107,7 @@ namespace Seeker
         {
             base.OnResume();
 
-            MainActivity.LogDebug("OnResume ran");
+            Logger.Debug("OnResume ran");
             //this.View.ViewTreeObserver.AddOnGlobalLayoutListener(this);
             //Window window = Dialog.Window;//  getDialog().getWindow();
 
@@ -119,7 +119,7 @@ namespace Seeker
 
             Dialog?.SetSizeProportional(.9, -1);
 
-            MainActivity.LogDebug("OnResume End");
+            Logger.Debug("OnResume End");
         }
 
         private List<int> GetSearchTabIds()

@@ -27,6 +27,7 @@ using Soulseek;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 namespace Seeker
 {
     public class LoginFragment : Fragment //, Android.Net.DnsResolver.ICallback //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
@@ -62,7 +63,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -93,7 +94,7 @@ namespace Seeker
         {
 
             HasOptionsMenu = true;
-            MainActivity.LogDebug("LoginFragmentOnCreateView");
+            Logger.Debug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
             if (MainActivity.IsNotLoggedIn())//you are not logged in if username or password is null
             {
@@ -120,7 +121,7 @@ namespace Seeker
                     catch (InvalidOperationException)
                     {
                         Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
-                        MainActivity.LogFirebase("We are already logging in");
+                        Logger.Firebase("We are already logging in");
                     }
                     //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SeekerState.Username, SeekerState.Password);
                     login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
@@ -237,7 +238,7 @@ namespace Seeker
                 var action = new Action(() =>
                 {
                     Toast.MakeText(SeekerState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
-                    //MainActivity.LogFirebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
+                    //Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
                 SeekerState.MainActivityRef.RunOnUiThread(action);
                 SoulseekClient.DNS_LOOKUP_FAILED = false; // dont have to keep showing this... wait for next failure for it to be set...
@@ -324,17 +325,17 @@ namespace Seeker
 
                 if (msgToLog != string.Empty)
                 {
-                    MainActivity.LogDebug(msgToLog);
-                    MainActivity.LogFirebase(msgToLog);
+                    Logger.Debug(msgToLog);
+                    Logger.Firebase(msgToLog);
                 }
 
-                MainActivity.LogDebug("time to update layouts..");
+                Logger.Debug("time to update layouts..");
                 MainActivity.AddLoggedInLayout(this.rootView);
                 MainActivity.BackToLogInLayout(this.rootView, LogInClick, clearUserPass);
             }
 
 
-            MainActivity.LogDebug("Login Status: " + cannotLogin);
+            Logger.Debug("Login Status: " + cannotLogin);
             //SeekerState.ManualResetEvent.WaitOne();
 
             if (cannotLogin == false)

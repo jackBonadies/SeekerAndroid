@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
 
 namespace Seeker.Users
 {
@@ -148,7 +149,7 @@ namespace Seeker.Users
             UserRowView userRowView = v as UserRowView;
             string username = userRowView.viewUsername.Text;
             UserListActivity.PopUpMenuOwnerHack = username;
-            MainActivity.LogDebug(username + " clicked");
+            Logger.Debug(username + " clicked");
             UserListItem userListItem = userRowView.BoundItem;
             bool isIgnored = userListItem.Role == UserRole.Ignored;
 
@@ -395,7 +396,7 @@ namespace Seeker.Users
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("user list activity set item: " + e.Message);
+                Logger.Firebase("user list activity set item: " + e.Message);
             }
             //TEST
             //viewSpeed.Text = item.FreeUploadSlots.ToString();

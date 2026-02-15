@@ -3,6 +3,7 @@ using Android.Net.Wifi;
 using Android.Widget;
 using System;
 using System.Threading;
+using Seeker.Helpers;
 
 namespace Seeker.UPnP
 {
@@ -127,7 +128,7 @@ namespace Seeker.UPnP
                 }
                 else
                 {
-                    MainActivity.LogFirebase("GetIconAndMessage We should not get here");
+                    Logger.Firebase("GetIconAndMessage We should not get here");
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
                 }
             }
@@ -137,7 +138,7 @@ namespace Seeker.UPnP
             }
             else
             {
-                MainActivity.LogFirebase("GetIconAndMessage We should not get here 2");
+                Logger.Firebase("GetIconAndMessage We should not get here 2");
                 return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
             }
         }
@@ -151,7 +152,7 @@ namespace Seeker.UPnP
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("FinishSearchTimer_Elapsed " + ex.Message + ex.StackTrace);
+                Logger.Firebase("FinishSearchTimer_Elapsed " + ex.Message + ex.StackTrace);
             }
             if (DevicesSuccessfullyMapped > 0)
             {
@@ -180,7 +181,7 @@ namespace Seeker.UPnP
                 });
             }
             Feedback = false;
-            MainActivity.LogDebug("finished " + DiagStatus.ToString());
+            Logger.Debug("finished " + DiagStatus.ToString());
 
             SearchFinished?.Invoke(null, new EventArgs());
             if (DiagStatus == UPnPDiagStatus.Success)
@@ -196,14 +197,14 @@ namespace Seeker.UPnP
             {
                 if (!SeekerState.ListenerEnabled || !SeekerState.ListenerUPnpEnabled)
                 {
-                    MainActivity.LogDebug("Upnp is off...");
+                    Logger.Debug("Upnp is off...");
                     SearchFinished?.Invoke(null, new EventArgs());
                     Feedback = false;
                     return;
                 }
                 if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SeekerState.ListenerPort && IsLocalIPsame())
                 {
-                    MainActivity.LogDebug("Renew Mapping Later... we already have a good one..");
+                    Logger.Debug("Renew Mapping Later... we already have a good one..");
                     RunningStatus = UPnPRunningStatus.AlreadyMapped;
                     SearchFinished?.Invoke(null, new EventArgs());
                     Feedback = false;
@@ -211,13 +212,13 @@ namespace Seeker.UPnP
                 }
                 else
                 {
-                    MainActivity.LogDebug("search and set mapping...");
+                    Logger.Debug("search and set mapping...");
                     SearchAndSetMapping();
                 }
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("SearchAndSetMappingIfRequired" + e.Message + e.StackTrace);
+                Logger.Firebase("SearchAndSetMappingIfRequired" + e.Message + e.StackTrace);
                 Feedback = false;
             }
         }
@@ -226,7 +227,7 @@ namespace Seeker.UPnP
         public static System.Timers.Timer RenewMappingTimer = null;
         public void RenewMapping() //if new port
         {
-            MainActivity.LogDebug("renewing mapping");
+            Logger.Debug("renewing mapping");
             try
             {
                 if (LastSetLifeTime != -1 && LastSetPort != -1 && LastSetTime != DateTime.MinValue)
@@ -243,13 +244,13 @@ namespace Seeker.UPnP
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RenewMapping" + e.Message + e.StackTrace);
+                Logger.Firebase("RenewMapping" + e.Message + e.StackTrace);
             }
         }
 
         private void RenewMappingTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            MainActivity.LogDebug("renew timer elapsed");
+            Logger.Debug("renew timer elapsed");
             SearchAndSetMapping();
         }
 
@@ -266,7 +267,7 @@ namespace Seeker.UPnP
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("IsLocalIPsame exception " + ex.Message + ex.StackTrace);
+                Logger.Firebase("IsLocalIPsame exception " + ex.Message + ex.StackTrace);
                 return false;
             }
         }
@@ -307,7 +308,7 @@ namespace Seeker.UPnP
                 }
                 LocalIP = Mono.Nat.NatUtility.LocalIpAddress = Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress);
                 //string gatewayAddress = Android.Text.Format.Formatter.FormatIpAddress(wm.DhcpInfo.Gateway);
-                MainActivity.LogDebug(LocalIP);
+                Logger.Debug(LocalIP);
 
                 DevicesFound = 0;
                 DevicesSuccessfullyMapped = 0;
@@ -325,7 +326,7 @@ namespace Seeker.UPnP
             catch (Exception e)
             {
                 DiagStatus = UPnPDiagStatus.ErrorUnspecified;
-                MainActivity.LogFirebase("SearchAndSetMapping: " + e.Message + e.StackTrace);
+                Logger.Firebase("SearchAndSetMapping: " + e.Message + e.StackTrace);
                 SearchFinished?.Invoke(null, new EventArgs());
             }
         }
@@ -340,11 +341,11 @@ namespace Seeker.UPnP
         {
             try
             {
-                MainActivity.LogDebug("Device Found");
+                Logger.Debug("Device Found");
                 Interlocked.Increment(ref DevicesFound); //not sure if this will ever be greater than one....
                 if (DevicesFound > 1)
                 {
-                    MainActivity.LogFirebase("more than 1 device found");
+                    Logger.Firebase("more than 1 device found");
                 }
                 bool ipOurs = (e.Device as Mono.Nat.Upnp.UpnpNatDevice).LocalAddress.ToString() == Mono.Nat.NatUtility.LocalIpAddress; //I think this will always be true
                 if (ipOurs)
@@ -356,7 +357,7 @@ namespace Seeker.UPnP
                         bool timeOutCreateMapping = !(t.Wait(5000));
                         if (timeOutCreateMapping)
                         {
-                            MainActivity.LogFirebase("CreatePortMapAsync timeout");
+                            Logger.Firebase("CreatePortMapAsync timeout");
                             return;
                         }
                     }
@@ -372,14 +373,14 @@ namespace Seeker.UPnP
                                 bool timeOutCreateMapping0lease = !(t0.Wait(5000));
                                 if (timeOutCreateMapping0lease)
                                 {
-                                    MainActivity.LogFirebase("CreatePortMapAsync timeout try with 0 lease");
+                                    Logger.Firebase("CreatePortMapAsync timeout try with 0 lease");
                                     return;
                                 }
                                 t = t0; // use this good task instead. bc t.Result is gonna throw heh
                             }
                             catch (Exception ex0)
                             {
-                                MainActivity.LogFirebase("CreatePortMapAsync try with 0 lease " + ex0.Message + ex0.StackTrace);
+                                Logger.Firebase("CreatePortMapAsync try with 0 lease " + ex0.Message + ex0.StackTrace);
                                 return;
                             }
                         }
@@ -393,7 +394,7 @@ namespace Seeker.UPnP
                             //Error ActionFailed: Action Failed
                             //InvalidArgs
 
-                            MainActivity.LogDebug("CreatePortMapAsync " + ex.Message + ex.StackTrace);
+                            Logger.Debug("CreatePortMapAsync " + ex.Message + ex.StackTrace);
                             return;
                         }
                     }
@@ -408,14 +409,14 @@ namespace Seeker.UPnP
                         bool timeOutGetMapping = !(t2.Wait(5000));
                         if (timeOutGetMapping)
                         {
-                            MainActivity.LogFirebase("GetSpecificMappingAsync timeout");
+                            Logger.Firebase("GetSpecificMappingAsync timeout");
                             return;
                         }
                     }
                     catch (Exception ex)
                     {
                         //the task can throw (in which case the task.Wait throws)
-                        MainActivity.LogFirebase("GetSpecificMappingAsync " + ex.Message + ex.StackTrace);
+                        Logger.Firebase("GetSpecificMappingAsync " + ex.Message + ex.StackTrace);
                         return;
                     }
                     Mono.Nat.Mapping actualMapping = t2.Result;
@@ -432,7 +433,7 @@ namespace Seeker.UPnP
                     }
                     else if (LastSetLifeTime < 2 * 3600)
                     {
-                        MainActivity.LogFirebase("less than 2 hours: " + LastSetLifeTime); //20 mins
+                        Logger.Firebase("less than 2 hours: " + LastSetLifeTime); //20 mins
                         LastSetLifeTime = 2 * 3600;
                     }
 
@@ -441,18 +442,18 @@ namespace Seeker.UPnP
                     SaveUpnpState();
 
                     Interlocked.Increment(ref DevicesSuccessfullyMapped);
-                    MainActivity.LogDebug("successfully mapped");
+                    Logger.Debug("successfully mapped");
                     DiagStatus = UPnPDiagStatus.Success;
                     DeviceSuccessfullyMapped?.Invoke(null, new EventArgs());
                 }
                 else
                 {
-                    MainActivity.LogFirebase("ip is not ours");
+                    Logger.Firebase("ip is not ours");
                 }
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("NatUtility_DeviceFound " + ex.Message + ex.StackTrace);
+                Logger.Firebase("NatUtility_DeviceFound " + ex.Message + ex.StackTrace);
             }
             //e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp,3000,3000)).Wait();
         }

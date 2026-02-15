@@ -52,7 +52,7 @@ namespace Seeker
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("chatroom activity on create");
+            Logger.Debug("chatroom activity on create");
             base.OnCreate(savedInstanceState);
 
             ChatroomActivityRef = this;
@@ -74,10 +74,10 @@ namespace Seeker
 
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtChatroomInner"))
             {
-                MainActivity.LogDebug("restoring chatroom inner fragment");
+                Logger.Debug("restoring chatroom inner fragment");
                 if (ChatroomInnerFragment.OurRoomInfo == null)
                 {
-                    MainActivity.LogDebug("ourroominfo is null");
+                    Logger.Debug("ourroominfo is null");
                     RestoreStartingRoomInfo(savedInstanceState);
                     ChatroomController.StartingState = ChatroomInnerFragment.OurRoomInfo != null ? ChatroomInnerFragment.OurRoomInfo.Name : null;
                     //this means we have since been killed
@@ -93,7 +93,7 @@ namespace Seeker
                     string goToRoom = Intent.GetStringExtra(ChatroomController.FromRoomName);
                     if (goToRoom == string.Empty)
                     {
-                        MainActivity.LogFirebase("empty goToUsersMessages");
+                        Logger.Firebase("empty goToUsersMessages");
                     }
                     else
                     {
@@ -155,7 +155,7 @@ namespace Seeker
                 string goToRoom = intent.GetStringExtra(ChatroomController.FromRoomName);
                 if (goToRoom == string.Empty)
                 {
-                    MainActivity.LogFirebase("empty goToRoom");
+                    Logger.Firebase("empty goToRoom");
                 }
                 else
                 {
@@ -200,10 +200,10 @@ namespace Seeker
             int rCount = inState.GetInt(INNER_ROOM_COUNT_CONST, -1);
             if (rName == string.Empty)
             {
-                MainActivity.LogFirebase("no restore info...");
+                Logger.Firebase("no restore info...");
                 return;
             }
-            MainActivity.LogFirebase("restoring info...");
+            Logger.Firebase("restoring info...");
             ChatroomInnerFragment.OurRoomInfo = new Soulseek.RoomInfo(rName, rCount);
             ChatroomInnerFragment.cachedMod = inState.GetBoolean(INNER_ROOM_MOD_CONST, false);
             ChatroomInnerFragment.cachedOwned = inState.GetBoolean(INNER_ROOM_OWNED_CONST, false);
@@ -216,9 +216,9 @@ namespace Seeker
             if (f != null && f.IsVisible)
             {
                 outState.PutBoolean("SaveStateAtChatroomInner", true);
-                MainActivity.LogDebug("SaveStateAtChatroomInner OnSaveInstanceState");
+                Logger.Debug("SaveStateAtChatroomInner OnSaveInstanceState");
                 SaveStartingRoomInfo(outState, f as ChatroomInnerFragment);
-                MainActivity.LogDebug("currentlyInsideRoomName -- OnSaveInstanceState -- " + ChatroomController.currentlyInsideRoomName);
+                Logger.Debug("currentlyInsideRoomName -- OnSaveInstanceState -- " + ChatroomController.currentlyInsideRoomName);
                 //ChatroomController.currentlyInsideRoomName = ChatroomInnerFragment.OurRoomInfo.Name; //this sets it after we are leaving....
             }
             else
@@ -233,7 +233,7 @@ namespace Seeker
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            MainActivity.LogDebug("on create options menu");
+            Logger.Debug("on create options menu");
             var fOuter = SupportFragmentManager.FindFragmentByTag("OuterListChatroomFragment");
             var fInner = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment");
             if (fOuter != null && fOuter.IsVisible)
@@ -255,7 +255,7 @@ namespace Seeker
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
             base.OnPrepareOptionsMenu(menu);
-            MainActivity.LogDebug("on prepare options menu");
+            Logger.Debug("on prepare options menu");
             var fInner = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment");
 
             //fix : there is a bug where if you rotate the phone in the inner chatroom and then press back
@@ -277,7 +277,7 @@ namespace Seeker
             if (fInner != null && fInner.IsVisible && !transitionBothVisible)
             {
                 //if private different options...
-                MainActivity.LogDebug("on prepare options menu INNER");
+                Logger.Debug("on prepare options menu INNER");
                 bool isPrivate = false;
                 bool isOwnedByUs = false;
                 bool isOperator = false;
@@ -293,7 +293,7 @@ namespace Seeker
                     isOwnedByUs = ChatroomInnerFragment.cachedOwned;
                     isOperator = ChatroomInnerFragment.cachedMod;
                 }
-                MainActivity.LogDebug("isPrivate: " + isPrivate + "isOwnedByUs: " + isOwnedByUs + "isOperator: " + isOperator);
+                Logger.Debug("isPrivate: " + isPrivate + "isOwnedByUs: " + isOwnedByUs + "isOperator: " + isOperator);
                 menu.FindItem(Resource.Id.invite_user_action).SetVisible(isOperator || isOwnedByUs); //tho what about a public room owned by us ?? if such a thing exists???
                 menu.FindItem(Resource.Id.give_up_room_action).SetVisible(isOwnedByUs);
                 menu.FindItem(Resource.Id.give_up_membership_action).SetVisible(isPrivate && !isOwnedByUs);
@@ -440,7 +440,7 @@ namespace Seeker
 
         public void ShowAllTickersDialog(string roomName)
         {
-            MainActivity.LogInfoFirebase("ShowAllTickersDialog" + this.IsFinishing + this.IsDestroyed + SupportFragmentManager.IsDestroyed);
+            Logger.InfoFirebase("ShowAllTickersDialog" + this.IsFinishing + this.IsDestroyed + SupportFragmentManager.IsDestroyed);
             var tickerDialog = new AllTickersDialog(roomName);
             tickerDialog.Show(SupportFragmentManager, "ticker dialog");
         }
@@ -459,7 +459,7 @@ namespace Seeker
 
         public void ShowInviteUserDialog(string roomToInvite)
         {
-            MainActivity.LogInfoFirebase("ShowInviteUserDialog" + this.IsFinishing + this.IsDestroyed);
+            Logger.InfoFirebase("ShowInviteUserDialog" + this.IsFinishing + this.IsDestroyed);
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             builder.SetTitle(this.Resources.GetString(Resource.String.invite_user));
@@ -512,7 +512,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -523,7 +523,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -534,7 +534,7 @@ namespace Seeker
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
-                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -545,7 +545,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -574,26 +574,26 @@ namespace Seeker
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("invite WindowManagerBadTokenException null activities");
+                    Logger.Firebase("invite WindowManagerBadTokenException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
-                    MainActivity.LogFirebase("invite WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.Firebase("invite WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("invite Exception null activities");
+                    Logger.Firebase("invite Exception null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
-                    MainActivity.LogFirebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.Firebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
 
@@ -623,7 +623,7 @@ namespace Seeker
 
         public void ShowSetTickerDialog(string roomToInvite)
         {
-            MainActivity.LogInfoFirebase("ShowSetTickerDialog" + this.IsFinishing + this.IsDestroyed);
+            Logger.InfoFirebase("ShowSetTickerDialog" + this.IsFinishing + this.IsDestroyed);
 
             void OkayAction(object sender, string textInput)
             {
@@ -668,7 +668,7 @@ namespace Seeker
 
         public void ShowEditCreateChatroomDialog()
         {
-            MainActivity.LogInfoFirebase("ShowEditCreateChatroomDialog" + this.IsFinishing + this.IsDestroyed);
+            Logger.InfoFirebase("ShowEditCreateChatroomDialog" + this.IsFinishing + this.IsDestroyed);
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             Context c = this;
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
@@ -733,26 +733,26 @@ namespace Seeker
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("createroomWindowManagerBadTokenException null activities");
+                    Logger.Firebase("createroomWindowManagerBadTokenException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
-                    MainActivity.LogFirebase("createroomWindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.Firebase("createroomWindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("createroomException null activities");
+                    Logger.Firebase("createroomException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.IsFinishing;
-                    MainActivity.LogFirebase("createroomException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.Firebase("createroomException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
 
@@ -766,7 +766,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("createroomMainActivity_FocusChange" + err.Message);
+                Logger.Firebase("createroomMainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -998,7 +998,7 @@ namespace Seeker
     {
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            MainActivity.LogDebug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
+            Logger.Debug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
 
             //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
             //in that case we still dont want to show anything.
@@ -1020,7 +1020,7 @@ namespace Seeker
             }
             else
             {
-                MainActivity.LogFirebase("sender for GroupMessageInnerViewReceivedHolder.GroupMessageInnerViewReceived is " + v.GetType().Name);
+                Logger.Firebase("sender for GroupMessageInnerViewReceivedHolder.GroupMessageInnerViewReceived is " + v.GetType().Name);
             }
 
             menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
@@ -1127,7 +1127,7 @@ namespace Seeker
             base.OnSizeChanged(w, h, oldw, oldh);
             if (oldh > h)
             {
-                MainActivity.LogDebug("size changed to smaller...");
+                Logger.Debug("size changed to smaller...");
                 this.GetLayoutManager().ScrollToPosition(this.GetLayoutManager().ItemCount - 1);
             }
         }
@@ -1222,7 +1222,7 @@ namespace Seeker
                 if (localDataSet[i].Name == roomName)
                 {
                     this.NotifyItemChanged(i);
-                    MainActivity.LogDebug("NotifyItemChanged notifyRoomStatusChanged");
+                    Logger.Debug("NotifyItemChanged notifyRoomStatusChanged");
                     break;
                 }
             }

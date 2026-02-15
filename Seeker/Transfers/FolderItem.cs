@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -101,7 +102,7 @@ namespace Seeker
                 //error "System.OverflowException: Value was either too large or too small for an Int32." can occur for example when totalFolderBytes is 0
                 if (totalFolderBytes == 0)
                 {
-                    MainActivity.LogInfoFirebase("total folder bytes == 0");
+                    Logger.InfoFirebase("total folder bytes == 0");
                     return 100;
                 }
                 else

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Environment = Android.OS.Environment;
+using Seeker.Helpers;
 //using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
 namespace Seeker
@@ -102,7 +103,7 @@ namespace Seeker
                 }
                 if (rootFolder != "storage")
                 {
-                    MainActivity.LogFirebase("sdcard root is: " + rootFolder);
+                    Logger.Firebase("sdcard root is: " + rootFolder);
                 }
                 _mSdcardDirectory = @"/" + rootFolder + @"/";
                 //this allows one to press '..' to go above the typical emulated root.

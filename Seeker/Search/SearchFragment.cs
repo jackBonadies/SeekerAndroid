@@ -30,17 +30,17 @@ namespace Seeker
         {
             //this fixes the same bug as the MainActivity OnStart fixes.
             SearchFragment.Instance = this;
-            MainActivity.LogDebug("SearchFragmentOnStart");
+            Logger.Debug("SearchFragmentOnStart");
             base.OnStart();
         }
         public override void OnResume()
         {
             base.OnResume();
-            MainActivity.LogDebug("Search Fragment On Resume");
+            Logger.Debug("Search Fragment On Resume");
             //you had a pending intent that could not get handled til now.
             if (MainActivity.goToSearchTab != int.MaxValue)
             {
-                MainActivity.LogDebug("Search Fragment On Resume for wishlist");
+                Logger.Debug("Search Fragment On Resume for wishlist");
                 this.GoToTab(MainActivity.goToSearchTab, false, true);
                 MainActivity.goToSearchTab = int.MaxValue;
             }
@@ -264,7 +264,7 @@ namespace Seeker
         {
             if (SearchTabHelper.CurrentlySearching)
             {
-                MainActivity.LogDebug("CURRENT SEARCHING SET TRANSITION DRAWABLE");
+                Logger.Debug("CURRENT SEARCHING SET TRANSITION DRAWABLE");
                 GetTransitionDrawable().StartTransition(0);
             }
             else
@@ -336,7 +336,7 @@ namespace Seeker
                     {
                         if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
                         {
-                            MainActivity.LogDebug("filtering...");
+                            Logger.Debug("filtering...");
                             UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
                         }
                         SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
@@ -354,7 +354,7 @@ namespace Seeker
                     else
                     {
                         //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
-                        //MainActivity.LogDebug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
+                        //Logger.Debug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
                         //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
                         //lv.Adapter = (customAdapter);
                         SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
@@ -384,7 +384,7 @@ namespace Seeker
                 });
                 if (SeekerState.MainActivityRef == null)
                 {
-                    MainActivity.LogFirebase("mainActivityRef is null GoToTab");
+                    Logger.Firebase("mainActivityRef is null GoToTab");
                 }
                 SeekerState.MainActivityRef?.RunOnUiThread(a);
             }
@@ -412,7 +412,7 @@ namespace Seeker
                 case Resource.Id.action_search:
                     if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                     {
-                        MainActivity.LogDebug("transitionDrawable: REVERSE transition");
+                        Logger.Debug("transitionDrawable: REVERSE transition");
                         (item.Icon as Android.Graphics.Drawables.TransitionDrawable).ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                         SearchTabHelper.CancellationTokenSource.Cancel();
                         SearchTabHelper.CurrentlySearching = false;
@@ -422,7 +422,7 @@ namespace Seeker
                     {
                         (item.Icon as Android.Graphics.Drawables.TransitionDrawable).StartTransition(SearchToCloseDuration);
                         PerformBackUpRefresh();
-                        MainActivity.LogDebug("START TRANSITION");
+                        Logger.Debug("START TRANSITION");
                         SearchTabHelper.CurrentlySearching = true;
                         SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
                         EditText editText = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
@@ -480,21 +480,21 @@ namespace Seeker
         {
             if (SeekerState.ActiveActivityRef is MainActivity)
             {
-                MainActivity.LogInfoFirebase("current activity is Main");
+                Logger.InfoFirebase("current activity is Main");
             }
             else
             {
-                MainActivity.LogInfoFirebase("current activity is NOT Main");
+                Logger.InfoFirebase("current activity is NOT Main");
             }
             foreach (Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
             {
                 if (frag is SearchFragment sfrag)
                 {
-                    MainActivity.LogInfoFirebase("yes search fragment,  isAdded: " + sfrag.IsAdded);
+                    Logger.InfoFirebase("yes search fragment,  isAdded: " + sfrag.IsAdded);
                     return sfrag;
                 }
             }
-            MainActivity.LogInfoFirebase("no search fragment.");
+            Logger.InfoFirebase("no search fragment.");
             return null;
         }
 
@@ -504,7 +504,7 @@ namespace Seeker
             //bool isAdded = (((SeekerState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
             if (!this.IsAdded || this.Activity == null) //then child fragment manager will likely be null
             {
-                MainActivity.LogInfoFirebase("ShowSearchTabsDialog, fragment no longer attached...");
+                Logger.InfoFirebase("ShowSearchTabsDialog, fragment no longer attached...");
 
                 //foreach(Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
                 //{
@@ -544,7 +544,7 @@ namespace Seeker
 
         public static void ConfigureSupportCustomView(View customView/*, Context contextJustInCase*/) //todo: seems to be an error. which seems entirely possible. where ActiveActivityRef does not get set yet.
         {
-            MainActivity.LogDebug("ConfigureSupportCustomView");
+            Logger.Debug("ConfigureSupportCustomView");
             AutoCompleteTextView actv = customView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
             try
             {
@@ -555,15 +555,15 @@ namespace Seeker
             }
             catch (System.ArgumentException e)
             {
-                MainActivity.LogFirebase("ArugmentException Value does not fall within range: " + SearchingText + " " + e.Message);
+                Logger.Firebase("ArugmentException Value does not fall within range: " + SearchingText + " " + e.Message);
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("catchException Value does not fall within range: " + SearchingText + " " + e.Message);
+                Logger.Firebase("catchException Value does not fall within range: " + SearchingText + " " + e.Message);
             }
             catch
             {
-                MainActivity.LogFirebase("catchunspecException Value does not fall within range: " + SearchingText);
+                Logger.Firebase("catchunspecException Value does not fall within range: " + SearchingText);
             }
             ImageView iv = customView.FindViewById<ImageView>(Resource.Id.search_tabs);
             iv.Click += Iv_Click;
@@ -593,7 +593,7 @@ namespace Seeker
             Context contextToUse = SeekerState.ActiveActivityRef;
             //if (SeekerState.ActiveActivityRef==null)
             //{
-            //    MainActivity.LogFirebase("Active ActivityRef is null!!!");
+            //    Logger.Firebase("Active ActivityRef is null!!!");
             //    //contextToUse = contextJustInCase;
             //}
             //else
@@ -655,7 +655,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -757,18 +757,18 @@ namespace Seeker
                 SearchFragment f = GetSearchFragment(); //is there an attached fragment?? i.e. is our instance just a stale one..
                 if (f == null)
                 {
-                    MainActivity.LogInfoFirebase("search fragment not on activities fragment manager");
+                    Logger.InfoFirebase("search fragment not on activities fragment manager");
                 }
                 else if (!f.IsAdded)
                 {
-                    MainActivity.LogInfoFirebase("search fragment from activities fragment manager is not added");
+                    Logger.InfoFirebase("search fragment from activities fragment manager is not added");
                 }
                 else
                 {
-                    MainActivity.LogInfoFirebase("search fragment from activities fragment manager is good, though not setting it");
+                    Logger.InfoFirebase("search fragment from activities fragment manager is good, though not setting it");
                     //SearchFragment.Instance = f; 
                 }
-                MainActivity.LogFirebase("SearchFragment.Instance.IsAdded == false, currently searching: " + SearchTabHelper.CurrentlySearching);
+                Logger.Firebase("SearchFragment.Instance.IsAdded == false, currently searching: " + SearchTabHelper.CurrentlySearching);
             }
             //try
             //{
@@ -808,8 +808,8 @@ namespace Seeker
             HasOptionsMenu = true;
             //SeekerState.MainActivityRef.SupportActionBar.SetDisplayShowCustomEnabled(true);
             //SeekerState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
-            MainActivity.LogDebug("SearchFragmentOnCreateView");
-            MainActivity.LogDebug("SearchFragmentOnCreateView - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
+            Logger.Debug("SearchFragmentOnCreateView");
+            Logger.Debug("SearchFragmentOnCreateView - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
             this.rootView = inflater.Inflate(Resource.Layout.searches, container, false);
             UpdateForScreenSize();
 
@@ -938,9 +938,9 @@ namespace Seeker
             SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
             //SeekerState.SoulseekClient.SearchResponseReceived -= SoulseekClient_SearchResponseReceived;
             int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
-            MainActivity.LogDebug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
+            Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
             //SeekerState.SoulseekClient.SearchResponseReceived += SoulseekClient_SearchResponseReceived;
-            MainActivity.LogDebug("SearchFragmentOnCreateViewEnd - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
+            Logger.Debug("SearchFragmentOnCreateViewEnd - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
             filterText.TextChanged += FilterText_TextChanged;
@@ -1034,7 +1034,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -1063,25 +1063,25 @@ namespace Seeker
                 //Android.Views.InputMethods.InputMethodManager IMM = context.GetSystemService(Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
                 //Rect outRect = new Rect();
                 //this.rootView.GetWindowVisibleDisplayFrame(outRect);
-                //MainActivity.LogDebug("Window Visible Display Frame " + outRect.Height());
-                //MainActivity.LogDebug("Actual Height " + this.rootView.Height);
+                //Logger.Debug("Window Visible Display Frame " + outRect.Height());
+                //Logger.Debug("Actual Height " + this.rootView.Height);
                 //Type immType = IMM.GetType();
 
-                //MainActivity.LogDebug("Y Position " + rel.GetY());
+                //Logger.Debug("Y Position " + rel.GetY());
                 //int[] location = new int[2];
                 //rel.GetLocationOnScreen(location);
-                //MainActivity.LogDebug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
+                //Logger.Debug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
                 //var method = immType.GetProperty("InputMethodWindowVisibleHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 //foreach (var prop in immType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 //{
-                //    MainActivity.LogDebug(string.Format("Property Name: {0}", prop.Name));
+                //    Logger.Debug(string.Format("Property Name: {0}", prop.Name));
                 //}
                 //foreach(var meth in immType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 //{
-                //    MainActivity.LogDebug(string.Format("Property Name: {0}", meth.Name));
+                //    Logger.Debug(string.Format("Property Name: {0}", meth.Name));
                 //}
 
-                MainActivity.LogDebug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
+                Logger.Debug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
                 if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
                 {
@@ -1146,12 +1146,12 @@ namespace Seeker
                     EditText searchHere = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                     if (searchHere != null)
                     {
-                        //MainActivity.LogFirebase("editTextSearch is NULL only on cached activity");//these are both real cases that occur
+                        //Logger.Firebase("editTextSearch is NULL only on cached activity");//these are both real cases that occur
                         editSearchText = searchHere.Text;
                     }
                     else
                     {
-                        //MainActivity.LogFirebase("editTextSearch is NULL from both cached and MainActivity"); //these are both real cases that occur
+                        //Logger.Firebase("editTextSearch is NULL from both cached and MainActivity"); //these are both real cases that occur
                         editSearchText = SearchingText;
                     }
                 }
@@ -1159,7 +1159,7 @@ namespace Seeker
                 {
                     editSearchText = editTextSearch.Text;
                 }
-                MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                 //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                 //overriding this, the keyboard fails to go down by default for some reason.....
@@ -1170,19 +1170,19 @@ namespace Seeker
                 }
                 catch (System.Exception ex)
                 {
-                    MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    Logger.Firebase(ex.Message + " error closing keyboard");
                 }
                 var transitionDrawable = GetTransitionDrawable();
                 if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                 {
-                    MainActivity.LogDebug("transitionDrawable: reverse transition");
+                    Logger.Debug("transitionDrawable: reverse transition");
                     transitionDrawable.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                     SearchTabHelper.CancellationTokenSource.Cancel();
                     SearchTabHelper.CurrentlySearching = false;
                 }
                 else
                 {
-                    MainActivity.LogDebug("transitionDrawable: start transition");
+                    Logger.Debug("transitionDrawable: start transition");
                     transitionDrawable.StartTransition(SearchToCloseDuration);
                     PerformBackUpRefresh();
                     SearchTabHelper.CurrentlySearching = true;
@@ -1259,23 +1259,23 @@ namespace Seeker
             {
                 if (this.Activity == null)
                 {
-                    MainActivity.LogInfoFirebase("GetTransitionDrawable activity is null");
+                    Logger.InfoFirebase("GetTransitionDrawable activity is null");
                     SearchFragment f = GetSearchFragment();
                     if (f == null)
                     {
-                        MainActivity.LogInfoFirebase("GetTransitionDrawable no search fragment attached to activity");
+                        Logger.InfoFirebase("GetTransitionDrawable no search fragment attached to activity");
                     }
                     else if (!f.IsAdded)
                     {
-                        MainActivity.LogInfoFirebase("GetTransitionDrawable attached but not added");
+                        Logger.InfoFirebase("GetTransitionDrawable attached but not added");
                     }
                     else if (f.Activity == null)
                     {
-                        MainActivity.LogInfoFirebase("GetTransitionDrawable f.Activity activity is null");
+                        Logger.InfoFirebase("GetTransitionDrawable f.Activity activity is null");
                     }
                     else
                     {
-                        MainActivity.LogInfoFirebase("we should be using the fragment manager one...");
+                        Logger.InfoFirebase("we should be using the fragment manager one...");
                     }
                 }
                 //when coming from an intent its actually (toolbar.Menu.FindItem(Resource.Id.action_search)) that is null.  so the menu is there, just no action_search menu item.
@@ -1557,7 +1557,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //i get a lot of imenull..
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -1568,7 +1568,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     eventHandlerClose(sender, null);
                 }
@@ -1647,7 +1647,7 @@ namespace Seeker
                 e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
             {
-                MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                 rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                 //overriding this, the keyboard fails to go down by default for some reason.....
@@ -1658,7 +1658,7 @@ namespace Seeker
                 }
                 catch (System.Exception ex)
                 {
-                    MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    Logger.Firebase(ex.Message + " error closing keyboard");
                 }
             }
         }
@@ -1978,10 +1978,10 @@ namespace Seeker
             //if - in front then it must not contain this word
             //there are also several keywords
 
-            MainActivity.LogDebug("Words To Avoid: " + searchTab.WordsToAvoid.ToString());
-            MainActivity.LogDebug("Words To Include: " + searchTab.WordsToInclude.ToString());
-            MainActivity.LogDebug("Whether to Filer: " + searchTab.FilteredResults);
-            MainActivity.LogDebug("FilterString: " + searchTab.FilterString);
+            Logger.Debug("Words To Avoid: " + searchTab.WordsToAvoid.ToString());
+            Logger.Debug("Words To Include: " + searchTab.WordsToInclude.ToString());
+            Logger.Debug("Whether to Filer: " + searchTab.FilteredResults);
+            Logger.Debug("FilterString: " + searchTab.FilterString);
             bool hideLocked = SeekerState.HideLockedResultsInSearch;
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
@@ -2084,7 +2084,7 @@ namespace Seeker
 
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            MainActivity.LogDebug("Text Changed: " + e.Text);
+            Logger.Debug("Text Changed: " + e.Text);
             string oldFilterString = SearchTabHelper.FilteredResults ? SearchTabHelper.FilterString : string.Empty;
             if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || this.AreChipsFiltering())
             {
@@ -2109,7 +2109,7 @@ namespace Seeker
 
                 int oldCount = oldList.Count;
                 int newCount = SearchTabHelper.UI_SearchResponses.Count();
-                MainActivity.LogDebug($"update filtered only - old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
+                Logger.Debug($"update filtered only - old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
 
 #endif
 
@@ -2128,7 +2128,7 @@ namespace Seeker
 
                 recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top. (unlike old method)
 #if DEBUG
-                MainActivity.LogDebug($"old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
+                Logger.Debug($"old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
 
 #endif
 
@@ -2244,7 +2244,7 @@ namespace Seeker
 
         public override void OnPause()
         {
-            MainActivity.LogDebug("SearchFragmentOnPause");
+            Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
 
             string listOfSearchItems = string.Empty;
@@ -2285,7 +2285,7 @@ namespace Seeker
             var transitionDrawable = GetTransitionDrawable();
             if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
             {
-                MainActivity.LogDebug("transitionDrawable: RESET transition");
+                Logger.Debug("transitionDrawable: RESET transition");
                 transitionDrawable.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                 SearchTabHelper.CancellationTokenSource.Cancel();
                 SearchTabHelper.CurrentlySearching = false;
@@ -2294,7 +2294,7 @@ namespace Seeker
             {
                 transitionDrawable.StartTransition(SearchToCloseDuration);
                 PerformBackUpRefresh();
-                MainActivity.LogDebug("START TRANSITION");
+                Logger.Debug("START TRANSITION");
                 SearchTabHelper.CurrentlySearching = true;
             }
             SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
@@ -2304,14 +2304,14 @@ namespace Seeker
             {
                 (sender as AutoCompleteTextView).DismissDropDown();
             }
-            MainActivity.LogDebug("Enter Pressed..");
+            Logger.Debug("Enter Pressed..");
         }
 
         private void Actv_KeyPress(object sender, View.KeyEventArgs e)
         {
             if (e.KeyCode == Keycode.Enter && e.Event.Action == KeyEventActions.Down)
             {
-                MainActivity.LogDebug("ENTER PRESSED " + e.KeyCode.ToString());
+                Logger.Debug("ENTER PRESSED " + e.KeyCode.ToString());
                 PeformSearchLogic(sender);
             }
             else if (e.KeyCode == Keycode.Del && e.Event.Action == KeyEventActions.Down)
@@ -2328,8 +2328,8 @@ namespace Seeker
             {
                 if (e.Event.Action == KeyEventActions.Down)
                 {
-                    //MainActivity.LogDebug(e.KeyCode.ToString()); //happens on HW keyboard... event does NOT get called on SW keyboard. :)
-                    //MainActivity.LogDebug((sender as AutoCompleteTextView).IsFocused.ToString());
+                    //Logger.Debug(e.KeyCode.ToString()); //happens on HW keyboard... event does NOT get called on SW keyboard. :)
+                    //Logger.Debug((sender as AutoCompleteTextView).IsFocused.ToString());
                     (sender as AutoCompleteTextView).OnKeyDown(e.KeyCode, e.Event);
                 }
             }
@@ -2337,18 +2337,18 @@ namespace Seeker
 
         private static void SoulseekClient_SearchResponseReceived(object sender, SearchResponseReceivedEventArgs e, int fromTab, bool fromWishlist)
         {
-            //MainActivity.LogDebug("SoulseekClient_SearchResponseReceived");
-            //MainActivity.LogDebug(e.Response.Username + " queuelength: " + e.Response.QueueLength + " free upload slots" + e.Response.FreeUploadSlots);
+            //Logger.Debug("SoulseekClient_SearchResponseReceived");
+            //Logger.Debug(e.Response.Username + " queuelength: " + e.Response.QueueLength + " free upload slots" + e.Response.FreeUploadSlots);
             //Console.WriteLine("Response Received");
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
             if (e.Response.FileCount == 0 && SeekerState.HideLockedResultsInSearch || !SeekerState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
             {
-                MainActivity.LogDebug("Skipping Locked or 0/0");
+                Logger.Debug("Skipping Locked or 0/0");
                 return;
             }
-            //MainActivity.LogDebug("SEARCH RESPONSE RECEIVED");
+            //Logger.Debug("SEARCH RESPONSE RECEIVED");
             refreshListView(e.Response, fromTab, fromWishlist);
             //SeekerState.MainActivityRef.RunOnUiThread(action);
 
@@ -2362,7 +2362,7 @@ namespace Seeker
             }
 
 
-            MainActivity.LogDebug("clearListView SearchResponses.Clear()");
+            Logger.Debug("clearListView SearchResponses.Clear()");
             SearchTabHelper.SortHelper.Clear();
             SearchTabHelper.SearchResponses.Clear();
             SearchTabHelper.LastSearchResponseCount = -1;
@@ -2387,13 +2387,13 @@ namespace Seeker
 
         public override void OnDetach() //happens whenever the fragment gets recreated.  (i.e. on rotating device).
         {
-            MainActivity.LogDebug("search frag detach");
+            Logger.Debug("search frag detach");
             base.OnDetach();
         }
         private AutoCompleteTextView searchEditText = null;
         public override void OnAttach(Android.App.Activity activity)
         {
-            MainActivity.LogDebug("search frag attach");
+            Logger.Debug("search frag attach");
             base.OnAttach(activity);
         }
 
@@ -2478,7 +2478,7 @@ namespace Seeker
 
             private void CustomAdapter_Click1(object sender, EventArgs e)
             {
-                //MainActivity.LogInfoFirebase("CustomAdapter_Click1");
+                //Logger.InfoFirebase("CustomAdapter_Click1");
                 int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
                 SearchFragment.Instance.showEditDialog(position);
             }
@@ -2636,7 +2636,7 @@ namespace Seeker
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogFirebase(e.Message + " splitmultidirresponse");
+                    Logger.Firebase(e.Message + " splitmultidirresponse");
                 }
 
                 try
@@ -2666,7 +2666,7 @@ namespace Seeker
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogDebug(e.Message);
+                    Logger.Debug(e.Message);
                 }
 
                 SearchTabHelper.SearchTabCollection[fromTab].SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Keys.ToList();
@@ -2685,28 +2685,28 @@ namespace Seeker
                 {
 #if DEBUG
                     Seeker.SearchFragment.StopWatch.Stop();
-                    //MainActivity.LogDebug("time between start and stop " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
+                    //Logger.Debug("time between start and stop " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
                     Seeker.SearchFragment.StopWatch.Reset();
                     Seeker.SearchFragment.StopWatch.Start();
 #endif
                     //SearchResponses.Add(resp);
-                    //MainActivity.LogDebug("UI - SEARCH RESPONSE RECEIVED");
+                    //Logger.Debug("UI - SEARCH RESPONSE RECEIVED");
                     if (fromTab != SearchTabHelper.CurrentTab)
                     {
                         return;
                     }
                     //int total = newList.Count;
                     int total = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-                    //MainActivity.LogDebug("START _ ui thread response received - search collection: " + total);
+                    //Logger.Debug("START _ ui thread response received - search collection: " + total);
                     if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount == total)
                     {
-                        //MainActivity.LogDebug("already did it..: " + total);
+                        //Logger.Debug("already did it..: " + total);
                         //we already updated for this one.
                         //the UI marshelled calls are delayed.  as a result there will be many all coming in with the final search response count of say 751.  
                         return;
                     }
 
-                    //MainActivity.LogDebug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
+                    //Logger.Debug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
 
                     if (SearchTabHelper.SearchTabCollection[fromTab].FilteredResults)
                     {
@@ -2726,7 +2726,7 @@ namespace Seeker
 
 
                             SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);
-                            MainActivity.LogDebug("refreshListView  oldList: " + oldList.Count + " newList " + newList.Count);
+                            Logger.Debug("refreshListView  oldList: " + oldList.Count + " newList " + newList.Count);
                             DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses), true);
                             //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
                             //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
@@ -2760,7 +2760,7 @@ namespace Seeker
 #if DEBUG
                             if (oldList.Count == 0)
                             {
-                                MainActivity.LogDebug("refreshListView  oldList: " + oldList.Count + " newList " + newListx.Count);
+                                Logger.Debug("refreshListView  oldList: " + oldList.Count + " newList " + newListx.Count);
                             }
 #endif
                             DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, newListx), true); //race condition where gototab sets oldList to empty and so in DiffUtil we get an index out of range.... or maybe a wishlist happening at thte same time does it??????
@@ -2782,7 +2782,7 @@ namespace Seeker
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = total;
                     Seeker.SearchFragment.StopWatch.Stop();
-                    //MainActivity.LogDebug("time it takes to set adapter for " + total + " results: " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
+                    //Logger.Debug("time it takes to set adapter for " + total + " results: " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
 #if DEBUG
                     Seeker.SearchFragment.StopWatch.Reset();
                     Seeker.SearchFragment.StopWatch.Start();
@@ -2790,7 +2790,7 @@ namespace Seeker
 
                     //                    oldList = newList.ToList();
 
-                    //MainActivity.LogDebug("END _ ui thread response received - search collection: " + total);
+                    //Logger.Debug("END _ ui thread response received - search collection: " + total);
                 });
 
                 SeekerState.MainActivityRef?.RunOnUiThread(a);
@@ -2850,7 +2850,7 @@ namespace Seeker
                     msg = "SearchResponses.Count = " + SearchTabHelper.SearchResponses.Count.ToString() + " position selected = " + pos.ToString();
                 }
 
-                MainActivity.LogFirebase(msg + " showEditDialog" + e.Message);
+                Logger.Firebase(msg + " showEditDialog" + e.Message);
                 Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, "Error, please try again: " + msg, ToastLength.Long).Show(); });
                 SeekerState.ActiveActivityRef.RunOnUiThread(a);
             }
@@ -2866,7 +2866,7 @@ namespace Seeker
                 {
                     menuItem.SetVisible(false);
                     menuItem.SetVisible(true);
-                    MainActivity.LogDebug("perform backup refresh");
+                    Logger.Debug("perform backup refresh");
                 }
 
             }), 310);
@@ -2900,19 +2900,19 @@ namespace Seeker
             {
                 //if(SeekerState.MainActivityRef==null)
                 //{
-                //    MainActivity.LogFirebase("Search Logic: MainActivityRef is null");
+                //    Logger.Firebase("Search Logic: MainActivityRef is null");
                 //}
                 //else if(SeekerState.MainActivityRef.SupportActionBar==null)
                 //{
-                //    MainActivity.LogFirebase("Search Logic: Support Action Bar");
+                //    Logger.Firebase("Search Logic: Support Action Bar");
                 //}
                 //else if(SeekerState.MainActivityRef.SupportActionBar.CustomView == null)
                 //{
-                //    MainActivity.LogFirebase("Search Logic: SupportActionBar.CustomView");
+                //    Logger.Firebase("Search Logic: SupportActionBar.CustomView");
                 //}
                 //else if(SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere)==null)
                 //{
-                //    MainActivity.LogFirebase("Search Logic: searchHere");
+                //    Logger.Firebase("Search Logic: searchHere");
                 //}
                 //throw e;
             }
@@ -2991,7 +2991,7 @@ namespace Seeker
 
                     if (!t.IsCompletedSuccessfully && t.Exception != null)
                     {
-                        MainActivity.LogDebug("search exception: " + t.Exception.Message);
+                        Logger.Debug("search exception: " + t.Exception.Message);
                     }
 
                     if (t.IsCanceled)
@@ -3008,7 +3008,7 @@ namespace Seeker
                             {
                                 if (fromTab == SearchTabHelper.CurrentTab && !fromWishlist)
                                 {
-                                    MainActivity.LogDebug("transitionDrawable: ReverseTransition transition");
+                                    Logger.Debug("transitionDrawable: ReverseTransition transition");
                                     //this can be stale, not part of anything anymore....
                                     //no real way to test that.  IsVisible returns true...
                                     try
@@ -3151,7 +3151,7 @@ namespace Seeker
 
                     Toast.MakeText(SeekerState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                    MainActivity.LogDebug("transitionDrawable: RESET transition");
+                    Logger.Debug("transitionDrawable: RESET transition");
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
                         transitionDrawable.ResetTransition();
@@ -3171,7 +3171,7 @@ namespace Seeker
                     {
                         errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
-                    MainActivity.LogDebug("transitionDrawable: RESET transition");
+                    Logger.Debug("transitionDrawable: RESET transition");
                     Toast.MakeText(SeekerState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
@@ -3193,10 +3193,10 @@ namespace Seeker
                 SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                 {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                    MainActivity.LogDebug("transitionDrawable: RESET transition");
+                    Logger.Debug("transitionDrawable: RESET transition");
 
                     Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
-                    MainActivity.LogFirebase("tabpageradapter searchclick: " + ue.Message);
+                    Logger.Firebase("tabpageradapter searchclick: " + ue.Message);
 
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
@@ -3221,7 +3221,7 @@ namespace Seeker
                     actv = (SearchFragment.Instance.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
                     if (actv == null)
                     {
-                        MainActivity.LogFirebase("actv stull null, cannot refresh adapter");
+                        Logger.Firebase("actv stull null, cannot refresh adapter");
                         return;
                     }
                 }
@@ -3237,7 +3237,7 @@ namespace Seeker
             {
                 //try to clearFocus on the search if you can (gets rid of blinking cursor)
                 ClearFocusSearchEditText();
-                MainActivity.LogDebug("Search_Click");
+                Logger.Debug("Search_Click");
             }
             //#if !DEBUG
             if (!SeekerState.currentlyLoggedIn)
@@ -3246,7 +3246,7 @@ namespace Seeker
                 {
                     Toast tst = Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_search, ToastLength.Long);
                     tst.Show();
-                    MainActivity.LogDebug("transitionDrawable: RESET transition");
+                    Logger.Debug("transitionDrawable: RESET transition");
                     transitionDrawable.ResetTransition();
 
                 }

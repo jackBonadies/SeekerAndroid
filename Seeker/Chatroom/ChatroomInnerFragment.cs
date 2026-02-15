@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
 namespace Seeker.Chatroom
 {
@@ -68,12 +69,12 @@ namespace Seeker.Chatroom
 
         public ChatroomInnerFragment() : base()
         {
-            MainActivity.LogDebug("Chatroom Inner Fragment DEFAULT Constructor");
+            Logger.Debug("Chatroom Inner Fragment DEFAULT Constructor");
         }
 
         public ChatroomInnerFragment(Soulseek.RoomInfo roomInfo) : base()
         {
-            MainActivity.LogDebug("Chatroom Inner Fragment ROOMINFO Constructor");
+            Logger.Debug("Chatroom Inner Fragment ROOMINFO Constructor");
 
             OurRoomInfo = roomInfo;
 
@@ -143,11 +144,11 @@ namespace Seeker.Chatroom
             //{
             //    return base.OnContextItemSelected(item);
             //}
-            //MainActivity.LogDebug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
+            //Logger.Debug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
             string username = MessagesLongClickData.Username;
             if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, this.View))
             {
-                MainActivity.LogDebug("Handled by commons");
+                Logger.Debug("Handled by commons");
                 return base.OnContextItemSelected(item);
             }
             switch (item.ItemId)
@@ -191,7 +192,7 @@ namespace Seeker.Chatroom
                         }
                         catch (Exception ex)
                         {
-                            MainActivity.LogFirebase("OnMessageRecieved" + ex.Message);
+                            Logger.Firebase("OnMessageRecieved" + ex.Message);
                         }
                         recyclerAdapter.NotifyItemChanged(indexToUpdate);
                     }
@@ -201,7 +202,7 @@ namespace Seeker.Chatroom
                         //the above method is O(n) and if anything gets enqueued in the mean time (which can happen since Enqueue() happens on background thread) it throws.
                         messagesInternal.Add(roomArgs.Message);
                         int lastVisibleItemPosition = recycleLayoutManager.FindLastVisibleItemPosition();
-                        MainActivity.LogDebug("lastVisibleItemPosition : " + lastVisibleItemPosition);
+                        Logger.Debug("lastVisibleItemPosition : " + lastVisibleItemPosition);
                         recyclerAdapter.NotifyItemInserted(messagesInternal.Count - 1);
 
                         if (lastVisibleItemPosition >= messagesInternal.Count - 2) //since its based on the old list index so -1 -1
@@ -235,7 +236,7 @@ namespace Seeker.Chatroom
 
         public void OnRoomMembershipRemoved(object sender, string room)
         {
-            MainActivity.LogDebug("handler remove from " + room);
+            Logger.Debug("handler remove from " + room);
 
             if (OurRoomInfo != null && OurRoomInfo.Name == room)
             {
@@ -243,7 +244,7 @@ namespace Seeker.Chatroom
                 {
                     if (this.IsVisible)
                     {
-                        MainActivity.LogDebug("pressed back from " + room);
+                        Logger.Debug("pressed back from " + room);
                         this.Activity.OnBackPressedDispatcher.OnBackPressed();
                     }
                     ChatroomController.GetRoomListApi();
@@ -255,7 +256,7 @@ namespace Seeker.Chatroom
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                //MainActivity.LogDebug("UI event handler for status view " + e.Joined);
+                //Logger.Debug("UI event handler for status view " + e.Joined);
                 if (user == SeekerState.Username && UI_statusMessagesInternal.Count > 0)
                 {
                     //this is to correct an issue where:
@@ -265,13 +266,13 @@ namespace Seeker.Chatroom
 
                     if (UI_statusMessagesInternal.Last().Equals(statusMessage))
                     {
-                        MainActivity.LogDebug("UI event - throwing away the duplicate..");
+                        Logger.Debug("UI event - throwing away the duplicate..");
                         return; //we already have this exact status message.
                     }
                 }
                 UI_statusMessagesInternal.Add(statusMessage);
                 int lastVisibleItemPosition = recycleLayoutManagerStatuses.FindLastVisibleItemPosition();
-                MainActivity.LogDebug("lastVisibleItemPosition : " + lastVisibleItemPosition);
+                Logger.Debug("lastVisibleItemPosition : " + lastVisibleItemPosition);
                 recyclerUserStatusAdapter.NotifyItemInserted(UI_statusMessagesInternal.Count - 1);
 
                 if (lastVisibleItemPosition >= UI_statusMessagesInternal.Count - 2) //since its based on the old list index so -1 -1
@@ -299,7 +300,7 @@ namespace Seeker.Chatroom
                     //not our room..
                     return;
                 }
-                //MainActivity.LogDebug("nonUI event handler for status view " + e.Joined);
+                //Logger.Debug("nonUI event handler for status view " + e.Joined);
                 AddStatusMessageUI(e.User, e.StatusMessageUpdate.Value);
             }
         }
@@ -319,7 +320,7 @@ namespace Seeker.Chatroom
                     //not our room..
                     return;
                 }
-                //MainActivity.LogDebug("nonUI event handler for status view " + e.Joined);
+                //Logger.Debug("nonUI event handler for status view " + e.Joined);
                 AddStatusMessageUI(e.User, e.StatusMessageUpdate);
             }
         }
@@ -341,7 +342,7 @@ namespace Seeker.Chatroom
 
             if (ChatroomController.JoinedRoomStatusUpdateMessages.ContainsKey(OurRoomInfo.Name))
             {
-                MainActivity.LogDebug("we have the room messages");
+                Logger.Debug("we have the room messages");
                 UI_statusMessagesInternal = ChatroomController.JoinedRoomStatusUpdateMessages[OurRoomInfo.Name].ToList();
             }
             else
@@ -349,7 +350,7 @@ namespace Seeker.Chatroom
                 UI_statusMessagesInternal = new List<ChatroomController.StatusMessageUpdate>();
             }
 
-            //MainActivity.LogDebug("SetStatusView Count: " + UI_statusMessagesInternal.Count);
+            //Logger.Debug("SetStatusView Count: " + UI_statusMessagesInternal.Count);
 
             recyclerUserStatusAdapter = new ChatroomStatusesRecyclerAdapter(UI_statusMessagesInternal); //this depends tightly on MessageController... since these are just strings..
             recyclerViewStatusesView.SetAdapter(recyclerUserStatusAdapter);
@@ -408,7 +409,7 @@ namespace Seeker.Chatroom
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("Chatroom Inner Fragment OnCreateView");
+            Logger.Debug("Chatroom Inner Fragment OnCreateView");
 
             //if (Username == null)
             //{
@@ -427,25 +428,25 @@ namespace Seeker.Chatroom
             Soulseek.RoomData roomData = null;
             if (ChatroomController.HasRoomData(OurRoomInfo.Name))
             {
-                MainActivity.LogDebug("we have the room data");
+                Logger.Debug("we have the room data");
                 roomData = ChatroomController.GetRoomData(OurRoomInfo.Name);
             }
             else
             {
-                MainActivity.LogDebug("joining room " + OurRoomInfo.Name);
+                Logger.Debug("joining room " + OurRoomInfo.Name);
                 if (SeekerState.currentlyLoggedIn)
                 {
                     ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, false, false);
                 }
                 else
                 {
-                    MainActivity.LogDebug("not logged in, on log in we will join");
+                    Logger.Debug("not logged in, on log in we will join");
                 }
             }
 
             if (ChatroomController.JoinedRoomMessages.ContainsKey(OurRoomInfo.Name))
             {
-                MainActivity.LogDebug("we have the room messages");
+                Logger.Debug("we have the room messages");
                 messagesInternal = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].ToList();
             }
             else
@@ -455,13 +456,13 @@ namespace Seeker.Chatroom
 
             if (ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count > 0)
             {
-                MainActivity.LogDebug("we have the room tickers");
+                Logger.Debug("we have the room tickers");
                 var ticker = ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Last();
                 SetTickerMessage(ticker);
             }
             else if (ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count == 0)
             {
-                MainActivity.LogDebug("no tickers yet");
+                Logger.Debug("no tickers yet");
                 SetTickerMessage(new Soulseek.RoomTicker("", this.Resources.GetString(Resource.String.no_room_tickers)));
             }
             else
@@ -532,13 +533,13 @@ namespace Seeker.Chatroom
             {
                 recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
             }
-            MainActivity.LogDebug("currentlyInsideRoomName -- OnCreateView Inner -- " + ChatroomController.currentlyInsideRoomName);
+            Logger.Debug("currentlyInsideRoomName -- OnCreateView Inner -- " + ChatroomController.currentlyInsideRoomName);
             ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
             ChatroomController.UnreadRooms.TryRemove(OurRoomInfo.Name, out _);
             HookUpEventHandlers(true); //this NEEDS to be strictly before SetStatusesView
-            MainActivity.LogDebug("set up statuses view");
+            Logger.Debug("set up statuses view");
             SetStatusesView();
-            MainActivity.LogDebug("finish set up statuses view");
+            Logger.Debug("finish set up statuses view");
 
             created = true;
 
@@ -566,8 +567,8 @@ namespace Seeker.Chatroom
             {
                 fabScrollToNewest.Visibility = ViewStates.Visible;
             }
-            //MainActivity.LogDebug("count " + recycleLayoutManager.ItemCount);
-            //MainActivity.LogDebug("last vis " + recycleLayoutManager.FindLastVisibleItemPosition());
+            //Logger.Debug("count " + recycleLayoutManager.ItemCount);
+            //Logger.Debug("last vis " + recycleLayoutManager.FindLastVisibleItemPosition());
         }
 
         private void ScrollToBottomClick(object sender, EventArgs e)
@@ -583,9 +584,9 @@ namespace Seeker.Chatroom
                 //dont expand if there is nothing to show..
                 if (this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition() == 0 && this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition() >= this.recycleLayoutManagerStatuses.ItemCount - 1)
                 {
-                    MainActivity.LogDebug("too small to expand" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
-                    MainActivity.LogDebug("too small to expand" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
-                    MainActivity.LogDebug("too small to expand");
+                    Logger.Debug("too small to expand" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
+                    Logger.Debug("too small to expand" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
+                    Logger.Debug("too small to expand");
                     return;
                 }
             }
@@ -608,10 +609,10 @@ namespace Seeker.Chatroom
         //happens too late...
         //private void RecyclerViewStatusesView_LayoutChange(object sender, View.LayoutChangeEventArgs e)
         //{
-        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + e.OldTop + "   " + e.Top);
-        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + e.OldBottom + "   " + e.Bottom);
-        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
-        //    MainActivity.LogDebug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
+        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + e.OldTop + "   " + e.Top);
+        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + e.OldBottom + "   " + e.Bottom);
+        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
+        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
         //    if(e.OldBottom > e.Bottom)
         //    {
         //        this.recycleLayoutManagerStatuses.ScrollToPosition(this.recycleLayoutManagerStatuses.ItemCount - 1);
@@ -655,11 +656,11 @@ namespace Seeker.Chatroom
                 //this is if we arent there anymore...... but shouldnt we have unbound?? or if it simply comes in too fast....
                 if (t == null)
                 {
-                    MainActivity.LogDebug("null ticker");
+                    Logger.Debug("null ticker");
                 }
                 else
                 {
-                    MainActivity.LogDebug("null ticker view");
+                    Logger.Debug("null ticker view");
                 }
             }
         }
@@ -694,18 +695,18 @@ namespace Seeker.Chatroom
 
         public override void OnAttach(Context activity)
         {
-            MainActivity.LogDebug("OnAttach chatroom inner fragment !!");
+            Logger.Debug("OnAttach chatroom inner fragment !!");
             if (created) //attach can happen before we created our view...
             {
-                MainActivity.LogDebug("iscreated= true OnAttach chatroom inner fragment !!");
+                Logger.Debug("iscreated= true OnAttach chatroom inner fragment !!");
                 //try
                 //{
-                //    MainActivity.LogDebug("currentlyInsideRoomName -- OnAttach -- " + ChatroomController.currentlyInsideRoomName);
+                //    Logger.Debug("currentlyInsideRoomName -- OnAttach -- " + ChatroomController.currentlyInsideRoomName);
                 //    ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name; //nullref
                 //}
                 //catch(Exception e)
                 //{
-                //    MainActivity.LogDebug("1" + e.Message);
+                //    Logger.Debug("1" + e.Message);
                 //}
                 try
                 {
@@ -719,17 +720,17 @@ namespace Seeker.Chatroom
                 }
                 catch (Exception e)
                 {
-                    MainActivity.LogDebug("2" + e.Message);
+                    Logger.Debug("2" + e.Message);
                 }
 
 
 
-                MainActivity.LogDebug("set setatus view");
+                Logger.Debug("set setatus view");
                 SetStatusesView();
-                MainActivity.LogDebug("set setatus view end");
-                MainActivity.LogDebug("hook up event handlers ");
+                Logger.Debug("set setatus view end");
+                Logger.Debug("hook up event handlers ");
                 HookUpEventHandlers(true);
-                MainActivity.LogDebug("hook up event handlers end");
+                Logger.Debug("hook up event handlers end");
 
             }
             base.OnAttach(activity);
@@ -737,14 +738,14 @@ namespace Seeker.Chatroom
 
         public override void OnPause()
         {
-            MainActivity.LogDebug("currentlyInsideRoomName OnPause -- nulling");
+            Logger.Debug("currentlyInsideRoomName OnPause -- nulling");
             ChatroomController.currentlyInsideRoomName = string.Empty;
             base.OnPause();
         }
 
         public override void OnResume()
         {
-            MainActivity.LogDebug("currentlyInsideRoomName OnResume");
+            Logger.Debug("currentlyInsideRoomName OnResume");
             if (OurRoomInfo != null)
             {
                 ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
@@ -755,7 +756,7 @@ namespace Seeker.Chatroom
 
         public override void OnDetach()
         {
-            MainActivity.LogDebug("currentlyInsideRoomName OnDetach -- nulling");
+            Logger.Debug("currentlyInsideRoomName OnDetach -- nulling");
 
             HookUpEventHandlers(false);
             base.OnDetach();
@@ -770,7 +771,7 @@ namespace Seeker.Chatroom
                 if (t.IsFaulted)
                 {
                     //only show once for the original fault.
-                    MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
+                    Logger.Debug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
@@ -801,7 +802,7 @@ namespace Seeker.Chatroom
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
-                MainActivity.LogDebug("CurrentlyLoggedInButDisconnectedState: TRUE");
+                Logger.Debug("CurrentlyLoggedInButDisconnectedState: TRUE");
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;

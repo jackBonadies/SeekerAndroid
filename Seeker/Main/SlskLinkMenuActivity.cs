@@ -5,6 +5,7 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -78,13 +79,13 @@ namespace Seeker
                     {
                         msgToToast = "Failed to follow link";
                     }
-                    MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
+                    Logger.Debug(dirTask.Exception.InnerException.Message);
                     SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                     {
                         Toast.MakeText(SeekerState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
                     });
                 }
-                MainActivity.LogDebug("DirectoryReceivedContAction faulted");
+                Logger.Debug("DirectoryReceivedContAction faulted");
             }
             else
             {

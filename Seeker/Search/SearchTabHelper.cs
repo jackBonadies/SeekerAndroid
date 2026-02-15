@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using Seeker.Helpers;
 
 namespace Seeker.Helpers
 {
@@ -25,12 +26,12 @@ namespace Seeker.Helpers
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
             if (!fileForOurInternalStorage.Delete())
             {
-                MainActivity.LogDebug("HEADERS - Delete Search Results: FAILED TO DELETE");
-                MainActivity.LogFirebase("HEADERS - Delete Search Results: FAILED TO DELETE");
+                Logger.Debug("HEADERS - Delete Search Results: FAILED TO DELETE");
+                Logger.Firebase("HEADERS - Delete Search Results: FAILED TO DELETE");
             }
 
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - Delete Search Results: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - Delete Search Results: " + sw.ElapsedMilliseconds);
         }
 
 
@@ -42,7 +43,7 @@ namespace Seeker.Helpers
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
             if (tabsToSave.Count == 0)
             {
-                MainActivity.LogDebug("Nothing to Save");
+                Logger.Debug("Nothing to Save");
             }
             else
             {
@@ -52,7 +53,7 @@ namespace Seeker.Helpers
                 }
             }
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - Save ALL Search Results: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - Save ALL Search Results: " + sw.ElapsedMilliseconds);
         }
 
 #if BinaryFormatterAvailable
@@ -70,7 +71,7 @@ namespace Seeker.Helpers
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
             if (tabsToSave.Count == 0)
             {
-                MainActivity.LogDebug("Nothing to Save");
+                Logger.Debug("Nothing to Save");
             }
             else
             {
@@ -83,7 +84,7 @@ namespace Seeker.Helpers
                     }
                     catch (Exception ex)
                     {
-                        MainActivity.LogFirebase("Error Migrating Seach Tabs: " + ex.Message + ex.StackTrace);
+                        Logger.Firebase("Error Migrating Seach Tabs: " + ex.Message + ex.StackTrace);
                         RemoveTabFromSharedPrefs(tabIndex, c, true);
                     }
 
@@ -95,7 +96,7 @@ namespace Seeker.Helpers
                 }
             }
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
         }
 #endif
 
@@ -140,9 +141,9 @@ namespace Seeker.Helpers
 
             using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
             {
-                MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - get file: " + sw.ElapsedMilliseconds);
 
-                MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - read file: " + sw.ElapsedMilliseconds);
 
                 var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
                 return restoredSearchResponses;
@@ -158,7 +159,7 @@ namespace Seeker.Helpers
             }
             catch(Exception e)
             {
-                MainActivity.LogFirebase("FAILED to restore search results from disk " + e.Message + e.StackTrace);
+                Logger.Firebase("FAILED to restore search results from disk " + e.Message + e.StackTrace);
             }
 
 
@@ -174,7 +175,7 @@ namespace Seeker.Helpers
                 else
                 {
                     //log error... but still safely fix the state. otherwise the user wont even be able to load the app without crash...
-                    MainActivity.LogFirebase("search tab does not exist on disk but it should... ");
+                    Logger.Firebase("search tab does not exist on disk but it should... ");
                     SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime = DateTime.MinValue;
                     SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResponseCount = 0;
                     SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount = 0;
@@ -212,7 +213,7 @@ namespace Seeker.Helpers
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
             if (tabsToSave.Count == 0)
             {
-                MainActivity.LogDebug("Nothing to Save");
+                Logger.Debug("Nothing to Save");
             }
             else
             {
@@ -233,7 +234,7 @@ namespace Seeker.Helpers
             }
 
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);
         }
 
 #if BinaryFormatterAvailable
@@ -249,7 +250,7 @@ namespace Seeker.Helpers
             }
             else
             {
-                MainActivity.LogDebug("Converting Wishlists to New Format...");
+                Logger.Debug("Converting Wishlists to New Format...");
                 RestoreStateFromSharedPreferencesLegacy();
                 SeekerState.SharedPreferences.Edit().Remove(KeyConsts.M_SearchTabsState_LEGACY).Commit();
                 //string x = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_LEGACY, string.Empty); //works, string is empty.
@@ -271,7 +272,7 @@ namespace Seeker.Helpers
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                MainActivity.LogDebug("HEADERS - base64 string length: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - base64 string length: " + sw.ElapsedMilliseconds);
 
                 Dictionary<int, SavedStateSearchTabHeader> savedStateDict = SerializationHelper.RestoreSavedStateHeaderDictFromString(savedState);
 
@@ -290,7 +291,7 @@ namespace Seeker.Helpers
                 }
 
                 sw.Stop();
-                MainActivity.LogDebug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
             //SeekerState.SharedPreferences.Edit().Remove
         }
@@ -307,7 +308,7 @@ namespace Seeker.Helpers
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                MainActivity.LogDebug("base64 string length: " + sw.ElapsedMilliseconds);
+                Logger.Debug("base64 string length: " + sw.ElapsedMilliseconds);
 
                 using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
                 {
@@ -328,7 +329,7 @@ namespace Seeker.Helpers
                     }
                 }
                 sw.Stop();
-                MainActivity.LogDebug("RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
+                Logger.Debug("RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
         }
 #endif

@@ -53,7 +53,7 @@ namespace Seeker
         //private List<int> selectedPositions = new List<int>();
         public DownloadDialog(int pos, SearchResponse resp)
         {
-            MainActivity.LogDebug("DownloadDialog create");
+            Logger.Debug("DownloadDialog create");
             searchResponse = resp;
             searchPosition = pos;
             SearchResponseTemp = resp;
@@ -62,7 +62,7 @@ namespace Seeker
 
         public DownloadDialog()
         {
-            MainActivity.LogDebug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
+            Logger.Debug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
             searchResponse = SearchResponseTemp;
             searchPosition = SearchPositionTemp;
         }
@@ -100,16 +100,16 @@ namespace Seeker
         public override void OnResume()
         {
             base.OnResume();
-            MainActivity.LogDebug("OnResume Start");
+            Logger.Debug("OnResume Start");
 
             Dialog?.SetSizeProportional(.9, .9);
 
-            MainActivity.LogDebug("OnResume End");
+            Logger.Debug("OnResume End");
         }
 
         public override void OnAttach(Context context)
         {
-            MainActivity.LogDebug("DownloadDialog OnAttach");
+            Logger.Debug("DownloadDialog OnAttach");
             base.OnAttach(context);
             if (context is Activity)
             {
@@ -123,7 +123,7 @@ namespace Seeker
 
         public override void OnDetach()
         {
-            MainActivity.LogDebug("DownloadDialog OnDetach");
+            Logger.Debug("DownloadDialog OnDetach");
             SearchFragment.dlDialogShown = false;
             base.OnDetach();
             this.activity = null;
@@ -150,7 +150,7 @@ namespace Seeker
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("DownloadDialog OnCreateView");
+            Logger.Debug("DownloadDialog OnCreateView");
             return inflater.Inflate(Resource.Layout.downloaddialog, container); //container is parent
         }
 
@@ -179,15 +179,15 @@ namespace Seeker
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
-            log.Debug(MainActivity.logCatTag, "Is View null: " + (view == null).ToString());
+            log.Debug(Logger.LogCatTag, "Is View null: " + (view == null).ToString());
 
-            log.Debug(MainActivity.logCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
+            log.Debug(Logger.LogCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
             this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
-            log.Debug(MainActivity.logCatTag, "Is dl null: " + (dl == null).ToString());
+            log.Debug(Logger.LogCatTag, "Is dl null: " + (dl == null).ToString());
             dl.Click += DownloadAll_Click;
             Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
             cancel.Click += Cancel_Click;
@@ -208,15 +208,15 @@ namespace Seeker
 
             if (searchResponse == null)
             {
-                log.Debug(MainActivity.logCatTag, "Is searchResponse null");
-                MainActivity.LogFirebase("DownloadDialog search response is null");
+                log.Debug(Logger.LogCatTag, "Is searchResponse null");
+                Logger.Firebase("DownloadDialog search response is null");
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
             }
             userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
             subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
-            log.Debug(MainActivity.logCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
+            log.Debug(Logger.LogCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
             ListView listView = view.FindViewById<ListView>(Resource.Id.listView1);
             listView.ItemClick += ListView_ItemClick;
@@ -269,7 +269,7 @@ namespace Seeker
                 //in response to a crash android.view.WindowManager.BadTokenException
                 //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
                 //in this case not showing it is probably best... as opposed to a crash...
-                MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
+                Logger.Firebase(error.Message + " POPUP BAD ERROR");
             }
         }
 
@@ -281,7 +281,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("RequestFilesLogic: " + e.Message + e.StackTrace);
+                Logger.Firebase("RequestFilesLogic: " + e.Message + e.StackTrace);
             }
             Task<BrowseResponse> browseResponseTask = null;
             try
@@ -306,7 +306,7 @@ namespace Seeker
                 //    }
                 //}
                 //Console.WriteLine(arrayOfDir.ToString());
-                MainActivity.LogDebug($"RequestFilesLogic {username} completed");
+                Logger.Debug($"RequestFilesLogic {username} completed");
 
                 if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
                 {
@@ -339,7 +339,7 @@ namespace Seeker
                 {
                     //shouldnt get here
                     SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
-                    MainActivity.LogFirebase("browse response faulted: " + username + br.Exception?.Message);
+                    Logger.Firebase("browse response faulted: " + username + br.Exception?.Message);
                     return;
                 }
                 //TODO there is a case due to like button mashing or if you keep requesting idk. but its a SoulseekClient InnerException and it says peer disconnected unexpectedly and timeout.
@@ -474,7 +474,7 @@ namespace Seeker
             {
                 if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
                 {
-                    MainActivity.LogDebug("on finish log in we will do it");
+                    Logger.Debug("on finish log in we will do it");
                     return;
                 }
                 else
@@ -611,7 +611,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
+                Logger.Firebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
                 throw e;
             }
 
@@ -759,7 +759,7 @@ namespace Seeker
                         SeekerState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
                         return;
                     }
-                    MainActivity.LogDebug("DownloadDialog Dl_Click");
+                    Logger.Debug("DownloadDialog Dl_Click");
                     DownloadFiles(filesToDownload, username, false);
 
                 }));
@@ -770,14 +770,14 @@ namespace Seeker
                 }
                 catch (Exception exx)
                 {
-                    MainActivity.LogDebug("DownloadDialog DownloadWithContinuation: " + exx.Message);
+                    Logger.Debug("DownloadDialog DownloadWithContinuation: " + exx.Message);
                     return; //dont dismiss dialog.  that only happens on success..
                 }
                 Dismiss();
             }
             else
             {
-                MainActivity.LogDebug("DownloadDialog Dl_Click");
+                Logger.Debug("DownloadDialog Dl_Click");
                 DownloadFiles(filesToDownload, username, false);
                 Dismiss();
             }
@@ -849,7 +849,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + " InNightMode");
+                Logger.Firebase(e.Message + " InNightMode");
                 return false;
             }
         }
@@ -887,14 +887,14 @@ namespace Seeker
                         {
                             Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_timed_out), ToastLength.Short).Show();
                         }
-                        MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
+                        Logger.Debug(dirTask.Exception.InnerException.Message);
                     }
                     Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_failed), ToastLength.Short).Show();
-                    MainActivity.LogDebug("DirectoryReceivedContAction faulted");
+                    Logger.Debug("DirectoryReceivedContAction faulted");
                 }
                 else
                 {
-                    MainActivity.LogDebug("DirectoryReceivedContAction successful!");
+                    Logger.Debug("DirectoryReceivedContAction successful!");
                     ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
                     if (listView.Count == dirTask.Result.Files.Count)
                     {
@@ -922,7 +922,7 @@ namespace Seeker
                 string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
-                    MainActivity.LogFirebase("The dirname is empty!!");
+                    Logger.Firebase("The dirname is empty!!");
                     stopRefreshing();
                     return;
                 }
@@ -937,7 +937,7 @@ namespace Seeker
             catch (Exception ex)
             {
                 CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
-                MainActivity.LogFirebaseError($"{SeekerState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
+                Logger.FirebaseError($"{SeekerState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
             }
         }
 

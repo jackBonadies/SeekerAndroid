@@ -1,4 +1,5 @@
 ﻿using Android.Content;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -231,7 +232,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("getMp3Metadata: " + e.Message + e.StackTrace);
+                Logger.Firebase("getMp3Metadata: " + e.Message + e.StackTrace);
             }
             finally
             {
@@ -329,7 +330,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("GetAiffMetadata: " + e.Message + e.StackTrace);
+                Logger.Firebase("GetAiffMetadata: " + e.Message + e.StackTrace);
             }
             finally
             {
@@ -415,7 +416,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("GetApeMetadata: " + e.Message + e.StackTrace);
+                Logger.Firebase("GetApeMetadata: " + e.Message + e.StackTrace);
             }
             finally
             {
@@ -490,7 +491,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("getFlacMetadata: " + e.Message + e.StackTrace); //TODO: getFlacMetadata: FileDescriptor must not be null a
+                Logger.Firebase("getFlacMetadata: " + e.Message + e.StackTrace); //TODO: getFlacMetadata: FileDescriptor must not be null a
             }
             finally
             {

@@ -210,7 +210,7 @@ namespace Seeker
             }
             if (UserToView == null)
             {
-                MainActivity.LogFirebase("UserToView==null");
+                Logger.Firebase("UserToView==null");
             }
             myToolbar.Title = this.GetString(Resource.String.user_) + " " + UserToView;
             this.SetSupportActionBar(myToolbar);
@@ -341,7 +341,7 @@ namespace Seeker
                 {
                     Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
                     string uname = userData != null ? userData.Username : "no user";
-                    MainActivity.LogFirebase("FAILURE TO DECODE USERS PICTURE " + uname);
+                    Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
                     return;
                 }
                 int h = loadedBitmap.Height;

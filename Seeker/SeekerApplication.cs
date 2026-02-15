@@ -21,7 +21,6 @@ using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Messages;
 using Seeker.Search;
-using Seeker.Serialization;
 using Seeker.Transfers;
 using Seeker.UPnP;
 using Android.App;
@@ -66,14 +65,14 @@ namespace Seeker
             Firebase.FirebaseApp app = Firebase.FirebaseApp.InitializeApp(this);
             if (app == null)
             {
-                MainActivity.crashlyticsEnabled = false;
+                Logger.CrashlyticsEnabled = false;
             }
 #endif
-            //MainActivity.LogFirebase("testing release");
+            //Logger.Firebase("testing release");
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));
-            var sharedPrefs = this.GetSharedPreferences("SoulSeekPrefs", 0);
+            var sharedPrefs = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
             SeekerState.SharedPreferences = sharedPrefs;
 
             //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
@@ -93,7 +92,7 @@ namespace Seeker
                     SeekerState.LegacyLanguageMigrated = true;
                     lock (MainActivity.SHARED_PREF_LOCK)
                     {
-                        var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
+                        var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
                         editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated);
                         editor.Commit();
                     }
@@ -209,6 +208,7 @@ namespace Seeker
             }
         }
 
+        // TODO common.locale
         /// <summary>
         /// converts say "pt-rBR" to "pt-BR"
         /// </summary>
@@ -231,6 +231,7 @@ namespace Seeker
             return (int)Android.OS.Build.VERSION.SdkInt >= 33;
         }
 
+        // TODO common locale
         public static Java.Util.Locale LocaleFromString(string localeString)
         {
             Java.Util.Locale locale = null;
@@ -301,6 +302,7 @@ namespace Seeker
             }
         }
 
+        // TODO Common.LocaleHelper
         public static string LocaleToString(Java.Util.Locale locale)
         {
             //"en" ""
@@ -340,14 +342,14 @@ namespace Seeker
                 {
                     bool oldState = SeekerState.CurrentConnectionIsUnmetered;
                     SeekerState.CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
-                    MainActivity.LogDebug("SetNetworkState is metered " + !SeekerState.CurrentConnectionIsUnmetered);
+                    Logger.Debug("SetNetworkState is metered " + !SeekerState.CurrentConnectionIsUnmetered);
                     return oldState != SeekerState.CurrentConnectionIsUnmetered;
                 }
                 return false;
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("SetNetworkState" + e.Message + e.StackTrace);
+                Logger.Firebase("SetNetworkState" + e.Message + e.StackTrace);
                 return false;
             }
         }
@@ -389,8 +391,8 @@ namespace Seeker
         private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
         {
             //by default e.Handled == false. and this does go on to crash the process (which is good imo, I only want this for logging purposes).
-            MainActivity.LogDebug(e.Exception.Message);
-            MainActivity.LogDebug(e.Exception.StackTrace);
+            Logger.Debug(e.Exception.Message);
+            Logger.Debug(e.Exception.StackTrace);
         }
 
         private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
@@ -506,7 +508,7 @@ namespace Seeker
             {
                 if (!diagnosticFilesystemErrorShown)
                 {
-                    MainActivity.LogFirebase("failed to write to diagnostic file " + ex.Message + line + ex.StackTrace);
+                    Logger.Firebase("failed to write to diagnostic file " + ex.Message + line + ex.StackTrace);
                     Toast.MakeText(SeekerApplication.ApplicationContext, "Failed to write to diagnostic file.", ToastLength.Long);
                     diagnosticFilesystemErrorShown = true;
                 }
@@ -527,7 +529,7 @@ namespace Seeker
 
         private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
         {
-            MainActivity.LogDebug("disconnected");
+            Logger.Debug("disconnected");
             lock (OurCurrentLoginTaskSyncObject)
             {
                 OurCurrentLoginTask = null;
@@ -607,7 +609,7 @@ namespace Seeker
             {
                 UPLOAD_COUNT = -1;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
-                MainActivity.LogDebug("Stop Service");
+                Logger.Debug("Stop Service");
                 this.StopService(uploadServiceIntent);
                 SeekerState.UploadKeepAliveServiceRunning = false;
             }
@@ -671,16 +673,16 @@ namespace Seeker
             //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
             //SeekerState.MainActivityRef.RunOnUiThread(()=>
             //{
-            MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
-            MainActivity.LogDebug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+            Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
+            Logger.Debug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
             bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer) < 750;
-            MainActivity.LogDebug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
+            Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
             if (e.Count == 0 || cancelAndClear)
             {
                 DL_COUNT = -1;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                MainActivity.LogDebug("Stop Service");
+                Logger.Debug("Stop Service");
                 this.StopService(downloadServiceIntent);
                 SeekerState.DownloadKeepAliveServiceRunning = false;
             }
@@ -826,7 +828,7 @@ namespace Seeker
                 }
                 catch (Exception ex)
                 {
-                    MainActivity.LogFirebase("DL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
+                    Logger.Firebase("DL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
                     return Task.CompletedTask;
                 }
             }
@@ -903,7 +905,7 @@ namespace Seeker
                 }
                 catch (Exception ex)
                 {
-                    MainActivity.LogFirebase("UL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
+                    Logger.Firebase("UL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
                     return Task.CompletedTask;
                 }
             }
@@ -942,7 +944,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
+                Logger.Firebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
@@ -956,7 +958,7 @@ namespace Seeker
             TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
             if (relevantItem == null)
             {
-                MainActivity.LogInfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
+                Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
             //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
             if (relevantItem != null)
@@ -964,7 +966,7 @@ namespace Seeker
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
                 if (e.Transfer.State.HasFlag(TransferStates.Cancelled) && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
                 {
-                    MainActivity.LogDebug("fallen from queue");
+                    Logger.Debug("fallen from queue");
                     //the state is good as is.  do not add cancelled to it, since we used cancelled to mean "user cancelled" i.e. paused.
                     relevantItem.Failed = true;
                     relevantItem.Progress = 100;
@@ -1075,7 +1077,7 @@ namespace Seeker
                 if (relevantItem == null && e.Transfer.State == TransferStates.InProgress)
                 {
                     //THIS SHOULD NOT HAPPEN now that the race condition is resolved....
-                    MainActivity.LogFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
+                    Logger.Firebase("relevantItem==null. state: " + e.Transfer.State.ToString());
                     return;
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
@@ -1092,7 +1094,7 @@ namespace Seeker
                 {
                     // all we need to do is update the size.
                     relevantItem.Size = newSize;
-                    MainActivity.LogDebug("updated the size");
+                    Logger.Debug("updated the size");
                 }
                 else
                 {
@@ -1123,13 +1125,13 @@ namespace Seeker
                     }
 
                     relevantItem.Progress = 0;
-                    MainActivity.LogDebug("truncated the file and updated the size");
+                    Logger.Debug("truncated the file and updated the size");
                 }
 
             }
             catch (Exception e)
             {
-                MainActivity.LogDebug("OnTransferSizeMismatchFunc: " + e.ToString());
+                Logger.Debug("OnTransferSizeMismatchFunc: " + e.ToString());
                 return false;
             }
             return true;
@@ -1141,7 +1143,7 @@ namespace Seeker
             //Its possible to get a nullref here IF the system orientation changes..
             //throttle this maybe...
 
-            //MainActivity.LogDebug("TRANSFER PROGRESS UPDATED"); //this typically happens once every 10 ms or even less and thats in debug mode.  in fact sometimes it happens 4 times in 1 ms.
+            //Logger.Debug("TRANSFER PROGRESS UPDATED"); //this typically happens once every 10 ms or even less and thats in debug mode.  in fact sometimes it happens 4 times in 1 ms.
             try
             {
                 MainActivity.KeepAliveInactivityKillTimer.Stop(); //lot of nullref here...
@@ -1149,12 +1151,12 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
+                Logger.Firebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
             TransferItem relevantItem = null;
             if (TransfersFragment.TransferItemManagerDL == null)
             {
-                MainActivity.LogDebug("transferItems Null " + e.Transfer.Filename);
+                Logger.Debug("transferItems Null " + e.Transfer.Filename);
                 return;
             }
 
@@ -1165,8 +1167,8 @@ namespace Seeker
             if (relevantItem == null)
             {
                 //this happens on Clear and Cancel All.
-                MainActivity.LogDebug("Relevant Item Null " + e.Transfer.Filename);
-                MainActivity.LogDebug("transferItems.IsEmpty " + TransfersFragment.TransferItemManagerDL.IsEmpty());
+                Logger.Debug("Relevant Item Null " + e.Transfer.Filename);
+                Logger.Debug("transferItems.IsEmpty " + TransfersFragment.TransferItemManagerDL.IsEmpty());
                 return;
             }
             else
@@ -1187,7 +1189,7 @@ namespace Seeker
                         TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
                         TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
                         //int after = TransfersFragment.transferItems.Count;
-                        //MainActivity.LogDebug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
+                        //Logger.Debug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
                     if (SeekerState.ActiveActivityRef != null)
                     {
@@ -1227,7 +1229,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("GetVersionString: " + e.Message);
+                Logger.Firebase("GetVersionString: " + e.Message);
                 return string.Empty;
             }
         }
@@ -1265,7 +1267,7 @@ namespace Seeker
             Java.IO.File userInfoPicDir = new Java.IO.File(ApplicationContext.FilesDir, EditUserInfoActivity.USER_INFO_PIC_DIR);
             if (!userInfoPicDir.Exists())
             {
-                MainActivity.LogFirebase("!userInfoPicDir.Exists()");
+                Logger.Firebase("!userInfoPicDir.Exists()");
                 return null;
             }
 
@@ -1273,7 +1275,7 @@ namespace Seeker
             if (!userInfoPic.Exists())
             {
                 //I could imagine a race condition causing this...
-                MainActivity.LogFirebase("!userInfoPic.Exists()");
+                Logger.Firebase("!userInfoPic.Exists()");
                 return null;
             }
             DocumentFile documentFile = DocumentFile.FromFile(userInfoPic);
@@ -1297,7 +1299,7 @@ namespace Seeker
             }
             else
             {
-                MainActivity.LogDebug("wishlist interval is null");
+                Logger.Debug("wishlist interval is null");
             }
         }
 
@@ -1312,15 +1314,15 @@ namespace Seeker
 
         private void SoulseekClient_StateChanged(object sender, SoulseekClientStateChangedEventArgs e)
         {
-            MainActivity.LogDebug("Prev: " + e.PreviousState.ToString() + " Next: " + e.State.ToString());
+            Logger.Debug("Prev: " + e.PreviousState.ToString() + " Next: " + e.State.ToString());
             if (e.PreviousState.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Disconnecting))
             {
-                MainActivity.LogDebug("!! changing from connected to disconnecting");
+                Logger.Debug("!! changing from connected to disconnecting");
 
 
                 if (e.Exception is KickedFromServerException)
                 {
-                    MainActivity.LogDebug("Kicked Kicked Kicked");
+                    Logger.Debug("Kicked Kicked Kicked");
                     if (SeekerState.ActiveActivityRef != null)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show(); });
@@ -1336,7 +1338,7 @@ namespace Seeker
 
                 //this is a "true" connected to disconnected
                 ChatroomController.ClearAndCacheJoined();
-                MainActivity.LogDebug("disconnected " + DateTime.UtcNow.ToString());
+                Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
                 if (SeekerState.logoutClicked)
                 {
                     SeekerState.logoutClicked = false;
@@ -1349,11 +1351,11 @@ namespace Seeker
             }
             else if (e.PreviousState.HasFlag(SoulseekClientStates.Disconnected))
             {
-                MainActivity.LogDebug("!! changing from disconnected to trying to connect");
+                Logger.Debug("!! changing from disconnected to trying to connect");
             }
             else if (e.State.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Connected))
             {
-                MainActivity.LogDebug("!! changing trying to connect to successfully connected");
+                Logger.Debug("!! changing trying to connect to successfully connected");
             }
         }
 
@@ -1365,13 +1367,13 @@ namespace Seeker
             }
             ChatroomController.JoinAutoJoinRoomsAndPreviousJoined();
             //ChatroomController.ConnectionLapse.Add(new Tuple<bool, DateTime>(true, DateTime.UtcNow)); //just testing obv remove later...
-            MainActivity.LogDebug("logged in " + DateTime.UtcNow.ToString());
-            MainActivity.LogDebug("Listening State: " + SeekerState.SoulseekClient.GetListeningState());
+            Logger.Debug("logged in " + DateTime.UtcNow.ToString());
+            Logger.Debug("Listening State: " + SeekerState.SoulseekClient.GetListeningState());
             if (SeekerState.ListenerEnabled && !SeekerState.SoulseekClient.GetListeningState())
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
-                    MainActivity.LogFirebase("SeekerState.ActiveActivityRef null SoulseekClient_LoggedIn");
+                    Logger.Firebase("SeekerState.ActiveActivityRef null SoulseekClient_LoggedIn");
                 }
                 else
                 {
@@ -1386,14 +1388,14 @@ namespace Seeker
         private void SoulseekClient_Connected(object sender, EventArgs e)
         {
             //ChatroomController.SetConnectionLapsedMessage(true);
-            MainActivity.LogDebug("connected " + DateTime.UtcNow.ToString());
+            Logger.Debug("connected " + DateTime.UtcNow.ToString());
 
         }
 
         //private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
         //{
         //    ChatroomController.ConnectionLapse.Add(new Tuple<bool,DateTime>(false,DateTime.UtcNow));
-        //    MainActivity.LogDebug("disconnected " + DateTime.UtcNow.ToString());
+        //    Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
         //    bool AUTO_CONNECT = true;
         //    if(AUTO_CONNECT && SeekerState.currentlyLoggedIn)
         //    {
@@ -1406,7 +1408,7 @@ namespace Seeker
         {
             if (SeekerState.ActiveActivityRef == null)
             {
-                MainActivity.LogDebug("cant show toast, active activity ref is null");
+                Logger.Debug("cant show toast, active activity ref is null");
             }
             else
             {
@@ -1465,7 +1467,7 @@ namespace Seeker
                     bool isDueToAutoReset = ReconnectAutoResetEvent.WaitOne(retrySeconds[i] * 1000);
                     if (isDueToAutoReset)
                     {
-                        MainActivity.LogDebug("is woken due to auto reset");
+                        Logger.Debug("is woken due to auto reset");
                     }
                     //System.Threading.Thread.Sleep(retrySeconds[i] * 1000); //todo AutoResetEvent or WaitOne(ms) etc.
 
@@ -1480,7 +1482,7 @@ namespace Seeker
                         t.Wait();
                         if (t.IsCompletedSuccessfully)
                         {
-                            MainActivity.LogDebug("RETRY " + i + "SUCCEEDED");
+                            Logger.Debug("RETRY " + i + "SUCCEEDED");
                             return; //our work here is done
                         }
                     }
@@ -1489,7 +1491,7 @@ namespace Seeker
 
                     }
                     //if we got here we failed.. so try again shortly...
-                    MainActivity.LogDebug("RETRY " + i + "FAILED");
+                    Logger.Debug("RETRY " + i + "FAILED");
                 }
             }
             finally
@@ -1529,7 +1531,7 @@ namespace Seeker
                     {
                         foreach (UserListItem item in SeekerState.UserList)
                         {
-                            MainActivity.LogDebug("adding user: " + item.Username);
+                            Logger.Debug("adding user: " + item.Username);
                             SeekerState.SoulseekClient.AddUserAsync(item.Username).ContinueWith(UpdateUserInfo);
                         }
                     }
@@ -1538,7 +1540,7 @@ namespace Seeker
                     {
                         foreach (string userDownloadOffline in TransfersFragment.UsersWhereDownloadFailedDueToOffline.Keys)
                         {
-                            MainActivity.LogDebug("adding user (due to a download we wanted from them when they were offline): " + userDownloadOffline);
+                            Logger.Debug("adding user (due to a download we wanted from them when they were offline): " + userDownloadOffline);
                             SeekerState.SoulseekClient.AddUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
                         }
                     }
@@ -1548,25 +1550,25 @@ namespace Seeker
                     if (SeekerState.PendingStatusChangeToAwayOnline == SeekerState.PendingStatusChange.OnlinePending)
                     {
                         //we just did this by logging in...
-                        MainActivity.LogDebug("online was pending");
+                        Logger.Debug("online was pending");
                         SeekerState.PendingStatusChangeToAwayOnline = SeekerState.PendingStatusChange.NothingPending;
                     }
                     else if (((SeekerState.PendingStatusChangeToAwayOnline == SeekerState.PendingStatusChange.AwayPending || SeekerState.OurCurrentStatusIsAway)))
                     {
-                        MainActivity.LogDebug("a change to away was pending / our status is away. lets set it now");
+                        Logger.Debug("a change to away was pending / our status is away. lets set it now");
 
                         if (SeekerState.PendingStatusChangeToAwayOnline == SeekerState.PendingStatusChange.AwayPending)
                         {
-                            MainActivity.LogDebug("pending that is....");
+                            Logger.Debug("pending that is....");
                         }
                         else
                         {
-                            MainActivity.LogDebug("current that is...");
+                            Logger.Debug("current that is...");
                         }
 
                         if (ForegroundLifecycleTracker.NumberOfActiveActivities != 0)
                         {
-                            MainActivity.LogDebug("There is a hole in our logic!!! the pendingstatus and/or current status should not be away!!!");
+                            Logger.Debug("There is a hole in our logic!!! the pendingstatus and/or current status should not be away!!!");
                         }
                         else
                         {
@@ -1581,7 +1583,7 @@ namespace Seeker
                     //we log in.
                     if (SeekerState.NumberOfSharedDirectoriesIsStale && SeekerState.AttemptedToSetUpSharing)
                     {
-                        MainActivity.LogDebug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
+                        Logger.Debug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
                         MainActivity.InformServerOfSharedFiles();
                     }
 
@@ -1589,7 +1591,7 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    MainActivity.LogFirebase("PerformPostConnectTasks" + e.Message + e.StackTrace);
+                    Logger.Firebase("PerformPostConnectTasks" + e.Message + e.StackTrace);
                 }
             }
         }
@@ -1629,11 +1631,11 @@ namespace Seeker
         {
             try
             {
-                MainActivity.LogDebug("Update User Info Received");
+                Logger.Debug("Update User Info Received");
                 if (t.IsCompletedSuccessfully)
                 {
                     string username = t.Result.Username;
-                    MainActivity.LogDebug("Update User Info: " + username + " status: " + t.Result.Status.ToString());
+                    Logger.Debug("Update User Info: " + username + " status: " + t.Result.Status.ToString());
                     if (MainActivity.UserListContainsUser(username))
                     {
                         MainActivity.UserListAddUser(t.Result, t.Result.Status);
@@ -1653,18 +1655,18 @@ namespace Seeker
                     }
                     else
                     {
-                        MainActivity.LogFirebase("unexcepted error message - " + t.Exception.InnerException.Message);
+                        Logger.Firebase("unexcepted error message - " + t.Exception.InnerException.Message);
                     }
                 }
                 else
                 {
                     //timeout
-                    MainActivity.LogFirebase("UpdateUserInfo case 3 " + t.Exception.Message);
+                    Logger.Firebase("UpdateUserInfo case 3 " + t.Exception.Message);
                 }
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("UpdateUserInfo" + e.Message + e.StackTrace);
+                Logger.Firebase("UpdateUserInfo" + e.Message + e.StackTrace);
             }
         }
 
@@ -1813,21 +1815,21 @@ namespace Seeker
             }
             if (e.Transfer.State == TransferStates.InProgress)
             {
-                MainActivity.LogDebug("transfer state changed to in progress" + e.Transfer.Filename);
+                Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
                 //uploading file to user...
             }
             //if(e.Transfer.State == TransferStates.Completed) //this condition will NEVER be hit.  it is always completed | succeeded
             if (e.Transfer.State.HasFlag(TransferStates.Succeeded)) //todo rethink upload notifications....
             {
-                MainActivity.LogDebug("transfer state changed to completed" + e.Transfer.Filename);
+                Logger.Debug("transfer state changed to completed" + e.Transfer.Filename);
                 //send notif successfully uploading file to user..
                 //e.Transfer.AverageSpeed - speed in bytes/second
                 if (e.Transfer.AverageSpeed <= 0 || ((int)(e.Transfer.AverageSpeed)) == 0)
                 {
-                    MainActivity.LogDebug("avg speed <= 0" + e.Transfer.Filename);
+                    Logger.Debug("avg speed <= 0" + e.Transfer.Filename);
                     return;
                 }
-                MainActivity.LogDebug("sending avg speed of " + e.Transfer.AverageSpeed.ToString());
+                Logger.Debug("sending avg speed of " + e.Transfer.AverageSpeed.ToString());
                 SeekerState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
                 try
                 {
@@ -1855,7 +1857,7 @@ namespace Seeker
                 }
                 catch (Exception err)
                 {
-                    MainActivity.LogFirebase("Upload Noficiation Failed" + err.Message + err.StackTrace);
+                    Logger.Firebase("Upload Noficiation Failed" + err.Message + err.StackTrace);
                 }
             }
         }
@@ -1898,7 +1900,7 @@ namespace Seeker
             //if not in our user list, then this is likely a result of GetUserInfo!, so dont do any of this..
             if (found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline)))
             {
-                MainActivity.LogDebug("from offline to online " + username);
+                Logger.Debug("from offline to online " + username);
                 if (SeekerState.UserOnlineAlerts != null && SeekerState.UserOnlineAlerts.ContainsKey(username))
                 {
                     //show notification.
@@ -1907,7 +1909,7 @@ namespace Seeker
             }
             else
             {
-                MainActivity.LogDebug("NOT from offline to online (or not in user list)" + username);
+                Logger.Debug("NOT from offline to online (or not in user list)" + username);
             }
             return found;
         }
@@ -1955,7 +1957,7 @@ namespace Seeker
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogFirebase("ShowNotificationForUserOnlineAlert failed: " + e.Message + e.StackTrace);
+                    Logger.Firebase("ShowNotificationForUserOnlineAlert failed: " + e.Message + e.StackTrace);
                 }
             });
         }
@@ -1987,7 +1989,7 @@ namespace Seeker
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogFirebase("ShowNotificationForCompletedFolder failed: " + e.Message + e.StackTrace);
+                    Logger.Firebase("ShowNotificationForCompletedFolder failed: " + e.Message + e.StackTrace);
                 }
             });
         }
@@ -2247,7 +2249,7 @@ namespace Seeker
         /// <param name="e"></param>
         private void SoulseekClient_UserDataReceived(object sender, UserData e)
         {
-            MainActivity.LogDebug("User Data Received: " + e.Username);
+            Logger.Debug("User Data Received: " + e.Username);
             if (e.Username == SeekerState.Username)
             {
                 SeekerState.UploadSpeed = e.AverageSpeed; //bytes
@@ -2256,7 +2258,7 @@ namespace Seeker
             {
                 if (SeekerState.UserList == null)
                 {
-                    MainActivity.LogFirebase("UserList is null on user data receive");
+                    Logger.Firebase("UserList is null on user data receive");
                 }
                 else
                 {
@@ -2274,12 +2276,12 @@ namespace Seeker
 
             if (DeduplicateUsername == e.Username && DeduplicateStatus == e.Status)
             {
-                MainActivity.LogDebug($"throwing away {e.Username} status changed");
+                Logger.Debug($"throwing away {e.Username} status changed");
                 return;
             }
             else
             {
-                MainActivity.LogDebug($"handling {e.Username} status changed");
+                Logger.Debug($"handling {e.Username} status changed");
                 DeduplicateUsername = e.Username;
                 DeduplicateStatus = e.Status;
                 SeekerApplication.UserStatusChangedDeDuplicated?.Invoke(sender, e);
@@ -2294,7 +2296,7 @@ namespace Seeker
                 {
                     if (TransfersFragment.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
                     {
-                        MainActivity.LogDebug("the user came back who we previously dl from " + username);
+                        Logger.Debug("the user came back who we previously dl from " + username);
                         //retry all failed downloads from them..
                         List<TransferItem> items = TransfersFragment.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
                         if (items.Count == 0)
@@ -2313,7 +2315,7 @@ namespace Seeker
                             }
                             catch (Exception e)
                             {
-                                MainActivity.LogDebug("ProcessPotentialUserOfflineChangedEvent" + e.Message);
+                                Logger.Debug("ProcessPotentialUserOfflineChangedEvent" + e.Message);
                             }
                         }
 
@@ -2338,7 +2340,7 @@ namespace Seeker
                     bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
                     if (found)
                     {
-                        MainActivity.LogDebug("friend status changed " + e.Username);
+                        Logger.Debug("friend status changed " + e.Username);
                         SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
                     }
                 }

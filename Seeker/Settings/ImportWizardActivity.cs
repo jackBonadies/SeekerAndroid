@@ -171,7 +171,7 @@ namespace Seeker
                                         {
                                             Toast.MakeText(this, Resource.String.FailedToParseContactDev, ToastLength.Long).Show();
                                         }
-                                        MainActivity.LogFirebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
+                                        Logger.Firebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
                                     }
 
                                 });
@@ -1761,7 +1761,7 @@ namespace Seeker
             }
             else
             {
-                MainActivity.LogDebug("Unsure of filetype.  Firstline = " + firstLine);
+                Logger.Debug("Unsure of filetype.  Firstline = " + firstLine);
                 return ImportType.Nicotine;
             }
         }

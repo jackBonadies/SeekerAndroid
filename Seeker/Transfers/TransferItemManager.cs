@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -480,7 +481,7 @@ namespace Seeker
         {
             if (ti == null)
             {
-                MainActivity.LogDebug("IsFolderNowComplete: transferitem is null");
+                Logger.Debug("IsFolderNowComplete: transferitem is null");
                 return false;
             }
             else
@@ -492,7 +493,7 @@ namespace Seeker
                 }
                 if (folder == null)
                 {
-                    MainActivity.LogDebug("IsFolderNowComplete: folder is null");
+                    Logger.Debug("IsFolderNowComplete: folder is null");
                     return false;
                 }
                 lock (folder.TransferItems)

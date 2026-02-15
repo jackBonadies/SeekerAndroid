@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.OS;
 using AndroidX.AppCompat.App;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -11,7 +12,7 @@ namespace Seeker
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            MainActivity.LogInfoFirebase("shutting down");
+            Logger.InfoFirebase("shutting down");
 
             //stop all soulseek connection.
             if (SeekerState.SoulseekClient != null)

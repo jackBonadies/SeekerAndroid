@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
 
 namespace Seeker.Messages
 {
@@ -104,7 +105,7 @@ namespace Seeker.Messages
 
         public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            MainActivity.LogDebug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
+            Logger.Debug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
 
             //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
             //in that case we still dont want to show anything.
@@ -157,7 +158,7 @@ namespace Seeker.Messages
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
 
-            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewSentHolder");
+            Logger.Debug("OnCreateContextMenu MessageInnerViewSentHolder");
 
             MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
@@ -186,7 +187,7 @@ namespace Seeker.Messages
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
 
-            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewReceivedHolder");
+            Logger.Debug("OnCreateContextMenu MessageInnerViewReceivedHolder");
 
             MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }

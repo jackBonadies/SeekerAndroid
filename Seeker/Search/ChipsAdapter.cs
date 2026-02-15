@@ -242,7 +242,7 @@ namespace Seeker
 #if DEBUG
                     foreach (string ftype in sortedListPass1str)
                     {
-                        MainActivity.LogDebug(ftype + " : " + fileTypeCounts[ftype]);
+                        Logger.Debug(ftype + " : " + fileTypeCounts[ftype]);
                     }
 #endif
 
@@ -580,7 +580,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("keywords failed " + ex.Message + ex.StackTrace);
+                Logger.Firebase("keywords failed " + ex.Message + ex.StackTrace);
                 return new List<Tuple<string, HashSet<string>>>();
             }
         }

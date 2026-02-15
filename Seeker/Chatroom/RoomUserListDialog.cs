@@ -112,12 +112,12 @@ namespace Seeker.Chatroom
 
                         if (wasAtTop)
                         {
-                            MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                            Logger.Debug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
                             recycleLayoutManager.ScrollToPosition(0);
                         }
                         else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                         {
-                            MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                            Logger.Debug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
                             recycleLayoutManager.OnRestoreInstanceState(p);
                         }
 
@@ -177,7 +177,7 @@ namespace Seeker.Chatroom
                         }
                         if (indexToRemove == -1)
                         {
-                            MainActivity.LogDebug("not there" + uname);
+                            Logger.Debug("not there" + uname);
                             return;
                         }
                         UI_userDataList.RemoveAt(indexToRemove);
@@ -188,7 +188,7 @@ namespace Seeker.Chatroom
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("EXCEPTION UpdateData " + e.Message + e.StackTrace);
+                Logger.Firebase("EXCEPTION UpdateData " + e.Message + e.StackTrace);
             }
         }
 
@@ -460,12 +460,12 @@ namespace Seeker.Chatroom
 
                     if (wasAtTop)
                     {
-                        MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                        Logger.Debug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
                         recycleLayoutManager.ScrollToPosition(0);
                     }
                     else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                     {
-                        MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                        Logger.Debug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
                         recycleLayoutManager.OnRestoreInstanceState(p);
                     }
                 });
@@ -487,7 +487,7 @@ namespace Seeker.Chatroom
             {
                 if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
-                    MainActivity.LogDebug("Handled by commons");
+                    Logger.Debug("Handled by commons");
                     return base.OnContextItemSelected(item);
                 }
             }

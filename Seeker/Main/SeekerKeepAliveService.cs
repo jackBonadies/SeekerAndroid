@@ -53,7 +53,7 @@ namespace Seeker
                 this.StopSelf();
                 return StartCommandResult.NotSticky;
             }
-            MainActivity.LogInfoFirebase("keep alive service started...");
+            Logger.InfoFirebase("keep alive service started...");
             SeekerState.IsStartUpServiceCurrentlyRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
@@ -74,7 +74,7 @@ namespace Seeker
                 //   in my case it did not.
                 SeekerState.IsStartUpServiceCurrentlyRunning = false;
                 bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
-                MainActivity.LogFirebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
+                Logger.Firebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
                 SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
 #endif
@@ -85,18 +85,18 @@ namespace Seeker
                 if (CpuKeepAlive_FullService != null && !CpuKeepAlive_FullService.IsHeld)
                 {
                     CpuKeepAlive_FullService.Acquire();
-                    MainActivity.LogInfoFirebase("CpuKeepAlive acquire");
+                    Logger.InfoFirebase("CpuKeepAlive acquire");
                 }
                 if (WifiKeepAlive_FullService != null && !WifiKeepAlive_FullService.IsHeld)
                 {
                     WifiKeepAlive_FullService.Acquire();
-                    MainActivity.LogInfoFirebase("WifiKeepAlive acquire");
+                    Logger.InfoFirebase("WifiKeepAlive acquire");
                 }
             }
             catch (System.Exception e)
             {
-                MainActivity.LogInfoFirebase("keepalive issue: " + e.Message + e.StackTrace);
-                MainActivity.LogFirebase("keepalive issue: " + e.Message + e.StackTrace);
+                Logger.InfoFirebase("keepalive issue: " + e.Message + e.StackTrace);
+                Logger.Firebase("keepalive issue: " + e.Message + e.StackTrace);
             }
             //}
             //runs indefinitely until stop.
@@ -110,28 +110,28 @@ namespace Seeker
             if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
             {
                 CpuKeepAlive_FullService.Release();
-                MainActivity.LogInfoFirebase("CpuKeepAlive release");
+                Logger.InfoFirebase("CpuKeepAlive release");
             }
             else if (CpuKeepAlive_FullService == null)
             {
-                MainActivity.LogFirebase("CpuKeepAlive is null");
+                Logger.Firebase("CpuKeepAlive is null");
             }
             else if (!CpuKeepAlive_FullService.IsHeld)
             {
-                MainActivity.LogFirebase("CpuKeepAlive not held");
+                Logger.Firebase("CpuKeepAlive not held");
             }
             if (WifiKeepAlive_FullService != null && WifiKeepAlive_FullService.IsHeld)
             {
                 WifiKeepAlive_FullService.Release();
-                MainActivity.LogInfoFirebase("WifiKeepAlive release");
+                Logger.InfoFirebase("WifiKeepAlive release");
             }
             else if (WifiKeepAlive_FullService == null)
             {
-                MainActivity.LogFirebase("WifiKeepAlive is null");
+                Logger.Firebase("WifiKeepAlive is null");
             }
             else if (!WifiKeepAlive_FullService.IsHeld)
             {
-                MainActivity.LogFirebase("WifiKeepAlive not held");
+                Logger.Firebase("WifiKeepAlive not held");
             }
 
             base.OnDestroy();
