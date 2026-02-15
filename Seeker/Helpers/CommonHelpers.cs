@@ -47,8 +47,8 @@ namespace Seeker
                 //    //string uuid2 = sv2.Uuid;
 
 
-                //    string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, out _);
-                //    string volume2 = MainActivity.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume1 = FileFilterHelper.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume2 = FileFilterHelper.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
 
                 //    return uuid1 != uuid2;
                 //}
@@ -56,12 +56,12 @@ namespace Seeker
                 //{
                 try
                 {
-                    string volume1 = MainActivity.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
+                    string volume1 = FileFilterHelper.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
                     if (everything)
                     {
                         volume1 = SeekerState.RootDocumentFile.Uri.LastPathSegment;
                     }
-                    string volume2 = MainActivity.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
+                    string volume2 = FileFilterHelper.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
                     if (everything)
                     {
                         volume2 = SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
@@ -306,7 +306,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (MainActivity.UserListContainsUser(username)) //if we already have added said user, change title add to remove..
+                if (UserListService.ContainsUser(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
                     {
@@ -372,7 +372,7 @@ namespace Seeker
             // if we added this user as a friend do not show the option to ignore. they must be removed first.
             if (!string.IsNullOrEmpty(username))
             {
-                bool isInUserList = MainActivity.UserListContainsUser(username);
+                bool isInUserList = UserListService.ContainsUser(username);
                 var menuItem = menu.FindItem(Resource.Id.action_ignore);
                 menuItem?.SetVisible(!isInUserList);
             }
@@ -395,7 +395,7 @@ namespace Seeker
         public static void AddAddRemoveUserMenuItem(IMenu menu, int i, int j, int k, string username, bool full_title = false)
         {
             string title = null;
-            if (!MainActivity.UserListContainsUser(username))
+            if (!UserListService.ContainsUser(username))
             {
                 if (full_title)
                 {
@@ -430,7 +430,7 @@ namespace Seeker
         public static void AddIgnoreUnignoreUserMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             //ignored and added are mutually exclusive.  you cannot have a user be both ignored and added.
-            if (MainActivity.UserListContainsUser(username))
+            if (UserListService.ContainsUser(username))
             {
                 return;
             }
@@ -724,7 +724,7 @@ namespace Seeker
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
                 MainActivity.ToastUI_short(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
-                MainActivity.UserListRemoveUser(usernameInQuestion);
+                UserListService.RemoveUser(usernameInQuestion);
                 SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
             }
@@ -1455,7 +1455,7 @@ namespace Seeker
                         {
                             SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
                             SeekerState.Password = newPassword;
-                            lock (MainActivity.SHARED_PREF_LOCK)
+                            lock (SeekerState.SharedPrefLock)
                             {
                                 var editor = SeekerState.SharedPreferences.Edit();
                                 editor.PutString(KeyConsts.M_Password, SeekerState.Password);
@@ -1671,7 +1671,7 @@ namespace Seeker
 
         public static void SaveUserNotes()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserNotes, SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
@@ -1682,7 +1682,7 @@ namespace Seeker
 
         public static void SaveOnlineAlerts()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));

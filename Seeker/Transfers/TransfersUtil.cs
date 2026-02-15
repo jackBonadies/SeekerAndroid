@@ -1,4 +1,5 @@
 ﻿using Android.Widget;
+using Seeker.Services;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace Seeker.Transfers
                 var file = files[i];
                 var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
                 var e = new DownloadAddedEventArgs(dlInfo);
-                Action<Task> continuationActionSaveFile = MainActivity.DownloadContinuationActionUI(e);
+                Action<Task> continuationActionSaveFile = DownloadService.DownloadContinuationActionUI(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
                 // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next 
                 await waitForNext;
@@ -241,7 +242,7 @@ namespace Seeker.Transfers
                     long partialLength = 0;
                     Android.Net.Uri incompleteUri = null;
                     Android.Net.Uri incompleteUriDirectory = null;
-                    System.IO.Stream streamToWriteTo = MainActivity.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength); //something here to denote...
+                    System.IO.Stream streamToWriteTo = DownloadService.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength); //something here to denote...
                     return new Tuple<System.IO.Stream, long, string, string>(streamToWriteTo, partialLength, incompleteUri.ToString(), incompleteUriDirectory.ToString());
                 });
             return task;

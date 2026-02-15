@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+using Seeker.Services;
 using Seeker.Chatroom;
 using Seeker.Helpers;
 using Seeker.Managers;
@@ -47,7 +48,7 @@ using SlskHelp;
 namespace Seeker
 {
     [Application()]
-    public class SeekerApplication : Application
+    public partial class SeekerApplication : Application
     {
         public static Context ApplicationContext = null;
         public SeekerApplication(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
@@ -90,7 +91,7 @@ namespace Seeker
                 if (!SeekerState.LegacyLanguageMigrated)
                 {
                     SeekerState.LegacyLanguageMigrated = true;
-                    lock (MainActivity.SHARED_PREF_LOCK)
+                    lock (SeekerState.SharedPrefLock)
                     {
                         var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
                         editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated);
@@ -736,181 +737,6 @@ namespace Seeker
         }
 
 
-        // TODOORG move to Utils\SpeedLimitHelper
-        public static class SpeedLimitHelper
-        {
-
-            public static void RemoveDownloadUser(string username)
-            {
-                DownloadUserDelays.TryRemove(username, out _);
-                DownloadLastAvgSpeed.TryRemove(username, out _);
-            }
-
-            public static void RemoveUploadUser(string username)
-            {
-                UploadUserDelays.TryRemove(username, out _);
-                UploadLastAvgSpeed.TryRemove(username, out _);
-            }
-
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>(); //we need the double precision bc sometimes 1.1 cast to int will be the same number i.e. (int)(4*1.1)==4
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> DownloadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
-
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadUserDelays = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
-            public static System.Collections.Concurrent.ConcurrentDictionary<string, double> UploadLastAvgSpeed = new System.Collections.Concurrent.ConcurrentDictionary<string, double>();
-            public static Task OurDownloadGoverner(double currentSpeed, string username, CancellationToken cts)
-            {
-                try
-                {
-                    if (SeekerState.SpeedLimitDownloadOn)
-                    {
-
-                        if (DownloadUserDelays.TryGetValue(username, out double msDelay))
-                        {
-                            bool exists = DownloadLastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                            if (exists && currentSpeed == lastAvgSpeed)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("dont update");
-#endif
-                                //do not adjust as we have not yet recalculated the average speed
-                                return Task.Delay((int)msDelay, cts);
-                            }
-
-                            DownloadLastAvgSpeed[username] = currentSpeed;
-
-                            double avgSpeed = currentSpeed;
-                            if (!SeekerState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
-                            {
-
-                                //its threadsafe when using linq on concurrent dict itself.
-                                avgSpeed = DownloadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
-#if DEBUG
-                                //System.Console.WriteLine("multiple total speed " + avgSpeed);
-#endif
-                            }
-
-                            if (avgSpeed > SeekerState.SpeedLimitDownloadBytesSec)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("speed too high " + currentSpeed + "   " + msDelay);
-#endif
-                                DownloadUserDelays[username] = msDelay = msDelay * 1.04;
-
-                            }
-                            else
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("speed too low " + currentSpeed + "   " + msDelay);
-#endif
-                                DownloadUserDelays[username] = msDelay = msDelay * 0.96;
-                            }
-
-                            return Task.Delay((int)msDelay, cts);
-                        }
-                        else
-                        {
-#if DEBUG
-                            //System.Console.WriteLine("first time guess");
-#endif
-                            //first time we need to guess a decent value
-                            //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                            double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitDownloadBytesSec;
-                            DownloadUserDelays[username] = msDelaySeed;
-                            DownloadLastAvgSpeed[username] = currentSpeed;
-                            return Task.Delay((int)msDelaySeed, cts);
-                        }
-
-                    }
-                    else
-                    {
-                        return Task.CompletedTask;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Firebase("DL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
-                    return Task.CompletedTask;
-                }
-            }
-
-            //this is duplicated for speed.
-            public static Task OurUploadGoverner(double currentSpeed, string username, CancellationToken cts)
-            {
-                try
-                {
-                    if (SeekerState.SpeedLimitUploadOn)
-                    {
-
-                        if (UploadUserDelays.TryGetValue(username, out double msDelay))
-                        {
-                            bool exists = UploadLastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                            if (exists && currentSpeed == lastAvgSpeed)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("UL dont update");
-#endif
-                                //do not adjust as we have not yet recalculated the average speed
-                                return Task.Delay((int)msDelay, cts);
-                            }
-
-                            UploadLastAvgSpeed[username] = currentSpeed;
-
-                            double avgSpeed = currentSpeed;
-                            if (!SeekerState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
-                            {
-
-                                //its threadsafe when using linq on concurrent dict itself.
-                                avgSpeed = UploadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
-#if DEBUG
-                                //System.Console.WriteLine("UL multiple total speed " + avgSpeed);
-#endif
-                            }
-
-                            if (avgSpeed > SeekerState.SpeedLimitUploadBytesSec)
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
-#endif
-                                UploadUserDelays[username] = msDelay = msDelay * 1.04;
-
-                            }
-                            else
-                            {
-#if DEBUG
-                                //System.Console.WriteLine("UL speed too low " + currentSpeed + "   " + msDelay);
-#endif
-                                UploadUserDelays[username] = msDelay = msDelay * 0.96;
-                            }
-
-                            return Task.Delay((int)msDelay, cts);
-                        }
-                        else
-                        {
-#if DEBUG
-                            //System.Console.WriteLine("UL first time guess");
-#endif
-                            //first time we need to guess a decent value
-                            //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                            double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitUploadBytesSec;
-                            UploadUserDelays[username] = msDelaySeed;
-                            UploadLastAvgSpeed[username] = currentSpeed;
-                            return Task.Delay((int)msDelaySeed, cts);
-                        }
-
-                    }
-                    else
-                    {
-                        return Task.CompletedTask;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Firebase("UL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
-                    return Task.CompletedTask;
-                }
-            }
-
-        }
 
 
         // TODOORG move to EventArgs?
@@ -1013,11 +839,11 @@ namespace Seeker
                     // TODO why is queue length max value
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                     {
-                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
+                        Seeker.Services.DownloadService.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                     else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
                     {
-                        MainActivity.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
+                        Seeker.Services.DownloadService.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
@@ -1584,7 +1410,7 @@ namespace Seeker
                     if (SeekerState.NumberOfSharedDirectoriesIsStale && SeekerState.AttemptedToSetUpSharing)
                     {
                         Logger.Debug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
-                        MainActivity.InformServerOfSharedFiles();
+                        SharedFileService.InformServerOfSharedFiles();
                     }
 
                     TransfersController.InitializeService();
@@ -1636,9 +1462,9 @@ namespace Seeker
                 {
                     string username = t.Result.Username;
                     Logger.Debug("Update User Info: " + username + " status: " + t.Result.Status.ToString());
-                    if (MainActivity.UserListContainsUser(username))
+                    if (UserListService.ContainsUser(username))
                     {
-                        MainActivity.UserListAddUser(t.Result, t.Result.Status);
+                        UserListService.AddUser(t.Result, t.Result.Status);
                     }
 
 
@@ -1648,9 +1474,9 @@ namespace Seeker
                     if (t.Exception.InnerException.Message.Contains("User ") && t.Exception.InnerException.Message.Contains("does not exist"))
                     {
                         string username = t.Exception.InnerException.Message.Split(null)[1];
-                        if (MainActivity.UserListContainsUser(username))
+                        if (UserListService.ContainsUser(username))
                         {
-                            MainActivity.UserListSetDoesNotExist(username);
+                            UserListService.SetDoesNotExist(username);
                         }
                     }
                     else
@@ -1708,9 +1534,9 @@ namespace Seeker
             //typically its tough to add a user to ignore list from the UI if they are in the User List.
             //but for example if you ignore a user based on their message.
             //User List and Ignore List and mutually exclusive so if you ignore someone, they will be removed from user list.
-            if (MainActivity.UserListContainsUser(username))
+            if (UserListService.ContainsUser(username))
             {
-                MainActivity.UserListRemoveUser(username);
+                UserListService.RemoveUser(username);
             }
 
             lock (SeekerState.IgnoreUserList)
@@ -1724,7 +1550,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
@@ -1763,7 +1589,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
@@ -1851,7 +1677,7 @@ namespace Seeker
                         NotificationUploadTracker.Add(e.Transfer.Username, notifInfo);
                     }
 
-                    Notification n = MainActivity.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
+                    Notification n = Seeker.Services.DownloadService.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
                     NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.MainActivityRef);
                     nmc.Notify(e.Transfer.Username.GetHashCode(), n);
                 }
@@ -2004,7 +1830,7 @@ namespace Seeker
                 SeekerState.Password = sharedPreferences.GetString(KeyConsts.M_Password, "");
                 SeekerState.SaveDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_SaveDataDirectoryUri, "");
                 SeekerState.SaveDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
-                SeekerState.NumberSearchResults = sharedPreferences.GetInt(KeyConsts.M_NumberSearchResults, MainActivity.DEFAULT_SEARCH_RESULTS);
+                SeekerState.NumberSearchResults = sharedPreferences.GetInt(KeyConsts.M_NumberSearchResults, Constants.DefaultSearchResults);
                 SeekerState.DayNightMode = sharedPreferences.GetInt(KeyConsts.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
                 SeekerState.Language = sharedPreferences.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
                 SeekerState.LegacyLanguageMigrated = sharedPreferences.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
@@ -2105,7 +1931,7 @@ namespace Seeker
 
         public static void RestoreListeningState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 SeekerState.ListenerEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerEnabled, true);
                 SeekerState.ListenerPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_ListenerPort, 33939);
@@ -2115,7 +1941,7 @@ namespace Seeker
 
         public static void SaveListeningState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ListenerEnabled, SeekerState.ListenerEnabled);
@@ -2127,7 +1953,7 @@ namespace Seeker
 
         public static void SaveSpeedLimitState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, SeekerState.SpeedLimitDownloadOn);
@@ -2181,7 +2007,7 @@ namespace Seeker
 
         public static void SaveSmartFilterState()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled);
@@ -2231,7 +2057,7 @@ namespace Seeker
                 serializer.Serialize(writer, recentUsers);
                 recentUsersStr = writer.ToString();
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_RecentUsersList, recentUsersStr);

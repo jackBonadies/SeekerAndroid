@@ -112,7 +112,7 @@ namespace Seeker
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.removeUser:
-                    MainActivity.UserListRemoveUser(PopUpMenuOwnerHack);
+                    UserListService.RemoveUser(PopUpMenuOwnerHack);
                     this.NotifyItemRemoved(PopUpMenuOwnerHack);
                     return true;
                 case Resource.Id.removeUserFromIgnored:
@@ -438,12 +438,12 @@ namespace Seeker
                 }
                 else
                 {
-                    MainActivity.UserListAddUser(t.Result);
+                    UserListService.AddUser(t.Result);
                     if (!massImportCase)
                     {
                         if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
                         {
-                            lock (MainActivity.SHARED_PREF_LOCK)
+                            lock (SeekerState.SharedPrefLock)
                             {
                                 var editor = SeekerState.SharedPreferences.Edit();
                                 editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
@@ -477,7 +477,7 @@ namespace Seeker
                 return;
             }
 
-            if (MainActivity.UserListContainsUser(username))
+            if (UserListService.ContainsUser(username))
             {
                 Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_), username), ToastLength.Short).Show();
                 return;
@@ -595,7 +595,7 @@ namespace Seeker
 
             if (prev != UserListSortOrder)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutInt(KeyConsts.M_UserListSortOrder, (int)UserListSortOrder);

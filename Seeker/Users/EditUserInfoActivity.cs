@@ -85,7 +85,7 @@ namespace Seeker
         public void SaveBio()
         {
             SeekerState.UserInfoBio = PendingText;
-            lock (MainActivity.SHARED_PREF_LOCK)
+            lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserInfoBio, PendingText);
@@ -173,7 +173,7 @@ namespace Seeker
                 DeleteImage(SeekerState.UserInfoPictureName);
                 SeekerState.UserInfoPictureName = string.Empty;
                 pictureText.Text = this.GetString(Resource.String.no_image_chosen);
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_UserInfoPicture, SeekerState.UserInfoPictureName);
@@ -260,7 +260,7 @@ namespace Seeker
                     }
 
                     SeekerState.UserInfoPictureName = name;
-                    lock (MainActivity.SHARED_PREF_LOCK)
+                    lock (SeekerState.SharedPrefLock)
                     {
                         var editor = SeekerState.SharedPreferences.Edit();
                         editor.PutString(KeyConsts.M_UserInfoPicture, SeekerState.UserInfoPictureName);

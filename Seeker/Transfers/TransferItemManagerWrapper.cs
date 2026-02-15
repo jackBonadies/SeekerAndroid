@@ -1,4 +1,5 @@
 ﻿using AndroidX.DocumentFile.Provider;
+using Seeker.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -127,7 +128,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed");
                 }
-                MainActivity.DeleteParentIfEmpty(parent);
+                DownloadService.DeleteParentIfEmpty(parent);
             }
             else
             {
@@ -141,7 +142,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed LEGACY");
                 }
-                MainActivity.DeleteParentIfEmpty(parent);
+                DownloadService.DeleteParentIfEmpty(parent);
             }
         }
 

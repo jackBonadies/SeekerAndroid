@@ -531,7 +531,7 @@ namespace Seeker.Messages
             }
             if (messagesString != null && messagesString != string.Empty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                 {
                     var editor = sharedPrefs.Edit();
                     editor.PutString(KeyConsts.M_Messages, messagesString);
@@ -574,7 +574,7 @@ namespace Seeker.Messages
             }
             if (UnreadUsernames.IsEmpty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                 {
                     var editor = sharedPrefs.Edit();
                     editor.PutString(KeyConsts.M_UnreadMessageUsernames, String.Empty);
@@ -586,7 +586,7 @@ namespace Seeker.Messages
                 var messagesString = SerializationHelper.SaveUnreadUsernamesToString(UnreadUsernames);
                 if (!string.IsNullOrEmpty(messagesString))
                 {
-                    lock (MainActivity.SHARED_PREF_LOCK)
+                    lock (SeekerState.SharedPrefLock)
                     {
                         var editor = sharedPrefs.Edit();
                         editor.PutString(KeyConsts.M_UnreadMessageUsernames, messagesString);

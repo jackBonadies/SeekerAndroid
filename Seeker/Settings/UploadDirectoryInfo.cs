@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Seeker.Services;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -74,7 +75,7 @@ namespace Seeker
         {
             if (string.IsNullOrEmpty(this.DisplayNameOverride))
             {
-                MainActivity.GetAllFolderInfo(this, out _, out _, out _, out _, out string presentableName);
+                SharedFileService.GetAllFolderInfo(this, out _, out _, out _, out _, out string presentableName);
                 return presentableName;
             }
             else
@@ -93,7 +94,7 @@ namespace Seeker
             }
             else
             {
-                MainActivity.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, out _, out _, out string rootOverrideName, out string parentPresentableName);
+                SharedFileService.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, out _, out _, out string rootOverrideName, out string parentPresentableName);
                 return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length); //remove parent part and replace it with the parent presentable name.
             }
         }

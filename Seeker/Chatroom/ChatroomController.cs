@@ -375,8 +375,8 @@ namespace Seeker.Chatroom
 
                 if (PutFriendsOnTop)
                 {
-                    bool xFriend = MainActivity.UserListContainsUser(x.Username);
-                    bool yFriend = MainActivity.UserListContainsUser(y.Username);
+                    bool xFriend = UserListService.ContainsUser(x.Username);
+                    bool yFriend = UserListService.ContainsUser(y.Username);
                     if (xFriend && !yFriend)
                     {
                         return -1; //x is better
@@ -475,7 +475,7 @@ namespace Seeker.Chatroom
 
             if (joinedRoomsString != null && joinedRoomsString != string.Empty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
@@ -526,7 +526,7 @@ namespace Seeker.Chatroom
 
             if (notifyRoomsString != null && notifyRoomsString != string.Empty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);

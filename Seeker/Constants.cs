@@ -22,5 +22,6 @@ namespace Seeker
     public static class Constants
     {
         public const string SharedPrefFile = "SoulSeekPrefs";
+        public const int DefaultSearchResults = 250;
     }
 }

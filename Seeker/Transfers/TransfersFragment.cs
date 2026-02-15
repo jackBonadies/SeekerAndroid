@@ -1,4 +1,5 @@
 ﻿using Android.Content;
+using Seeker.Services;
 using Android.Content.Res;
 using Android.Graphics;
 using Android.OS;
@@ -19,7 +20,7 @@ using Seeker.Helpers;
 
 namespace Seeker
 {
-    public class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
+    public partial class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
     {
         private View rootView = null;
 
@@ -633,7 +634,7 @@ namespace Seeker
                 else
                 {
                     noTransfers.Visibility = ViewStates.Visible;
-                    if (MainActivity.MeetsSharingConditions())
+                    if (SharedFileService.MeetsSharingConditions())
                     {
                         noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
                         setupUpSharing.Visibility = ViewStates.Gone;
@@ -929,7 +930,7 @@ namespace Seeker
         //    {
         //        SeekerState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
         //        SeekerState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
-        //        MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+        //        DownloadService.TransferItemQueueUpdated -= TranferQueueStateChanged;
         //    }
         //    catch (System.Exception)
         //    {
@@ -1006,7 +1007,7 @@ namespace Seeker
                     serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
                     listOfUploadItems = writer.ToString();
                 }
-                lock (MainActivity.SHARED_PREF_LOCK)
+                lock (SeekerState.SharedPrefLock)
                     lock (TransferStateSaveLock)
                     {
                         var editor = sharedPreferences.Edit();
@@ -1112,7 +1113,7 @@ namespace Seeker
                     Android.Net.Uri incompleteUri = null;
                     SetupCancellationToken(item, cancellationTokenSource, out _);
                     Task task = TransfersUtil.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
-                    task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
+                    task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -1266,7 +1267,7 @@ namespace Seeker
                 //filename: item1.FullFilename,
                 //size: item1.Size,
                 //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(MainActivity.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //if paused do retry counter 0.
+                task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //if paused do retry counter 0.
             }
             catch (DuplicateTransferException)
             {
@@ -1790,178 +1791,6 @@ namespace Seeker
             }
         }
 
-        public class ActionModeCallback : Java.Lang.Object, ActionMode.ICallback
-        {
-            public TransferAdapterRecyclerVersion Adapter;
-            public TransfersFragment Frag;
-            public bool OnCreateActionMode(ActionMode mode, IMenu menu)
-            {
-                mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
-                return true;
-            }
-
-            public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
-            {
-                if (BatchSelectedItems.Count == 0)
-                {
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(false);
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(true);
-                }
-
-
-                if (TransfersFragment.InUploadsMode)
-                {
-                    //the only thing you can do is clear and abort the selected
-                    menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
-                    return false;
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
-
-                    TransferStates transferStates = TransferStates.None;
-                    bool failed = false;
-                    List<TransferItem> transfersSelected = new List<TransferItem>();
-                    foreach (int position in BatchSelectedItems)
-                    {
-                        var ti = TransferItemManagerWrapped.GetItemAtUserIndex(position);
-                        if (ti is TransferItem singleTi)
-                        {
-                            transfersSelected.Add(singleTi);
-                        }
-                        else if (ti is FolderItem folderTi)
-                        {
-                            transfersSelected.AddRange(folderTi.TransferItems);
-                        }
-                    }
-                    TransferViewHelper.GetStatusNumbers(transfersSelected, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued);
-
-                    if (numPaused != 0)
-                    {
-                        menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(true);
-                    }
-                    if (numInProgress != 0 || numQueued != 0)
-                    {
-                        menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(true);
-                    }
-                    if (numFailed != 0)
-                    {
-                        menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(true);
-                    }
-
-                    //clear all complete??
-
-                }
-                return false;
-            }
-
-            public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
-            {
-                switch (item.ItemId)
-                {
-                    //this is the only option that uploads gets
-                    case Resource.Id.action_cancel_and_clear_all_batch:
-                        Logger.InfoFirebase("action_cancel_and_clear_batch Pressed");
-                        SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                        TransferItemManagerWrapped.CancelSelectedItems(true);
-                        TransferItemManagerWrapped.ClearSelectedItemsAndClean();
-                        var selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemRemoved(pos);
-                        }
-                        //since all selected stuff is going away. its what Gmail action mode does.
-                        TransfersActionMode.Finish(); //TransfersActionMode can be null!
-                        break;
-                    case Resource.Id.pause_selected_batch:
-                        TransferItemManagerWrapped.CancelSelectedItems(false);
-                        selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemChanged(pos);
-                        }
-                        //since all selected stuff is going away. its what Gmail action mode does.
-                        TransfersActionMode.Finish();
-                        break;
-                    case Resource.Id.resume_selected_batch:
-                        Frag.RetryAllConditionEntry(false, true);
-                        selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemChanged(pos);
-                        }
-                        TransfersActionMode.Finish();
-                        break;
-                    case Resource.Id.retry_all_failed_batch:
-                        Frag.RetryAllConditionEntry(true, true);
-                        selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemChanged(pos);
-                        }
-                        TransfersActionMode.Finish();
-                        break;
-                    case Resource.Id.select_all:
-                        BatchSelectedItems.Clear();
-                        int cnt = TransfersActionModeCallback.Adapter.ItemCount;
-                        for (int i = 0; i < cnt; i++)
-                        {
-                            BatchSelectedItems.Add(i);
-                        }
-
-                        TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
-
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                        TransfersActionMode.Invalidate();
-                        return true;
-                    case Resource.Id.invert_selection:
-                        ForceOutIfZeroSelected = false;
-                        List<int> oldOnes = BatchSelectedItems.ToList();
-                        BatchSelectedItems.Clear();
-                        List<int> all = new List<int>();
-                        int cnt1 = TransfersActionModeCallback.Adapter.ItemCount;
-                        for (int i = 0; i < cnt1; i++)
-                        {
-                            all.Add(i);
-                        }
-                        BatchSelectedItems = all.Except(oldOnes).ToList();
-
-                        TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
-
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
-                        TransfersActionMode.Invalidate();
-                        return true;
-                }
-                return true;
-            }
-
-            public void OnDestroyActionMode(ActionMode mode)
-            {
-
-                int[] prevSelectedItems = new int[BatchSelectedItems.Count];
-                BatchSelectedItems.CopyTo(prevSelectedItems);
-                TransfersActionMode = null;
-                BatchSelectedItems.Clear();
-                this.Adapter.IsInBatchSelectMode = false;
-                foreach (int i in prevSelectedItems)
-                {
-                    this.Adapter.NotifyItemChanged(i);
-                }
-
-            }
-
-        }
 
 
         public void GetQueuePosition(TransferItem ttItem)
@@ -2001,7 +1830,7 @@ namespace Seeker
                 return null;
             });
 
-            MainActivity.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
+            DownloadService.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
         }
 
         public void UpdateQueueState(string fullFilename) //Add this to the event handlers so that when downloads are added they have their queue position.
@@ -2225,465 +2054,6 @@ namespace Seeker
         //public string const IndividualItemType = 1;
         //public string const FolderItemType = 2;
 
-        public class TransferAdapterRecyclerIndividualItem : TransferAdapterRecyclerVersion
-        {
-            public TransferAdapterRecyclerIndividualItem(System.Collections.IList ti) : base(ti)
-            {
-                localDataSet = ti;
-            }
-
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            {
-                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem, this.IsInBatchSelectMode);
-                //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
-            }
-
-            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
-            {
-                bool TYPE_TO_USE = true;
-                ITransferItemView view = TransferItemViewDetails.inflate(parent, this.showSizes, this.showSpeed);
-
-                view.setupChildren();
-                // .inflate(R.layout.text_row_item, viewGroup, false);
-                (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
-                (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
-                return new TransferViewHolder(view as View);
-            }
-
-            private void TransferAdapterRecyclerIndividualItem_Click(object sender, EventArgs e)
-            {
-                if (IsInBatchSelectMode)
-                {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
-                }
-            }
-
-            protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
-            {
-                if (!IsInBatchSelectMode)
-                {
-                    setSelectedItem((sender as ITransferItemView).InnerTransferItem);
-                    (sender as View).ShowContextMenu();
-                }
-                else
-                {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
-                }
-            }
-
-        }
-
-
-
-
-
-        public class TransferAdapterRecyclerFolderItem : TransferAdapterRecyclerVersion
-        {
-            public TransferAdapterRecyclerFolderItem(System.Collections.IList ti) : base(ti)
-            {
-                localDataSet = ti;
-            }
-
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            {
-                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as FolderItem, this.IsInBatchSelectMode);
-                //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
-            }
-
-            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
-            {
-                ITransferItemView view = TransferItemViewFolder.inflate(parent, this.showSizes, this.showSpeed);
-                view.setupChildren();
-                // .inflate(R.layout.text_row_item, viewGroup, false);
-                (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
-                (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
-                return new TransferViewHolder(view as View);
-            }
-
-            private void TransferAdapterRecyclerFolderItem_Click(object sender, EventArgs e)
-            {
-                if (IsInBatchSelectMode)
-                {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
-                }
-                else
-                {
-                    FolderItem f = (sender as ITransferItemView).InnerTransferItem as FolderItem;
-                    setSelectedItem(f);
-                    if (InUploadsMode)
-                    {
-                        CurrentlySelectedUploadFolder = f;
-                    }
-                    else
-                    {
-                        CurrentlySelectedDLFolder = f;
-                    }
-
-                    TransfersFragment.SaveScrollPositionOnMovingIntoFolder();
-                    TransfersFragment.SetRecyclerAdapter();
-                    SeekerState.MainActivityRef.SetTransferSupportActionBarState();
-                    SeekerState.MainActivityRef.InvalidateOptionsMenu();
-                }
-            }
-
-            protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
-            {
-                if (IsInBatchSelectMode)
-                {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
-                }
-                else
-                {
-                    setSelectedItem((sender as ITransferItemView).InnerTransferItem);
-                    (sender as View).ShowContextMenu();
-                }
-            }
-
-        }
-
-        public class ProgressSizeTextView : TextView
-        {
-            public int Progress = 0;
-            private readonly bool isInNightMode = false;
-            public ProgressSizeTextView(Context context, IAttributeSet attrs) : base(context, attrs)
-            {
-                isInNightMode = DownloadDialog.InNightMode(context);
-            }
-            protected override void OnDraw(Canvas canvas)
-            {
-                if (isInNightMode)
-                {
-                    canvas.Save();
-                    this.SetTextColor(Color.White);
-                    base.OnDraw(canvas);
-                    canvas.Restore();
-                }
-                else
-                {
-                    Rect rect = new Rect();
-                    this.GetDrawingRect(rect);
-                    rect.Right = (int)(rect.Left + (Progress * .01) * (rect.Right - rect.Left));
-                    canvas.Save();
-                    canvas.ClipRect(rect, Region.Op.Difference);
-                    this.SetTextColor(Color.Black);
-                    base.OnDraw(canvas);
-                    canvas.Restore();
-
-                    canvas.Save();
-                    canvas.ClipRect(rect, Region.Op.Intersect); // lets draw inside center rect only
-                    this.SetTextColor(Color.White);
-                    base.OnDraw(canvas);
-                    canvas.Restore();
-                }
-            }
-        }
-
-
-        public abstract class TransferAdapterRecyclerVersion : RecyclerView.Adapter //<TransferAdapterRecyclerVersion.TransferViewHolder>
-        {
-            protected System.Collections.IList localDataSet;
-            public override int ItemCount => localDataSet.Count;
-            protected ITransferItem selectedItem = null;
-            public bool IsInBatchSelectMode;
-
-            public TransfersFragment TransfersFragment;
-#if DEBUG
-            public void SelectedDebugInfo(ITransferItem iti)
-            {
-
-                int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
-                Logger.Debug($"position: {position} ti name: {iti.GetDisplayName()}");
-
-            }
-#endif
-
-            public void setSelectedItem(ITransferItem item)
-            {
-                this.selectedItem = item;
-#if DEBUG
-                SelectedDebugInfo(item);
-#endif
-                if (this.selectedItem == null)
-                {
-                    Logger.InfoFirebase("selected item was set as null");
-                }
-            }
-
-            public ITransferItem getSelectedItem()
-            {
-                return this.selectedItem;
-            }
-
-            //public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            //{
-            //    (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem);
-            //    //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
-            //}
-
-
-
-
-            protected readonly bool showSpeed = false;
-            protected readonly bool showSizes = false;
-            public TransferAdapterRecyclerVersion(System.Collections.IList tranfersList)
-            {
-                localDataSet = tranfersList;
-                showSpeed = SeekerState.TransferViewShowSpeed;
-                showSizes = SeekerState.TransferViewShowSizes;
-            }
-
-        }
-
-        public const int UNIQUE_TRANSFER_GROUP_ID = 303;
-        public class TransferViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
-        {
-            private ITransferItemView transferItemView;
-
-
-            public TransferViewHolder(View view) : base(view)
-            {
-                //super(view);
-                // Define click listener for the ViewHolder's View
-
-                transferItemView = (ITransferItemView)view;
-                transferItemView.ViewHolder = this;
-                (transferItemView as View).SetOnCreateContextMenuListener(this);
-            }
-
-            public ITransferItemView getTransferItemView()
-            {
-                return transferItemView;
-            }
-
-            public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-            {
-                //base.OnCreateContextMenu(menu, v, menuInfo);
-                ITransferItemView tvh = v as ITransferItemView;
-                TransferItem ti = null;
-                FolderItem fi = null;
-                TransferStates folderItemState = TransferStates.None;
-                bool isTransferItem = false;
-                bool anyFailed = false;
-                //bool anyOffline = false;
-                bool isUpload = false;
-                if (tvh?.InnerTransferItem is TransferItem tvhi)
-                {
-                    isTransferItem = true;
-                    ti = tvhi;
-                    isUpload = ti.IsUpload();
-                }
-                else if (tvh?.InnerTransferItem is FolderItem tvhf)
-                {
-                    fi = tvhf;
-                    folderItemState = fi.GetState(out anyFailed, out _);
-                    isUpload = fi.IsUpload();
-                }
-                //else
-                //{
-                //shouldnt happen....
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-                int pos1 = info?.Position ?? -1;
-                //}
-
-
-                //if somehow we got here without setting the transfer item. then set it now...  you have menuInfo.Position, AND tvh.InnerTransferItem. and recyclerTransfer.GetSelectedItem() to check for null.
-
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 0, 0, Resource.String.resume_dl);
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 0, 0, Resource.String.retry_dl);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 100, 0, Resource.String.ResumeFolder);
-                        }
-                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.PauseFolder);
-                        }
-                    }
-                }
-                else
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && !(CommonHelpers.IsUploadCompleteOrAborted(ti.State)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, Resource.String.AbortUpload);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && !(CommonHelpers.IsUploadCompleteOrAborted(folderItemState))) ;
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.AbortUploads);
-                        }
-                    }
-                }
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
-                            //if completed then we dont need to show the cancel option...
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.cancel_and_clear);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.cancel_and_clear);
-                        }
-                    }
-                }
-                else
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && (CommonHelpers.IsUploadCompleteOrAborted(ti.State)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
-                            //if completed then we dont need to show the cancel option...
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.AbortandClearUpload);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && (CommonHelpers.IsUploadCompleteOrAborted(folderItemState)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.AbortandClearUploads);
-                        }
-                    }
-                }
-
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-
-                        if (tvh != null && ti != null)
-                        {
-                            if (ti.QueueLength > 0)
-                            {
-                                //the queue length of a succeeded download can be 183......
-                                //bc queue length AND free upload slots!!
-                                if (ti.State.HasFlag(TransferStates.Succeeded) ||
-                                    ti.State.HasFlag(TransferStates.Completed))
-                                {
-                                    //no op
-                                }
-                                else
-                                {
-                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 3, 3, Resource.String.refresh_queue_pos);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null)
-                        {
-                            if (fi.GetQueueLength() > 0)
-                            {
-                                //the queue length of a succeeded download can be 183......
-                                //bc queue length AND free upload slots!!
-                                if (folderItemState.HasFlag(TransferStates.Succeeded) ||
-                                    folderItemState.HasFlag(TransferStates.Completed))
-                                {
-                                    //no op
-                                }
-                                else
-                                {
-                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 3, 3, Resource.String.refresh_queue_pos);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri != string.Empty)
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 4, 4, Resource.String.play_file);
-                        }
-                    }
-                    else
-                    {
-                        if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
-                        {
-                            //no op
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 102, 4, Resource.String.RetryFailedFiles);
-                        }
-                    }
-                }
-                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, 5, 5, Resource.String.UserOptions);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 6, 6, Resource.String.browse_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, Resource.String.browse_at_location);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 8, 8, Resource.String.search_user_files);
-                CommonHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 9, 9, tvh.InnerTransferItem.GetUsername(), false);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.msg_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 11, 11, Resource.String.get_user_info);
-                CommonHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 12, 12, tvh.InnerTransferItem.GetUsername());
-                CommonHelpers.AddGivePrivilegesIfApplicable(subMenu, 13);
-
-                if (isUpload)
-                {
-                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 104, 6, Resource.String.IgnoreUnshareUser);
-                }
-                //finally batch selection mode
-                menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, Resource.String.BatchSelect);
-
-                //if (!isUpload)
-                //{
-                //    if (isTransferItem)
-                //    {
-                //        if(ti.State.HasFlag(TransferStates.UserOffline))
-                //        {
-
-                //        }
-                //    }
-                //    else
-                //    {
-                //        if(anyOffline)
-                //        {
-                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Do Not Auto-Retry When User Goes Back Online");
-                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Auto-Retry When User Goes Back Online");
-                //        }
-                //    }
-                //}
-            }
-
-        }
 
         private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
         {
@@ -2814,7 +2184,7 @@ namespace Seeker
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
             MainActivity.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
-            MainActivity.TransferItemQueueUpdated += TranferQueueStateChanged;
+            DownloadService.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
             {
@@ -2860,7 +2230,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
-            MainActivity.TransferItemQueueUpdated -= TranferQueueStateChanged;
+            DownloadService.TransferItemQueueUpdated -= TranferQueueStateChanged;
             MainActivity.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }

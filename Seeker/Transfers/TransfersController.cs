@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Seeker.Services;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -39,7 +40,7 @@ namespace Seeker.Transfers
                 if (queuedTransfers.Count > 0)
                 {
                     Logger.Debug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
-                    MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
+                    DownloadService.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
                 }
             }
 
@@ -62,7 +63,7 @@ namespace Seeker.Transfers
             if (queuedTransfers.Count > 0)
             {
                 Logger.Debug("TransfersTimerElapsed - Lets get position of queued transfers...");
-                MainActivity.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
+                DownloadService.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
             }
 
         }

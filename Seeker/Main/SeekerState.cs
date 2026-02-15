@@ -50,7 +50,7 @@ namespace Seeker
 
         public static bool AutoRequeueDownloadsAtStartup = true;
 
-        public static int NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
+        public static int NumberSearchResults = Constants.DefaultSearchResults;
         public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
         public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;
         public static ThemeHelper.DayThemeType DayModeVarient = ThemeHelper.DayThemeType.ClassicPurple;
@@ -316,6 +316,7 @@ namespace Seeker
         /// </summary>
         public static volatile FragmentActivity ActiveActivityRef = null;
         public static ISharedPreferences SharedPreferences;
+        public static object SharedPrefLock = new object();
         public static volatile MainActivity MainActivityRef;
 
         public static bool IsParsing
