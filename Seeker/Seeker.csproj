@@ -2,11 +2,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
-    <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidClientHandler</AndroidHttpClientHandlerType>
+    <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidMessageHandler</AndroidHttpClientHandlerType>
     <AndroidAapt2LinkExtraArgs>--no-version-vectors</AndroidAapt2LinkExtraArgs>
     <MonoSymbolArchive>true</MonoSymbolArchive>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
-    <TargetFramework>net8.0-android</TargetFramework>
+    <TargetFramework>net9.0-android</TargetFramework>
     <AssemblyTitle>AndriodApp1</AssemblyTitle>
     <Product>AndriodApp1</Product>
     <Copyright>Copyright ©  2018</Copyright>
