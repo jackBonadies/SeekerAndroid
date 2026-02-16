@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Common;
 namespace Seeker
 {
     public class FilterSpecialFlags
@@ -131,7 +132,7 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SeekerState.HideLockedResultsInSearch;
+            hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
         public void setItem(SearchResponse item, int noop)
@@ -226,13 +227,13 @@ namespace Seeker
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SeekerState.HideLockedResultsInSearch;
+            hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
         private bool hideLocked = false;
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach (Soulseek.File f in item.GetFiles(SeekerState.HideLockedResultsInSearch))
+            foreach (Soulseek.File f in item.GetFiles(PreferencesState.HideLockedResultsInSearch))
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 SetTextColor(tv, SeekerState.MainActivityRef);

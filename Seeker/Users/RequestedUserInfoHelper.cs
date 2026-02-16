@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker
 {
     /// <summary>
@@ -68,7 +69,7 @@ namespace Seeker
                 Toast.MakeText(SeekerApplication.ApplicationContext, Resource.String.request_user_error_empty, ToastLength.Short).Show();
                 return;
             }
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerApplication.ApplicationContext, Resource.String.must_be_logged_to_request_user_info, ToastLength.Short).Show();
                 return;

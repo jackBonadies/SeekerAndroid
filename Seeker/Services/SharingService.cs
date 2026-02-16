@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker.Services
 {
     /// <summary>
@@ -71,7 +72,7 @@ namespace Seeker.Services
                 return defaultResponse;
             }
 
-            if (SeekerState.Username == null || SeekerState.Username == string.Empty || SeekerState.SharedFileCache == null)
+            if (PreferencesState.Username == null || PreferencesState.Username == string.Empty || SeekerState.SharedFileCache == null)
             {
                 return defaultResponse;
             }
@@ -82,12 +83,12 @@ namespace Seeker.Services
             {
                 //Console.WriteLine($"[SENDING SEARCH RESULTS]: {results.Count()} records to {username} for query {query.SearchText}");
                 int ourUploadSpeed = 1024 * 256;
-                if (SeekerState.UploadSpeed > 0)
+                if (PreferencesState.UploadSpeed > 0)
                 {
-                    ourUploadSpeed = SeekerState.UploadSpeed;
+                    ourUploadSpeed = PreferencesState.UploadSpeed;
                 }
                 return Task.FromResult(new SearchResponse(
-                    SeekerState.Username,
+                    PreferencesState.Username,
                     token,
                     freeUploadSlots: 1,
                     uploadSpeed: ourUploadSpeed,
@@ -260,7 +261,7 @@ namespace Seeker.Services
                     return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
                 }
             }
-            else if (!SeekerState.SharingOn)
+            else if (!PreferencesState.SharingOn)
             {
                 return new Tuple<SharingIcons, string>(SharingIcons.Off, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off));
             }

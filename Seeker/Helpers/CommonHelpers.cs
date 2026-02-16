@@ -16,6 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AndroidX.Core.Util;
 
+using Common;
 namespace Seeker
 {
     public static class CommonHelpers
@@ -1144,7 +1145,7 @@ namespace Seeker
         {
             int numFiles = 0;
             long totalBytes = -1;
-            if (SeekerState.HideLockedResultsInSearch)
+            if (PreferencesState.HideLockedResultsInSearch)
             {
                 numFiles = searchResponse.FileCount;
                 totalBytes = searchResponse.Files.Sum(f => f.Size);
@@ -1159,7 +1160,7 @@ namespace Seeker
             string sizeString = GetHumanReadableSize(totalBytes);
 
             var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
-            if (!SeekerState.HideLockedResultsInSearch)
+            if (!PreferencesState.HideLockedResultsInSearch)
             {
                 filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
             }
@@ -1394,7 +1395,7 @@ namespace Seeker
         /// <returns></returns>
         public static bool PerformConnectionRequiredAction(Action action, string notLoggedInToast = null)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 if(string.IsNullOrEmpty(notLoggedInToast))
                 {
@@ -1454,11 +1455,11 @@ namespace Seeker
                         else
                         {
                             SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
-                            SeekerState.Password = newPassword;
+                            PreferencesState.Password = newPassword;
                             lock (SeekerState.SharedPrefLock)
                             {
                                 var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_Password, SeekerState.Password);
+                                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
                                 editor.Commit();
                             }
                         }
@@ -1492,7 +1493,7 @@ namespace Seeker
                 MainActivity.ToastUI(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
                 return false;
             }
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
                 return false;

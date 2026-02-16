@@ -24,6 +24,7 @@ using Seeker.Messages;
 using Seeker.Search;
 using Seeker.Transfers;
 using Seeker.UPnP;
+using Common;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -56,7 +57,11 @@ namespace Seeker
         }
 
         public const bool AUTO_CONNECT_ON = true;
-        public static bool LOG_DIAGNOSTICS = false;
+        public static bool LOG_DIAGNOSTICS
+        {
+            get => Common.PreferencesState.LogDiagnostics;
+            set => Common.PreferencesState.LogDiagnostics = value;
+        }
 
         public override void OnCreate()
         {
@@ -88,29 +93,29 @@ namespace Seeker
 
             if (HasProperPerAppLanguageSupport())
             {
-                if (!SeekerState.LegacyLanguageMigrated)
+                if (!PreferencesState.LegacyLanguageMigrated)
                 {
-                    SeekerState.LegacyLanguageMigrated = true;
+                    PreferencesState.LegacyLanguageMigrated = true;
                     lock (SeekerState.SharedPrefLock)
                     {
                         var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                        editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, SeekerState.LegacyLanguageMigrated);
+                        editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
                         editor.Commit();
                     }
-                    SetLanguage(SeekerState.Language);
+                    SetLanguage(PreferencesState.Language);
                 }
             }
             else
             {
-                SetLanguageLegacy(SeekerState.Language, false);
+                SetLanguageLegacy(PreferencesState.Language, false);
             }
 
             //LogDebug("Default Night Mode: " + AppCompatDelegate.DefaultNightMode); //-100 = night mode unspecified, default on my Pixel 2. also on api22 emulator it is -100.
             //though setting it to -1 does not seem to recreate the activity or have any negative side effects..
             //this does not restart Android.App.Application. so putting it here is a much better place... in MainActivity.OnCreate it would restart the activity every time.
-            if (AppCompatDelegate.DefaultNightMode != SeekerState.DayNightMode)
+            if (AppCompatDelegate.DefaultNightMode != PreferencesState.DayNightMode)
             {
-                AppCompatDelegate.DefaultNightMode = SeekerState.DayNightMode;
+                AppCompatDelegate.DefaultNightMode = PreferencesState.DayNightMode;
             }
 
             //SeekerState.SharedPreferences = sharedPrefs;
@@ -130,8 +135,8 @@ namespace Seeker
             if (SeekerState.SoulseekClient == null)
             {
                 //need search response and enqueue download action...
-                //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:SeekerState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: SeekerState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: SeekerState.AllowPrivateRoomInvitations, listenPort: SeekerState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
+                //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
+                SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: PreferencesState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations, listenPort: PreferencesState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
                 SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
@@ -190,7 +195,7 @@ namespace Seeker
                 LocaleList appLocales = lm.ApplicationLocales;
                 if (appLocales.IsEmpty)
                 {
-                    return SeekerState.FieldLangAuto;
+                    return PreferencesState.FieldLangAuto;
                 }
                 else
                 {
@@ -198,14 +203,14 @@ namespace Seeker
                     string lang = locale.Language; // ex. fr, uk
                     if (lang == "pt")
                     {
-                        return SeekerState.FieldLangPtBr;
+                        return PreferencesState.FieldLangPtBr;
                     }
                     return lang;
                 }
             }
             else
             {
-                return SeekerState.Language;
+                return PreferencesState.Language;
             }
         }
 
@@ -255,7 +260,7 @@ namespace Seeker
             {
                 var lm = (LocaleManager)ApplicationContext.GetSystemService(Context.LocaleService);
 
-                if (language == SeekerState.FieldLangAuto)
+                if (language == PreferencesState.FieldLangAuto)
                 {
                     lm.ApplicationLocales = LocaleList.EmptyLocaleList;
                 }
@@ -266,7 +271,7 @@ namespace Seeker
             }
             else
             {
-                SetLanguageLegacy(SeekerState.Language, true);
+                SetLanguageLegacy(PreferencesState.Language, true);
             }
         }
 
@@ -284,13 +289,13 @@ namespace Seeker
                 return;
             }
 
-            if (language == SeekerState.FieldLangAuto && SeekerState.SystemLanguage == LocaleToString(currentLocale))
+            if (language == PreferencesState.FieldLangAuto && SeekerState.SystemLanguage == LocaleToString(currentLocale))
             {
                 return;
             }
 
 
-            Java.Util.Locale locale = language != SeekerState.FieldLangAuto ? LocaleFromString(localeString) : LocaleFromString(SeekerState.SystemLanguage);
+            Java.Util.Locale locale = language != PreferencesState.FieldLangAuto ? LocaleFromString(localeString) : LocaleFromString(SeekerState.SystemLanguage);
 
             Java.Util.Locale.Default = locale;
             config.SetLocale(locale);
@@ -443,13 +448,13 @@ namespace Seeker
                             }
                         }
                     }
-                    else if (SeekerState.UseLegacyStorage() || !SeekerState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+                    else if (SeekerState.UseLegacyStorage() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
                     {
                         //when the directory is unset.
                         string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                        if (!string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
+                        if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
                         {
-                            fullPath = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri).Path;
+                            fullPath = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri).Path;
                         }
 
                         var containingDir = new Java.IO.File(fullPath);
@@ -883,7 +888,7 @@ namespace Seeker
 
                 if (e.Transfer.State.HasFlag(TransferStates.Succeeded))
                 {
-                    if (SeekerState.NotifyOnFolderCompleted && !isUpload)
+                    if (PreferencesState.NotifyOnFolderCompleted && !isUpload)
                     {
                         if (TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
                         {
@@ -931,7 +936,7 @@ namespace Seeker
 
                     fileStream.Close();
                     bool useDownloadDir = false;
-                    if (SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+                    if (PreferencesState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
                     {
                         useDownloadDir = true;
                     }
@@ -1006,7 +1011,7 @@ namespace Seeker
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
 
                 // int indexRemoved = -1;
-                if (((SeekerState.AutoClearCompleteDownloads && !isUpload) || (SeekerState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear //todo: autoclear on upload
+                if (((PreferencesState.AutoClearCompleteDownloads && !isUpload) || (PreferencesState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear //todo: autoclear on upload
                 {
 
                     Action action = new Action(() =>
@@ -1069,12 +1074,12 @@ namespace Seeker
             {
                 return Task.FromResult(new UserInfo(string.Empty, 0, 0, false));
             }
-            string bio = SeekerState.UserInfoBio ?? string.Empty;
+            string bio = PreferencesState.UserInfoBio ?? string.Empty;
             byte[] picture = GetUserInfoPicture();
             int uploadSlots = 1;
             int queueLength = 0;
             bool hasFreeSlots = true;
-            if (!SeekerState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
+            if (!PreferencesState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
             {
                 uploadSlots = 0;
                 queueLength = 0;
@@ -1086,7 +1091,7 @@ namespace Seeker
 
         private static byte[] GetUserInfoPicture()
         {
-            if (SeekerState.UserInfoPictureName == null || SeekerState.UserInfoPictureName == string.Empty)
+            if (PreferencesState.UserInfoPictureName == null || PreferencesState.UserInfoPictureName == string.Empty)
             {
                 return null;
             }
@@ -1097,7 +1102,7 @@ namespace Seeker
                 return null;
             }
 
-            Java.IO.File userInfoPic = new Java.IO.File(userInfoPicDir, SeekerState.UserInfoPictureName);
+            Java.IO.File userInfoPic = new Java.IO.File(userInfoPicDir, PreferencesState.UserInfoPictureName);
             if (!userInfoPic.Exists())
             {
                 //I could imagine a race condition causing this...
@@ -1169,7 +1174,7 @@ namespace Seeker
                 {
                     SeekerState.logoutClicked = false;
                 }
-                else if (AUTO_CONNECT_ON && SeekerState.currentlyLoggedIn)
+                else if (AUTO_CONNECT_ON && PreferencesState.CurrentlyLoggedIn)
                 {
                     Thread reconnectRetrier = new Thread(ReconnectSteppedBackOffThreadTask);
                     reconnectRetrier.Start();
@@ -1195,7 +1200,7 @@ namespace Seeker
             //ChatroomController.ConnectionLapse.Add(new Tuple<bool, DateTime>(true, DateTime.UtcNow)); //just testing obv remove later...
             Logger.Debug("logged in " + DateTime.UtcNow.ToString());
             Logger.Debug("Listening State: " + SeekerState.SoulseekClient.GetListeningState());
-            if (SeekerState.ListenerEnabled && !SeekerState.SoulseekClient.GetListeningState())
+            if (PreferencesState.ListenerEnabled && !SeekerState.SoulseekClient.GetListeningState())
             {
                 if (SeekerState.ActiveActivityRef == null)
                 {
@@ -1223,7 +1228,7 @@ namespace Seeker
         //    ChatroomController.ConnectionLapse.Add(new Tuple<bool,DateTime>(false,DateTime.UtcNow));
         //    Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
         //    bool AUTO_CONNECT = true;
-        //    if(AUTO_CONNECT && SeekerState.currentlyLoggedIn)
+        //    if(AUTO_CONNECT && PreferencesState.CurrentlyLoggedIn)
         //    {
         //        Thread reconnectRetrier = new Thread(ReconnectExponentialBackOffThreadTask);
         //        reconnectRetrier.Start();
@@ -1249,7 +1254,7 @@ namespace Seeker
 
         public static bool ShouldWeTryToConnect()
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 //we logged out on purpose
                 return false;
@@ -1304,7 +1309,7 @@ namespace Seeker
                         //you have to re-AddUser them.  This is what SoulSeekQt does (wireshark message code 5 for each user in list).
                         //and what Nicotine does (userlist.server_login()).
                         //and reconnecting means every single time, including toggling from wifi to data / vice versa.
-                        Task t = ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
+                        Task t = ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
                         t.Wait();
                         if (t.IsCompletedSuccessfully)
                         {
@@ -1515,11 +1520,11 @@ namespace Seeker
             //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
             if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
             {
-                a.SetTheme(ThemeHelper.ToNightThemeProper(SeekerState.NightModeVarient));
+                a.SetTheme(ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVarient));
             }
             else
             {
-                a.SetTheme(ThemeHelper.ToDayThemeProper(SeekerState.DayModeVarient));
+                a.SetTheme(ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVarient));
             }
         }
 
@@ -1820,105 +1825,30 @@ namespace Seeker
             });
         }
 
-        public static void RestoreSeekerState(ISharedPreferences sharedPreferences, Context c) //the Bundle can be SLOWER than the SHARED PREFERENCES if SHARED PREFERENCES was saved in a different activity.  The best exapmle being DAYNIGHTMODE
-        {   //day night mode sets the static, saves to shared preferences the new value, sets appcompat value, which recreates everything and calls restoreSeekerState(bundle) where the bundle was older than shared prefs
-            //because saveSeekerState was not called in the meantime...
+        public static void RestoreSeekerState(ISharedPreferences sharedPreferences, Context c)
+        {
             if (sharedPreferences != null)
             {
-                SeekerState.currentlyLoggedIn = sharedPreferences.GetBoolean(KeyConsts.M_CurrentlyLoggedIn, false);
-                SeekerState.Username = sharedPreferences.GetString(KeyConsts.M_Username, "");
-                SeekerState.Password = sharedPreferences.GetString(KeyConsts.M_Password, "");
-                SeekerState.SaveDataDirectoryUri = sharedPreferences.GetString(KeyConsts.M_SaveDataDirectoryUri, "");
-                SeekerState.SaveDataDirectoryUriIsFromTree = sharedPreferences.GetBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, true);
-                SeekerState.NumberSearchResults = sharedPreferences.GetInt(KeyConsts.M_NumberSearchResults, Constants.DefaultSearchResults);
-                SeekerState.DayNightMode = sharedPreferences.GetInt(KeyConsts.M_DayNightMode, (int)AppCompatDelegate.ModeNightFollowSystem);
-                SeekerState.Language = sharedPreferences.GetString(KeyConsts.M_Lanuage, SeekerState.FieldLangAuto);
-                SeekerState.LegacyLanguageMigrated = sharedPreferences.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
-                SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)(sharedPreferences.GetInt(KeyConsts.M_NightVarient, (int)ThemeHelper.NightThemeType.ClassicPurple));
-                SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)(sharedPreferences.GetInt(KeyConsts.M_DayVarient, (int)ThemeHelper.DayThemeType.ClassicPurple));
-                SeekerState.AutoClearCompleteDownloads = sharedPreferences.GetBoolean(KeyConsts.M_AutoClearComplete, false);
-                SeekerState.AutoClearCompleteUploads = sharedPreferences.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
-                SeekerState.RememberSearchHistory = sharedPreferences.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
-                SeekerState.ShowRecentUsers = sharedPreferences.GetBoolean(KeyConsts.M_RememberUserHistory, true);
-                SeekerState.FreeUploadSlotsOnly = sharedPreferences.GetBoolean(KeyConsts.M_OnlyFreeUploadSlots, true);
-                SeekerState.HideLockedResultsInBrowse = sharedPreferences.GetBoolean(KeyConsts.M_HideLockedBrowse, true);
-                SeekerState.HideLockedResultsInSearch = sharedPreferences.GetBoolean(KeyConsts.M_HideLockedSearch, true);
+                // Restore all pure-data preferences via PreferencesManager
+                PreferencesManager.RestoreAll(sharedPreferences);
+                PreferencesManager.RestoreListeningState(sharedPreferences);
 
-                SeekerState.TransferViewShowSizes = sharedPreferences.GetBoolean(KeyConsts.M_TransfersShowSizes, true);
-                SeekerState.TransferViewShowSpeed = sharedPreferences.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);
+                SearchFragment.SetSearchResultStyle(Common.PreferencesState.SearchResultStyle);
 
-                SeekerState.SpeedLimitUploadOn = sharedPreferences.GetBoolean(KeyConsts.M_UploadLimitEnabled, false);
-                SeekerState.SpeedLimitDownloadOn = sharedPreferences.GetBoolean(KeyConsts.M_DownloadLimitEnabled, false);
-                SeekerState.SpeedLimitUploadIsPerTransfer = sharedPreferences.GetBoolean(KeyConsts.M_UploadPerTransfer, true);
-                SeekerState.SpeedLimitDownloadIsPerTransfer = sharedPreferences.GetBoolean(KeyConsts.M_DownloadPerTransfer, true);
-                SeekerState.SpeedLimitUploadBytesSec = sharedPreferences.GetInt(KeyConsts.M_UploadSpeedLimitBytes, 4 * 1024 * 1024);
-                SeekerState.SpeedLimitDownloadBytesSec = sharedPreferences.GetInt(KeyConsts.M_DownloadSpeedLimitBytes, 4 * 1024 * 1024);
+                SimultaneousDownloadsGatekeeper.Initialize(Common.PreferencesState.LimitSimultaneousDownloads, Common.PreferencesState.MaxSimultaneousLimit);
 
-                SeekerState.DisableDownloadToastNotification = sharedPreferences.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
-                SeekerState.MemoryBackedDownload = sharedPreferences.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
-                SearchFragment.FilterSticky = sharedPreferences.GetBoolean(KeyConsts.M_FilterSticky, false);
-                SearchFragment.FilterStickyString = sharedPreferences.GetString(KeyConsts.M_FilterStickyString, string.Empty);
-                SearchFragment.SetSearchResultStyle(sharedPreferences.GetInt(KeyConsts.M_SearchResultStyle, 1));
-                SeekerState.UploadSpeed = sharedPreferences.GetInt(KeyConsts.M_UploadSpeed, -1);
-
-
-
-                //SerializationHelper.MigrateUploadDirectoryInfoIfApplicable(sharedPreferences, KeyConsts.M_SharedDirectoryInfo_Legacy, KeyConsts.M_SharedDirectoryInfo);
+                // Side-effect restores that depend on Android APIs
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
-                SeekerState.SharingOn = sharedPreferences.GetBoolean(KeyConsts.M_SharingOn, false);
-                //SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_UserList_Legacy, KeyConsts.M_UserList);
                 SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
-
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
-                //SerializationHelper.MigrateUserListIfApplicable(sharedPreferences, KeyConsts.M_IgnoreUserList_Legacy, KeyConsts.M_IgnoreUserList);
                 SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
-                SeekerState.AllowPrivateRoomInvitations = sharedPreferences.GetBoolean(KeyConsts.M_AllowPrivateRooomInvitations, false);
-                SeekerState.StartServiceOnStartup = sharedPreferences.GetBoolean(KeyConsts.M_ServiceOnStartup, true);
-                SeekerState.NoSubfolderForSingle = sharedPreferences.GetBoolean(KeyConsts.M_NoSubfolderForSingle, false);
 
-                SeekerState.ShowSmartFilters = sharedPreferences.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
-                RestoreSmartFilterState(sharedPreferences);
-
-                SeekerState.UserInfoBio = sharedPreferences.GetString(KeyConsts.M_UserInfoBio, string.Empty);
-                SeekerState.UserInfoPictureName = sharedPreferences.GetString(KeyConsts.M_UserInfoPicture, string.Empty);
-
-                //SerializationHelper.MigrateUserNotesIfApplicable(sharedPreferences, KeyConsts.M_UserNotes_Legacy, KeyConsts.M_UserNotes);
                 SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
-                //SerializationHelper.MigrateOnlineAlertsIfApplicable(sharedPreferences, KeyConsts.M_UserOnlineAlerts_Legacy, KeyConsts.M_UserOnlineAlerts);
                 SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
 
-                SeekerState.AutoAwayOnInactivity = sharedPreferences.GetBoolean(KeyConsts.M_AutoSetAwayOnInactivity, false);
-                SeekerState.AutoRetryBackOnline = sharedPreferences.GetBoolean(KeyConsts.M_AutoRetryBackOnline, true);
-
-                SeekerState.NotifyOnFolderCompleted = sharedPreferences.GetBoolean(KeyConsts.M_NotifyFolderComplete, true);
-                SeekerState.AllowUploadsOnMetered = sharedPreferences.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
-
-                UserListActivity.UserListSortOrder = (UserListActivity.SortOrder)(sharedPreferences.GetInt(KeyConsts.M_UserListSortOrder, 0));
-                SeekerState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(sharedPreferences.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
-
-                SimultaneousDownloadsGatekeeper.Initialize(sharedPreferences.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false), sharedPreferences.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1));
-
-                //SearchTabHelper.RestoreStateFromSharedPreferencesLegacy();
-
-                //SearchTabHelper.SaveHeadersToSharedPrefs();
-                //SearchTabHelper.SaveAllSearchTabsToDisk(c);
-                //SearchTabHelper.ConvertLegacyWishlistsIfApplicable(c);
-                //SerializationHelper.MigrateHeaderState(sharedPreferences, KeyConsts.M_SearchTabsState_Headers_Legacy, KeyConsts.M_SearchTabsState_Headers);
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
-                //SerializationHelper.MigrateWishlistTabs(c);
-
-                //SearchTabHelper.RestoreAllSearchTabsFromDisk(c);
-
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
-
-                ChatroomActivity.ShowStatusesView = sharedPreferences.GetBoolean(KeyConsts.M_ShowStatusesView, true);
-                ChatroomActivity.ShowTickerView = sharedPreferences.GetBoolean(KeyConsts.M_ShowTickerView, false);
-                ChatroomController.SortChatroomUsersBy = (ChatroomController.SortOrderChatroomUsers)(sharedPreferences.GetInt(KeyConsts.M_RoomUserListSortOrder, 2)); //default is 2 = alphabetical..
-                ChatroomController.PutFriendsOnTop = sharedPreferences.GetBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, false);
-
-                SeekerApplication.LOG_DIAGNOSTICS = sharedPreferences.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
-
 
                 if (TransfersFragment.TransferItemManagerDL == null)
                 {
@@ -1933,9 +1863,7 @@ namespace Seeker
         {
             lock (SeekerState.SharedPrefLock)
             {
-                SeekerState.ListenerEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerEnabled, true);
-                SeekerState.ListenerPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_ListenerPort, 33939);
-                SeekerState.ListenerUPnpEnabled = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ListenerUPnpEnabled, true);
+                PreferencesManager.RestoreListeningState(SeekerState.SharedPreferences);
             }
         }
 
@@ -1944,10 +1872,7 @@ namespace Seeker
             lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_ListenerEnabled, SeekerState.ListenerEnabled);
-                editor.PutInt(KeyConsts.M_ListenerPort, SeekerState.ListenerPort);
-                editor.PutBoolean(KeyConsts.M_ListenerUPnpEnabled, SeekerState.ListenerUPnpEnabled);
-                editor.Commit();
+                PreferencesManager.SaveListeningState(editor);
             }
         }
 
@@ -1956,15 +1881,7 @@ namespace Seeker
             lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, SeekerState.SpeedLimitDownloadOn);
-                editor.PutBoolean(KeyConsts.M_DownloadPerTransfer, SeekerState.SpeedLimitDownloadIsPerTransfer);
-                editor.PutInt(KeyConsts.M_DownloadSpeedLimitBytes, SeekerState.SpeedLimitDownloadBytesSec);
-
-                editor.PutBoolean(KeyConsts.M_UploadLimitEnabled, SeekerState.SpeedLimitUploadOn);
-                editor.PutBoolean(KeyConsts.M_UploadPerTransfer, SeekerState.SpeedLimitUploadIsPerTransfer);
-                editor.PutInt(KeyConsts.M_UploadSpeedLimitBytes, SeekerState.SpeedLimitUploadBytesSec);
-
-                editor.Commit();
+                PreferencesManager.SaveSpeedLimitState(editor);
             }
         }
 
@@ -1972,7 +1889,7 @@ namespace Seeker
 
         public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
         {
-            if (SeekerState.ShowRecentUsers)
+            if (PreferencesState.ShowRecentUsers)
             {
                 if (forAddingUser)
                 {
@@ -1996,13 +1913,7 @@ namespace Seeker
 
         public static void RestoreSmartFilterState(ISharedPreferences sharedPreferences)
         {
-            SeekerState.SmartFilterOptions = new SeekerState.SmartFilterState();
-            SeekerState.SmartFilterOptions.KeywordsEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true);
-            SeekerState.SmartFilterOptions.KeywordsOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0);
-            SeekerState.SmartFilterOptions.FileTypesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true);
-            SeekerState.SmartFilterOptions.FileTypesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1);
-            SeekerState.SmartFilterOptions.NumFilesEnabled = sharedPreferences.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true);
-            SeekerState.SmartFilterOptions.NumFilesOrder = sharedPreferences.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2);
+            PreferencesManager.RestoreSmartFilterState(sharedPreferences);
         }
 
         public static void SaveSmartFilterState()
@@ -2010,13 +1921,7 @@ namespace Seeker
             lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, SeekerState.SmartFilterOptions.KeywordsEnabled);
-                editor.PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, SeekerState.SmartFilterOptions.FileTypesEnabled);
-                editor.PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, SeekerState.SmartFilterOptions.NumFilesEnabled);
-                editor.PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, SeekerState.SmartFilterOptions.KeywordsOrder);
-                editor.PutInt(KeyConsts.M_SmartFilter_TypesOrder, SeekerState.SmartFilterOptions.FileTypesOrder);
-                editor.PutInt(KeyConsts.M_SmartFilter_CountsOrder, SeekerState.SmartFilterOptions.NumFilesOrder);
-                editor.Commit();
+                PreferencesManager.SaveSmartFilterState(editor);
             }
         }
 
@@ -2076,9 +1981,9 @@ namespace Seeker
         private void SoulseekClient_UserDataReceived(object sender, UserData e)
         {
             Logger.Debug("User Data Received: " + e.Username);
-            if (e.Username == SeekerState.Username)
+            if (e.Username == PreferencesState.Username)
             {
-                SeekerState.UploadSpeed = e.AverageSpeed; //bytes
+                PreferencesState.UploadSpeed = e.AverageSpeed; //bytes
             }
             else
             {
@@ -2118,7 +2023,7 @@ namespace Seeker
         {
             if (status != UserPresence.Offline)
             {
-                if (SeekerState.AutoRetryBackOnline)
+                if (PreferencesState.AutoRetryBackOnline)
                 {
                     if (TransfersFragment.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
                     {
@@ -2154,7 +2059,7 @@ namespace Seeker
         public static EventHandler<string> UserStatusChangedUIEvent;
         private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
         {
-            if (e.Username == SeekerState.Username)
+            if (e.Username == PreferencesState.Username)
             {
                 //not sure this will ever happen
             }

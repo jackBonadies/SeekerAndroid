@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Android.Provider.DocumentsContract;
 
+using Common;
 namespace Seeker.Services
 {
     public static class DownloadService
@@ -834,7 +835,7 @@ namespace Seeker.Services
                         Logger.Firebase("auto retry succeeded: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
                     }
 
-                    if (!SeekerState.DisableDownloadToastNotification)
+                    if (!PreferencesState.DisableDownloadToastNotification)
                     {
                         action = () => { MainActivity.ToastUI(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
@@ -877,7 +878,7 @@ namespace Seeker.Services
             string filePath = string.Empty;
 
             bool useDownloadDir = false;
-            if (SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+            if (PreferencesState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
             {
                 useDownloadDir = true;
             }
@@ -1222,13 +1223,13 @@ namespace Seeker.Services
                 //this method works just fine if coming from a temp dir.  just not a open doc tree dir.
 
                 string rootdir = string.Empty;
-                //if (SeekerState.SaveDataDirectoryUri ==null || SeekerState.SaveDataDirectoryUri == string.Empty)
+                //if (PreferencesState.SaveDataDirectoryUri ==null || PreferencesState.SaveDataDirectoryUri == string.Empty)
                 //{
                 rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
                 //}
                 //else
                 //{
-                //    rootdir = SeekerState.SaveDataDirectoryUri;
+                //    rootdir = PreferencesState.SaveDataDirectoryUri;
                 //}
                 if (!(new Java.IO.File(rootdir)).Exists())
                 {
@@ -1236,11 +1237,11 @@ namespace Seeker.Services
                 }
                 //string rootdir = GetExternalFilesDir(Android.OS.Environment.DirectoryMusic)
                 string intermediateFolder = @"/";
-                if (SeekerState.CreateCompleteAndIncompleteFolders)
+                if (PreferencesState.CreateCompleteAndIncompleteFolders)
                 {
                     intermediateFolder = @"/Soulseek Complete/";
                 }
-                if (SeekerState.CreateUsernameSubfolders)
+                if (PreferencesState.CreateUsernameSubfolders)
                 {
                     intermediateFolder = intermediateFolder + username + @"/"; //TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
                 }
@@ -1272,13 +1273,13 @@ namespace Seeker.Services
                     //this means that even though rootfile is null, manual folder is set and is a docfile.
                     //so we must wrap the default root doc file.
                     string legacyRootdir = string.Empty;
-                    //if (SeekerState.SaveDataDirectoryUri ==null || SeekerState.SaveDataDirectoryUri == string.Empty)
+                    //if (PreferencesState.SaveDataDirectoryUri ==null || PreferencesState.SaveDataDirectoryUri == string.Empty)
                     //{
                     legacyRootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
                     //}
                     //else
                     //{
-                    //    rootdir = SeekerState.SaveDataDirectoryUri;
+                    //    rootdir = PreferencesState.SaveDataDirectoryUri;
                     //}
                     Java.IO.File legacyRoot = (new Java.IO.File(legacyRootdir));
                     if (!legacyRoot.Exists())
@@ -1317,7 +1318,7 @@ namespace Seeker.Services
                     //var slskCompleteUri = rootdir.Uri + @"/Soulseek Complete/";
 
                     DocumentFile slskDir1 = null;
-                    if (SeekerState.CreateCompleteAndIncompleteFolders)
+                    if (PreferencesState.CreateCompleteAndIncompleteFolders)
                     {
                         slskDir1 = rootdir.FindFile("Soulseek Complete"); //does Soulseek Complete folder exist
                         if (slskDir1 == null || !slskDir1.Exists())
@@ -1343,7 +1344,7 @@ namespace Seeker.Services
 
                     bool diagUsernameDirExistsAfterCreation = false;
                     bool diagDidWeCreateUsernameDir = false;
-                    if (SeekerState.CreateUsernameSubfolders)
+                    if (PreferencesState.CreateUsernameSubfolders)
                     {
                         DocumentFile tempUsernameDir1 = null;
                         lock (string.Intern("IfNotExistCreateAtomic_1"))
@@ -1425,7 +1426,7 @@ namespace Seeker.Services
                 }
                 catch (Exception e)
                 {
-                    Logger.Firebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + SeekerState.CreateUsernameSubfolders);
+                    Logger.Firebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + PreferencesState.CreateUsernameSubfolders);
                 }
 
                 if (rootdir == null && !SeekerState.UseLegacyStorage())
@@ -1459,7 +1460,7 @@ namespace Seeker.Services
                     if (SeekerState.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
                         (SeekerState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
-                        CommonHelpers.CompleteIncompleteDifferentVolume() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree || !SeekerState.SaveDataDirectoryUriIsFromTree)
+                        CommonHelpers.CompleteIncompleteDifferentVolume() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree || !PreferencesState.SaveDataDirectoryUriIsFromTree)
                     {
                         try
                         {
@@ -1571,7 +1572,7 @@ namespace Seeker.Services
 
                     if (uri == null)
                     {
-                        Logger.Firebase("DocumentsContract MoveDocument FAILED, override incomplete: " + SeekerState.OverrideDefaultIncompleteLocations);
+                        Logger.Firebase("DocumentsContract MoveDocument FAILED, override incomplete: " + PreferencesState.OverrideDefaultIncompleteLocations);
                     }
 
                     finalUri = uri.ToString();

@@ -42,6 +42,7 @@ using System.Threading.Tasks;
 using Seeker.Messages;
 using AndroidX.Activity;
 
+using Common;
 namespace Seeker
 {
 
@@ -457,10 +458,10 @@ namespace Seeker
 
         protected override void OnResume()
         {
-            if (SeekerState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
+            if (PreferencesState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
             {
-                MessageController.MessagesUsername = SeekerState.Username;
-                MessageController.Messages = MessageController.RootMessages[SeekerState.Username]; //username can be null here... perhaps restarting the app without internet or such...
+                MessageController.MessagesUsername = PreferencesState.Username;
+                MessageController.Messages = MessageController.RootMessages[PreferencesState.Username]; //username can be null here... perhaps restarting the app without internet or such...
             }
             base.OnResume();
         }
@@ -500,36 +501,36 @@ namespace Seeker
             {
                 var sharedPref = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
                 MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty)
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
                 {
-                    MessageController.MessagesUsername = SeekerState.Username;
-                    if (!MessageController.RootMessages.ContainsKey(SeekerState.Username))
+                    MessageController.MessagesUsername = PreferencesState.Username;
+                    if (!MessageController.RootMessages.ContainsKey(PreferencesState.Username))
                     {
-                        MessageController.RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessageController.RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                     }
                     else
                     {
-                        MessageController.Messages = MessageController.RootMessages[SeekerState.Username];
+                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
                     }
                 }
             }
-            else if (SeekerState.Username != MessageController.MessagesUsername)
+            else if (PreferencesState.Username != MessageController.MessagesUsername)
             {
-                MessageController.MessagesUsername = SeekerState.Username;
-                if (SeekerState.Username == null || SeekerState.Username == string.Empty)
+                MessageController.MessagesUsername = PreferencesState.Username;
+                if (PreferencesState.Username == null || PreferencesState.Username == string.Empty)
                 {
                     MessageController.Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                 }
                 else
                 {
-                    if (MessageController.RootMessages.ContainsKey(SeekerState.Username))
+                    if (MessageController.RootMessages.ContainsKey(PreferencesState.Username))
                     {
-                        MessageController.Messages = MessageController.RootMessages[SeekerState.Username];
+                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
                     }
                     else
                     {
-                        MessageController.RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessageController.Messages = MessageController.RootMessages[SeekerState.Username];
+                        MessageController.RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
                     }
                 }
             }
@@ -648,7 +649,7 @@ namespace Seeker
                 if (remoteInputBundle != null)
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");
-                    //Message msg = new Message(SeekerState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
+                    //Message msg = new Message(PreferencesState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     Logger.Debug("direct reply " + replyText + " " + uname);
                     MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 

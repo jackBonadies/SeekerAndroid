@@ -29,6 +29,7 @@ using Seeker.Helpers;
 using System;
 using System.Linq;
 
+using Common;
 namespace Seeker
 {
     [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
@@ -45,7 +46,7 @@ namespace Seeker
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            if (PendingText == SeekerState.UserInfoBio)
+            if (PendingText == PreferencesState.UserInfoBio)
             {
                 menu.FindItem(Resource.Id.save_user_action).SetVisible(false);
             }
@@ -61,7 +62,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.save_user_action:
-                    if (PendingText == SeekerState.UserInfoBio)
+                    if (PendingText == PreferencesState.UserInfoBio)
                     {
                         Toast.MakeText(this, this.Resources.GetString(Resource.String.no_changes_to_save), ToastLength.Short).Show();
                     }
@@ -73,7 +74,7 @@ namespace Seeker
                     }
                     return true;
                 case Resource.Id.view_self_info_action:
-                    RequestedUserInfoHelper.LaunchUserInfoView(SeekerState.Username);
+                    RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -84,7 +85,7 @@ namespace Seeker
 
         public void SaveBio()
         {
-            SeekerState.UserInfoBio = PendingText;
+            PreferencesState.UserInfoBio = PendingText;
             lock (SeekerState.SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
@@ -108,7 +109,7 @@ namespace Seeker
         private bool force = false;
         private void backPressedAction(OnBackPressedCallback callback)
         {
-            if (!force && PendingText != SeekerState.UserInfoBio)
+            if (!force && PendingText != PreferencesState.UserInfoBio)
             {
                 force = false;
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
@@ -139,14 +140,14 @@ namespace Seeker
             this.SupportActionBar.SetHomeButtonEnabled(true);
 
             EditText editText = this.FindViewById<EditText>(Resource.Id.editTextBio);
-            PendingText = SeekerState.UserInfoBio ?? string.Empty;
-            editText.Text = SeekerState.UserInfoBio ?? string.Empty;
+            PendingText = PreferencesState.UserInfoBio ?? string.Empty;
+            editText.Text = PreferencesState.UserInfoBio ?? string.Empty;
             editText.TextChanged += EditText_TextChanged;
 
             pictureText = this.FindViewById<TextView>(Resource.Id.user_info_picture_textview);
-            if (SeekerState.UserInfoPictureName != null && SeekerState.UserInfoPictureName != string.Empty)
+            if (PreferencesState.UserInfoPictureName != null && PreferencesState.UserInfoPictureName != string.Empty)
             {
-                pictureText.Text = SeekerState.UserInfoPictureName;
+                pictureText.Text = PreferencesState.UserInfoPictureName;
             }
 
             Button selectImage = this.FindViewById<Button>(Resource.Id.buttonSelectImage);
@@ -168,15 +169,15 @@ namespace Seeker
 
         private void ClearImage_Click(object sender, EventArgs e)
         {
-            if (SeekerState.UserInfoPictureName != null && SeekerState.UserInfoPictureName != string.Empty)
+            if (PreferencesState.UserInfoPictureName != null && PreferencesState.UserInfoPictureName != string.Empty)
             {
-                DeleteImage(SeekerState.UserInfoPictureName);
-                SeekerState.UserInfoPictureName = string.Empty;
+                DeleteImage(PreferencesState.UserInfoPictureName);
+                PreferencesState.UserInfoPictureName = string.Empty;
                 pictureText.Text = this.GetString(Resource.String.no_image_chosen);
                 lock (SeekerState.SharedPrefLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_UserInfoPicture, SeekerState.UserInfoPictureName);
+                    editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
                     editor.Commit();
                 }
             }
@@ -253,17 +254,17 @@ namespace Seeker
                         user_info_dir.Mkdir();
                     }
 
-                    string oldImage = SeekerState.UserInfoPictureName;
-                    if (SeekerState.UserInfoPictureName != string.Empty && SeekerState.UserInfoPictureName != null)
+                    string oldImage = PreferencesState.UserInfoPictureName;
+                    if (PreferencesState.UserInfoPictureName != string.Empty && PreferencesState.UserInfoPictureName != null)
                     {
                         DeleteImage(oldImage);  //delete old image in our internal storage.
                     }
 
-                    SeekerState.UserInfoPictureName = name;
+                    PreferencesState.UserInfoPictureName = name;
                     lock (SeekerState.SharedPrefLock)
                     {
                         var editor = SeekerState.SharedPreferences.Edit();
-                        editor.PutString(KeyConsts.M_UserInfoPicture, SeekerState.UserInfoPictureName);
+                        editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
                         editor.Commit();
                     }
                     Java.IO.File fileForOurInternalStorage = new Java.IO.File(user_info_dir, name);
@@ -290,11 +291,11 @@ namespace Seeker
                     {
                         Logger.Firebase("files.Count!=1");
                     }
-                    else if (files[0].Name != SeekerState.UserInfoPictureName)
+                    else if (files[0].Name != PreferencesState.UserInfoPictureName)
                     {
-                        Logger.Firebase("files[0].Name != SeekerState.UserInfoPictureName");
+                        Logger.Firebase("files[0].Name != PreferencesState.UserInfoPictureName");
                     }
-                    pictureText.Text = SeekerState.UserInfoPictureName;
+                    pictureText.Text = PreferencesState.UserInfoPictureName;
                     pictureText.Invalidate();
                     Toast.MakeText(this, this.GetString(Resource.String.success_set_pic), ToastLength.Long).Show();
                 }
@@ -311,9 +312,9 @@ namespace Seeker
         public static string PendingText = string.Empty;
         private void EditText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            bool wasSame = (PendingText == SeekerState.UserInfoBio);
+            bool wasSame = (PendingText == PreferencesState.UserInfoBio);
             PendingText = e.Text.ToString();
-            bool isSame = (PendingText == SeekerState.UserInfoBio);
+            bool isSame = (PendingText == PreferencesState.UserInfoBio);
             if (isSame != wasSame)
             {
                 this.InvalidateOptionsMenu();

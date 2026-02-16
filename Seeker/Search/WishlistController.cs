@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
+using Common;
 namespace Seeker.Search
 {
     // TODOORG controllers
@@ -82,7 +83,7 @@ namespace Seeker.Search
         {
             //a search that we initiated completed...
             //var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(SeekerState.HideLockedResultsInSearch)).ToList();
+            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(PreferencesState.HideLockedResultsInSearch)).ToList();
             OldResultsToCompare.TryRemove(id, out _); //save memory. wont always exist if the tab got deleted during the search.  exceptions thrown here dont crash anything tho.
             int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
 
@@ -172,7 +173,7 @@ namespace Seeker.Search
                         sw.Start();
 #endif
                         OldNumResults[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count;
-                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(SeekerState.HideLockedResultsInSearch));
+                        OldResultsToCompare[oldestId] = SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.ToHashSet(new SearchResponseComparer(PreferencesState.HideLockedResultsInSearch));
 #if DEBUG
                         sw.Stop();
                         Logger.Debug($"search response count: {SearchTabHelper.SearchTabCollection[oldestId].SearchResponses.Count} hashSet count: {OldResultsToCompare[oldestId].Count} time {sw.ElapsedMilliseconds} ms");

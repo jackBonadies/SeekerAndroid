@@ -25,6 +25,7 @@ using Seeker.Helpers;
 using System;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker
 {
     public class ForegroundLifecycleTracker : Java.Lang.Object, Application.IActivityLifecycleCallbacks
@@ -50,7 +51,7 @@ namespace Seeker
                 HasAppEverStarted = true;
                 try
                 {
-                    if (SeekerState.StartServiceOnStartup)
+                    if (PreferencesState.StartServiceOnStartup)
                     {
                         Intent seekerKeepAliveService = new Intent(activity, typeof(SeekerKeepAliveService));
                         activity.StartService(seekerKeepAliveService);
@@ -139,7 +140,7 @@ namespace Seeker
                 {
                     System.Threading.ThreadPool.QueueUserWorkItem((object o) =>
                     {
-                        Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
+                        Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
 #if DEBUG
                         t.ContinueWith((Task t) =>
                         {
@@ -168,7 +169,7 @@ namespace Seeker
             Logger.Debug("OnActivityStopped " + DiagLastStopped);
 
             NumberOfActiveActivities--;
-            if (NumberOfActiveActivities == 0 && SeekerState.AutoAwayOnInactivity)
+            if (NumberOfActiveActivities == 0 && PreferencesState.AutoAwayOnInactivity)
             {
                 Logger.Debug("We are away!");
                 if (AutoAwayTimer == null)

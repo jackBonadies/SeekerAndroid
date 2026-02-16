@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -23,111 +23,38 @@ namespace Seeker
             downloadInfoList = new List<DownloadInfo>();
         }
 
-        // Misc
+        // Misc (non-persisted)
         public static bool InDarkModeCache = false;
-        public static bool currentlyLoggedIn = false;
         public static bool logoutClicked = false; // TODO hack
 
-
-        // Settings
-        public static bool AutoClearCompleteDownloads = false;
-        public static bool AutoClearCompleteUploads = false;
-
-        public static bool NotifyOnFolderCompleted = true;
-
-        public static bool FreeUploadSlotsOnly = true;
-        public static bool DisableDownloadToastNotification = true;
         public const bool AutoRetryDownload = true;
-
-        public static bool HideLockedResultsInSearch = true;
-        public static bool HideLockedResultsInBrowse = true;
-
-        public static bool TransferViewShowSizes = false;
-        public static bool TransferViewShowSpeed = false;
-
-        public static bool MemoryBackedDownload = false;
-        public static bool AutoRetryBackOnline = true; //this is for downloads that fail with the condition "User is Offline". this will also autodownload when we first log in as well.
-
         public static bool AutoRequeueDownloadsAtStartup = true;
 
-        public static int NumberSearchResults = Constants.DefaultSearchResults;
-        public static int DayNightMode = (int)(AppCompatDelegate.ModeNightFollowSystem);
-        public static ThemeHelper.NightThemeType NightModeVarient = ThemeHelper.NightThemeType.ClassicPurple;
-        public static ThemeHelper.DayThemeType DayModeVarient = ThemeHelper.DayThemeType.ClassicPurple;
-        public static bool RememberSearchHistory = true;
         public static SoulseekClient SoulseekClient = null;
-        public static String Username = null;
-        public static String Password = null;
-        public static bool SharingOn = false;
-        public static bool AllowPrivateRoomInvitations = false;
-        public static bool StartServiceOnStartup = true;
-        public static bool IsStartUpServiceCurrentlyRunning = false;
-        public static bool NoSubfolderForSingle { get; set; } = false;
 
-        public static bool AllowUploadsOnMetered = true;
+        public static bool IsStartUpServiceCurrentlyRunning = false;
+
         public static bool CurrentConnectionIsUnmetered = true;
         public static bool IsNetworkPermitting()
         {
-            return AllowUploadsOnMetered || CurrentConnectionIsUnmetered;
+            return PreferencesState.AllowUploadsOnMetered || CurrentConnectionIsUnmetered;
         }
 
-        public static SearchResultSorting DefaultSearchResultSortAlgorithm = SearchResultSorting.Available;
-
-        public static String SaveDataDirectoryUri = null;
-        public static bool SaveDataDirectoryUriIsFromTree = true;
-
-        public static bool LegacyLanguageMigrated = false;
         public static string SystemLanguage;
-
-
-        // Consts
-        public static string Language = FieldLangAuto;
-        public const string FieldLangAuto = "Auto";
-        public const string FieldLangEn = "en";
-        public const string FieldLangPtBr = "pt-rBR"; //language code -"r" region code
-        public const string FieldLangFr = "fr";
-        public const string FieldLangRu = "ru";
-        public const string FieldLangEs = "es";
-        public const string FieldLangUk = "uk"; //ukrainian
-        public const string FieldLangCs = "cs"; //czech
-        public const string FieldLangIt = "it";
-        public const string FieldLangNl = "nl"; //dutch
-
-
-
-        public static String ManualIncompleteDataDirectoryUri = null;
-        public static bool ManualIncompleteDataDirectoryUriIsFromTree = true;
-
-        public static bool SpeedLimitDownloadOn = false;
-        public static bool SpeedLimitUploadOn = false;
-        public static int SpeedLimitDownloadBytesSec = 4 * 1024 * 1024;//1048576;
-        public static int SpeedLimitUploadBytesSec = 4 * 1024 * 1024;
-        public static bool SpeedLimitDownloadIsPerTransfer = true;
-        public static bool SpeedLimitUploadIsPerTransfer = true;
-
-        public static bool ShowSmartFilters = true;
-        public static SmartFilterState SmartFilterOptions;
 
         public static volatile bool DownloadKeepAliveServiceRunning = false;
         public static volatile bool UploadKeepAliveServiceRunning = false;
 
         public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
 
-
         public static SlskHelp.SharedFileCache SharedFileCache = null;
-        public static int UploadSpeed = -1; //bytes
         public static bool FailedShareParse = false;
         private static volatile bool isParsing = false;
 
         public static bool NumberOfSharedDirectoriesIsStale = true;
         public static bool AttemptedToSetUpSharing = false;
 
-        public static bool OurCurrentStatusIsAway = false; //bool because it can only be online or away. we set this after we successfully change the status.
-        //NOTE: 
-        //If we end the connection abruptly (i.e. airplane mode, kill app, turn phone off) then our status will not be changed to offline. (at least after waiting for 20 mins, not sure when it would have)
-        //  only if we close the tcp connection properly (FIN, ACK) (i.e. menu > Shut Down) does the server update our status properly to offline.
-        //The server does not remember your old status.  So if you log in again after setting your status to away, then your status will be online.  You must set it to away again if desired.
-        //There is some weirdness where we only get "GetStatus" (7) messages when we go from online to away.  Otherwise, we dont get anything.  So its not reliable for determining what our status is.
+        public static bool OurCurrentStatusIsAway = false;
         public enum PendingStatusChange
         {
             NothingPending = 0,
@@ -135,7 +62,6 @@ namespace Seeker
             OnlinePending = 2,
         }
         public static PendingStatusChange PendingStatusChangeToAwayOnline = PendingStatusChange.NothingPending;
-
 
         public static List<UserListItem> IgnoreUserList = new List<UserListItem>();
         public static List<UserListItem> UserList = new List<UserListItem>();
@@ -145,28 +71,12 @@ namespace Seeker
         /// There is no concurrent hashset so concurrent dictionary is used. the value is pointless so its only 1 byte.
         /// </summary>
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UserOnlineAlerts = null;
-        public static bool ShowRecentUsers = true;
-
-        public static string UserInfoBio = string.Empty;
-        public static string UserInfoPictureName = string.Empty; //filename only. The picture will be in (internal storage) FilesDir/user_info_pic/filename.
-
-        public static bool ListenerEnabled = true;
-        public static volatile int ListenerPort = 33939;
-        public static bool ListenerUPnpEnabled = true;
-
-        public static bool CreateCompleteAndIncompleteFolders = true;
-        public static bool CreateUsernameSubfolders = false;
-        public static bool OverrideDefaultIncompleteLocations = false;
-
-        public static bool PerformDeepMetadataSearch = true;
-
-        public static bool AutoAwayOnInactivity = false;
 
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
         public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
         /// <summary>
-        /// This is only for showing toasts.  The logic is as follows.  If we showed a cancelled toast 
+        /// This is only for showing toasts.  The logic is as follows.  If we showed a cancelled toast
         /// notification <1000ms ago then dont keep showing them. if >1s ago then its okay to show.
         /// They all come in super fast
         /// </summary>
@@ -178,105 +88,6 @@ namespace Seeker
         /// </summary>
         public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
         public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
-
-        // TODOORG seperateclass models
-        public struct SmartFilterState
-        {
-            public bool KeywordsEnabled;
-            public int KeywordsOrder;
-            public bool NumFilesEnabled;
-            public int NumFilesOrder;
-            public bool FileTypesEnabled;
-            public int FileTypesOrder;
-            public List<ChipType> GetEnabledOrder()
-            {
-                List<Tuple<ChipType, int>> tuples = new List<Tuple<ChipType, int>>();
-                if (KeywordsEnabled)
-                {
-                    tuples.Add(new Tuple<ChipType, int>(ChipType.Keyword, KeywordsOrder));
-                }
-                if (NumFilesEnabled)
-                {
-                    tuples.Add(new Tuple<ChipType, int>(ChipType.FileCount, NumFilesOrder));
-                }
-                if (FileTypesEnabled)
-                {
-                    tuples.Add(new Tuple<ChipType, int>(ChipType.FileType, FileTypesOrder));
-                }
-                tuples.Sort((t1, t2) => t1.Item2.CompareTo(t2.Item2));
-                return tuples.Select(t1 => t1.Item1).ToList();
-            }
-
-            public List<ConfigureChipItems> GetAdapterItems()
-            {
-                List<Tuple<string, int, bool>> tuples = new List<Tuple<string, int, bool>>();
-                tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.Keyword), KeywordsOrder, KeywordsEnabled));
-                tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.FileCount), NumFilesOrder, NumFilesEnabled));
-                tuples.Add(new Tuple<string, int, bool>(GetNameFromEnum(ChipType.FileType), FileTypesOrder, FileTypesEnabled));
-                tuples.Sort((t1, t2) => t1.Item2.CompareTo(t2.Item2));
-                return tuples.Select(t1 => new ConfigureChipItems() { Name = t1.Item1, Enabled = t1.Item3 }).ToList();
-            }
-
-            public void FromAdapterItems(List<ConfigureChipItems> chipItems)
-            {
-                for (int i = 0; i < chipItems.Count; i++)
-                {
-                    ChipType ct = GetEnumFromName(chipItems[i].Name);
-                    bool enabled = chipItems[i].Enabled;
-                    switch (ct)
-                    {
-                        case ChipType.Keyword:
-                            SeekerState.SmartFilterOptions.KeywordsEnabled = enabled;
-                            SeekerState.SmartFilterOptions.KeywordsOrder = i;
-                            break;
-                        case ChipType.FileType:
-                            SeekerState.SmartFilterOptions.FileTypesEnabled = enabled;
-                            SeekerState.SmartFilterOptions.FileTypesOrder = i;
-                            break;
-                        case ChipType.FileCount:
-                            SeekerState.SmartFilterOptions.NumFilesEnabled = enabled;
-                            SeekerState.SmartFilterOptions.NumFilesOrder = i;
-                            break;
-                        default:
-                            throw new Exception("unknown option");
-                    }
-                }
-            }
-
-            public const string DisplayNameKeyword = "Keywords";
-            public const string DisplayNameType = "File Types";
-            public const string DisplayNameCount = "# Files";
-
-            public string GetNameFromEnum(ChipType chipType)
-            {
-                switch (chipType)
-                {
-                    case ChipType.Keyword:
-                        return DisplayNameKeyword;
-                    case ChipType.FileType:
-                        return DisplayNameType;
-                    case ChipType.FileCount:
-                        return DisplayNameCount;
-                    default:
-                        throw new Exception("unknown enum");
-                }
-            }
-
-            public ChipType GetEnumFromName(string name)
-            {
-                switch (name)
-                {
-                    case DisplayNameKeyword:
-                        return ChipType.Keyword;
-                    case DisplayNameType:
-                        return ChipType.FileType;
-                    case DisplayNameCount:
-                        return ChipType.FileCount;
-                    default:
-                        throw new Exception("unknown enum");
-                }
-            }
-        }
 
 
         public static void ClearSearchHistoryEventsFromTarget(object target)

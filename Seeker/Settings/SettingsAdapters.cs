@@ -7,6 +7,7 @@ using Seeker.Managers;
 using System;
 using System.Collections.Generic;
 
+using Common;
 namespace Seeker
 {
     public partial class SettingsActivity
@@ -129,8 +130,8 @@ namespace Seeker
 
             public void setItem(UploadDirectoryInfo item)
             {
-                this.Clickable = SeekerState.SharingOn;
-                this.LongClickable = SeekerState.SharingOn;
+                this.Clickable = PreferencesState.SharingOn;
+                this.LongClickable = PreferencesState.SharingOn;
 
                 BoundItem = item;
                 if (string.IsNullOrEmpty(item.DisplayNameOverride))

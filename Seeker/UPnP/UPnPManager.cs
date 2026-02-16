@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.UPnP
 {
     // TODO Org UPNP folder
@@ -84,11 +85,11 @@ namespace Seeker.UPnP
 
         public Tuple<ListeningIcon, string> GetIconAndMessage()
         {
-            if (!SeekerState.ListenerUPnpEnabled)
+            if (!PreferencesState.ListenerUPnpEnabled)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_off));
             }
-            else if (!SeekerState.ListenerEnabled)
+            else if (!PreferencesState.ListenerEnabled)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.listener_off));
             }
@@ -195,14 +196,14 @@ namespace Seeker.UPnP
         {
             try
             {
-                if (!SeekerState.ListenerEnabled || !SeekerState.ListenerUPnpEnabled)
+                if (!PreferencesState.ListenerEnabled || !PreferencesState.ListenerUPnpEnabled)
                 {
                     Logger.Debug("Upnp is off...");
                     SearchFinished?.Invoke(null, new EventArgs());
                     Feedback = false;
                     return;
                 }
-                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == SeekerState.ListenerPort && IsLocalIPsame())
+                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == PreferencesState.ListenerPort && IsLocalIPsame())
                 {
                     Logger.Debug("Renew Mapping Later... we already have a good one..");
                     RunningStatus = UPnPRunningStatus.AlreadyMapped;
@@ -276,7 +277,7 @@ namespace Seeker.UPnP
         {
             try
             {
-                if (!SeekerState.ListenerEnabled || !SeekerState.ListenerUPnpEnabled)
+                if (!PreferencesState.ListenerEnabled || !PreferencesState.ListenerUPnpEnabled)
                 {
                     DiagStatus = UPnPDiagStatus.UpnpDisabled;
                     RunningStatus = UPnPRunningStatus.Finished;
@@ -351,7 +352,7 @@ namespace Seeker.UPnP
                 if (ipOurs)
                 {
                     int oneWeek = 60 * 60 * 24 * 7; // == 604800.  on my home router I request 1 week, I get back 604800 in the mapping. but then on getting it again its 22 hours (which is probably the real time)
-                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SeekerState.ListenerPort, SeekerState.ListenerPort, oneWeek, "Android Seeker"));
+                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, PreferencesState.ListenerPort, PreferencesState.ListenerPort, oneWeek, "Android Seeker"));
                     try
                     {
                         bool timeOutCreateMapping = !(t.Wait(5000));
@@ -367,7 +368,7 @@ namespace Seeker.UPnP
 
                         if (ex.InnerException is Mono.Nat.MappingException && ex.InnerException.Message != null && ex.InnerException.Message.Contains("Error 725: OnlyPermanentLeasesSupported")) //happened on my tablet... connected to my other 192.168.1.1 router
                         {
-                            System.Threading.Tasks.Task<Mono.Nat.Mapping> t0 = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, SeekerState.ListenerPort, SeekerState.ListenerPort, 0, "Android Seeker"));
+                            System.Threading.Tasks.Task<Mono.Nat.Mapping> t0 = e.Device.CreatePortMapAsync(new Mono.Nat.Mapping(Mono.Nat.Protocol.Tcp, PreferencesState.ListenerPort, PreferencesState.ListenerPort, 0, "Android Seeker"));
                             try
                             {
                                 bool timeOutCreateMapping0lease = !(t0.Wait(5000));
@@ -403,7 +404,7 @@ namespace Seeker.UPnP
                     int privatePort = mapping.PrivatePort;
                     int publicPort = mapping.PublicPort;
 
-                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t2 = e.Device.GetSpecificMappingAsync(Mono.Nat.Protocol.Tcp, SeekerState.ListenerPort);
+                    System.Threading.Tasks.Task<Mono.Nat.Mapping> t2 = e.Device.GetSpecificMappingAsync(Mono.Nat.Protocol.Tcp, PreferencesState.ListenerPort);
                     try
                     {
                         bool timeOutGetMapping = !(t2.Wait(5000));

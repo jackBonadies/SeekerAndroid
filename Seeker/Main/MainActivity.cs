@@ -576,10 +576,10 @@ namespace Seeker
                     ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
                 //file picker with legacy case
-                if (!string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
+                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
                 {
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    Android.Net.Uri chosenUri = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
+                    Android.Net.Uri chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                     bool canWrite = false;
                     try
                     {
@@ -588,7 +588,7 @@ namespace Seeker
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.SaveDataDirectoryUriIsFromTree)
+                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.SaveDataDirectoryUriIsFromTree)
                         {
                             canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
                         }
@@ -639,10 +639,10 @@ namespace Seeker
                 }
 
                 //now for incomplete
-                if (!string.IsNullOrEmpty(SeekerState.ManualIncompleteDataDirectoryUri))
+                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
                 {
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    Android.Net.Uri chosenIncompleteUri = Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
+                    Android.Net.Uri chosenIncompleteUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                     bool canWrite = false;
                     try
                     {
@@ -651,7 +651,7 @@ namespace Seeker
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path)).CanWrite();
                         }
@@ -705,7 +705,7 @@ namespace Seeker
             {
 
                 Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
+                if (string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
                 {
                     //try
                     //{
@@ -723,7 +723,7 @@ namespace Seeker
                 else
                 {
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
+                    res = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                 }
 
                 bool canWrite = false;
@@ -734,7 +734,7 @@ namespace Seeker
                     //Caused by: java.lang.IllegalArgumentException: 
                     //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                     //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                    if (SeekerState.PreOpenDocumentTree() || !SeekerState.SaveDataDirectoryUriIsFromTree) //this will never get hit..
+                    if (SeekerState.PreOpenDocumentTree() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //this will never get hit..
                     {
                         canWrite = DocumentFile.FromFile(new Java.IO.File(res.Path)).CanWrite();
                     }
@@ -744,7 +744,7 @@ namespace Seeker
                     }
 
                     // if canwrite is false then if we try to create a file we get null.
-                    //if (SeekerState.SaveDataDirectoryUriIsFromTree)
+                    //if (PreferencesState.SaveDataDirectoryUriIsFromTree)
                     //{
                     //    SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
 
@@ -808,7 +808,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (SeekerState.SaveDataDirectoryUriIsFromTree)
+                    if (PreferencesState.SaveDataDirectoryUriIsFromTree)
                     {
                         SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
 
@@ -822,11 +822,11 @@ namespace Seeker
                 bool manualSet = false;
                 //for incomplete case
                 Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if (!string.IsNullOrEmpty(SeekerState.ManualIncompleteDataDirectoryUri))
+                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
                 {
                     manualSet = true;
                     // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    incompleteRes = Android.Net.Uri.Parse(SeekerState.ManualIncompleteDataDirectoryUri);
+                    incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                 }
                 else
                 {
@@ -843,7 +843,7 @@ namespace Seeker
                         //Caused by: java.lang.IllegalArgumentException: 
                         //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
                         //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
                         }
@@ -865,7 +865,7 @@ namespace Seeker
                     }
                     if (canWriteIncomplete)
                     {
-                        if (SeekerState.PreOpenDocumentTree() || !SeekerState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
                         {
                             SeekerState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
                         }
@@ -1278,7 +1278,7 @@ namespace Seeker
                         return;
                     }
                     SharedFileService.InformServerOfSharedFiles(); //dont need to get the result of this one.
-                    SeekerState.SoulseekClient.GetUserDataAsync(SeekerState.Username); //the result of this one if from an event handler..
+                    SeekerState.SoulseekClient.GetUserDataAsync(PreferencesState.Username); //the result of this one if from an event handler..
                     //.ContinueWith(
                     //    (Task<UserData> userDataTask) =>
                     //    {
@@ -1441,7 +1441,7 @@ namespace Seeker
             //also if the async part of the task fails we will get task.faulted.
             try
             {
-                connectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
+                connectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
                 return true;
             }
             catch
@@ -1458,7 +1458,7 @@ namespace Seeker
 
         public static bool CurrentlyLoggedInButDisconnectedState()
         {
-            return (SeekerState.currentlyLoggedIn &&
+            return (PreferencesState.CurrentlyLoggedIn &&
                 (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
         }
 
@@ -1559,7 +1559,7 @@ namespace Seeker
                 {
                     ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
                     AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
-                    if (!SeekerState.currentlyLoggedIn)
+                    if (!PreferencesState.CurrentlyLoggedIn)
                     {
                         MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
                     }
@@ -1609,15 +1609,15 @@ namespace Seeker
                     {
                         var x = data.Data;
                         SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                        SeekerState.SaveDataDirectoryUriIsFromTree = true;
+                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
+                        PreferencesState.SaveDataDirectoryUriIsFromTree = true;
                         this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     }
                     else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
                         SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                        SeekerState.SaveDataDirectoryUriIsFromTree = false;
+                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
+                        PreferencesState.SaveDataDirectoryUriIsFromTree = false;
                     }
                 }
                 else
@@ -1681,14 +1681,14 @@ namespace Seeker
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
                         SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                        SeekerState.SaveDataDirectoryUriIsFromTree = false;
+                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
+                        PreferencesState.SaveDataDirectoryUriIsFromTree = false;
                     }
                     else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
                     {
                         SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                        SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                        SeekerState.SaveDataDirectoryUriIsFromTree = true;
+                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
+                        PreferencesState.SaveDataDirectoryUriIsFromTree = true;
                         this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     }
 
@@ -1740,7 +1740,7 @@ namespace Seeker
             var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
             intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
             Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-            if (string.IsNullOrEmpty(SeekerState.SaveDataDirectoryUri))
+            if (string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
             {
                 //try
                 //{
@@ -1757,7 +1757,7 @@ namespace Seeker
             }
             else
             {
-                res = Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri);
+                res = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
             }
             intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
             try
@@ -2044,7 +2044,7 @@ namespace Seeker
                 bttnTwoIsAttached = true;
             }
 
-            if (!bttnIsAttached && !bttnTwoIsAttached && (!SeekerState.currentlyLoggedIn || force))
+            if (!bttnIsAttached && !bttnTwoIsAttached && (!PreferencesState.CurrentlyLoggedIn || force))
             {
                 //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
                 //ViewGroup relLayout = SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
@@ -2134,7 +2134,7 @@ namespace Seeker
                     bttn.Click -= BttnClick;
                     bttn.Click += BttnClick;
                     loggingInLayout.Visibility = ViewStates.Gone;
-                    welcome.Text = String.Format(SeekerApplication.GetString(Resource.String.welcome), SeekerState.Username);
+                    welcome.Text = String.Format(SeekerApplication.GetString(Resource.String.welcome), PreferencesState.Username);
                 }
                 else if (cWelcome != null)
                 {
@@ -2166,7 +2166,7 @@ namespace Seeker
 
         public static bool IsNotLoggedIn()
         {
-            return (!SeekerState.currentlyLoggedIn) || SeekerState.Username == null || SeekerState.Password == null || SeekerState.Username == string.Empty;
+            return (!PreferencesState.CurrentlyLoggedIn) || PreferencesState.Username == null || PreferencesState.Password == null || PreferencesState.Username == string.Empty;
         }
 
 
@@ -2253,10 +2253,10 @@ namespace Seeker
                 if (logInLayout != null)
                 {
                     logInLayout.Visibility = ViewStates.Visible;
-                    if (!clearUserPass && !string.IsNullOrEmpty(SeekerState.Username))
+                    if (!clearUserPass && !string.IsNullOrEmpty(PreferencesState.Username))
                     {
-                        logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = SeekerState.Username;
-                        logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = SeekerState.Password;
+                        logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = PreferencesState.Username;
+                        logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = PreferencesState.Password;
                     }
                    AndroidX.Core.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
 
@@ -2368,31 +2368,31 @@ namespace Seeker
             lock (SeekerState.SharedPrefLock)
             {
                 var editor = sharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn);
-                editor.PutString(KeyConsts.M_Username, SeekerState.Username);
-                editor.PutString(KeyConsts.M_Password, SeekerState.Password);
-                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, SeekerState.SaveDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree);
-                editor.PutInt(KeyConsts.M_NumberSearchResults, SeekerState.NumberSearchResults);
-                editor.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
-                editor.PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads);
-                editor.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, SeekerState.AutoClearCompleteUploads);
-                editor.PutBoolean(KeyConsts.M_RememberSearchHistory, SeekerState.RememberSearchHistory);
-                editor.PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers);
-                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, SeekerState.TransferViewShowSizes);
-                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, SeekerState.TransferViewShowSpeed);
-                editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, SeekerState.FreeUploadSlotsOnly);
-                editor.PutBoolean(KeyConsts.M_HideLockedSearch, SeekerState.HideLockedResultsInSearch);
-                editor.PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse);
+                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
+                editor.PutString(KeyConsts.M_Username, PreferencesState.Username);
+                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
+                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
+                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
+                editor.PutInt(KeyConsts.M_NumberSearchResults, PreferencesState.NumberSearchResults);
+                editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
+                editor.PutBoolean(KeyConsts.M_AutoClearComplete, PreferencesState.AutoClearCompleteDownloads);
+                editor.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, PreferencesState.AutoClearCompleteUploads);
+                editor.PutBoolean(KeyConsts.M_RememberSearchHistory, PreferencesState.RememberSearchHistory);
+                editor.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
+                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
+                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
+                editor.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
+                editor.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
                 editor.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
                 editor.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
-                editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload);
+                editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
                 editor.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
-                editor.PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification);
-                editor.PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed);
+                editor.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
+                editor.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
                 //editor.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
-                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
+                editor.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
+                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
 
                 if (SeekerState.UserList != null)
                 {
@@ -2407,29 +2407,29 @@ namespace Seeker
         protected override void OnSaveInstanceState(Bundle outState)
         {
             base.OnSaveInstanceState(outState);
-            outState.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, SeekerState.currentlyLoggedIn);
-            outState.PutString(KeyConsts.M_Username, SeekerState.Username);
-            outState.PutString(KeyConsts.M_Password, SeekerState.Password);
-            outState.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, SeekerState.SaveDataDirectoryUriIsFromTree);
-            outState.PutString(KeyConsts.M_SaveDataDirectoryUri, SeekerState.SaveDataDirectoryUri);
-            outState.PutInt(KeyConsts.M_NumberSearchResults, SeekerState.NumberSearchResults);
-            outState.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
-            outState.PutBoolean(KeyConsts.M_AutoClearComplete, SeekerState.AutoClearCompleteDownloads);
-            outState.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, SeekerState.AutoClearCompleteUploads);
-            outState.PutBoolean(KeyConsts.M_RememberSearchHistory, SeekerState.RememberSearchHistory);
-            outState.PutBoolean(KeyConsts.M_RememberUserHistory, SeekerState.ShowRecentUsers);
-            outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, SeekerState.MemoryBackedDownload);
+            outState.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
+            outState.PutString(KeyConsts.M_Username, PreferencesState.Username);
+            outState.PutString(KeyConsts.M_Password, PreferencesState.Password);
+            outState.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
+            outState.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
+            outState.PutInt(KeyConsts.M_NumberSearchResults, PreferencesState.NumberSearchResults);
+            outState.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
+            outState.PutBoolean(KeyConsts.M_AutoClearComplete, PreferencesState.AutoClearCompleteDownloads);
+            outState.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, PreferencesState.AutoClearCompleteUploads);
+            outState.PutBoolean(KeyConsts.M_RememberSearchHistory, PreferencesState.RememberSearchHistory);
+            outState.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
+            outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
             outState.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
-            outState.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, SeekerState.FreeUploadSlotsOnly);
-            outState.PutBoolean(KeyConsts.M_HideLockedSearch, SeekerState.HideLockedResultsInSearch);
-            outState.PutBoolean(KeyConsts.M_HideLockedBrowse, SeekerState.HideLockedResultsInBrowse);
-            outState.PutBoolean(KeyConsts.M_DisableToastNotifications, SeekerState.DisableDownloadToastNotification);
+            outState.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
+            outState.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
+            outState.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
+            outState.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
             outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
             outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
-            outState.PutInt(KeyConsts.M_UploadSpeed, SeekerState.UploadSpeed);
+            outState.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
             //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
-            outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, SeekerState.AllowPrivateRoomInvitations);
-            outState.PutBoolean(KeyConsts.M_SharingOn, SeekerState.SharingOn);
+            outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
+            outState.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
             if (SeekerState.UserList != null)
             {
                 outState.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));

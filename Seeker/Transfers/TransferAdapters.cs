@@ -9,6 +9,7 @@ using Seeker.Search;
 using Soulseek;
 using System;
 
+using Common;
 namespace Seeker
 {
     public partial class TransfersFragment
@@ -212,8 +213,8 @@ namespace Seeker
             public TransferAdapterRecyclerVersion(System.Collections.IList tranfersList)
             {
                 localDataSet = tranfersList;
-                showSpeed = SeekerState.TransferViewShowSpeed;
-                showSizes = SeekerState.TransferViewShowSizes;
+                showSpeed = PreferencesState.TransferViewShowSpeed;
+                showSizes = PreferencesState.TransferViewShowSizes;
             }
 
         }

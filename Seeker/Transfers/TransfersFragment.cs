@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker
 {
     public partial class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
@@ -224,7 +225,7 @@ namespace Seeker
                 }
             }
 
-            if (SeekerState.TransferViewShowSizes)
+            if (PreferencesState.TransferViewShowSizes)
             {
                 menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.HideSize);
             }
@@ -233,7 +234,7 @@ namespace Seeker
                 menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.ShowSize);
             }
 
-            if (SeekerState.TransferViewShowSpeed)
+            if (PreferencesState.TransferViewShowSpeed)
             {
                 menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.HideSpeed);
             }
@@ -276,11 +277,11 @@ namespace Seeker
                     SetRecyclerAdapter();
                     return true;
                 case Resource.Id.action_show_size:
-                    SeekerState.TransferViewShowSizes = !SeekerState.TransferViewShowSizes;
+                    PreferencesState.TransferViewShowSizes = !PreferencesState.TransferViewShowSizes;
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_show_speed:
-                    SeekerState.TransferViewShowSpeed = !SeekerState.TransferViewShowSpeed;
+                    PreferencesState.TransferViewShowSpeed = !PreferencesState.TransferViewShowSpeed;
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
@@ -639,7 +640,7 @@ namespace Seeker
                         noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
                         setupUpSharing.Visibility = ViewStates.Gone;
                     }
-                    else if(SeekerState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && UploadDirectoryManager.AreAllFailed())
+                    else if(PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && UploadDirectoryManager.AreAllFailed())
                     {
                         noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_failed_to_set_up_shared_files);
                         setupUpSharing.Visibility = ViewStates.Visible;
@@ -732,7 +733,7 @@ namespace Seeker
 
 
 
-            Logger.InfoFirebase("AutoClear: " + SeekerState.AutoClearCompleteDownloads);
+            Logger.InfoFirebase("AutoClear: " + PreferencesState.AutoClearCompleteDownloads);
             Logger.InfoFirebase("AutoRetry: " + SeekerState.AutoRetryDownload);
 
             return rootView;
@@ -885,26 +886,26 @@ namespace Seeker
 
             //    //    if (SeekerState.UseLegacyStorage())
             //    //    {
-            //    //        if (SeekerState.SaveDataDirectoryUri == null || SeekerState.SaveDataDirectoryUri == string.Empty)
+            //    //        if (PreferencesState.SaveDataDirectoryUri == null || PreferencesState.SaveDataDirectoryUri == string.Empty)
             //    //        {
             //    //            string rootDir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
             //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(rootDir), "*/*");
             //    //        }
             //    //        else
             //    //        {
-            //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri), "*/*");
+            //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri), "*/*");
             //    //        }
             //    //    }
             //    //    else
             //    //    {
-            //    //        if (SeekerState.SaveDataDirectoryUri==null || SeekerState.SaveDataDirectoryUri==string.Empty)
+            //    //        if (PreferencesState.SaveDataDirectoryUri==null || PreferencesState.SaveDataDirectoryUri==string.Empty)
             //    //        {
             //    //            Toast tst = Toast.MakeText(Context, "Download Directory is not set.  Please set it to enable downloading.", ToastLength.Short);
             //    //            tst.Show();
             //    //            return true;
             //    //        }
 
-            //    //        chooser.SetData(Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri));
+            //    //        chooser.SetData(Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri));
             //    //    }
 
             //    //    try
@@ -1313,7 +1314,7 @@ namespace Seeker
 
         private bool NotLoggedInShowMessageGaurd(string msg)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, "Must be logged in to " + msg, ToastLength.Short).Show();
                 return true;

@@ -10,6 +10,7 @@ using Android.Widget;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using AndroidX.ViewPager.Widget;
+using Common;
 using System;
 using System.Collections.Generic;
 using System.IO;

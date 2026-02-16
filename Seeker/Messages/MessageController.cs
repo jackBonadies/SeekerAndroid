@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Messages
 {
     public static class MessageController
@@ -64,19 +65,19 @@ namespace Seeker.Messages
                 Message msg = new Message(e.Username, e.Id, e.Replayed, e.Timestamp.ToLocalTime(), e.Timestamp, e.Message, false);
                 lock (MessageListLockObject)
                 {
-                    if (SeekerState.Username == null || SeekerState.Username == string.Empty)
+                    if (PreferencesState.Username == null || PreferencesState.Username == string.Empty)
                     {
                         Logger.Firebase("we received a message while our username is still null");
                     }
-                    else if (!RootMessages.ContainsKey(SeekerState.Username))
+                    else if (!RootMessages.ContainsKey(PreferencesState.Username))
                     {
-                        RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessagesUsername = SeekerState.Username;
-                        Messages = RootMessages[SeekerState.Username];
+                        RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessagesUsername = PreferencesState.Username;
+                        Messages = RootMessages[PreferencesState.Username];
                     }
-                    else if (RootMessages.ContainsKey(SeekerState.Username))
+                    else if (RootMessages.ContainsKey(PreferencesState.Username))
                     {
-                        Messages = RootMessages[SeekerState.Username];
+                        Messages = RootMessages[PreferencesState.Username];
                     }
 
                     if (Messages.ContainsKey(e.Username))
@@ -351,7 +352,7 @@ namespace Seeker.Messages
         /// <returns></returns>
         public static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
-            if (SeekerState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
+            if (PreferencesState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
             {
                 //if we follow the system then we can just return whether our app is in night mode.
                 return DownloadDialog.InNightMode(contextToUse);
@@ -551,10 +552,10 @@ namespace Seeker.Messages
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
-                if (!string.IsNullOrEmpty(SeekerState.Username) && RootMessages.ContainsKey(SeekerState.Username))
+                if (!string.IsNullOrEmpty(PreferencesState.Username) && RootMessages.ContainsKey(PreferencesState.Username))
                 {
-                    Messages = RootMessages[SeekerState.Username];
-                    MessagesUsername = SeekerState.Username;
+                    Messages = RootMessages[PreferencesState.Username];
+                    MessagesUsername = PreferencesState.Username;
                 }
             }
         }

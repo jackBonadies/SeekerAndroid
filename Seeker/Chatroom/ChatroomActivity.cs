@@ -37,6 +37,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Javax.Security.Auth;
 using AndroidX.Activity;
+using Common;
 
 namespace Seeker
 {
@@ -46,8 +47,16 @@ namespace Seeker
     {
         public static ChatroomActivity ChatroomActivityRef = null;
 
-        public static bool ShowStatusesView = true;
-        public static bool ShowTickerView = false;
+        public static bool ShowStatusesView
+        {
+            get => Common.PreferencesState.ShowStatusesView;
+            set => Common.PreferencesState.ShowStatusesView = value;
+        }
+        public static bool ShowTickerView
+        {
+            get => Common.PreferencesState.ShowTickerView;
+            set => Common.PreferencesState.ShowTickerView = value;
+        }
         public static bool ShowUserOnlineAwayStatusUpdates = true;
 
         protected override void OnCreate(Bundle savedInstanceState)

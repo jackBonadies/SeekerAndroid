@@ -73,7 +73,7 @@ namespace Seeker
             //but when we get a dir response the files are just the end file names i.e. "02 - songname.mp3" so they cannot be downloaded like that...
             //can be fixed with d.Name + "\\" + f.Filename
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
-            bool hideLocked = SeekerState.HideLockedResultsInSearch;
+            bool hideLocked = PreferencesState.HideLockedResultsInSearch;
             List<File> fullFilenameCollection = new List<File>();
             foreach (File f in d.Files)
             {
@@ -230,7 +230,7 @@ namespace Seeker
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
             List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
             adapterList.AddRange(searchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
-            if (!SeekerState.HideLockedResultsInSearch)
+            if (!PreferencesState.HideLockedResultsInSearch)
             {
                 adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
             }
@@ -428,7 +428,7 @@ namespace Seeker
         /// </remarks>
         public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<Directory>> continueWithAction)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
                 return;
@@ -498,7 +498,7 @@ namespace Seeker
 
         public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
                 return;
@@ -535,7 +535,7 @@ namespace Seeker
         {
             //logging code for unit tests / diagnostic.. //TODO comment out always
             //#if DEBUG
-            //var root = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse( SeekerState.SaveDataDirectoryUri) );
+            //var root = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse( PreferencesState.SaveDataDirectoryUri) );
             //DocumentFile exists = root.FindFile(username + "_dir_response");
             ////save:
             //if(exists==null || !exists.Exists())
@@ -569,7 +569,7 @@ namespace Seeker
 
             //str.Close();
             //end logging code
-            bool hideLocked = SeekerState.HideLockedResultsInBrowse;
+            bool hideLocked = PreferencesState.HideLockedResultsInBrowse;
             if (b.DirectoryCount == 0 && b.LockedDirectoryCount != 0 && hideLocked)
             {
                 errorMsgToToast = SeekerState.ActiveActivityRef.GetString(Resource.String.browse_onlylocked);
@@ -617,7 +617,7 @@ namespace Seeker
 
 
             //logging code for unit tests / diagnostic..
-            //var root2 = DocumentFile.FromTreeUri(SeekerState.MainActivityRef, Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri));
+            //var root2 = DocumentFile.FromTreeUri(SeekerState.MainActivityRef, Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri));
             //DocumentFile exists2 = root.FindFile(username + "_parsed_answer");
             //if (exists2 == null || !exists2.Exists())
             //{
@@ -795,14 +795,14 @@ namespace Seeker
                 List<File> selectedFiles = new List<File>();
                 foreach (int position in this.customAdapter.SelectedPositions)
                 {
-                    var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, position);
+                    var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
                     selectedFiles.Add(file);
                 }
                 return GetFullFileInfos(selectedFiles.ToArray());
             }
             else
             {
-                return GetFullFileInfos(searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch));
+                return GetFullFileInfos(searchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
             }
         }
 
@@ -918,7 +918,7 @@ namespace Seeker
         {
             try
             {
-                var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0);
+                var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
                 string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
@@ -926,7 +926,7 @@ namespace Seeker
                     stopRefreshing();
                     return;
                 }
-                if (!SeekerState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+                if (!PreferencesState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
                 {
                     Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
                     stopRefreshing();
@@ -937,7 +937,7 @@ namespace Seeker
             catch (Exception ex)
             {
                 CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
-                Logger.FirebaseError($"{SeekerState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
+                Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
             }
         }
 
@@ -949,13 +949,13 @@ namespace Seeker
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = CommonHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0).Filename);
+                    string startingDir = CommonHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
                     Action<View> action = new Action<View>((v) =>
                     {
                         this.Dismiss();
                         ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
-                    if (!SeekerState.HideLockedResultsInSearch && SeekerState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
                     {
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;

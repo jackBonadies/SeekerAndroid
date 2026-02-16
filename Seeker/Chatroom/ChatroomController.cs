@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Chatroom
 {
     public class ChatroomController
@@ -151,16 +152,24 @@ namespace Seeker.Chatroom
 
         public static bool AreWeMod(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(SeekerState.Username);
+            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(PreferencesState.Username);
         }
 
         public static bool AreWeOwner(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Owner == SeekerState.Username;
+            return ChatroomController.JoinedRoomData[roomname].Owner == PreferencesState.Username;
         }
 
-        public static bool PutFriendsOnTop = false;
-        public static SortOrderChatroomUsers SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical;
+        public static bool PutFriendsOnTop
+        {
+            get => Common.PreferencesState.PutFriendsOnTop;
+            set => Common.PreferencesState.PutFriendsOnTop = value;
+        }
+        public static SortOrderChatroomUsers SortChatroomUsersBy
+        {
+            get => (SortOrderChatroomUsers)Common.PreferencesState.SortChatroomUsersBy;
+            set => Common.PreferencesState.SortChatroomUsersBy = (int)value;
+        }
 
         public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate, string filterString = "")
         {
@@ -469,7 +478,7 @@ namespace Seeker.Chatroom
             {
                 return;
             }
-            RootAutoJoinRoomNames[SeekerState.Username] = AutoJoinRoomNames;
+            RootAutoJoinRoomNames[PreferencesState.Username] = AutoJoinRoomNames;
 
             var joinedRoomsString = SerializationHelper.SaveAutoJoinRoomsListToString(RootAutoJoinRoomNames);
 
@@ -496,15 +505,15 @@ namespace Seeker.Chatroom
             else
             {
                 RootAutoJoinRoomNames = SerializationHelper.RestoreAutoJoinRoomsListFromString(joinedRooms);
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SeekerState.Username))
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(PreferencesState.Username))
                 {
-                    AutoJoinRoomNames = RootAutoJoinRoomNames[SeekerState.Username];
-                    CurrentUsername = SeekerState.Username;
+                    AutoJoinRoomNames = RootAutoJoinRoomNames[PreferencesState.Username];
+                    CurrentUsername = PreferencesState.Username;
                 }
                 else
                 {
                     AutoJoinRoomNames = new List<string>();
-                    CurrentUsername = SeekerState.Username;
+                    CurrentUsername = PreferencesState.Username;
                 }
             }
         }
@@ -520,7 +529,7 @@ namespace Seeker.Chatroom
             {
                 return;
             }
-            RootNotifyRoomNames[SeekerState.Username] = NotifyRoomNames;
+            RootNotifyRoomNames[PreferencesState.Username] = NotifyRoomNames;
 
             string notifyRoomsString = SerializationHelper.SaveNotifyRoomsListToString(RootNotifyRoomNames);
 
@@ -547,15 +556,15 @@ namespace Seeker.Chatroom
             else
             {
                 RootNotifyRoomNames = SerializationHelper.RestoreNotifyRoomsListFromString(notifyRooms);
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SeekerState.Username))
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(PreferencesState.Username))
                 {
-                    NotifyRoomNames = RootNotifyRoomNames[SeekerState.Username];
-                    CurrentUsername = SeekerState.Username;
+                    NotifyRoomNames = RootNotifyRoomNames[PreferencesState.Username];
+                    CurrentUsername = PreferencesState.Username;
                 }
                 else
                 {
                     NotifyRoomNames = new List<string>();
-                    CurrentUsername = SeekerState.Username;
+                    CurrentUsername = PreferencesState.Username;
                 }
             }
         }
@@ -818,7 +827,7 @@ namespace Seeker.Chatroom
             Logger.Debug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
             Message msg = new Message(e.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
-            if (e.Username == SeekerState.Username)
+            if (e.Username == PreferencesState.Username)
             {
                 //we already logged it..
                 return;
@@ -852,7 +861,7 @@ namespace Seeker.Chatroom
                 var oldRoomData = JoinedRoomData[e.RoomName];
                 JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users.Append(e.UserData), oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
             }
-            else if (e.Username == SeekerState.Username)
+            else if (e.Username == PreferencesState.Username)
             {
                 //this is when we first join..
             }
@@ -963,7 +972,7 @@ namespace Seeker.Chatroom
 
         public static void ShowNotification(Message msg, string roomName)
         {
-            if (msg.Username == SeekerState.Username)
+            if (msg.Username == PreferencesState.Username)
             {
                 return;
             }
@@ -997,7 +1006,7 @@ namespace Seeker.Chatroom
 
         public static void GetRoomListApi(bool feedback = false)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 if (feedback)
                 {
@@ -1083,7 +1092,7 @@ namespace Seeker.Chatroom
 
         public static void CreateRoomApi(string roomName, bool isPrivate, bool feedback)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short).Show();
                 return;
@@ -1132,7 +1141,7 @@ namespace Seeker.Chatroom
 
         public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead = false)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short).Show();
                 return;
@@ -1313,7 +1322,7 @@ namespace Seeker.Chatroom
         {
             string ownershipString = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.ownership);
             string membershipString = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.membership);
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 string membership = ownership ? ownershipString : membershipString;
                 Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short).Show();
@@ -1408,7 +1417,7 @@ namespace Seeker.Chatroom
 
         public static void SetTickerApi(string roomName, string tickerMessage, bool feedback)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short).Show();
                 return;
@@ -1488,7 +1497,7 @@ namespace Seeker.Chatroom
         public static void JoinRoomApi(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)
         {
             Logger.Debug("JOINING ROOM" + roomName);
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {   //since this happens on startup its no good to have this logic...
                 Logger.Debug("CANT JOIN NOT LOGGED IN:" + roomName);
                 return;

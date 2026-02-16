@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker
 {
     /// <summary>
@@ -122,7 +123,7 @@ namespace Seeker
                 if (df == null || !df.Exists())
                 {
                     Logger.Debug("delete failed - null or not exist");
-                    Logger.InfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SeekerState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
+                    Logger.InfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + PreferencesState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
                 }
                 if (!df.Delete()) //nullref
                 {

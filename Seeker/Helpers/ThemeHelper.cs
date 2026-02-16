@@ -1,4 +1,5 @@
 using Android.Content;
+using Common;
 using System;
 
 namespace Seeker
@@ -11,14 +12,6 @@ namespace Seeker
         public const string Red = "Red";
         public const string AmoledClassicPurple = "Amoled - Classic Purple";
         public const string AmoledGrey = "Amoled - Grey";
-
-        public enum DayThemeType : ushort
-        {
-            ClassicPurple = 0,
-            Red = 1,
-            Blue = 2,
-            Grey = 3,
-        }
 
         public static DayThemeType FromDayThemeTypeString(string themeTypeString)
         {
@@ -69,16 +62,6 @@ namespace Seeker
                 default:
                     throw new Exception("unknown");
             }
-        }
-
-        public enum NightThemeType : ushort
-        {
-            ClassicPurple = 0,
-            Grey = 1,
-            Blue = 2,
-            Red = 3,
-            AmoledClassicPurple = 4,
-            AmoledGrey = 5
         }
 
         public static NightThemeType FromNightThemeTypeString(string themeTypeString)
@@ -157,18 +140,18 @@ namespace Seeker
             {
                 if (isNightMode)
                 {
-                    return ThemeHelper.ToNightThemeProper(SeekerState.NightModeVarient);
+                    return ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVarient);
                 }
                 else
                 {
-                    switch (SeekerState.NightModeVarient)
+                    switch (PreferencesState.NightModeVarient)
                     {
                         case NightThemeType.ClassicPurple:
-                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
+                            return ThemeHelper.ToDayThemeProper(DayThemeType.ClassicPurple);
                         case NightThemeType.Blue:
-                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.Blue);
+                            return ThemeHelper.ToDayThemeProper(DayThemeType.Blue);
                         default:
-                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
+                            return ThemeHelper.ToDayThemeProper(DayThemeType.ClassicPurple);
                     }
                 }
             }
@@ -176,18 +159,18 @@ namespace Seeker
             {
                 if (!isNightMode)
                 {
-                    return ThemeHelper.ToDayThemeProper(SeekerState.DayModeVarient);
+                    return ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVarient);
                 }
                 else
                 {
-                    switch (SeekerState.DayModeVarient)
+                    switch (PreferencesState.DayModeVarient)
                     {
                         case DayThemeType.ClassicPurple:
-                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
+                            return ThemeHelper.ToNightThemeProper(NightThemeType.ClassicPurple);
                         case DayThemeType.Blue:
-                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.Blue);
+                            return ThemeHelper.ToNightThemeProper(NightThemeType.Blue);
                         default:
-                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
+                            return ThemeHelper.ToNightThemeProper(NightThemeType.ClassicPurple);
                     }
                 }
             }

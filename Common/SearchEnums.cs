@@ -1,4 +1,4 @@
-﻿namespace Seeker
+namespace Seeker
 {
     public enum SearchTarget
     {
@@ -29,5 +29,18 @@
         Fastest = 1,
         FolderAlphabetical = 2,
         BitRate = 3,
+    }
+
+    public enum ChipType
+    {
+        FileType = 0,
+        FileCount = 1,
+        Keyword = 2
+    }
+
+    public class ConfigureChipItems
+    {
+        public bool Enabled;
+        public string Name;
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Managers
 {
     public class PrivilegesManager
@@ -36,9 +37,9 @@ namespace Seeker.Managers
             lock (PrivilegedUsersLock)
             {
                 PrivilegedUsers = privUsers;
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty)
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
                 {
-                    IsPrivileged = CheckIfPrivileged(SeekerState.Username);
+                    IsPrivileged = CheckIfPrivileged(PreferencesState.Username);
                     if (IsPrivileged)
                     {
                         GetPrivilegesAPI(false);
@@ -194,7 +195,7 @@ namespace Seeker.Managers
 
         public void GetPrivilegesAPI(bool feedback)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_check_privileges, ToastLength.Short).Show();
                 return;

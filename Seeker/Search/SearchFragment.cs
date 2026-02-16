@@ -22,6 +22,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker
 {
     public partial class SearchFragment : Fragment
@@ -47,8 +48,16 @@ namespace Seeker
         }
         public View rootView = null;
 
-        public static bool FilterSticky = false;
-        public static string FilterStickyString = string.Empty; //if FilterSticky is on then always use this string..
+        public static bool FilterSticky
+        {
+            get => Common.PreferencesState.FilterSticky;
+            set => Common.PreferencesState.FilterSticky = value;
+        }
+        public static string FilterStickyString
+        {
+            get => Common.PreferencesState.FilterStickyString;
+            set => Common.PreferencesState.FilterStickyString = value;
+        }
 
         private Context context;
         public static List<string> searchHistory = new List<string>();
@@ -758,7 +767,7 @@ namespace Seeker
             //this.listView = rootView.FindViewById<ListView>(Resource.Id.listView1);
 
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
-            //if(SeekerState.ShowSmartFilters)
+            //if(PreferencesState.ShowSmartFilters)
             //{
             recyclerViewChips.Visibility = ViewStates.Visible;
             //}
@@ -888,7 +897,7 @@ namespace Seeker
             UpdateDrawableState(filterText, true);
 
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SeekerState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
+            showHideSmartFilters.Text = PreferencesState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
             showHideSmartFilters.Click += ShowHideSmartFilters_Click;
 
             return rootView;
@@ -896,10 +905,10 @@ namespace Seeker
 
         private void ShowHideSmartFilters_Click(object sender, EventArgs e)
         {
-            SeekerState.ShowSmartFilters = !SeekerState.ShowSmartFilters;
+            PreferencesState.ShowSmartFilters = !PreferencesState.ShowSmartFilters;
             Button showHideSmartFilters = rootView.FindViewById<Button>(Resource.Id.toggleSmartFilters);
-            showHideSmartFilters.Text = SeekerState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
-            if (SeekerState.ShowSmartFilters)
+            showHideSmartFilters.Text = PreferencesState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
+            if (PreferencesState.ShowSmartFilters)
             {
                 if (SearchTabHelper.CurrentlySearching)
                 {
@@ -907,7 +916,7 @@ namespace Seeker
                 }
                 if ((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
                 {
-                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, SeekerState.SmartFilterOptions);
+                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions);
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                     SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
@@ -950,7 +959,7 @@ namespace Seeker
         /// <returns></returns>
         private bool AreChipsFiltering()
         {
-            if (!SeekerState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
+            if (!PreferencesState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
                 return false;
             }
@@ -1299,14 +1308,14 @@ namespace Seeker
 
                 if (checkBoxSetAsDefault.Checked)
                 {
-                    var old = SeekerState.DefaultSearchResultSortAlgorithm;
-                    SeekerState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
-                    if (old != SeekerState.DefaultSearchResultSortAlgorithm)
+                    var old = PreferencesState.DefaultSearchResultSortAlgorithm;
+                    PreferencesState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
+                    if (old != PreferencesState.DefaultSearchResultSortAlgorithm)
                     {
                         lock (SeekerState.SharedPrefLock)
                         {
                             var editor = SeekerState.SharedPreferences.Edit();
-                            editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)SeekerState.DefaultSearchResultSortAlgorithm);
+                            editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
                             editor.Commit();
                         }
                     }
@@ -1636,7 +1645,7 @@ namespace Seeker
             Logger.Debug("Words To Include: " + searchTab.WordsToInclude.ToString());
             Logger.Debug("Whether to Filer: " + searchTab.FilteredResults);
             Logger.Debug("FilterString: " + searchTab.FilterString);
-            bool hideLocked = SeekerState.HideLockedResultsInSearch;
+            bool hideLocked = PreferencesState.HideLockedResultsInSearch;
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
             (SearchResponse s) =>
@@ -1997,7 +2006,7 @@ namespace Seeker
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
-            if (e.Response.FileCount == 0 && SeekerState.HideLockedResultsInSearch || !SeekerState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
+            if (e.Response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch || !PreferencesState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
             {
                 Logger.Debug("Skipping Locked or 0/0");
                 return;
@@ -2116,7 +2125,7 @@ namespace Seeker
                 Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
                 try
                 {
-                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(SeekerState.HideLockedResultsInSearch, resp);
+                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(PreferencesState.HideLockedResultsInSearch, resp);
                 }
                 catch (System.Exception e)
                 {
@@ -2410,7 +2419,7 @@ namespace Seeker
                 SoulseekClient_SearchResponseReceived(null, e, fromTab, fromWishlist);
             });
 
-            SearchOptions searchOptions = new SearchOptions(responseLimit: SeekerState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: SeekerState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
+            SearchOptions searchOptions = new SearchOptions(responseLimit: PreferencesState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: PreferencesState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
             SearchScope scope = null;
             if (fromWishlist)
             {
@@ -2539,7 +2548,7 @@ namespace Seeker
 
                     if (fromTab == SearchTabHelper.CurrentTab)
                     {
-                        if (SeekerState.ShowSmartFilters)
+                        if (PreferencesState.ShowSmartFilters)
                         {
 #if DEBUG
                             try
@@ -2559,7 +2568,7 @@ namespace Seeker
                             }
 
 #endif
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, SeekerState.SmartFilterOptions);
+                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, PreferencesState.SmartFilterOptions);
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                             SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                             {
@@ -2692,7 +2701,7 @@ namespace Seeker
             if (!fromWishlist)
             {
                 //add a new item to our search history
-                if (SeekerState.RememberSearchHistory)
+                if (PreferencesState.RememberSearchHistory)
                 {
                     if (!searchHistory.Contains(searchString))
                     {
@@ -2724,7 +2733,7 @@ namespace Seeker
                 Logger.Debug("Search_Click");
             }
             //#if !DEBUG
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 if (!fromWishlist)
                 {

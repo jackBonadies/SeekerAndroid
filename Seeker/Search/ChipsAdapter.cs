@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Common;
 namespace Seeker
 {
 
@@ -22,10 +23,10 @@ namespace Seeker
         /// <param name="searchTerm"></param>
         /// <param name="smartFilterOptions"></param>
         /// <returns></returns>
-        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SeekerState.SmartFilterState smartFilterOptions)
+        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, PreferencesState.SmartFilterState smartFilterOptions)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-            bool hideHidden = SeekerState.HideLockedResultsInSearch;
+            bool hideHidden = PreferencesState.HideLockedResultsInSearch;
 
             //this is relevant to both
             if (smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
@@ -1061,12 +1062,6 @@ namespace Seeker
         }
     }
 
-    public enum ChipType
-    {
-        FileType = 0,
-        FileCount = 1,
-        Keyword = 2
-    }
 
     public class ChipDataItem
     {

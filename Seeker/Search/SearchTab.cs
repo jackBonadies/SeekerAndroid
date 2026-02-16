@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
+using Common;
 namespace Seeker
 {
     public class SearchTab
     {
         public List<SearchResponse> SearchResponses = new List<SearchResponse>();
-        public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(SeekerState.DefaultSearchResultSortAlgorithm));
-        public SearchResultSorting SortHelperSorting = SeekerState.DefaultSearchResultSortAlgorithm;
+        public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm));
+        public SearchResultSorting SortHelperSorting = PreferencesState.DefaultSearchResultSortAlgorithm;
         public object SortHelperLockObject = new object();
         public bool FilteredResults = false;
         public bool FilterSticky = false;

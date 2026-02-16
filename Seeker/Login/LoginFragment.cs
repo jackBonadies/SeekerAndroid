@@ -28,6 +28,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Common;
 namespace Seeker
 {
     public class LoginFragment : Fragment //, Android.Net.DnsResolver.ICallback //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
@@ -98,7 +99,7 @@ namespace Seeker
             StaticHacks.LoginFragment = this;
             if (MainActivity.IsNotLoggedIn())//you are not logged in if username or password is null
             {
-                SeekerState.currentlyLoggedIn = false;
+                PreferencesState.CurrentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
 
                 SetUpLogInLayout();
@@ -116,14 +117,14 @@ namespace Seeker
                     try
                     {
                         //there is a bug where we reach here with an empty Username and Password...
-                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(SeekerState.Username, SeekerState.Password);
+                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
                     }
                     catch (InvalidOperationException)
                     {
                         Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
                         Logger.Firebase("We are already logging in");
                     }
-                    //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, SeekerState.Username, SeekerState.Password);
+                    //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, PreferencesState.Username, PreferencesState.Password);
                     login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
                     login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
                     SeekerState.MainActivityRef.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
@@ -141,7 +142,7 @@ namespace Seeker
 
                 bttn.Click += LogoutClick;
                 var welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                welcome.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.welcome), SeekerState.Username);
+                welcome.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.welcome), PreferencesState.Username);
                 welcome.Visibility = ViewStates.Gone;
                 bttn.Visibility = ViewStates.Gone;
 
@@ -210,7 +211,7 @@ namespace Seeker
         public void Settings_Click(object sender, EventArgs e)
         {
             Intent intent = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
-            //intent.PutExtra("SaveDataDirectoryUri", SeekerState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
+            //intent.PutExtra("SaveDataDirectoryUri", PreferencesState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
             SeekerState.MainActivityRef.StartActivityForResult(intent, 140);
         }
 
@@ -341,7 +342,7 @@ namespace Seeker
             if (cannotLogin == false)
             {
                 StaticHacks.UpdateUI = true;
-                SeekerState.currentlyLoggedIn = true; //when we recreate we lose the statics as they get overwritten by bundle
+                PreferencesState.CurrentlyLoggedIn = true; //when we recreate we lose the statics as they get overwritten by bundle
                 StaticHacks.LoggingIn = false;
                 //SeekerState.currentSessionLoggedIn = true;
                 //var tabLayout = (Android.Support.Design.Widget.TabLayout)SeekerState.MainActivityRef.FindViewById(Resource.Id.tabs);
@@ -359,9 +360,9 @@ namespace Seeker
                 {
                     string message = msg;
                     Toast.MakeText(SeekerState.MainActivityRef, msg, ToastLength.Long).Show();
-                    SeekerState.currentlyLoggedIn = false; //this should maybe be removed???
-                    SeekerState.Username = null;
-                    SeekerState.Password = null;
+                    PreferencesState.CurrentlyLoggedIn = false; //this should maybe be removed???
+                    PreferencesState.Username = null;
+                    PreferencesState.Password = null;
                     //this.Activity.Recreate();
                     //SeekerState.MainActivityRef.Recreate();
                 });
@@ -381,9 +382,9 @@ namespace Seeker
             {
 
             }
-            SeekerState.Username = null;
-            SeekerState.Password = null;
-            SeekerState.currentlyLoggedIn = false;
+            PreferencesState.Username = null;
+            PreferencesState.Password = null;
+            PreferencesState.CurrentlyLoggedIn = false;
             SeekerState.MainActivityRef.Recreate();
 
         }
@@ -430,7 +431,7 @@ namespace Seeker
             catch (AddressException)
             {
                 Toast.MakeText(this.Activity, Resource.String.dns_failed_2, ToastLength.Long).Show();
-                SeekerState.currentlyLoggedIn = false;
+                PreferencesState.CurrentlyLoggedIn = false;
                 return;
             }
             catch (InvalidOperationException err)
@@ -438,20 +439,20 @@ namespace Seeker
                 if (err.Message.Equals("The client is already connected"))
                 {
                     alreadyConnected = true;
-                    SeekerState.currentlyLoggedIn = true;
+                    PreferencesState.CurrentlyLoggedIn = true;
                     MainActivity.AddLoggedInLayout(this.rootView, true);
                     MainActivity.UpdateUIForLoggedIn(this.rootView);
                 }
                 else
                 {
                     Toast.MakeText(this.Activity, err.Message, ToastLength.Long).Show();
-                    SeekerState.currentlyLoggedIn = false;
+                    PreferencesState.CurrentlyLoggedIn = false;
                     return;
                 }
             }
             try
             {
-                //SeekerState.currentlyLoggedIn = true;
+                //PreferencesState.CurrentlyLoggedIn = true;
                 //LayoutInflater inflater = (LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService);
                 //View rootView = inflater.Inflate(Resource.Layout.loggedin,null);
                 MainActivity.AddLoggedInLayout(this.rootView); //i.e. if not already
@@ -459,8 +460,8 @@ namespace Seeker
                 {
                     MainActivity.UpdateUIForLoggingInLoading(this.rootView);
                 }
-                SeekerState.Username = this.usernameTextEdit.Text;
-                SeekerState.Password = this.passwordTextEdit.Text;
+                PreferencesState.Username = this.usernameTextEdit.Text;
+                PreferencesState.Password = this.passwordTextEdit.Text;
                 if (!alreadyConnected)
                 {
                     StaticHacks.LoggingIn = true;
@@ -469,7 +470,7 @@ namespace Seeker
                 //if(login.IsCompleted)
                 //{
                 //    StaticHacks.UpdateUI = true;
-                //    SeekerState.currentlyLoggedIn = true;
+                //    PreferencesState.CurrentlyLoggedIn = true;
                 //    StaticHacks.LoggingIn = false;
                 //    Activity.Recreate();
                 //}
@@ -495,7 +496,7 @@ namespace Seeker
                     message = ex.Message;
                 }
                 Toast.MakeText(this.Activity, message, ToastLength.Long).Show();
-                SeekerState.currentlyLoggedIn = false;
+                PreferencesState.CurrentlyLoggedIn = false;
             }
 
             //Activity.Recreate();

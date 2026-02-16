@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Chatroom
 {
     public class ChatroomInnerFragment : AndroidX.Fragment.App.Fragment //,PopupMenu.IOnMenuItemClickListener
@@ -62,7 +63,7 @@ namespace Seeker.Chatroom
         {
             if (ChatroomController.ModeratedRoomData.ContainsKey(OurRoomInfo.Name))
             {
-                return ChatroomController.ModeratedRoomData[OurRoomInfo.Name].Users.Contains(SeekerState.Username);
+                return ChatroomController.ModeratedRoomData[OurRoomInfo.Name].Users.Contains(PreferencesState.Username);
             }
             return false;
         }
@@ -257,7 +258,7 @@ namespace Seeker.Chatroom
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
                 //Logger.Debug("UI event handler for status view " + e.Joined);
-                if (user == SeekerState.Username && UI_statusMessagesInternal.Count > 0)
+                if (user == PreferencesState.Username && UI_statusMessagesInternal.Count > 0)
                 {
                     //this is to correct an issue where:
                     //  (non UI thread) we join and are added to the room data
@@ -434,7 +435,7 @@ namespace Seeker.Chatroom
             else
             {
                 Logger.Debug("joining room " + OurRoomInfo.Name);
-                if (SeekerState.currentlyLoggedIn)
+                if (PreferencesState.CurrentlyLoggedIn)
                 {
                     ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, false, false);
                 }
@@ -671,7 +672,7 @@ namespace Seeker.Chatroom
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SeekerState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -686,7 +687,7 @@ namespace Seeker.Chatroom
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SeekerState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -783,7 +784,7 @@ namespace Seeker.Chatroom
                 }));
             });
 
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                 {
@@ -830,7 +831,7 @@ namespace Seeker.Chatroom
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(SeekerState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }

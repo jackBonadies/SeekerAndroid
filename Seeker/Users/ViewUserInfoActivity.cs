@@ -27,6 +27,7 @@ using Android.Views;
 using Android.Widget;
 using System;
 
+using Common;
 namespace Seeker
 {
     [Activity(Label = "ViewUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
@@ -63,7 +64,7 @@ namespace Seeker
                     //    SeekerState.ActiveActivityRef.RunOnUiThread(() => {
                     //    Google.Android.Material.Snackbar.Snackbar sb = Google.Android.Material.Snackbar.Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), "Test anywhere snackbar", Google.Android.Material.Snackbar.Snackbar.LengthLong).SetAction("Go", (View v)=>{
 
-                    //        RequestedUserInfoHelper.LaunchUserInfoView(SeekerState.Username);
+                    //        RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username);
 
 
 
@@ -217,10 +218,10 @@ namespace Seeker
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
 
-            if (UserToView == SeekerState.Username)
+            if (UserToView == PreferencesState.Username)
             {
                 //for UserData we only care about Online Status, upload speed, file count, and dir count
-                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, SeekerState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
+                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = SeekerApplication.UserInfoResponseHandler(UserToView, null).Result; //the task is already completed.  (task.fromresult).
             }
             else if (UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)

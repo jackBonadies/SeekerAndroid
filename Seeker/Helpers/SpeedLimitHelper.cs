@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker
 {
     public static class SpeedLimitHelper
@@ -30,7 +31,7 @@ namespace Seeker
         {
             try
             {
-                if (SeekerState.SpeedLimitDownloadOn)
+                if (PreferencesState.SpeedLimitDownloadOn)
                 {
 
                     if (DownloadUserDelays.TryGetValue(username, out double msDelay))
@@ -45,14 +46,14 @@ namespace Seeker
                         DownloadLastAvgSpeed[username] = currentSpeed;
 
                         double avgSpeed = currentSpeed;
-                        if (!SeekerState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
+                        if (!PreferencesState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
                         {
 
                             //its threadsafe when using linq on concurrent dict itself.
                             avgSpeed = DownloadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
                         }
 
-                        if (avgSpeed > SeekerState.SpeedLimitDownloadBytesSec)
+                        if (avgSpeed > PreferencesState.SpeedLimitDownloadBytesSec)
                         {
                             DownloadUserDelays[username] = msDelay = msDelay * 1.04;
                         }
@@ -70,7 +71,7 @@ namespace Seeker
 #endif
                         //first time we need to guess a decent value
                         //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                        double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitDownloadBytesSec;
+                        double msDelaySeed = 1000 * 16384.0 / PreferencesState.SpeedLimitDownloadBytesSec;
                         DownloadUserDelays[username] = msDelaySeed;
                         DownloadLastAvgSpeed[username] = currentSpeed;
                         return Task.Delay((int)msDelaySeed, cts);
@@ -94,7 +95,7 @@ namespace Seeker
         {
             try
             {
-                if (SeekerState.SpeedLimitUploadOn)
+                if (PreferencesState.SpeedLimitUploadOn)
                 {
 
                     if (UploadUserDelays.TryGetValue(username, out double msDelay))
@@ -112,7 +113,7 @@ namespace Seeker
                         UploadLastAvgSpeed[username] = currentSpeed;
 
                         double avgSpeed = currentSpeed;
-                        if (!SeekerState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
+                        if (!PreferencesState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
                         {
 
                             //its threadsafe when using linq on concurrent dict itself.
@@ -122,7 +123,7 @@ namespace Seeker
 #endif
                         }
 
-                        if (avgSpeed > SeekerState.SpeedLimitUploadBytesSec)
+                        if (avgSpeed > PreferencesState.SpeedLimitUploadBytesSec)
                         {
 #if DEBUG
                             //System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
@@ -147,7 +148,7 @@ namespace Seeker
 #endif
                         //first time we need to guess a decent value
                         //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
-                        double msDelaySeed = 1000 * 16384.0 / SeekerState.SpeedLimitUploadBytesSec;
+                        double msDelaySeed = 1000 * 16384.0 / PreferencesState.SpeedLimitUploadBytesSec;
                         UploadUserDelays[username] = msDelaySeed;
                         UploadLastAvgSpeed[username] = currentSpeed;
                         return Task.Delay((int)msDelaySeed, cts);

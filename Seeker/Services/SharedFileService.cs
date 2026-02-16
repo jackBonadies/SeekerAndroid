@@ -824,7 +824,7 @@ namespace Seeker.Services
                     }
                 }
 
-                if ((SeekerState.PerformDeepMetadataSearch && (bitrate == -1 || duration == -1) && size != 0))
+                if ((PreferencesState.PerformDeepMetadataSearch && (bitrate == -1 || duration == -1) && size != 0))
                 {
                     try
                     {
@@ -877,7 +877,7 @@ namespace Seeker.Services
                 //on api 19 the vbr being reported at 32000 is reported as 128000.... both obviously quite incorrect...
                 if (System.IO.Path.GetExtension(presentableName) == ".mp3" && (bitrate >= 0 && bitrate <= 128000) && size != 0)
                 {
-                    if (SeekerState.PerformDeepMetadataSearch)
+                    if (PreferencesState.PerformDeepMetadataSearch)
                     {
                         MicroTagReader.GetMp3Metadata(contentResolver, childUri, duration, size, out bitrate);
                     }
@@ -890,7 +890,7 @@ namespace Seeker.Services
 
 
 
-                if (SeekerState.PerformDeepMetadataSearch && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
+                if (PreferencesState.PerformDeepMetadataSearch && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
                 {
                     MicroTagReader.GetFlacMetadata(contentResolver, childUri, out sampleRate, out bitDepth);
                 }
@@ -1677,7 +1677,7 @@ namespace Seeker.Services
         /// <returns></returns>
         public static bool MeetsSharingConditions()
         {
-            return SeekerState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SeekerState.IsParsing && !UploadDirectoryManager.AreAllFailed();
+            return PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SeekerState.IsParsing && !UploadDirectoryManager.AreAllFailed();
         }
 
         /// <summary>

@@ -9,13 +9,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Transfers
 {
     public static class TransfersUtil
     {    
         public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
         {
-            if (username == SeekerState.Username)
+            if (username == PreferencesState.Username)
             {
                 SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long);
                 return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
@@ -129,7 +130,7 @@ namespace Seeker.Transfers
                 transferItem.QueueLength = downloadInfo.QueueLength;
                 transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
                 transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
-                if (isSingle && SeekerState.NoSubfolderForSingle)
+                if (isSingle && PreferencesState.NoSubfolderForSingle)
                 {
                     transferItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
                 }
@@ -202,7 +203,7 @@ namespace Seeker.Transfers
                     waitUntilEnqueue.TrySetResult(true);
                 }
             });
-            if (SeekerState.MemoryBackedDownload)
+            if (PreferencesState.MemoryBackedDownload)
             {
                 dlTask =
                     SeekerState.SoulseekClient.DownloadAsync(

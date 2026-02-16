@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker
 {
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
@@ -471,7 +472,7 @@ namespace Seeker
                 return;
             }
 
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Toast.MakeText(c, Resource.String.must_be_logged_to_add_or_remove_user, ToastLength.Short).Show();
                 return;
@@ -519,7 +520,11 @@ namespace Seeker
             }
         }
 
-        public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
+        public static SortOrder UserListSortOrder
+        {
+            get => (SortOrder)Common.PreferencesState.UserListSortOrder;
+            set => Common.PreferencesState.UserListSortOrder = (int)value;
+        }
         private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
         public void ShowSortUserListDialog()
         {

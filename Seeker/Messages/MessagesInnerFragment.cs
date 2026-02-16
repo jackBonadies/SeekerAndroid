@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Messages
 {
     public class MessagesInnerFragment : AndroidX.Fragment.App.Fragment
@@ -177,7 +178,7 @@ namespace Seeker.Messages
                 }
                 return;
             }
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Logger.Debug("not currently logged in");
                 Toast.MakeText(contextToUse, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();

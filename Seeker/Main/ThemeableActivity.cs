@@ -4,6 +4,7 @@ using AndroidX.AppCompat.App;
 using System;
 using Seeker.Helpers;
 
+using Common;
 namespace Seeker
 {
     //TODOORG seperate class
@@ -37,10 +38,10 @@ namespace Seeker
 
         protected override void AttachBaseContext(Context @base)
         {
-            if (!SeekerApplication.HasProperPerAppLanguageSupport() && SeekerState.Language != SeekerState.FieldLangAuto)
+            if (!SeekerApplication.HasProperPerAppLanguageSupport() && PreferencesState.Language != PreferencesState.FieldLangAuto)
             {
                 var config = new Android.Content.Res.Configuration();
-                config.Locale = SeekerApplication.LocaleFromString(SeekerState.Language);
+                config.Locale = SeekerApplication.LocaleFromString(PreferencesState.Language);
                 var baseContext = @base.CreateConfigurationContext(config);
                 base.AttachBaseContext(baseContext);
             }
