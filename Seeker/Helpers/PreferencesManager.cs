@@ -1,10 +1,12 @@
 using Android.Content;
 using Common;
+using Seeker.Transfers;
 
 namespace Seeker
 {
     public static class PreferencesManager
     {
+        private static object SharedPrefLock = new object();
         /// <summary>
         /// Restores all persisted preferences from the given shared preferences.
         /// Side-effect restores (UploadDirectoryManager, SearchTabHelper, TransfersFragment, etc.)
@@ -126,7 +128,7 @@ namespace Seeker
         // Save Methods
         public static void SaveListeningState()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ListenerEnabled, PreferencesState.ListenerEnabled);
@@ -138,7 +140,7 @@ namespace Seeker
 
         public static void SaveSpeedLimitState()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, PreferencesState.SpeedLimitDownloadOn);
@@ -153,7 +155,7 @@ namespace Seeker
 
         public static void SaveSmartFilterState()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, PreferencesState.SmartFilterOptions.KeywordsEnabled);
@@ -168,7 +170,7 @@ namespace Seeker
 
         public static void SaveShowTickerView()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowTickerView, PreferencesState.ShowTickerView);
@@ -178,7 +180,7 @@ namespace Seeker
 
         public static void SaveShowStatusesView()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowStatusesView, PreferencesState.ShowStatusesView);
@@ -188,7 +190,7 @@ namespace Seeker
 
         public static void SavePutFriendsOnTop()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, PreferencesState.PutFriendsOnTop);
@@ -198,7 +200,7 @@ namespace Seeker
 
         public static void SaveSortChatroomUsersBy()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_RoomUserListSortOrder, PreferencesState.SortChatroomUsersBy);
@@ -208,7 +210,7 @@ namespace Seeker
 
         public static void SavePassword()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
@@ -218,7 +220,7 @@ namespace Seeker
 
         public static void SaveDefaultSearchResultSortAlgorithm()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
@@ -228,7 +230,7 @@ namespace Seeker
 
         public static void SaveLanguage()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_Lanuage, PreferencesState.Language);
@@ -238,7 +240,7 @@ namespace Seeker
 
         public static void SaveAllowUploadsOnMetered()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered, PreferencesState.AllowUploadsOnMetered);
@@ -248,7 +250,7 @@ namespace Seeker
 
         public static void SaveNotifyOnFolderCompleted()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, PreferencesState.NotifyOnFolderCompleted);
@@ -258,7 +260,7 @@ namespace Seeker
 
         public static void SaveAutoRetryBackOnline()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, PreferencesState.AutoRetryBackOnline);
@@ -268,7 +270,7 @@ namespace Seeker
 
         public static void SaveAutoAwayOnInactivity()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, PreferencesState.AutoAwayOnInactivity);
@@ -278,7 +280,7 @@ namespace Seeker
 
         public static void SaveShowSmartFilters()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowSmartFilters, PreferencesState.ShowSmartFilters);
@@ -288,7 +290,7 @@ namespace Seeker
 
         public static void SaveLogDiagnostics()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, PreferencesState.LogDiagnostics);
@@ -298,7 +300,7 @@ namespace Seeker
 
         public static void SaveStartServiceOnStartup()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ServiceOnStartup, PreferencesState.StartServiceOnStartup);
@@ -308,7 +310,7 @@ namespace Seeker
 
         public static void SaveAllowPrivateRoomInvitations()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
@@ -318,7 +320,7 @@ namespace Seeker
 
         public static void SaveDayModeVarient()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DayVarient, (int)PreferencesState.DayModeVarient);
@@ -328,7 +330,7 @@ namespace Seeker
 
         public static void SaveNightModeVarient()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_NightVarient, (int)PreferencesState.NightModeVarient);
@@ -338,7 +340,7 @@ namespace Seeker
 
         public static void SaveDayNightMode()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
@@ -348,7 +350,7 @@ namespace Seeker
 
         public static void SaveUserInfoPictureName()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
@@ -358,7 +360,7 @@ namespace Seeker
 
         public static void SaveUserListSortOrder()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_UserListSortOrder, PreferencesState.UserListSortOrder);
@@ -368,7 +370,7 @@ namespace Seeker
 
         public static void SaveLegacyLanguageMigrated()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
@@ -378,7 +380,7 @@ namespace Seeker
 
         public static void SaveManualIncompleteDir()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
@@ -389,7 +391,7 @@ namespace Seeker
 
         public static void SaveAdditionalDirectorySettings()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, PreferencesState.CreateCompleteAndIncompleteFolders);
@@ -404,7 +406,7 @@ namespace Seeker
 
         public static void RestoreAdditionalDirectorySettings()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 PreferencesState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, true);
                 PreferencesState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
@@ -416,7 +418,7 @@ namespace Seeker
 
         public static void SaveMaxConcurrentDownloadsSettings(bool restrict, int max)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads, restrict);
@@ -427,7 +429,7 @@ namespace Seeker
 
         public static void SaveUPnPState(long ticks, int lifetime, int port, string localIP)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutLong(KeyConsts.M_LastSetUpnpRuleTicks, ticks);
@@ -440,7 +442,7 @@ namespace Seeker
 
         public static void RestoreUPnPState(out long ticks, out int lifetime, out int port, out string localIP)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 ticks = SeekerState.SharedPreferences.GetLong(KeyConsts.M_LastSetUpnpRuleTicks, 0);
                 lifetime = SeekerState.SharedPreferences.GetInt(KeyConsts.M_LifetimeSeconds, -1);
@@ -452,7 +454,7 @@ namespace Seeker
         // TODO: refactor these? why are they not in preferences state?
         public static void SaveUserInfoBio(string bio)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserInfoBio, bio);
@@ -462,7 +464,7 @@ namespace Seeker
 
         public static void SaveUserList(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserList, serialized);
@@ -472,7 +474,7 @@ namespace Seeker
 
         public static void SaveIgnoreUserList(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, serialized);
@@ -482,7 +484,7 @@ namespace Seeker
 
         public static void SaveUserNotes(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserNotes, serialized);
@@ -492,7 +494,7 @@ namespace Seeker
 
         public static void SaveUserOnlineAlerts(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserOnlineAlerts, serialized);
@@ -502,7 +504,7 @@ namespace Seeker
 
         public static void SaveAutoJoinRooms(string joinedRoomsString)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
@@ -512,7 +514,7 @@ namespace Seeker
 
         public static void SaveNotifyRooms(string notifyRoomsString)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);
@@ -522,7 +524,7 @@ namespace Seeker
 
         public static void SaveSearchTabHeaders(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchTabsState_Headers, serialized);
@@ -532,7 +534,7 @@ namespace Seeker
 
         public static void SaveMessages(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_Messages, serialized);
@@ -542,7 +544,7 @@ namespace Seeker
 
         public static void SaveUnreadMessageUsernames(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UnreadMessageUsernames, serialized);
@@ -552,7 +554,7 @@ namespace Seeker
 
         public static void SaveRecentUsers(string serialized)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_RecentUsersList, serialized);
@@ -562,7 +564,7 @@ namespace Seeker
 
         public static void ClearSearchHistory()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
@@ -572,7 +574,7 @@ namespace Seeker
 
         public static void SavePostNotificationShown()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, true);
@@ -582,7 +584,7 @@ namespace Seeker
 
         public static void ClearLegacyCachedResults()
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.Remove(KeyConsts.M_CACHE_stringUriPairs);
@@ -601,10 +603,109 @@ namespace Seeker
 
         public static void SaveCachedFileCount(int count)
         {
-            lock (SeekerState.SharedPrefLock)
+            lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, count);
+                editor.Commit();
+            }
+        }
+
+        public static void RestoreListeningStateLocked()
+        {
+            lock (SharedPrefLock)
+            {
+                RestoreListeningState(SeekerState.SharedPreferences);
+            }
+        }
+
+        /// <summary>
+        /// Saves the bulk state from MainActivity.OnPause — all PreferencesState fields
+        /// plus a pre-serialized user list string (null to skip).
+        /// </summary>
+        public static void SaveOnPauseState(string userListSerialized)
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
+                editor.PutString(KeyConsts.M_Username, PreferencesState.Username);
+                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
+                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
+                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
+                editor.PutInt(KeyConsts.M_NumberSearchResults, PreferencesState.NumberSearchResults);
+                editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
+                editor.PutBoolean(KeyConsts.M_AutoClearComplete, PreferencesState.AutoClearCompleteDownloads);
+                editor.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, PreferencesState.AutoClearCompleteUploads);
+                editor.PutBoolean(KeyConsts.M_RememberSearchHistory, PreferencesState.RememberSearchHistory);
+                editor.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
+                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
+                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
+                editor.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
+                editor.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
+                editor.PutBoolean(KeyConsts.M_FilterSticky, PreferencesState.FilterSticky);
+                editor.PutString(KeyConsts.M_FilterStickyString, PreferencesState.FilterStickyString);
+                editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
+                editor.PutInt(KeyConsts.M_SearchResultStyle, PreferencesState.SearchResultStyle);
+                editor.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
+                editor.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
+                editor.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
+                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
+
+                if (userListSerialized != null)
+                {
+                    editor.PutString(KeyConsts.M_UserList, userListSerialized);
+                }
+
+                editor.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Saves search history and optionally the sticky filter state from SearchFragment.OnPause.
+        /// </summary>
+        public static void SaveSearchFragmentState(string searchHistory, bool filterSticky, string filterStickyString, int searchResultStyle)
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchHistory, searchHistory);
+                if (filterSticky)
+                {
+                    editor.PutBoolean(KeyConsts.M_FilterSticky, filterSticky);
+                    editor.PutString(KeyConsts.M_FilterStickyString, filterStickyString);
+                }
+                editor.PutInt(KeyConsts.M_SearchResultStyle, searchResultStyle);
+                editor.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Saves serialized transfer items, acquiring both SharedPrefLock and TransferStateSaveLock.
+        /// </summary>
+        public static void SaveTransferItems(string downloads, string uploads)
+        {
+            lock (SharedPrefLock)
+                lock (TransfersFragment.TransferStateSaveLock)
+                {
+                    var editor = SeekerState.SharedPreferences.Edit();
+                    editor.PutString(KeyConsts.M_TransferList, downloads);
+                    editor.PutString(KeyConsts.M_TransferListUpload, uploads);
+                    editor.Commit();
+                }
+        }
+
+        /// <summary>
+        /// Migrates cache from v2 to v3 format: clears v2 key and saves v3 data.
+        /// </summary>
+        public static void SaveCacheV2ToV3Migration(string v3Data)
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
+                editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v3, v3Data);
                 editor.Commit();
             }
         }

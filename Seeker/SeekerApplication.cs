@@ -84,7 +84,7 @@ namespace Seeker
             //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
 
             RestoreSeekerState(sharedPrefs, this);
-            RestoreListeningState();
+            PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
             SeekerState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
@@ -1841,14 +1841,6 @@ namespace Seeker
                     TransfersFragment.RestoreUploadTransferItems(sharedPreferences);
                     TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
                 }
-            }
-        }
-
-        public static void RestoreListeningState()
-        {
-            lock (SeekerState.SharedPrefLock)
-            {
-                PreferencesManager.RestoreListeningState(SeekerState.SharedPreferences);
             }
         }
 

@@ -1907,18 +1907,7 @@ namespace Seeker
                 serializer.Serialize(writer, searchHistory);
                 listOfSearchItems = writer.ToString();
             }
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchHistory, listOfSearchItems);
-                if (FilterSticky)
-                {
-                    editor.PutBoolean(KeyConsts.M_FilterSticky, FilterSticky);
-                    editor.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
-                }
-                editor.PutInt(KeyConsts.M_SearchResultStyle, (int)SearchResultStyle);
-                editor.Commit();
-            }
+            PreferencesManager.SaveSearchFragmentState(listOfSearchItems, FilterSticky, SearchTabHelper.FilterString, (int)SearchResultStyle);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)

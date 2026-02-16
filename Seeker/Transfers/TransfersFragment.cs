@@ -1008,14 +1008,7 @@ namespace Seeker
                     serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
                     listOfUploadItems = writer.ToString();
                 }
-                lock (SeekerState.SharedPrefLock)
-                    lock (TransferStateSaveLock)
-                    {
-                        var editor = sharedPreferences.Edit();
-                        editor.PutString(KeyConsts.M_TransferList, listOfDownloadItems);
-                        editor.PutString(KeyConsts.M_TransferListUpload, listOfUploadItems);
-                        editor.Commit();
-                    }
+                PreferencesManager.SaveTransferItems(listOfDownloadItems, listOfUploadItems);
 
                 SeekerApplication.TransfersDownloadsCompleteStale = false;
                 SeekerApplication.TransfersLastSavedTime = DateTime.UtcNow;

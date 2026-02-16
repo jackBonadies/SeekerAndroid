@@ -2360,43 +2360,10 @@ namespace Seeker
             base.OnPause();
 
             TransfersFragment.SaveTransferItems(sharedPreferences);
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = sharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
-                editor.PutString(KeyConsts.M_Username, PreferencesState.Username);
-                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
-                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
-                editor.PutInt(KeyConsts.M_NumberSearchResults, PreferencesState.NumberSearchResults);
-                editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
-                editor.PutBoolean(KeyConsts.M_AutoClearComplete, PreferencesState.AutoClearCompleteDownloads);
-                editor.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, PreferencesState.AutoClearCompleteUploads);
-                editor.PutBoolean(KeyConsts.M_RememberSearchHistory, PreferencesState.RememberSearchHistory);
-                editor.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
-                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
-                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
-                editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
-                editor.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
-                editor.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
-                editor.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
-                editor.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
-                editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
-                editor.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
-                editor.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
-                editor.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
-                //editor.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
-                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
-
-                if (SeekerState.UserList != null)
-                {
-                    editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
-                }
-
-                //editor.Apply();
-                editor.Commit();
-            }
+            string userListSerialized = SeekerState.UserList != null
+                ? SerializationHelper.SaveUserListToString(SeekerState.UserList)
+                : null;
+            PreferencesManager.SaveOnPauseState(userListSerialized);
         }
 
         protected override void OnSaveInstanceState(Bundle outState)

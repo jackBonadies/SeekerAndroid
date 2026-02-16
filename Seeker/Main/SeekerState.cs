@@ -127,7 +127,6 @@ namespace Seeker
         /// </summary>
         public static volatile FragmentActivity ActiveActivityRef = null;
         public static ISharedPreferences SharedPreferences;
-        public static object SharedPrefLock = new object();
         public static volatile MainActivity MainActivityRef;
 
         public static bool IsParsing
