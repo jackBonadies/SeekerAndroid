@@ -86,12 +86,7 @@ namespace Seeker
         public void SaveBio()
         {
             PreferencesState.UserInfoBio = PendingText;
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_UserInfoBio, PendingText);
-                editor.Commit();
-            }
+            PreferencesManager.SaveUserInfoBio(PendingText);
         }
 
         private void OnOkayClick(object sender, DialogClickEventArgs e)
@@ -174,12 +169,7 @@ namespace Seeker
                 DeleteImage(PreferencesState.UserInfoPictureName);
                 PreferencesState.UserInfoPictureName = string.Empty;
                 pictureText.Text = this.GetString(Resource.String.no_image_chosen);
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
-                    editor.Commit();
-                }
+                PreferencesManager.SaveUserInfoPictureName();
             }
             else
             {
@@ -261,12 +251,7 @@ namespace Seeker
                     }
 
                     PreferencesState.UserInfoPictureName = name;
-                    lock (SeekerState.SharedPrefLock)
-                    {
-                        var editor = SeekerState.SharedPreferences.Edit();
-                        editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
-                        editor.Commit();
-                    }
+                    PreferencesManager.SaveUserInfoPictureName();
                     Java.IO.File fileForOurInternalStorage = new Java.IO.File(user_info_dir, name);
                     System.IO.Stream outputStream = this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 

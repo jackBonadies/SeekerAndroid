@@ -28,26 +28,16 @@ namespace Seeker.UPnP
 
         public static void SaveUpnpState()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutLong(KeyConsts.M_LastSetUpnpRuleTicks, LastSetTime.Ticks);
-                editor.PutInt(KeyConsts.M_LifetimeSeconds, LastSetLifeTime);
-                editor.PutInt(KeyConsts.M_PortMapped, LastSetPort);
-                editor.PutString(KeyConsts.M_LastSetLocalIP, LastSetLocalIP);
-                editor.Commit();
-            }
+            PreferencesManager.SaveUPnPState(LastSetTime.Ticks, LastSetLifeTime, LastSetPort, LastSetLocalIP);
         }
 
         public static void RestoreUpnpState()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                LastSetTime = new DateTime(SeekerState.SharedPreferences.GetLong(KeyConsts.M_LastSetUpnpRuleTicks, 0));
-                LastSetLifeTime = SeekerState.SharedPreferences.GetInt(KeyConsts.M_LifetimeSeconds, -1);
-                LastSetPort = SeekerState.SharedPreferences.GetInt(KeyConsts.M_PortMapped, -1);
-                LastSetLocalIP = SeekerState.SharedPreferences.GetString(KeyConsts.M_LastSetLocalIP, string.Empty);
-            }
+            PreferencesManager.RestoreUPnPState(out long ticks, out int lifetime, out int port, out string localIP);
+            LastSetTime = new DateTime(ticks);
+            LastSetLifeTime = lifetime;
+            LastSetPort = port;
+            LastSetLocalIP = localIP;
         }
 
         public static UPnpManager Instance

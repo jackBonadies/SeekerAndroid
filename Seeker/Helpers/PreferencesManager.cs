@@ -123,36 +123,490 @@ namespace Seeker
             PreferencesState.SmartFilterOptions.NumFilesOrder = prefs.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2);
         }
 
-        // Save methods
-
-        public static void SaveListeningState(ISharedPreferencesEditor editor)
+        // Save Methods
+        public static void SaveListeningState()
         {
-            editor.PutBoolean(KeyConsts.M_ListenerEnabled, PreferencesState.ListenerEnabled);
-            editor.PutInt(KeyConsts.M_ListenerPort, PreferencesState.ListenerPort);
-            editor.PutBoolean(KeyConsts.M_ListenerUPnpEnabled, PreferencesState.ListenerUPnpEnabled);
-            editor.Commit();
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_ListenerEnabled, PreferencesState.ListenerEnabled);
+                editor.PutInt(KeyConsts.M_ListenerPort, PreferencesState.ListenerPort);
+                editor.PutBoolean(KeyConsts.M_ListenerUPnpEnabled, PreferencesState.ListenerUPnpEnabled);
+                editor.Commit();
+            }
         }
 
-        public static void SaveSpeedLimitState(ISharedPreferencesEditor editor)
+        public static void SaveSpeedLimitState()
         {
-            editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, PreferencesState.SpeedLimitDownloadOn);
-            editor.PutBoolean(KeyConsts.M_DownloadPerTransfer, PreferencesState.SpeedLimitDownloadIsPerTransfer);
-            editor.PutInt(KeyConsts.M_DownloadSpeedLimitBytes, PreferencesState.SpeedLimitDownloadBytesSec);
-            editor.PutBoolean(KeyConsts.M_UploadLimitEnabled, PreferencesState.SpeedLimitUploadOn);
-            editor.PutBoolean(KeyConsts.M_UploadPerTransfer, PreferencesState.SpeedLimitUploadIsPerTransfer);
-            editor.PutInt(KeyConsts.M_UploadSpeedLimitBytes, PreferencesState.SpeedLimitUploadBytesSec);
-            editor.Commit();
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled, PreferencesState.SpeedLimitDownloadOn);
+                editor.PutBoolean(KeyConsts.M_DownloadPerTransfer, PreferencesState.SpeedLimitDownloadIsPerTransfer);
+                editor.PutInt(KeyConsts.M_DownloadSpeedLimitBytes, PreferencesState.SpeedLimitDownloadBytesSec);
+                editor.PutBoolean(KeyConsts.M_UploadLimitEnabled, PreferencesState.SpeedLimitUploadOn);
+                editor.PutBoolean(KeyConsts.M_UploadPerTransfer, PreferencesState.SpeedLimitUploadIsPerTransfer);
+                editor.PutInt(KeyConsts.M_UploadSpeedLimitBytes, PreferencesState.SpeedLimitUploadBytesSec);
+                editor.Commit();
+            }
         }
 
-        public static void SaveSmartFilterState(ISharedPreferencesEditor editor)
+        public static void SaveSmartFilterState()
         {
-            editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, PreferencesState.SmartFilterOptions.KeywordsEnabled);
-            editor.PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, PreferencesState.SmartFilterOptions.FileTypesEnabled);
-            editor.PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, PreferencesState.SmartFilterOptions.NumFilesEnabled);
-            editor.PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, PreferencesState.SmartFilterOptions.KeywordsOrder);
-            editor.PutInt(KeyConsts.M_SmartFilter_TypesOrder, PreferencesState.SmartFilterOptions.FileTypesOrder);
-            editor.PutInt(KeyConsts.M_SmartFilter_CountsOrder, PreferencesState.SmartFilterOptions.NumFilesOrder);
-            editor.Commit();
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, PreferencesState.SmartFilterOptions.KeywordsEnabled);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled, PreferencesState.SmartFilterOptions.FileTypesEnabled);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled, PreferencesState.SmartFilterOptions.NumFilesEnabled);
+                editor.PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, PreferencesState.SmartFilterOptions.KeywordsOrder);
+                editor.PutInt(KeyConsts.M_SmartFilter_TypesOrder, PreferencesState.SmartFilterOptions.FileTypesOrder);
+                editor.PutInt(KeyConsts.M_SmartFilter_CountsOrder, PreferencesState.SmartFilterOptions.NumFilesOrder);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveShowTickerView()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_ShowTickerView, PreferencesState.ShowTickerView);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveShowStatusesView()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_ShowStatusesView, PreferencesState.ShowStatusesView);
+                editor.Commit();
+            }
+        }
+
+        public static void SavePutFriendsOnTop()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, PreferencesState.PutFriendsOnTop);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveSortChatroomUsersBy()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_RoomUserListSortOrder, PreferencesState.SortChatroomUsersBy);
+                editor.Commit();
+            }
+        }
+
+        public static void SavePassword()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveDefaultSearchResultSortAlgorithm()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveLanguage()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_Lanuage, PreferencesState.Language);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveAllowUploadsOnMetered()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered, PreferencesState.AllowUploadsOnMetered);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveNotifyOnFolderCompleted()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, PreferencesState.NotifyOnFolderCompleted);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveAutoRetryBackOnline()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, PreferencesState.AutoRetryBackOnline);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveAutoAwayOnInactivity()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, PreferencesState.AutoAwayOnInactivity);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveShowSmartFilters()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_ShowSmartFilters, PreferencesState.ShowSmartFilters);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveLogDiagnostics()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, PreferencesState.LogDiagnostics);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveStartServiceOnStartup()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_ServiceOnStartup, PreferencesState.StartServiceOnStartup);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveAllowPrivateRoomInvitations()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveDayModeVarient()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_DayVarient, (int)PreferencesState.DayModeVarient);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveNightModeVarient()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_NightVarient, (int)PreferencesState.NightModeVarient);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveDayNightMode()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUserInfoPictureName()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUserListSortOrder()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_UserListSortOrder, PreferencesState.UserListSortOrder);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveLegacyLanguageMigrated()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveManualIncompleteDir()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
+                editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveAdditionalDirectorySettings()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, PreferencesState.CreateCompleteAndIncompleteFolders);
+                editor.PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, PreferencesState.OverrideDefaultIncompleteLocations);
+                editor.PutBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, PreferencesState.CreateUsernameSubfolders);
+                editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle, PreferencesState.NoSubfolderForSingle);
+                editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
+                editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
+                editor.Commit();
+            }
+        }
+
+        public static void RestoreAdditionalDirectorySettings()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                PreferencesState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, true);
+                PreferencesState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
+                PreferencesState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, false);
+                PreferencesState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(KeyConsts.M_ManualIncompleteDirectoryUri, string.Empty);
+                PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, true);
+            }
+        }
+
+        public static void SaveMaxConcurrentDownloadsSettings(bool restrict, int max)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads, restrict);
+                editor.PutInt(KeyConsts.M_MaxSimultaneousLimit, max);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUPnPState(long ticks, int lifetime, int port, string localIP)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutLong(KeyConsts.M_LastSetUpnpRuleTicks, ticks);
+                editor.PutInt(KeyConsts.M_LifetimeSeconds, lifetime);
+                editor.PutInt(KeyConsts.M_PortMapped, port);
+                editor.PutString(KeyConsts.M_LastSetLocalIP, localIP);
+                editor.Commit();
+            }
+        }
+
+        public static void RestoreUPnPState(out long ticks, out int lifetime, out int port, out string localIP)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                ticks = SeekerState.SharedPreferences.GetLong(KeyConsts.M_LastSetUpnpRuleTicks, 0);
+                lifetime = SeekerState.SharedPreferences.GetInt(KeyConsts.M_LifetimeSeconds, -1);
+                port = SeekerState.SharedPreferences.GetInt(KeyConsts.M_PortMapped, -1);
+                localIP = SeekerState.SharedPreferences.GetString(KeyConsts.M_LastSetLocalIP, string.Empty);
+            }
+        }
+
+        // TODO: refactor these? why are they not in preferences state?
+        public static void SaveUserInfoBio(string bio)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserInfoBio, bio);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUserList(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserList, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveIgnoreUserList(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_IgnoreUserList, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUserNotes(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserNotes, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUserOnlineAlerts(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UserOnlineAlerts, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveAutoJoinRooms(string joinedRoomsString)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveNotifyRooms(string notifyRoomsString)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveSearchTabHeaders(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchTabsState_Headers, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveMessages(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_Messages, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveUnreadMessageUsernames(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_UnreadMessageUsernames, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveRecentUsers(string serialized)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_RecentUsersList, serialized);
+                editor.Commit();
+            }
+        }
+
+        public static void ClearSearchHistory()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
+                editor.Commit();
+            }
+        }
+
+        public static void SavePostNotificationShown()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, true);
+                editor.Commit();
+            }
+        }
+
+        public static void ClearLegacyCachedResults()
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.Remove(KeyConsts.M_CACHE_stringUriPairs);
+                editor.Remove(KeyConsts.M_CACHE_browseResponse);
+                editor.Remove(KeyConsts.M_CACHE_friendlyDirNameToUriMapping);
+                editor.Remove(KeyConsts.M_CACHE_auxDupList);
+                editor.Remove(KeyConsts.M_CACHE_stringUriPairs_v2);
+                editor.Remove(KeyConsts.M_CACHE_stringUriPairs_v3);
+                editor.Remove(KeyConsts.M_CACHE_browseResponse_v2);
+                editor.Remove(KeyConsts.M_CACHE_friendlyDirNameToUriMapping_v2);
+                editor.Remove(KeyConsts.M_CACHE_tokenIndex_v2);
+                editor.Remove(KeyConsts.M_CACHE_intHelperIndex_v2);
+                editor.Commit();
+            }
+        }
+
+        public static void SaveCachedFileCount(int count)
+        {
+            lock (SeekerState.SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, count);
+                editor.Commit();
+            }
         }
     }
 }

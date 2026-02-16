@@ -501,21 +501,7 @@ namespace Seeker.Services
         {
             try
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.Remove(KeyConsts.M_CACHE_stringUriPairs);
-                    editor.Remove(KeyConsts.M_CACHE_browseResponse);
-                    editor.Remove(KeyConsts.M_CACHE_friendlyDirNameToUriMapping);
-                    editor.Remove(KeyConsts.M_CACHE_auxDupList);
-                    editor.Remove(KeyConsts.M_CACHE_stringUriPairs_v2);
-                    editor.Remove(KeyConsts.M_CACHE_stringUriPairs_v3);
-                    editor.Remove(KeyConsts.M_CACHE_browseResponse_v2);
-                    editor.Remove(KeyConsts.M_CACHE_friendlyDirNameToUriMapping_v2);
-                    editor.Remove(KeyConsts.M_CACHE_tokenIndex_v2);
-                    editor.Remove(KeyConsts.M_CACHE_intHelperIndex_v2);
-                    editor.Commit();
-                }
+                PreferencesManager.ClearLegacyCachedResults();
             }
             catch (Exception e)
             {
@@ -1575,20 +1561,7 @@ namespace Seeker.Services
             data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
             CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_FriendlyDirNameToUri_Filename);
 
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, cachedParseResults.nonHiddenFileCount);
-                //editor.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
-                //editor.PutBoolean(KeyConsts.M_UploadDirectoryUriIsFromTree, SeekerState.UploadDataDirectoryUriIsFromTree);
-
-
-                //TODO TODO save upload dirs ---- do this now might as well....
-
-                //before this line ^ ,its possible for the saved UploadDirectoryUri and the actual browse response to be different.
-                //this is because upload data uri saves on MainActivity OnPause. and so one could set shared folder and then press home and then swipe up. never having saved uploadirectoryUri.
-                editor.Commit();
-            }
+            PreferencesManager.SaveCachedFileCount(cachedParseResults.nonHiddenFileCount);
         }
 
         public static string ShowCodePoints(string str)

@@ -292,21 +292,11 @@ namespace Seeker
             CommonHelpers.SaveUserNotes();
             if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
-                    editor.Commit();
-                }
+                PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(SeekerState.UserList));
             }
             if (SeekerState.SharedPreferences != null && SeekerState.IgnoreUserList != null)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
-                    editor.Commit();
-                }
+                PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
             }
         }
 

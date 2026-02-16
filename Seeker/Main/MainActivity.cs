@@ -965,12 +965,7 @@ namespace Seeker
             {
                 void setAlreadyShown()
                 {
-                    lock (SeekerState.SharedPrefLock)
-                    {
-                        var editor = SeekerState.SharedPreferences.Edit();
-                        editor.PutBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, true);
-                        editor.Commit();
-                    }
+                    PreferencesManager.SavePostNotificationShown();
                 }
 
                 ActivityCompat.RequestPermissions(SeekerState.ActiveActivityRef, new string[] { Manifest.Permission.PostNotifications }, POST_NOTIFICATION_PERMISSION);

@@ -708,12 +708,7 @@ namespace Seeker
             }
 
             PreferencesState.Language = selection;
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                editor.PutString(KeyConsts.M_Lanuage, PreferencesState.Language);
-                editor.Commit();
-            }
+            PreferencesManager.SaveLanguage();
 
             (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(PreferencesState.Language);
         }
@@ -751,12 +746,7 @@ namespace Seeker
                 SharingService.SetUnsetSharingBasedOnConditions(true);
                 UpdateShareImageView();
             }
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered, PreferencesState.AllowUploadsOnMetered);
-                editor.Commit();
-            }
+            PreferencesManager.SaveAllowUploadsOnMetered();
         }
 
         private void ClearAllFoldersButton_Click(object sender, EventArgs e)
@@ -797,12 +787,7 @@ namespace Seeker
             PreferencesState.NotifyOnFolderCompleted = e.IsChecked;
             if (changed)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, PreferencesState.NotifyOnFolderCompleted);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveNotifyOnFolderCompleted();
             }
         }
 
@@ -812,12 +797,7 @@ namespace Seeker
             PreferencesState.AutoRetryBackOnline = e.IsChecked;
             if (changed)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, PreferencesState.AutoRetryBackOnline);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveAutoRetryBackOnline();
             }
         }
 
@@ -827,12 +807,7 @@ namespace Seeker
             PreferencesState.AutoAwayOnInactivity = e.IsChecked;
             if (changed)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, PreferencesState.AutoAwayOnInactivity);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveAutoAwayOnInactivity();
             }
         }
 
@@ -920,7 +895,7 @@ namespace Seeker
             }
             PreferencesState.SpeedLimitDownloadOn = e.IsChecked;
             UpdateSpeedLimitsState();
-            SeekerApplication.SaveSpeedLimitState();
+            PreferencesManager.SaveSpeedLimitState();
         }
 
         private void EnableUlSpeedLimits_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -931,7 +906,7 @@ namespace Seeker
             }
             PreferencesState.SpeedLimitUploadOn = e.IsChecked;
             UpdateSpeedLimitsState();
-            SeekerApplication.SaveSpeedLimitState();
+            PreferencesManager.SaveSpeedLimitState();
         }
 
         private void ShowLockedBrowse_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -1017,12 +992,7 @@ namespace Seeker
         private void ShowSmartFilters_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             PreferencesState.ShowSmartFilters = e.IsChecked;
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                editor.PutBoolean(KeyConsts.M_ShowSmartFilters, PreferencesState.ShowSmartFilters);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveShowSmartFilters();
         }
 
         private void ImportData_Click(object sender, EventArgs e)
@@ -1061,12 +1031,7 @@ namespace Seeker
                 SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
                 //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
                 SeekerApplication.SetDiagnosticState(SeekerApplication.LOG_DIAGNOSTICS);
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.ActiveActivityRef.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                    editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, SeekerApplication.LOG_DIAGNOSTICS);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveLogDiagnostics();
             }
         }
 
@@ -1330,7 +1295,7 @@ namespace Seeker
                 return;
             }
             PreferencesState.ListenerUPnpEnabled = e.IsChecked;
-            SeekerApplication.SaveListeningState();
+            PreferencesManager.SaveListeningState();
 
             if (e.IsChecked)
             {
@@ -1361,7 +1326,7 @@ namespace Seeker
             }
             PreferencesState.ListenerEnabled = e.IsChecked;
             UpdateListeningViewState();
-            SeekerApplication.SaveListeningState();
+            PreferencesManager.SaveListeningState();
             ReconfigureOptionsAPI(null, e.IsChecked, null);
             if (e.IsChecked)
             {
@@ -1603,7 +1568,7 @@ namespace Seeker
                     PreferencesState.ListenerPort = portNum;
                     UPnpManager.Instance.Feedback = true;
                     UPnpManager.Instance.SearchAndSetMappingIfRequired();
-                    SeekerApplication.SaveListeningState();
+                    PreferencesManager.SaveListeningState();
                     SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
                     changeDialog.Dismiss();
                 }
@@ -1631,7 +1596,7 @@ namespace Seeker
                         SetSpeedTextView(FindViewById<TextView>(Resource.Id.uploadSpeed), true);
                     }
 
-                    SeekerApplication.SaveSpeedLimitState();
+                    PreferencesManager.SaveSpeedLimitState();
                     changeDialog.Dismiss();
                 }
                 else if (changeDialogType == ChangeDialogType.ConcurrentDL)
@@ -1946,12 +1911,7 @@ namespace Seeker
         private void StartServiceOnStartupCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             PreferencesState.StartServiceOnStartup = e.IsChecked;
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                editor.PutBoolean(KeyConsts.M_ServiceOnStartup, PreferencesState.StartServiceOnStartup);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveStartServiceOnStartup();
         }
 
         private void StartupServiceMoreInfo_Click(object sender, EventArgs e)
@@ -2063,13 +2023,7 @@ namespace Seeker
                         {
                             Logger.Debug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
                             PreferencesState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
-                            //set shared prefs...
-                            lock (SeekerState.SharedPrefLock)
-                            {
-                                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, allowPrivateInvites.Value);
-                                bool success = editor.Commit();
-                            }
+                            PreferencesManager.SaveAllowPrivateRoomInvitations();
                         }
                     }
                 });
@@ -2352,12 +2306,7 @@ namespace Seeker
             PreferencesState.DayModeVarient = (DayThemeType)(e.Position);
             if (oldVarient != PreferencesState.DayModeVarient)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                    editor.PutInt(KeyConsts.M_DayVarient, (int)(PreferencesState.DayModeVarient));
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveDayModeVarient();
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
@@ -2384,12 +2333,7 @@ namespace Seeker
             }
             if (oldVarient != PreferencesState.NightModeVarient)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                    editor.PutInt(KeyConsts.M_NightVarient, (int)(PreferencesState.NightModeVarient));
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveNightModeVarient();
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
@@ -2414,15 +2358,7 @@ namespace Seeker
             {
                 PreferencesState.DayNightMode = e.Position;
             }
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
-                bool success = editor.Commit();
-                int x = this.GetSharedPreferences(Constants.SharedPrefFile, 0).GetInt(KeyConsts.M_DayNightMode, -1);
-                Logger.Debug("was commit successful: " + success);
-                Logger.Debug("after writing and immediately reading: " + x);
-            }
+            PreferencesManager.SaveDayNightMode();
             //auto = 0, light = 1, dark = 2.  //NO we do NOT want to do AUTO, that is follow time.  we want to do FOLLOW SYSTEM i.e. -1.
             switch (e.Position)
             {
@@ -3478,51 +3414,24 @@ namespace Seeker
 
         public static void RestoreAdditionalDirectorySettingsFromSharedPreferences()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                PreferencesState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, true);
-                PreferencesState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
-                PreferencesState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, false);
-                PreferencesState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(KeyConsts.M_ManualIncompleteDirectoryUri, string.Empty);
-                PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, true);
-            }
+            PreferencesManager.RestoreAdditionalDirectorySettings();
         }
 
         public static void SaveAdditionalDirectorySettingsToSharedPreferences()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, PreferencesState.CreateCompleteAndIncompleteFolders);
-                editor.PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, PreferencesState.OverrideDefaultIncompleteLocations);
-                editor.PutBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, PreferencesState.CreateUsernameSubfolders);
-                editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle, PreferencesState.NoSubfolderForSingle);
-                editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveAdditionalDirectorySettings();
         }
 
         public static void SaveMaxConcurrentDownloadsSettings()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads, Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers);
-                editor.PutInt(KeyConsts.M_MaxSimultaneousLimit, Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveMaxConcurrentDownloadsSettings(
+                Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers,
+                Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent);
         }
 
         public static void SaveManualIncompleteDirToSharedPreferences()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveManualIncompleteDir();
         }
 
     }

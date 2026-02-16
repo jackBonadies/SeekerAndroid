@@ -96,12 +96,7 @@ namespace Seeker
                 if (!PreferencesState.LegacyLanguageMigrated)
                 {
                     PreferencesState.LegacyLanguageMigrated = true;
-                    lock (SeekerState.SharedPrefLock)
-                    {
-                        var editor = this.GetSharedPreferences(Constants.SharedPrefFile, 0).Edit();
-                        editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
-                        editor.Commit();
-                    }
+                    PreferencesManager.SaveLegacyLanguageMigrated();
                     SetLanguage(PreferencesState.Language);
                 }
             }
@@ -1555,12 +1550,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
-                editor.Commit();
-            }
+            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
             return true;
         }
 
@@ -1594,12 +1584,7 @@ namespace Seeker
                     SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_IgnoreUserList, SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
-                editor.Commit();
-            }
+            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
             return true;
         }
 
@@ -1867,26 +1852,6 @@ namespace Seeker
             }
         }
 
-        public static void SaveListeningState()
-        {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                PreferencesManager.SaveListeningState(editor);
-            }
-        }
-
-        public static void SaveSpeedLimitState()
-        {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                PreferencesManager.SaveSpeedLimitState(editor);
-            }
-        }
-
-
-
         public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
         {
             if (PreferencesState.ShowRecentUsers)
@@ -1918,11 +1883,7 @@ namespace Seeker
 
         public static void SaveSmartFilterState()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                PreferencesManager.SaveSmartFilterState(editor);
-            }
+            PreferencesManager.SaveSmartFilterState();
         }
 
         public static void RestoreRecentUsersManagerFromString(string xmlRecentUsersList)
@@ -1962,12 +1923,7 @@ namespace Seeker
                 serializer.Serialize(writer, recentUsers);
                 recentUsersStr = writer.ToString();
             }
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_RecentUsersList, recentUsersStr);
-                editor.Commit();
-            }
+            PreferencesManager.SaveRecentUsers(recentUsersStr);
         }
 
 

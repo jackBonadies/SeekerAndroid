@@ -1312,12 +1312,7 @@ namespace Seeker
                     PreferencesState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
                     if (old != PreferencesState.DefaultSearchResultSortAlgorithm)
                     {
-                        lock (SeekerState.SharedPrefLock)
-                        {
-                            var editor = SeekerState.SharedPreferences.Edit();
-                            editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
-                            editor.Commit();
-                        }
+                        PreferencesManager.SaveDefaultSearchResultSortAlgorithm();
                     }
                 }
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
@@ -1878,12 +1873,7 @@ namespace Seeker
         private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
         {
             searchHistory = new List<string>();
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
-                editor.Commit();
-            }
+            PreferencesManager.ClearSearchHistory();
             if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
             {
                 AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);

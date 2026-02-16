@@ -425,23 +425,13 @@ namespace Seeker
                     {
                         f.currentTickerView.Visibility = ViewStates.Gone;
                     }
-                    lock (SeekerState.SharedPrefLock)
-                    {
-                        var editor = SeekerState.SharedPreferences.Edit();
-                        editor.PutBoolean(KeyConsts.M_ShowTickerView, ChatroomActivity.ShowTickerView);
-                        editor.Commit();
-                    }
+                    PreferencesManager.SaveShowTickerView();
                     return true;
                 case Resource.Id.hide_show_user_status_action:
                     ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
                     var f1 = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
                     f1.SetStatusesView();
-                    lock (SeekerState.SharedPrefLock)
-                    {
-                        var editor = SeekerState.SharedPreferences.Edit();
-                        editor.PutBoolean(KeyConsts.M_ShowStatusesView, ChatroomActivity.ShowStatusesView);
-                        editor.Commit();
-                    }
+                    PreferencesManager.SaveShowStatusesView();
                     return true;
             }
             return base.OnOptionsItemSelected(item);

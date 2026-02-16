@@ -532,12 +532,7 @@ namespace Seeker.Messages
             }
             if (messagesString != null && messagesString != string.Empty)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = sharedPrefs.Edit();
-                    editor.PutString(KeyConsts.M_Messages, messagesString);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveMessages(messagesString);
             }
         }
 
@@ -575,24 +570,14 @@ namespace Seeker.Messages
             }
             if (UnreadUsernames.IsEmpty)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = sharedPrefs.Edit();
-                    editor.PutString(KeyConsts.M_UnreadMessageUsernames, String.Empty);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveUnreadMessageUsernames(String.Empty);
             }
             else
             {
                 var messagesString = SerializationHelper.SaveUnreadUsernamesToString(UnreadUsernames);
                 if (!string.IsNullOrEmpty(messagesString))
                 {
-                    lock (SeekerState.SharedPrefLock)
-                    {
-                        var editor = sharedPrefs.Edit();
-                        editor.PutString(KeyConsts.M_UnreadMessageUsernames, messagesString);
-                        bool success = editor.Commit();
-                    }
+                    PreferencesManager.SaveUnreadMessageUsernames(messagesString);
                 }
             }
         }

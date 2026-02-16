@@ -484,12 +484,7 @@ namespace Seeker.Chatroom
 
             if (joinedRoomsString != null && joinedRoomsString != string.Empty)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveAutoJoinRooms(joinedRoomsString);
             }
         }
 
@@ -535,12 +530,7 @@ namespace Seeker.Chatroom
 
             if (notifyRoomsString != null && notifyRoomsString != string.Empty)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveNotifyRooms(notifyRoomsString);
             }
         }
 

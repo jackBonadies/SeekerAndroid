@@ -1456,12 +1456,7 @@ namespace Seeker
                         {
                             SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
                             PreferencesState.Password = newPassword;
-                            lock (SeekerState.SharedPrefLock)
-                            {
-                                var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
-                                editor.Commit();
-                            }
+                            PreferencesManager.SavePassword();
                         }
                     });
                 }
@@ -1672,23 +1667,13 @@ namespace Seeker
 
         public static void SaveUserNotes()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_UserNotes, SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
-                editor.Commit();
-            }
+            PreferencesManager.SaveUserNotes(SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
         }
 
 
         public static void SaveOnlineAlerts()
         {
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_UserOnlineAlerts, SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));
-                editor.Commit();
-            }
+            PreferencesManager.SaveUserOnlineAlerts(SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));
         }
 
 

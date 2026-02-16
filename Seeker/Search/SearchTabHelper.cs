@@ -227,12 +227,7 @@ namespace Seeker.Helpers
                 stringToSave = SerializationHelper.SerializeToString(savedStates);
             }
 
-            lock (SeekerState.SharedPrefLock)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchTabsState_Headers, stringToSave);
-                editor.Commit();
-            }
+            PreferencesManager.SaveSearchTabHeaders(stringToSave);
 
             sw.Stop();
             Logger.Debug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);

@@ -444,12 +444,7 @@ namespace Seeker
                     {
                         if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
                         {
-                            lock (SeekerState.SharedPrefLock)
-                            {
-                                var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
-                                editor.Commit();
-                            }
+                            PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(SeekerState.UserList));
                         }
                     }
                     if (UIaction != null)
@@ -600,12 +595,7 @@ namespace Seeker
 
             if (prev != UserListSortOrder)
             {
-                lock (SeekerState.SharedPrefLock)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutInt(KeyConsts.M_UserListSortOrder, (int)UserListSortOrder);
-                    editor.Commit();
-                }
+                PreferencesManager.SaveUserListSortOrder();
                 this.RefreshUserList();
             }
         }
