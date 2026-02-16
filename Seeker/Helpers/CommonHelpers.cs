@@ -482,7 +482,7 @@ namespace Seeker
 
         public static PendingIntentFlags AppendMutabilityIfApplicable(PendingIntentFlags existingFlags, bool immutable)
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+            if (OperatingSystem.IsAndroidVersionAtLeast(23))
             {
                 if (immutable)
                 {
@@ -1309,7 +1309,7 @@ namespace Seeker
 
         public static void CreateNotificationChannel(Context c, string id, string name, Android.App.NotificationImportance importance = Android.App.NotificationImportance.Low)
         {
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 NotificationChannel serviceChannel = new NotificationChannel(
                         id,
@@ -1323,7 +1323,7 @@ namespace Seeker
 
         public static void SetToolTipText(View v, string tip)
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 v.TooltipText = tip; //api26+ otherwise crash...
             }
@@ -1342,7 +1342,7 @@ namespace Seeker
 
             //here we use the non compat notif builder as we want the special SetForegroundServiceBehavior method to prevent the new 10 second foreground notification delay.
             Notification notification = null;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 31 && forForegroundService)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31) && forForegroundService)
             {
                 var builder = new Notification.Builder(context, channelID)
                           .SetContentTitle(titleText)
@@ -1374,7 +1374,7 @@ namespace Seeker
                           .SetTicker(titleText);
                 //for < 21 it is possible (must use png icon instead of xml) but the icon does look great 
                 //  and it doesnt clear from recents..
-                if (shutdownAction && (int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (shutdownAction && OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     Intent intent3 = new Intent(context, typeof(CloseActivity));
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);

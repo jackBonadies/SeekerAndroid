@@ -522,8 +522,7 @@ namespace Seeker.Chatroom
             recyclerViewInner.SetAdapter(recyclerAdapter);
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
 
-            //does not work on sub23
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+            if (OperatingSystem.IsAndroidVersionAtLeast(23))
             {
                 recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
             }

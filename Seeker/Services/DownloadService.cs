@@ -340,7 +340,7 @@ namespace Seeker.Services
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
             Notification notification = null;
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 notification =
                       new Notification.Builder(context, MainActivity.UPLOADS_CHANNEL_ID)

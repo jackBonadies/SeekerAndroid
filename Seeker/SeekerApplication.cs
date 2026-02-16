@@ -229,7 +229,7 @@ namespace Seeker
 
         public static bool HasProperPerAppLanguageSupport()
         {
-            return (int)Android.OS.Build.VERSION.SdkInt >= 33;
+            return OperatingSystem.IsAndroidVersionAtLeast(33);
         }
 
         // TODO common locale
@@ -618,7 +618,7 @@ namespace Seeker
             {
                 UPLOAD_COUNT = e.Count;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
-                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
 
@@ -691,7 +691,7 @@ namespace Seeker
             {
                 DL_COUNT = e.Count;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
 
@@ -1427,7 +1427,7 @@ namespace Seeker
             var typedValue = new TypedValue();
             c.Theme.ResolveAttribute(attr, typedValue, true);
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
             }

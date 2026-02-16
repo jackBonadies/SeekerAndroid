@@ -374,7 +374,7 @@ namespace Seeker
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
             v.Focusable = true;
             //SetFocusable(int) was added in API26. bool was there since API1
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 v.SetFocusable(ViewFocusability.Focusable);
             }

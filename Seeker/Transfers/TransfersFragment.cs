@@ -672,7 +672,7 @@ namespace Seeker
             StaticHacks.TransfersFrag = this;
             HasOptionsMenu = true;
             Logger.Debug("TransfersFragment OnCreateView");
-            if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
+            if (!OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
                 this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
@@ -1875,7 +1875,7 @@ namespace Seeker
         private void ClearProgressBarColor(ProgressBar pb)
         {
 #pragma warning disable 0618
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 pb.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
             }

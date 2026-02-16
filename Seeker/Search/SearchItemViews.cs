@@ -311,7 +311,7 @@ namespace Seeker
             }
             else
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                if (OperatingSystem.IsAndroidVersionAtLeast(23))
                 {
                     return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
                 }

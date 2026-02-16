@@ -203,7 +203,7 @@ namespace Seeker
                     {
                         string volName = FileFilterHelper.GetVolumeName(lastPathSegment, true, out _);
 
-                        if ((int)Android.OS.Build.VERSION.SdkInt < 29)
+                        if (!OperatingSystem.IsAndroidVersionAtLeast(29))
                         {
                             interestedVolnames.Add("external");
                             return interestedVolnames;

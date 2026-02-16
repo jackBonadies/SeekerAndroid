@@ -926,7 +926,7 @@ namespace Seeker
             }
             postNotficationAlreadyRequestedInSession = true;
 
-            if ((int)Android.OS.Build.VERSION.SdkInt < 33)
+            if (!OperatingSystem.IsAndroidVersionAtLeast(33))
             {
                 return;
             }
@@ -1174,13 +1174,13 @@ namespace Seeker
                     // basically it clears all activities in the current task.
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
                     this.StartActivity(intent3);
-                    if ((int)Android.OS.Build.VERSION.SdkInt < 21)
+                    if (OperatingSystem.IsAndroidVersionAtLeast(21))
                     {
-                        this.FinishAffinity();
+                        this.FinishAndRemoveTask();
                     }
                     else
                     {
-                        this.FinishAndRemoveTask();
+                        this.FinishAffinity();
                     }
                     return true;
                 case Resource.Id.about_action:
@@ -1189,7 +1189,7 @@ namespace Seeker
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     var origString = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body), SeekerApplication.GetVersionString()); //this is a literal CDATA string.
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
+                    if (OperatingSystem.IsAndroidVersionAtLeast(24))
                     {
                         ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
                     }
@@ -1529,7 +1529,7 @@ namespace Seeker
 
         public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
         {
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)//Build.VERSION_CODES.N)
+            if (OperatingSystem.IsAndroidVersionAtLeast(24))
             {
                 SupportFragmentManager.BeginTransaction().Detach(f).CommitNowAllowingStateLoss();//hisbeginTransaction().detach(fragment).commitNow()
                 SupportFragmentManager.BeginTransaction().Attach(f).CommitNowAllowingStateLoss();
@@ -2012,7 +2012,7 @@ namespace Seeker
         /// <returns></returns>
         public static bool OnUIthread()
         {
-            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.M) //23
+            if (OperatingSystem.IsAndroidVersionAtLeast(23))
             {
                 return Looper.MainLooper.IsCurrentThread;
             }

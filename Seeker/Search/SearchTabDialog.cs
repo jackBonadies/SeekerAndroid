@@ -78,7 +78,7 @@ namespace Seeker
             newSearch.Click += NewSearch_Click;
             //newSearch.CompoundDrawablePadding = 6;
             Android.Graphics.Drawables.Drawable drawable = null;
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 drawable = this.Context.Resources.GetDrawable(Resource.Drawable.ic_add_black_24dp, this.Context.Theme);
             }

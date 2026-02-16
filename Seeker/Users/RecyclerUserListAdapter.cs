@@ -301,7 +301,7 @@ namespace Seeker.Users
                 if (item.Role == UserRole.Ignored)
                 {
                     string ignoredString = SeekerState.ActiveActivityRef.GetString(Resource.String.ignored);
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                    if (OperatingSystem.IsAndroidVersionAtLeast(26))
                     {
                         viewUserStatus.TooltipText = ignoredString; //api26+ otherwise crash...
                     }
@@ -319,9 +319,9 @@ namespace Seeker.Users
                         case Soulseek.UserPresence.Away:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.away));
                             string awayString = SeekerState.ActiveActivityRef.GetString(Resource.String.away);
-                            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                            if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
-                                viewUserStatus.TooltipText = awayString; //api26+ otherwise crash...
+                                viewUserStatus.TooltipText = awayString;
                             }
                             else
                             {
@@ -331,9 +331,9 @@ namespace Seeker.Users
                         case Soulseek.UserPresence.Online:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.online)); //added in api 8 :) SetTint made it a weird dark color..
                             string onlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.online);
-                            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                            if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
-                                viewUserStatus.TooltipText = onlineString; //api26+ otherwise crash...
+                                viewUserStatus.TooltipText = onlineString;
                             }
                             else
                             {
@@ -343,9 +343,9 @@ namespace Seeker.Users
                         case Soulseek.UserPresence.Offline:
                             viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
                             string offlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.offline);
-                            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                            if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
-                                viewUserStatus.TooltipText = offlineString; //api26+ otherwise crash...
+                                viewUserStatus.TooltipText = offlineString;
                             }
                             else
                             {
@@ -358,9 +358,9 @@ namespace Seeker.Users
                 {
                     viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
                     string doesNotExistString = "Does not Exist";
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+                    if (OperatingSystem.IsAndroidVersionAtLeast(26))
                     {
-                        viewUserStatus.TooltipText = doesNotExistString; //api26+ otherwise crash...
+                        viewUserStatus.TooltipText = doesNotExistString;
                     }
                     else
                     {

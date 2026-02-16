@@ -438,7 +438,7 @@ namespace Seeker
         private void SaveImage(byte[] pic)
         {
             string ext = '.' + originalImageMimetype.Split('/')[1];
-            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+            if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {
                 ContentValues valuesForContentResolver = GetContentValues();
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + CommonHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);

@@ -675,12 +675,12 @@ namespace Seeker.Services
 
         public static bool HasMediaStoreDurationColumn()
         {
-            return (int)Android.OS.Build.VERSION.SdkInt >= 29;
+            return OperatingSystem.IsAndroidVersionAtLeast(29);
         }
 
         public static bool HasMediaStoreBitRateColumn()
         {
-            return (int)Android.OS.Build.VERSION.SdkInt >= 30;
+            return OperatingSystem.IsAndroidVersionAtLeast(30);
         }
 
         // never made it into Android 12

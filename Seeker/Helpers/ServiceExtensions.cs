@@ -13,11 +13,11 @@ namespace Seeker.Helpers
     {
         public static void StartForegroundSafe(this Service service, int notificationId, Notification notification)
         {
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.UpsideDownCake)
+            if (OperatingSystem.IsAndroidVersionAtLeast(34))
             {
                 service.StartForeground(notificationId, notification, Android.Content.PM.ForegroundService.TypeSpecialUse);
             }
-            else if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Q)
+            else if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {
                 service.StartForeground(notificationId, notification, Android.Content.PM.ForegroundService.TypeDataSync);
             }

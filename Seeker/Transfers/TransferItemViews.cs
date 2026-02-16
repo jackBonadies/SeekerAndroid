@@ -184,7 +184,7 @@ namespace Seeker
                     (viewProgressSize as Seeker.TransfersFragment.ProgressSizeTextView).Progress = 100;
                 }
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     progressBar.ProgressTintList = ColorStateList.ValueOf(Color.Red);
                 }
@@ -197,7 +197,7 @@ namespace Seeker
             else
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
                 }
@@ -209,7 +209,7 @@ namespace Seeker
             }
             if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
                     //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
@@ -223,7 +223,7 @@ namespace Seeker
             else
             {
                 //this.Background
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
                                            //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
@@ -774,7 +774,7 @@ namespace Seeker
             {
                 progressBar.Progress = 100;
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     progressBar.ProgressTintList = ColorStateList.ValueOf(Color.Red);
                 }
@@ -787,7 +787,7 @@ namespace Seeker
             else
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
                 }
@@ -801,7 +801,7 @@ namespace Seeker
 
             if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
                     //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
@@ -815,7 +815,7 @@ namespace Seeker
             else
             {
                 //this.Background
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
                                            //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);

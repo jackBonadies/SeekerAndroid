@@ -4,6 +4,7 @@ using Android.Views;
 using AndroidX.ViewPager.Widget;
 using Google.Android.Material.BottomNavigation;
 using Seeker.Helpers;
+using System;
 
 namespace Seeker
 {
@@ -15,7 +16,7 @@ namespace Seeker
 
             private bool alreadyOpen;
             private const int defaultKeyboardHeightDP = 100;
-            private int EstimatedKeyboardDP = defaultKeyboardHeightDP + (Build.VERSION.SdkInt >= BuildVersionCodes.Lollipop ? 48 : 0); //api 21
+            private int EstimatedKeyboardDP = defaultKeyboardHeightDP + (OperatingSystem.IsAndroidVersionAtLeast(21) ? 48 : 0); //api 21
             private View parentView;
             private Android.Graphics.Rect rect = new Android.Graphics.Rect();
             public ListenerKeyboard(View _parentView)

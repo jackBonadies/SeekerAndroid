@@ -114,7 +114,7 @@ namespace Seeker
 #pragma warning disable 0618
             if (isSelected)
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
                     //this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);

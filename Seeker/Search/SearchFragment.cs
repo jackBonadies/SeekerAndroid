@@ -192,7 +192,7 @@ namespace Seeker
             }
 
             Android.Graphics.Drawables.Drawable drawable = null;
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
             }
@@ -789,7 +789,7 @@ namespace Seeker
             View v = rootView.FindViewById<View>(Resource.Id.focusableLayout);
             v.Focusable = true;
             //SetFocusable(int) was added in API26. bool was there since API1
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 v.SetFocusable(ViewFocusability.Focusable);
             }

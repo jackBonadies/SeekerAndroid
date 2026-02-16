@@ -105,7 +105,7 @@ namespace Seeker
             //    return;
             //}
             //api 21+
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 DocumentFile parent = null;
                 Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);

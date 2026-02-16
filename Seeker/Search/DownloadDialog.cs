@@ -653,7 +653,7 @@ namespace Seeker
             {
 
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
@@ -669,7 +669,7 @@ namespace Seeker
             else
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     e.View.Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
@@ -688,7 +688,7 @@ namespace Seeker
         private void SetDownloadSelectedButtonState()
         {
             //backgroundtintlist is api 21+ so lower than this, there is no disabled state change which is fine.
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
                 {
@@ -1045,7 +1045,7 @@ namespace Seeker
             if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
                     itemView.Background = cellbackSelected;
@@ -1062,7 +1062,7 @@ namespace Seeker
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     var cellbackNormal = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                     itemView.Background = cellbackNormal;

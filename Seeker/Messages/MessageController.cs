@@ -147,7 +147,7 @@ namespace Seeker.Messages
         private static Color GetYouTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use secondary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
                 if (useNightColors)
                 {
@@ -181,7 +181,7 @@ namespace Seeker.Messages
         private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
                 if (useNightColors)
                 {
@@ -204,7 +204,7 @@ namespace Seeker.Messages
         private static Color GetActionTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
                 return GetOtherTextColor(useNightColors, contextToUse);
             }
@@ -400,7 +400,7 @@ namespace Seeker.Messages
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(contextToUse);
 
                 //no direct reply in <26 and so the actions are rather pointless..
-                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
 
                     bool systemIsInNightMode = GetIfSystemIsInNightMode(contextToUse);
@@ -484,7 +484,7 @@ namespace Seeker.Messages
                         .SetDeleteIntent(clearNotifPendingIntent);
 
                     //if android 12+ let the system pick the color.  it will make it Android.Resource.Color.SystemAccent1100 if dark Android.Resource.Color.SystemAccent1600 otherwise.
-                    if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.S)
+                    if (!OperatingSystem.IsAndroidVersionAtLeast(31))
                     {
                         builder.SetColor(GetNiceAndroidBlueNotifColor(systemIsInNightMode, contextToUse));
                     }

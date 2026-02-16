@@ -692,7 +692,7 @@ namespace Seeker
             intent.SetType("application/xml");
             intent.PutExtra(Android.Content.Intent.ExtraTitle, "seeker_data.xml");
             intent.AddCategory(Android.Content.Intent.CategoryOpenable);
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 intent.PutExtra(Android.Provider.DocumentsContract.ExtraInitialUri, Android.Net.Uri.Parse(DefaultDocumentsUri));
             }
@@ -1767,7 +1767,7 @@ namespace Seeker
             //TODO
             Tuple<UPnpManager.ListeningIcon, string> info = UPnpManager.Instance.GetIconAndMessage();
             if (iv == null) return;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 iv.TooltipText = info.Item2; //api26+ otherwise crash...
             }
@@ -1806,7 +1806,7 @@ namespace Seeker
             var diag = builder.SetMessage(Resource.String.force_filesystem_message).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
             var origString = SeekerState.ActiveActivityRef.GetString(Resource.String.force_filesystem_message); //this is a literal CDATA string.
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
+            if (OperatingSystem.IsAndroidVersionAtLeast(24))
             {
                 ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
             }
@@ -1820,7 +1820,7 @@ namespace Seeker
         private static bool HasManageStoragePermission(Context context)
         {
             bool hasExternalStoragePermissions = false;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 30)
+            if (OperatingSystem.IsAndroidVersionAtLeast(30))
             {
                 hasExternalStoragePermissions = Android.OS.Environment.IsExternalStorageManager;
             }
@@ -2131,7 +2131,7 @@ namespace Seeker
                     toolTip = toolTip + String.Format($" ({SeekerApplication.GetString(Resource.String.XFilesParsed)})", numParsed);
                 }
             }
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 imageView.TooltipText = toolTip; //api26+ otherwise crash...
                 progressBar.TooltipText = toolTip;
@@ -2638,7 +2638,7 @@ namespace Seeker
 
         private bool needsMediaStorePermission()
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
                 return AndroidX.Core.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
             }
@@ -2650,7 +2650,7 @@ namespace Seeker
 
         private void requestMediaStorePermission()
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
                 AndroidX.Core.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadMediaAudio }, READ_EXTERNAL_FOR_MEDIA_STORE);
             }

@@ -339,22 +339,22 @@ namespace Seeker
         public static bool RequiresEitherOpenDocumentTreeOrManageAllFiles()
         {
             //29 does has the requestExternalStorage workaround.
-            return Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.R;
+            return OperatingSystem.IsAndroidVersionAtLeast(30);
         }
 
         public static bool UseLegacyStorage()
         {
-            return Android.OS.Build.VERSION.SdkInt < BuildVersionCodes.Q;
+            return !OperatingSystem.IsAndroidVersionAtLeast(29);
         }
 
         public static bool PreOpenDocumentTree()
         {
-            return Android.OS.Build.VERSION.SdkInt < BuildVersionCodes.Lollipop;
+            return !OperatingSystem.IsAndroidVersionAtLeast(21);
         }
 
         public static bool PreMoveDocument()
         {
-            return Android.OS.Build.VERSION.SdkInt < BuildVersionCodes.N;
+            return !OperatingSystem.IsAndroidVersionAtLeast(24);
         }
 
         public static bool IsLowDpi()
