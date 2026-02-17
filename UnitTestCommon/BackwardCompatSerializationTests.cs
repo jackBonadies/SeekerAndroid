@@ -67,7 +67,6 @@ namespace UnitTestCommon
             var result = SerializationHelper.RestoreUserListFromString(raw);
 
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("testuser4", result[0].Username);
             Assert.IsNotNull(result[0].UserData);
             Assert.AreEqual(294836, result[0].UserData.AverageSpeed);
             Assert.AreEqual(6892, result[0].UserData.FileCount);

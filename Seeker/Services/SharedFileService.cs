@@ -460,42 +460,6 @@ namespace Seeker.Services
             return slskDir;
         }
 
-        // TODO org models  OR move into Sharing Folder
-        public class CachedParseResults
-        {
-             public CachedParseResults(
-                Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys, 
-                int directoryCount, 
-                BrowseResponse browseResponse, 
-                List<Directory> browseResponseHiddenPortion, 
-                List<Tuple<string, string>> friendlyDirNameToUriMapping, 
-                Dictionary<string, List<int>> tokenIndex, 
-                Dictionary<int, string> helperIndex, 
-                int nonHiddenFileCount)
-            {
-                this.keys = keys;
-                this.directoryCount = directoryCount;
-                this.browseResponse = browseResponse;
-                this.browseResponseHiddenPortion = browseResponseHiddenPortion;
-                this.friendlyDirNameToUriMapping = friendlyDirNameToUriMapping;
-                this.tokenIndex = tokenIndex;
-                this.helperIndex = helperIndex;
-                this.nonHiddenFileCount = nonHiddenFileCount;
-            }
-
-            public CachedParseResults()
-            {
-            }
-
-            public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys = null;
-            public int directoryCount = -1;
-            public BrowseResponse browseResponse = null;
-            public List<Soulseek.Directory> browseResponseHiddenPortion = null;
-            public List<Tuple<string, string>> friendlyDirNameToUriMapping = null;
-            public Dictionary<string, List<int>> tokenIndex = null;
-            public Dictionary<int, string> helperIndex = null;
-            public int nonHiddenFileCount = -1;
-        }
 
         public static void ClearLegacyParsedCacheResults()
         {
@@ -1468,52 +1432,13 @@ namespace Seeker.Services
             //SeekerState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
         }
 
-        public static T deserializeFromDisk<T>(Context c, Java.IO.File dir, string filename, MessagePack.MessagePackSerializerOptions options = null) where T : class
-        {
-            Java.IO.File fileForOurInternalStorage = new Java.IO.File(dir, filename);
-
-            if (!fileForOurInternalStorage.Exists())
-            {
-                return null;
-            }
-
-            using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
-            {
-                return MessagePack.MessagePackSerializer.Deserialize<T>(inputStream, options);
-            }
-        }
-
         public static CachedParseResults GetCachedParseResults(Context c)
         {
-            Java.IO.File fileshare_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_fileshare_cache_dir);
-            if (!fileshare_dir.Exists())
-            {
-                return null;
-            }
-
             try
             {
-                var helperIndex = deserializeFromDisk<Dictionary<int, string>>(c, fileshare_dir, KeyConsts.M_HelperIndex_Filename);
-                var tokenIndex = deserializeFromDisk<Dictionary<string, List<int>>>(c, fileshare_dir, KeyConsts.M_TokenIndex_Filename);
-                var keys = deserializeFromDisk<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(c, fileshare_dir, KeyConsts.M_Keys_Filename);
-                var browseResponse = deserializeFromDisk<BrowseResponse>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Filename, SerializationHelper.BrowseResponseOptions);
-                var browseResponseHidden = deserializeFromDisk<List<Directory>>(c, fileshare_dir, KeyConsts.M_BrowseResponse_Hidden_Filename, SerializationHelper.BrowseResponseOptions);
-                var friendlyDirToUri = deserializeFromDisk<List<Tuple<string, string>>>(c, fileshare_dir, KeyConsts.M_FriendlyDirNameToUri_Filename);
-
-                int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
-
-                var cachedParseResults = new CachedParseResults(
-                    keys,
-                    browseResponse.DirectoryCount, //todo
-                    browseResponse,
-                    browseResponseHidden,
-                    friendlyDirToUri,
-                    tokenIndex,
-                    helperIndex,
-                    nonHiddenFileCount);
-                return cachedParseResults;
+                return CachedParseResultsSerializer.Restore(new AndroidCacheDataProvider(c));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Logger.Firebase("FAILED to restore sharing parse results: " + e.Message + e.StackTrace);
                 return null;
@@ -1535,33 +1460,7 @@ namespace Seeker.Services
 
         public static void StoreCachedParseResults(Context c, CachedParseResults cachedParseResults)
         {
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-
-            Java.IO.File fileShareCachedDir = new Java.IO.File(c.FilesDir, KeyConsts.M_fileshare_cache_dir);
-            if (!fileShareCachedDir.Exists())
-            {
-                fileShareCachedDir.Mkdir();
-            }
-
-            byte[] data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.helperIndex);
-            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_HelperIndex_Filename);
-
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.tokenIndex);
-            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_TokenIndex_Filename);
-
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.keys); //TODO directoryCount
-            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_Keys_Filename);
-
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponse, options: SerializationHelper.BrowseResponseOptions);
-            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Filename);
-
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.browseResponseHiddenPortion, options: SerializationHelper.BrowseResponseOptions);
-            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_BrowseResponse_Hidden_Filename);
-
-            data = MessagePack.MessagePackSerializer.Serialize(cachedParseResults.friendlyDirNameToUriMapping);
-            CommonHelpers.SaveToDisk(c, data, fileShareCachedDir, KeyConsts.M_FriendlyDirNameToUri_Filename);
-
-            PreferencesManager.SaveCachedFileCount(cachedParseResults.nonHiddenFileCount);
+            CachedParseResultsSerializer.Store(new AndroidCacheDataProvider(c), cachedParseResults);
         }
 
         public static string ShowCodePoints(string str)
