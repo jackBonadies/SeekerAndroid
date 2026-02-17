@@ -1,0 +1,131 @@
+﻿{
+  keys: {
+    key1: {
+      Item1: 100,
+      Item2: val1,
+      Item3: {
+        Item1: 1,
+        Item2: 2,
+        Item3: 3,
+        Item4: 4
+      },
+      Item4: true,
+      Item5: false
+    },
+    key2: {
+      Item1: 200,
+      Item2: val2,
+      Item3: {
+        Item1: 5,
+        Item2: 6,
+        Item3: 7,
+        Item4: 8
+      },
+      Item4: false,
+      Item5: true
+    }
+  },
+  directoryCount: 2,
+  browseResponse: {
+    Directories: [
+      {
+        Name: Music/Album1,
+        DecodedViaLatin1: false,
+        FileCount: 1,
+        Files: [
+          {
+            AttributeCount: 1,
+            Attributes: [
+              {
+                Value: 320
+              }
+            ],
+            BitRate: 320,
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: mp3,
+            Filename: song.mp3,
+            Size: 5000000
+          }
+        ],
+        OrderedFiles: [
+          {
+            AttributeCount: 1,
+            Attributes: [
+              {
+                Value: 320
+              }
+            ],
+            BitRate: 320,
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: mp3,
+            Filename: song.mp3,
+            Size: 5000000
+          }
+        ]
+      },
+      {
+        Name: Music/Album2,
+        DecodedViaLatin1: false,
+        FileCount: 1,
+        Files: [
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 2,
+            Extension: flac,
+            Filename: track.flac,
+            Size: 20000000
+          }
+        ],
+        OrderedFiles: [
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 2,
+            Extension: flac,
+            Filename: track.flac,
+            Size: 20000000
+          }
+        ]
+      }
+    ],
+    DirectoryCount: 2
+  },
+  browseResponseHiddenPortion: [
+    {
+      Name: Private/Stuff,
+      DecodedViaLatin1: false,
+      OrderedFiles: []
+    }
+  ],
+  friendlyDirNameToUriMapping: [
+    {
+      Item1: friendly1,
+      Item2: uri1
+    },
+    {
+      Item1: friendly2,
+      Item2: uri2
+    }
+  ],
+  tokenIndex: {
+    token1: [
+      1,
+      2,
+      3
+    ],
+    token2: [
+      4,
+      5
+    ]
+  },
+  helperIndex: {
+    1: helper1,
+    2: helper2
+  },
+  nonHiddenFileCount: 42
+}

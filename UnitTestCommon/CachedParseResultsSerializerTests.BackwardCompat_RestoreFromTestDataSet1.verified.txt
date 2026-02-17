@@ -1,0 +1,290 @@
+﻿{
+  keys: {
+    hiddenFolder\subFolder1\hidden_file_testing.txt: {
+      Item1: 20,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FhiddenFolder/document/3731-6564%3Atest%2Ffakedata%2FhiddenFolder%2FsubFolder1%2Fhidden_file_testing.txt,
+      Item4: false,
+      Item5: true
+    },
+    hiddenFolder\subFolder2\hiddenfile1.txt: {
+      Item1: 18,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FhiddenFolder/document/3731-6564%3Atest%2Ffakedata%2FhiddenFolder%2FsubFolder2%2Fhiddenfile1.txt,
+      Item4: false,
+      Item5: true
+    },
+    hiddenFolder\subFolder2\hiddenfile2.txt: {
+      Item1: 19,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FhiddenFolder/document/3731-6564%3Atest%2Ffakedata%2FhiddenFolder%2FsubFolder2%2Fhiddenfile2.txt,
+      Item4: false,
+      Item5: true
+    },
+    mainFolder\folder1\file 1.txt: {
+      Item1: 13,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder%2Ffolder1%2Ffile%201.txt,
+      Item4: false,
+      Item5: false
+    },
+    mainFolder\folder1\file 2.txt: {
+      Item1: 15,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder%2Ffolder1%2Ffile%202.txt,
+      Item4: false,
+      Item5: false
+    },
+    mainFolder\folder2\file2 1.txt: {
+      Item1: 17,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder%2Ffolder2%2Ffile2%201.txt,
+      Item4: false,
+      Item5: false
+    },
+    mainFolder\folder2\file2 2.txt: {
+      Item1: 20,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder%2Ffolder2%2Ffile2%202.txt,
+      Item4: false,
+      Item5: false
+    }
+  },
+  directoryCount: 3,
+  browseResponse: {
+    Directories: [
+      {
+        Name: mainFolder\folder1,
+        DecodedViaLatin1: false,
+        FileCount: 2,
+        Files: [
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file 1.txt,
+            Size: 13
+          },
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file 2.txt,
+            Size: 15
+          }
+        ],
+        OrderedFiles: [
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file 1.txt,
+            Size: 13
+          },
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file 2.txt,
+            Size: 15
+          }
+        ]
+      },
+      {
+        Name: mainFolder\folder2,
+        DecodedViaLatin1: false,
+        FileCount: 2,
+        Files: [
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file2 1.txt,
+            Size: 17
+          },
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file2 2.txt,
+            Size: 20
+          }
+        ],
+        OrderedFiles: [
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file2 1.txt,
+            Size: 17
+          },
+          {
+            IsLatin1Decoded: false,
+            IsDirectoryLatin1Decoded: false,
+            Code: 1,
+            Extension: .txt,
+            Filename: file2 2.txt,
+            Size: 20
+          }
+        ]
+      },
+      {
+        Name: mainFolder,
+        DecodedViaLatin1: false,
+        OrderedFiles: []
+      }
+    ],
+    DirectoryCount: 3
+  },
+  browseResponseHiddenPortion: [
+    {
+      Name: hiddenFolder\subFolder1,
+      DecodedViaLatin1: false,
+      FileCount: 1,
+      Files: [
+        {
+          IsLatin1Decoded: false,
+          IsDirectoryLatin1Decoded: false,
+          Code: 1,
+          Extension: .txt,
+          Filename: hidden_file_testing.txt,
+          Size: 20
+        }
+      ],
+      OrderedFiles: [
+        {
+          IsLatin1Decoded: false,
+          IsDirectoryLatin1Decoded: false,
+          Code: 1,
+          Extension: .txt,
+          Filename: hidden_file_testing.txt,
+          Size: 20
+        }
+      ]
+    },
+    {
+      Name: hiddenFolder\subFolder2,
+      DecodedViaLatin1: false,
+      FileCount: 2,
+      Files: [
+        {
+          IsLatin1Decoded: false,
+          IsDirectoryLatin1Decoded: false,
+          Code: 1,
+          Extension: .txt,
+          Filename: hiddenfile1.txt,
+          Size: 18
+        },
+        {
+          IsLatin1Decoded: false,
+          IsDirectoryLatin1Decoded: false,
+          Code: 1,
+          Extension: .txt,
+          Filename: hiddenfile2.txt,
+          Size: 19
+        }
+      ],
+      OrderedFiles: [
+        {
+          IsLatin1Decoded: false,
+          IsDirectoryLatin1Decoded: false,
+          Code: 1,
+          Extension: .txt,
+          Filename: hiddenfile1.txt,
+          Size: 18
+        },
+        {
+          IsLatin1Decoded: false,
+          IsDirectoryLatin1Decoded: false,
+          Code: 1,
+          Extension: .txt,
+          Filename: hiddenfile2.txt,
+          Size: 19
+        }
+      ]
+    },
+    {
+      Name: hiddenFolder,
+      DecodedViaLatin1: false,
+      OrderedFiles: []
+    }
+  ],
+  friendlyDirNameToUriMapping: [
+    {
+      Item1: mainFolder\folder1,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder%2Ffolder1
+    },
+    {
+      Item1: mainFolder\folder2,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder%2Ffolder2
+    },
+    {
+      Item1: mainFolder,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FmainFolder/document/3731-6564%3Atest%2Ffakedata%2FmainFolder
+    },
+    {
+      Item1: hiddenFolder\subFolder1,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FhiddenFolder/document/3731-6564%3Atest%2Ffakedata%2FhiddenFolder%2FsubFolder1
+    },
+    {
+      Item1: hiddenFolder\subFolder2,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FhiddenFolder/document/3731-6564%3Atest%2Ffakedata%2FhiddenFolder%2FsubFolder2
+    },
+    {
+      Item1: hiddenFolder,
+      Item2: content://com.android.externalstorage.documents/tree/3731-6564%3Atest%2Ffakedata%2FhiddenFolder/document/3731-6564%3Atest%2Ffakedata%2FhiddenFolder
+    }
+  ],
+  tokenIndex: {
+    1: [
+      0,
+      2
+    ],
+    2: [
+      1,
+      3
+    ],
+    file: [
+      0,
+      1
+    ],
+    file2: [
+      2,
+      3
+    ],
+    folder1: [
+      0,
+      1
+    ],
+    folder2: [
+      2,
+      3
+    ],
+    hidden_file_testing: [
+      4
+    ],
+    hiddenfile1: [
+      5
+    ],
+    hiddenfile2: [
+      6
+    ],
+    subfolder1: [
+      4
+    ],
+    subfolder2: [
+      5,
+      6
+    ]
+  },
+  helperIndex: {
+    0: mainFolder\folder1\file 1.txt,
+    1: mainFolder\folder1\file 2.txt,
+    2: mainFolder\folder2\file2 1.txt,
+    3: mainFolder\folder2\file2 2.txt,
+    4: hiddenFolder\subFolder1\hidden_file_testing.txt,
+    5: hiddenFolder\subFolder2\hiddenfile1.txt,
+    6: hiddenFolder\subFolder2\hiddenfile2.txt
+  },
+  nonHiddenFileCount: -1
+}
