@@ -715,8 +715,6 @@ namespace Seeker
             clipboardManager.PrimaryClip = clip;
         }
 
-        public static string GetFileNameFromFile(string filename) => SimpleHelpers.GetFileNameFromFile(filename);
-
         public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
         {
             int end = path.LastIndexOf("\\");

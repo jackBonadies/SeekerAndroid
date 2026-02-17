@@ -330,7 +330,7 @@ namespace Seeker.Services
                     else
                     {
 
-                        string fname = CommonHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
+                        string fname = SimpleHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
                         string folderName = Common.Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
                         string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                                                                                //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
@@ -422,7 +422,7 @@ namespace Seeker.Services
                     }
                     else
                     {
-                        fname = CommonHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
+                        fname = SimpleHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
                         searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                     }
                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
@@ -948,7 +948,7 @@ namespace Seeker.Services
                         }
 
 
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + @"\" + CommonHelpers.GetFileNameFromFile(presentableName);
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + @"\" + SimpleHelpers.GetFileNameFromFile(presentableName);
 
                         Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
                         if (attributes != null)
@@ -966,7 +966,7 @@ namespace Seeker.Services
                         }
                         //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
-                        string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                        string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                               //for the brose response should only be the filename!!! 
                                                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                               //bc we get a path that is:
@@ -1085,7 +1085,7 @@ namespace Seeker.Services
                         //update public status variable every so often
                         SeekerState.NumberParsed = indexNum;
                     }
-                    string fname = CommonHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                    string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                           //for the brose response should only be the filename!!! 
                                                                                                           //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                           //bc we get a path that is:
@@ -1218,7 +1218,7 @@ namespace Seeker.Services
                     var reversed = helperIndex.ToDictionary(x => x.Value, x => x.Key);
                     foreach (string presentableName in keys.Keys)
                     {
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(CommonHelpers.GetFileNameFromFile(presentableName));
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                         int code = reversed[presentableName];
                         foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace

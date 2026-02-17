@@ -122,7 +122,7 @@ namespace Seeker.Transfers
                 downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
 
                 transferItem = new TransferItem();
-                transferItem.Filename = CommonHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
+                transferItem.Filename = SimpleHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
                 transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;

@@ -454,7 +454,7 @@ namespace Seeker.Services
             TransferItem transferItem = new TransferItem();
             transferItem.Username = username;
             transferItem.FullFilename = filename;
-            transferItem.Filename = CommonHelpers.GetFileNameFromFile(filename);
+            transferItem.Filename = SimpleHelpers.GetFileNameFromFile(filename);
             transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(filename);
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
@@ -837,7 +837,7 @@ namespace Seeker.Services
 
                     if (!PreferencesState.DisableDownloadToastNotification)
                     {
-                        action = () => { MainActivity.ToastUI(CommonHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
+                        action = () => { MainActivity.ToastUI(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
@@ -873,7 +873,7 @@ namespace Seeker.Services
 
         public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
-            string name = CommonHelpers.GetFileNameFromFile(fullfilename);
+            string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
@@ -1202,7 +1202,7 @@ namespace Seeker.Services
             bool noSubFolder,
             out string finalUri)
         {
-            string name = CommonHelpers.GetFileNameFromFile(fullfilename);
+            string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
             string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 

@@ -218,7 +218,7 @@ namespace Seeker
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 SetTextColor(tv, SeekerState.MainActivityRef);
-                tv.Text = CommonHelpers.GetFileNameFromFile(f.Filename);
+                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
                 viewToHideShow.AddView(tv);
             }
         }

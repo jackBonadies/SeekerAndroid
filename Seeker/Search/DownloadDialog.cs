@@ -1086,11 +1086,11 @@ namespace Seeker
         {
             if (wrapper.IsLocked)
             {
-                viewFilename.Text = SimpleHelpers.LOCK_EMOJI + CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
             }
             else
             {
-                viewFilename.Text = CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
             }
             viewAttributes.Text = SimpleHelpers.GetSizeLengthAttrString(wrapper.File);
         }

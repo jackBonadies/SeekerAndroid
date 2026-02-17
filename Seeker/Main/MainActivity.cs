@@ -195,7 +195,7 @@ namespace Seeker
                         string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
                         string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
 
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(fullPath) + @"\" + CommonHelpers.GetFileNameFromFile(fullPath);
+                        string searchableName = Common.Helpers.GetFolderNameFromFile(fullPath) + @"\" + SimpleHelpers.GetFileNameFromFile(fullPath);
                         if (isRootCase && (volName != null))
                         {
                             if (searchableName.Substring(0, volName.Length) == volName)

@@ -151,6 +151,7 @@ namespace Seeker
         }
 
 
+        //TODO2026 - merge with browseutil
         public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude, FilterSpecialFlags filterSpecialFlags)
         {
             List<string> filterStringSplit = filterString.Split(' ').ToList();
