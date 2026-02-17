@@ -33,15 +33,15 @@ namespace Seeker
     {
         public static string GetCompositeErrorString()
         {
-            if (UploadDirectoryManager.UploadDirectories.Any(d => d.ErrorState == UploadDirectoryError.CannotWrite))
+            if (UploadDirectoryManager.UploadDirectories.Any(d => d.Info.ErrorState == UploadDirectoryError.CannotWrite))
             {
                 return GetErrorString(UploadDirectoryError.CannotWrite);
             }
-            else if (UploadDirectoryManager.UploadDirectories.Any(d => d.ErrorState == UploadDirectoryError.DoesNotExist))
+            else if (UploadDirectoryManager.UploadDirectories.Any(d => d.Info.ErrorState == UploadDirectoryError.DoesNotExist))
             {
                 return GetErrorString(UploadDirectoryError.DoesNotExist);
             }
-            else if (UploadDirectoryManager.UploadDirectories.Any(d => d.ErrorState == UploadDirectoryError.Unknown))
+            else if (UploadDirectoryManager.UploadDirectories.Any(d => d.Info.ErrorState == UploadDirectoryError.Unknown))
             {
                 return GetErrorString(UploadDirectoryError.Unknown);
             }
@@ -77,8 +77,8 @@ namespace Seeker
 
                 if (!string.IsNullOrEmpty(legacyUploadDataDirectory))
                 {
-                    UploadDirectoryInfo uploadDir = new UploadDirectoryInfo(legacyUploadDataDirectory, fromTree, false, false, null);
-                    UploadDirectories = new List<UploadDirectoryInfo>();
+                    var uploadDir = new UploadDirectoryEntry(new UploadDirectoryInfo(legacyUploadDataDirectory, fromTree, false, false, null));
+                    UploadDirectories = new List<UploadDirectoryEntry>();
                     UploadDirectories.Add(uploadDir);
 
                     SaveToSharedPreferences(sharedPreferences);
@@ -88,12 +88,13 @@ namespace Seeker
                 }
                 else
                 {
-                    UploadDirectories = new List<UploadDirectoryInfo>();
+                    UploadDirectories = new List<UploadDirectoryEntry>();
                 }
             }
             else
             {
-                UploadDirectories = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo);
+                var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo);
+                UploadDirectories = infos.Select(info => new UploadDirectoryEntry(info)).ToList();
             }
         }
 
@@ -101,7 +102,7 @@ namespace Seeker
         {
             using (System.IO.MemoryStream mem = new System.IO.MemoryStream())
             {
-                string userDirsString = SerializationHelper.SerializeToString(UploadDirectories);
+                string userDirsString = SerializationHelper.SerializeToString(UploadDirectories.Select(e => e.Info).ToList());
                 lock (sharedPreferences)
                 {
                     var editor = sharedPreferences.Edit();
@@ -114,16 +115,16 @@ namespace Seeker
         public static String UploadDataDirectoryUri = null;
         public static bool UploadDataDirectoryUriIsFromTree = true;
 
-        public static List<UploadDirectoryInfo> UploadDirectories;
+        public static List<UploadDirectoryEntry> UploadDirectories;
 
         public static bool IsFromTree(string presentablePath)
         {
-            if (UploadDirectories.All(dir => dir.UploadDataDirectoryUriIsFromTree))
+            if (UploadDirectories.All(dir => dir.Info.UploadDataDirectoryUriIsFromTree))
             {
                 return true;
             }
 
-            if (UploadDirectories.All(dir => !dir.UploadDataDirectoryUriIsFromTree))
+            if (UploadDirectories.All(dir => !dir.Info.UploadDataDirectoryUriIsFromTree))
             {
                 return false;
             }
@@ -133,7 +134,7 @@ namespace Seeker
 
         public static bool AreAnyFromLegacy()
         {
-            return UploadDirectories.Where(dir => !dir.UploadDataDirectoryUriIsFromTree).Any();
+            return UploadDirectories.Where(dir => !dir.Info.UploadDataDirectoryUriIsFromTree).Any();
         }
 
         /// <summary>
@@ -141,26 +142,26 @@ namespace Seeker
         /// </summary>
         public static bool AreAllFailed()
         {
-            return UploadDirectories.All(dir => dir.HasError());
+            return UploadDirectories.All(dir => dir.Info.HasError());
         }
 
-        public static bool DoesNewDirectoryHaveUniqueRootName(UploadDirectoryInfo newDirInfo, bool updateItToHaveUniqueName)
+        public static bool DoesNewDirectoryHaveUniqueRootName(UploadDirectoryEntry newDirEntry, bool updateItToHaveUniqueName)
         {
             bool isUnique = true;
             List<string> currentRootNames = new List<string>();
-            foreach (UploadDirectoryInfo dirInfo in UploadDirectories)
+            foreach (UploadDirectoryEntry dirEntry in UploadDirectories)
             {
-                if (dirInfo.IsSubdir || (dirInfo == newDirInfo))
+                if (dirEntry.IsSubdir || (dirEntry == newDirEntry))
                 {
                     continue;
                 }
                 else
                 {
-                    SharedFileService.GetAllFolderInfo(dirInfo, out _, out _, out _, out _, out string presentableName);
+                    SharedFileService.GetAllFolderInfo(dirEntry, out _, out _, out _, out _, out string presentableName);
                     currentRootNames.Add(presentableName);
                 }
             }
-            SharedFileService.GetAllFolderInfo(newDirInfo, out _, out _, out _, out _, out string presentableNameNew);
+            SharedFileService.GetAllFolderInfo(newDirEntry, out _, out _, out _, out _, out string presentableNameNew);
             if (currentRootNames.Contains(presentableNameNew))
             {
                 isUnique = false;
@@ -170,7 +171,7 @@ namespace Seeker
                     {
                         presentableNameNew = presentableNameNew + " (1)";
                     }
-                    newDirInfo.DisplayNameOverride = presentableNameNew;
+                    newDirEntry.Info.DisplayNameOverride = presentableNameNew;
                 }
             }
             return isUnique;
@@ -181,7 +182,7 @@ namespace Seeker
         /// </summary>
         public static bool AreAnyFailed()
         {
-            return UploadDirectories.Any(dir => dir.HasError());
+            return UploadDirectories.Any(dir => dir.Info.HasError());
         }
 
         /// <summary>
@@ -244,49 +245,49 @@ namespace Seeker
         {
             for (int i = 0; i < UploadDirectories.Count; i++)
             {
-                UploadDirectoryInfo uploadDirectoryInfo = UploadDirectories[i];
+                UploadDirectoryEntry entry = UploadDirectories[i];
 
-                Android.Net.Uri uploadDirUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+                Android.Net.Uri uploadDirUri = Android.Net.Uri.Parse(entry.Info.UploadDataDirectoryUri);
                 try
                 {
-                    uploadDirectoryInfo.ErrorState = UploadDirectoryError.NoError;
-                    if (SeekerState.PreOpenDocumentTree() || !uploadDirectoryInfo.UploadDataDirectoryUriIsFromTree)
+                    entry.Info.ErrorState = UploadDirectoryError.NoError;
+                    if (SeekerState.PreOpenDocumentTree() || !entry.Info.UploadDataDirectoryUriIsFromTree)
                     {
-                        uploadDirectoryInfo.UploadDirectory = DocumentFile.FromFile(new Java.IO.File(uploadDirUri.Path));
+                        entry.UploadDirectory = DocumentFile.FromFile(new Java.IO.File(uploadDirUri.Path));
                     }
                     else
                     {
-                        uploadDirectoryInfo.UploadDirectory = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, uploadDirUri);
-                        if (!uploadDirectoryInfo.UploadDirectory.Exists())
+                        entry.UploadDirectory = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, uploadDirUri);
+                        if (!entry.UploadDirectory.Exists())
                         {
-                            uploadDirectoryInfo.UploadDirectory = null;
-                            uploadDirectoryInfo.ErrorState = UploadDirectoryError.DoesNotExist;
+                            entry.UploadDirectory = null;
+                            entry.Info.ErrorState = UploadDirectoryError.DoesNotExist;
                         }
-                        else if (!uploadDirectoryInfo.UploadDirectory.CanWrite())
+                        else if (!entry.UploadDirectory.CanWrite())
                         {
-                            uploadDirectoryInfo.UploadDirectory = null;
-                            uploadDirectoryInfo.ErrorState = UploadDirectoryError.CannotWrite;
+                            entry.UploadDirectory = null;
+                            entry.Info.ErrorState = UploadDirectoryError.CannotWrite;
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    uploadDirectoryInfo.ErrorState = UploadDirectoryError.Unknown;
+                    entry.Info.ErrorState = UploadDirectoryError.Unknown;
                 }
             }
 
             for (int i = 0; i < UploadDirectories.Count; i++)
             {
-                UploadDirectoryInfo uploadDirectoryInfo = UploadDirectories[i];
-                var ourUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+                UploadDirectoryEntry entry = UploadDirectories[i];
+                var ourUri = Android.Net.Uri.Parse(entry.Info.UploadDataDirectoryUri);
 
                 for (int j = 0; j < UploadDirectories.Count; j++)
                 {
                     if (i != j)
                     {
-                        if (ourUri.LastPathSegment.Contains(Android.Net.Uri.Parse(UploadDirectories[j].UploadDataDirectoryUri).LastPathSegment))
+                        if (ourUri.LastPathSegment.Contains(Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri).LastPathSegment))
                         {
-                            uploadDirectoryInfo.IsSubdir = true;
+                            entry.IsSubdir = true;
                         }
                     }
                 }
@@ -296,35 +297,35 @@ namespace Seeker
             PresentableNameHiddenDirectories.Clear();
             for (int i = 0; i < UploadDirectories.Count; i++)
             {
-                UploadDirectoryInfo uploadDirectoryInfo = UploadDirectories[i];
-                if (!uploadDirectoryInfo.IsLocked && !uploadDirectoryInfo.IsHidden)
+                UploadDirectoryEntry entry = UploadDirectories[i];
+                if (!entry.Info.IsLocked && !entry.Info.IsHidden)
                 {
                     continue;
                 }
 
-                if (!uploadDirectoryInfo.IsSubdir)
+                if (!entry.IsSubdir)
                 {
-                    if (uploadDirectoryInfo.IsLocked)
+                    if (entry.Info.IsLocked)
                     {
-                        PresentableNameLockedDirectories.Add(uploadDirectoryInfo.GetPresentableName());
+                        PresentableNameLockedDirectories.Add(entry.GetPresentableName());
                     }
 
-                    if (uploadDirectoryInfo.IsHidden)
+                    if (entry.Info.IsHidden)
                     {
-                        PresentableNameHiddenDirectories.Add(uploadDirectoryInfo.GetPresentableName());
+                        PresentableNameHiddenDirectories.Add(entry.GetPresentableName());
                     }
                 }
                 else
                 {
-                    var ourUri = Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+                    var ourUri = Android.Net.Uri.Parse(entry.Info.UploadDataDirectoryUri);
 
-                    UploadDirectoryInfo ourTopLevelParent = null;
+                    UploadDirectoryEntry ourTopLevelParent = null;
 
                     for (int j = 0; j < UploadDirectories.Count; j++)
                     {
                         if (i != j)
                         {
-                            if (!UploadDirectories[j].IsSubdir && ourUri.LastPathSegment.Contains(Android.Net.Uri.Parse(UploadDirectories[j].UploadDataDirectoryUri).LastPathSegment))
+                            if (!UploadDirectories[j].IsSubdir && ourUri.LastPathSegment.Contains(Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri).LastPathSegment))
                             {
                                 ourTopLevelParent = UploadDirectories[j];
                                 break;
@@ -332,16 +333,16 @@ namespace Seeker
                         }
                     }
 
-                    if (!uploadDirectoryInfo.HasError() && !ourTopLevelParent.HasError())
+                    if (!entry.Info.HasError() && !ourTopLevelParent.Info.HasError())
                     {
-                        if (uploadDirectoryInfo.IsLocked)
+                        if (entry.Info.IsLocked)
                         {
-                            PresentableNameLockedDirectories.Add(uploadDirectoryInfo.GetPresentableName(ourTopLevelParent));
+                            PresentableNameLockedDirectories.Add(entry.GetPresentableName(ourTopLevelParent));
                         }
 
-                        if (uploadDirectoryInfo.IsHidden)
+                        if (entry.Info.IsHidden)
                         {
-                            PresentableNameHiddenDirectories.Add(uploadDirectoryInfo.GetPresentableName(ourTopLevelParent));
+                            PresentableNameHiddenDirectories.Add(entry.GetPresentableName(ourTopLevelParent));
                         }
                     }
                 }

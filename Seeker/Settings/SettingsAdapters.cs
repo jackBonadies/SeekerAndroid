@@ -22,11 +22,11 @@ namespace Seeker
 
         public class ReyclerUploadsAdapter : RecyclerView.Adapter
         {
-            public List<UploadDirectoryInfo> localDataSet;
+            public List<UploadDirectoryEntry> localDataSet;
             public override int ItemCount => localDataSet.Count;
             private int position = -1;
             public SettingsActivity settingsActivity;
-            public ReyclerUploadsAdapter(SettingsActivity activity, List<UploadDirectoryInfo> ti)
+            public ReyclerUploadsAdapter(SettingsActivity activity, List<UploadDirectoryEntry> ti)
             {
                 this.settingsActivity = activity;
                 localDataSet = ti;
@@ -69,7 +69,7 @@ namespace Seeker
             {
                 RecyclerViewFolderView folderRowView = v as RecyclerViewFolderView;
                 ContextMenuItem = folderRowView.BoundItem;
-                if (ContextMenuItem.HasError())
+                if (ContextMenuItem.Info.HasError())
                 {
                     menu.Add(0, 1, 0, Resource.String.ViewErrorOptions);
                 }
@@ -83,7 +83,7 @@ namespace Seeker
 
         public class RecyclerViewFolderView : RelativeLayout
         {
-            public UploadDirectoryInfo BoundItem;
+            public UploadDirectoryEntry BoundItem;
 
             public RecyclerViewFolderHolder ViewHolder;
             public SettingsActivity SettingsActivity = null;
@@ -128,32 +128,32 @@ namespace Seeker
 
             }
 
-            public void setItem(UploadDirectoryInfo item)
+            public void setItem(UploadDirectoryEntry item)
             {
                 this.Clickable = PreferencesState.SharingOn;
                 this.LongClickable = PreferencesState.SharingOn;
 
                 BoundItem = item;
-                if (string.IsNullOrEmpty(item.DisplayNameOverride))
+                if (string.IsNullOrEmpty(item.Info.DisplayNameOverride))
                 {
                     viewFolderName.Text = item.GetLastPathSegment();
                 }
                 else
                 {
-                    viewFolderName.Text = item.GetLastPathSegment() + $" ({item.DisplayNameOverride})";
+                    viewFolderName.Text = item.GetLastPathSegment() + $" ({item.Info.DisplayNameOverride})";
                 }
 
-                if (item.HasError())
+                if (item.Info.HasError())
                 {
                     viewFolderStatus.Visibility = ViewStates.Visible;
                     viewFolderStatus.SetImageResource(Resource.Drawable.alert_circle_outline);
                 }
-                else if (item.IsHidden)
+                else if (item.Info.IsHidden)
                 {
                     viewFolderStatus.Visibility = ViewStates.Visible;
                     viewFolderStatus.SetImageResource(Resource.Drawable.hidden_lock_question);
                 }
-                else if (item.IsLocked)
+                else if (item.Info.IsLocked)
                 {
                     viewFolderStatus.Visibility = ViewStates.Visible;
                     viewFolderStatus.SetImageResource(Resource.Drawable.lock_icon);

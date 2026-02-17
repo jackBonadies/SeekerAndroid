@@ -7,7 +7,7 @@ namespace Seeker
     /// Small info about which directories the user shared.
     /// </summary>
     [Serializable]
-    public partial class UploadDirectoryInfo
+    public class UploadDirectoryInfo
     {
         public string UploadDataDirectoryUri;
         public bool UploadDataDirectoryUriIsFromTree;

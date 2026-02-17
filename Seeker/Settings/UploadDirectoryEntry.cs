@@ -1,53 +1,55 @@
 using Seeker.Services;
 using AndroidX.DocumentFile.Provider;
-using System;
-using System.Text.Json.Serialization;
+using Seeker.Helpers;
 
 namespace Seeker
 {
     /// <summary>
-    /// Android-specific partial for UploadDirectoryInfo.
+    /// Android-specific wrapper around UploadDirectoryInfo.
+    /// Holds runtime state (DocumentFile, IsSubdir) and Android-dependent methods.
     /// </summary>
-    public partial class UploadDirectoryInfo
+    public class UploadDirectoryEntry
     {
-        [JsonIgnore]
-        [NonSerialized]
-        public DocumentFile UploadDirectory;
+        public UploadDirectoryInfo Info { get; }
 
-        [JsonIgnore]
-        [NonSerialized]
+        public DocumentFile UploadDirectory;
         public bool IsSubdir;
+
+        public UploadDirectoryEntry(UploadDirectoryInfo info)
+        {
+            Info = info;
+        }
 
         public string GetLastPathSegment()
         {
-            return Android.Net.Uri.Parse(this.UploadDataDirectoryUri).LastPathSegment;
+            return Android.Net.Uri.Parse(Info.UploadDataDirectoryUri).LastPathSegment;
         }
 
         public string GetPresentableName()
         {
-            if (string.IsNullOrEmpty(this.DisplayNameOverride))
+            if (string.IsNullOrEmpty(Info.DisplayNameOverride))
             {
                 SharedFileService.GetAllFolderInfo(this, out _, out _, out _, out _, out string presentableName);
                 return presentableName;
             }
             else
             {
-                return this.DisplayNameOverride;
+                return Info.DisplayNameOverride;
             }
         }
 
-        public string GetPresentableName(UploadDirectoryInfo ourTopMostParent)
+        public string GetPresentableName(UploadDirectoryEntry ourTopMostParent)
         {
             string parentLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(ourTopMostParent.UploadDirectory, out bool msdCase);
             string ourLastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(this.UploadDirectory, out bool ourMsdCase);
             if (ourMsdCase || msdCase)
             {
-                return ourLastPathSegment; //not great but no good solution for msd. TODO test
+                return ourLastPathSegment;
             }
             else
             {
                 SharedFileService.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, out _, out _, out string rootOverrideName, out string parentPresentableName);
-                return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length); //remove parent part and replace it with the parent presentable name.
+                return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length);
             }
         }
     }

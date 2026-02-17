@@ -259,11 +259,7 @@ namespace Seeker
         CheckBox useUPnPCheckBox;
         CheckBox showSmartFilters;
 
-
-        private static UploadDirectoryInfo ContextMenuItem = null;
-
-
-
+        private static UploadDirectoryEntry ContextMenuItem = null;
 
         private ScrollView mainScrollView;
         private View sharingLayoutParent;
@@ -2141,7 +2137,7 @@ namespace Seeker
             return true;
         }
 
-        private void RemoveUploadDirFolder(UploadDirectoryInfo uploadDirInfo)
+        private void RemoveUploadDirFolder(UploadDirectoryEntry uploadDirEntry)
         {
             if (UploadDirectoryManager.UploadDirectories.Count == 1)
             {
@@ -2149,7 +2145,7 @@ namespace Seeker
             }
             else
             {
-                UploadDirectoryManager.UploadDirectories.Remove(uploadDirInfo);
+                UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
                 this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
                 SetSharedFolderView();
                 Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
@@ -2890,9 +2886,9 @@ namespace Seeker
             }));
         }
 
-        public void ShowDialogForUploadDir(UploadDirectoryInfo uploadInfo)
+        public void ShowDialogForUploadDir(UploadDirectoryEntry uploadInfo)
         {
-            if (uploadInfo.HasError())
+            if (uploadInfo.Info.HasError())
             {
                 ShowUploadDirectoryErrorDialog(uploadInfo);
             }
@@ -2901,12 +2897,12 @@ namespace Seeker
                 ShowUploadDirectoryOptionsDialog(uploadInfo);
             }
         }
-        private static UploadDirectoryInfo UploadDirToReplaceOnReselect = null;
-        public void ShowUploadDirectoryErrorDialog(UploadDirectoryInfo uploadInfo)
+        private static UploadDirectoryEntry UploadDirToReplaceOnReselect = null;
+        public void ShowUploadDirectoryErrorDialog(UploadDirectoryEntry uploadInfo)
         {
             var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(Resource.String.FolderError);
-            string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
+            string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.Info.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
                 .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) =>
                 { //puts it slightly right
@@ -2916,7 +2912,7 @@ namespace Seeker
                 .SetPositiveButton(Resource.String.Reselect, (object sender, DialogClickEventArgs e) =>
                 { //puts it rightmost
                     UploadDirToReplaceOnReselect = uploadInfo;
-                    this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
+                    this.ShowDirSettings(uploadInfo.Info.UploadDataDirectoryUri, DirectoryType.Upload, true);
                     this.OnCloseClick(sender, e);
                 })
                 .SetNeutralButton(Resource.String.cancel, OnCloseClick) //puts it leftmost
@@ -2924,7 +2920,7 @@ namespace Seeker
             diag.Show();
         }
 
-        public void ShowUploadDirectoryOptionsDialog(UploadDirectoryInfo uploadDirInfo)
+        public void ShowUploadDirectoryOptionsDialog(UploadDirectoryEntry uploadDirEntry)
         {
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.UploadFolderOptions);
@@ -2948,17 +2944,17 @@ namespace Seeker
 
 
             };
-            if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+            if (!string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride))
             {
-                custromFolderNameEditText.Text = uploadDirInfo.DisplayNameOverride;
+                custromFolderNameEditText.Text = uploadDirEntry.Info.DisplayNameOverride;
                 overrideFolderName.Checked = true;
             }
             else
             {
                 overrideFolderName.Checked = false;
             }
-            hiddenCheck.Checked = uploadDirInfo.IsHidden;
-            lockedCheck.Checked = uploadDirInfo.IsLocked;
+            hiddenCheck.Checked = uploadDirEntry.Info.IsHidden;
+            lockedCheck.Checked = uploadDirEntry.Info.IsLocked;
 
             builder.SetView(viewInflated);
 
@@ -2969,26 +2965,26 @@ namespace Seeker
 
                 //any changed?
 
-                bool hiddenChanged = uploadDirInfo.IsHidden != hiddenCheck.Checked;
-                bool lockedChanged = uploadDirInfo.IsLocked != lockedCheck.Checked;
+                bool hiddenChanged = uploadDirEntry.Info.IsHidden != hiddenCheck.Checked;
+                bool lockedChanged = uploadDirEntry.Info.IsLocked != lockedCheck.Checked;
                 bool overrideNameChanged =
-                    (string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
-                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride)) ||
-                    (overrideFolderName.Checked && uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text);
+                    (string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
+                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride)) ||
+                    (overrideFolderName.Checked && uploadDirEntry.Info.DisplayNameOverride != custromFolderNameEditText.Text);
 
-                uploadDirInfo.IsHidden = hiddenCheck.Checked;
-                uploadDirInfo.IsLocked = lockedCheck.Checked;
-                string displayNameOld = uploadDirInfo.DisplayNameOverride;
+                uploadDirEntry.Info.IsHidden = hiddenCheck.Checked;
+                uploadDirEntry.Info.IsLocked = lockedCheck.Checked;
+                string displayNameOld = uploadDirEntry.Info.DisplayNameOverride;
 
                 if (overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text))
                 {
-                    if (uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text)
+                    if (uploadDirEntry.Info.DisplayNameOverride != custromFolderNameEditText.Text)
                     {
                         //make sure that we CAN change it.
-                        uploadDirInfo.DisplayNameOverride = custromFolderNameEditText.Text;
-                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        uploadDirEntry.Info.DisplayNameOverride = custromFolderNameEditText.Text;
+                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirEntry, false))
                         {
-                            uploadDirInfo.DisplayNameOverride = displayNameOld;
+                            uploadDirEntry.Info.DisplayNameOverride = displayNameOld;
                             Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
                             overrideNameChanged = false; //we prevented it
                         }
@@ -2996,13 +2992,13 @@ namespace Seeker
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+                    if (!string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride))
                     {
                         //make sure that we CAN change it.
-                        uploadDirInfo.DisplayNameOverride = null;
-                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        uploadDirEntry.Info.DisplayNameOverride = null;
+                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirEntry, false))
                         {
-                            uploadDirInfo.DisplayNameOverride = displayNameOld;
+                            uploadDirEntry.Info.DisplayNameOverride = displayNameOld;
                             Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
                             overrideNameChanged = false; //we prevented it
                         }
@@ -3068,25 +3064,25 @@ namespace Seeker
 
 
 
-            UploadDirectoryInfo newlyAddedDirectory = null;
+            UploadDirectoryEntry newlyAddedDirectory = null;
             if (newlyAddedUriIfApplicable != null)
             {
                 //RESELECT CASE
                 if (reselectCase)
                 {
-                    newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, UploadDirToReplaceOnReselect.IsLocked, UploadDirToReplaceOnReselect.IsHidden, UploadDirToReplaceOnReselect.DisplayNameOverride);
+                    newlyAddedDirectory = new UploadDirectoryEntry(new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, UploadDirToReplaceOnReselect.Info.IsLocked, UploadDirToReplaceOnReselect.Info.IsHidden, UploadDirToReplaceOnReselect.Info.DisplayNameOverride));
                     newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
                     UploadDirectoryManager.UploadDirectories.Remove(UploadDirToReplaceOnReselect);
                 }
                 else
                 {
-                    newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null);
+                    newlyAddedDirectory = new UploadDirectoryEntry(new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null));
                     newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
                 }
 
 
 
-                if (UploadDirectoryManager.UploadDirectories.Where(up => up.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
+                if (UploadDirectoryManager.UploadDirectories.Where(up => up.Info.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
                 {
                     //error!!
                     this.RunOnUiThread(new Action(() =>

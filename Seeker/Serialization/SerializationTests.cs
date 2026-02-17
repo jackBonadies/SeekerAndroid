@@ -97,19 +97,18 @@ namespace Seeker.Serialization
             Debug.Assert(savedStates[1].LastSearchTerm == restored12[1].LastSearchTerm);
 
 
-            var uploadDir = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
-            uploadDir.ErrorState = UploadDirectoryError.CannotWrite;
-            uploadDir.IsSubdir = true;
+            var uploadDirInfo = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
+            uploadDirInfo.ErrorState = UploadDirectoryError.CannotWrite;
 
             List<UploadDirectoryInfo> uploadDirectoryInfos = new List<UploadDirectoryInfo>();
-            uploadDirectoryInfos.Add(uploadDir);
+            uploadDirectoryInfos.Add(uploadDirInfo);
 
             var serInfos = SerializationHelper.SerializeToString(uploadDirectoryInfos);
             var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(serInfos);
 
             Debug.Assert(infos.Count == uploadDirectoryInfos.Count);
-            Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirectoryInfos[0].UploadDataDirectoryUri);
-            Debug.Assert(infos[0].ErrorState != uploadDirectoryInfos[0].ErrorState);
+            Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirInfo.UploadDataDirectoryUri);
+            Debug.Assert(infos[0].ErrorState != uploadDirInfo.ErrorState);
 
             ConcurrentDictionary<string, byte> unreadUsernames = new ConcurrentDictionary<string, byte>();
             unreadUsernames["testuser1"] = 0;

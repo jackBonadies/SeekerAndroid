@@ -17,7 +17,7 @@ namespace Seeker.Services
 {
     public static class SharedFileService
     {
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryFastDocContract(UploadDirectoryInfo newlyAddedDirectoryIfApplicable,
+        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryFastDocContract(UploadDirectoryEntry newlyAddedDirectoryIfApplicable,
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br,
             out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
         {
@@ -46,15 +46,15 @@ namespace Seeker.Services
             index = new Dictionary<int, string>();
             int indexNum = 0;
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
-            foreach (var uploadDirectoryInfo in tmpUploadDirs)
+            foreach (var uploadDirEntry in tmpUploadDirs)
             {
-                if (uploadDirectoryInfo.IsSubdir || uploadDirectoryInfo.HasError())
+                if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
                 }
 
-                DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-                GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
+                DocumentFile dir = uploadDirEntry.UploadDirectory;
+                GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
                 traverseDirectoryEntriesInternal(SeekerState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri,
                     pairs, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
@@ -66,10 +66,10 @@ namespace Seeker.Services
             return pairs;
         }
 
-        public static void GetAllFolderInfo(UploadDirectoryInfo uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out string presentableNameToUse)
+        public static void GetAllFolderInfo(UploadDirectoryEntry uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out string presentableNameToUse)
         {
-            DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-            Android.Net.Uri uri = dir.Uri;//Android.Net.Uri.Parse(uploadDirectoryInfo.UploadDataDirectoryUri);
+            DocumentFile dir = uploadDirEntry.UploadDirectory;
+            Android.Net.Uri uri = dir.Uri;//Android.Net.Uri.Parse(uploadDirEntry.Info.UploadDataDirectoryUri);
             Logger.InfoFirebase("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
             //string lastPathSegment = null;
             //bool msdCase = false;
@@ -119,7 +119,7 @@ namespace Seeker.Services
             }
 
 
-            rootFolderDisplayName = uploadDirectoryInfo.DisplayNameOverride;
+            rootFolderDisplayName = uploadDirEntry.Info.DisplayNameOverride;
             overrideCase = false;
 
             if (msdCase)
@@ -237,7 +237,7 @@ namespace Seeker.Services
 
 
         public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryLegacy(
-            UploadDirectoryInfo newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
+            UploadDirectoryEntry newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
@@ -270,15 +270,15 @@ namespace Seeker.Services
             //}
 
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
-            foreach (var uploadDirectoryInfo in tmpUploadDirs)
+            foreach (var uploadDirEntry in tmpUploadDirs)
             {
-                if (uploadDirectoryInfo.IsSubdir || uploadDirectoryInfo.HasError())
+                if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
                 }
 
-                DocumentFile dir = uploadDirectoryInfo.UploadDirectory;
-                GetAllFolderInfo(uploadDirectoryInfo, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
+                DocumentFile dir = uploadDirEntry.UploadDirectory;
+                GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
                 traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs,
                     allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index,
@@ -1193,7 +1193,7 @@ namespace Seeker.Services
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public static bool InitializeDatabase(UploadDirectoryInfo newlyAddedDirectoryIfApplicable, bool checkCache, out string errorMsg)
+        public static bool InitializeDatabase(UploadDirectoryEntry newlyAddedDirectoryIfApplicable, bool checkCache, out string errorMsg)
         {
             errorMsg = string.Empty;
             bool success = false;
