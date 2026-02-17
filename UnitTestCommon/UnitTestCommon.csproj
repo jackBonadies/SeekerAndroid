@@ -15,6 +15,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="TestData\Set1\browseresponse.mpk" />
+    <Content Include="TestData\Set1\browseresponse_hidden.mpk" />
+    <Content Include="TestData\Set1\friendlydirtouri.mpk" />
+    <Content Include="TestData\Set1\helperindex.mpk" />
+    <Content Include="TestData\Set1\keys.mpk" />
+    <Content Include="TestData\Set1\SoulSeekPrefs.xml" />
+    <Content Include="TestData\Set1\tokenindex.mpk" />
+  </ItemGroup>
+	<ItemGroup>
+	<Content Include="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek_Source.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
