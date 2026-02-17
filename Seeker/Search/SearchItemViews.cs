@@ -86,7 +86,7 @@ namespace Seeker
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item);
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString(); //kb/s
 
             //TEST
@@ -138,7 +138,7 @@ namespace Seeker
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
             viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
             if (item.FreeUploadSlots > 0)
@@ -246,7 +246,7 @@ namespace Seeker
         {
             bool opposite = this.AdapterRef.oppositePositions.Contains(position);
             viewUsername.Text = item.Username;
-            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item);
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + "kbs"; //kb/s
             if (item.FreeUploadSlots > 0)
             {

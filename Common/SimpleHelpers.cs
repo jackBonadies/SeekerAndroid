@@ -9,6 +9,8 @@ namespace Seeker
 {
     public static class SimpleHelpers
     {
+        public static readonly string LOCK_EMOJI = char.ConvertFromUtf32(0x1F512);
+
         public static string AvoidLineBreaks(string orig)
         {
             return orig.Replace(' ', '\u00A0').Replace("\\", "\\\u2060");
@@ -41,6 +43,51 @@ namespace Seeker
                 incompleteFolderName = incompleteFolderName.Replace(c, '_');
             }
             return incompleteFolderName;
+        }
+
+        private static string GetLockedFileName(SearchResponse item)
+        {
+            try
+            {
+                Soulseek.File f = item.LockedFiles.First();
+                return f.Filename;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+        private static string GetUnlockedFileName(SearchResponse item)
+        {
+            try
+            {
+                Soulseek.File f = item.Files.First();
+                return f.Filename;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// This will prepend the lock when applicable..
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFolderNameForSearchResult(SearchResponse item)
+        {
+            if (item.FileCount > 0)
+            {
+                return Common.Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+            }
+            else if (item.LockedFileCount > 0)
+            {
+                return LOCK_EMOJI + Common.Helpers.GetFolderNameFromFile(GetLockedFileName(item));
+            }
+            else
+            {
+                return "\\Locked\\";
+            }
         }
 
         public static bool IsFileUri(string uriString)

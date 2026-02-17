@@ -3,6 +3,17 @@ using Soulseek;
 
 namespace Seeker
 {
+    public class FileLockedUnlockedWrapper
+    {
+        public Soulseek.File File;
+        public bool IsLocked;
+        public FileLockedUnlockedWrapper(Soulseek.File _file, bool _isLocked)
+        {
+            File = _file;
+            IsLocked = _isLocked;
+        }
+    }
+
     public class FolderSummary
     {
         public int LengthSeconds = 0;
@@ -69,7 +80,7 @@ namespace Seeker
             {
                 if (this.Node.IsLocked)
                 {
-                    return char.ConvertFromUtf32(0x1F512) + SimpleHelpers.GetFileNameFromFile(Name);
+                    return SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(Name);
                 }
                 else
                 {
@@ -80,7 +91,7 @@ namespace Seeker
             {
                 if (this.Node.IsLocked)
                 {
-                    return char.ConvertFromUtf32(0x1F512) + Name;
+                    return SimpleHelpers.LOCK_EMOJI + Name;
                 }
                 else
                 {

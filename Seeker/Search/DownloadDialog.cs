@@ -38,6 +38,7 @@ using System.Threading.Tasks;
 using log = Android.Util.Log;
 using Seeker.Helpers;
 using Seeker.Transfers;
+using Common.Browse;
 
 namespace Seeker
 {
@@ -67,6 +68,7 @@ namespace Seeker
             searchPosition = SearchPositionTemp;
         }
 
+        // TODO2026 move
         private void UpdateSearchResponseWithFullDirectory(Soulseek.Directory d)
         {
             //normally files are like this "@@ynkmv\\Albums\\albumname (2012)\\02 - songname.mp3"
@@ -528,9 +530,7 @@ namespace Seeker
             }
         }
 
-
-
-
+        // TODO2026 create ILogger and migrate
         public static TreeNode<Directory> CreateTree(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, out string errorMsgToToast)
         {
             //logging code for unit tests / diagnostic.. //TODO comment out always
@@ -783,11 +783,6 @@ namespace Seeker
             }
         }
 
-        private FullFileInfo[] GetFullFileInfos(IEnumerable<Soulseek.File> files)
-        {
-            return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
-        }
-
         private FullFileInfo[] GetFilesToDownload(bool selectedOnly)
         {
             if (selectedOnly)
@@ -798,11 +793,11 @@ namespace Seeker
                     var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
                     selectedFiles.Add(file);
                 }
-                return GetFullFileInfos(selectedFiles.ToArray());
+                return BrowseUtils.GetFullFileInfos(selectedFiles.ToArray());
             }
             else
             {
-                return GetFullFileInfos(searchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
+                return BrowseUtils.GetFullFileInfos(searchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
             }
         }
 
@@ -811,18 +806,6 @@ namespace Seeker
             var task = TransfersUtil.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
-        }
-
-        public static int GetQueueLength(SearchResponse s)
-        {
-            if (s.FreeUploadSlots > 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (int)(s.QueueLength);
-            }
         }
 
         public void OnCloseClick(object sender, DialogClickEventArgs d)
@@ -919,7 +902,7 @@ namespace Seeker
             try
             {
                 var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
-                string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
+                string dirname = SimpleHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
                     Logger.Firebase("The dirname is empty!!");
@@ -949,7 +932,7 @@ namespace Seeker
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = CommonHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
+                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
                     Action<View> action = new Action<View>((v) =>
                     {
                         this.Dismiss();
@@ -1010,17 +993,6 @@ namespace Seeker
                     return false;
 
             }
-        }
-    }
-
-    public class FileLockedUnlockedWrapper
-    {
-        public Soulseek.File File;
-        public bool IsLocked;
-        public FileLockedUnlockedWrapper(Soulseek.File _file, bool _isLocked)
-        {
-            File = _file;
-            IsLocked = _isLocked;
         }
     }
 
@@ -1114,7 +1086,7 @@ namespace Seeker
         {
             if (wrapper.IsLocked)
             {
-                viewFilename.Text = new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.LOCK_EMOJI + CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
             }
             else
             {
@@ -1122,61 +1094,5 @@ namespace Seeker
             }
             viewAttributes.Text = SimpleHelpers.GetSizeLengthAttrString(wrapper.File);
         }
-
-        /// <summary>
-        /// The other one cuts off 1 character..... They both do
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        //public static string GetFileNameFromFile(string filename)
-        //{
-        //    int begin = filename.LastIndexOf("\\");
-        //    string clipped = filename.Substring(begin + 1);
-        //    return clipped;
-        //}
-
-        private string GetStringFromAttributes(IReadOnlyCollection<Soulseek.FileAttribute> fileAttributes)
-        {
-            if (fileAttributes.Count == 0)
-            {
-                return "";
-            }
-            StringBuilder stringBuilder = new StringBuilder();
-            string attrString = "";
-            foreach (FileAttribute attr in fileAttributes)
-            {
-
-                if (attr.Type == FileAttributeType.BitDepth)
-                {
-                    attrString = attr.Value.ToString();
-                }
-                else if (attr.Type == FileAttributeType.SampleRate)
-                {
-                    attrString = (attr.Value / 1000.0).ToString();
-                }
-                else if (attr.Type == FileAttributeType.BitRate)
-                {
-                    attrString = attr.Value.ToString() + "kbs";
-                }
-                else if (attr.Type == FileAttributeType.VariableBitRate)
-                {
-                    attrString = attr.Value.ToString() + "kbs";
-                }
-                else if (attr.Type == FileAttributeType.Length)
-                {
-                    continue;
-                }
-                stringBuilder.Append(attrString);
-                stringBuilder.Append(", ");
-            }
-            if (stringBuilder.Length <= 3)
-            {
-                return "";
-            }
-            stringBuilder.Remove(stringBuilder.Length - 2, 2);
-            return stringBuilder.ToString();
-        }
     }
-
-
 }

@@ -862,19 +862,6 @@ namespace Seeker
             }
         }
 
-        private static string GetUnlockedFileName(SearchResponse item)
-        {
-            try
-            {
-                Soulseek.File f = item.Files.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
         /// <summary>
         /// returns false if unable to parse
         /// </summary>
@@ -928,39 +915,6 @@ namespace Seeker
                 link = link + "/";
             }
             return "slsk://" + Android.Net.Uri.Encode(link, "/");
-        }
-
-        private static string GetLockedFileName(SearchResponse item)
-        {
-            try
-            {
-                Soulseek.File f = item.LockedFiles.First();
-                return f.Filename;
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        /// <summary>
-        /// This will prepend the lock when applicable..
-        /// </summary>
-        /// <returns></returns>
-        public static string GetFolderNameForSearchResult(SearchResponse item)
-        {
-            if (item.FileCount > 0)
-            {
-                return Common.Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
-            }
-            else if (item.LockedFileCount > 0)
-            {
-                return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Common.Helpers.GetFolderNameFromFile(GetLockedFileName(item));
-            }
-            else
-            {
-                return "\\Locked\\";
-            }
         }
 
         public static void CreateNotificationChannel(Context c, string id, string name, Android.App.NotificationImportance importance = Android.App.NotificationImportance.Low)
