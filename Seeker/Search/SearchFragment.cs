@@ -1642,102 +1642,8 @@ namespace Seeker
             Logger.Debug("FilterString: " + searchTab.FilterString);
             bool hideLocked = PreferencesState.HideLockedResultsInSearch;
             searchTab.UI_SearchResponses.Clear();
-            searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(new Predicate<SearchResponse>(
-            (SearchResponse s) =>
-            {
-                if (!MatchesCriteria(s, hideLocked))
-                {
-                    return false;
-                }
-                else if (!MatchesChipCriteria(s, searchTab.ChipsFilter, hideLocked))
-                {
-                    return false;
-                }
-                else
-                {   //so it matches the word criteria.  now lets see if it matches the flags if any...
-                    if (!searchTab.FilterSpecialFlags.ContainsSpecialFlags)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        //we need to make sure this also matches our special flags
-                        if (searchTab.FilterSpecialFlags.MinFoldersInFile != 0)
-                        {
-                            if (searchTab.FilterSpecialFlags.MinFoldersInFile > (hideLocked ? s.Files.Count : (s.Files.Count + s.LockedFiles.Count)))
-                            {
-                                return false;
-                            }
-                        }
-                        if (searchTab.FilterSpecialFlags.MinFileSizeMB != 0)
-                        {
-                            bool match = false;
-                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
-                            {
-                                int mb = (int)(f.Size) / (1024 * 1024);
-                                if (mb > searchTab.FilterSpecialFlags.MinFileSizeMB)
-                                {
-                                    match = true;
-                                }
-                            }
-                            if (!match)
-                            {
-                                return false;
-                            }
-                        }
-                        if (searchTab.FilterSpecialFlags.MinBitRateKBS != 0)
-                        {
-                            bool match = false;
-                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
-                            {
-                                if (f.BitRate == null || !(f.BitRate.HasValue))
-                                {
-                                    continue;
-                                }
-                                if ((int)(f.BitRate) > searchTab.FilterSpecialFlags.MinBitRateKBS)
-                                {
-                                    match = true;
-                                }
-                            }
-                            if (!match)
-                            {
-                                return false;
-                            }
-                        }
-                        if (searchTab.FilterSpecialFlags.IsCBR)
-                        {
-                            bool match = false;
-                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
-                            {
-                                if (f.IsVariableBitRate == false)//this is bool? can have no value...
-                                {
-                                    match = true;
-                                }
-                            }
-                            if (!match)
-                            {
-                                return false;
-                            }
-                        }
-                        if (searchTab.FilterSpecialFlags.IsVBR)
-                        {
-                            bool match = false;
-                            foreach (Soulseek.File f in s.GetFiles(hideLocked))
-                            {
-                                if (f.IsVariableBitRate == true)
-                                {
-                                    match = true;
-                                }
-                            }
-                            if (!match)
-                            {
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                }
-            })));
+            searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(
+                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, searchTab.FilterSpecialFlags, searchTab.WordsToAvoid, searchTab.WordsToInclude, hideLocked)));
         }
 
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
@@ -1756,7 +1662,7 @@ namespace Seeker
                 {
                     FilterStickyString = SearchTabHelper.FilterString;
                 }
-                ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                SearchFilter.ParseFilterString(SearchTabHelper.FilterString, SearchTabHelper.WordsToAvoid, SearchTabHelper.WordsToInclude, SearchTabHelper.FilterSpecialFlags);
 
                 var oldList = SearchTabHelper.UI_SearchResponses.ToList();
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
@@ -1799,7 +1705,7 @@ namespace Seeker
                 {
                     FilterStickyString = SearchTabHelper.FilterString;
                 }
-                ParseFilterString(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                SearchFilter.ParseFilterString(SearchTabHelper.FilterString, SearchTabHelper.WordsToAvoid, SearchTabHelper.WordsToInclude, SearchTabHelper.FilterSpecialFlags);
 
 
 

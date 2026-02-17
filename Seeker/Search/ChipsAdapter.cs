@@ -1012,7 +1012,7 @@ namespace Seeker
             //    CheckedItems.Remove(pos);
             //}
             var searchTab = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab];
-            searchTab.ChipsFilter = SearchFragment.ParseChips(searchTab);
+            searchTab.ChipsFilter = SearchFilter.ParseChips(searchTab.ChipDataItems);
             SearchFragment.Instance.RefreshOnChipChanged();
         }
 
@@ -1059,35 +1059,6 @@ namespace Seeker
             chipItemView = (ChipItemView)view;
             chipItemView.ViewHolder = this;
             //(ChatroomOverviewView as View).SetOnCreateContextMenuListener(this);
-        }
-    }
-
-
-    public class ChipDataItem
-    {
-        public readonly string DisplayText;
-        public readonly List<string> Children; //this is for "other". this is what the chip actually represents..
-        public readonly ChipType ChipType;
-        public bool LastInGroup; //last in group AND there is more after it
-        public bool IsChecked = false;
-        public bool IsEnabled = true; //(-all case)
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText)
-        {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.DisplayText = displayText;
-            this.Children = null;
-        }
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, List<string> children)
-        {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.DisplayText = displayText;
-            this.Children = children;
-        }
-        public bool HasTag()
-        {
-            return this.Children != null;
         }
     }
 

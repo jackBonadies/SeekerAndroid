@@ -33,7 +33,7 @@ namespace Seeker
         public int LastSearchResultsCount = 0;
 
         public List<ChipDataItem> ChipDataItems;
-        public SearchFragment.ChipFilter ChipsFilter;
+        public ChipFilter ChipsFilter;
 
         public bool IsLoaded()
         {

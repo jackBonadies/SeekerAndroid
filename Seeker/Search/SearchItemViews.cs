@@ -18,25 +18,6 @@ using System.Text;
 using Common;
 namespace Seeker
 {
-    public class FilterSpecialFlags
-    {
-        public bool ContainsSpecialFlags = false;
-        public int MinFoldersInFile = 0;
-        public int MinFileSizeMB = 0;
-        public int MinBitRateKBS = 0;
-        public bool IsVBR = false;
-        public bool IsCBR = false;
-        public void Clear()
-        {
-            ContainsSpecialFlags = false;
-            MinFoldersInFile = 0;
-            MinFileSizeMB = 0;
-            MinBitRateKBS = 0;
-            IsVBR = false;
-            IsCBR = false;
-        }
-    }
-
     public interface ISearchItemViewBase
     {
         void setupChildren();

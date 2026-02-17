@@ -57,7 +57,7 @@ namespace Seeker
             {
                 searchTab.FilterSticky = SearchFragment.FilterSticky;
                 searchTab.FilterString = SearchFragment.FilterStickyString;
-                SearchFragment.ParseFilterString(searchTab);
+                SearchFilter.ParseFilterString(searchTab.FilterString, searchTab.WordsToAvoid, searchTab.WordsToInclude, searchTab.FilterSpecialFlags);
             }
             searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
             foreach (SearchResponse resp in searchTab.SearchResponses)

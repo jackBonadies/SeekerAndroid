@@ -1,4 +1,4 @@
-﻿using Soulseek;
+using Soulseek;
 using System.Collections.Generic;
 using System.Linq;
 
