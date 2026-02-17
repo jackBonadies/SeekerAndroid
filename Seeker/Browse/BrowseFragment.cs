@@ -73,10 +73,8 @@ namespace Seeker
         public static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>(); //indexOfItem, topmargin. for going up/down dirs.
         public static Tuple<int, int> ScrollPositionRestoreRotate = null; //for rotating..
 
-        public static bool FilteredResults = false;
-        public static string FilterString = string.Empty;
-        public static List<string> WordsToAvoid = new List<string>();
-        public static List<string> WordsToInclude = new List<string>();
+
+        private static BrowseFilter BrowseFilter = new BrowseFilter();
         public static List<int> SelectedPositionsState = new List<int>(); //this is used for restoring our state.  if its an empty list then thats fine, its just like if we didnt have one..
         public static System.Timers.Timer DebounceTimer = null;
         public static System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
@@ -334,7 +332,7 @@ namespace Seeker
             //savedInstanceState can be null if first time.
             int[]? selectedPos = savedInstanceState?.GetIntArray("selectedPositions");
 
-            if (FilteredResults)
+            if (BrowseFilter.IsFiltered)
             {
                 //tempHackItemClick = true;
                 lock (filteredDataItemsForListView)
@@ -355,7 +353,7 @@ namespace Seeker
 
             if (dataItemsForListView.Count != 0)
             {
-                pathItems = GetPathItems(dataItemsForListView);
+                pathItems = BrowseUtils.GetPathItems(dataItemsForListView);
             }
 
             treePathRecyclerAdapter = new TreePathRecyclerAdapter(pathItems, this);
@@ -365,7 +363,7 @@ namespace Seeker
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
-            if (FilteredResults || IsResponseLoaded()) // if we are filtering then we already know how it works..
+            if (BrowseFilter.IsFiltered || IsResponseLoaded()) // if we are filtering then we already know how it works..
             {
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
@@ -564,7 +562,7 @@ namespace Seeker
             //cant do this OnViewCreated since filterText.Text will always be empty...
             DebounceTimer.Stop();
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
-            filterText.Text = FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
+            filterText.Text = BrowseFilter.FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
             SearchFragment.UpdateDrawableState(filterText, true);
         }
 
@@ -631,79 +629,11 @@ namespace Seeker
         }
 
 
-        // TODO2026 move to own object object primitivism
-        private void ParseFilterString()
-        {
-            List<string> filterStringSplit = FilterString.Split(' ').ToList();
-            WordsToAvoid.Clear();
-            WordsToInclude.Clear();
-            //FilterSpecialFlags.Clear(); //TODO why?
-            foreach (string word in filterStringSplit)
-            {
-                //if (word.Contains("mbr:") || word.Contains("minbitrate:"))
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    try
-                //    {
-                //        FilterSpecialFlags.MinBitRateKBS = Integer.ParseInt(word.Split(':')[1]);
-                //    }
-                //    catch (System.Exception)
-                //    {
-
-                //    }
-                //}
-                //else if (word.Contains("mfs:") || word.Contains("minfilesize:"))
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    try
-                //    {
-                //        FilterSpecialFlags.MinFileSizeMB = (Integer.ParseInt(word.Split(':')[1]));
-                //    }
-                //    catch (System.Exception)
-                //    {
-
-                //    }
-                //}
-                //else if (word.Contains("mfif:") || word.Contains("minfilesinfolder:"))
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    try
-                //    {
-                //        FilterSpecialFlags.MinFoldersInFile = Integer.ParseInt(word.Split(':')[1]);
-                //    }
-                //    catch (System.Exception)
-                //    {
-
-                //    }
-                //}
-                //else if (word == "isvbr")
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    FilterSpecialFlags.IsVBR = true;
-                //}
-                //else if (word == "iscbr")
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    FilterSpecialFlags.IsCBR = true;
-                //}
-                if (word.StartsWith('-'))
-                {
-                    if (word.Length > 1)//if just '-' dont remove everything. just skip it.
-                    {
-                        WordsToAvoid.Add(word.Substring(1)); //skip the '-'
-                    }
-                }
-                else
-                {
-                    WordsToInclude.Add(word);
-                }
-            }
-        }
 
 
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string oldFilterString = FilteredResults ? FilterString : string.Empty;
+            string oldFilterString = BrowseFilter.IsFiltered ? BrowseFilter.FilterString : string.Empty;
             Logger.Debug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
             if (e.Text != null && e.Text.ToString() != string.Empty && isPaused)
@@ -714,9 +644,7 @@ namespace Seeker
             Logger.Debug("Text Changed: " + e.Text);
             if (e.Text != null && e.Text.ToString() != string.Empty)
             {
-                FilteredResults = true;
-                FilterString = e.Text.ToString();
-                ParseFilterString();
+                BrowseFilter.Set(e.Text.ToString());
 
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
@@ -728,7 +656,7 @@ namespace Seeker
             else
             {
                 DebounceTimer.Stop();
-                FilteredResults = false;
+                BrowseFilter.Reset();
                 lock (dataItemsForListView) //collection was modified exception here...
                 {
                     BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, dataItemsForListView, this);
@@ -747,138 +675,6 @@ namespace Seeker
             }
         }
 
-        private bool MatchesCriteriaShallow(DataItem di)
-        {
-            string fullyQualifiedName = string.Empty;
-            if (di.File != null)
-            {
-                //we are looking at files here...
-                fullyQualifiedName = di.Node.Data.Name + di.File.Filename;
-            }
-            else
-            {
-                fullyQualifiedName = di.Node.Data.Name;
-                //maybe here we should also do children...
-            }
-
-
-            if (WordsToAvoid != null)
-            {
-                foreach (string avoid in WordsToAvoid)
-                {
-                    if (fullyQualifiedName.Contains(avoid, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                        //badTerm = true;
-                    }
-                }
-            }
-            if (WordsToInclude != null)
-            {
-                foreach (string include in WordsToInclude)
-                {
-                    if (!fullyQualifiedName.Contains(include, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        private bool MatchesCriteriaFull(DataItem di)
-        {
-            string fullyQualifiedName = string.Empty;
-            if (di.File != null)
-            {
-                //we are looking at files here...
-                fullyQualifiedName = di.Node.Data.Name + di.File.Filename;
-            }
-            else
-            {
-                fullyQualifiedName = di.Node.Data.Name;
-                //maybe here we should also do children...
-            }
-
-
-            if (WordsToAvoid != null)
-            {
-                foreach (string avoid in WordsToAvoid)
-                {
-                    if (fullyQualifiedName.Contains(avoid, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                        //badTerm = true;
-                    }
-                }
-            }
-            bool includesAll = true;
-            if (WordsToInclude != null)
-            {
-                foreach (string include in WordsToInclude)
-                {
-                    if (!fullyQualifiedName.Contains(include, StringComparison.OrdinalIgnoreCase))
-                    {
-                        includesAll = false;
-                    }
-                }
-            }
-            if (includesAll)
-            {
-                return true;
-            }
-            else
-            {
-                //search children for a match.. if there are children.. else we are done..
-                if (di.Node.Children.Count == 0 && (di.Directory == null || di.Directory.Files.Count == 0))
-                {
-                    return false;
-                }
-                else if (di.File != null)
-                {
-                    //then we are at the end
-                    return false;
-                }
-                else
-                {
-                    if (di.Node.Children.Count != 0)
-                    {
-                        foreach (TreeNode<Directory> child in di.Node.Children)
-                        {
-                            if (MatchesCriteriaFull(new DataItem(child.Data, child)))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    if (di.File == null && di.Directory != null && di.Directory.Files.Count != 0)
-                    {
-                        foreach (File f in di.Directory.Files)
-                        {
-                            if (MatchesCriteriaFull(new DataItem(f, di.Node)))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                }
-            }
-        }
-
-        private List<DataItem> FilterBrowseList(List<DataItem> unfiltered)
-        {
-            List<DataItem> filtered = new List<DataItem>();
-            foreach (DataItem di in unfiltered)
-            {
-                if (MatchesCriteriaFull(di)) //change back to shallow...
-                {
-                    filtered.Add(di);
-                }
-            }
-            return filtered;
-        }
-
 
         private void UpdateFilteredResponses()
         {
@@ -888,19 +684,19 @@ namespace Seeker
                 //filteredBrowseTree = DownloadDialog.CreateTree(OriginalBrowseResponse,true,WordsToAvoid,WordsToInclude);
                 //string nameToFindInTheFilteredTree = OurCurrentLocation.Data.Name;
                 //TreeNode<Directory> item = GetNodeByName(filteredBrowseTree, nameToFindInTheFilteredTree);
-                if (cachedFilteredDataItemsForListView != null && BrowseUtils.IsCurrentSearchMoreRestrictive(FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
+                if (cachedFilteredDataItemsForListView != null && BrowseUtils.IsCurrentSearchMoreRestrictive(BrowseFilter.FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
                 {
                     //Logger.Debug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
-                    var test = FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
+                    var test = BrowseUtils.FilterBrowseList(cachedFilteredDataItemsForListView.Item2, BrowseFilter);
                     filteredDataItemsForListView.AddRange(test);//FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
                 }
                 else
                 {
                     //Logger.Debug("current filter is less restrictive: " + FilterString);
-                    var test = FilterBrowseList(dataItemsForListView);
+                    var test = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
                     filteredDataItemsForListView.AddRange(test);
                 }
-                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(FilterString, filteredDataItemsForListView.ToList());
+                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(BrowseFilter.FilterString, filteredDataItemsForListView.ToList());
             }
         }
 
@@ -920,7 +716,7 @@ namespace Seeker
 
         private void CopySelectedURLs()
         {
-            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
+            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
             {
                 Toast.MakeText(this.Context, Resource.String.NothingToCopy, ToastLength.Long).Show();
             }
@@ -931,7 +727,7 @@ namespace Seeker
             else
             {
                 List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (FilteredResults)
+                if (BrowseFilter.IsFiltered)
                 {
                     lock (filteredDataItemsForListView)
                     {
@@ -1000,7 +796,7 @@ namespace Seeker
 
         private void DownloadSelectedFiles(bool queuePaused)
         {
-            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
+            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
             {
                 Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
             }
@@ -1011,7 +807,7 @@ namespace Seeker
             else
             {
                 List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (FilteredResults)
+                if (BrowseFilter.IsFiltered)
                 {
                     lock (filteredDataItemsForListView)
                     {
@@ -1178,6 +974,7 @@ namespace Seeker
                 var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
+                // TODO2026
                 string topLevelStr = string.Empty;
                 if (toplevelItems == 1)
                 {
@@ -1215,11 +1012,11 @@ namespace Seeker
                     {
                         if (!justFilteredItems)
                         {
-                            TagDepths(dataItemsForDownload.First(), recusiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(dataItemsForDownload.First(), recusiveFullFileInfo);
                         }
                         else
                         {
-                            TagDepths(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
                         }
                     }
                     DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
@@ -1232,52 +1029,6 @@ namespace Seeker
             {
                 DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
             }
-        }
-
-        private static void TagDepths(DataItem d, List<FullFileInfo> recursiveFileInfo)
-        {
-            int lowestLevel = GetLevel(d.Node.Data.Name);
-            foreach (FullFileInfo fullFileInfo in recursiveFileInfo)
-            {
-                int level = GetLevel(fullFileInfo.FullFileName);
-                int depth = level - lowestLevel + 1;
-#if DEBUG
-                if (depth == 0)
-                {
-                    throw new Exception("depth is 0");
-                }
-#endif
-                fullFileInfo.Depth = depth;
-            }
-
-        }
-
-        //private static int GetMaxDepth(DataItem d, List<FullFileInfo> recursiveFileInfo)
-        //{
-        //    int lowestLevel = GetLevel(d.Node.Data.Name);
-        //    int highestLevel = int.MinValue;
-        //    foreach(FullFileInfo fullFileInfo in recursiveFileInfo)
-        //    {
-        //        int level = GetLevel(fullFileInfo.FullFileName);
-        //        if(level > highestLevel)
-        //        {
-        //            highestLevel = level;
-        //        }
-        //    }
-        //    return highestLevel - lowestLevel + 1;
-        //}
-
-        private static int GetLevel(string fileName)
-        {
-            int count = 0;
-            foreach (char c in fileName)
-            {
-                if (c == '\\')
-                {
-                    count++;
-                }
-            }
-            return count;
         }
 
         /// <summary>
@@ -1297,14 +1048,14 @@ namespace Seeker
             {
                 //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
                 dataItemsForDownload = new List<DataItem>();
-                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, FilteredResults);
+                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, BrowseFilter.IsFiltered);
                 if (itemSelected == null)
                 {
                     CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
                     return; //else nullref
                 }
                 PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
-                filteredDataItemsForDownload = FilterBrowseList(dataItemsForDownload.ToList());
+                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload.ToList(), BrowseFilter);
             }
 
 
@@ -1313,7 +1064,7 @@ namespace Seeker
                 Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
                 return;
             }
-            if (FilteredResults && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
+            if (BrowseFilter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
@@ -1421,7 +1172,7 @@ namespace Seeker
         public static int ItemPositionLongClicked = -1;
         private void ListViewDirectories_ItemLongClick(object sender, AdapterView.ItemLongClickEventArgs e)
         {
-            bool filteredResults = FilteredResults;
+            bool filteredResults = BrowseFilter.IsFiltered;
             DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
             if (itemSelected == null)
             {
@@ -1480,7 +1231,7 @@ namespace Seeker
         private void ListViewDirectories_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
             cachedFilteredDataItemsForListView = null;
-            bool filteredResults = FilteredResults;
+            bool filteredResults = BrowseFilter.IsFiltered;
             DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
             if (itemSelected == null)
             {
@@ -1570,7 +1321,7 @@ namespace Seeker
         public bool GoUpDirectory(int additionalLevels = 0)
         {
             cachedFilteredDataItemsForListView = null;
-            bool filteredResults = FilteredResults;
+            bool filteredResults = BrowseFilter.IsFiltered;
             lock (dataItemsForListView)
             {
                 TreeNode<Directory> item = null;
@@ -1650,7 +1401,7 @@ namespace Seeker
         {
             if (toFilter)
             {
-                filteredDataItemsForListView = FilterBrowseList(dataItemsForListView);
+                filteredDataItemsForListView = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
                 listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this);
             }
             else
@@ -1658,7 +1409,7 @@ namespace Seeker
                 listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
             }
 
-            var items = GetPathItems(dataItemsForListView);
+            var items = BrowseUtils.GetPathItems(dataItemsForListView);
             pathItems.Clear();
             pathItems.AddRange(items);
             if (fullRefreshOfPathItems)
@@ -1684,47 +1435,6 @@ namespace Seeker
 
 
 
-        public static List<PathItem> GetPathItems(List<DataItem> nonFilteredDataItemsForListView)
-        {
-            if (nonFilteredDataItemsForListView.Count == 0)
-            {
-                return new List<PathItem>();
-            }
-            List<PathItem> pathItemsList = new List<PathItem>();
-            if (nonFilteredDataItemsForListView[0].IsDirectory())
-            {
-                GetPathItemsInternal(pathItemsList, nonFilteredDataItemsForListView[0].Node.Parent, true);
-            }
-            else
-            {
-                GetPathItemsInternal(pathItemsList, nonFilteredDataItemsForListView[0].Node, true);
-            }
-            pathItemsList.Reverse();
-            FixNullRootDisplayName(pathItemsList);
-            return pathItemsList;
-        }
-
-        private static void FixNullRootDisplayName(List<PathItem> pathItemsList)
-        {
-            if (pathItemsList.Count > 0 && pathItemsList[0].DisplayName == string.Empty)
-            {
-                pathItemsList[0].DisplayName = "root";
-            }
-        }
-
-        private static void GetPathItemsInternal(List<PathItem> pathItems, TreeNode<Directory> treeNode, bool lastChild)
-        {
-            string displayName = CommonHelpers.GetFileNameFromFile(treeNode.Data.Name);
-            pathItems.Add(new PathItem(displayName, lastChild));
-            if (treeNode.Parent == null)
-            {
-                return;
-            }
-            else
-            {
-                GetPathItemsInternal(pathItems, treeNode.Parent, false);
-            }
-        }
         //https://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
         //onContextItemSelected() is called for all currently existing fragments starting with the first added one.
         public const int UNIQUE_BROWSE_GROUP_ID = 304;
@@ -1750,12 +1460,12 @@ namespace Seeker
                         DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
                         return true;
                     case 2:
-                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
+                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
                         var folderSummary = BrowseUtils.GetFolderSummary(itemSelected);
                         ShowFolderSummaryDialog(folderSummary);
                         return true;
                     case 3:
-                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
+                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
                         //bool isDir = itemSelected.IsDirectory();
                         string slskLink = CommonHelpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
@@ -1819,10 +1529,7 @@ namespace Seeker
 
         private static void ClearFilterStringAndCached(bool force = false)
         {
-            FilterString = string.Empty;
-            FilteredResults = false;
-            WordsToAvoid.Clear();
-            WordsToInclude.Clear();
+            BrowseFilter.Reset();
             //FilterSpecialFlags.Clear();
             if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
@@ -2084,8 +1791,6 @@ namespace Seeker
             }
 
         }
-
-
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
         {
