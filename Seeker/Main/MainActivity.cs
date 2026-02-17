@@ -789,7 +789,7 @@ namespace Seeker
                         }
                         catch (Exception ex)
                         {
-                            if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                            if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                             {
                                 FallbackFileSelectionEntry(false);
                             }
@@ -1766,7 +1766,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                 {
                     FallbackFileSelectionEntry(true);
                 }

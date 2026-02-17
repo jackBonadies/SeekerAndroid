@@ -105,7 +105,7 @@ namespace Seeker.Messages
 
         public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            Logger.Debug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
+            Logger.Debug("ShowSlskLinkContextMenu " + SimpleHelpers.ShowSlskLinkContextMenu);
 
             //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
             //in that case we still dont want to show anything.
@@ -113,10 +113,10 @@ namespace Seeker.Messages
             {
                 return;
             }
-            else if (CommonHelpers.ShowSlskLinkContextMenu)
+            else if (SimpleHelpers.ShowSlskLinkContextMenu)
             {
                 //closing wont turn this off since its invalid parse, so turn it off here...
-                CommonHelpers.ShowSlskLinkContextMenu = false;
+                SimpleHelpers.ShowSlskLinkContextMenu = false;
                 return;
             }
 

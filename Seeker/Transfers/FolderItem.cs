@@ -250,7 +250,7 @@ namespace Seeker
                 TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99; });
                 if (IsUpload())
                 {
-                    TransferItems.RemoveAll((TransferItem i) => { return CommonHelpers.IsUploadCompleteOrAborted(i.State); });
+                    TransferItems.RemoveAll((TransferItem i) => { return SimpleHelpers.IsUploadCompleteOrAborted(i.State); });
                 }
             }
         }

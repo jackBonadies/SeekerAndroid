@@ -211,15 +211,15 @@ namespace Seeker
     {
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            Logger.Debug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
+            Logger.Debug("ShowSlskLinkContextMenu " + SimpleHelpers.ShowSlskLinkContextMenu);
 
             if (menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
             {
                 return;
             }
-            else if (CommonHelpers.ShowSlskLinkContextMenu)
+            else if (SimpleHelpers.ShowSlskLinkContextMenu)
             {
-                CommonHelpers.ShowSlskLinkContextMenu = false;
+                SimpleHelpers.ShowSlskLinkContextMenu = false;
                 return;
             }
 

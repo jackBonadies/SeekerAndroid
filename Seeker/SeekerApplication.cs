@@ -87,7 +87,7 @@ namespace Seeker
             PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
-            SeekerState.OffsetFromUtcCached = CommonHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
+            SeekerState.OffsetFromUtcCached = SimpleHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
 
             SeekerState.SystemLanguage = LocaleToString(Resources.Configuration.Locale);
 

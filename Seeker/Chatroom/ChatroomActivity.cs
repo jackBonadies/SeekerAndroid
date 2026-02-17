@@ -356,7 +356,7 @@ namespace Seeker
                 for (int i = 0; i < 1000; i++)
                 {
                     System.Threading.Thread.Sleep(r.Next(0, 100));
-                    Message m = new Message("test", 1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, "test" + i, false);
+                    Message m = new Message("test", 1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, "test" + i, false);
                     ChatroomController.AddMessage(ChatroomInnerFragment.OurRoomInfo.Name, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(ChatroomInnerFragment.OurRoomInfo.Name, m));
                 }

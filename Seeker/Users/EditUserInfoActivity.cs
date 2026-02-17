@@ -188,7 +188,7 @@ namespace Seeker
             }
             catch (System.Exception ex)
             {
-                if (ex.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                 {
                     Toast.MakeText(this, this.GetString(Resource.String.error_no_file_manager_image), ToastLength.Long).Show();
                 }

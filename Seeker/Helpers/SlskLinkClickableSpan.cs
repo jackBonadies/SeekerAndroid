@@ -13,8 +13,8 @@ namespace Seeker
         public override void OnClick(View widget)
         {
             Logger.Debug("slsk link click");
-            CommonHelpers.SlskLinkClickedData = textClicked;
-            CommonHelpers.ShowSlskLinkContextMenu = true;
+            SimpleHelpers.SlskLinkClickedData = textClicked;
+            SimpleHelpers.ShowSlskLinkContextMenu = true;
             SeekerState.ActiveActivityRef.RegisterForContextMenu(widget);
             SeekerState.ActiveActivityRef.OpenContextMenu(widget);
             SeekerState.ActiveActivityRef.UnregisterForContextMenu(widget);

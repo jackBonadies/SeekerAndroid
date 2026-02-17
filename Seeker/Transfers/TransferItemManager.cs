@@ -594,7 +594,7 @@ namespace Seeker
                 AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
                 if (isUploads)
                 {
-                    AllTransferItems.RemoveAll((TransferItem i) => { return CommonHelpers.IsUploadCompleteOrAborted(i.State); });
+                    AllTransferItems.RemoveAll((TransferItem i) => { return SimpleHelpers.IsUploadCompleteOrAborted(i.State); });
                 }
             }
             lock (AllFolderItems)
@@ -856,7 +856,7 @@ namespace Seeker
             {
                 foreach (FolderItem fi in AllFolderItems)
                 {
-                    foldersToNotDelete.Add(CommonHelpers.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
+                    foldersToNotDelete.Add(SimpleHelpers.GenerateIncompleteFolderName(fi.Username, fi.TransferItems.First().FullFilename, fi.GetDirectoryLevel()));
                 }
             }
             return foldersToNotDelete;

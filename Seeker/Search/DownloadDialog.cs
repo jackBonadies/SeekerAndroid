@@ -214,7 +214,7 @@ namespace Seeker
                 return;
             }
             userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
             log.Debug(Logger.LogCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
@@ -242,7 +242,7 @@ namespace Seeker
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -1120,7 +1120,7 @@ namespace Seeker
             {
                 viewFilename.Text = CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
             }
-            viewAttributes.Text = CommonHelpers.GetSizeLengthAttrString(wrapper.File);
+            viewAttributes.Text = SimpleHelpers.GetSizeLengthAttrString(wrapper.File);
         }
 
         /// <summary>

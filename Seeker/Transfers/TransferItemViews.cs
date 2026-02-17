@@ -600,7 +600,7 @@ namespace Seeker
                 //Helpers.GetTransferSpeedString(avgSpeedBytes);
                 if (showSpeed)
                 {
-                    viewStatusAdditionalInfo.Text = CommonHelpers.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
+                    viewStatusAdditionalInfo.Text = SimpleHelpers.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
                 }
                 else
                 {

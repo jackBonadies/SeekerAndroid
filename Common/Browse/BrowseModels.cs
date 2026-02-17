@@ -1,9 +1,25 @@
 using Common;
-using Seeker.Helpers;
 using Soulseek;
 
 namespace Seeker
 {
+    public class FolderSummary
+    {
+        public int LengthSeconds = 0;
+        public long SizeBytes = 0;
+        public int NumFiles = 0;
+        public int NumSubFolders = 0;
+        public void AddFile(Soulseek.File file)
+        {
+            if (file.Length.HasValue)
+            {
+                LengthSeconds += file.Length.Value;
+            }
+            SizeBytes += file.Size;
+            NumFiles++;
+        }
+    }
+
     public class PathItem
     {
         public string DisplayName;
@@ -14,7 +30,6 @@ namespace Seeker
             IsLastNode = isLastNode;
         }
     }
-
 
     public class FullFileInfo
     {
@@ -47,24 +62,25 @@ namespace Seeker
         {
             return Directory != null;
         }
+
         public string GetDisplayName()
         {
             if (IsDirectory())
             {
                 if (this.Node.IsLocked)
                 {
-                    return new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFileNameFromFile(Name);
+                    return char.ConvertFromUtf32(0x1F512) + SimpleHelpers.GetFileNameFromFile(Name);
                 }
                 else
                 {
-                    return CommonHelpers.GetFileNameFromFile(Name);
+                    return SimpleHelpers.GetFileNameFromFile(Name);
                 }
             }
             else
             {
                 if (this.Node.IsLocked)
                 {
-                    return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Name;
+                    return char.ConvertFromUtf32(0x1F512) + Name;
                 }
                 else
                 {

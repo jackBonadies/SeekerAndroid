@@ -17,9 +17,9 @@ namespace Seeker
         public const int FromSlskLinkDownloadFiles = 81;
         public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            if (v is TextView && CommonHelpers.ShowSlskLinkContextMenu)
+            if (v is TextView && SimpleHelpers.ShowSlskLinkContextMenu)
             {
-                if (!CommonHelpers.ParseSlskLinkString(CommonHelpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
+                if (!CommonHelpers.ParseSlskLinkString(SimpleHelpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
                 {
                     Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
                     base.OnCreateContextMenu(menu, v, menuInfo);
@@ -46,7 +46,7 @@ namespace Seeker
 
         public override void OnContextMenuClosed(IMenu menu)
         {
-            CommonHelpers.ShowSlskLinkContextMenu = false;
+            SimpleHelpers.ShowSlskLinkContextMenu = false;
             base.OnContextMenuClosed(menu);
         }
 
@@ -137,7 +137,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case FromSlskLinkBrowseAtLocation: //Browse At Location
-                    CommonHelpers.ParseSlskLinkString(CommonHelpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
+                    CommonHelpers.ParseSlskLinkString(SimpleHelpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
@@ -149,10 +149,10 @@ namespace Seeker
                     DownloadDialog.RequestFilesApi(username, null, action, dirPath);
                     return true;
                 case FromSlskLinkCopyLink:
-                    CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, CommonHelpers.SlskLinkClickedData);
+                    CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, SimpleHelpers.SlskLinkClickedData);
                     return true;
                 case FromSlskLinkDownloadFiles:
-                    CommonHelpers.ParseSlskLinkString(CommonHelpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
+                    CommonHelpers.ParseSlskLinkString(SimpleHelpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
                     Action<Task<Directory>> ContAction = null;
                     if (isFile)
                     {

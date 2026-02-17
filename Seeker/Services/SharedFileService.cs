@@ -356,7 +356,7 @@ namespace Seeker.Services
             {
                 closeQuietly(c);
             }
-            CommonHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            SimpleHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
@@ -443,7 +443,7 @@ namespace Seeker.Services
                 }
 
             }
-            CommonHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
+            SimpleHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
 
             if (volumePath != null)
             {
@@ -982,7 +982,7 @@ namespace Seeker.Services
                         files.Add(slskFile);
                     }
                 }
-                CommonHelpers.SortSlskDirFiles(files);
+                SimpleHelpers.SortSlskDirFiles(files);
                 string lastPathSegment = null;
                 if (msdMsfOrOverrideCase)
                 {
@@ -1101,7 +1101,7 @@ namespace Seeker.Services
                 }
             }
 
-            CommonHelpers.SortSlskDirFiles(files);
+            SimpleHelpers.SortSlskDirFiles(files);
             string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
 
             if (overrideCase)

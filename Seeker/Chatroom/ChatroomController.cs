@@ -110,7 +110,7 @@ namespace Seeker.Chatroom
                 List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
                 foreach (string room in noLongerConnectedRooms)
                 {
-                    DateTime localNow = CommonHelpers.GetDateTimeNowSafe();
+                    DateTime localNow = SimpleHelpers.GetDateTimeNowSafe();
                     Message m = new Message(localNow, DateTime.UtcNow, code, getSpecialStatusMessageText(code, localNow));
                     ChatroomController.AddMessage(room, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(room, m));
@@ -828,7 +828,7 @@ namespace Seeker.Chatroom
 
             Logger.Debug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
-            Message msg = new Message(e.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
+            Message msg = new Message(e.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
             if (e.Username == PreferencesState.Username)
             {
                 //we already logged it..

@@ -252,7 +252,7 @@ namespace Seeker.Messages
             viewUsername.Text = username;
             Message m = MessageController.Messages[username].Last();
 
-            viewDateTimeAgo.Text = CommonHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
+            viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
             if (MessageController.UnreadUsernames.ContainsKey(username))
             {

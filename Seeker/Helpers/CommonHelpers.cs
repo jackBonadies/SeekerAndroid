@@ -1,4 +1,4 @@
-﻿using Seeker.Helpers;
+using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Messages;
 using Android.App;
@@ -21,19 +21,6 @@ namespace Seeker
 {
     public static class CommonHelpers
     {
-        public static string AvoidLineBreaks(string orig)
-        {
-            return orig.Replace(' ', '\u00A0').Replace("\\", "\\\u2060");
-        }
-        /// <summary>
-        /// This is necessary since DocumentFile.ListFiles() returns files in an incomprehensible order (not by name, size, modified, inode, etc.)
-        /// </summary>
-        /// <param name="files"></param>
-        public static void SortSlskDirFiles(List<Soulseek.File> files)
-        {
-            files.Sort((x, y) => x.Filename.CompareTo(y.Filename));
-        }
-
         public static bool CompleteIncompleteDifferentVolume()
         {
             if (SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootIncompleteDocumentFile != null && SeekerState.RootDocumentFile != null)
@@ -82,43 +69,6 @@ namespace Seeker
             }
         }
 
-        public static string GenerateIncompleteFolderName(string username, string fullFileName, int depth)
-        {
-            string albumFolderName = null;
-            if (depth == 1)
-            {
-                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
-            }
-            else
-            {
-                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
-                albumFolderName = albumFolderName.Replace('\\', '_');
-            }
-            string incompleteFolderName = username + "_" + albumFolderName;
-            //Path.GetInvalidPathChars() doesnt seem like enough bc I still get failures on ''' and '&'
-            foreach (char c in System.IO.Path.GetInvalidPathChars().Union(new[] { '&', '\'' }))
-            {
-                incompleteFolderName = incompleteFolderName.Replace(c, '_');
-            }
-            return incompleteFolderName;
-        }
-
-        public static bool IsFileUri(string uriString)
-        {
-            if (uriString.StartsWith("file:"))
-            {
-                return true;
-            }
-            else if (uriString.StartsWith("content:"))
-            {
-                return false;
-            }
-            else
-            {
-                throw new Exception("IsFileUri failed: " + uriString);
-            }
-        }
-
 
         public static string GetNiceDateTime(DateTime dt)
         {
@@ -131,7 +81,7 @@ namespace Seeker
             {
                 Logger.Firebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
-            if (dt.Date == CommonHelpers.GetDateTimeNowSafe().Date)
+            if (dt.Date == SimpleHelpers.GetDateTimeNowSafe().Date)
             {
                 return SeekerState.ActiveActivityRef.GetString(Resource.String.today) + " " + dt.ToString("h:mm:ss tt", cultureInfo); //cultureInfo can be null without issue..
             }
@@ -141,53 +91,12 @@ namespace Seeker
             }
         }
 
-        [Flags]
-        public enum SpecialMessageType : short
-        {
-            None = 0,
-            SlashMe = 1,
-            MagnetLink = 2,
-            SlskLink = 4,
-        }
-
-        /// <summary>
-        /// true if '/me ' message
-        /// </summary>
-        /// <returns>true if special message</returns>
-        public static bool IsSpecialMessage(string msg, out SpecialMessageType specialMessageType)
-        {
-            specialMessageType = SpecialMessageType.None;
-            if (string.IsNullOrEmpty(msg))
-            {
-                return false;
-            }
-            if (msg.StartsWith(@"/me "))
-            {
-                specialMessageType = SpecialMessageType.SlashMe;
-                return true;
-            }
-            if (msg.Contains(@"magnet:?xt=urn:"))
-            {
-                specialMessageType = SpecialMessageType.MagnetLink;
-                return true;
-            }
-            if (msg.Contains(@"slsk://"))
-            {
-                specialMessageType = SpecialMessageType.SlskLink;
-                return true;
-            }
-            return false;
-        }
-
-        private readonly static System.Text.RegularExpressions.Regex MagnetLinkRegex = new System.Text.RegularExpressions.Regex(@"magnet:\?xt=urn:[^ ""]+");
-        private readonly static System.Text.RegularExpressions.Regex SlskLinkRegex = new System.Text.RegularExpressions.Regex(@"slsk://[^ ""]+");
-
-        public static void ConfigureSpecialLinks(TextView textView, string msgText, SpecialMessageType specialMessageType)
+        public static void ConfigureSpecialLinks(TextView textView, string msgText, SimpleHelpers.SpecialMessageType specialMessageType)
         {
             Android.Text.SpannableString messageText = new Android.Text.SpannableString(msgText);
-            if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink))
+            if (specialMessageType.HasFlag(SimpleHelpers.SpecialMessageType.MagnetLink))
             {
-                var matches = MagnetLinkRegex.Matches(msgText);
+                var matches = SimpleHelpers.MagnetLinkRegex.Matches(msgText);
                 //add in our spans.
                 if (matches.Count > 0)
                 {
@@ -199,9 +108,9 @@ namespace Seeker
                     }
                 }
             }
-            if (specialMessageType.HasFlag(SpecialMessageType.SlskLink))
+            if (specialMessageType.HasFlag(SimpleHelpers.SpecialMessageType.SlskLink))
             {
-                var matches = SlskLinkRegex.Matches(msgText);
+                var matches = SimpleHelpers.SlskLinkRegex.Matches(msgText);
                 //add in our spans.
                 if (matches.Count > 0)
                 {
@@ -215,29 +124,6 @@ namespace Seeker
             }
             textView.MovementMethod = Android.Text.Method.LinkMovementMethod.Instance; //needed for slsk:// not needed for magnet. weird.
             textView.TextFormatted = messageText;
-        }
-
-        public static string ParseSpecialMessage(string msg)
-        {
-            if (IsSpecialMessage(msg, out SpecialMessageType specialMessageType))
-            {
-                //if slash me dont include other special links, too excessive.
-                if (specialMessageType == SpecialMessageType.SlashMe)
-                {
-                    //"/me goes to the store"
-                    //"goes to the store" + style
-                    return msg.Substring(4, msg.Length - 4);
-                }
-                else
-                {
-                    return msg;
-                }
-            }
-            else
-            {
-                return msg;
-
-            }
         }
 
         public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
@@ -454,18 +340,6 @@ namespace Seeker
             }
         }
 
-        public static DateTime GetDateTimeNowSafe()
-        {
-            try
-            {
-                return DateTime.Now;
-            }
-            catch (System.TimeZoneNotFoundException)
-            {
-                return DateTime.UtcNow;
-            }
-        }
-
         public static void AddGivePrivilegesIfApplicable(IMenu menu, int indexToUse)
         {
             if (PrivilegesManager.Instance.GetRemainingDays() >= 1)
@@ -545,7 +419,7 @@ namespace Seeker
                 cancelString = SeekerState.ActiveActivityRef.GetString(Resource.String.cancel);
             }
 
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(owner, Resource.Style.MyAlertDialogTheme); 
+            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(owner, Resource.Style.MyAlertDialogTheme);
             builder.SetTitle(title);
 
             View viewInflated = LayoutInflater.From(owner).Inflate(dialogContentId, (ViewGroup)owner.FindViewById(Android.Resource.Id.Content).RootView, false);
@@ -787,14 +661,14 @@ namespace Seeker
 
         public static void SetMessageTextView(TextView viewMessage, Message msg)
         {
-            if (CommonHelpers.IsSpecialMessage(msg.MessageText, out SpecialMessageType specialMessageType))
+            if (SimpleHelpers.IsSpecialMessage(msg.MessageText, out SimpleHelpers.SpecialMessageType specialMessageType))
             {
-                if (specialMessageType.HasFlag(SpecialMessageType.SlashMe))
+                if (specialMessageType.HasFlag(SimpleHelpers.SpecialMessageType.SlashMe))
                 {
-                    viewMessage.Text = CommonHelpers.ParseSpecialMessage(msg.MessageText);
+                    viewMessage.Text = SimpleHelpers.ParseSpecialMessage(msg.MessageText);
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Italic);
                 }
-                else if (specialMessageType.HasFlag(SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SpecialMessageType.SlskLink))
+                else if (specialMessageType.HasFlag(SimpleHelpers.SpecialMessageType.MagnetLink) || specialMessageType.HasFlag(SimpleHelpers.SpecialMessageType.SlskLink))
                 {
                     viewMessage.SetTypeface(null, Android.Graphics.TypefaceStyle.Normal);
                     CommonHelpers.ConfigureSpecialLinks(viewMessage, msg.MessageText, specialMessageType);
@@ -824,7 +698,7 @@ namespace Seeker
             {
                 Logger.Firebase("CANNOT GET CURRENT CULTURE: " + e.Message + e.StackTrace);
             }
-            if (dt.Date == CommonHelpers.GetDateTimeNowSafe().Date)
+            if (dt.Date == SimpleHelpers.GetDateTimeNowSafe().Date)
             {
                 return dt.ToString("h:mm:ss tt", cultureInfo); //this is the only difference...
             }
@@ -841,12 +715,7 @@ namespace Seeker
             clipboardManager.PrimaryClip = clip;
         }
 
-        public static string GetFileNameFromFile(string filename) //is also used to get the last folder
-        {
-            int begin = filename.LastIndexOf("\\");
-            string clipped = filename.Substring(begin + 1);
-            return clipped;
-        }
+        public static string GetFileNameFromFile(string filename) => SimpleHelpers.GetFileNameFromFile(filename);
 
         public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
         {
@@ -854,7 +723,6 @@ namespace Seeker
             string clipped = path.Substring(0, end);
             return clipped; //"raw:\\storage\\emulated\\0\\Download"
         }
-
 
         //this is a helper for this issue:
         //var name1 = df.CreateFile("audio/m4a", "name1").Name;
@@ -901,7 +769,7 @@ namespace Seeker
         //[seeker] .wav === audio/x-wav
         //[seeker] .mp4 === video/mp4
 
-        //other problematic - 
+        //other problematic -
         //        ".alac", -> null
         //        ".ape",  -> null  // audio/x-ape
         //        ".m4p" //aac with apple drm. similar to the drm free m4a. audio/m4p not mp4 which is reported. I am not sure...
@@ -940,19 +808,12 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                if (e.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                 {
                     Logger.Firebase("viewUri: " + e.Message + httpUri.ToString());
                     SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
                 }
             }
-        }
-
-        public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";
-
-        public static bool IsUploadCompleteOrAborted(TransferStates state)
-        {
-            return (state.HasFlag(TransferStates.Succeeded) || state.HasFlag(TransferStates.Cancelled) || state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Completed) || state.HasFlag(TransferStates.Rejected));
         }
 
         public static string GetLastPathSegmentWithSpecialCaseProtection(DocumentFile dir, out bool msdCase)
@@ -1014,9 +875,6 @@ namespace Seeker
             }
         }
 
-        public static string SlskLinkClickedData = null;
-        public static bool ShowSlskLinkContextMenu = false;
-
         /// <summary>
         /// returns false if unable to parse
         /// </summary>
@@ -1045,7 +903,7 @@ namespace Seeker
                 fullFilePath = linkStringToParse.Substring(linkStringToParse.IndexOf('/') + 1).TrimEnd('/').Replace('/', '\\');
                 if (isFile)
                 {
-                    dirPath = CommonHelpers.GetDirectoryRequestFolderName(fullFilePath);
+                    dirPath = SimpleHelpers.GetDirectoryRequestFolderName(fullFilePath);
                 }
                 else
                 {
@@ -1102,209 +960,6 @@ namespace Seeker
             else
             {
                 return "\\Locked\\";
-            }
-        }
-
-        public static string GetTransferSpeedString(double bytesPerSecond)
-        {
-            if (bytesPerSecond > 1048576) //more than 1MB
-            {
-                return string.Format("{0:F1}mbs", bytesPerSecond / 1048576.0);
-            }
-            else
-            {
-                return string.Format("{0:F1}kbs", bytesPerSecond / 1024.0);
-            }
-        }
-
-        public static string GetDateTimeSinceAbbrev(DateTime dtThen)
-        {
-            var dtNow = CommonHelpers.GetDateTimeNowSafe(); //2.5 microseconds
-            if (dtNow.Day == dtThen.Day)
-            {
-                //if on same day then show time. 24 hour time? maybe option to change?
-                //ex. 2:45, 20:34
-                //hh:mm
-                return dtThen.ToString("H:mm");
-            }
-            else if (dtNow.Year == dtThen.Year)
-            {
-                //if different day but same year show month day
-                //ex. Jan 4
-                return dtThen.ToString("MMM d"); // d = 7 or 17.
-            }
-            else
-            {
-                //if different year show full.
-                //ex. Dec 30 2021
-                return dtThen.ToString("MMM d yyyy");
-            }
-        }
-
-        public static string GetSubHeaderText(SearchResponse searchResponse)
-        {
-            int numFiles = 0;
-            long totalBytes = -1;
-            if (PreferencesState.HideLockedResultsInSearch)
-            {
-                numFiles = searchResponse.FileCount;
-                totalBytes = searchResponse.Files.Sum(f => f.Size);
-            }
-            else
-            {
-                numFiles = searchResponse.FileCount + searchResponse.LockedFileCount;
-                totalBytes = searchResponse.Files.Sum(f => f.Size) + searchResponse.LockedFiles.Sum(f => f.Size);
-            }
-
-            //if total bytes greater than 1GB 
-            string sizeString = GetHumanReadableSize(totalBytes);
-
-            var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
-            if (!PreferencesState.HideLockedResultsInSearch)
-            {
-                filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
-            }
-            string timeString = null;
-            if (filesWithLength.Count() > 0)
-            {
-                //translate length into human readable
-                timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value));
-            }
-            if (timeString == null)
-            {
-                return string.Format("{0} files • {1}", numFiles, sizeString);
-            }
-            else
-            {
-                return string.Format("{0} files • {1} • {2}", numFiles, sizeString, timeString);
-            }
-
-
-        }
-
-        public static string GetSizeLengthAttrString(Soulseek.File f)
-        {
-
-            string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
-            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : null;
-            string attrString = GetHumanReadableAttributesForSingleItem(f);
-            if (attrString == null && lengthString == null)
-            {
-                return sizeString;
-            }
-            else if (attrString == null)
-            {
-                return String.Format("{0} • {1}", sizeString, lengthString);
-            }
-            else if (lengthString == null)
-            {
-                return String.Format("{0} • {1}", sizeString, attrString);
-            }
-            else
-            {
-                return String.Format("{0} • {1} • {2}", sizeString, lengthString, attrString);
-            }
-        }
-
-
-        public static string GetHumanReadableAttributesForSingleItem(Soulseek.File f)
-        {
-
-            int bitRate = -1;
-            int bitDepth = -1;
-            double sampleRate = double.NaN;
-            foreach (var attr in f.Attributes)
-            {
-                switch (attr.Type)
-                {
-                    case FileAttributeType.BitRate:
-                        bitRate = attr.Value;
-                        break;
-                    case FileAttributeType.BitDepth:
-                        bitDepth = attr.Value;
-                        break;
-                    case FileAttributeType.SampleRate:
-                        sampleRate = attr.Value / 1000.0;
-                        break;
-                }
-            }
-            if (bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
-            {
-                return null; //nothing to add
-            }
-            else if (bitDepth != -1 && !double.IsNaN(sampleRate))
-            {
-                return bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
-            }
-            else if (!double.IsNaN(sampleRate))
-            {
-                return sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
-            }
-            else if (bitRate != -1)
-            {
-                return bitRate + SlskHelp.CommonHelpers.STRINGS_KBS;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static string GetHumanReadableSize(long totalBytes)
-        {
-            if (totalBytes > 1024 * 1024 * 1024)
-            {
-                return string.Format("{0:0.##} gb", totalBytes / (1024.0 * 1024.0 * 1024.0));
-            }
-            else
-            {
-                return string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
-            }
-        }
-
-
-        public static string GetHumanReadableTime(int totalSeconds)
-        {
-            int sec = totalSeconds % 60;
-            int minutes = (totalSeconds % 3600) / 60;
-            int hours = (totalSeconds / 3600);
-            if (minutes == 0 && hours == 0 && sec == 0)
-            {
-                return null;
-            }
-            else if (minutes == 0 && hours == 0)
-            {
-                return string.Format("{0}s", sec);
-            }
-            else if (hours == 0)
-            {
-                return string.Format("{0}m{1}s", minutes, sec);
-            }
-            else
-            {
-                return string.Format("{0}h{1}m{2}s", hours, minutes, sec);
-            }
-        }
-
-
-
-
-        /// <summary>
-        /// Get all BUT the filename
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        public static string GetDirectoryRequestFolderName(string filename)
-        {
-            try
-            {
-                int end = filename.LastIndexOf("\\");
-                string clipped = filename.Substring(0, end);
-                return clipped;
-            }
-            catch
-            {
-                return "";
             }
         }
 
@@ -1373,7 +1028,7 @@ namespace Seeker
                           .SetContentIntent(pendingIntent)
                           .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
                           .SetTicker(titleText);
-                //for < 21 it is possible (must use png icon instead of xml) but the icon does look great 
+                //for < 21 it is possible (must use png icon instead of xml) but the icon does look great
                 //  and it doesnt clear from recents..
                 if (shutdownAction && OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
@@ -1605,7 +1260,7 @@ namespace Seeker
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
+                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.
                 //you cannot input '.' or negative even with physical keyboard, etc.
                 string newText = input.Text;
                 bool isEmpty = string.IsNullOrEmpty(newText);
@@ -1690,7 +1345,7 @@ namespace Seeker
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.  
+                //in my testing the only "bad" input we can get is "0" or a number greater than what you have.
                 //you cannot input '.' or negative even with physical keyboard, etc.
                 GivePrilegesAPI(username, input.Text);
             });

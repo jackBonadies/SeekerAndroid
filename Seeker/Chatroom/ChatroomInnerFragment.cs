@@ -672,7 +672,7 @@ namespace Seeker.Chatroom
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -687,7 +687,7 @@ namespace Seeker.Chatroom
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -831,7 +831,7 @@ namespace Seeker.Chatroom
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }

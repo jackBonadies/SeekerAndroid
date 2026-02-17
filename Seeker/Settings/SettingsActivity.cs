@@ -1141,14 +1141,14 @@ namespace Seeker
 
         private void SetCompleteFolderView()
         {
-            string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
+            string friendlyName = SimpleHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
             currentCompleteFolderView.Text = friendlyName;
             CommonHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
         }
 
         private void SetIncompleteFolderView()
         {
-            string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
+            string friendlyName = SimpleHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
             currentIncompleteFolderView.Text = friendlyName;
             CommonHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
         }
@@ -2708,7 +2708,7 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
@@ -2754,7 +2754,7 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }

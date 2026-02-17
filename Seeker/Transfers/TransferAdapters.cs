@@ -302,14 +302,14 @@ namespace Seeker
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && !(CommonHelpers.IsUploadCompleteOrAborted(ti.State)))
+                        if (tvh != null && ti != null && !(SimpleHelpers.IsUploadCompleteOrAborted(ti.State)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, Resource.String.AbortUpload);
                         }
                     }
                     else
                     {
-                        if (tvh != null && fi != null && !(CommonHelpers.IsUploadCompleteOrAborted(folderItemState))) ;
+                        if (tvh != null && fi != null && !(SimpleHelpers.IsUploadCompleteOrAborted(folderItemState))) ;
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.AbortUploads);
                         }
@@ -345,7 +345,7 @@ namespace Seeker
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && (CommonHelpers.IsUploadCompleteOrAborted(ti.State)))
+                        if (tvh != null && ti != null && (SimpleHelpers.IsUploadCompleteOrAborted(ti.State)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
@@ -357,7 +357,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (tvh != null && fi != null && (CommonHelpers.IsUploadCompleteOrAborted(folderItemState)))
+                        if (tvh != null && fi != null && (SimpleHelpers.IsUploadCompleteOrAborted(folderItemState)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
                         }

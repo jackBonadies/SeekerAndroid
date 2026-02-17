@@ -929,7 +929,7 @@ namespace Seeker.Services
                         }
                     }
 
-                    string fullDir = rootdir + @"/Soulseek Incomplete/" + CommonHelpers.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
+                    string fullDir = rootdir + @"/Soulseek Incomplete/" + SimpleHelpers.GenerateIncompleteFolderName(username, fullfilename, depth); //+ @"/" + name;
                     musicDir = new Java.IO.File(fullDir);
                     lock (lock_album_ifexist_create)
                     {
@@ -1062,7 +1062,7 @@ namespace Seeker.Services
                     }
 
 
-                    string album_folder_name = CommonHelpers.GenerateIncompleteFolderName(username, fullfilename, depth);
+                    string album_folder_name = SimpleHelpers.GenerateIncompleteFolderName(username, fullfilename, depth);
                     lock (lock_album_ifexist_create)
                     {
                         folderDir1 = slskDir1.FindFile(album_folder_name); //does the folder we want to save to exist

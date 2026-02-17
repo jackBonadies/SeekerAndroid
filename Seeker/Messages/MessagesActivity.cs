@@ -628,7 +628,7 @@ namespace Seeker
                     string replyText = remoteInputBundle.GetString("key_text_result");
                     //Message msg = new Message(PreferencesState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     Logger.Debug("direct reply " + replyText + " " + uname);
-                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
+                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
 
                 }

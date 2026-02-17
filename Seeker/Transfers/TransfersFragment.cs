@@ -1518,7 +1518,7 @@ namespace Seeker
                             //tested on API25 and API30
                             //AndroidX.Core.Content.FileProvider
                             Android.Net.Uri uriToUse = null;
-                            if (SeekerState.UseLegacyStorage() && CommonHelpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
+                            if (SeekerState.UseLegacyStorage() && SimpleHelpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
                             {
                                 uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
                             }
@@ -1546,7 +1546,7 @@ namespace Seeker
                         }
                         if (ti is TransferItem ttti)
                         {
-                            string startingDir = CommonHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
+                            string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
                             Action<View> action = new Action<View>((v) =>
                             {
                                 ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
@@ -1562,10 +1562,10 @@ namespace Seeker
                                 Toast.MakeText(SeekerState.ActiveActivityRef, "Folder is empty.", ToastLength.Short).Show();
                                 return true;
                             }
-                            string startingDir = CommonHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
+                            string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
                             for (int i = 0; i < fi.GetDirectoryLevel() - 1; i++)
                             {
-                                startingDir = CommonHelpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
+                                startingDir = SimpleHelpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
                             }
 
 
@@ -1920,7 +1920,7 @@ namespace Seeker
                     {
                         if (v.GetShowSpeed())
                         {
-                            v.GetAdditionalStatusInfoView().Text = CommonHelpers.GetTransferSpeedString(avgSpeedBytes) + "  •  " + TransferViewHelper.GetTimeRemainingString(timeRemaining);
+                            v.GetAdditionalStatusInfoView().Text = SimpleHelpers.GetTransferSpeedString(avgSpeedBytes) + "  •  " + TransferViewHelper.GetTimeRemainingString(timeRemaining);
                         }
                         else
                         {
