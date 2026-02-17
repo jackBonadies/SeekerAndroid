@@ -49,12 +49,12 @@ namespace Seeker.Serialization
 
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-            var test = SerializationHelper.LegacyBinarySerializeToString(messages);
+            var test = SerializationMigrationHelper.LegacyBinarySerializeToString(messages);
             var time1 = sw.ElapsedMilliseconds;
             log.Error("SEEKER", $"TIMER Binary Native Ser {time1}");
 
             sw.Start();
-            var obj12 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Message>>(test);
+            var obj12 = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<List<Message>>(test);
             var time132 = sw.ElapsedMilliseconds;
             log.Error("SEEKER", $"TIMER Binary Native Deser {time132}");
 
@@ -196,8 +196,8 @@ namespace Seeker.Serialization
             var respones1 = MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(searchResponsesBytes, options: SerializationHelper.SearchResponseOptions);
 
             var dir1 = new Soulseek.Directory("dirname", null, true);
-            var resp123 = SerializationHelper.LegacyBinarySerializeToString<List<SearchResponse>>(listSearchResponse);
-            var resDir = SerializationHelper.LegacyBinaryDeserializeFromString<List<SearchResponse>>(resp123);
+            var resp123 = SerializationMigrationHelper.LegacyBinarySerializeToString<List<SearchResponse>>(listSearchResponse);
+            var resDir = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<List<SearchResponse>>(resp123);
         }
 
         public static void TestCustomBrowseResponseSerialization()
@@ -207,8 +207,8 @@ namespace Seeker.Serialization
             var dirBytes = MessagePack.MessagePackSerializer.Serialize(browseResponse, options: SerializationHelper.BrowseResponseOptions);
             var dirDeser1 = MessagePack.MessagePackSerializer.Deserialize<BrowseResponse>(dirBytes, options: SerializationHelper.BrowseResponseOptions);
 
-            var dir123 = SerializationHelper.LegacyBinarySerializeToString<BrowseResponse>(browseResponse);
-            var dir1234 = SerializationHelper.LegacyBinaryDeserializeFromString<BrowseResponse>(dir123);
+            var dir123 = SerializationMigrationHelper.LegacyBinarySerializeToString<BrowseResponse>(browseResponse);
+            var dir1234 = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<BrowseResponse>(dir123);
         }
 
 
@@ -219,8 +219,8 @@ namespace Seeker.Serialization
             var dirBytes = MessagePack.MessagePackSerializer.Serialize(dirList, options: SerializationHelper.BrowseResponseOptions);
             var dirDeser1 = MessagePack.MessagePackSerializer.Deserialize<List<Soulseek.Directory>>(dirBytes, options: SerializationHelper.BrowseResponseOptions);
 
-            var dir123 = SerializationHelper.LegacyBinarySerializeToString<List<Soulseek.Directory>>(dirList);
-            var dir1234 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Soulseek.Directory>>(dir123);
+            var dir123 = SerializationMigrationHelper.LegacyBinarySerializeToString<List<Soulseek.Directory>>(dirList);
+            var dir1234 = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<List<Soulseek.Directory>>(dir123);
         }
 
         public static void PopulateSharedPreferencesFromFile(Context c, ISharedPreferences sharedPrefs)

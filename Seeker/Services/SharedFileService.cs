@@ -555,7 +555,7 @@ namespace Seeker.Services
 
                     using (System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
                     {
-                        BinaryFormatter binaryFormatter = SerializationHelper.GetLegacyBinaryFormatter();
+                        BinaryFormatter binaryFormatter = SerializationMigrationHelper.GetLegacyBinaryFormatter();
                         CachedParseResults cachedParseResults = new CachedParseResults();
                         if (convertFrom2to3)
                         {
@@ -575,7 +575,7 @@ namespace Seeker.Services
                                 editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
                                 using (System.IO.MemoryStream bstringUrimemoryStreamv3 = new System.IO.MemoryStream())
                                 {
-                                    BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
+                                    BinaryFormatter formatter = SerializationMigrationHelper.GetLegacyBinaryFormatter();
                                     formatter.Serialize(bstringUrimemoryStreamv3, newKeys);
                                     string stringUrimemoryStreamv3 = Convert.ToBase64String(bstringUrimemoryStreamv3.ToArray());
                                     editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v3, stringUrimemoryStreamv3);

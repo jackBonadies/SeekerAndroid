@@ -1,19 +1,10 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using MessagePack;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Seeker
 {
     [MessagePackObject]
-    [System.Serializable] 
+    [System.Serializable]
     public class Message
     {
         [Key(0)]
@@ -39,7 +30,6 @@ namespace Seeker
 
         public Message()
         {
-            //i think this is necessary for serialization...
         }
 
         public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe)
@@ -65,29 +55,33 @@ namespace Seeker
             SentMsgStatus = sentStatus;
         }
 
-        public Message(DateTime localDateTime, DateTime utcDateTime, SpecialMessageCode connectOrDisconnect)
+        public Message(DateTime localDateTime, DateTime utcDateTime, SpecialMessageCode connectOrDisconnect, string messageText)
         {
             Username = string.Empty;
             Id = -2;
             Replayed = false;
             LocalDateTime = localDateTime;
             UtcDateTime = utcDateTime;
-            SetConnectDisconnectText(localDateTime, connectOrDisconnect);
+            MessageText = messageText;
             SentMsgStatus = 0;
             SpecialCode = connectOrDisconnect;
         }
-
-        private void SetConnectDisconnectText(DateTime localDateTime, SpecialMessageCode connectOrDisconnect)
-        {
-            if (connectOrDisconnect == SpecialMessageCode.Disconnect)
-            {
-                MessageText = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
-            }
-            else
-            {
-                MessageText = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), CommonHelpers.GetNiceDateTime(localDateTime));
-            }
-        }
     }
 
+    [System.Serializable]
+    public enum SentStatus
+    {
+        None = 0,
+        Pending = 1,
+        Failed = 2,
+        Success = 3,
+    }
+
+    [System.Serializable]
+    public enum SpecialMessageCode
+    {
+        None = 0,
+        Reconnect = 1,
+        Disconnect = 2,
+    }
 }

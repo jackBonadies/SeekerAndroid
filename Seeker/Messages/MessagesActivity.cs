@@ -575,29 +575,6 @@ namespace Seeker
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [System.Serializable]
-    public enum SentStatus
-    {
-        None = 0,
-        Pending = 1,
-        Failed = 2,
-        Success = 3,
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [System.Serializable]
-    public enum SpecialMessageCode
-    {
-        None = 0,
-        Reconnect = 1,
-        Disconnect = 2,
-    }
-
     [BroadcastReceiver(Exported = false, Label = "OurMessagesBroadcastReceiver")]
     public class MessagesBroadcastReceiver : BroadcastReceiver
     {

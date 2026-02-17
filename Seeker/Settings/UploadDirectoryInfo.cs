@@ -1,74 +1,26 @@
-﻿using Android.App;
 using Seeker.Services;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Seeker
 {
     /// <summary>
-    /// Small info about which directories the user shared.
+    /// Android-specific partial for UploadDirectoryInfo.
     /// </summary>
-    [Serializable]
-    public class UploadDirectoryInfo
+    public partial class UploadDirectoryInfo
     {
-        public string UploadDataDirectoryUri;
-        public bool UploadDataDirectoryUriIsFromTree;
-        public bool IsLocked;
-        public bool IsHidden;
-        public string DisplayNameOverride;
+        [JsonIgnore]
+        [NonSerialized]
+        public DocumentFile UploadDirectory;
 
-        public bool HasError()
-        {
-            return ErrorState != UploadDirectoryError.NoError;
-        }
+        [JsonIgnore]
+        [NonSerialized]
+        public bool IsSubdir;
 
         public string GetLastPathSegment()
         {
             return Android.Net.Uri.Parse(this.UploadDataDirectoryUri).LastPathSegment;
-        }
-
-        [JsonIgnore]
-        [NonSerialized]
-        public UploadDirectoryError ErrorState;
-
-        [JsonIgnore]
-        [NonSerialized]
-        public DocumentFile UploadDirectory;
-        
-        [JsonIgnore]
-        [NonSerialized]
-        public bool IsSubdir;
-        //[System.Xml.Serialization.XmlIgnoreAttribute]
-        //public Android.Net.Uri UploadDirectoryUri;
-
-        public void Reset()
-        {
-            UploadDataDirectoryUri = null;
-            UploadDataDirectoryUriIsFromTree = true;
-            IsLocked = false;
-            IsHidden = false;
-            DisplayNameOverride = null;
-        }
-
-        public UploadDirectoryInfo(string UploadDataDirectoryUri, bool UploadDataDirectoryUriIsFromTree, bool IsLocked, bool IsHidden, string DisplayNameOverride)
-        {
-            this.UploadDataDirectoryUri = UploadDataDirectoryUri;
-            this.UploadDataDirectoryUriIsFromTree = UploadDataDirectoryUriIsFromTree;
-            this.IsLocked = IsLocked;
-            this.IsHidden = IsHidden;
-            this.DisplayNameOverride = DisplayNameOverride;
-            ErrorState = UploadDirectoryError.NoError;
-            UploadDirectory = null;
-            IsSubdir = false;
         }
 
         public string GetPresentableName()
@@ -99,13 +51,4 @@ namespace Seeker
             }
         }
     }
-
-    public enum UploadDirectoryError
-    {
-        NoError = 0,
-        DoesNotExist = 1,
-        CannotWrite = 2,
-        Unknown = 3,
-    }
-
 }

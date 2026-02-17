@@ -221,7 +221,7 @@ namespace Seeker.Helpers
                 Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
                 foreach (int tabIndex in tabsToSave)
                 {
-                    savedStates.Add(tabIndex, SavedStateSearchTabHeader.GetSavedStateHeaderFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
+                    savedStates.Add(tabIndex, SavedStateSearchTabHeaderHelper.GetSavedStateHeaderFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
                 }
 
                 stringToSave = SerializationHelper.SerializeToString(savedStates);
@@ -279,7 +279,7 @@ namespace Seeker.Helpers
                     {
                         lowestID = pair.Key;
                     }
-                    SearchTabCollection[pair.Key] = SavedStateSearchTabHeader.GetTabFromSavedState(pair.Value, null);
+                    SearchTabCollection[pair.Key] = SavedStateSearchTabHeaderHelper.GetTabFromSavedState(pair.Value, null);
                 }
                 if (lowestID != int.MaxValue)
                 {
@@ -308,7 +308,7 @@ namespace Seeker.Helpers
 
                 using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
                 {
-                    BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
+                    BinaryFormatter formatter = SerializationMigrationHelper.GetLegacyBinaryFormatter();
                     var savedStateDict = formatter.Deserialize(memStream) as Dictionary<int, SavedStateSearchTab>;
                     int lowestID = int.MaxValue;
                     foreach (var pair in savedStateDict)

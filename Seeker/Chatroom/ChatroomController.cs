@@ -110,7 +110,8 @@ namespace Seeker.Chatroom
                 List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
                 foreach (string room in noLongerConnectedRooms)
                 {
-                    Message m = new Message(CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, code);
+                    DateTime localNow = CommonHelpers.GetDateTimeNowSafe();
+                    Message m = new Message(localNow, DateTime.UtcNow, code, getSpecialStatusMessageText(code, localNow));
                     ChatroomController.AddMessage(room, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(room, m));
                 }
@@ -118,6 +119,17 @@ namespace Seeker.Chatroom
             }
         }
 
+        private static String getSpecialStatusMessageText(SpecialMessageCode code, DateTime localNow)
+        {
+            switch (code)
+            {
+                case SpecialMessageCode.Disconnect:
+                    return string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), CommonHelpers.GetNiceDateTime(localNow));
+                case SpecialMessageCode.Reconnect:
+                    return string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), CommonHelpers.GetNiceDateTime(localNow));
+            }
+            return null;
+        }
 
         public static bool IsPrivate(string roomName)
         {

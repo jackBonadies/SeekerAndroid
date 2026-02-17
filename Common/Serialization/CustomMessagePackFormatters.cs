@@ -1,17 +1,9 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using MessagePack;
 using MessagePack.Formatters;
 using Soulseek;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Seeker.Serialization
 {
@@ -210,7 +202,7 @@ namespace Seeker.Serialization
 
             writer.WriteArrayHeader(2);
             writer.Write(value.Name);
- 
+
             writer.WriteArrayHeader(value.Files.Count);
             var standardFileAttributeFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.File>();
             foreach (var file in value.Files)
@@ -231,12 +223,6 @@ namespace Seeker.Serialization
             string name = null;
             List<Soulseek.File> files = null;
 
-            // Loop over *all* array elements independently of how many we expect,
-            // since if we're serializing an older/newer version of this object it might
-            // vary in number of elements that were serialized, but the contract of the formatter
-            // is that exactly one data structure must be read, regardless.
-            // Alternatively, we could check that the size of the array/map is what we expect
-            // and throw if it is not.
             int count = reader.ReadArrayHeader();
             for (int i = 0; i < count; i++)
             {

@@ -1,36 +1,20 @@
-﻿using Seeker.Messages;
-using Android.Hardware.Camera2;
-using AndroidX.DocumentFile.Provider;
+using Seeker.Serialization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text.Json;
-using log = Android.Util.Log;
-using System.Text.Json.Serialization;
-using Android.Util;
 using System.IO;
-using Soulseek;
-using Android.Preferences;
-using Android.Content;
-using AndroidX.ConstraintLayout.Core.Parser;
-using AndroidX.Core.Content;
-using Java.Security.Interfaces;
-using Java.IO;
-using Seeker.Helpers;
+using System.Runtime.Serialization;
+using System.Text.Json;
 using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
-using Seeker.Serialization;
-using System.Runtime.Serialization;
+using Soulseek;
 
 namespace Seeker
 {
     public class SerializationHelper
     {
-        
+
         private static readonly bool useBinarySerializer = false;
 
         public static MessagePackSerializerOptions BrowseResponseOptions
@@ -93,7 +77,7 @@ namespace Seeker
             }
         }
 
-        private static bool isBinaryFormatterSerialized(string base64string) 
+        private static bool isBinaryFormatterSerialized(string base64string)
         {
             return base64string.StartsWith(@"AAEAAAD/////");
         }
@@ -114,18 +98,7 @@ namespace Seeker
 
         public static T DeserializeFromString<T>(string serializedString) where T : class
         {
-//            if (legacy)
-//            {
-//#if BinaryFormatterAvailable
-//                return LegacyBinaryDeserializeFromString<T>(serializedString);
-//#else
-//                throw new Exception("Attempted to Deserialize Legacy BinaryFormatter");
-//#endif
-//            }
-//            else
-//            {
                 return JsonDeserializeFromString<T>(serializedString);
-            //}
         }
 
         private static T JsonDeserializeFromString<T>(string serializedString)
@@ -158,29 +131,6 @@ namespace Seeker
                 return type;
             }
         }
-
-#if BinaryFormatterAvailable
-
-        public static string LegacyBinarySerializeToString<T>(T objectToSerialize)
-        {
-            using (System.IO.MemoryStream memStream = new System.IO.MemoryStream())
-            {
-                BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
-                formatter.Serialize(memStream, objectToSerialize);
-                return Convert.ToBase64String(memStream.ToArray());
-            }
-        }
-
-        public static T LegacyBinaryDeserializeFromString<T>(string base64String) where T : class
-        {
-            using (System.IO.MemoryStream mem = new System.IO.MemoryStream(Convert.FromBase64String(base64String)))
-            {
-                BinaryFormatter binaryFormatter = SerializationHelper.GetLegacyBinaryFormatter();
-                return binaryFormatter.Deserialize(mem) as T;
-            }
-        }
-
-#endif
 
         public static string SaveUserNotesToString(ConcurrentDictionary<string, string> userNotes)
         {
@@ -250,7 +200,7 @@ namespace Seeker
                 return new List<UserListItem>();
             }
             return MessagePack.MessagePackSerializer.Deserialize<List<UserListItem>>(
-                Convert.FromBase64String(base64userList), 
+                Convert.FromBase64String(base64userList),
                 options: UserListOptions);
         }
 
@@ -326,193 +276,7 @@ namespace Seeker
 
         public static List<SearchResponse> RestoreSearchResponsesFromStream(System.IO.Stream inputStream)
         {
-//            if(legacy)
-//            {
-//#if BinaryFormatterAvailable
-
-//                BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
-//                return formatter.Deserialize(inputStream) as List<SearchResponse>;
-//#else
-//                throw new Exception("Attempted to Deserialize Legacy BinaryFormatter");
-//#endif
-//            }
-//            else
-//            {
                 return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: SearchResponseOptions);
-            //}
         }
-
-        private static bool AnythingToMigrate(ISharedPreferences sharedPreferences, string oldKey)
-        {
-            if (!sharedPreferences.Contains(oldKey))
-            {
-                return false;
-            }
-            var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-            if (string.IsNullOrEmpty(oldKeyValue))
-            {
-                var editor = sharedPreferences.Edit();
-                editor.Remove(oldKey);
-                editor.Commit();
-                return false;
-            }
-            return true;
-        }
-
-        private static void SaveToSharedPrefs(ISharedPreferences sharedPreferences, string newKey, string stringToSave)
-        {
-            var editor = sharedPreferences.Edit();
-            editor.PutString(newKey, stringToSave);
-            editor.Commit();
-        }
-
-
-        private static void RemoveOldKey(ISharedPreferences sharedPreferences, string oldKey)
-        {
-            var editor = sharedPreferences.Edit();
-            editor.Remove(oldKey);
-            editor.Commit();
-        }
-#if BinaryFormatterAvailable
-
-        public static bool MigrateUnreadUsernames(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var items = RestoreUnreadUsernamesFromString(oldKeyValue, true);
-                var newString = SaveUnreadUsernamesToString(items);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        public static bool MigrateUserListIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if(AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var userListItems = RestoreUserListFromString(oldKeyValue, true);
-                var newString = SaveUserListToString(userListItems);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        public static bool MigrateUserNotesIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var userListItems = RestoreUserNotesFromString(oldKeyValue, true);
-                var newString = SaveUserNotesToString(userListItems);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        public static bool MigrateOnlineAlertsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var userListItems = RestoreUserOnlineAlertsFromString(oldKeyValue, true);
-                var newString = SaveUserOnlineAlertsToString(userListItems);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        internal static bool MigrateAutoJoinRoomsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var autoJoinRooms = RestoreAutoJoinRoomsListFromString(oldKeyValue, true);
-                var newString = SaveAutoJoinRoomsListToString(autoJoinRooms);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        internal static bool MigrateNotifyRoomsIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var autoJoinRooms = RestoreNotifyRoomsListFromString(oldKeyValue, true);
-                var newString = SaveNotifyRoomsListToString(autoJoinRooms);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        public static void MigrateWishlistTabs(Context context)
-        {
-            SearchTabHelper.MigrateAllSearchTabsFromDisk(context);
-        }
-
-        internal static bool MigrateHeaderState(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var items = RestoreSavedStateHeaderDictFromString(oldKeyValue, true);
-                var newString = SaveSavedStateHeaderDictToString(items);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        internal static bool MigratedMessages(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var autoJoinRooms = RestoreMessagesFromString(oldKeyValue, true);
-                var newString = SaveMessagesToString(autoJoinRooms);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            return false;
-        }
-
-        public static bool MigrateUploadDirectoryInfoIfApplicable(ISharedPreferences sharedPreferences, string oldKey, string newKey)
-        {
-            if (AnythingToMigrate(sharedPreferences, oldKey))
-            {
-                string sharedDirInfo = sharedPreferences.GetString(oldKey, string.Empty);
-                var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo, true);
-                var newString = SerializationHelper.SerializeToString(infos);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
-                RemoveOldKey(sharedPreferences, oldKey);
-                return true;
-            }
-            
-            return false;
-        }
-
-        public static BinaryFormatter GetLegacyBinaryFormatter()
-        {
-            var bf = new BinaryFormatter();
-            bf.Binder = new UpdatedNamespaceSerializationBinder();
-            return bf;
-        }
-#endif
     }
 }
