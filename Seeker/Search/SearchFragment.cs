@@ -72,11 +72,8 @@ namespace Seeker
         {
             if (!FilterSticky || force)
             {
-                SearchTabHelper.FilterString = string.Empty;
-                SearchTabHelper.FilteredResults = this.AreChipsFiltering();
-                SearchTabHelper.WordsToAvoid.Clear();
-                SearchTabHelper.WordsToInclude.Clear();
-                SearchTabHelper.FilterSpecialFlags.Clear();
+                // Clear()
+                SearchTabHelper.TextFilter.Reset();
                 EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
                 if (filterText.Text != string.Empty)
                 {
@@ -264,7 +261,7 @@ namespace Seeker
             }
             else
             {
-                filter.Text = SearchTabHelper.FilterString;
+                filter.Text = SearchTabHelper.TextFilter.FilterString;
             }
             UpdateDrawableState(filter, true);
         }
@@ -341,7 +338,7 @@ namespace Seeker
 
 
 
-                    if (SearchTabHelper.SearchTabCollection[fromTab].FilteredResults)
+                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || this.AreChipsFiltering())
                     {
                         if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
                         {
@@ -349,9 +346,6 @@ namespace Seeker
                             UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
                         }
                         SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-                        //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses); //this throws, its not ready..
-                        //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                        //lv.Adapter = (customAdapter);
 
                         recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
                         recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
@@ -675,7 +669,7 @@ namespace Seeker
             //(rootView.FindViewById<ListView>(Resource.Id.listView1).Adapter as SearchAdapter).NotifyDataSetChanged();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
-            if (SearchTabHelper.FilteredResults)
+            if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
             {
                 SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 rv.SetAdapter(customAdapter);
@@ -855,12 +849,10 @@ namespace Seeker
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recyclerViewTransferItems.SetItemAnimator(null); //todo
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
-            if (SearchTabHelper.FilteredResults)
+            if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
             {
                 recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
-                //CustomAdapter customAdapter = new CustomAdapter(Context, FilteredResponses);
-                //lv.Adapter = (customAdapter);
             }
             else
             {
@@ -1063,7 +1055,7 @@ namespace Seeker
             FilterSticky = e.IsChecked;
             if (FilterSticky)
             {
-                FilterStickyString = SearchTabHelper.FilterString;
+                FilterStickyString = SearchTabHelper.TextFilter.FilterString;
             }
         }
 
@@ -1378,7 +1370,7 @@ namespace Seeker
                     //now that they are sorted, replace them.
                     SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
 
-                    if (SearchTabHelper.FilteredResults)
+                    if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
                     {
                         UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                         recyclerSearchAdapter.NotifyDataSetChanged();
@@ -1636,33 +1628,31 @@ namespace Seeker
             //if - in front then it must not contain this word
             //there are also several keywords
 
-            Logger.Debug("Words To Avoid: " + searchTab.WordsToAvoid.ToString());
-            Logger.Debug("Words To Include: " + searchTab.WordsToInclude.ToString());
-            Logger.Debug("Whether to Filer: " + searchTab.FilteredResults);
-            Logger.Debug("FilterString: " + searchTab.FilterString);
+            Logger.Debug("Words To Avoid: " + searchTab.TextFilter.WordsToAvoid.ToString());
+            Logger.Debug("Words To Include: " + searchTab.TextFilter.WordsToInclude.ToString());
+            Logger.Debug("Whether to Filter: " + searchTab.TextFilter.IsFiltered);
+            Logger.Debug("FilterString: " + searchTab.TextFilter.FilterString);
             bool hideLocked = PreferencesState.HideLockedResultsInSearch;
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(
-                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, searchTab.FilterSpecialFlags, searchTab.WordsToAvoid, searchTab.WordsToInclude, hideLocked)));
+                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, searchTab.TextFilter.FilterSpecialFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
         }
 
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             Logger.Debug("Text Changed: " + e.Text);
-            string oldFilterString = SearchTabHelper.FilteredResults ? SearchTabHelper.FilterString : string.Empty;
+            string oldFilterString = SearchTabHelper.TextFilter.IsFiltered ? SearchTabHelper.TextFilter.FilterString : string.Empty;
             if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || this.AreChipsFiltering())
             {
 
 #if DEBUG
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 #endif
-                SearchTabHelper.FilteredResults = true;
-                SearchTabHelper.FilterString = e.Text.ToString();
+                SearchTabHelper.TextFilter.Set(e.Text.ToString());
                 if (FilterSticky)
                 {
-                    FilterStickyString = SearchTabHelper.FilterString;
+                    FilterStickyString = SearchTabHelper.TextFilter.FilterString;
                 }
-                SearchFilter.ParseFilterString(SearchTabHelper.FilterString, SearchTabHelper.WordsToAvoid, SearchTabHelper.WordsToInclude, SearchTabHelper.FilterSpecialFlags);
 
                 var oldList = SearchTabHelper.UI_SearchResponses.ToList();
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
@@ -1699,13 +1689,11 @@ namespace Seeker
             }
             else
             {
-                SearchTabHelper.FilteredResults = false;
-                SearchTabHelper.FilterString = string.Empty;
+                SearchTabHelper.TextFilter.Reset();
                 if (FilterSticky)
                 {
-                    FilterStickyString = SearchTabHelper.FilterString;
+                    FilterStickyString = string.Empty;
                 }
-                SearchFilter.ParseFilterString(SearchTabHelper.FilterString, SearchTabHelper.WordsToAvoid, SearchTabHelper.WordsToInclude, SearchTabHelper.FilterSpecialFlags);
 
 
 
@@ -1743,9 +1731,8 @@ namespace Seeker
         /// <param name="e"></param>
         public void RefreshOnChipChanged()
         {
-            if (this.AreChipsFiltering() || !string.IsNullOrEmpty(SearchTabHelper.FilterString))
+            if (this.AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
             {
-                SearchTabHelper.FilteredResults = true;
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 
                 //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
@@ -1760,7 +1747,6 @@ namespace Seeker
             }
             else
             {
-                SearchTabHelper.FilteredResults = false;
                 SearchTabHelper.UI_SearchResponses.Clear();// = SearchTabHelper.SearchResponses.ToList();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);// = SearchTabHelper.SearchResponses.ToList();
                 //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
@@ -1813,7 +1799,7 @@ namespace Seeker
                 serializer.Serialize(writer, searchHistory);
                 listOfSearchItems = writer.ToString();
             }
-            PreferencesManager.SaveSearchFragmentState(listOfSearchItems, FilterSticky, SearchTabHelper.FilterString, (int)SearchResultStyle);
+            PreferencesManager.SaveSearchFragmentState(listOfSearchItems, FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
@@ -2086,10 +2072,9 @@ namespace Seeker
 
                     //Logger.Debug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
 
-                    if (SearchTabHelper.SearchTabCollection[fromTab].FilteredResults)
+                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || this.AreChipsFiltering())
                     {
-                        //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses = newList;
-                        oldList = GetOldList(SearchTabHelper.SearchTabCollection[fromTab].FilterString);
+                        oldList = GetOldList(SearchTabHelper.SearchTabCollection[fromTab].TextFilter.FilterString);
                         if (oldList == null)
                         {
                             SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
@@ -2113,7 +2098,7 @@ namespace Seeker
 
                             SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
                         }
-                        SetOldList(SearchTabHelper.SearchTabCollection[fromTab].FilterString, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses.ToList());
+                        SetOldList(SearchTabHelper.SearchTabCollection[fromTab].TextFilter.FilterString, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses.ToList());
                         //SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
                         //SearchFragment.Instance.listView.Adapter = (customAdapter);
                     }
@@ -2204,7 +2189,7 @@ namespace Seeker
                 }
                 dlDialogShown = true;
                 SearchResponse dlDiagResp = null;
-                if (SearchTabHelper.FilteredResults)
+                if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
                 {
                     dlDiagResp = SearchTabHelper.UI_SearchResponses.ElementAt<SearchResponse>(pos);
                 }
@@ -2219,7 +2204,7 @@ namespace Seeker
             catch (System.Exception e)
             {
                 System.String msg = string.Empty;
-                if (SearchTabHelper.FilteredResults)
+                if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
                 {
                     msg = "Filtered.Count " + SearchTabHelper.UI_SearchResponses.Count.ToString() + " position selected = " + pos.ToString();
                 }
@@ -2468,7 +2453,7 @@ namespace Seeker
 
 
 
-                if (SearchTabHelper.FilteredResults && FilterSticky && !fromWishlist)
+                if (SearchTabHelper.TextFilter.IsFiltered && FilterSticky && !fromWishlist)
                 {
                     //remind the user that the filter is ON.
                     t.ContinueWith(new Action<Task>(

@@ -153,7 +153,7 @@ namespace Common.Browse
         {
             return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
         }
-        private static bool MatchesCriteriaFull(DataItem di, BrowseFilter filter)
+        private static bool MatchesCriteriaFull(DataItem di, TextFilter filter)
         {
             string fullyQualifiedName = string.Empty;
             if (di.File != null)
@@ -227,7 +227,7 @@ namespace Common.Browse
             }
         }
 
-        public static List<DataItem> FilterBrowseList(List<DataItem> unfiltered, BrowseFilter filter)
+        public static List<DataItem> FilterBrowseList(List<DataItem> unfiltered, TextFilter filter)
         {
             List<DataItem> filtered = new List<DataItem>();
             foreach (DataItem di in unfiltered)

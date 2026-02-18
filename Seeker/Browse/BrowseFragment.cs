@@ -74,7 +74,7 @@ namespace Seeker
         public static Tuple<int, int> ScrollPositionRestoreRotate = null; //for rotating..
 
 
-        private static BrowseFilter BrowseFilter = new BrowseFilter();
+        private static TextFilter BrowseFilter = new TextFilter();
         public static List<int> SelectedPositionsState = new List<int>(); //this is used for restoring our state.  if its an empty list then thats fine, its just like if we didnt have one..
         public static System.Timers.Timer DebounceTimer = null;
         public static System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();

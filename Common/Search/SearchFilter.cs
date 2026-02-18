@@ -151,16 +151,17 @@ namespace Seeker
         }
 
 
-        //TODO2026 - merge with browseutil
+        public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude)
+        {
+            ParseFilterString(filterString, wordsToAvoid, wordsToInclude, null);
+        }
+
         public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude, FilterSpecialFlags filterSpecialFlags)
         {
             List<string> filterStringSplit = filterString.Split(' ').ToList();
-            wordsToAvoid.Clear();
-            wordsToInclude.Clear();
-            filterSpecialFlags.Clear();
             foreach (string word in filterStringSplit)
             {
-                if (word.Contains("mbr:") || word.Contains("minbitrate:"))
+                if (filterSpecialFlags != null && (word.Contains("mbr:") || word.Contains("minbitrate:")))
                 {
                     filterSpecialFlags.ContainsSpecialFlags = true;
                     try
@@ -172,7 +173,7 @@ namespace Seeker
 
                     }
                 }
-                else if (word.Contains("mfs:") || word.Contains("minfilesize:"))
+                else if (filterSpecialFlags != null && (word.Contains("mfs:") || word.Contains("minfilesize:")))
                 {
                     filterSpecialFlags.ContainsSpecialFlags = true;
                     try
@@ -184,7 +185,7 @@ namespace Seeker
 
                     }
                 }
-                else if (word.Contains("mfif:") || word.Contains("minfilesinfolder:"))
+                else if (filterSpecialFlags != null && (word.Contains("mfif:") || word.Contains("minfilesinfolder:")))
                 {
                     filterSpecialFlags.ContainsSpecialFlags = true;
                     try
@@ -196,12 +197,12 @@ namespace Seeker
 
                     }
                 }
-                else if (word == "isvbr")
+                else if (filterSpecialFlags != null && word == "isvbr")
                 {
                     filterSpecialFlags.ContainsSpecialFlags = true;
                     filterSpecialFlags.IsVBR = true;
                 }
-                else if (word == "iscbr")
+                else if (filterSpecialFlags != null && word == "iscbr")
                 {
                     filterSpecialFlags.ContainsSpecialFlags = true;
                     filterSpecialFlags.IsCBR = true;

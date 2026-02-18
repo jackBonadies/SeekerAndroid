@@ -2387,7 +2387,7 @@ namespace Seeker
             outState.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
             outState.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
             outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
-            outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.FilterString);
+            outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.TextFilter.FilterString);
             outState.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
             //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
             outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);

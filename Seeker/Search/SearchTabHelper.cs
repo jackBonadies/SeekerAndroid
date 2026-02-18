@@ -475,28 +475,7 @@ namespace Seeker.Helpers
             }
         }
 
-        public static bool FilteredResults
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].FilteredResults;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].FilteredResults = value;
-            }
-        }
-        //public static bool FilterSticky
-        //{
-        //    get
-        //    {
-        //        return SearchTabCollection[CurrentTab].FilterSticky;
-        //    }
-        //    set
-        //    {
-        //        SearchTabCollection[CurrentTab].FilterSticky = value;
-        //    }
-        //}
+        public static TextFilter TextFilter => SearchTabCollection[CurrentTab].TextFilter;
 
         public static CancellationTokenSource CancellationTokenSource
         {
@@ -510,52 +489,6 @@ namespace Seeker.Helpers
             }
         }
 
-        public static string FilterString
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].FilterString;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].FilterString = value;
-            }
-        }
-        public static List<string> WordsToAvoid
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].WordsToAvoid;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].WordsToAvoid = value;
-            }
-        }
-        public static List<string> WordsToInclude
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].WordsToInclude;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].WordsToInclude = value;
-            }
-        }
-
-
-        public static FilterSpecialFlags FilterSpecialFlags
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].FilterSpecialFlags;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].FilterSpecialFlags = value;
-            }
-        }
 
         public static List<SearchResponse> UI_SearchResponses
         {

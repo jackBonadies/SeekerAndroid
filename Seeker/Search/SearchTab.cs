@@ -14,12 +14,8 @@ namespace Seeker
         public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm));
         public SearchResultSorting SortHelperSorting = PreferencesState.DefaultSearchResultSortAlgorithm;
         public object SortHelperLockObject = new object();
-        public bool FilteredResults = false;
+        public TextFilter TextFilter = new TextFilter(supportsSpecialFlags: true);
         public bool FilterSticky = false;
-        public string FilterString = string.Empty;
-        public List<string> WordsToAvoid = new List<string>();
-        public List<string> WordsToInclude = new List<string>();
-        public FilterSpecialFlags FilterSpecialFlags = new FilterSpecialFlags();
         public List<SearchResponse> UI_SearchResponses = new List<SearchResponse>();
         public SearchTarget SearchTarget = SearchTarget.AllUsers;
         public bool CurrentlySearching = false;
@@ -58,12 +54,11 @@ namespace Seeker
                 }
             }
             clone.SortHelper = cloned;
-            clone.FilteredResults = this.FilteredResults;
             clone.FilterSticky = this.FilterSticky;
-            clone.FilterString = this.FilterString;
-            clone.WordsToAvoid = this.WordsToAvoid.ToList();
-            clone.WordsToInclude = this.WordsToInclude.ToList();
-            clone.FilterSpecialFlags = this.FilterSpecialFlags;
+            if (this.TextFilter.IsFiltered)
+            {
+                clone.TextFilter.Set(this.TextFilter.FilterString);
+            }
             clone.UI_SearchResponses = this.UI_SearchResponses.ToList();
             clone.CurrentlySearching = this.CurrentlySearching;
             clone.SearchTarget = this.SearchTarget;
