@@ -48,17 +48,6 @@ namespace Seeker
         }
         public View rootView = null;
 
-        public static bool FilterSticky
-        {
-            get => Common.PreferencesState.FilterSticky;
-            set => Common.PreferencesState.FilterSticky = value;
-        }
-        public static string FilterStickyString
-        {
-            get => Common.PreferencesState.FilterStickyString;
-            set => Common.PreferencesState.FilterStickyString = value;
-        }
-
         private Context context;
         public static List<string> searchHistory = new List<string>();
 
@@ -70,7 +59,7 @@ namespace Seeker
 
         private void ClearFilterStringAndCached(bool force = false)
         {
-            if (!FilterSticky || force)
+            if (!PreferencesState.FilterSticky || force)
             {
                 // Clear()
                 SearchTabHelper.TextFilter.Reset();
@@ -81,7 +70,7 @@ namespace Seeker
                     filterText.Text = string.Empty;
                     UpdateDrawableState(filterText, true);
                 }
-                FilterStickyString = string.Empty;
+                PreferencesState.FilterStickyString = string.Empty;
             }
         }
 
@@ -255,9 +244,9 @@ namespace Seeker
         private void SetFilterState()
         {
             EditText filter = rootView.FindViewById<EditText>(Resource.Id.filterText);
-            if (FilterSticky)
+            if (PreferencesState.FilterSticky)
             {
-                filter.Text = FilterStickyString;
+                filter.Text = PreferencesState.FilterStickyString;
             }
             else
             {
@@ -338,7 +327,7 @@ namespace Seeker
 
 
 
-                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || this.AreChipsFiltering())
+                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering())
                     {
                         if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
                         {
@@ -669,7 +658,7 @@ namespace Seeker
             //(rootView.FindViewById<ListView>(Resource.Id.listView1).Adapter as SearchAdapter).NotifyDataSetChanged();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
-            if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
+            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
             {
                 SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 rv.SetAdapter(customAdapter);
@@ -783,7 +772,7 @@ namespace Seeker
             bsb.State = BottomSheetBehavior.StateHidden;
 
             CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
-            filterSticky.Checked = FilterSticky;
+            filterSticky.Checked = PreferencesState.FilterSticky;
             filterSticky.CheckedChange += FilterSticky_CheckedChange;
 
             //bsb.SetBottomSheetCallback(new MyCallback());
@@ -849,7 +838,7 @@ namespace Seeker
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recyclerViewTransferItems.SetItemAnimator(null); //todo
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
-            if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
+            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
             {
                 recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
@@ -882,9 +871,9 @@ namespace Seeker
             filterText.FocusChange += FilterText_FocusChange;
             filterText.EditorAction += FilterText_EditorAction;
             filterText.Touch += FilterText_Touch;
-            if (FilterSticky)
+            if (PreferencesState.FilterSticky)
             {
-                filterText.Text = FilterStickyString;
+                filterText.Text = PreferencesState.FilterStickyString;
             }
             UpdateDrawableState(filterText, true);
 
@@ -949,7 +938,7 @@ namespace Seeker
         /// Are chips filtering out results..
         /// </summary>
         /// <returns></returns>
-        private bool AreChipsFiltering()
+        private static bool AreChipsFiltering()
         {
             if (!PreferencesState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
@@ -975,8 +964,8 @@ namespace Seeker
 
         //private void ClearFilter_Click(object sender, EventArgs e)
         //{
-        //    CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
-        //    filterSticky.Checked = false;
+        //    CheckBox PreferencesState.FilterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
+        //    PreferencesState.FilterSticky.Checked = false;
         //    ClearFilterStringAndCached(true);
         //}
 
@@ -1052,10 +1041,10 @@ namespace Seeker
 
         private void FilterSticky_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            FilterSticky = e.IsChecked;
-            if (FilterSticky)
+            PreferencesState.FilterSticky = e.IsChecked;
+            if (PreferencesState.FilterSticky)
             {
-                FilterStickyString = SearchTabHelper.TextFilter.FilterString;
+                PreferencesState.FilterStickyString = SearchTabHelper.TextFilter.FilterString;
             }
         }
 
@@ -1370,7 +1359,7 @@ namespace Seeker
                     //now that they are sorted, replace them.
                     SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
 
-                    if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
+                    if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
                     {
                         UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                         recyclerSearchAdapter.NotifyDataSetChanged();
@@ -1642,16 +1631,16 @@ namespace Seeker
         {
             Logger.Debug("Text Changed: " + e.Text);
             string oldFilterString = SearchTabHelper.TextFilter.IsFiltered ? SearchTabHelper.TextFilter.FilterString : string.Empty;
-            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || this.AreChipsFiltering())
+            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || AreChipsFiltering())
             {
 
 #if DEBUG
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 #endif
                 SearchTabHelper.TextFilter.Set(e.Text.ToString());
-                if (FilterSticky)
+                if (PreferencesState.FilterSticky)
                 {
-                    FilterStickyString = SearchTabHelper.TextFilter.FilterString;
+                    PreferencesState.FilterStickyString = SearchTabHelper.TextFilter.FilterString;
                 }
 
                 var oldList = SearchTabHelper.UI_SearchResponses.ToList();
@@ -1690,9 +1679,9 @@ namespace Seeker
             else
             {
                 SearchTabHelper.TextFilter.Reset();
-                if (FilterSticky)
+                if (PreferencesState.FilterSticky)
                 {
-                    FilterStickyString = string.Empty;
+                    PreferencesState.FilterStickyString = string.Empty;
                 }
 
 
@@ -1731,7 +1720,7 @@ namespace Seeker
         /// <param name="e"></param>
         public void RefreshOnChipChanged()
         {
-            if (this.AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
+            if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 
@@ -1799,7 +1788,7 @@ namespace Seeker
                 serializer.Serialize(writer, searchHistory);
                 listOfSearchItems = writer.ToString();
             }
-            PreferencesManager.SaveSearchFragmentState(listOfSearchItems, FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
+            PreferencesManager.SaveSearchFragmentState(listOfSearchItems, PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
@@ -2072,7 +2061,7 @@ namespace Seeker
 
                     //Logger.Debug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
 
-                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || this.AreChipsFiltering())
+                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering())
                     {
                         oldList = GetOldList(SearchTabHelper.SearchTabCollection[fromTab].TextFilter.FilterString);
                         if (oldList == null)
@@ -2189,7 +2178,7 @@ namespace Seeker
                 }
                 dlDialogShown = true;
                 SearchResponse dlDiagResp = null;
-                if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
+                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
                 {
                     dlDiagResp = SearchTabHelper.UI_SearchResponses.ElementAt<SearchResponse>(pos);
                 }
@@ -2204,7 +2193,7 @@ namespace Seeker
             catch (System.Exception e)
             {
                 System.String msg = string.Empty;
-                if (SearchTabHelper.TextFilter.IsFiltered || this.AreChipsFiltering())
+                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
                 {
                     msg = "Filtered.Count " + SearchTabHelper.UI_SearchResponses.Count.ToString() + " position selected = " + pos.ToString();
                 }
@@ -2453,7 +2442,7 @@ namespace Seeker
 
 
 
-                if (SearchTabHelper.TextFilter.IsFiltered && FilterSticky && !fromWishlist)
+                if (SearchTabHelper.TextFilter.IsFiltered && PreferencesState.FilterSticky && !fromWishlist)
                 {
                     //remind the user that the filter is ON.
                     t.ContinueWith(new Action<Task>(

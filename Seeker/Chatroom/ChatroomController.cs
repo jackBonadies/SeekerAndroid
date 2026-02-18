@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Seeker.Helpers;
 
 using Common;
+using Common.Messages;
 namespace Seeker.Chatroom
 {
     public class ChatroomController
@@ -215,13 +216,6 @@ namespace Seeker.Chatroom
             return chatroomUserData;
         }
 
-        public enum SortOrderChatroomUsers
-        {
-            //DateJoinedAsc = 0,  //the user list is NOT given to us in any order.  so cant do these.
-            //DateJoinedDesc = 1,
-            Alphabetical = 2,
-            OnlineStatus = 3
-        }
 
         public static Soulseek.ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
         {
@@ -438,7 +432,6 @@ namespace Seeker.Chatroom
                 SortCriteria = sortCriteria;
             }
         }
-
 
 
         public static void ToggleAutoJoin(string roomName, bool feedback, Context c)

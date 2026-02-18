@@ -1,3 +1,4 @@
+using Common;
 using Seeker.Search;
 using Soulseek;
 using System.Collections.Generic;
@@ -32,10 +33,10 @@ namespace Seeker
             searchTab.LastRanTime = new System.DateTime(savedStateHeader.LastRanTime);
             searchTab.SearchTarget = SearchTarget.Wishlist;
             searchTab.LastSearchResultsCount = responses != null ? responses.Count : savedStateHeader.LastSearchResultsCount;
-            if (SearchFragment.FilterSticky)
+            if (PreferencesState.FilterSticky)
             {
-                searchTab.FilterSticky = SearchFragment.FilterSticky;
-                searchTab.TextFilter.Set(SearchFragment.FilterStickyString);
+                searchTab.FilterSticky = PreferencesState.FilterSticky;
+                searchTab.TextFilter.Set(PreferencesState.FilterStickyString);
             }
             searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
             if (responses != null)

@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Common.Messages;
 
 namespace Seeker.Chatroom
 {
@@ -81,7 +82,7 @@ namespace Seeker.Chatroom
                         return;
                     }
                     UI_userDataList[previousPosition].Status = e.Status;
-                    if (ChatroomController.SortChatroomUsersBy != ChatroomController.SortOrderChatroomUsers.OnlineStatus)
+                    if (ChatroomController.SortChatroomUsersBy != SortOrderChatroomUsers.OnlineStatus)
                     {
                         //position wont change
                         roomUserListAdapter.NotifyItemChanged(previousPosition);
@@ -237,10 +238,10 @@ namespace Seeker.Chatroom
 
             switch (ChatroomController.SortChatroomUsersBy)
             {
-                case ChatroomController.SortOrderChatroomUsers.Alphabetical:
+                case SortOrderChatroomUsers.Alphabetical:
                     alphaOrder.Checked = true;
                     break;
-                case ChatroomController.SortOrderChatroomUsers.OnlineStatus:
+                case SortOrderChatroomUsers.OnlineStatus:
                     onlineStatus.Checked = true;
                     break;
             }
@@ -280,14 +281,14 @@ namespace Seeker.Chatroom
 
         private static void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
         {
-            ChatroomController.SortOrderChatroomUsers prev = ChatroomController.SortChatroomUsersBy;
+            SortOrderChatroomUsers prev = ChatroomController.SortChatroomUsersBy;
             switch (e.CheckedId)
             {
                 case Resource.Id.onlineStatus:
-                    ChatroomController.SortChatroomUsersBy = ChatroomController.SortOrderChatroomUsers.OnlineStatus;
+                    ChatroomController.SortChatroomUsersBy = SortOrderChatroomUsers.OnlineStatus;
                     break;
                 case Resource.Id.alphaOrder:
-                    ChatroomController.SortChatroomUsersBy = ChatroomController.SortOrderChatroomUsers.Alphabetical;
+                    ChatroomController.SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical;
                     break;
             }
 

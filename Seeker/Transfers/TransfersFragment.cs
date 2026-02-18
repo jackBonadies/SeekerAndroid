@@ -258,6 +258,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Android.Resource.Id.Home:
+                    // TODO2026: obsolete on android 33?
                     SeekerState.MainActivityRef.OnBackPressed();
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
@@ -707,31 +708,8 @@ namespace Seeker
 
             recycleLayoutManager = new CustomLinearLayoutManager(Activity);
             SetRecyclerAdapter();
-            //if (savedInstanceState != null)
-            //{
-            //    // Restore saved layout manager type.
-            //    mCurrentLayoutManagerType = (LayoutManagerType)savedInstanceState
-            //            .getSerializable(KEY_LAYOUT_MANAGER);
-            //}
 
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
-
-            //// If a layout manager has already been set, get current scroll position.
-            //if (mRecyclerView.getLayoutManager() != null)
-            //{
-            //    scrollPosition = ((LinearLayoutManager)mRecyclerView.getLayoutManager())
-            //            .findFirstCompletelyVisibleItemPosition();
-            //}
-            //recyclerViewTransferItems.ScrollToPosition()
-
-            //// If a layout manager has already been set, get current scroll position.
-            //if (mRecyclerView.getLayoutManager() != null)
-            //{
-            //    scrollPosition = ((LinearLayoutManager)mRecyclerView.getLayoutManager())
-            //            .findFirstCompletelyVisibleItemPosition();
-            //}
-
-
 
             Logger.InfoFirebase("AutoClear: " + PreferencesState.AutoClearCompleteDownloads);
             Logger.InfoFirebase("AutoRetry: " + SeekerState.AutoRetryDownload);
@@ -844,109 +822,8 @@ namespace Seeker
         public bool OnMenuItemClick(IMenuItem item)
         {
             return false;
-            //switch (item.ItemId)
-            //{
-            //    case Resource.Id.clearAllComplete:
-            //        //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
-            //        //transferItems.CopyTo(tempArry);
-            //        lock (transferItems)
-            //        {
-            //            //Occurs on UI thread.
-            //            transferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
-            //            //for (int i=0; i< tempArry.Count;i++)
-            //            //{
-            //            //    if(tempArry[i].Progress>99)
-            //            //    {
-            //            //        transferItems.Remove(tempArry[i]);
-            //            //    }
-            //            //}
-            //            refreshListView();
-            //        }
-            //        return true;
-            //    case Resource.Id.cancelAndClearAll:
-            //        lock (transferItems)
-            //        {
-            //            SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            //            for (int i = 0; i < transferItems.Count; i++)
-            //            {
-            //                //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
-            //                CancellationTokens.TryGetValue(ProduceCancellationTokenKey(transferItems[i]), out CancellationTokenSource token);
-            //                token?.Cancel();
-            //                //CancellationTokens.Remove(ProduceCancellationTokenKey(transferItems[i]));
-            //            }
-            //            CancellationTokens.Clear();
-            //            transferItems.Clear();
-            //            refreshListView();
-            //        }
-            //        return true;
-            //    //case Resource.Id.openDownloadsDir:
-            //    //    Intent chooser = new Intent(Intent.ActionView); //not get content
-            //    //    //actionview - no apps can perform this action.
-            //    //    //chooser.AddCategory(Intent.CategoryOpenable);
-
-            //    //    if (SeekerState.UseLegacyStorage())
-            //    //    {
-            //    //        if (PreferencesState.SaveDataDirectoryUri == null || PreferencesState.SaveDataDirectoryUri == string.Empty)
-            //    //        {
-            //    //            string rootDir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-            //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(rootDir), "*/*");
-            //    //        }
-            //    //        else
-            //    //        {
-            //    //            chooser.SetDataAndType(Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri), "*/*");
-            //    //        }
-            //    //    }
-            //    //    else
-            //    //    {
-            //    //        if (PreferencesState.SaveDataDirectoryUri==null || PreferencesState.SaveDataDirectoryUri==string.Empty)
-            //    //        {
-            //    //            Toast tst = Toast.MakeText(Context, "Download Directory is not set.  Please set it to enable downloading.", ToastLength.Short);
-            //    //            tst.Show();
-            //    //            return true;
-            //    //        }
-
-            //    //        chooser.SetData(Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri));
-            //    //    }
-
-            //    //    try
-            //    //    {
-            //    //        StartActivity(Intent.CreateChooser(chooser,"Download Directory"));
-            //    //    }
-            //    //    catch
-            //    //    {
-            //    //        Toast tst = Toast.MakeText(Context, "No compatible File Browser app installed", ToastLength.Short);
-            //    //        tst.Show();
-            //    //    }
-            //    //    return true;
-            //    default:
-            //        return false;
-
-            //}
         }
 
-
-        //public override void OnDestroyView()
-        //{
-        //    try
-        //    {
-        //        SeekerState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-        //        SeekerState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
-        //        DownloadService.TransferItemQueueUpdated -= TranferQueueStateChanged;
-        //    }
-        //    catch (System.Exception)
-        //    {
-
-        //    }
-        //    base.OnDestroyView();
-        //}
-
-        //public override void OnDestroy()
-        //{
-        //    //SeekerState.DownloadAdded -= SeekerState_DownloadAdded;
-        //    //SeekerState.SoulseekClient.TransferProgressUpdated -= SoulseekClient_TransferProgressUpdated;
-        //    //SeekerState.SoulseekClient.TransferStateChanged -= SoulseekClient_TransferStateChanged;
-        //    base.OnDestroy();
-        //}
 
         public override void OnResume()
         {
@@ -1851,9 +1728,6 @@ namespace Seeker
             }
         }
 
-
-
-
         private void refreshListViewSafe()
         {
             try
@@ -2026,18 +1900,7 @@ namespace Seeker
             SetNoTransfersMessage();
             if (specificRefreshAction == null)
             {
-                //primaryListView.Adapter = (customAdapter); try with just notifyDataSetChanged...
-
-                //int oldCount = recyclerTransferAdapter.ItemCount;
-                //int newCount = transferItems.Count;
-                //Logger.Debug("!!! recyclerTransferAdapter.NotifyDataSetChanged() old:: " + oldCount + " new: " + newCount);
-                ////old 73, new 73...
-                //recyclerTransferAdapter.NotifyItemRangeRemoved(0,oldCount);
-                //recyclerTransferAdapter.NotifyItemRangeInserted(0,newCount);
-
                 recyclerTransferAdapter.NotifyDataSetChanged();
-                //(primaryListView.Adapter as TransferAdapter).NotifyDataSetChanged();
-
             }
             else
             {
@@ -2286,9 +2149,6 @@ namespace Seeker
 
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource> CancellationTokens = new System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource>();
-
-
-
 
     }
 

@@ -4,6 +4,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
+using Common;
 using Seeker.Search;
 using Soulseek;
 using System;
@@ -53,10 +54,10 @@ namespace Seeker
             }
             searchTab.SearchTarget = SearchTarget.Wishlist;
             searchTab.LastSearchResultsCount = searchTab.SearchResponses.Count;
-            if (SearchFragment.FilterSticky)
+            if (PreferencesState.FilterSticky)
             {
-                searchTab.FilterSticky = SearchFragment.FilterSticky;
-                searchTab.TextFilter.Set(SearchFragment.FilterStickyString);
+                searchTab.FilterSticky = PreferencesState.FilterSticky;
+                searchTab.TextFilter.Set(PreferencesState.FilterStickyString);
             }
             searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
             foreach (SearchResponse resp in searchTab.SearchResponses)

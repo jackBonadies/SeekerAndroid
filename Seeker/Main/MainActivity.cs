@@ -2381,7 +2381,7 @@ namespace Seeker
             outState.PutBoolean(KeyConsts.M_RememberSearchHistory, PreferencesState.RememberSearchHistory);
             outState.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
             outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
-            outState.PutBoolean(KeyConsts.M_FilterSticky, SearchFragment.FilterSticky);
+            outState.PutBoolean(KeyConsts.M_FilterSticky, PreferencesState.FilterSticky);
             outState.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
             outState.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
             outState.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
