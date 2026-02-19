@@ -92,7 +92,7 @@ namespace Seeker.Chatroom
                         bool wasAtTop = recycleLayoutManager.FindFirstCompletelyVisibleItemPosition() == 0;
                         int positionOfTopItem = recycleLayoutManager.FindFirstVisibleItemPosition();
 
-                        UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                        UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
                         int newPosition = -1;
                         for (int i = 0; i < UI_userDataList.Count; i++)
                         {
@@ -161,7 +161,7 @@ namespace Seeker.Chatroom
                         {
                             Soulseek.ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
                             UI_userDataList.Add(cud);
-                            UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                            UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
                             int itemInsertedAt = UI_userDataList.IndexOf(cud);
                             roomUserListAdapter.NotifyItemInserted(itemInsertedAt);
                         }
@@ -430,7 +430,7 @@ namespace Seeker.Chatroom
                     {
                         return;
                     }
-                    UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                    UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
                     int newPosition = -1;
                     for (int i = 0; i < UI_userDataList.Count; i++)
                     {

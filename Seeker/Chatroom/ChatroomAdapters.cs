@@ -10,6 +10,7 @@ using AndroidX.ConstraintLayout.Widget;
 using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;
+using Common.Messages;
 
 namespace Seeker
 {
@@ -40,30 +41,30 @@ namespace Seeker
             viewUserStatus = FindViewById<TextView>(Resource.Id.userStatusMessage);
         }
 
-        private void SetMessageText(TextView userStatus, ChatroomController.StatusMessageUpdate data)
+        private void SetMessageText(TextView userStatus, StatusMessageUpdate data)
         {
             string statusMessage = null;
             DateTime dateTimeLocal = data.DateTimeUtc.Add(SeekerState.OffsetFromUtcCached);
             string timePrefix = $"[{CommonHelpers.GetNiceDateTimeGroupChat(dateTimeLocal)}]";
             switch (data.StatusType)
             {
-                case ChatroomController.StatusMessageType.Joined:
+                case StatusMessageType.Joined:
                     statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserJoined);
                     break;
-                case ChatroomController.StatusMessageType.Left:
+                case StatusMessageType.Left:
                     statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserLeft);
                     break;
-                case ChatroomController.StatusMessageType.WentAway:
+                case StatusMessageType.WentAway:
                     statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserWentAway);
                     break;
-                case ChatroomController.StatusMessageType.CameBack:
+                case StatusMessageType.CameBack:
                     statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserCameBack);
                     break;
             }
             userStatus.Text = string.Format(statusMessage, timePrefix, data.Username);
         }
 
-        public void setItem(ChatroomController.StatusMessageUpdate userStatusMessage)
+        public void setItem(StatusMessageUpdate userStatusMessage)
         {
             SetMessageText(viewUserStatus, userStatusMessage);
         }
@@ -89,7 +90,7 @@ namespace Seeker
 
     public class ChatroomStatusesRecyclerAdapter : RecyclerView.Adapter
     {
-        private List<ChatroomController.StatusMessageUpdate> localDataSet;
+        private List<StatusMessageUpdate> localDataSet;
         public override int ItemCount => localDataSet.Count;
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
@@ -104,7 +105,7 @@ namespace Seeker
             return new UserStatusHolder(view as View);
         }
 
-        public ChatroomStatusesRecyclerAdapter(List<ChatroomController.StatusMessageUpdate> ti)
+        public ChatroomStatusesRecyclerAdapter(List<StatusMessageUpdate> ti)
         {
             localDataSet = ti;
         }
@@ -332,57 +333,6 @@ namespace Seeker
         }
     }
 
-    public class UserRoomStatusChangedEventArgs
-    {
-        public string User;
-        public string RoomName;
-        public ChatroomController.StatusMessageUpdate StatusMessageUpdate;
-        public Soulseek.UserPresence Status;
-        public UserRoomStatusChangedEventArgs(string roomName, string user, Soulseek.UserPresence status, ChatroomController.StatusMessageUpdate statusMessageUpdate)
-        {
-            User = user;
-            RoomName = roomName;
-            StatusMessageUpdate = statusMessageUpdate;
-            Status = status;
-        }
-    }
-
-    public class UserJoinedOrLeftEventArgs
-    {
-        public bool Joined;
-        public string User;
-        public string RoomName;
-        public ChatroomController.StatusMessageUpdate? StatusMessageUpdate;
-        public Soulseek.UserData UserData;
-        public UserJoinedOrLeftEventArgs(string roomName, bool joined, string user, ChatroomController.StatusMessageUpdate? statusMessageUpdate = null, Soulseek.UserData uData = null, bool isOperator = false)
-        {
-            Joined = joined;
-            User = user;
-            RoomName = roomName;
-            StatusMessageUpdate = statusMessageUpdate;
-            UserData = uData;
-        }
-    }
-
-    public class MessageReceivedArgs
-    {
-        public MessageReceivedArgs(string roomName, Message m)
-        {
-            RoomName = roomName;
-            Message = m;
-        }
-        public MessageReceivedArgs(string roomName, bool fromUsPending, bool fromUsCon, Message m)
-        {
-            RoomName = roomName;
-            FromUsPending = fromUsPending;
-            FromUsConfirmation = fromUsCon;
-            Message = m;
-        }
-        public string RoomName;
-        public bool FromUsPending;
-        public bool FromUsConfirmation;
-        public Message Message;
-    }
 
 
     public class ChatroomOverviewRecyclerAdapter : RecyclerView.Adapter

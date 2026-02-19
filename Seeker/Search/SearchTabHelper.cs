@@ -191,15 +191,11 @@ namespace Seeker.Helpers
                     }
                 }
                 //safely fix the state. even in case of error...
-                SavedStateSearchTab tab = new SavedStateSearchTab();
-                tab.searchResponses = new List<SearchResponse>();
-                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SearchTabUtil.GetTabFromSavedState(new List<SearchResponse>(), SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
             }
             else
             {
-                SavedStateSearchTab tab = new SavedStateSearchTab();
-                tab.searchResponses = restoredSearchResults;
-                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SearchTabUtil.GetTabFromSavedState(restoredSearchResults, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
             }
         }
 
@@ -329,8 +325,6 @@ namespace Seeker.Helpers
             }
         }
 #endif
-
-
 
         static SearchTabHelper()
         {

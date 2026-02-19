@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Seeker.Helpers;
 
 using Common;
+using Common.Messages;
 namespace Seeker.Chatroom
 {
     public class ChatroomInnerFragment : AndroidX.Fragment.App.Fragment //,PopupMenu.IOnMenuItemClickListener
@@ -22,7 +23,7 @@ namespace Seeker.Chatroom
         private LinearLayoutManager recycleLayoutManager;
         private ChatroomInnerRecyclerAdapter recyclerAdapter;
         private List<Message> messagesInternal = null;
-        private List<ChatroomController.StatusMessageUpdate> UI_statusMessagesInternal = null;
+        private List<StatusMessageUpdate> UI_statusMessagesInternal = null;
 
         //private string currentTickerText = string.Empty;
         private bool created = false;
@@ -253,7 +254,7 @@ namespace Seeker.Chatroom
             }
         }
 
-        private void AddStatusMessageUI(string user, ChatroomController.StatusMessageUpdate statusMessage)
+        private void AddStatusMessageUI(string user, StatusMessageUpdate statusMessage)
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
@@ -348,7 +349,7 @@ namespace Seeker.Chatroom
             }
             else
             {
-                UI_statusMessagesInternal = new List<ChatroomController.StatusMessageUpdate>();
+                UI_statusMessagesInternal = new List<StatusMessageUpdate>();
             }
 
             //Logger.Debug("SetStatusView Count: " + UI_statusMessagesInternal.Count);

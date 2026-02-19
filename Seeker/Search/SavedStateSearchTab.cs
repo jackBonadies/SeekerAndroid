@@ -17,41 +17,20 @@ namespace Seeker
     /// <summary>
     /// Saved info for the full search tab (i.e. all search responses)
     /// </summary>
-    [Serializable]
-    public class SavedStateSearchTab
+    //TODO2026 - move to seperate file
+    public class SearchTabUtil
     {
-        //there are all of the things we must save in order to later restore a SearchTab
-        public List<SearchResponse> searchResponses;
-        public string LastSearchTerm;
-        public long LastRanTime;
-        public static SavedStateSearchTab GetSavedStateFromTab(SearchTab searchTab)
-        {
-            SavedStateSearchTab searchTabState = new SavedStateSearchTab();
-            searchTabState.searchResponses = searchTab.SearchResponses.ToList();
-            searchTabState.LastSearchTerm = searchTab.LastSearchTerm;
-            searchTabState.LastRanTime = searchTab.LastRanTime.Ticks;
-            return searchTabState;
-        }
-
         /// <summary>
         /// these by definition will always be wishlist tabs...
         /// </summary>
         /// <param name="savedState"></param>
         /// <returns></returns>
-        public static SearchTab GetTabFromSavedState(SavedStateSearchTab savedState, bool searchResponsesOnly = false, SearchTab oldTab = null)
+        public static SearchTab GetTabFromSavedState(List<SearchResponse> searchResponses, SearchTab oldTab = null)
         {
             SearchTab searchTab = new SearchTab();
-            searchTab.SearchResponses = savedState.searchResponses;
-            if (!searchResponsesOnly)
-            {
-                searchTab.LastSearchTerm = savedState.LastSearchTerm;
-                searchTab.LastRanTime = new DateTime(savedState.LastRanTime);
-            }
-            else
-            {
-                searchTab.LastSearchTerm = oldTab.LastSearchTerm;
-                searchTab.LastRanTime = oldTab.LastRanTime;
-            }
+            searchTab.SearchResponses = searchResponses;
+            searchTab.LastSearchTerm = oldTab.LastSearchTerm;
+            searchTab.LastRanTime = oldTab.LastRanTime;
             searchTab.SearchTarget = SearchTarget.Wishlist;
             searchTab.LastSearchResultsCount = searchTab.SearchResponses.Count;
             if (PreferencesState.FilterSticky)

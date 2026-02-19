@@ -43,6 +43,7 @@ using Seeker.Messages;
 using AndroidX.Activity;
 
 using Common;
+using Common.Messages;
 namespace Seeker
 {
 
@@ -56,7 +57,7 @@ namespace Seeker
         /// if a user replies to a message from notification or gets a new one when the notificaiton is up, then it gets added to.
         /// but once the user clears the notification OR goes to the activity to respond to the message then it gets cleared.
         /// </summary>
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<MessageController.MessageNotifExtended>> DirectReplyMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<MessageController.MessageNotifExtended>>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<MessageNotifExtended>> DirectReplyMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<MessageNotifExtended>>();
 
         public void ChangeToInnerFragment(string username)
         {

@@ -63,18 +63,6 @@ namespace Seeker.Chatroom
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomInfo> ModeratedRoomData = new System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomInfo>();
 
-        public struct StatusMessageUpdate
-        {
-            public StatusMessageType StatusType;
-            public string Username;
-            public DateTime DateTimeUtc;
-            public StatusMessageUpdate(StatusMessageType statusType, string username, DateTime dateTimeUtc)
-            {
-                StatusType = statusType;
-                Username = username;
-                DateTimeUtc = dateTimeUtc;
-            }
-        }
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>> JoinedRoomStatusUpdateMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>>();
 
@@ -212,7 +200,7 @@ namespace Seeker.Chatroom
                     chatroomUserData.Add(GetChatroomUserData(user, userRole));
                 }
             }
-            chatroomUserData.Sort(new ChatroomUserDataComparer(PutFriendsOnTop, SortChatroomUsersBy));
+            chatroomUserData.Sort(new ChatroomUserDataComparer(UserListService.Instance, PutFriendsOnTop, SortChatroomUsersBy));
             return chatroomUserData;
         }
 
@@ -271,6 +259,7 @@ namespace Seeker.Chatroom
             }
         }
 
+        //TODO2026 move to lower
         public static List<Soulseek.RoomInfo> GetParsedList(Soulseek.RoomList roomList)
         {
             List<Soulseek.RoomInfo> ownedList = roomList.Owned.ToList();
@@ -331,106 +320,12 @@ namespace Seeker.Chatroom
             if (roomList.PublicCount != 0)
             {
                 allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
-                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !SpamList.Contains(roomInfo.Name) && !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
+                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 noSpam.Sort(new RoomCountComparer());
                 allRooms.AddRange(noSpam);
             }
 
             return allRooms;
-        }
-
-        public static List<string> SpamList = null;
-
-        static ChatroomController()
-        {
-            //we filter out unfortunate room names
-            SpamList = new List<string>();
-            SpamList.Add("! ! ! NO JEWS");
-            SpamList.Add("! ! ! NO FAGGOTS");
-            SpamList.Add("! ! ! NO NIGGERS");
-            SpamList.Add("! ! ! NO NIGGERS ! ! !");
-            SpamList.Add("! ! ! NO WOMEN");
-            SpamList.Add("! ! ! NO QUEERS");
-            SpamList.Add("dev");
-        }
-
-        public class RoomCountComparer : IComparer<Soulseek.RoomInfo>
-        {
-            // Compares by UserCount then Name
-            public int Compare(Soulseek.RoomInfo x, Soulseek.RoomInfo y)
-            {
-                if (x.UserCount.CompareTo(y.UserCount) != 0)
-                {
-                    return y.UserCount.CompareTo(x.UserCount); //high to low
-                }
-                else if (x.Name.CompareTo(y.Name) != 0)
-                {
-                    return x.Name.CompareTo(y.Name);
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-
-        public class ChatroomUserDataComparer : IComparer<Soulseek.UserData>
-        {
-            // Compares by UserCount then Name
-            public int Compare(Soulseek.UserData x, Soulseek.UserData y)
-            {
-                //always put owners and operators first in private rooms. this is the primary condition.
-                if (x is Soulseek.ChatroomUserData xData && y is Soulseek.ChatroomUserData yData)
-                {
-                    if ((int)yData.ChatroomUserRole != (int)xData.ChatroomUserRole)
-                    {
-                        return (int)yData.ChatroomUserRole - (int)xData.ChatroomUserRole;
-                    }
-                }
-
-                if (PutFriendsOnTop)
-                {
-                    bool xFriend = UserListService.Instance.ContainsUser(x.Username);
-                    bool yFriend = UserListService.Instance.ContainsUser(y.Username);
-                    if (xFriend && !yFriend)
-                    {
-                        return -1; //x is better
-                    }
-                    else if (yFriend && !xFriend)
-                    {
-                        return 1; //y is better
-                    }
-                    //else we continue on to the next criteria
-                }
-
-                switch (SortCriteria)
-                {
-                    case SortOrderChatroomUsers.Alphabetical:
-                        return x.Username.CompareTo(y.Username);
-                    case SortOrderChatroomUsers.OnlineStatus:
-                        if (x.Status == Soulseek.UserPresence.Online && y.Status != Soulseek.UserPresence.Online)
-                        {
-                            return -1;
-                        }
-                        else if (x.Status != Soulseek.UserPresence.Online && y.Status == Soulseek.UserPresence.Online)
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return x.Username.CompareTo(y.Username);
-                        }
-                }
-
-                return 0;
-            }
-            private bool PutFriendsOnTop = false;
-            private SortOrderChatroomUsers SortCriteria = SortOrderChatroomUsers.Alphabetical;
-            public ChatroomUserDataComparer(bool putFriendsOnTop, SortOrderChatroomUsers sortCriteria)
-            {
-                PutFriendsOnTop = putFriendsOnTop;
-                SortCriteria = sortCriteria;
-            }
         }
 
 
@@ -518,10 +413,7 @@ namespace Seeker.Chatroom
             }
         }
 
-
-
-
-
+        //TODO2026 move to lower
         public static void SaveNotifyRoomsToSharedPrefs()
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
@@ -619,7 +511,7 @@ namespace Seeker.Chatroom
                     {
                         //do event.. room user status updated..
                         //add the message and also possibly do the UI event...
-                        ChatroomController.StatusMessageUpdate statusMessageUpdate = new ChatroomController.StatusMessageUpdate(e.Status == Soulseek.UserPresence.Away ? ChatroomController.StatusMessageType.WentAway : ChatroomController.StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
+                        StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(e.Status == Soulseek.UserPresence.Away ? StatusMessageType.WentAway : StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
                         ChatroomController.AddStatusMessage(kvp.Key, statusMessageUpdate);
                         UserRoomStatusChanged?.Invoke(sender, new UserRoomStatusChangedEventArgs(kvp.Key, e.Username, e.Status, statusMessageUpdate));
                         Logger.Debug("room user status updated: " + e.Username + " " + e.Status.ToString() + " " + kvp.Key);
@@ -756,14 +648,6 @@ namespace Seeker.Chatroom
         }
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UnreadRooms = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();//basically a concurrent hashset.
-
-        public enum StatusMessageType
-        {
-            Joined = 1,
-            Left = 2,
-            WentAway = 3,
-            CameBack = 4,
-        }
 
         public static void AddStatusMessage(string roomName, StatusMessageUpdate statusMessageUpdate)
         {

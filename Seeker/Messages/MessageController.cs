@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Seeker.Helpers;
 
 using Common;
+using Common.Messages;
 namespace Seeker.Messages
 {
     public static class MessageController
@@ -137,13 +138,6 @@ namespace Seeker.Messages
             }
         }
 
-        public struct MessageNotifExtended
-        {
-            public bool IsSpecialMessage;
-            public string Username;
-            public bool IsOurMessage; //You
-            public string MessageText;
-        }
 
         private static Color GetYouTextColor(bool useNightColors, Context contextToUse)
         {
@@ -373,12 +367,10 @@ namespace Seeker.Messages
             }
         }
 
-
-
-        public static string CHANNEL_ID = "Private Messages ID";
-        public static string CHANNEL_NAME = "Private Messages";
-        public static string FromUserName = "FromThisUser";
-        public static string ComingFromMessageTapped = "FromAMessage";
+        public const string CHANNEL_ID = "Private Messages ID";
+        public const string CHANNEL_NAME = "Private Messages";
+        public const string FromUserName = "FromThisUser";
+        public const string ComingFromMessageTapped = "FromAMessage";
 
         public static void ShowNotificationLogic(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureReason = "", Context broadcastContext = null)
         {
