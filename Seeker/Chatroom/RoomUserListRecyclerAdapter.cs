@@ -273,7 +273,7 @@ namespace Seeker.Chatroom
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_cancel);
                 imageFriendIgnored.Visibility = ViewStates.Visible;
             }
-            else if (UserListService.ContainsUser(userData.Username))
+            else if (UserListService.Instance.ContainsUser(userData.Username))
             {
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_star);
                 imageFriendIgnored.Visibility = ViewStates.Visible;

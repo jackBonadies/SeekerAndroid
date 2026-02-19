@@ -1462,9 +1462,9 @@ namespace Seeker
                 {
                     string username = t.Result.Username;
                     Logger.Debug("Update User Info: " + username + " status: " + t.Result.Status.ToString());
-                    if (UserListService.ContainsUser(username))
+                    if (UserListService.Instance.ContainsUser(username))
                     {
-                        UserListService.AddUser(t.Result, t.Result.Status);
+                        UserListService.Instance.AddUser(t.Result, t.Result.Status);
                     }
 
 
@@ -1474,9 +1474,9 @@ namespace Seeker
                     if (t.Exception.InnerException.Message.Contains("User ") && t.Exception.InnerException.Message.Contains("does not exist"))
                     {
                         string username = t.Exception.InnerException.Message.Split(null)[1];
-                        if (UserListService.ContainsUser(username))
+                        if (UserListService.Instance.ContainsUser(username))
                         {
-                            UserListService.SetDoesNotExist(username);
+                            UserListService.Instance.SetDoesNotExist(username);
                         }
                     }
                     else
@@ -1534,9 +1534,9 @@ namespace Seeker
             //typically its tough to add a user to ignore list from the UI if they are in the User List.
             //but for example if you ignore a user based on their message.
             //User List and Ignore List and mutually exclusive so if you ignore someone, they will be removed from user list.
-            if (UserListService.ContainsUser(username))
+            if (UserListService.Instance.ContainsUser(username))
             {
-                UserListService.RemoveUser(username);
+                UserListService.Instance.RemoveUser(username);
             }
 
             lock (SeekerState.IgnoreUserList)

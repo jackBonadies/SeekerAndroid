@@ -9,7 +9,7 @@ namespace Seeker
     {
         public bool IsInUserList(string user)
         {
-            return UserListService.ContainsUser(user);
+            return UserListService.Instance.ContainsUser(user);
         }
     }
 }

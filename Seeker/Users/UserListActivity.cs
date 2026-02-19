@@ -113,7 +113,7 @@ namespace Seeker
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.removeUser:
-                    UserListService.RemoveUser(PopUpMenuOwnerHack);
+                    UserListService.Instance.RemoveUser(PopUpMenuOwnerHack);
                     this.NotifyItemRemoved(PopUpMenuOwnerHack);
                     return true;
                 case Resource.Id.removeUserFromIgnored:
@@ -439,7 +439,7 @@ namespace Seeker
                 }
                 else
                 {
-                    UserListService.AddUser(t.Result);
+                    UserListService.Instance.AddUser(t.Result);
                     if (!massImportCase)
                     {
                         if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
@@ -473,7 +473,7 @@ namespace Seeker
                 return;
             }
 
-            if (UserListService.ContainsUser(username))
+            if (UserListService.Instance.ContainsUser(username))
             {
                 Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_), username), ToastLength.Short).Show();
                 return;

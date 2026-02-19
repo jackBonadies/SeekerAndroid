@@ -390,8 +390,8 @@ namespace Seeker.Chatroom
 
                 if (PutFriendsOnTop)
                 {
-                    bool xFriend = UserListService.ContainsUser(x.Username);
-                    bool yFriend = UserListService.ContainsUser(y.Username);
+                    bool xFriend = UserListService.Instance.ContainsUser(x.Username);
+                    bool yFriend = UserListService.Instance.ContainsUser(y.Username);
                     if (xFriend && !yFriend)
                     {
                         return -1; //x is better
@@ -563,16 +563,6 @@ namespace Seeker.Chatroom
                 }
             }
         }
-
-
-
-
-
-
-
-
-
-
 
         public static void Initialize()
         {

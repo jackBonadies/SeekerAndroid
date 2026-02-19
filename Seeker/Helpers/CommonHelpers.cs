@@ -193,7 +193,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (UserListService.ContainsUser(username)) //if we already have added said user, change title add to remove..
+                if (UserListService.Instance.ContainsUser(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_to_user_list))
                     {
@@ -259,7 +259,7 @@ namespace Seeker
             // if we added this user as a friend do not show the option to ignore. they must be removed first.
             if (!string.IsNullOrEmpty(username))
             {
-                bool isInUserList = UserListService.ContainsUser(username);
+                bool isInUserList = UserListService.Instance.ContainsUser(username);
                 var menuItem = menu.FindItem(Resource.Id.action_ignore);
                 menuItem?.SetVisible(!isInUserList);
             }
@@ -282,7 +282,7 @@ namespace Seeker
         public static void AddAddRemoveUserMenuItem(IMenu menu, int i, int j, int k, string username, bool full_title = false)
         {
             string title = null;
-            if (!UserListService.ContainsUser(username))
+            if (!UserListService.Instance.ContainsUser(username))
             {
                 if (full_title)
                 {
@@ -317,7 +317,7 @@ namespace Seeker
         public static void AddIgnoreUnignoreUserMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             //ignored and added are mutually exclusive.  you cannot have a user be both ignored and added.
-            if (UserListService.ContainsUser(username))
+            if (UserListService.Instance.ContainsUser(username))
             {
                 return;
             }
@@ -599,7 +599,7 @@ namespace Seeker
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
                 MainActivity.ToastUI_short(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
-                UserListService.RemoveUser(usernameInQuestion);
+                UserListService.Instance.RemoveUser(usernameInQuestion);
                 SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
             }

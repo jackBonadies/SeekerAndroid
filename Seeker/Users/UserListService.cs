@@ -21,9 +21,12 @@ using System.Linq;
 
 namespace Seeker
 {
-    public static class UserListService
+    public class UserListService : IUserListService
     {
-        public static bool ContainsUser(string username)
+        public static UserListService Instance { get; } = new UserListService();
+        private UserListService() { }
+
+        public bool ContainsUser(string username)
         {
             lock (SeekerState.UserList)
             {
@@ -35,7 +38,7 @@ namespace Seeker
             }
         }
 
-        public static bool SetDoesNotExist(string username)
+        public bool SetDoesNotExist(string username)
         {
             bool found = false;
             lock (SeekerState.UserList)
@@ -57,7 +60,7 @@ namespace Seeker
         /// This is for adding new users...
         /// </summary>
         /// <returns>true if user was already added</returns>
-        public static bool AddUser(UserData userData, UserPresence? status = null)
+        public bool AddUser(UserData userData, UserPresence? status = null)
         {
             lock (SeekerState.UserList)
             {
@@ -104,7 +107,7 @@ namespace Seeker
         /// Remove user from user list.
         /// </summary>
         /// <returns>true if user was found (if false then bad..)</returns>
-        public static bool RemoveUser(string username)
+        public bool RemoveUser(string username)
         {
             lock (SeekerState.UserList)
             {
