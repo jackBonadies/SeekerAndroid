@@ -1,24 +1,17 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using Common;
+﻿using Seeker;
 using Seeker.Search;
 using Soulseek;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
-namespace Seeker
+namespace Common.Search
 {
     /// <summary>
     /// Saved info for the full search tab (i.e. all search responses)
     /// </summary>
     //TODO2026 - move to seperate file
-    public class SearchTabUtil
+    public static class SearchTabUtil
     {
         /// <summary>
         /// these by definition will always be wishlist tabs...
@@ -43,25 +36,6 @@ namespace Seeker
             {
                 if (!searchTab.SortHelper.ContainsKey(resp))
                 {
-                    //bool isItActuallyNotThere = true;
-                    //foreach(var key in searchTab.SortHelper.Keys)
-                    //{
-                    //    if (key.Username == resp.Username)
-                    //    {
-                    //        if ((key.FileCount == resp.FileCount) && (key.LockedFileCount == resp.LockedFileCount))
-                    //        {
-                    //            if (key.FileCount != 0 && (key.Files.First().Filename == resp.Files.First().Filename))
-                    //            {
-                    //                isItActuallyNotThere = false;
-                    //            }
-                    //            if (key.LockedFileCount != 0 && (key.LockedFiles.First().Filename == resp.LockedFiles.First().Filename))
-                    //            {
-                    //                isItActuallyNotThere = false;
-                    //            }
-                    //        }
-                    //    }
-                    //}
-
                     searchTab.SortHelper.Add(resp, null);
                 }
                 else

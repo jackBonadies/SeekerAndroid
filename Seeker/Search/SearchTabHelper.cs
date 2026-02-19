@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using Seeker.Helpers;
 using Common;
+using Common.Search;
 
 namespace Seeker.Helpers
 {
