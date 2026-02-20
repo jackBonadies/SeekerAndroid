@@ -44,7 +44,10 @@ namespace Soulseek.Network.Tcp
             Options = options ?? new ConnectionOptions();
 
             TcpClient = tcpClient ?? new TcpClientAdapter(new TcpClient(AddressFamily.InterNetworkV6));
-            TcpClient.Client.DualMode = true;
+            if (TcpClient.Client.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                TcpClient.Client.DualMode = true;
+            }
 
             // invoke the configuration delegate to allow implementing code to configure
             // the socket.  .NET standard has a limited feature set with respect to SetSocketOptions()
