@@ -958,10 +958,10 @@ namespace Seeker
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 try
                 {
-                    Android.Net.Uri incompleteUri = null;
                     TransferState.SetupCancellationToken(item, cancellationTokenSource, out _);
-                    Task task = TransfersUtil.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
-                    task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
+                    var dlInfo = new DownloadInfo(item.Username, item.FullFilename, item.Size, null, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item };
+                    Task task = TransfersUtil.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
+                    task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
                 }
                 catch (DuplicateTransferException)
                 {
@@ -1108,15 +1108,10 @@ namespace Seeker
             try
             {
 
-                Android.Net.Uri incompleteUri = null;
                 TransferState.SetupCancellationToken(item1, cancellationTokenSource, out _);
-                Task task = TransfersUtil.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
-                //SeekerState.SoulseekClient.DownloadAsync(
-                //username: item1.Username,
-                //filename: item1.FullFilename,
-                //size: item1.Size,
-                //cancellationToken: cancellationTokenSource.Token);
-                task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, task, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 }))); //if paused do retry counter 0.
+                var dlInfo = new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, null, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 };
+                Task task = TransfersUtil.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
+                task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo))); //if paused do retry counter 0.
             }
             catch (DuplicateTransferException)
             {

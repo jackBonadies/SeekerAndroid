@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.IO;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 
@@ -83,7 +84,7 @@ namespace Seeker.Transfers
             {
                 var dlInfo = dlInfos[i];
                 var file = files[i];
-                var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
+                var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, dlInfo, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
                 var e = new DownloadAddedEventArgs(dlInfo);
                 Action<Task> continuationActionSaveFile = DownloadService.DownloadContinuationActionUI(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
@@ -189,7 +190,7 @@ namespace Seeker.Transfers
         /// <param name="cts"></param>
         /// <param name="incompleteUri"></param>
         /// <returns></returns>
-        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, out Task waitForNext, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
+        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, out Task waitForNext, DownloadInfo dlInfo, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
         {
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -205,49 +206,46 @@ namespace Seeker.Transfers
             });
             if (PreferencesState.MemoryBackedDownload)
             {
+                var memStream = new MemoryStream();
+                if (dlInfo != null)
+                {
+                    dlInfo.OutputMemoryStream = memStream;
+                }
                 dlTask =
                     SeekerState.SoulseekClient.DownloadAsync(
                         username: username,
-                        filename: fullfilename,
+                        remoteFilename: fullfilename,
+                        outputStreamFactory: () => Task.FromResult<Stream>((Stream)memStream),
                         size: size,
                         options: new TransferOptions(governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
-                        cancellationToken: cts.Token,
-                        isLegacy: isFileDecodedLegacy,
-                        isFolderDecodedLegacy: isFolderDecodedLegacy);
+                        cancellationToken: cts.Token);
             }
             else
             {
                 long partialLength = 0;
+                Android.Net.Uri incompleteUri = null;
+                Android.Net.Uri incompleteUriDirectory = null;
+                System.IO.Stream stream = DownloadService.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
+
+                if (dlInfo?.TransferItemReference != null)
+                {
+                    dlInfo.TransferItemReference.IncompleteUri = incompleteUri?.ToString();
+                    dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory?.ToString();
+                }
 
                 dlTask = SeekerState.SoulseekClient.DownloadAsync(
                         username: username,
-                        filename: fullfilename,
-                        null,
+                        remoteFilename: fullfilename,
+                        outputStreamFactory: () => Task.FromResult<System.IO.Stream>(stream),
                         size: size,
-                        startOffset: partialLength, //this will get populated
+                        startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
-                        cancellationToken: cts.Token,
-                        streamTask: GetStreamTask(username, fullfilename, depth),
-                        isFilenameDecodedLegacy: isFileDecodedLegacy,
-                        isFolderDecodedLegacy: isFolderDecodedLegacy);
+                        cancellationToken: cts.Token);
             }
             waitForNext = Task.WhenAny(waitUntilEnqueue.Task, dlTask);
             return dlTask;
         }
 
-        public static Task<Tuple<System.IO.Stream, long, string, string>> GetStreamTask(string username, string fullfilename, int depth = 1) //there has to be something extra here for args, bc we need to denote just how much of the fullFilename to use....
-        {
-            Task<Tuple<System.IO.Stream, long, string, string>> task = new Task<Tuple<System.IO.Stream, long, string, string>>(
-                () =>
-                {
-                    long partialLength = 0;
-                    Android.Net.Uri incompleteUri = null;
-                    Android.Net.Uri incompleteUriDirectory = null;
-                    System.IO.Stream streamToWriteTo = DownloadService.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength); //something here to denote...
-                    return new Tuple<System.IO.Stream, long, string, string>(streamToWriteTo, partialLength, incompleteUri.ToString(), incompleteUriDirectory.ToString());
-                });
-            return task;
-        }
 
     }
 }

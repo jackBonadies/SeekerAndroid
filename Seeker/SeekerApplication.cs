@@ -814,7 +814,7 @@ namespace Seeker
                 {
                     relevantItem.State = e.Transfer.State;
                 }
-                relevantItem.IncompleteParentUri = e.IncompleteParentUri;
+                // IncompleteParentUri and IncompleteUri are now set directly by DownloadFileAsync
                 if (!relevantItem.State.HasFlag(TransferStates.Requested))
                 {
                     relevantItem.InProcessing = true;
@@ -822,6 +822,7 @@ namespace Seeker
                 if (relevantItem.State.HasFlag(TransferStates.Succeeded))
                 {
                     relevantItem.IncompleteParentUri = null; //not needed anymore.
+                    relevantItem.IncompleteUri = null;
                 }
                 //if(relevantItem.Size==-1)
                 //{

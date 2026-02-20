@@ -24,7 +24,8 @@ namespace Seeker
         public bool WasFilenameLatin1Decoded = false;
         public bool WasFolderLatin1Decoded = false;
         public string FinalUri = string.Empty; //final uri of downloaded item
-        public string IncompleteParentUri = null; //incomplete uri of item.  will be null if successfully downloaded or not yet created.
+        public string IncompleteParentUri = null; //incomplete parent directory uri.  will be null if successfully downloaded or not yet created.
+        public string IncompleteUri = null; //incomplete file uri.  will be null if successfully downloaded or not yet created.
         public TransferItemExtras TransferItemExtra;
 
         [System.Xml.Serialization.XmlIgnoreAttribute]

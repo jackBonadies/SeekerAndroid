@@ -254,10 +254,10 @@ namespace Seeker.Services
                     try
                     {
                         transferItemInQuestion.QueueLength = int.MaxValue;
-                        Android.Net.Uri incompleteUri = null;
                         TransferState.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                        Task task = TransfersUtil.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1());
-                        task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, task, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion })));
+                        var dlInfo = new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, null, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion };
+                        Task task = TransfersUtil.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1());
+                        task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
                     }
                     catch (DuplicateTransferException)
                     {
@@ -528,10 +528,10 @@ namespace Seeker.Services
                             {
                                 //retry download.
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                                Android.Net.Uri incompleteUri = null;
                                 TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, cancellationTokenSource, out _, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth))));
+                                var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
+                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, cancellationTokenSource, out _, retryDlInfo, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
+                                retryTask.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(retryDlInfo)));
                             }
                             catch (System.Exception e)
                             {
@@ -798,10 +798,10 @@ namespace Seeker.Services
                             {
                                 //retry download.
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                                Android.Net.Uri incompleteUri = null;
                                 TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, out _, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, retryTask, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth))));
+                                var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
+                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, out _, retryDlInfo, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
+                                retryTask.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(retryDlInfo)));
                                 return; //i.e. dont toast anything just retry.
                             }
                             catch (System.Exception e)
@@ -841,22 +841,24 @@ namespace Seeker.Services
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
-                    if (task is Task<byte[]> tbyte)
+                    bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
+                    if (e.dlInfo.OutputMemoryStream != null)
                     {
-                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
-                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, tbyte.Result, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        byte[] bytes = e.dlInfo.OutputMemoryStream.ToArray();
+                        e.dlInfo.OutputMemoryStream.Dispose();
+                        e.dlInfo.OutputMemoryStream = null;
+                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, bytes, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
                         SaveFileToMediaStore(path);
                     }
-                    else if (task is Task<Tuple<string, string>> tString)
+                    else if (e.dlInfo.TransferItemReference?.IncompleteUri != null)
                     {
-                        //move file...
-                        bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
-                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(tString.Result.Item1), Android.Net.Uri.Parse(tString.Result.Item2), false, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        //move file from incomplete to final location...
+                        string path = SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteUri), Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteParentUri), false, e.dlInfo.Depth, noSubfolder, out finalUri);
                         SaveFileToMediaStore(path);
                     }
                     else
                     {
-                        Logger.Firebase("Very bad. Task is not the right type.....");
+                        Logger.Firebase("Very bad. No memory stream or incomplete URI available for saving file.");
                     }
                     e.dlInfo.TransferItemReference.FinalUri = finalUri;
                 }
