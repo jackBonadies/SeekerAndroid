@@ -257,6 +257,17 @@ namespace Soulseek
                 return;
             }
 
+            /*
+                for all other updates, we want to use a moving average, and for that to work well we need to throttle
+                it a bit and only update once per second so the math works
+
+                we keep track of the last update, and if it hasn't been at least `progressUpdateLimit` ms since the last
+                update, we'll do nothing.
+
+                this means that AverageSpeed will be zero until at least `progressUpdateLimit` ms after the start of the
+                transfer! and this is why we have special cases above for when the transfer is complete; otherwise very
+                fast transfers will have an average speed of 0.
+            */
             var ts = DateTime.UtcNow - (lastProgressTime ?? StartTime.Value);
 
             if (ts.TotalMilliseconds >= progressUpdateLimit)

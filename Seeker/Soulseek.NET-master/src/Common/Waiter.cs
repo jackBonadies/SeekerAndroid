@@ -64,9 +64,7 @@ namespace Soulseek
         public void Cancel(WaitKey key)
         {
             Disposition(key, wait =>
-            {
-                wait.TaskCompletionSource.TrySetCanceled();
-            });
+                wait.TaskCompletionSource.TrySetCanceled());
         }
 
         /// <summary>

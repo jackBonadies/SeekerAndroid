@@ -23,6 +23,11 @@ namespace Soulseek
     internal static class Constants
     {
         /// <summary>
+        ///     The major version of the client.
+        /// </summary>
+        public const int MajorVersion = 170;
+
+        /// <summary>
         ///     Connection methods.
         /// </summary>
         internal static class ConnectionMethod

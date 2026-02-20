@@ -219,8 +219,10 @@ namespace Soulseek.Network
                         var lengthBytes = await ReadAsync(4, CancellationToken.None).ConfigureAwait(false);
                         var length = BitConverter.ToInt32(lengthBytes, 0);
                         message.AddRange(lengthBytes);
+
                         codeBytes = await ReadAsync(CodeLength, CancellationToken.None).ConfigureAwait(false);
                         message.AddRange(codeBytes);
+
                         RaiseMessageDataRead(this, new ConnectionDataEventArgs(0, length - CodeLength));
 
                         Interlocked.CompareExchange(ref MessageReceived, null, null)?

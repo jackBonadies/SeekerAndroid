@@ -27,7 +27,6 @@ namespace Soulseek
     /// <summary>
     ///     A response to a file search.
     /// </summary>
-    [System.Serializable]
     public class SearchResponse
     {
         /// <summary>

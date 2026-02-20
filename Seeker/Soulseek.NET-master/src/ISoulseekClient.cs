@@ -832,24 +832,24 @@ namespace Soulseek
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
         Task<IReadOnlyCollection<Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false);
 
-        ///// <summary>
-        /////     Asynchronously fetches the current place of the specified <paramref name="filename"/> in the queue of the
-        /////     specified <paramref name="username"/>.
-        ///// </summary>
-        ///// <param name="username">The user whose queue to check.</param>
-        ///// <param name="filename">The file to check.</param>
-        ///// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        ///// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
-        ///// <exception cref="ArgumentException">
-        /////     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
-        ///// </exception>
-        ///// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
-        ///// <exception cref="TransferNotFoundException">Thrown when a corresponding download is not active.</exception>
-        ///// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
-        ///// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
-        ///// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
-        ///// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        //Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool isLegacy = false);
+        /// <summary>
+        ///     Asynchronously fetches the current place of the specified <paramref name="filename"/> in the queue of the
+        ///     specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">The user whose queue to check.</param>
+        /// <param name="filename">The file to check.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TransferNotFoundException">Thrown when a corresponding download is not active.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Gets the next token for use in client operations.

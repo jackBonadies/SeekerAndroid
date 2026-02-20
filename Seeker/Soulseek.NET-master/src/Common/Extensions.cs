@@ -91,7 +91,7 @@ namespace Soulseek
         /// </summary>
         /// <param name="timer">The timer to reset.</param>
         public static void Reset(this Timer timer)
-        { //this was null when I did a search..
+        {
             try
             {
                 timer.Stop();

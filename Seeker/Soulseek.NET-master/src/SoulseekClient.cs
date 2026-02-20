@@ -41,6 +41,7 @@ namespace Soulseek
     /// </summary>
     public class SoulseekClient : ISoulseekClient
     {
+    	private const string DefaultAddress = "server.slsknet.org";
 #pragma warning disable S2223 // Non-constant static fields should not be visible
 #pragma warning disable SA1310 // Field names should not contain underscore
 #pragma warning disable SA1401 // Fields should be private
@@ -55,29 +56,31 @@ namespace Soulseek
 #pragma warning restore SA1310 // Field names should not contain underscore
 #pragma warning restore S2223 // Non-constant static fields should not be visible
 
-        private const string DefaultAddress = "vps.slsknet.org";
         private const int DefaultPort = 2271;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
-        public SoulseekClient()
-            : this(options: new SoulseekClientOptions())
+        /// <param name="minorVersion">The minor version of the client.</param>
+        public SoulseekClient(int minorVersion)
+            : this(minorVersion, options: new SoulseekClientOptions())
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="options">The client options.</param>
-        public SoulseekClient(SoulseekClientOptions options)
-            : this(options, serverConnection: null)
+        public SoulseekClient(int minorVersion, SoulseekClientOptions options)
+            : this(minorVersion, options, serverConnection: null)
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="options">The client options.</param>
         /// <param name="serverConnection">The IMessageConnection instance to use.</param>
         /// <param name="connectionFactory">The IConnectionFactory instance to use.</param>
@@ -97,6 +100,7 @@ namespace Soulseek
         /// <param name="downloadTokenBucket">The ITokenBucket instance to use for downloads.</param>
 #pragma warning disable S3427 // Method overloads with default parameter values should not overlap
         internal SoulseekClient(
+            int minorVersion,
             SoulseekClientOptions options = null,
             IMessageConnection serverConnection = null,
             IConnectionFactory connectionFactory = null,
@@ -115,6 +119,13 @@ namespace Soulseek
             ITokenBucket uploadTokenBucket = null,
             ITokenBucket downloadTokenBucket = null)
         {
+            if (minorVersion < 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minorVersion), "The minor version must be greater than 100");
+            }
+
+            MinorVersion = minorVersion;
+
 #pragma warning restore S3427 // Method overloads with default parameter values should not overlap
             Options = options ?? new SoulseekClientOptions();
 
@@ -484,7 +495,7 @@ namespace Soulseek
         public event EventHandler<SearchResponseReceivedEventArgs> SearchResponseReceived;
 
 
-
+		// TODO2026 is this necessary?
         public class ErrorLogEventArgs : EventArgs
         {
             public string Message;
@@ -780,6 +791,16 @@ namespace Soulseek
         /// </summary>
         public virtual string Username { get; private set; }
 
+        /// <summary>
+        ///     Gets the major version of the library.
+        /// </summary>
+        public int MajorVersion { get; } = Constants.MajorVersion;
+
+        /// <summary>
+        ///     Gets the configured minor version of the client.
+        /// </summary>
+        public int MinorVersion { get; private set; }
+
 #pragma warning disable SA1600 // Elements should be documented
         internal virtual IDistributedConnectionManager DistributedConnectionManager { get; }
         internal virtual IDistributedMessageHandler DistributedMessageHandler { get; }
@@ -832,8 +853,6 @@ namespace Soulseek
             {
                 throw new ArgumentException("The private message ID must be greater than zero", nameof(privateMessageId));
             }
-
-            //as soon as we connect but just before we log in we get here...  
 
             if (!State.HasFlag(SoulseekClientStates.Connected) || (!State.HasFlag(SoulseekClientStates.LoggedIn)&& !State.HasFlag(SoulseekClientStates.LoggingIn)))
             {
@@ -1085,7 +1104,7 @@ namespace Soulseek
             {
                 throw new InvalidOperationException($"The client is already connected");
             }
-
+			//TODO2026
             DNS_LOOKUP_FAILED = false;
             if (!IPAddress.TryParse(address, out IPAddress ipAddress))
             {
@@ -3381,9 +3400,7 @@ namespace Soulseek
                     IPEndPoint = ipEndPoint;
 
                     ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, $"Logging in");
-                    //#if DEBUG
-                    //System.Threading.Thread.Sleep(4000);
-                    //#endif
+
                     using var loginFailureCts = new CancellationTokenSource();
                     using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, loginFailureCts.Token);
 
@@ -3393,7 +3410,7 @@ namespace Soulseek
                     // users are notified of the login but the listen port is not yet set, resulting in the server reporting a
                     // port of 0 if the notified users attempt to connect (e.g. to re-request uploads). this is still possible,
                     // but much less likely. the server will not accept a listen port command prior to login.
-                    var loginBytes = new LoginRequest(username, password).ToByteArray()
+                    var loginBytes = new LoginRequest(MinorVersion, username, password).ToByteArray()
                         .Concat(new SetListenPortCommand(Options.ListenPort).ToByteArray())
                         .ToArray();
 

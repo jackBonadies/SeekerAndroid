@@ -272,9 +272,9 @@ namespace Soulseek.Network.Tcp
         protected SystemTimer WatchdogTimer { get; set; }
 
         private TaskCompletionSource<string> DisconnectTaskCompletionSource { get; } = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        private SemaphoreSlim WriteSemaphore { get; set; } = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         private SemaphoreSlim WriteQueueSemaphore { get; set; }
         private bool WriteQueueFull { get; set; }
-        private SemaphoreSlim WriteSemaphore { get; set; } = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         /// <summary>
         ///     Asynchronously connects the client to the configured <see cref="IPEndPoint"/>.
@@ -376,8 +376,7 @@ namespace Soulseek.Network.Tcp
             catch (Exception ex)
             {
                 Disconnect($"Connection Error: {ex.Message}", ex);
-                //Do event so that firebase can log...
-                //SoulseekClient.InvokeErrorLogHandler(ex.Message + ex.StackTrace + IPEndPoint.AddressFamily); can be operation cancelled, no route to host, connection timed out, network is unreachable, network subsystem is down, too many open files
+
                 if (ex is TimeoutException || ex is OperationCanceledException)
                 {
                     throw;
@@ -555,10 +554,6 @@ namespace Soulseek.Network.Tcp
                 throw new InvalidOperationException("The underlying Tcp connection is closed");
             }
 
-            //bool selectRead = TcpClient.Client.Poll(1000000, SelectMode.SelectRead);
-            //bool selectWrite = TcpClient.Client.Poll(1000000, SelectMode.SelectWrite);
-            //bool selectError = TcpClient.Client.Poll(1000000, SelectMode.SelectError);
-
             if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException($"Invalid attempt to send to a disconnected or transitioning connection (current state: {State})");
@@ -721,12 +716,6 @@ namespace Soulseek.Network.Tcp
 
                     if (bytesRead == 0)
                     {
-#if DEBUG
-                        if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
-                        {
-                            Console.WriteLine("server remote connection closed");
-                        }
-#endif
                         throw new ConnectionException("Remote connection closed");
                     }
 
@@ -761,12 +750,6 @@ namespace Soulseek.Network.Tcp
             }
             catch (Exception ex)
             {
-#if DEBUG
-                if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
-                {
-                    Console.WriteLine("server remote disconnect");
-                }
-#endif
                 Disconnect($"Read error: {ex.Message}", ex);
 
                 if (ex is TimeoutException || ex is OperationCanceledException)
@@ -861,14 +844,6 @@ namespace Soulseek.Network.Tcp
 #endif
 
                     totalBytesWritten += bytesRead;
-#if DEBUG
-                    if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
-                    {
-                        Console.WriteLine("server write bytes: ");
-                        Console.WriteLine(this.Id);
-                        Console.WriteLine(TcpClient.Client.RemoteEndPoint.ToString() + TcpClient.Client.LocalEndPoint.ToString());
-                    }
-#endif
 
                     reporter?.Invoke(bytesToRead, bytesGranted, bytesRead);
 
