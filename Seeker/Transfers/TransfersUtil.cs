@@ -225,7 +225,7 @@ namespace Seeker.Transfers
                 long partialLength = 0;
                 Android.Net.Uri incompleteUri = null;
                 Android.Net.Uri incompleteUriDirectory = null;
-                System.IO.Stream stream = DownloadService.GetIncompleteStream(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
+                DownloadService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
 
                 if (dlInfo?.TransferItemReference != null)
                 {
@@ -236,7 +236,8 @@ namespace Seeker.Transfers
                 dlTask = SeekerState.SoulseekClient.DownloadAsync(
                         username: username,
                         remoteFilename: fullfilename,
-                        outputStreamFactory: () => Task.FromResult<System.IO.Stream>(stream),
+                        outputStreamFactory: () => Task.FromResult<System.IO.Stream>(
+                            DownloadService.OpenIncompleteStream(incompleteUri, partialLength)),
                         size: size,
                         startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),

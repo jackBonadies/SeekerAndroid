@@ -873,7 +873,7 @@ namespace Seeker.Services
         public static object lock_toplevel_ifexist_create = new object();
         public static object lock_album_ifexist_create = new object();
 
-        public static System.IO.Stream GetIncompleteStream(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
+        public static void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
             string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
@@ -898,7 +898,6 @@ namespace Seeker.Services
             bool fileExists = false;
             if (SeekerState.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir))
             {
-                System.IO.FileStream fs = null;
                 Java.IO.File incompleteDir = null;
                 Java.IO.File musicDir = null;
                 try
@@ -944,16 +943,13 @@ namespace Seeker.Services
                     parentUri = Android.Net.Uri.Parse(new Java.IO.File(fullDir).ToURI().ToString());
                     filePath = fullDir + @"/" + name;
                     Java.IO.File f = new Java.IO.File(filePath);
-                    fs = null;
                     if (f.Exists())
                     {
                         fileExists = true;
-                        fs = new System.IO.FileStream(filePath, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None);
                         partialLength = f.Length();
                     }
                     else
                     {
-                        fs = System.IO.File.Create(filePath);
                         partialLength = 0;
                     }
                     incompleteUri = Android.Net.Uri.Parse(new Java.IO.File(filePath).ToURI().ToString()); //using incompleteUri.Path gives you filePath :)
@@ -963,7 +959,6 @@ namespace Seeker.Services
                     Logger.Firebase("Legacy Filesystem Issue: " + e.Message + e.StackTrace + System.Environment.NewLine + incompleteDir.Exists() + musicDir.Exists() + fileExists);
                     throw;
                 }
-                return fs;
             }
             else
             {
@@ -1128,13 +1123,11 @@ namespace Seeker.Services
 
                 filePath = folderDir1.Uri + @"/" + name;
 
-                System.IO.Stream stream = null;
                 DocumentFile potentialFile = folderDir1.FindFile(name); //this will return null if does not exist!!
                 if (potentialFile != null && potentialFile.Exists())  //dont do a check for length 0 because then it will go to else and create another identical file (2)
                 {
                     partialLength = potentialFile.Length();
                     incompleteUri = potentialFile.Uri;
-                    stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wa");
                 }
                 else
                 {
@@ -1142,17 +1135,38 @@ namespace Seeker.Services
                     DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
-                    stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
                 }
-
-                return stream;
-                //string type1 = stream.GetType().ToString();
-                //Java.IO.File musicFile = new Java.IO.File(filePath);
-                //FileOutputStream stream = new FileOutputStream(mFile);
-                //stream.Write(bytes);
-                //stream.Close();
             }
-            //return filePath;
+        }
+
+        /// <summary>
+        /// Opens a stream for writing to the incomplete file. Call after GetOrCreateIncompleteLocation.
+        /// </summary>
+        public static System.IO.Stream OpenIncompleteStream(Android.Net.Uri incompleteUri, long partialLength)
+        {
+            if (SeekerState.UseLegacyStorage() && incompleteUri.Scheme == "file")
+            {
+                string filePath = incompleteUri.Path;
+                if (partialLength > 0)
+                {
+                    return new System.IO.FileStream(filePath, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.None);
+                }
+                else
+                {
+                    return System.IO.File.Create(filePath);
+                }
+            }
+            else
+            {
+                if (partialLength > 0)
+                {
+                    return SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wa");
+                }
+                else
+                {
+                    return SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
+                }
+            }
         }
 
         /// <summary>
