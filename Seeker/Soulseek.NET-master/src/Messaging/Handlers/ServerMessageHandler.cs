@@ -66,11 +66,6 @@ namespace Soulseek.Messaging.Handlers
         public event EventHandler<string> GlobalMessageReceived;
 
         /// <summary>
-        ///     Occurs when a global message is received.
-        /// </summary>
-        public event EventHandler<UserData> UserDataReceived;
-
-        /// <summary>
         ///     Occurs when the client is forcefully disconnected from the server, probably because another client logged in with
         ///     the same credentials.
         /// </summary>
@@ -233,11 +228,6 @@ namespace Soulseek.Messaging.Handlers
                         break;
 
                     case MessageCode.Server.CheckPrivileges:
-                        //if(MessageCode.Server.WishlistInterval == code)
-                        //{
-                        //int interval = IntegerResponse.FromByteArray<MessageCode.Server>(message);
-                        //}
-
                         SoulseekClient.Waiter.Complete(new WaitKey(code), IntegerResponse.FromByteArray<MessageCode.Server>(message));
                         break;
 
@@ -264,14 +254,6 @@ namespace Soulseek.Messaging.Handlers
                     case MessageCode.Server.NewPassword:
                         var confirmedPassword = NewPassword.FromByteArray(message).Password;
                         SoulseekClient.Waiter.Complete(new WaitKey(code), confirmedPassword);
-                        break;
-
-                    case MessageCode.Server.GetUserStats:
-                        UserData userData = GetUserStatsCommand.FromByteArray(message);
-                        UserDataReceived?.Invoke(this, userData);
-                        var statsForWait = UserStatisticsResponseFactory.FromByteArray(message);
-                        SoulseekClient.Waiter.Complete(new WaitKey(code, statsForWait.Username), statsForWait);
-                        UserStatisticsChanged?.Invoke(this, statsForWait);
                         break;
 
                     case MessageCode.Server.PrivateRoomToggle:
@@ -447,6 +429,12 @@ namespace Soulseek.Messaging.Handlers
                         var status = UserStatusResponseFactory.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code, status.Username), status);
                         UserStatusChanged?.Invoke(this, status);
+                        break;
+
+                    case MessageCode.Server.GetUserStats:
+                        var stats = UserStatisticsResponseFactory.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, stats.Username), stats);
+                        UserStatisticsChanged?.Invoke(this, stats);
                         break;
 
                     case MessageCode.Server.PrivateMessage:

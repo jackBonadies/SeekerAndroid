@@ -1,4 +1,4 @@
-﻿// <copyright file="RoomTickerRemovedEventArgs.cs" company="JP Dillingham">
+// <copyright file="OperatorAddedRemovedEventArgs.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -18,24 +18,34 @@
 namespace Soulseek
 {
     /// <summary>
-    ///     Event arguments for events raised when a ticker is removed from a chat room.
+    ///     Event arguments for operator added or removed to our room
     /// </summary>
-    public class RoomTickerRemovedEventArgs : RoomTickerEventArgs
+    public class OperatorAddedRemovedEventArgs : System.EventArgs
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="RoomTickerRemovedEventArgs"/> class.
+        ///     Initializes a new instance of the <see cref="OperatorAddedRemovedEventArgs"/> class.
         /// </summary>
-        /// <param name="roomName">The name of the chat room from which the ticker was removed.</param>
-        /// <param name="username">The name of the user to which the ticker belonged.</param>
-        public RoomTickerRemovedEventArgs(string roomName, string username)
-            : base(roomName)
+        /// <param name="roomName">The name of the chat room.</param>
+        /// <param name="username">The name of the user.</param>
+        /// <param name="added">Whether the operator was added (true) or removed (false).</param>
+        public OperatorAddedRemovedEventArgs(string roomName, string username, bool added)
         {
+            RoomName = roomName;
             Username = username;
+            Added = added;
         }
 
         /// <summary>
-        ///     Gets the name of the user to which the ticker belonged.
+        ///     Gets the name of the user
         /// </summary>
         public string Username { get; }
+        /// <summary>
+        ///     Gets the room name
+        /// </summary>
+        public string RoomName { get; }
+        /// <summary>
+        ///     Gets if Added (else removed)
+        /// </summary>
+        public bool Added { get; }
     }
 }

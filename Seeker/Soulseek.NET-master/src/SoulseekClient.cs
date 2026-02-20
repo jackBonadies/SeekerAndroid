@@ -265,7 +265,6 @@ namespace Soulseek
             ServerMessageHandler.RoomListReceived += (sender, e) => RoomListReceived?.Invoke(this, e);
             ServerMessageHandler.DiagnosticGenerated += (sender, e) => DiagnosticGenerated?.Invoke(sender, e);
             ServerMessageHandler.GlobalMessageReceived += (sender, e) => GlobalMessageReceived?.Invoke(this, e);
-            ServerMessageHandler.UserDataReceived += (sender, e) => UserDataReceived?.Invoke(this, e);
             ServerMessageHandler.DistributedNetworkReset += (sender, e) => DistributedNetworkReset?.Invoke(this, e);
             ServerMessageHandler.ExcludedSearchPhrasesReceived += (sender, e) => ExcludedSearchPhrasesReceived?.Invoke(this, e);
 

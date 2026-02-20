@@ -146,7 +146,7 @@ namespace Seeker
                         maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
                         userInfoResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
-                SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
+                SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
                 SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
                 SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
                 //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
@@ -1939,9 +1939,10 @@ namespace Seeker
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SoulseekClient_UserDataReceived(object sender, UserData e)
+        private void SoulseekClient_UserDataReceived(object sender, UserStatistics e)
         {
             Logger.Debug("User Data Received: " + e.Username);
+            var userData = SimpleHelpers.UserStatisticsToUserData(e);
             if (e.Username == PreferencesState.Username)
             {
                 PreferencesState.UploadSpeed = e.AverageSpeed; //bytes
@@ -1954,10 +1955,10 @@ namespace Seeker
                 }
                 else
                 {
-                    UserListAddIfContainsUser(e.Username, e, null);
+                    UserListAddIfContainsUser(e.Username, userData, null);
                 }
 
-                RequestedUserInfoHelper.AddIfRequestedUser(e.Username, e, null, null);
+                RequestedUserInfoHelper.AddIfRequestedUser(e.Username, userData, null, null);
             }
         }
 

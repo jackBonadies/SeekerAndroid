@@ -427,6 +427,11 @@ namespace Seeker
             }
         }
 
+        public static UserData UserStatisticsToUserData(UserStatistics stats)
+        {
+            return new UserData(stats.Username, UserPresence.Online, stats.AverageSpeed, stats.UploadCount, stats.FileCount, stats.DirectoryCount, null);
+        }
+
         static SimpleHelpers()
         {
             KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();

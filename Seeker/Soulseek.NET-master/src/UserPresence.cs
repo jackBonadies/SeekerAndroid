@@ -37,25 +37,4 @@ namespace Soulseek
         /// </summary>
         Online = 2,
     }
-
-    /// <summary>
-    ///     User status.
-    /// </summary>
-    public enum UserRole
-    {
-        /// <summary>
-        ///     Normal.
-        /// </summary>
-        Normal = 0,
-
-        /// <summary>
-        ///     Mod.
-        /// </summary>
-        Operator = 1,
-
-        /// <summary>
-        ///     Owner.
-        /// </summary>
-        Owner = 2,
-    }
 }

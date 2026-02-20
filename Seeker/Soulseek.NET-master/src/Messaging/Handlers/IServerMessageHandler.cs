@@ -41,11 +41,6 @@ namespace Soulseek.Messaging.Handlers
         event EventHandler<string> GlobalMessageReceived;
 
         /// <summary>
-        ///     Occurs when user data is received
-        /// </summary>
-        event EventHandler<UserData> UserDataReceived;
-
-        /// <summary>
         ///     Occurs when the client is forcefully disconnected from the server, probably because another client logged in with
         ///     the same credentials.
         /// </summary>

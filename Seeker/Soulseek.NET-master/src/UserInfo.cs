@@ -20,7 +20,6 @@ namespace Soulseek
     /// <summary>
     ///     The response to a user info request.
     /// </summary>
-    [System.Serializable]
     public class UserInfo
     {
         /// <summary>
