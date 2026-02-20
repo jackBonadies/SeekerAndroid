@@ -63,18 +63,42 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void UserList_DeserializesFromDisk()
+        public async Task UserList_DeserializesFromDisk()
         {
             var raw = GetPreferenceString("Cache_UserList_v2");
             var result = SerializationHelper.RestoreUserListFromString(raw);
 
-            Assert.AreEqual(1, result.Count);
-            Assert.IsNotNull(result[0].UserData);
-            Assert.AreEqual(294836, result[0].UserData.AverageSpeed);
-            Assert.AreEqual(6892, result[0].UserData.FileCount);
-            Assert.AreEqual(152, result[0].UserData.UploadCount);
-            Assert.AreEqual(UserPresence.Online, result[0].UserData.Status);
-            Assert.AreEqual(Seeker.UserRole.Friend, result[0].Role);
+            await Verifier.Verify(result.Select(u => new
+            {
+                u.Username,
+                u.Role,
+                u.DoesNotExist,
+                UserStatus = u.UserStatus == null ? null : new
+                {
+                    u.UserStatus.Username,
+                    u.UserStatus.Presence,
+                    u.UserStatus.IsPrivileged,
+                },
+                UserData = u.UserData == null ? null : new
+                {
+                    u.UserData.Username,
+                    u.UserData.Status,
+                    u.UserData.AverageSpeed,
+                    u.UserData.UploadCount,
+                    u.UserData.FileCount,
+                    u.UserData.DirectoryCount,
+                    u.UserData.CountryCode,
+                    u.UserData.SlotsFree,
+                },
+                UserInfo = u.UserInfo == null ? null : new
+                {
+                    u.UserInfo.Description,
+                    u.UserInfo.HasFreeUploadSlot,
+                    u.UserInfo.HasPicture,
+                    u.UserInfo.QueueLength,
+                    u.UserInfo.UploadSlots,
+                },
+            }));
         }
 
         [Test]

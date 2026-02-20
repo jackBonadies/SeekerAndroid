@@ -621,9 +621,10 @@ namespace Seeker.Serialization
                 return;
             }
 
-            writer.WriteArrayHeader(2);
+            writer.WriteArrayHeader(3);
             writer.Write(value.IsPrivileged);
             writer.WriteInt32((int)value.Presence);
+            writer.Write(value.Username);
         }
 
         Soulseek.UserStatus IMessagePackFormatter<Soulseek.UserStatus>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
@@ -635,6 +636,7 @@ namespace Seeker.Serialization
 
             bool isPrivileged = false;
             UserPresence presence = UserPresence.Online;
+            String username = string.Empty;
 
             int count = reader.ReadArrayHeader();
             for (int i = 0; i < count; i++)
@@ -646,6 +648,9 @@ namespace Seeker.Serialization
                         break;
                     case 1:
                         presence = (UserPresence)reader.ReadInt32();
+                        break;
+                    case 2:
+                        username = reader.ReadString();
                         break;
                     default:
                         reader.Skip();
@@ -659,7 +664,7 @@ namespace Seeker.Serialization
 
 
             reader.Depth--;
-            return new Soulseek.UserStatus(string.Empty, presence, isPrivileged);
+            return new Soulseek.UserStatus(username, presence, isPrivileged);
         }
     }
 
