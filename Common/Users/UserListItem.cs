@@ -2,7 +2,6 @@ using System;
 
 namespace Seeker
 {
-    [System.Serializable]
     public enum UserRole
     {
         Friend = 0,
@@ -10,11 +9,9 @@ namespace Seeker
         Category = 2
     }
 
-    // all fields are public ... including subclasses...
     /// <summary>
     /// This is the full user info...
     /// </summary>
-    [System.Serializable]
     public class UserListItem
     {
         public string Username = string.Empty;

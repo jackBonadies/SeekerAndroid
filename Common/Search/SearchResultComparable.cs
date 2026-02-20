@@ -34,11 +34,6 @@ namespace Seeker.Search
             }
             return base.Compare(x, y); //the actual comparison for which is "better"
         }
-
-        //public override int GetHashCode()
-        //{
-        //    return base.GetHashCode();
-        //}
     }
 
 

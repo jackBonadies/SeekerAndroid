@@ -23,7 +23,6 @@ namespace Soulseek
     /// <summary>
     ///     A file within search and browse results.
     /// </summary>
-    [System.Serializable]
     public class File
     {
         /// <summary>

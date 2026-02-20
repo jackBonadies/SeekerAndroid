@@ -159,7 +159,7 @@ namespace Seeker.Chatroom
                     {
                         if (uname.Contains(FilterText))
                         {
-                            Soulseek.ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
+                            ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
                             UI_userDataList.Add(cud);
                             UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, PreferencesState.PutFriendsOnTop, PreferencesState.SortChatroomUsersBy)); //resort so the new item goes into place...
                             int itemInsertedAt = UI_userDataList.IndexOf(cud);

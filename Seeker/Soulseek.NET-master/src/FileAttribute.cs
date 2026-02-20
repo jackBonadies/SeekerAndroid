@@ -20,7 +20,6 @@ namespace Soulseek
     /// <summary>
     ///     A file attribute.
     /// </summary>
-    [System.Serializable]
     public class FileAttribute
     {
         /// <summary>
@@ -32,14 +31,6 @@ namespace Soulseek
         {
             Type = type;
             Value = value;
-        }
-
-        /// <summary>
-        /// For serializer
-        /// </summary>
-        private FileAttribute()
-        {
-
         }
 
         /// <summary>

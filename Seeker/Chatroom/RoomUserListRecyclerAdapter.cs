@@ -6,6 +6,7 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -125,7 +126,7 @@ namespace Seeker.Chatroom
             bool canAddModPriviledgesAndApplicable = false;
             bool canRemoveUser = false;
             bool isPrivate = ChatroomController.IsPrivate(RoomUserListDialog.OurRoomName);
-            if (isPrivate && roomUserItemView.DataItem is Soulseek.ChatroomUserData cData) //that means we are in a private room
+            if (isPrivate && roomUserItemView.DataItem is ChatroomUserData cData) //that means we are in a private room
             {
                 if (ChatroomController.AreWeOwner(RoomUserListDialog.OurRoomName))
                 {
@@ -239,7 +240,7 @@ namespace Seeker.Chatroom
             viewUsername.Text = userData.Username;
             viewNumFiles.Text = userData.FileCount.ToString("N0");
             viewSpeed.Text = (userData.AverageSpeed / 1024).ToString("N0") + " " + SimpleHelpers.STRINGS_KBS;
-            if (userData is Soulseek.ChatroomUserData cData)
+            if (userData is ChatroomUserData cData)
             {
                 if (cData.ChatroomUserRole == Soulseek.UserRole.Normal)
                 {

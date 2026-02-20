@@ -193,9 +193,9 @@ namespace Seeker.Chatroom
         }
 
 
-        public static Soulseek.ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
+        public static ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
         {
-            var wrappedUser = new Soulseek.ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.DownloadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
+            var wrappedUser = new ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.DownloadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
             wrappedUser.ChatroomUserRole = role;
             return wrappedUser;
         }
@@ -258,7 +258,7 @@ namespace Seeker.Chatroom
 
             if (JoinedRoomNames.Count != 0)
             {
-                allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
+                allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
                 //find the rooms and add them...
                 foreach (string roomName in JoinedRoomNames)
                 {
@@ -288,7 +288,7 @@ namespace Seeker.Chatroom
                 List<Soulseek.RoomInfo> filteredOwned = ownedList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 if (filteredOwned.Count > 0)
                 {
-                    allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
+                    allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
                     filteredOwned.Sort(new RoomCountComparer());
                     allRooms.AddRange(filteredOwned);
                 }
@@ -299,7 +299,7 @@ namespace Seeker.Chatroom
                 List<Soulseek.RoomInfo> filtered = privateList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 if (filtered.Count > 0)
                 {
-                    allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
+                    allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
                     filtered.Sort(new RoomCountComparer());
                     allRooms.AddRange(filtered);
                 }
@@ -307,7 +307,7 @@ namespace Seeker.Chatroom
 
             if (roomList.PublicCount != 0)
             {
-                allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
+                allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
                 List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 noSpam.Sort(new RoomCountComparer());
                 allRooms.AddRange(noSpam);

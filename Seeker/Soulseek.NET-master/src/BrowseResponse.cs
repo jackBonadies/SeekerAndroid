@@ -23,7 +23,6 @@ namespace Soulseek
     /// <summary>
     ///     The response to a peer browse request.
     /// </summary>
-    [System.Serializable]
     public class BrowseResponse
     {
         /// <summary>
@@ -38,12 +37,6 @@ namespace Soulseek
 
             LockedDirectories = (lockedDirectoryList?.ToList() ?? new List<Directory>()).AsReadOnly();
             LockedDirectoryCount = LockedDirectories.Count;
-        }
-
-        //this is for the serializer, otherwise it throws...
-        private BrowseResponse()
-        {
-
         }
 
         /// <summary>

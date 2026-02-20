@@ -18,30 +18,8 @@
 namespace Soulseek
 {
     /// <summary>
-    /// Like Userdata but has an additional flag for role.
-    /// </summary>
-    [System.Serializable]
-    public class ChatroomUserData : UserData
-    {
-
-
-        public ChatroomUserData(string username, UserPresence status, int averageSpeed, long downloadCount, int fileCount, int directoryCount, string countryCode, int? slotsFree = null) : base(username, status, averageSpeed, downloadCount, fileCount, directoryCount, countryCode, slotsFree)
-        {
-
-        }
-
-        /// <summary>
-        ///     Gets or sets chatroom user role.
-        /// </summary>
-        public Soulseek.UserRole ChatroomUserRole { get; set;}
-
-    }
-
-
-    /// <summary>
     ///     User data.
     /// </summary>
-    [System.Serializable]
     public class UserData
     {
         /// <summary>
@@ -70,32 +48,32 @@ namespace Soulseek
         /// <summary>
         ///     Gets the average upload speed of the user.
         /// </summary>
-        public int AverageSpeed { get; protected set;}
+        public int AverageSpeed { get; }
 
         /// <summary>
         ///     Gets the user's country code.
         /// </summary>
-        public string CountryCode { get; protected set; }
+        public string CountryCode { get; }
 
         /// <summary>
         ///     Gets the number of directories shared by the user.
         /// </summary>
-        public int DirectoryCount { get; protected set; }
+        public int DirectoryCount { get; }
 
         /// <summary>
         ///     Gets the number of active user downloads.
         /// </summary>
-        public long DownloadCount { get; protected set; }
+        public long DownloadCount { get; }
 
         /// <summary>
         ///     Gets the number of files shared by the user.
         /// </summary>
-        public int FileCount { get; protected set; }
+        public int FileCount { get; }
 
         /// <summary>
         ///     Gets the number of the user's free download slots, if provided.
         /// </summary>
-        public int? SlotsFree { get; protected set; }
+        public int? SlotsFree { get; }
 
         /// <summary>
         ///     Gets the status of the user (0 = offline, 1 = away, 2 = online).
@@ -105,6 +83,6 @@ namespace Soulseek
         /// <summary>
         ///     Gets the username of the user.
         /// </summary>
-        public string Username { get; protected set; }
+        public string Username { get; }
     }
 }

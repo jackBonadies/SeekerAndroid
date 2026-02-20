@@ -32,7 +32,7 @@ namespace Common.Messages
             public int Compare(Soulseek.UserData x, Soulseek.UserData y)
             {
                 //always put owners and operators first in private rooms. this is the primary condition.
-                if (x is Soulseek.ChatroomUserData xData && y is Soulseek.ChatroomUserData yData)
+                if (x is ChatroomUserData xData && y is ChatroomUserData yData)
                 {
                     if ((int)yData.ChatroomUserRole != (int)xData.ChatroomUserRole)
                     {

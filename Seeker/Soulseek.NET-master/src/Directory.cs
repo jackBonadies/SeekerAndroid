@@ -23,7 +23,6 @@ namespace Soulseek
     /// <summary>
     ///     A file directory within a peer's shared files.
     /// </summary>
-    [System.Serializable]
     public class Directory
     {
         /// <summary>

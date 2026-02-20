@@ -67,7 +67,7 @@ namespace Soulseek
             FilterResponses = filterResponses;
             MinimumResponseFileCount = minimumResponseFileCount;
             MinimumPeerFreeUploadSlots = minimumPeerFreeUploadSlots;
-            MaximumPeerQueueLength = maximumPeerQueueLength; //tried for both 613 and 47 and the downloads worked just fine...
+            MaximumPeerQueueLength = maximumPeerQueueLength;
             MinimumPeerUploadSpeed = minimumPeerUploadSpeed;
             ResponseFilter = responseFilter;
             FileFilter = fileFilter;

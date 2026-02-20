@@ -258,8 +258,6 @@ namespace Soulseek.Messaging.Handlers
 
                     case MessageCode.Peer.QueueFailed:
                         var queueFailedResponse = QueueFailedResponse.FromByteArray(message);
-                        // this next line will fail to match the wait key if the QueueFailed was due to filename encoding Latin1 vs UTF-8 issue.
-                        // when sending a Latin1 filename to a Nicotine client, the Nicotine client sent back the mangled name which therefore did not match any records.
                         SoulseekClient.Waiter.Throw(new WaitKey(MessageCode.Peer.TransferRequest, connection.Username, queueFailedResponse.Filename), new TransferRejectedException(queueFailedResponse.Message));
                         break;
 

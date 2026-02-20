@@ -82,9 +82,6 @@ namespace Soulseek.Diagnostics
             {
                 var e = new DiagnosticEventArgs(level, message, exception);
                 EventHandler(e);
-                #if ADB_LOGCAT
-                Console.WriteLine(message + exception?.Message);
-                #endif
             }
         }
     }

@@ -346,7 +346,7 @@ namespace Seeker
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
-            if (localDataSet[position] is Soulseek.RoomInfoCategory)
+            if (localDataSet[position] is RoomInfoCategory)
             {
                 (holder as ChatroomOverviewCategoryHolder).chatroomOverviewView.setItem(localDataSet[position]);
             }
@@ -402,7 +402,7 @@ namespace Seeker
 
         public override int GetItemViewType(int position)
         {
-            if (localDataSet[position] is Soulseek.RoomInfoCategory)
+            if (localDataSet[position] is RoomInfoCategory)
             {
                 return VIEW_CATEGORY_HEADER;
             }

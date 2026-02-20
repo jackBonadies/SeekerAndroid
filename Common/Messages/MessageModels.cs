@@ -1,9 +1,43 @@
-﻿using System;
+﻿using Soulseek;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Common.Messages
 {
+
+    /// <summary>
+    /// Dummy RoomInfoCategory for Adapter
+    /// </summary>
+    public class RoomInfoCategory : RoomInfo
+    {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="RoomInfoCategory"/> class.
+        /// </summary>
+        /// <param name="name">The category name.</param>
+        /// <param name="userCount">The number of users in the room.</param>
+        public RoomInfoCategory(string name) : base(name, null)
+        {
+        }
+    }
+
+    public class ChatroomUserData : Soulseek.UserData
+    {
+
+
+        public ChatroomUserData(string username, Soulseek.UserPresence status, int averageSpeed, long downloadCount, int fileCount, int directoryCount, string countryCode, int? slotsFree = null) : base(username, status, averageSpeed, downloadCount, fileCount, directoryCount, countryCode, slotsFree)
+        {
+
+        }
+
+        /// <summary>
+        ///     Gets or sets chatroom user role.
+        /// </summary>
+        public Soulseek.UserRole ChatroomUserRole { get; set;}
+
+    }
+
+
     public enum SortOrderChatroomUsers
     {
         //DateJoinedAsc = 0,  //the user list is NOT given to us in any order.  so cant do these.

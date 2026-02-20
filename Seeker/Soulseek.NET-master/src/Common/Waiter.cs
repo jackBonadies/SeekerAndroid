@@ -62,14 +62,9 @@ namespace Soulseek
         /// <param name="key">The unique WaitKey for the wait.</param>
         public void Cancel(WaitKey key)
         {
-            //System.Reflection.MethodInfo[] methods = (key as PendingWait).TaskCompletionSource.GetMethods();
             Disposition(key, wait =>
             {
-                var test1 = wait.TaskCompletionSource;//).GetMethods();
-                var type1 = test1.GetType();
-                var methods = type1.GetMethods();
-                CancellationToken t = new CancellationToken();
-                wait.TaskCompletionSource.TrySetCanceled(t);
+                wait.TaskCompletionSource.TrySetCanceled();
             });
         }
 

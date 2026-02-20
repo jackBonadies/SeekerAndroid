@@ -20,7 +20,6 @@ namespace Soulseek
     /// <summary>
     ///     User status.
     /// </summary>
-    [System.Serializable]
     public class UserStatus
     {
         /// <summary>

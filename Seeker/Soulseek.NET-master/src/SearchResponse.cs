@@ -52,16 +52,6 @@ namespace Soulseek
             LockedFileCount = LockedFiles.Count;
         }
 
-        //public override int GetHashCode()
-        //{
-        //    int hash = this.Username.GetHashCode();
-        //    if(this.Files.Count!=0)
-        //    { 
-        //        hash = (hash*7) + this.Files.First().Filename.GetHashCode();
-        //    }
-        //    return hash;
-        //}
-
         public override bool Equals(object obj)
         {
             if ((obj == null) || !this.GetType().Equals(obj.GetType()))
