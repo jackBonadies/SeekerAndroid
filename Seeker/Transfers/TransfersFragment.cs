@@ -61,45 +61,7 @@ namespace Seeker
         public static TransferItemManagerWrapper TransferItemManagerWrapped;
 
 
-        public static int ScrollPositionBeforeMovingIntoFolder = int.MinValue;
-        public static int ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
-
-
-        public static bool GroupByFolder = false;
-        public static FolderItem CurrentlySelectedDLFolder = null;
-        public static FolderItem CurrentlySelectedUploadFolder = null;
-        public static volatile bool InUploadsMode = false;
-        public static List<int> BatchSelectedItems = new List<int>();
-
-        public static bool CurrentlyInFolder()
-        {
-            if (CurrentlySelectedDLFolder == null && CurrentlySelectedUploadFolder == null)
-            {
-                return false;
-            }
-            return true;
-        }
-        public static FolderItem GetCurrentlySelectedFolder()
-        {
-            if (InUploadsMode)
-            {
-                return CurrentlySelectedUploadFolder;
-            }
-            else
-            {
-                return CurrentlySelectedDLFolder;
-            }
-        }
-
-        public static TransferUIState CreateDLUIState()
-        {
-            return new TransferUIState
-            {
-                GroupByFolder = GroupByFolder,
-                CurrentlySelectedFolder = CurrentlySelectedDLFolder,
-                BatchSelectedItems = BatchSelectedItems,
-            };
-        }
+        private static TransfersViewState ViewState => TransfersViewState.Instance;
 
         //private ListView primaryListView = null;
         private TextView noTransfers = null;
@@ -132,11 +94,11 @@ namespace Seeker
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            if (InUploadsMode)
+            if (ViewState.InUploadsMode)
             {
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(true);
                 menu.FindItem(Resource.Id.action_abort_all).SetVisible(true);
-                if (CurrentlySelectedUploadFolder == null)
+                if (ViewState.CurrentlySelectedUploadFolder == null)
                 {
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
@@ -170,7 +132,7 @@ namespace Seeker
             {
                 menu.FindItem(Resource.Id.action_abort_all).SetVisible(false); //nullref here...
                 menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(false);
-                if (CurrentlySelectedDLFolder == null)
+                if (ViewState.CurrentlySelectedDLFolder == null)
                 {
                     menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
                     menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
@@ -184,8 +146,8 @@ namespace Seeker
                 else
                 {
 
-                    TransferViewHelper.GetStatusNumbers(CurrentlySelectedDLFolder.TransferItems, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued);
-                    //var state = CurrentlySelectedDLFolder.GetState(out bool isFailed);
+                    TransferViewHelper.GetStatusNumbers(ViewState.CurrentlySelectedDLFolder.TransferItems, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued);
+                    //var state = ViewState.CurrentlySelectedDLFolder.GetState(out bool isFailed);
 
                     if (numPaused != 0)
                     {
@@ -276,18 +238,18 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
                     Logger.InfoFirebase("Clear All Complete Pressed");
-                    if (CurrentlySelectedDLFolder == null)
+                    if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.ClearAllComplete();
                     }
                     else
                     {
-                        TransferItemManagerDL.ClearAllCompleteFromFolder(CurrentlySelectedDLFolder);
+                        TransferItemManagerDL.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedDLFolder);
                     }
                     refreshListView();
                     return true;
                 case Resource.Id.action_toggle_group_by: //toggle group by. group / ungroup by folder.
-                    GroupByFolder = !GroupByFolder;
+                    ViewState.GroupByFolder = !ViewState.GroupByFolder;
                     SetRecyclerAdapter();
                     return true;
                 case Resource.Id.action_show_size:
@@ -300,24 +262,24 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
                     Logger.InfoFirebase("Clear All Complete Pressed");
-                    if (CurrentlySelectedUploadFolder == null)
+                    if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
                         TransferItemManagerUploads.ClearAllComplete();
                     }
                     else
                     {
-                        TransferItemManagerUploads.ClearAllCompleteFromFolder(CurrentlySelectedUploadFolder);
+                        TransferItemManagerUploads.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedUploadFolder);
                     }
                     refreshListView();
                     return true;
                 case Resource.Id.action_toggle_download_upload:
-                    InUploadsMode = !InUploadsMode;
+                    ViewState.InUploadsMode = !ViewState.InUploadsMode;
                     RefreshForModeSwitch();
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    if (CurrentlySelectedDLFolder == null)
+                    if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.CancelAll(true);
                         var cleanupItems = TransferItemManagerDL.ClearAllReturnCleanupItems();
@@ -325,8 +287,8 @@ namespace Seeker
                     }
                     else
                     {
-                        TransferItemManagerDL.CancelFolder(CurrentlySelectedDLFolder, true);
-                        var cleanupItems = TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(CurrentlySelectedDLFolder);
+                        TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder, true);
+                        var cleanupItems = TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(ViewState.CurrentlySelectedDLFolder);
                         if (cleanupItems.Any()) TransferItemManagerWrapper.CleanupEntry(cleanupItems);
                     }
                     refreshListView();
@@ -334,26 +296,26 @@ namespace Seeker
                 case Resource.Id.action_abort_all: //abort all
                     Logger.InfoFirebase("action_abort_all_pressed");
                     SeekerState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    if (CurrentlySelectedUploadFolder == null)
+                    if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
                         TransferItemManagerUploads.CancelAll();
                     }
                     else
                     {
-                        TransferItemManagerUploads.CancelFolder(CurrentlySelectedUploadFolder);
+                        TransferItemManagerUploads.CancelFolder(ViewState.CurrentlySelectedUploadFolder);
                     }
                     refreshListView();
                     return true;
                 case Resource.Id.action_pause_all:
                     Logger.InfoFirebase("pause all Pressed");
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    if (CurrentlySelectedDLFolder == null)
+                    if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.CancelAll();
                     }
                     else
                     {
-                        TransferItemManagerDL.CancelFolder(CurrentlySelectedDLFolder);
+                        TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder);
                     }
                     refreshListView();
                     return true;
@@ -384,25 +346,25 @@ namespace Seeker
                                 });
                                 return;
                             }
-                            if (CurrentlySelectedDLFolder == null)
+                            if (ViewState.CurrentlySelectedDLFolder == null)
                             {
                                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
                             }
                             else
                             {
-                                DownloadRetryAllConditionLogic(false, false, CurrentlySelectedDLFolder, false);
+                                DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
                             }
                         }));
                     }
                     else
                     {
-                        if (CurrentlySelectedDLFolder == null)
+                        if (ViewState.CurrentlySelectedDLFolder == null)
                         {
                             DownloadRetryAllConditionLogic(false, true, null, false);
                         }
                         else
                         {
-                            DownloadRetryAllConditionLogic(false, false, CurrentlySelectedDLFolder, false);
+                            DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
                         }
                     }
                     return true;
@@ -454,25 +416,25 @@ namespace Seeker
                         });
                         return;
                     }
-                    if (CurrentlySelectedDLFolder == null)
+                    if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
                     }
                     else
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
                     }
                 }));
             }
             else
             {
-                if (CurrentlySelectedDLFolder == null)
+                if (ViewState.CurrentlySelectedDLFolder == null)
                 {
                     DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
                 }
                 else
                 {
-                    DownloadRetryAllConditionLogic(failed, false, CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
+                    DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
                 }
             }
         }
@@ -641,7 +603,7 @@ namespace Seeker
 
         private void SetNoTransfersMessage()
         {
-            if (TransfersFragment.InUploadsMode)
+            if (ViewState.InUploadsMode)
             {
                 if (!(TransferItemManagerUploads.IsEmpty()))
                 {
@@ -741,21 +703,21 @@ namespace Seeker
 
         public void SaveScrollPositionOnMovingIntoFolder()
         {
-            ScrollPositionBeforeMovingIntoFolder = ((LinearLayoutManager)recycleLayoutManager).FindFirstVisibleItemPosition();
+            ViewState.ScrollPositionBeforeMovingIntoFolder = ((LinearLayoutManager)recycleLayoutManager).FindFirstVisibleItemPosition();
             View v = recyclerViewTransferItems.GetChildAt(0);
             if (v == null)
             {
-                ScrollOffsetBeforeMovingIntoFolder = 0;
+                ViewState.ScrollOffsetBeforeMovingIntoFolder = 0;
             }
             else
             {
-                ScrollOffsetBeforeMovingIntoFolder = v.Top - recyclerViewTransferItems.Top;
+                ViewState.ScrollOffsetBeforeMovingIntoFolder = v.Top - recyclerViewTransferItems.Top;
             }
         }
 
         public void RestoreScrollPosition()
         {
-            ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(ScrollPositionBeforeMovingIntoFolder, ScrollOffsetBeforeMovingIntoFolder); //if you dont do with offset, it scrolls it until the visible item is simply in view (so it will be at bottom, almost a whole screen off)
+            ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(ViewState.ScrollPositionBeforeMovingIntoFolder, ViewState.ScrollOffsetBeforeMovingIntoFolder); //if you dont do with offset, it scrolls it until the visible item is simply in view (so it will be at bottom, almost a whole screen off)
         }
 
         // TODO2026
@@ -783,7 +745,7 @@ namespace Seeker
                 }
 
 
-                if (GroupByFolder && !CurrentlyInFolder())
+                if (ViewState.GroupByFolder && !ViewState.CurrentlyInFolder())
                 {
                     recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItemManagerWrapped.GetUICurrentList() as List<FolderItem>);
                 }
@@ -853,9 +815,9 @@ namespace Seeker
 
         public void MoveToUploadForNotif()
         {
-            InUploadsMode = true;
-            CurrentlySelectedDLFolder = null;
-            CurrentlySelectedUploadFolder = null;
+            ViewState.InUploadsMode = true;
+            ViewState.CurrentlySelectedDLFolder = null;
+            ViewState.CurrentlySelectedUploadFolder = null;
             this.RefreshForModeSwitch();
             SeekerState.MainActivityRef.InvalidateOptionsMenu();
         }
@@ -916,13 +878,13 @@ namespace Seeker
         private List<TransferItem> GetBatchSelectedItemsForRetryCondition(bool selectFailed)
         {
             bool folderItems = false;
-            if (GroupByFolder && !CurrentlyInFolder())
+            if (ViewState.GroupByFolder && !ViewState.CurrentlyInFolder())
             {
                 folderItems = true;
             }
-            var uiState = CreateDLUIState();
+            var uiState = ViewState.CreateDLUIState();
             List<TransferItem> tis = new List<TransferItem>();
-            foreach (int pos in BatchSelectedItems)
+            foreach (int pos in ViewState.BatchSelectedItems)
             {
                 if (folderItems)
                 {
@@ -1042,7 +1004,7 @@ namespace Seeker
                         // not only did the recycleview break weirdly, but the whole main activity
                         // (the login screen, search screen, action bar, browse screen).
 
-                        var uiState = CreateDLUIState();
+                        var uiState = ViewState.CreateDLUIState();
                         HashSet<int> indicesToUpdate = new HashSet<int>();
                         foreach (TransferItem ti in transferItemConditionList)
                         {
@@ -1063,7 +1025,7 @@ namespace Seeker
                                 indicesToUpdate.Add(pos);
                             }
                         }
-                        if (InUploadsMode)
+                        if (ViewState.InUploadsMode)
                         {
                             return;
                         }
@@ -1080,7 +1042,7 @@ namespace Seeker
 
                     });
             });
-            lock (TransferItemManagerDL.GetUICurrentList(CreateDLUIState())) //TODO: test
+            lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState())) //TODO: test
             { //also can update this to do a partial refresh...
                 if (StaticHacks.TransfersFrag != null)
                 {
@@ -1113,7 +1075,7 @@ namespace Seeker
             string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             Logger.Debug("chosenFname? " + chosenFname);
             TransferItem item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
-            int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1, CreateDLUIState());
+            int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1, ViewState.CreateDLUIState());
             Logger.Debug("item1 is null?" + (item1 == null).ToString());//tested
             if (item1 == null || indexToRefresh == -1)
             {
@@ -1192,7 +1154,7 @@ namespace Seeker
 
 
             });
-            lock (TransferItemManagerDL.GetUICurrentList(CreateDLUIState()))
+            lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
             { //also can update this to do a partial refresh...
                 refreshListView(refreshOnlySelected);
             }
@@ -1290,7 +1252,7 @@ namespace Seeker
                         {
                             try
                             {
-                                if (InUploadsMode)
+                                if (ViewState.InUploadsMode)
                                 {
                                     TransferItemManagerWrapped.RemoveAtUserIndex(position);
                                 }
@@ -1332,7 +1294,7 @@ namespace Seeker
                             TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tti), out _);
                             lock (TransferItemManagerWrapped.GetUICurrentList())
                             {
-                                if (InUploadsMode)
+                                if (ViewState.InUploadsMode)
                                 {
                                     TransferItemManagerWrapped.RemoveAtUserIndex(position);
                                 }
@@ -1366,7 +1328,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, CreateDLUIState());
+                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState());
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1398,7 +1360,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, CreateDLUIState()) as TransferItem;
+                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState()) as TransferItem;
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1613,16 +1575,16 @@ namespace Seeker
         public static bool ForceOutIfZeroSelected = true;
         public static void ToggleItemBatchSelect(TransferAdapterRecyclerVersion recyclerTransferAdapter, int pos)
         {
-            if (BatchSelectedItems.Contains(pos))
+            if (ViewState.BatchSelectedItems.Contains(pos))
             {
-                BatchSelectedItems.Remove(pos);
+                ViewState.BatchSelectedItems.Remove(pos);
             }
             else
             {
-                BatchSelectedItems.Add(pos);
+                ViewState.BatchSelectedItems.Add(pos);
             }
             recyclerTransferAdapter.NotifyItemChanged(pos);
-            int cnt = BatchSelectedItems.Count;
+            int cnt = ViewState.BatchSelectedItems.Count;
             if (cnt == 0 && ForceOutIfZeroSelected)
             {
                 TransfersActionMode.Finish();
@@ -1649,31 +1611,31 @@ namespace Seeker
             }
             Logger.Debug("batch on, updating: " + userPostionBeingRemoved);
             //adjust numbers
-            int cnt = BatchSelectedItems.Count;
+            int cnt = ViewState.BatchSelectedItems.Count;
             for (int i = cnt - 1; i >= 0; i--)
             {
-                int position = BatchSelectedItems[i];
+                int position = ViewState.BatchSelectedItems[i];
                 if (position < userPostionBeingRemoved)
                 {
                     continue;
                 }
                 else if (position == userPostionBeingRemoved)
                 {
-                    BatchSelectedItems.RemoveAt(i);
+                    ViewState.BatchSelectedItems.RemoveAt(i);
                 }
                 else
                 {
-                    BatchSelectedItems[i] = position - 1;
+                    ViewState.BatchSelectedItems[i] = position - 1;
                 }
             }
             //if there was only 1 and its the one that just finished then take us out of batchSelectedItems
-            if (BatchSelectedItems.Count == 0)
+            if (ViewState.BatchSelectedItems.Count == 0)
             {
                 TransfersActionMode.Finish();
             }
-            else if (BatchSelectedItems.Count != cnt) //if we have 1 less now.
+            else if (ViewState.BatchSelectedItems.Count != cnt) //if we have 1 less now.
             {
-                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
+                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
                 TransfersActionMode.Invalidate();
             }
         }
@@ -1701,8 +1663,8 @@ namespace Seeker
                     }
                     else
                     {
-                        int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t, CreateDLUIState());
-                        if (indexOfItem == -1 && InUploadsMode)
+                        int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t, ViewState.CreateDLUIState());
+                        if (indexOfItem == -1 && ViewState.InUploadsMode)
                         {
                             return null;
                         }
@@ -1724,11 +1686,11 @@ namespace Seeker
         {
             try
             {
-                if (InUploadsMode)
+                if (ViewState.InUploadsMode)
                 {
                     return;
                 }
-                int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename, CreateDLUIState());
+                int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename, ViewState.CreateDLUIState());
                 Logger.Debug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
                 Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
                 if (recyclerTransferAdapter.ItemCount == indexOfItem)
@@ -1930,7 +1892,7 @@ namespace Seeker
 
         private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
         {
-            bool needsRefresh = (e.ti.IsUpload() && TransfersFragment.InUploadsMode) || (!(e.ti.IsUpload()) && !(TransfersFragment.InUploadsMode));
+            bool needsRefresh = (e.ti.IsUpload() && ViewState.InUploadsMode) || (!(e.ti.IsUpload()) && !(ViewState.InUploadsMode));
             if (!needsRefresh)
             {
                 return;
@@ -2071,11 +2033,11 @@ namespace Seeker
         {
             if (MainActivity.OnUIthread())
             {
-                if (e.IsUpload() && InUploadsMode)
+                if (e.IsUpload() && ViewState.InUploadsMode)
                 {
                     lock (TransferItemManagerWrapped.GetUICurrentList())
                     { //todo can update this to do a partial refresh... just the index..
-                        if (GroupByFolder && !CurrentlyInFolder())
+                        if (ViewState.GroupByFolder && !ViewState.CurrentlyInFolder())
                         {
                             //folderview - so we may insert or update
                             //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
@@ -2131,7 +2093,7 @@ namespace Seeker
             {
                 //occurs on nonUI thread...
                 //if there is any deadlock due to this, then do Thread.Start().
-                lock (TransferItemManagerDL.GetUICurrentList(CreateDLUIState()))
+                lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
                 { //todo can update this to do a partial refresh... just the index..
                     refreshListView();
                 }

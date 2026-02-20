@@ -21,7 +21,7 @@ namespace Seeker
 
             public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
             {
-                if (BatchSelectedItems.Count == 0)
+                if (ViewState.BatchSelectedItems.Count == 0)
                 {
                     menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(false);
                 }
@@ -31,7 +31,7 @@ namespace Seeker
                 }
 
 
-                if (TransfersFragment.InUploadsMode)
+                if (ViewState.InUploadsMode)
                 {
                     //the only thing you can do is clear and abort the selected
                     menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
@@ -48,7 +48,7 @@ namespace Seeker
                     TransferStates transferStates = TransferStates.None;
                     bool failed = false;
                     List<TransferItem> transfersSelected = new List<TransferItem>();
-                    foreach (int position in BatchSelectedItems)
+                    foreach (int position in ViewState.BatchSelectedItems)
                     {
                         var ti = TransferItemManagerWrapped.GetItemAtUserIndex(position);
                         if (ti is TransferItem singleTi)
@@ -91,8 +91,8 @@ namespace Seeker
                         SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         TransferItemManagerWrapped.CancelSelectedItems(true);
                         TransferItemManagerWrapped.ClearSelectedItemsAndClean();
-                        var selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
+                        var selected = ViewState.BatchSelectedItems.ToArray();
+                        ViewState.BatchSelectedItems.Clear();
                         foreach (int pos in selected)
                         {
                             Adapter.NotifyItemRemoved(pos);
@@ -102,8 +102,8 @@ namespace Seeker
                         break;
                     case Resource.Id.pause_selected_batch:
                         TransferItemManagerWrapped.CancelSelectedItems(false);
-                        selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
+                        selected = ViewState.BatchSelectedItems.ToArray();
+                        ViewState.BatchSelectedItems.Clear();
                         foreach (int pos in selected)
                         {
                             Adapter.NotifyItemChanged(pos);
@@ -113,8 +113,8 @@ namespace Seeker
                         break;
                     case Resource.Id.resume_selected_batch:
                         Frag.RetryAllConditionEntry(false, true);
-                        selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
+                        selected = ViewState.BatchSelectedItems.ToArray();
+                        ViewState.BatchSelectedItems.Clear();
                         foreach (int pos in selected)
                         {
                             Adapter.NotifyItemChanged(pos);
@@ -123,8 +123,8 @@ namespace Seeker
                         break;
                     case Resource.Id.retry_all_failed_batch:
                         Frag.RetryAllConditionEntry(true, true);
-                        selected = BatchSelectedItems.ToArray();
-                        BatchSelectedItems.Clear();
+                        selected = ViewState.BatchSelectedItems.ToArray();
+                        ViewState.BatchSelectedItems.Clear();
                         foreach (int pos in selected)
                         {
                             Adapter.NotifyItemChanged(pos);
@@ -132,11 +132,11 @@ namespace Seeker
                         TransfersActionMode.Finish();
                         break;
                     case Resource.Id.select_all:
-                        BatchSelectedItems.Clear();
+                        ViewState.BatchSelectedItems.Clear();
                         int cnt = TransfersActionModeCallback.Adapter.ItemCount;
                         for (int i = 0; i < cnt; i++)
                         {
-                            BatchSelectedItems.Add(i);
+                            ViewState.BatchSelectedItems.Add(i);
                         }
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
@@ -146,19 +146,19 @@ namespace Seeker
                         return true;
                     case Resource.Id.invert_selection:
                         ForceOutIfZeroSelected = false;
-                        List<int> oldOnes = BatchSelectedItems.ToList();
-                        BatchSelectedItems.Clear();
+                        List<int> oldOnes = ViewState.BatchSelectedItems.ToList();
+                        ViewState.BatchSelectedItems.Clear();
                         List<int> all = new List<int>();
                         int cnt1 = TransfersActionModeCallback.Adapter.ItemCount;
                         for (int i = 0; i < cnt1; i++)
                         {
                             all.Add(i);
                         }
-                        BatchSelectedItems = all.Except(oldOnes).ToList();
+                        ViewState.BatchSelectedItems = all.Except(oldOnes).ToList();
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), BatchSelectedItems.Count.ToString());
+                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
                         TransfersActionMode.Invalidate();
                         return true;
                 }
@@ -168,10 +168,10 @@ namespace Seeker
             public void OnDestroyActionMode(ActionMode mode)
             {
 
-                int[] prevSelectedItems = new int[BatchSelectedItems.Count];
-                BatchSelectedItems.CopyTo(prevSelectedItems);
+                int[] prevSelectedItems = new int[ViewState.BatchSelectedItems.Count];
+                ViewState.BatchSelectedItems.CopyTo(prevSelectedItems);
                 TransfersActionMode = null;
-                BatchSelectedItems.Clear();
+                ViewState.BatchSelectedItems.Clear();
                 this.Adapter.IsInBatchSelectMode = false;
                 foreach (int i in prevSelectedItems)
                 {

@@ -207,7 +207,7 @@ namespace Seeker
                 }
 #pragma warning restore 0618
             }
-            if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+            if (isInBatchMode && TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
             {
                 if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
@@ -799,7 +799,7 @@ namespace Seeker
 
             }
 
-            if (isInBatchMode && TransfersFragment.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+            if (isInBatchMode && TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
             {
                 if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {

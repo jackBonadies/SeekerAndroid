@@ -1325,15 +1325,15 @@ namespace Seeker
                 }
                 else if (pager.CurrentItem == 2) //transfer tab
                 {
-                    if (TransfersFragment.GetCurrentlySelectedFolder() != null)
+                    if (TransfersViewState.Instance.GetCurrentlySelectedFolder() != null)
                     {
-                        if (TransfersFragment.InUploadsMode)
+                        if (TransfersViewState.Instance.InUploadsMode)
                         {
-                            TransfersFragment.CurrentlySelectedUploadFolder = null;
+                            TransfersViewState.Instance.CurrentlySelectedUploadFolder = null;
                         }
                         else
                         {
-                            TransfersFragment.CurrentlySelectedDLFolder = null;
+                            TransfersViewState.Instance.CurrentlySelectedDLFolder = null;
                         }
                         SetTransferSupportActionBarState();
                         this.InvalidateOptionsMenu();
@@ -2501,9 +2501,9 @@ namespace Seeker
 
         public void SetTransferSupportActionBarState()
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                if (TransfersFragment.CurrentlySelectedUploadFolder == null)
+                if (TransfersViewState.Instance.CurrentlySelectedUploadFolder == null)
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Uploads);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -2511,14 +2511,14 @@ namespace Seeker
                 }
                 else
                 {
-                    this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedUploadFolder.FolderName;
+                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.FolderName;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
             }
             else
             {
-                if (TransfersFragment.CurrentlySelectedDLFolder == null)
+                if (TransfersViewState.Instance.CurrentlySelectedDLFolder == null)
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Downloads);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -2526,7 +2526,7 @@ namespace Seeker
                 }
                 else
                 {
-                    this.SupportActionBar.Title = TransfersFragment.CurrentlySelectedDLFolder.FolderName;
+                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.FolderName;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }

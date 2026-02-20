@@ -95,13 +95,13 @@ namespace Seeker
                 {
                     FolderItem f = (sender as ITransferItemView).InnerTransferItem as FolderItem;
                     setSelectedItem(f);
-                    if (InUploadsMode)
+                    if (ViewState.InUploadsMode)
                     {
-                        CurrentlySelectedUploadFolder = f;
+                        ViewState.CurrentlySelectedUploadFolder = f;
                     }
                     else
                     {
-                        CurrentlySelectedDLFolder = f;
+                        ViewState.CurrentlySelectedDLFolder = f;
                     }
 
                     TransfersFragment.SaveScrollPositionOnMovingIntoFolder();

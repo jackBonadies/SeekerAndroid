@@ -55,7 +55,7 @@ namespace Seeker
 
         public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetTransferItemsForUser(username);
             }
@@ -67,18 +67,19 @@ namespace Seeker
 
         private static TransferUIState CreateUIState()
         {
+            var vs = TransfersViewState.Instance;
             return new TransferUIState
             {
-                GroupByFolder = TransfersFragment.GroupByFolder,
-                CurrentlySelectedFolder = TransfersFragment.GetCurrentlySelectedFolder(),
-                BatchSelectedItems = TransfersFragment.BatchSelectedItems,
+                GroupByFolder = vs.GroupByFolder,
+                CurrentlySelectedFolder = vs.GetCurrentlySelectedFolder(),
+                BatchSelectedItems = vs.BatchSelectedItems,
             };
         }
 
         public void CancelSelectedItems(bool prepareForClean)
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.CancelSelectedItems(uiState, prepareForClean);
             }
@@ -91,7 +92,7 @@ namespace Seeker
         public void ClearSelectedItemsAndClean()
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.ClearSelectedItemsReturnCleanupItems(uiState);
             }
@@ -198,7 +199,7 @@ namespace Seeker
         public object GetUICurrentList()
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetUICurrentList(uiState);
             }
@@ -223,11 +224,11 @@ namespace Seeker
         public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode && ti.IsUpload())
+            if (TransfersViewState.Instance.InUploadsMode && ti.IsUpload())
             {
                 return Uploads.GetUserIndexForTransferItem(ti, uiState);
             }
-            else if (!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
+            else if (!TransfersViewState.Instance.InUploadsMode && !(ti.IsUpload()))
             {
                 return Downloads.GetUserIndexForTransferItem(ti, uiState);
             }
@@ -240,7 +241,7 @@ namespace Seeker
         public ITransferItem GetItemAtUserIndex(int position)
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetItemAtUserIndex(position, uiState);
             }
@@ -253,7 +254,7 @@ namespace Seeker
         public object RemoveAtUserIndex(int position)
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.RemoveAtUserIndex(position, uiState);
             }
@@ -303,7 +304,7 @@ namespace Seeker
 
         public void CancelFolder(FolderItem fi)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.CancelFolder(fi);
             }
@@ -320,7 +321,7 @@ namespace Seeker
         /// <param name="prepareForClear"></param>
         public void CancelFolder(FolderItem fi, bool prepareForClear = false)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.CancelFolder(fi);
             }
@@ -332,7 +333,7 @@ namespace Seeker
 
         public void ClearAllFromFolder(FolderItem fi)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.ClearAllFromFolder(fi);
             }
@@ -344,7 +345,7 @@ namespace Seeker
 
         public void ClearAllFromFolderAndClean(FolderItem fi)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.ClearAllFromFolder(fi);
             }
@@ -360,7 +361,7 @@ namespace Seeker
 
         public int GetIndexForFolderItem(FolderItem folderItem)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetIndexForFolderItem(folderItem);
             }
@@ -373,7 +374,7 @@ namespace Seeker
         public int GetUserIndexForITransferItem(ITransferItem iti)
         {
             var uiState = CreateUIState();
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetUserIndexForITransferItem(iti, uiState);
             }

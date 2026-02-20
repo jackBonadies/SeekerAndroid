@@ -624,7 +624,6 @@ namespace Seeker
         /// Saves the bulk state from MainActivity.OnPause — all PreferencesState fields
         /// plus a pre-serialized user list string (null to skip).
         /// </summary>
-        // TODO2026
         public static void SaveOnPauseState(string userListSerialized)
         {
             lock (SharedPrefLock)
@@ -667,7 +666,6 @@ namespace Seeker
         /// <summary>
         /// Saves search history and optionally the sticky filter state from SearchFragment.OnPause.
         /// </summary>
-        // TODO2026 - depends on shared prefs...
         public static void SaveSearchFragmentState(string searchHistory, bool filterSticky, string filterStickyString, int searchResultStyle)
         {
             lock (SharedPrefLock)
@@ -687,7 +685,6 @@ namespace Seeker
         /// <summary>
         /// Saves serialized transfer items, acquiring both SharedPrefLock and TransferStateSaveLock.
         /// </summary>
-        // TODO2026 - depends on shared prefs...
         public static void SaveTransferItems(string downloads, string uploads)
         {
             lock (SharedPrefLock)
