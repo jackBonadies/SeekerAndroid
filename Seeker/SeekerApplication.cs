@@ -426,6 +426,7 @@ namespace Seeker
         }
 
 
+        // TODO2026 - reorg all these loose members into a class
         private static bool diagnosticFilesystemErrorShown = false; //so that we only show it once.
         private static void AppendLineToDiagFile(string line)
         {

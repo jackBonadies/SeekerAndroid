@@ -6,8 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using VerifyNUnit;
 
 namespace UnitTestCommon
 {
@@ -129,6 +131,60 @@ namespace UnitTestCommon
             }
 
             Assert.IsTrue(result.Contains("testuser4"));
+        }
+
+        [Test]
+        public async Task TransferListDownloads_DeserializesFromDisk()
+        {
+            var raw = GetPreferenceString("Momento_List");
+            var serializer = new XmlSerializer(typeof(List<TransferItem>));
+            List<TransferItem> result;
+            using (var reader = new StringReader(raw))
+            {
+                result = (List<TransferItem>)serializer.Deserialize(reader);
+            }
+
+            await Verifier.Verify(result.Select(t => new
+            {
+                t.Filename,
+                t.Username,
+                t.FolderName,
+                t.FullFilename,
+                t.Progress,
+                t.Failed,
+                State = t.State.ToString(),
+                t.Size,
+                t.isUpload,
+                t.QueueLength,
+                t.FinalUri,
+            }));
+        }
+
+        [Test]
+        public async Task TransferListUploads_DeserializesFromDisk()
+        {
+            var raw = GetPreferenceString("Momento_Upload_List");
+            var serializer = new XmlSerializer(typeof(List<TransferItem>));
+            List<TransferItem> result;
+            using (var reader = new StringReader(raw))
+            {
+                result = (List<TransferItem>)serializer.Deserialize(reader);
+            }
+
+            await Verifier.Verify(result.Select(t => new
+            {
+                t.Filename,
+                t.Username,
+                t.FolderName,
+                t.FullFilename,
+                t.Progress,
+                t.Failed,
+                State = t.State.ToString(),
+                t.Size,
+                t.isUpload,
+                t.QueueLength,
+                t.FinalUri,
+            }));
         }
     }
 }
