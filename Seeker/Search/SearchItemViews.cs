@@ -122,7 +122,7 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS; //kbs
             viewFileType.Text = item.GetDominantFileTypeAndBitRate(hideLocked, out _);
-            if (item.FreeUploadSlots > 0)
+            if (item.HasFreeUploadSlot)
             {
                 viewQueue.Text = "";
             }
@@ -229,7 +229,7 @@ namespace Seeker
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + "kbs"; //kb/s
-            if (item.FreeUploadSlots > 0)
+            if (item.HasFreeUploadSlot)
             {
                 viewQueue.Text = "";
             }

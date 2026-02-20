@@ -75,7 +75,7 @@ namespace Seeker
                             if (status != null)
                             {
                                 var oldStatus = item.UserStatus;
-                                item.UserStatus = new UserStatus(status.Value, oldStatus?.IsPrivileged ?? false);
+                                item.UserStatus = new UserStatus(item.Username, status.Value, oldStatus?.IsPrivileged ?? false);
                             }
                             item.UserData = userData;
                             item.DoesNotExist = false;

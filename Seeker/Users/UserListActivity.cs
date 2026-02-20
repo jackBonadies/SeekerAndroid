@@ -455,7 +455,7 @@ namespace Seeker
             };
 
             //Add User Logic...
-            SeekerState.SoulseekClient.AddUserAsync(username).ContinueWith(continueWithAction);
+            SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith(continueWithAction);
         }
 
         public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)

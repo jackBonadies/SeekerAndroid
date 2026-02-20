@@ -90,7 +90,7 @@ namespace Seeker.Services
                 return Task.FromResult(new SearchResponse(
                     PreferencesState.Username,
                     token,
-                    freeUploadSlots: 1,
+                    hasFreeUploadSlot: true,
                     uploadSpeed: ourUploadSpeed,
                     queueLength: 0,
                     fileList: results,
@@ -110,7 +110,7 @@ namespace Seeker.Services
         /// <param name="token">The unique token for the request, supplied by the requesting user.</param>
         /// <param name="directory">The requested directory.</param>
         /// <returns>A Task resolving an instance of Soulseek.Directory containing the contents of the requested directory.</returns>
-        private static Task<Soulseek.Directory> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
+        private static Task<IEnumerable<Soulseek.Directory>> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
         {
             //the directory is the presentable name.
             //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
@@ -137,7 +137,7 @@ namespace Seeker.Services
             //Android.Net.Uri.Parse(SeekerState.UploadDataDirectoryUri).Path
             var slskDir = SharedFileService.SlskDirFromDocumentFile(fullDir, true, FileFilterHelper.GetVolumeName(fullDir.Uri.LastPathSegment, false, out _));
             slskDir = new Directory(directory, slskDir.Files);
-            return Task.FromResult(slskDir);
+            return Task.FromResult(Enumerable.Repeat(slskDir, 1));
         }
 
         /// <summary>

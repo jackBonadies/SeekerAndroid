@@ -5,15 +5,15 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.App;
+using Common;
+using Common.Messages;
+using Seeker.Helpers;
+using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Seeker.Helpers;
-
-using Common;
-using Common.Messages;
 namespace Seeker.Chatroom
 {
     public class ChatroomController
@@ -195,7 +195,7 @@ namespace Seeker.Chatroom
 
         public static ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
         {
-            var wrappedUser = new ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.DownloadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
+            var wrappedUser = new ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.UploadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
             wrappedUser.ChatroomUserRole = role;
             return wrappedUser;
         }
@@ -477,7 +477,7 @@ namespace Seeker.Chatroom
             IsInitialized = true;
         }
 
-        private static void SoulseekClient_UserStatusChanged(object sender, Soulseek.UserStatusChangedEventArgs e)
+        private static void SoulseekClient_UserStatusChanged(object sender, UserStatus e)
         {
             if (ChatroomController.JoinedRoomData != null && !ChatroomController.JoinedRoomData.IsEmpty)
             {
@@ -490,7 +490,7 @@ namespace Seeker.Chatroom
                     {
                         if (uData.Username == e.Username)
                         {
-                            uData.Status = e.Status;
+                            uData.Status = e.Presence;
                             roomUserFound = true;
                             break;
                         }
@@ -499,10 +499,10 @@ namespace Seeker.Chatroom
                     {
                         //do event.. room user status updated..
                         //add the message and also possibly do the UI event...
-                        StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(e.Status == Soulseek.UserPresence.Away ? StatusMessageType.WentAway : StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
+                        StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(e.Presence == Soulseek.UserPresence.Away ? StatusMessageType.WentAway : StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
                         ChatroomController.AddStatusMessage(kvp.Key, statusMessageUpdate);
-                        UserRoomStatusChanged?.Invoke(sender, new UserRoomStatusChangedEventArgs(kvp.Key, e.Username, e.Status, statusMessageUpdate));
-                        Logger.Debug("room user status updated: " + e.Username + " " + e.Status.ToString() + " " + kvp.Key);
+                        UserRoomStatusChanged?.Invoke(sender, new UserRoomStatusChangedEventArgs(kvp.Key, e.Username, e.Presence, statusMessageUpdate));
+                        Logger.Debug("room user status updated: " + e.Username + " " + e.Presence.ToString() + " " + kvp.Key);
                     }
                 }
             }

@@ -1858,7 +1858,7 @@ namespace Seeker
             }
         }
 
-        private static void SoulseekClient_SearchResponseReceived(object sender, SearchResponseReceivedEventArgs e, int fromTab, bool fromWishlist)
+        private static void SoulseekClient_SearchResponseReceived(object sender, SearchResponse response, int fromTab, bool fromWishlist)
         {
             //Logger.Debug("SoulseekClient_SearchResponseReceived");
             //Logger.Debug(e.Response.Username + " queuelength: " + e.Response.QueueLength + " free upload slots" + e.Response.FreeUploadSlots);
@@ -1866,13 +1866,13 @@ namespace Seeker
             //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
             //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
             //lv.Adapter = (customAdapter);
-            if (e.Response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch || !PreferencesState.HideLockedResultsInSearch && e.Response.FileCount == 0 && e.Response.LockedFileCount == 0)
+            if (response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch || !PreferencesState.HideLockedResultsInSearch && response.FileCount == 0 && response.LockedFileCount == 0)
             {
                 Logger.Debug("Skipping Locked or 0/0");
                 return;
             }
             //Logger.Debug("SEARCH RESPONSE RECEIVED");
-            refreshListView(e.Response, fromTab, fromWishlist);
+            refreshListView(response, fromTab, fromWishlist);
             //SeekerState.MainActivityRef.RunOnUiThread(action);
 
         }
@@ -2226,6 +2226,15 @@ namespace Seeker
 
         public const int SearchToCloseDuration = 300;
 
+        private static bool searchResponseFilter(SearchResponse s)
+        {
+            if (PreferencesState.FreeUploadSlotsOnly && !s.HasFreeUploadSlot)
+            {
+                return false;
+            }
+            return true;
+        }
+
         private static void SearchLogic(CancellationToken cancellationToken, Android.Graphics.Drawables.TransitionDrawable transitionDrawable, string searchString, int fromTab, bool fromWishlist)
         {
             try
@@ -2273,12 +2282,17 @@ namespace Seeker
             // if someone has 1 free upload slot and a queue size of 100, 143, 28, 5, etc. it worked just fine.
             int searchTimeout = SearchTabHelper.SearchTarget == SearchTarget.AllUsers ? 5000 : 12000;
 
-            Action<SearchResponseReceivedEventArgs> searchResponseReceived = new Action<SearchResponseReceivedEventArgs>((SearchResponseReceivedEventArgs e) =>
+            Action<(Soulseek.Search, SearchResponse)> searchResponseReceived = new Action<(Soulseek.Search, SearchResponse)>(tuple =>
             {
-                SoulseekClient_SearchResponseReceived(null, e, fromTab, fromWishlist);
+                SoulseekClient_SearchResponseReceived(null, tuple.Item2, fromTab, fromWishlist);
             });
 
-            SearchOptions searchOptions = new SearchOptions(responseLimit: PreferencesState.NumberSearchResults, searchTimeout: searchTimeout, maximumPeerQueueLength: int.MaxValue, minimumPeerFreeUploadSlots: PreferencesState.FreeUploadSlotsOnly ? 1 : 0, responseReceived: searchResponseReceived);
+            SearchOptions searchOptions = new SearchOptions(responseLimit: PreferencesState.NumberSearchResults, 
+                searchTimeout: searchTimeout, 
+                maximumPeerQueueLength: int.MaxValue, 
+                responseReceived: searchResponseReceived, 
+                responseFilter: (SearchResponse s) => searchResponseFilter(s), 
+                filterResponses: true);
             SearchScope scope = null;
             if (fromWishlist)
             {
@@ -2327,7 +2341,7 @@ namespace Seeker
             }
             try
             {
-                Task<IReadOnlyCollection<SearchResponse>> t = null;
+                Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)> t = null;
                 if (fromTab == SearchTabHelper.CurrentTab)
                 {
                     //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
@@ -2337,7 +2351,7 @@ namespace Seeker
                 //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
                 //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
-                t.ContinueWith(new Action<Task<IReadOnlyCollection<SearchResponse>>>((Task<IReadOnlyCollection<SearchResponse>> t) =>
+                t.ContinueWith(new Action<Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)>>(t =>
                 {
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
 
@@ -2384,7 +2398,7 @@ namespace Seeker
                         }));
 
                     }
-                    if ((!t.IsCanceled) && t.Result.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
+                    if ((!t.IsCanceled) && t.Result.Item2.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                         {

@@ -133,7 +133,7 @@ namespace Seeker
                 outState.PutInt("userData.AverageSpeed", userData.AverageSpeed);
                 outState.PutString("userData.CountryCode", userData.CountryCode);
                 outState.PutInt("userData.DirectoryCount", userData.DirectoryCount);
-                outState.PutLong("userData.DownloadCount", userData.DownloadCount);
+                outState.PutLong("userData.DownloadCount", userData.UploadCount);
                 outState.PutInt("userData.FileCount", userData.FileCount);
                 if (userData.SlotsFree.HasValue)
                 {
@@ -171,7 +171,7 @@ namespace Seeker
                         int ql = savedInstanceState.GetInt("UserInfo.QueueLength");
                         int uploadSlots = savedInstanceState.GetInt("UserInfo.UploadSlots");
                         bool freeSlot = savedInstanceState.GetBoolean("UserInfo.HasFreeUploadSlot");
-                        userInfo = new Soulseek.UserInfo(desc, pic, uploadSlots, ql, freeSlot);
+                        userInfo = new Soulseek.UserInfo(desc, uploadSlots, ql, freeSlot, pic);
                     }
 
                     if (savedInstanceState.ContainsKey("userData.AverageSpeed"))

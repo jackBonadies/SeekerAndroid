@@ -17,7 +17,6 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Extensions.SearchResponseExtensions;
 using Android.App;
 using Android.Content;
 using Android.Content.Res;
@@ -27,18 +26,20 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Common;
+using Common.Browse;
 using Google.Android.Material.Snackbar;
+using Seeker.Extensions.SearchResponseExtensions;
+using Seeker.Helpers;
+using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log = Android.Util.Log;
-using Seeker.Helpers;
-using Seeker.Transfers;
-using Common.Browse;
 
 namespace Seeker
 {
@@ -96,7 +97,7 @@ namespace Seeker
                     fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
                 }
             }
-            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.FreeUploadSlots, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
+            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.HasFreeUploadSlot, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
         }
 
         public override void OnResume()
@@ -422,7 +423,7 @@ namespace Seeker
         /// retrying since the versions of Nicotine that send us a Latin1 string are the same versions that send
         /// the token = 1.  Also, even if it did work, the the user would only get the folder after a full 30 second timeout.  
         /// </remarks>
-        public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<Directory>> continueWithAction)
+        public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<IReadOnlyCollection<Directory>>> continueWithAction)
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
@@ -448,7 +449,7 @@ namespace Seeker
                 else
                 {
                     //the original logic...
-                    Task<Directory> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
+                    Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
                     t.ContinueWith(continueWithAction);
                 }
 
@@ -475,7 +476,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Task<Directory> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
+                    Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
                     t.ContinueWith(continueWithAction);
                 }
             }
@@ -840,7 +841,7 @@ namespace Seeker
         }
 
 
-        public void DirectoryReceivedContAction(Task<Directory> dirTask)
+        public void DirectoryReceivedContAction(Task<IReadOnlyCollection<Directory>> dirTask)
         {
 
             //if we have since closed the dialog, then this.View will be null
@@ -873,12 +874,13 @@ namespace Seeker
                 {
                     Logger.Debug("DirectoryReceivedContAction successful!");
                     ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
-                    if (listView.Count == dirTask.Result.Files.Count)
+                    var directory = dirTask.Result.First();
+                    if (listView.Count == directory.Files.Count)
                     {
                         Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_already_have), ToastLength.Short).Show();
                         return;
                     }
-                    this.UpdateSearchResponseWithFullDirectory(dirTask.Result);
+                    this.UpdateSearchResponseWithFullDirectory(directory);
                     this.UpdateListView();
                     this.UpdateSubHeader();
 
@@ -942,13 +944,14 @@ namespace Seeker
                 case Resource.Id.moreInfo:
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
                     //transferItems.CopyTo(tempArry);
+                    //TODOASAP - hasfreeupload slots is now a boolean, fix the string.
                     var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
                         searchResponse.QueueLength +
                         System.Environment.NewLine +
                         System.Environment.NewLine +
                         this.Context.GetString(Resource.String.upload_slots_) +
-                        searchResponse.FreeUploadSlots).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+                        searchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
                     //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...

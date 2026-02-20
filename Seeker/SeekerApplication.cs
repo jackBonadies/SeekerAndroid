@@ -16,15 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
-using Seeker.Services;
-using Seeker.Chatroom;
-using Seeker.Helpers;
-using Seeker.Managers;
-using Seeker.Messages;
-using Seeker.Search;
-using Seeker.Transfers;
-using Seeker.UPnP;
-using Common;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -37,6 +28,16 @@ using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
+using Common;
+using Common.Share;
+using Seeker.Chatroom;
+using Seeker.Helpers;
+using Seeker.Managers;
+using Seeker.Messages;
+using Seeker.Search;
+using Seeker.Services;
+using Seeker.Transfers;
+using Seeker.UPnP;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Common.Share;
+using static Android.Provider.ContactsContract;
 
 namespace Seeker
 {
@@ -133,7 +134,16 @@ namespace Seeker
             {
                 //need search response and enqueue download action...
                 //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, messageTimeout: 30000, enableListener: PreferencesState.ListenerEnabled, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations, listenPort: PreferencesState.ListenerPort, userInfoResponseResolver: UserInfoResponseHandler));
+                SeekerState.SoulseekClient = new SoulseekClient(
+                    128,
+                    new SoulseekClientOptions(
+                        minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, 
+                        messageTimeout: 30000, 
+                        enableListener: PreferencesState.ListenerEnabled, 
+                        autoAcknowledgePrivateMessages: false, 
+                        acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations, 
+                        listenPort: PreferencesState.ListenerPort, 
+                        userInfoResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
                 SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
                 SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
@@ -529,7 +539,7 @@ namespace Seeker
         /// This is due to the fact that the server sends us the same user update multiple times if they are of multiple interests.
         /// i.e. if we have Added Them, we are in Chatroom A, B, and C with them, then we get 4 status updates.
         /// </summary>
-        public static EventHandler<UserStatusChangedEventArgs> UserStatusChangedDeDuplicated;
+        public static EventHandler<UserStatus> UserStatusChangedDeDuplicated;
 
         private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
         {
@@ -1084,7 +1094,7 @@ namespace Seeker
                 hasFreeSlots = false;
             }
 
-            return Task.FromResult(new UserInfo(bio, picture, uploadSlots, queueLength, hasFreeSlots));
+            return Task.FromResult(new UserInfo(bio,uploadSlots, queueLength, hasFreeSlots, picture));
         }
 
         private static byte[] GetUserInfoPicture()
@@ -1361,7 +1371,7 @@ namespace Seeker
                         foreach (UserListItem item in SeekerState.UserList)
                         {
                             Logger.Debug("adding user: " + item.Username);
-                            SeekerState.SoulseekClient.AddUserAsync(item.Username).ContinueWith(UpdateUserInfo);
+                            SeekerState.SoulseekClient.WatchUserAsync(item.Username).ContinueWith(UpdateUserInfo);
                         }
                     }
 
@@ -1370,7 +1380,7 @@ namespace Seeker
                         foreach (string userDownloadOffline in TransferState.UsersWhereDownloadFailedDueToOffline.Keys)
                         {
                             Logger.Debug("adding user (due to a download we wanted from them when they were offline): " + userDownloadOffline);
-                            SeekerState.SoulseekClient.AddUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
+                            SeekerState.SoulseekClient.WatchUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
                         }
                     }
 
@@ -1953,10 +1963,10 @@ namespace Seeker
 
         private static string DeduplicateUsername = null;
         private static Soulseek.UserPresence DeduplicateStatus = Soulseek.UserPresence.Offline;
-        private void SoulseekClient_UserStatusChanged_Deduplicator(object sender, UserStatusChangedEventArgs e)
+        private void SoulseekClient_UserStatusChanged_Deduplicator(object sender, UserStatus e)
         {
 
-            if (DeduplicateUsername == e.Username && DeduplicateStatus == e.Status)
+            if (DeduplicateUsername == e.Username && DeduplicateStatus == e.Presence)
             {
                 Logger.Debug($"throwing away {e.Username} status changed");
                 return;
@@ -1965,7 +1975,7 @@ namespace Seeker
             {
                 Logger.Debug($"handling {e.Username} status changed");
                 DeduplicateUsername = e.Username;
-                DeduplicateStatus = e.Status;
+                DeduplicateStatus = e.Presence;
                 SeekerApplication.UserStatusChangedDeDuplicated?.Invoke(sender, e);
             }
         }
@@ -2008,7 +2018,7 @@ namespace Seeker
 
 
         public static EventHandler<string> UserStatusChangedUIEvent;
-        private void SoulseekClient_UserStatusChanged(object sender, UserStatusChangedEventArgs e)
+        private void SoulseekClient_UserStatusChanged(object sender, UserStatus e)
         {
             if (e.Username == PreferencesState.Username)
             {
@@ -2019,7 +2029,7 @@ namespace Seeker
                 //we get user status changed for those we are in the same room as us
                 if (SeekerState.UserList != null)
                 {
-                    bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Status, e.IsPrivileged));
+                    bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Username, e.Presence, e.IsPrivileged));
                     if (found)
                     {
                         Logger.Debug("friend status changed " + e.Username);
@@ -2027,7 +2037,7 @@ namespace Seeker
                     }
                 }
 
-                ProcessPotentialUserOfflineChangedEvent(e.Username, e.Status);
+                ProcessPotentialUserOfflineChangedEvent(e.Username, e.Presence);
             }
 
         }

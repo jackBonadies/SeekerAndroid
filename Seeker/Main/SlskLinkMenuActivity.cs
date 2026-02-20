@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using System.Linq;
 
 namespace Seeker
 {
@@ -55,7 +56,7 @@ namespace Seeker
         //    DownloadFilesLogic(dirTask,null);
         //}
 
-        public static void DownloadFilesLogic(Task<Directory> dirTask, string _uname, string thisFileOnly = null)
+        public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)
         {
             if (dirTask.IsFaulted)
             {
@@ -93,7 +94,7 @@ namespace Seeker
 
                 //the filenames for these files are NOT the fullname.
                 //the fullname is dirTask.Result.Name "\\" f.Filename
-                var directory = dirTask.Result;
+                var directory = dirTask.Result.First();
                 foreach (var f in directory.Files)
                 {
                     string fullFilename = directory.Name + "\\" + f.Filename;
@@ -153,14 +154,14 @@ namespace Seeker
                     return true;
                 case FromSlskLinkDownloadFiles:
                     CommonHelpers.ParseSlskLinkString(SimpleHelpers.SlskLinkClickedData, out string _username, out string _dirPath, out string fullFilePath, out bool isFile);
-                    Action<Task<Directory>> ContAction = null;
+                    Action<Task<IReadOnlyCollection<Directory>>> ContAction = null;
                     if (isFile)
                     {
-                        ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, fullFilePath); };
+                        ContAction = (Task<IReadOnlyCollection<Directory>> t) => { DownloadFilesLogic(t, _username, fullFilePath); };
                     }
                     else
                     {
-                        ContAction = (Task<Directory> t) => { DownloadFilesLogic(t, _username, null); };
+                        ContAction = (Task<IReadOnlyCollection<Directory>> t) => { DownloadFilesLogic(t, _username, null); };
                     }
                     DownloadDialog.GetFolderContentsAPI(_username, _dirPath, false, ContAction);
                     return true;

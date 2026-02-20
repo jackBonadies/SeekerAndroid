@@ -46,7 +46,7 @@ namespace Seeker
                 }
                 try
                 {
-                    SeekerState.SoulseekClient.AddUserAsync(username);
+                    SeekerState.SoulseekClient.WatchUserAsync(username);
                 }
                 catch (System.Exception)
                 {
