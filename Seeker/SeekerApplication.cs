@@ -67,14 +67,16 @@ namespace Seeker
         {
             base.OnCreate();
             ApplicationContext = this;
+
+            var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
             Firebase.FirebaseApp app = Firebase.FirebaseApp.InitializeApp(this);
             if (app == null)
             {
-                Logger.CrashlyticsEnabled = false;
+                loggerBackend.CrashlyticsEnabled = false;
             }
 #endif
-            //Logger.Firebase("testing release");
+            Logger.Backend = loggerBackend;
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));

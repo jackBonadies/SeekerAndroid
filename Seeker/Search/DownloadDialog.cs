@@ -180,16 +180,11 @@ namespace Seeker
         /// <param name="savedInstanceState"></param>
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
-            //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
-            log.Debug(Logger.LogCatTag, "Is View null: " + (view == null).ToString());
-
-            log.Debug(Logger.LogCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
             this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
-            log.Debug(Logger.LogCatTag, "Is dl null: " + (dl == null).ToString());
             dl.Click += DownloadAll_Click;
             Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
             cancel.Click += Cancel_Click;
@@ -210,7 +205,6 @@ namespace Seeker
 
             if (searchResponse == null)
             {
-                log.Debug(Logger.LogCatTag, "Is searchResponse null");
                 Logger.Firebase("DownloadDialog search response is null");
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
@@ -218,7 +212,7 @@ namespace Seeker
             userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
             subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
-            log.Debug(Logger.LogCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
+            Logger.Debug("Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
             ListView listView = view.FindViewById<ListView>(Resource.Id.listView1);
             listView.ItemClick += ListView_ItemClick;

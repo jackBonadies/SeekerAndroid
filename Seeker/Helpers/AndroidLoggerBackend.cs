@@ -21,12 +21,12 @@ using log = Android.Util.Log;
 
 namespace Seeker.Helpers
 {
-    public static class Logger
+    public class AndroidLoggerBackend : ILoggerBackend
     {
         public const string LogCatTag = "seeker";
-        public static bool CrashlyticsEnabled = true;
+        public bool CrashlyticsEnabled { get; set; } = true;
 
-        public static void Debug(string msg)
+        public void Debug(string msg)
         {
             if (SeekerApplication.LOG_DIAGNOSTICS)
             {
@@ -37,12 +37,12 @@ namespace Seeker.Helpers
 #endif
         }
 
-        public static void FirebaseError(string msg, Exception e)
+        public void FirebaseError(string msg, Exception e)
         {
             Firebase($"{msg} msg: {e.Message} stack: {e.StackTrace}");
         }
 
-        public static void Firebase(string msg)
+        public void Firebase(string msg)
         {
             if (SeekerApplication.LOG_DIAGNOSTICS)
             {
@@ -59,7 +59,7 @@ namespace Seeker.Helpers
 #endif
         }
 
-        public static void InfoFirebase(string msg)
+        public void InfoFirebase(string msg)
         {
             if (SeekerApplication.LOG_DIAGNOSTICS)
             {
