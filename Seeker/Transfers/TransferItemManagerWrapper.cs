@@ -65,27 +65,43 @@ namespace Seeker
             }
         }
 
+        private static TransferUIState CreateUIState()
+        {
+            return new TransferUIState
+            {
+                GroupByFolder = TransfersFragment.GroupByFolder,
+                CurrentlySelectedFolder = TransfersFragment.GetCurrentlySelectedFolder(),
+                BatchSelectedItems = TransfersFragment.BatchSelectedItems,
+            };
+        }
+
         public void CancelSelectedItems(bool prepareForClean)
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode)
             {
-                Uploads.CancelSelectedItems(prepareForClean);
+                Uploads.CancelSelectedItems(uiState, prepareForClean);
             }
             else
             {
-                Downloads.CancelSelectedItems(prepareForClean);
+                Downloads.CancelSelectedItems(uiState, prepareForClean);
             }
         }
 
         public void ClearSelectedItemsAndClean()
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode)
             {
-                Uploads.ClearSelectedItemsAndClean();
+                Uploads.ClearSelectedItemsReturnCleanupItems(uiState);
             }
             else
             {
-                Downloads.ClearSelectedItemsAndClean();
+                var cleanupItems = Downloads.ClearSelectedItemsReturnCleanupItems(uiState);
+                if (cleanupItems.Any())
+                {
+                    CleanupEntry(cleanupItems);
+                }
             }
         }
 
@@ -163,11 +179,7 @@ namespace Seeker
 
         public static bool NeedsCleanUp(TransferItem ti)
         {
-            if (ti != null && ti.IncompleteParentUri != null && !ti.CancelAndClearFlag) //if cancel and clear flag is set then it will be cleaned up on continuation. that way we are sure the stream is closed.
-            {
-                return true;
-            }
-            return false;
+            return TransferItemManager.NeedsCleanUp(ti);
         }
 
 
@@ -185,13 +197,14 @@ namespace Seeker
 
         public object GetUICurrentList()
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode)
             {
-                return Uploads.GetUICurrentList();
+                return Uploads.GetUICurrentList(uiState);
             }
             else
             {
-                return Downloads.GetUICurrentList();
+                return Downloads.GetUICurrentList(uiState);
             }
         }
 
@@ -209,13 +222,14 @@ namespace Seeker
 
         public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode && ti.IsUpload())
             {
-                return Uploads.GetUserIndexForTransferItem(ti);
+                return Uploads.GetUserIndexForTransferItem(ti, uiState);
             }
             else if (!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
             {
-                return Downloads.GetUserIndexForTransferItem(ti);
+                return Downloads.GetUserIndexForTransferItem(ti, uiState);
             }
             else
             {
@@ -225,25 +239,27 @@ namespace Seeker
 
         public ITransferItem GetItemAtUserIndex(int position)
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode)
             {
-                return Uploads.GetItemAtUserIndex(position);
+                return Uploads.GetItemAtUserIndex(position, uiState);
             }
             else
             {
-                return Downloads.GetItemAtUserIndex(position);
+                return Downloads.GetItemAtUserIndex(position, uiState);
             }
         }
 
         public object RemoveAtUserIndex(int position)
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode)
             {
-                return Uploads.RemoveAtUserIndex(position);
+                return Uploads.RemoveAtUserIndex(position, uiState);
             }
             else
             {
-                return Downloads.RemoveAtUserIndex(position);
+                return Downloads.RemoveAtUserIndex(position, uiState);
             }
         }
 
@@ -334,7 +350,11 @@ namespace Seeker
             }
             else
             {
-                Downloads.ClearAllFromFolderAndClean(fi);
+                var cleanupItems = Downloads.ClearAllFromFolderReturnCleanupItems(fi);
+                if (cleanupItems.Any())
+                {
+                    CleanupEntry(cleanupItems);
+                }
             }
         }
 
@@ -352,13 +372,14 @@ namespace Seeker
 
         public int GetUserIndexForITransferItem(ITransferItem iti)
         {
+            var uiState = CreateUIState();
             if (TransfersFragment.InUploadsMode)
             {
-                return Uploads.GetUserIndexForITransferItem(iti);
+                return Uploads.GetUserIndexForITransferItem(iti, uiState);
             }
             else
             {
-                return Downloads.GetUserIndexForITransferItem(iti);
+                return Downloads.GetUserIndexForITransferItem(iti, uiState);
             }
         }
     }

@@ -139,7 +139,7 @@ namespace Seeker.Transfers
                 {
                     try
                     {
-                        TransfersFragment.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
+                        TransferState.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
                     }
                     catch (Exception errr)
                     {
@@ -173,7 +173,7 @@ namespace Seeker.Transfers
                 }
                 if (oldCts != null)
                 {
-                    TransfersFragment.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
+                    TransferState.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
                 }
             }
             return downloadInfo;

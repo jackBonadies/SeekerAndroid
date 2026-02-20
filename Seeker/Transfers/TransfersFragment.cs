@@ -32,18 +32,17 @@ namespace Seeker
         /// and having additional users here will not cause any issues.  (i.e. in case where other user was offline then the 
         /// user cleared that download, no harm as it will check and see there are no downloads to retry and just remove user)
         /// </summary>
-        public static Dictionary<string, byte> UsersWhereDownloadFailedDueToOffline = new Dictionary<string, byte>();
         public static void AddToUserOffline(string username)
         {
-            if (UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
+            if (TransferState.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
             {
                 return;
             }
             else
             {
-                lock (TransfersFragment.UsersWhereDownloadFailedDueToOffline)
+                lock (TransferState.UsersWhereDownloadFailedDueToOffline)
                 {
-                    UsersWhereDownloadFailedDueToOffline[username] = 0x0;
+                    TransferState.UsersWhereDownloadFailedDueToOffline[username] = 0x0;
                 }
                 try
                 {
@@ -61,12 +60,17 @@ namespace Seeker
         public static TransferItemManager TransferItemManagerUploads; //for uploads
         public static TransferItemManagerWrapper TransferItemManagerWrapped;
 
-        public static bool GroupByFolder = false;
 
         public static int ScrollPositionBeforeMovingIntoFolder = int.MinValue;
         public static int ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
+
+
+        public static bool GroupByFolder = false;
         public static FolderItem CurrentlySelectedDLFolder = null;
         public static FolderItem CurrentlySelectedUploadFolder = null;
+        public static volatile bool InUploadsMode = false;
+        public static List<int> BatchSelectedItems = new List<int>();
+
         public static bool CurrentlyInFolder()
         {
             if (CurrentlySelectedDLFolder == null && CurrentlySelectedUploadFolder == null)
@@ -86,14 +90,23 @@ namespace Seeker
                 return CurrentlySelectedDLFolder;
             }
         }
-        public static volatile bool InUploadsMode = false;
+
+        public static TransferUIState CreateDLUIState()
+        {
+            return new TransferUIState
+            {
+                GroupByFolder = GroupByFolder,
+                CurrentlySelectedFolder = CurrentlySelectedDLFolder,
+                BatchSelectedItems = BatchSelectedItems,
+            };
+        }
 
         //private ListView primaryListView = null;
         private TextView noTransfers = null;
         private Button setupUpSharing = null;
         private ISharedPreferences sharedPreferences = null;
         private static System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> ProgressUpdatedThrottler = new System.Collections.Concurrent.ConcurrentDictionary<string, DateTime>();
-        public static int THROTTLE_PROGRESS_UPDATED_RATE = 200;//in ms;
+        public const int THROTTLE_PROGRESS_UPDATED_RATE = 200;//in ms;
 
         public override void SetMenuVisibility(bool menuVisible)
         {
@@ -307,12 +320,14 @@ namespace Seeker
                     if (CurrentlySelectedDLFolder == null)
                     {
                         TransferItemManagerDL.CancelAll(true);
-                        TransferItemManagerDL.ClearAllAndClean();
+                        var cleanupItems = TransferItemManagerDL.ClearAllReturnCleanupItems();
+                        if (cleanupItems.Any()) TransferItemManagerWrapper.CleanupEntry(cleanupItems);
                     }
                     else
                     {
                         TransferItemManagerDL.CancelFolder(CurrentlySelectedDLFolder, true);
-                        TransferItemManagerDL.ClearAllFromFolderAndClean(CurrentlySelectedDLFolder);
+                        var cleanupItems = TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(CurrentlySelectedDLFolder);
+                        if (cleanupItems.Any()) TransferItemManagerWrapper.CleanupEntry(cleanupItems);
                     }
                     refreshListView();
                     return true;
@@ -600,7 +615,7 @@ namespace Seeker
 
                 if (ti.State.HasFlag(TransferStates.UserOffline))
                 {
-                    TransfersFragment.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
+                    TransferState.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
                 }
             }
         }
@@ -743,10 +758,9 @@ namespace Seeker
             ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(ScrollPositionBeforeMovingIntoFolder, ScrollOffsetBeforeMovingIntoFolder); //if you dont do with offset, it scrolls it until the visible item is simply in view (so it will be at bottom, almost a whole screen off)
         }
 
+        // TODO2026
         public static ActionModeCallback TransfersActionModeCallback = null;
-        //public static Android.Support.V7.View.ActionMode TransfersActionMode = null;
         public static ActionMode TransfersActionMode = null;
-        public static List<int> BatchSelectedItems = new List<int>();
 
         public void SetRecyclerAdapter(bool restoreState = false)
         {
@@ -906,12 +920,13 @@ namespace Seeker
             {
                 folderItems = true;
             }
+            var uiState = CreateDLUIState();
             List<TransferItem> tis = new List<TransferItem>();
             foreach (int pos in BatchSelectedItems)
             {
                 if (folderItems)
                 {
-                    var fi = TransferItemManagerDL.GetItemAtUserIndex(pos) as FolderItem;
+                    var fi = TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as FolderItem;
                     foreach (TransferItem ti in fi.TransferItems)
                     {
                         if (selectFailed && ti.Failed)
@@ -926,7 +941,7 @@ namespace Seeker
                 }
                 else
                 {
-                    var ti = TransferItemManagerDL.GetItemAtUserIndex(pos) as TransferItem;
+                    var ti = TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as TransferItem;
                     if (selectFailed && ti.Failed)
                     {
                         tis.Add(ti);
@@ -982,7 +997,7 @@ namespace Seeker
                 try
                 {
                     Android.Net.Uri incompleteUri = null;
-                    SetupCancellationToken(item, cancellationTokenSource, out _);
+                    TransferState.SetupCancellationToken(item, cancellationTokenSource, out _);
                     Task task = TransfersUtil.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
                     task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item.Username, item.FullFilename, item.Size, task, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item })));
                 }
@@ -1027,10 +1042,11 @@ namespace Seeker
                         // not only did the recycleview break weirdly, but the whole main activity
                         // (the login screen, search screen, action bar, browse screen).
 
+                        var uiState = CreateDLUIState();
                         HashSet<int> indicesToUpdate = new HashSet<int>();
                         foreach (TransferItem ti in transferItemConditionList)
                         {
-                            int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti);
+                            int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti, uiState);
                             if (pos == -1)
                             {
                                 Logger.Debug("pos == -1!!");
@@ -1064,7 +1080,7 @@ namespace Seeker
 
                     });
             });
-            lock (TransferItemManagerDL.GetUICurrentList()) //TODO: test
+            lock (TransferItemManagerDL.GetUICurrentList(CreateDLUIState())) //TODO: test
             { //also can update this to do a partial refresh...
                 if (StaticHacks.TransfersFrag != null)
                 {
@@ -1097,7 +1113,7 @@ namespace Seeker
             string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             Logger.Debug("chosenFname? " + chosenFname);
             TransferItem item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
-            int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1);
+            int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1, CreateDLUIState());
             Logger.Debug("item1 is null?" + (item1 == null).ToString());//tested
             if (item1 == null || indexToRefresh == -1)
             {
@@ -1131,7 +1147,7 @@ namespace Seeker
             {
 
                 Android.Net.Uri incompleteUri = null;
-                SetupCancellationToken(item1, cancellationTokenSource, out _);
+                TransferState.SetupCancellationToken(item1, cancellationTokenSource, out _);
                 Task task = TransfersUtil.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
                 //SeekerState.SoulseekClient.DownloadAsync(
                 //username: item1.Username,
@@ -1176,7 +1192,7 @@ namespace Seeker
 
 
             });
-            lock (TransferItemManagerDL.GetUICurrentList())
+            lock (TransferItemManagerDL.GetUICurrentList(CreateDLUIState()))
             { //also can update this to do a partial refresh...
                 refreshListView(refreshOnlySelected);
             }
@@ -1310,10 +1326,10 @@ namespace Seeker
                         if (tItem is TransferItem tti)
                         {
                             bool wasInProgress = tti.State.HasFlag(TransferStates.InProgress);
-                            CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
+                            TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
                             uptoken?.Cancel();
-                            //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                            CancellationTokens.Remove(ProduceCancellationTokenKey(tti), out _);
+                            //TransferState.CancellationTokens[TransferState.ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
+                            TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tti), out _);
                             lock (TransferItemManagerWrapped.GetUICurrentList())
                             {
                                 if (InUploadsMode)
@@ -1350,7 +1366,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position);
+                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, CreateDLUIState());
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1382,7 +1398,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position) as TransferItem;
+                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, CreateDLUIState()) as TransferItem;
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1552,10 +1568,10 @@ namespace Seeker
                         }
                         TransferItem uploadToCancel = tItem as TransferItem;
 
-                        CancellationTokens.TryGetValue(ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
+                        TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
                         token?.Cancel();
-                        //CancellationTokens[ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                        CancellationTokens.Remove(ProduceCancellationTokenKey(uploadToCancel), out _);
+                        //TransferState.CancellationTokens[TransferState.ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
+                        TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(uploadToCancel), out _);
                         lock (TransferItemManagerWrapped.GetUICurrentList())
                         {
                             recyclerTransferAdapter.NotifyItemChanged(position);
@@ -1566,9 +1582,9 @@ namespace Seeker
                         IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
                         foreach (var tiToCancel in tItems)
                         {
-                            CancellationTokens.TryGetValue(ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
+                            TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
                             token1?.Cancel();
-                            CancellationTokens.Remove(ProduceCancellationTokenKey(tiToCancel), out _);
+                            TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tiToCancel), out _);
                             lock (TransferItemManagerWrapped.GetUICurrentList())
                             {
                                 int posOfCancelled = TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
@@ -1685,7 +1701,7 @@ namespace Seeker
                     }
                     else
                     {
-                        int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t);
+                        int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t, CreateDLUIState());
                         if (indexOfItem == -1 && InUploadsMode)
                         {
                             return null;
@@ -1712,7 +1728,7 @@ namespace Seeker
                 {
                     return;
                 }
-                int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename);
+                int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename, CreateDLUIState());
                 Logger.Debug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
                 Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
                 if (recyclerTransferAdapter.ItemCount == indexOfItem)
@@ -2115,40 +2131,12 @@ namespace Seeker
             {
                 //occurs on nonUI thread...
                 //if there is any deadlock due to this, then do Thread.Start().
-                lock (TransferItemManagerDL.GetUICurrentList())
+                lock (TransferItemManagerDL.GetUICurrentList(CreateDLUIState()))
                 { //todo can update this to do a partial refresh... just the index..
                     refreshListView();
                 }
             });
         }
-
-        public static void SetupCancellationToken(TransferItem transferItem, CancellationTokenSource cts, out CancellationTokenSource oldToken)
-        {
-            transferItem.CancellationTokenSource = cts;
-            if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), cts)) //returns false if it already exists in dict
-            {
-                //likely old already exists so just replace the old one
-                oldToken = CancellationTokens[ProduceCancellationTokenKey(transferItem)];
-                CancellationTokens[ProduceCancellationTokenKey(transferItem)] = cts;
-            }
-            else
-            {
-                oldToken = null;
-            }
-        }
-
-        public static string ProduceCancellationTokenKey(TransferItem i)
-        {
-            return ProduceCancellationTokenKey(i.FullFilename, i.Size, i.Username);
-        }
-
-        public static string ProduceCancellationTokenKey(string fullFilename, long size, string username)
-        {
-            return fullFilename + size.ToString() + username;
-        }
-
-
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource> CancellationTokens = new System.Collections.Concurrent.ConcurrentDictionary<string, CancellationTokenSource>();
 
     }
 

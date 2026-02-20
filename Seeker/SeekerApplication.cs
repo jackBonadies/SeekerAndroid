@@ -1365,9 +1365,9 @@ namespace Seeker
                         }
                     }
 
-                    lock (TransfersFragment.UsersWhereDownloadFailedDueToOffline)
+                    lock (TransferState.UsersWhereDownloadFailedDueToOffline)
                     {
-                        foreach (string userDownloadOffline in TransfersFragment.UsersWhereDownloadFailedDueToOffline.Keys)
+                        foreach (string userDownloadOffline in TransferState.UsersWhereDownloadFailedDueToOffline.Keys)
                         {
                             Logger.Debug("adding user (due to a download we wanted from them when they were offline): " + userDownloadOffline);
                             SeekerState.SoulseekClient.AddUserAsync(userDownloadOffline).ContinueWith(UpdateUserOfflineDownload);
@@ -1976,7 +1976,7 @@ namespace Seeker
             {
                 if (PreferencesState.AutoRetryBackOnline)
                 {
-                    if (TransfersFragment.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
+                    if (TransferState.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
                     {
                         Logger.Debug("the user came back who we previously dl from " + username);
                         //retry all failed downloads from them..
@@ -1984,9 +1984,9 @@ namespace Seeker
                         if (items.Count == 0)
                         {
                             //no offline, then remove this user.
-                            lock (TransfersFragment.UsersWhereDownloadFailedDueToOffline)
+                            lock (TransferState.UsersWhereDownloadFailedDueToOffline)
                             {
-                                TransfersFragment.UsersWhereDownloadFailedDueToOffline.Remove(username);
+                                TransferState.UsersWhereDownloadFailedDueToOffline.Remove(username);
                             }
                         }
                         else
