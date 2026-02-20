@@ -137,12 +137,13 @@ namespace Seeker
                 SeekerState.SoulseekClient = new SoulseekClient(
                     128,
                     new SoulseekClientOptions(
-                        minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info, 
-                        messageTimeout: 30000, 
-                        enableListener: PreferencesState.ListenerEnabled, 
-                        autoAcknowledgePrivateMessages: false, 
-                        acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations, 
-                        listenPort: PreferencesState.ListenerPort, 
+                        minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
+                        messageTimeout: 30000,
+                        enableListener: PreferencesState.ListenerEnabled,
+                        autoAcknowledgePrivateMessages: false,
+                        acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
+                        listenPort: PreferencesState.ListenerPort,
+                        maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
                         userInfoResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
                 SeekerState.SoulseekClient.UserDataReceived += SoulseekClient_UserDataReceived;
@@ -1833,8 +1834,6 @@ namespace Seeker
                 PreferencesManager.RestoreListeningState(sharedPreferences);
 
                 SearchFragment.SetSearchResultStyle(Common.PreferencesState.SearchResultStyle);
-
-                SimultaneousDownloadsGatekeeper.Initialize(Common.PreferencesState.LimitSimultaneousDownloads, Common.PreferencesState.MaxSimultaneousLimit);
 
                 // Side-effect restores that depend on Android APIs
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);

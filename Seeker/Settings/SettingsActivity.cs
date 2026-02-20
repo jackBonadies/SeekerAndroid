@@ -520,12 +520,12 @@ namespace Seeker
             concurrentDlSublayout = FindViewById<ViewGroup>(Resource.Id.limitConcurrentDownloadsSublayout2);
             concurrentDlLabel = FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel);
             concurrentDlCheckbox = FindViewById<CheckBox>(Resource.Id.limitConcurrentDownloadsCheckBox);
-            concurrentDlCheckbox.Checked = Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers;
+            concurrentDlCheckbox.Checked = PreferencesState.LimitSimultaneousDownloads;
             concurrentDlCheckbox.CheckedChange += ConcurrentDlCheckbox_CheckedChange;
 
             concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
             concurrentDlButton.Click += ConcurrentDlBottom_Click;
-            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + PreferencesState.MaxSimultaneousLimit;
 
 
 
@@ -836,13 +836,14 @@ namespace Seeker
 
         private void ConcurrentDlCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers)
+            if (e.IsChecked == PreferencesState.LimitSimultaneousDownloads)
             {
                 return;
             }
-            Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers = e.IsChecked;
+            PreferencesState.LimitSimultaneousDownloads = e.IsChecked;
             this.UpdateConcurrentDownloadLimitsState();
             SaveMaxConcurrentDownloadsSettings();
+            Toast.MakeText(this, "This will take effect on next startup", ToastLength.Short).Show();
         }
 
         private void ConcurrentDlBottom_Click(object sender, EventArgs e)
@@ -1610,11 +1611,12 @@ namespace Seeker
                         return;
                     }
 
-                    Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent = concurrentDL;
+                    PreferencesState.MaxSimultaneousLimit = concurrentDL;
                     // always add space as the resource string will always trim trailing spaces.
-                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + PreferencesState.MaxSimultaneousLimit;
 
                     SaveMaxConcurrentDownloadsSettings();
+                    Toast.MakeText(this, "This will take effect on next startup", ToastLength.Short).Show();
                     changeDialog.Dismiss();
                 }
 
@@ -2225,7 +2227,7 @@ namespace Seeker
 
         private void UpdateConcurrentDownloadLimitsState()
         {
-            if (Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers)
+            if (PreferencesState.LimitSimultaneousDownloads)
             {
                 concurrentDlSublayout.Enabled = true;
                 concurrentDlSublayout.Alpha = 1.0f;
@@ -3422,8 +3424,8 @@ namespace Seeker
         public static void SaveMaxConcurrentDownloadsSettings()
         {
             PreferencesManager.SaveMaxConcurrentDownloadsSettings(
-                Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers,
-                Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent);
+                PreferencesState.LimitSimultaneousDownloads,
+                PreferencesState.MaxSimultaneousLimit);
         }
 
         public static void SaveManualIncompleteDirToSharedPreferences()
