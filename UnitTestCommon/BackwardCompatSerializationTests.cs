@@ -144,6 +144,57 @@ namespace UnitTestCommon
         }
 
         [Test]
+        public async Task WishlistTab_DeserializesFromDisk()
+        {
+            var stream = System.IO.File.OpenRead(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "Set1", "wishlist_dir", "1_wishlist_tab_v2"));
+            var results = SerializationHelper.RestoreSearchResponsesFromStream(stream);
+            Assert.AreEqual(51, results.Count);
+
+            var first = results[0];
+            await Verifier.Verify(new
+            {
+                first.Username,
+                first.Token,
+                first.HasFreeUploadSlot,
+                first.UploadSpeed,
+                first.QueueLength,
+                first.FileCount,
+                first.LockedFileCount,
+                Files = first.Files.Select(f => new
+                {
+                    f.Code,
+                    f.Filename,
+                    f.Size,
+                    f.Extension,
+                    f.BitRate,
+                    f.BitDepth,
+                    f.IsVariableBitRate,
+                    f.Length,
+                    f.SampleRate,
+                    f.AttributeCount,
+                    f.IsLatin1Decoded,
+                    f.IsDirectoryLatin1Decoded,
+                }),
+                LockedFiles = first.LockedFiles.Select(f => new
+                {
+                    f.Code,
+                    f.Filename,
+                    f.Size,
+                    f.Extension,
+                    f.BitRate,
+                    f.BitDepth,
+                    f.IsVariableBitRate,
+                    f.Length,
+                    f.SampleRate,
+                    f.AttributeCount,
+                    f.IsLatin1Decoded,
+                    f.IsDirectoryLatin1Decoded,
+                }),
+            });
+        }
+
+
+        [Test]
         public void RecentUsersList_DeserializesFromDisk()
         {
             var raw = GetPreferenceString("Momento_RecentUsersList");
