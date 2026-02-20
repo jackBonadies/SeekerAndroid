@@ -472,13 +472,15 @@ namespace Seeker.Services
                 CancellationTokenSource oldCts = null;
                 try
                 {
-                    using var stream = SeekerState.MainActivityRef.ContentResolver.OpenInputStream(ourFile.Uri); //outputstream.CanRead is false...
                     //using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
 
                     TransferState.SetupCancellationToken(transferItem, cts, out oldCts);
 
-                    await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size, stream, options: new TransferOptions(governor: SpeedLimitHelper.OurUploadGovernor), cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
-                                                                                                                                                                                                                                               //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
+                    var uploadUri = ourFile.Uri;
+                    await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
+                        inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
+                        options: new TransferOptions(governor: SpeedLimitHelper.OurUploadGovernor), cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
+                                                                                                                                   //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
 
                 }
                 catch (DuplicateTransferException dup) //not tested

@@ -525,13 +525,13 @@ namespace Soulseek.Messaging.Handlers
                         SoulseekClient.Waiter.Complete(new WaitKey(code, privateRoomRemoveUserResponse.RoomName, privateRoomRemoveUserResponse.Username));
                         break;
 
-                    case MessageCode.Server.PrivateRoomAddOperator: //an operator was added to the private room that we are in.
+                    case MessageCode.Server.PrivateRoomAddOperator:
                         var privateRoomAddOperatorResponse = PrivateRoomAddOperator.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code, privateRoomAddOperatorResponse.RoomName, privateRoomAddOperatorResponse.Username));
                         OperatorInPrivateRoomAddedRemoved?.Invoke(this, new Soulseek.OperatorAddedRemovedEventArgs(privateRoomAddOperatorResponse.RoomName, privateRoomAddOperatorResponse.Username, true));
                         break;
 
-                    case MessageCode.Server.PrivateRoomRemoveOperator: //an operator was removed from the private room that we are in.
+                    case MessageCode.Server.PrivateRoomRemoveOperator:
                         var privateRoomRemoveOperatorResponse = PrivateRoomRemoveOperator.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code, privateRoomRemoveOperatorResponse.RoomName, privateRoomRemoveOperatorResponse.Username));
                         OperatorInPrivateRoomAddedRemoved?.Invoke(this, new Soulseek.OperatorAddedRemovedEventArgs(privateRoomRemoveOperatorResponse.RoomName, privateRoomRemoveOperatorResponse.Username, false));
