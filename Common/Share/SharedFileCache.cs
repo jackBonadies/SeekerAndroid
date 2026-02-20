@@ -1,59 +1,14 @@
-﻿namespace SlskHelp
+﻿using Seeker;
+using Soulseek;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading;
+
+namespace Common.Share
 {
-    //using Microsoft.Data.Sqlite; //Microsoft Data SQLite Core from NuGet
-    //could not load assembly perhaps it does not exist in the Mono for Android profile?
-    using Soulseek;
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Threading;
-
-    public interface IUserListChecker
-    {
-        public bool IsInUserList(string user);
-    }
-
-    public static class CommonHelpers
-    {
-        public static IUserListChecker UserListChecker;
-
-        //this is a cache for localized strings accessed in tight loops...
-        private static string strings_kbs;
-        public static string STRINGS_KBS
-        {
-            get
-            {
-                return strings_kbs;
-            }
-            set
-            {
-                strings_kbs = value;
-            }
-        }
-
-        private static string strings_kHz;
-        public static string STRINGS_KHZ
-        {
-            get
-            {
-                return strings_kHz;
-            }
-            set
-            {
-                strings_kHz = value;
-            }
-        }
-
-        static CommonHelpers()
-        {
-            KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();
-        }
-        public static ReadOnlyCollection<string> KNOWN_TYPES;
-    }
-
     /// <summary>
     ///     Caches shared files.
     /// </summary>
@@ -188,7 +143,7 @@
                 {
                     if(!inUserList.HasValue)
                     {
-                        inUserList = CommonHelpers.UserListChecker.IsInUserList(uname);
+                        inUserList = SimpleHelpers.UserListService.ContainsUser(uname);
                     }
                     if(!inUserList.Value)
                     {
@@ -245,7 +200,7 @@
         private List<Soulseek.Directory> BrowseResponseHiddenPortion = null; //considered locked.
         public BrowseResponse GetBrowseResponseForUser(string user, bool force = false)
         {
-            if(!force && (BrowseResponseHiddenPortion == null || BrowseResponse == null || BrowseResponseHiddenPortion.Count == 0 || string.IsNullOrEmpty(user) || !CommonHelpers.UserListChecker.IsInUserList(user)))
+            if(!force && (BrowseResponseHiddenPortion == null || BrowseResponse == null || BrowseResponseHiddenPortion.Count == 0 || string.IsNullOrEmpty(user) || !SimpleHelpers.UserListService.ContainsUser(user)))
             {
                 return BrowseResponse;
             }
@@ -433,7 +388,18 @@
             }
         }
     }
+    internal interface ISharedFileCache
+    {
+        event EventHandler<(int Directories, int Files)> Refreshed;
 
+        //string Directory { get; }
+        //DateTime? LastFill { get; }
+        //long TTL { get; }
+
+        void Fill();
+
+        IEnumerable<Soulseek.File> Search(SearchQuery query, string username, out IEnumerable<Soulseek.File> lockedFiles);
+    }
     public static class SearchUtil
     {
         public static IReadOnlyCollection<string> ExcludedSearchPhrases { get; set; }
@@ -470,4 +436,8 @@
         }
     }
 
+    public static class CommonHelpers
+    {
+
+    }
 }

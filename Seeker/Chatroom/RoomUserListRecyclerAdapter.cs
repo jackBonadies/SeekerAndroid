@@ -238,7 +238,7 @@ namespace Seeker.Chatroom
             viewFlag.Text = ChatroomActivity.LocaleToEmoji(userData.CountryCode.ToUpper());
             viewUsername.Text = userData.Username;
             viewNumFiles.Text = userData.FileCount.ToString("N0");
-            viewSpeed.Text = (userData.AverageSpeed / 1024).ToString("N0") + " " + SlskHelp.CommonHelpers.STRINGS_KBS;
+            viewSpeed.Text = (userData.AverageSpeed / 1024).ToString("N0") + " " + SimpleHelpers.STRINGS_KBS;
             if (userData is Soulseek.ChatroomUserData cData)
             {
                 if (cData.ChatroomUserRole == Soulseek.UserRole.Normal)

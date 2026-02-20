@@ -1,7 +1,6 @@
 ﻿using Android.Content;
 using Android.Widget;
 using Java.IO;
-using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;

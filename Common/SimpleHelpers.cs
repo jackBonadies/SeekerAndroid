@@ -2,6 +2,7 @@ using Common;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -321,15 +322,15 @@ namespace Seeker
             }
             else if (bitDepth != -1 && !double.IsNaN(sampleRate))
             {
-                return bitDepth + ", " + sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
+                return bitDepth + ", " + sampleRate + SimpleHelpers.STRINGS_KHZ;
             }
             else if (!double.IsNaN(sampleRate))
             {
-                return sampleRate + SlskHelp.CommonHelpers.STRINGS_KHZ;
+                return sampleRate + SimpleHelpers.STRINGS_KHZ;
             }
             else if (bitRate != -1)
             {
-                return bitRate + SlskHelp.CommonHelpers.STRINGS_KBS;
+                return bitRate + SimpleHelpers.STRINGS_KBS;
             }
             else
             {
@@ -397,5 +398,39 @@ namespace Seeker
             string clipped = filename.Substring(begin + 1);
             return clipped;
         }
+
+        public static IUserListService UserListService;
+        //this is a cache for localized strings accessed in tight loops...
+        private static string strings_kbs;
+        public static string STRINGS_KBS
+        {
+            get
+            {
+                return strings_kbs;
+            }
+            set
+            {
+                strings_kbs = value;
+            }
+        }
+
+        private static string strings_kHz;
+        public static string STRINGS_KHZ
+        {
+            get
+            {
+                return strings_kHz;
+            }
+            set
+            {
+                strings_kHz = value;
+            }
+        }
+
+        static SimpleHelpers()
+        {
+            KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();
+        }
+        public static ReadOnlyCollection<string> KNOWN_TYPES;
     }
 }

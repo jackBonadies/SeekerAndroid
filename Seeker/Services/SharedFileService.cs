@@ -2,10 +2,10 @@ using Android.Content;
 using Android.Provider;
 using AndroidX.DocumentFile.Provider;
 using Common;
+using Common.Share;
 using Seeker.Helpers;
 using Seeker.Serialization;
 using Seeker.Transfers;
-using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -1307,7 +1307,7 @@ namespace Seeker.Services
                     // TODO we do not save the directoryCount ?? and so subsequent times its just browseResponse.Count?
                     // would it ever be different?
 
-                    SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(keys, directoryCount, browseResponse, dirMappingFriendlyNameToUri, tokenIndex, helperIndex, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
+                    SharedFileCache sharedFileCache = new SharedFileCache(keys, directoryCount, browseResponse, dirMappingFriendlyNameToUri, tokenIndex, helperIndex, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
                     SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer != -1 ? nonHiddenCountForServer : sharedFileCache.FileCount));
                     SeekerState.SharedFileCache = sharedFileCache;
 
@@ -1356,7 +1356,7 @@ namespace Seeker.Services
                     }
                     else
                     {
-                        SlskHelp.SharedFileCache sharedFileCache = new SlskHelp.SharedFileCache(cachedParseResults.keys, // todo new constructor
+                        SharedFileCache sharedFileCache = new SharedFileCache(cachedParseResults.keys, // todo new constructor
                             cachedParseResults.directoryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping,
                             cachedParseResults.tokenIndex, cachedParseResults.helperIndex, cachedParseResults.browseResponseHiddenPortion,
                             cachedParseResults.nonHiddenFileCount);

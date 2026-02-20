@@ -43,6 +43,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using Common.Share;
 
 namespace Seeker
 {
@@ -772,7 +773,7 @@ namespace Seeker
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
-            SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
+            SeekerState.SharedFileCache = SharedFileCache.GetEmptySharedFileCache();
             SharedFileService.SharedFileCache_Refreshed(null, (0, 0));
             this.UpdateShareImageView();
         }

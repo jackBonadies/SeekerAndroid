@@ -44,7 +44,6 @@ using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.Snackbar;
 using Google.Android.Material.Tabs;
 using Java.IO;
-using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;

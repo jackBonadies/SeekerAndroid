@@ -7,6 +7,7 @@ using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Fragment.App;
 using Common;
+using Common.Share;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace Seeker
 
         public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
 
-        public static SlskHelp.SharedFileCache SharedFileCache = null;
+        public static SharedFileCache SharedFileCache = null;
         public static bool FailedShareParse = false;
         private static volatile bool isParsing = false;
 

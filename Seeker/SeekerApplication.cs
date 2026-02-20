@@ -44,7 +44,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using SlskHelp;
+using Common.Share;
 
 namespace Seeker
 {
@@ -169,10 +169,10 @@ namespace Seeker
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
-            SlskHelp.CommonHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
-            SlskHelp.CommonHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
+            SimpleHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
+            SimpleHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
-            SlskHelp.CommonHelpers.UserListChecker = new UserListChecker();
+            SimpleHelpers.UserListService = UserListService.Instance;
 
             //shouldnt we also connect??? TODO TODO
 

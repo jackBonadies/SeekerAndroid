@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 
 using Common;
+using Seeker.Extensions.SearchResponseExtensions;
 namespace Seeker.Search
 {
 
@@ -150,8 +151,8 @@ namespace Seeker.Search
             else if (searchResultSorting == SearchResultSorting.BitRate)
             {
                 //for fastest, only speed matters. if they pick this then even locked files are in the running.
-                x.GetDominantFileType(PreferencesState.HideLockedResultsInSearch, out double xbitRate);
-                y.GetDominantFileType(PreferencesState.HideLockedResultsInSearch, out double ybitRate);
+                x.GetDominantFileTypeAndBitRate(PreferencesState.HideLockedResultsInSearch, out double xbitRate);
+                y.GetDominantFileTypeAndBitRate(PreferencesState.HideLockedResultsInSearch, out double ybitRate);
                 if (xbitRate != ybitRate)
                 {
                     if (xbitRate > ybitRate)

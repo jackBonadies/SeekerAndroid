@@ -414,7 +414,7 @@ namespace Seeker.Services
             {
                 //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
                 //CHECK USER LIST
-                if (!SlskHelp.CommonHelpers.UserListChecker.IsInUserList(username))
+                if (!SimpleHelpers.UserListService.ContainsUser(username))
                 {
                     throw new DownloadEnqueueException($"File not shared");
                 }

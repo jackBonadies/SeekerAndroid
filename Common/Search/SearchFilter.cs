@@ -253,14 +253,14 @@ namespace Seeker
                 match = chipFilter.AllVarientsFileType.Count == 0 && chipFilter.SpecificFileType.Count == 0;
                 foreach (string varient in chipFilter.AllVarientsFileType)
                 {
-                    if (s.GetDominantFileType(hideLocked, out _) == varient || s.GetDominantFileType(hideLocked, out _).Contains(varient + " "))
+                    if (s.GetDominantFileTypeAndBitRate(hideLocked, out _) == varient || s.GetDominantFileTypeAndBitRate(hideLocked, out _).Contains(varient + " "))
                     {
                         match = true;
                     }
                 }
                 foreach (string specific in chipFilter.SpecificFileType)
                 {
-                    if (s.GetDominantFileType(hideLocked, out _) == specific)
+                    if (s.GetDominantFileTypeAndBitRate(hideLocked, out _) == specific)
                     {
                         match = true;
                     }

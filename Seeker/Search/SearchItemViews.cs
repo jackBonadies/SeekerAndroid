@@ -120,8 +120,8 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
-            viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
+            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS; //kbs
+            viewFileType.Text = item.GetDominantFileTypeAndBitRate(hideLocked, out _);
             if (item.FreeUploadSlots > 0)
             {
                 viewQueue.Text = "";
@@ -131,7 +131,7 @@ namespace Seeker
                 viewQueue.Text = item.QueueLength.ToString();
             }
             //line separated..
-            //viewUsername.Text = item.Username + "  |  " + Helpers.GetDominantFileType(item) + "  |  " + (item.UploadSpeed / 1024).ToString() + "kbs";
+            //viewUsername.Text = item.Username + "  |  " + Helpers.GetDominantFileTypeAndBitRate(item) + "  |  " + (item.UploadSpeed / 1024).ToString() + "kbs";
 
         }
 
@@ -237,7 +237,7 @@ namespace Seeker
             {
                 viewQueue.Text = item.QueueLength.ToString();
             }
-            viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
+            viewFileType.Text = item.GetDominantFileTypeAndBitRate(hideLocked, out _);
 
             if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll && opposite ||
                 SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)

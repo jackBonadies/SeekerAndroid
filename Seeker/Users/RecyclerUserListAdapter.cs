@@ -383,7 +383,7 @@ namespace Seeker.Users
                 if (userDataExists)
                 {
                     viewNumFiles.Text = item.UserData.FileCount.ToString("N0") + " " + SeekerState.ActiveActivityRef.GetString(Resource.String.files);
-                    viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SlskHelp.CommonHelpers.STRINGS_KBS;
+                    viewSpeed.Text = (item.UserData.AverageSpeed / 1024).ToString("N0") + " " + SimpleHelpers.STRINGS_KBS;
                 }
                 else
                 {
