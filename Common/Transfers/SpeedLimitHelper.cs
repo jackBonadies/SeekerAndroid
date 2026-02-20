@@ -27,33 +27,35 @@ namespace Seeker
             UploadLastAvgSpeed.TryRemove(username, out _);
         }
 
-        public static Task OurDownloadGoverner(double currentSpeed, string username, CancellationToken cts)
+        public static async Task<int> OurDownloadGovernor(Soulseek.Transfer transfer, int requestedBytes, CancellationToken cts)
         {
             try
             {
                 if (PreferencesState.SpeedLimitDownloadOn)
                 {
+                    var username = transfer.Username;
+                    var averageSpeed = transfer.AverageSpeed;
 
                     if (DownloadUserDelays.TryGetValue(username, out double msDelay))
                     {
                         bool exists = DownloadLastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                        if (exists && currentSpeed == lastAvgSpeed)
+                        if (exists && averageSpeed == lastAvgSpeed)
                         {
                             //do not adjust as we have not yet recalculated the average speed
-                            return Task.Delay((int)msDelay, cts);
+                            await Task.Delay((int)msDelay, cts);
+                            return int.MaxValue;
                         }
 
-                        DownloadLastAvgSpeed[username] = currentSpeed;
+                        DownloadLastAvgSpeed[username] = averageSpeed;
 
-                        double avgSpeed = currentSpeed;
                         if (!PreferencesState.SpeedLimitDownloadIsPerTransfer && DownloadLastAvgSpeed.Count > 1)
                         {
 
                             //its threadsafe when using linq on concurrent dict itself.
-                            avgSpeed = DownloadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
+                            averageSpeed = DownloadLastAvgSpeed.Sum((p) => p.Value);//Values.ToArray().Sum();
                         }
 
-                        if (avgSpeed > PreferencesState.SpeedLimitDownloadBytesSec)
+                        if (averageSpeed > PreferencesState.SpeedLimitDownloadBytesSec)
                         {
                             DownloadUserDelays[username] = msDelay = msDelay * 1.04;
                         }
@@ -62,7 +64,8 @@ namespace Seeker
                             DownloadUserDelays[username] = msDelay = msDelay * 0.96;
                         }
 
-                        return Task.Delay((int)msDelay, cts);
+                        await Task.Delay((int)msDelay, cts);
+                        return int.MaxValue;
                     }
                     else
                     {
@@ -73,46 +76,50 @@ namespace Seeker
                         //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
                         double msDelaySeed = 1000 * 16384.0 / PreferencesState.SpeedLimitDownloadBytesSec;
                         DownloadUserDelays[username] = msDelaySeed;
-                        DownloadLastAvgSpeed[username] = currentSpeed;
-                        return Task.Delay((int)msDelaySeed, cts);
+                        DownloadLastAvgSpeed[username] = averageSpeed;
+                        await Task.Delay((int)msDelaySeed, cts);
+                        return int.MaxValue;
                     }
 
                 }
                 else
                 {
-                    return Task.CompletedTask;
+                    return int.MaxValue;
                 }
             }
             catch (Exception ex)
             {
                 Logger.Firebase("DL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace);
-                return Task.CompletedTask;
+                return int.MaxValue;
             }
         }
 
         //this is duplicated for speed.
-        public static Task OurUploadGoverner(double currentSpeed, string username, CancellationToken cts)
+        public static async Task<int> OurUploadGovernor(Soulseek.Transfer transfer, int requestedBytes, CancellationToken cts)
         {
             try
             {
                 if (PreferencesState.SpeedLimitUploadOn)
                 {
+                    var username = transfer.Username;
+                    var averageSpeed = transfer.AverageSpeed;
 
                     if (UploadUserDelays.TryGetValue(username, out double msDelay))
                     {
                         bool exists = UploadLastAvgSpeed.TryGetValue(username, out double lastAvgSpeed); //this is here in the case of a race condition (due to RemoveUser)
-                        if (exists && currentSpeed == lastAvgSpeed)
+                        if (exists && averageSpeed == lastAvgSpeed)
                         {
 #if DEBUG
                             //System.Console.WriteLine("UL dont update");
 #endif
                             //do not adjust as we have not yet recalculated the average speed
-                            return Task.Delay((int)msDelay, cts);
+                            await Task.Delay((int)msDelay, cts);
+                            return int.MaxValue;
                         }
 
-                        UploadLastAvgSpeed[username] = currentSpeed;
+                        UploadLastAvgSpeed[username] = averageSpeed;
 
-                        double avgSpeed = currentSpeed;
+                        double avgSpeed = averageSpeed;
                         if (!PreferencesState.SpeedLimitUploadIsPerTransfer && UploadLastAvgSpeed.Count > 1)
                         {
 
@@ -126,7 +133,7 @@ namespace Seeker
                         if (avgSpeed > PreferencesState.SpeedLimitUploadBytesSec)
                         {
 #if DEBUG
-                            //System.Console.WriteLine("UL speed too high " + currentSpeed + "   " + msDelay);
+                            //System.Console.WriteLine("UL speed too high " + averageSpeed + "   " + msDelay);
 #endif
                             UploadUserDelays[username] = msDelay = msDelay * 1.04;
 
@@ -134,12 +141,13 @@ namespace Seeker
                         else
                         {
 #if DEBUG
-                            //System.Console.WriteLine("UL speed too low " + currentSpeed + "   " + msDelay);
+                            //System.Console.WriteLine("UL speed too low " + averageSpeed + "   " + msDelay);
 #endif
                             UploadUserDelays[username] = msDelay = msDelay * 0.96;
                         }
 
-                        return Task.Delay((int)msDelay, cts);
+                        await Task.Delay((int)msDelay, cts);
+                        return int.MaxValue;
                     }
                     else
                     {
@@ -150,20 +158,21 @@ namespace Seeker
                         //wait time if the loop took 0s with buffer size of 16kB i.e. speed = 16kB / (delaytime). (delaytime in ms) = 1000 * 16,384 / (speed in bytes per second).
                         double msDelaySeed = 1000 * 16384.0 / PreferencesState.SpeedLimitUploadBytesSec;
                         UploadUserDelays[username] = msDelaySeed;
-                        UploadLastAvgSpeed[username] = currentSpeed;
-                        return Task.Delay((int)msDelaySeed, cts);
+                        UploadLastAvgSpeed[username] = averageSpeed;
+                        await Task.Delay((int)msDelaySeed, cts);
+                        return int.MaxValue;
                     }
 
                 }
                 else
                 {
-                    return Task.CompletedTask;
+                    return int.MaxValue;
                 }
             }
             catch (Exception ex)
             {
                 Logger.Firebase("UL SPEED LIMIT EXCEPTION: " + ex.Message + ex.StackTrace); // TODO2026
-                return Task.CompletedTask;
+                return int.MaxValue;
             }
         }
 
