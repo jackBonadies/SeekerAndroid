@@ -43,7 +43,6 @@ namespace Seeker.Chatroom
 
 
         public static bool IsInitialized;
-        public static int MAX_MESSAGES_PER_ROOM = 100;
 
         //these are the rooms that we are currnetly joined and connected to.  These clear on disconnect and get readded.  These will always be a subset of JoinedRoomNames.
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> CurrentlyJoinedRoomNames = null;
@@ -161,17 +160,6 @@ namespace Seeker.Chatroom
             return ChatroomController.JoinedRoomData[roomname].Owner == PreferencesState.Username;
         }
 
-        public static bool PutFriendsOnTop
-        {
-            get => Common.PreferencesState.PutFriendsOnTop;
-            set => Common.PreferencesState.PutFriendsOnTop = value;
-        }
-        public static SortOrderChatroomUsers SortChatroomUsersBy
-        {
-            get => (SortOrderChatroomUsers)Common.PreferencesState.SortChatroomUsersBy;
-            set => Common.PreferencesState.SortChatroomUsersBy = (int)value;
-        }
-
         public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate, string filterString = "")
         {
             List<Soulseek.UserData> chatroomUserData = new List<Soulseek.UserData>();
@@ -200,7 +188,7 @@ namespace Seeker.Chatroom
                     chatroomUserData.Add(GetChatroomUserData(user, userRole));
                 }
             }
-            chatroomUserData.Sort(new ChatroomUserDataComparer(UserListService.Instance, PutFriendsOnTop, SortChatroomUsersBy));
+            chatroomUserData.Sort(new ChatroomUserDataComparer(UserListService.Instance, PreferencesState.PutFriendsOnTop, PreferencesState.SortChatroomUsersBy));
             return chatroomUserData;
         }
 

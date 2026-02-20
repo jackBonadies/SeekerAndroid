@@ -1,3 +1,4 @@
+using Common.Messages;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -84,7 +85,7 @@ namespace Common
         // Chatroom
         public static bool ShowStatusesView = true;
         public static bool ShowTickerView = false;
-        public static int SortChatroomUsersBy = 2; // Alphabetical
+        public static SortOrderChatroomUsers SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical; // Alphabetical
         public static bool PutFriendsOnTop = false;
 
         // User list

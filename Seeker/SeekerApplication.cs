@@ -872,7 +872,7 @@ namespace Seeker
                 {
                     //clear queued flag...
                     SeekerApplication.TransfersDownloadsCompleteStale = true;
-                    TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 120);
+                    TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 60);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
