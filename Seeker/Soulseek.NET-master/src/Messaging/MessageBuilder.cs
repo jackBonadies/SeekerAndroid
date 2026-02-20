@@ -23,6 +23,7 @@ namespace Soulseek.Messaging
     using System.IO;
     using System.Linq;
     using System.Text;
+    using Soulseek.Diagnostics;
     using Soulseek.Messaging.Compression;
 
     /// <summary>
@@ -187,37 +188,25 @@ namespace Soulseek.Messaging
         /// <summary>
         ///     Writes the specified string <paramref name="value"/> to the message.
         /// </summary>
+        /// <remarks>
+        ///     If no <paramref name="encoding"/> is specified, <see cref="CharacterEncoding.UTF8"/> will be attempted first,
+        ///     falling back to <see cref="CharacterEncoding.ISO88591"/> if encoding fails.
+        /// </remarks>
         /// <param name="value">The value to write.</param>
         /// <param name="attemptLatin1File">Whether to attempt Latin1 (necessary if SoulseekNS) or to use UTF8 (prevents string appearing incorrectly if any special characters like accents)</param>
+        /// <param name="attemptLatin1Folder">Whether to attempt Latin1 for folder portion.</param>
+        /// <param name="encoding">The optional character encoding to use.</param>
         /// <returns>This MessageBuilder.</returns>
         /// <exception cref="InvalidOperationException">
         ///     Thrown when attempting to write additional data to a message that has been compressed.
         /// </exception>
-        public MessageBuilder WriteString(string value, bool attemptLatin1File = false, bool attemptLatin1Folder = false)
+        public MessageBuilder WriteString(string value, bool attemptLatin1File = false, bool attemptLatin1Folder = false, CharacterEncoding encoding = null)
         {
+            encoding ??= CharacterEncoding.UTF8;
             byte[] bytes;
 
-
-            //if(tryUndoMojibake)
-            //{
-            //    // try to undo mojibake that occurs when a client sends a string as latin1 and reads it as utf8
-            //    // i.e. they have a file fÃ¶r. they send it to us and we decode it as unicode as för. we need to send
-            //    //  them back fÃ¶r.
-            //    try
-            //    {
-            //        bytes = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
-            //        string theirString = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
-            //        bytes = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(theirString);
-            //        string finalString = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
-            //    }
-            //    catch (Exception)
-            //    {
-            //        bytes = Encoding.GetEncoding("UTF-8").GetBytes(value);
-            //    }
-            //}
             if(attemptLatin1File || attemptLatin1Folder)
             {
-
                 // if when reading the filename, we failed to decode it as UTF-8 (which means the client sent a Latin1 string).
                 // then make sure to encode it the way we decoded it, so that they get the same byte sequence back.
 
@@ -266,7 +255,19 @@ namespace Soulseek.Messaging
             }
             else
             {
-                bytes = Encoding.GetEncoding("UTF-8").GetBytes(value);
+                try
+                {
+                    bytes = Encoding.GetEncoding(encoding, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+                }
+                catch (Exception ex)
+                {
+                    // this should only happen if we attempt to write ISO-8859-1 and it fails, which in turn should only
+                    // happen if there's an application error somewhere else (probably in whatever is calling this library)
+                    // in this case we'll fail 'up' to UTF-8, instead of encoding to ISO-8859-1 while allowing replacements,
+                    // which is almost certainly wrong.
+                    bytes = Encoding.GetEncoding(CharacterEncoding.UTF8).GetBytes(value);
+                    GlobalDiagnostic.Trace($"Failed to encode {encoding} for string {value}; resorted to fallback encoding {CharacterEncoding.UTF8} (base64: {Convert.ToBase64String(bytes)})", ex);
+                }
             }
 
             return WriteBytes(BitConverter.GetBytes(bytes.Length))

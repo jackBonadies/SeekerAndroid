@@ -31,17 +31,19 @@ namespace Soulseek.Messaging.Messages
         {
             Username = username;
             Password = password;
+
+            Hash = $"{Username}{Password}".ToMD5Hash();
         }
 
         /// <summary>
         ///     Gets the MD5 hash of the username and password.
         /// </summary>
-        public string Hash => $"{Username}{Password}".ToMD5Hash();
+        public string Hash { get; }
 
         /// <summary>
         ///     Gets the minor client version.
         /// </summary>
-        public int MinorVersion => 100;
+        public int MinorVersion { get; } = 100;
 
         /// <summary>
         ///     Gets the password.
@@ -56,7 +58,7 @@ namespace Soulseek.Messaging.Messages
         /// <summary>
         ///     Gets the client version.
         /// </summary>
-        public int Version => 170;
+        public int Version { get; } = 170;
 
         /// <summary>
         ///     Constructs a <see cref="byte"/> array from this message.

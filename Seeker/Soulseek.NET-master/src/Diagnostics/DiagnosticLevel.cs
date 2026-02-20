@@ -41,5 +41,10 @@ namespace Soulseek.Diagnostics
         ///     Debug.
         /// </summary>
         Debug = 3,
+
+        /// <summary>
+        ///     Trace.
+        /// </summary>
+        Trace = 4,
     }
 }

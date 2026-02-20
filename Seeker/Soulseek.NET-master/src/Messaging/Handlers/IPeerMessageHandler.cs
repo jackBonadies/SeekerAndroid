@@ -17,6 +17,7 @@
 
 namespace Soulseek.Messaging.Handlers
 {
+    using System;
     using Soulseek.Network;
 
     /// <summary>
@@ -24,6 +25,16 @@ namespace Soulseek.Messaging.Handlers
     /// </summary>
     internal interface IPeerMessageHandler : IMessageHandler
     {
+        /// <summary>
+        ///     Occurs when a user reports that a download has been denied.
+        /// </summary>
+        event EventHandler<DownloadDeniedEventArgs> DownloadDenied;
+
+        /// <summary>
+        ///     Occurs when a user reports that a download has failed.
+        /// </summary>
+        event EventHandler<DownloadFailedEventArgs> DownloadFailed;
+
         /// <summary>
         ///     Handles the receipt of incoming messages, prior to the body having been read and parsed.
         /// </summary>

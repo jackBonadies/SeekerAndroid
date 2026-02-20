@@ -54,12 +54,15 @@ namespace Soulseek.Messaging.Messages
             Token = token;
             IPEndPoint = endpoint;
             IsPrivileged = isPrivileged;
+
+            IPAddress = IPEndPoint.Address;
+            Port = IPEndPoint.Port;
         }
 
         /// <summary>
         ///     Gets the IP address to which to connect.
         /// </summary>
-        public IPAddress IPAddress => IPEndPoint.Address;
+        public IPAddress IPAddress { get; }
 
         /// <summary>
         ///     Gets the IP endpoint to which to connect.
@@ -74,7 +77,7 @@ namespace Soulseek.Messaging.Messages
         /// <summary>
         ///     Gets the port to which to connect.
         /// </summary>
-        public int Port => IPEndPoint.Port;
+        public int Port { get; }
 
         /// <summary>
         ///     Gets the unique connection token.

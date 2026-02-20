@@ -268,7 +268,7 @@ namespace Seeker.Serialization
             writer.WriteInt32(value.LockedFileCount);
             writer.Write(value.Username);
             writer.WriteInt32(value.UploadSpeed);
-            writer.WriteInt32(value.FreeUploadSlots);
+            writer.WriteInt32(value.HasFreeUploadSlot ? 1 : 0);
             writer.WriteInt64(value.QueueLength);
             writer.WriteInt32(value.Token);
 
@@ -365,7 +365,7 @@ namespace Seeker.Serialization
 
 
             reader.Depth--;
-            return new SearchResponse(username, token, freeUploadSlots, uploadSpeed, queueLength, files, lockedFiles);
+            return new SearchResponse(username, token, freeUploadSlots != 0, uploadSpeed, (int)queueLength, files, lockedFiles);
         }
     }
 
@@ -387,7 +387,7 @@ namespace Seeker.Serialization
             var userStatusFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserStatus>();
             userStatusFormatter.Serialize(ref writer, value.UserStatus, options);
 
-            var userDataFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserData>(); // this does not need a custom formatter...
+            var userDataFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserData>();
             userDataFormatter.Serialize(ref writer, value.UserData, options);
 
             var userInfoFormatter = options.Resolver.GetFormatterWithVerify<Soulseek.UserInfo>();
@@ -456,6 +456,161 @@ namespace Seeker.Serialization
         }
     }
 
+    public class UserDataFormatter : IMessagePackFormatter<Soulseek.UserData>
+    {
+        public void Serialize(ref MessagePackWriter writer, Soulseek.UserData value, MessagePackSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
+
+            writer.WriteArrayHeader(8);
+            writer.Write(value.Username);
+            writer.WriteInt32((int)value.Status);
+            writer.WriteInt32(value.AverageSpeed);
+            writer.WriteInt64(value.UploadCount);
+            writer.WriteInt32(value.FileCount);
+            writer.WriteInt32(value.DirectoryCount);
+            writer.Write(value.CountryCode);
+            if (value.SlotsFree.HasValue)
+            {
+                writer.WriteInt32(value.SlotsFree.Value);
+            }
+            else
+            {
+                writer.WriteNil();
+            }
+        }
+
+        Soulseek.UserData IMessagePackFormatter<Soulseek.UserData>.Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            if (reader.TryReadNil())
+            {
+                return null;
+            }
+
+            var nextType = reader.NextMessagePackType;
+
+            if (nextType == MessagePackType.Map)
+            {
+                // Backward compat: old data serialized by ContractlessStandardResolver as a map.
+                // The old API had "DownloadCount" which is now "UploadCount".
+                string username = null;
+                UserPresence status = UserPresence.Online;
+                int averageSpeed = 0;
+                long uploadCount = 0;
+                int fileCount = 0;
+                int directoryCount = 0;
+                string countryCode = null;
+                int? slotsFree = null;
+
+                int mapCount = reader.ReadMapHeader();
+                for (int i = 0; i < mapCount; i++)
+                {
+                    string key = reader.ReadString();
+                    switch (key)
+                    {
+                        case "Username":
+                            username = reader.ReadString();
+                            break;
+                        case "Status":
+                            status = (UserPresence)reader.ReadInt32();
+                            break;
+                        case "AverageSpeed":
+                            averageSpeed = reader.ReadInt32();
+                            break;
+                        case "DownloadCount":
+                        case "UploadCount":
+                            uploadCount = reader.ReadInt64();
+                            break;
+                        case "FileCount":
+                            fileCount = reader.ReadInt32();
+                            break;
+                        case "DirectoryCount":
+                            directoryCount = reader.ReadInt32();
+                            break;
+                        case "CountryCode":
+                            countryCode = reader.ReadString();
+                            break;
+                        case "SlotsFree":
+                            if (reader.TryReadNil())
+                            {
+                                slotsFree = null;
+                            }
+                            else
+                            {
+                                slotsFree = reader.ReadInt32();
+                            }
+                            break;
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }
+
+                return new Soulseek.UserData(username, status, averageSpeed, uploadCount, fileCount, directoryCount, countryCode, slotsFree);
+            }
+            else
+            {
+                // New array-based format
+                string username = null;
+                UserPresence status = UserPresence.Online;
+                int averageSpeed = 0;
+                long uploadCount = 0;
+                int fileCount = 0;
+                int directoryCount = 0;
+                string countryCode = null;
+                int? slotsFree = null;
+
+                int count = reader.ReadArrayHeader();
+                for (int i = 0; i < count; i++)
+                {
+                    switch (i)
+                    {
+                        case 0:
+                            username = reader.ReadString();
+                            break;
+                        case 1:
+                            status = (UserPresence)reader.ReadInt32();
+                            break;
+                        case 2:
+                            averageSpeed = reader.ReadInt32();
+                            break;
+                        case 3:
+                            uploadCount = reader.ReadInt64();
+                            break;
+                        case 4:
+                            fileCount = reader.ReadInt32();
+                            break;
+                        case 5:
+                            directoryCount = reader.ReadInt32();
+                            break;
+                        case 6:
+                            countryCode = reader.ReadString();
+                            break;
+                        case 7:
+                            if (reader.TryReadNil())
+                            {
+                                slotsFree = null;
+                            }
+                            else
+                            {
+                                slotsFree = reader.ReadInt32();
+                            }
+                            break;
+                        default:
+                            reader.Skip();
+                            break;
+                    }
+                }
+
+                return new Soulseek.UserData(username, status, averageSpeed, uploadCount, fileCount, directoryCount, countryCode, slotsFree);
+            }
+        }
+    }
+
     public class UserStatusFormatter : IMessagePackFormatter<Soulseek.UserStatus>
     {
         public void Serialize(ref MessagePackWriter writer, Soulseek.UserStatus value, MessagePackSerializerOptions options)
@@ -504,7 +659,7 @@ namespace Seeker.Serialization
 
 
             reader.Depth--;
-            return new Soulseek.UserStatus(presence, isPrivileged);
+            return new Soulseek.UserStatus(string.Empty, presence, isPrivileged);
         }
     }
 
@@ -585,7 +740,7 @@ namespace Seeker.Serialization
 
 
             reader.Depth--;
-            return new Soulseek.UserInfo(description, hasPicture, picture, uploadSlots, queueLength, hasFreeUploadSlot);
+            return new Soulseek.UserInfo(description, uploadSlots, queueLength, hasFreeUploadSlot, picture);
         }
     }
 

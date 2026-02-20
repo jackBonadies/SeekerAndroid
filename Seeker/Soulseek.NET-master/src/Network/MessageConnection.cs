@@ -132,7 +132,7 @@ namespace Soulseek.Network
         /// <summary>
         ///     Gets the username of the peer associated with the connection, if applicable.
         /// </summary>
-        public string Username { get; private set; } = string.Empty;
+        public string Username { get; } = string.Empty;
 
         /// <summary>
         ///     Begins the internal continuous read loop, if it has not yet started.
@@ -193,13 +193,24 @@ namespace Soulseek.Network
 
             void RaiseMessageDataRead(object sender, ConnectionDataEventArgs e)
             {
-                Interlocked.CompareExchange(ref MessageDataRead, null, null)?
-                    .Invoke(this, new MessageDataEventArgs(codeBytes, e.CurrentLength, e.TotalLength));
+                if (SoulseekClient.RaiseEventsAsynchronously)
+                {
+                    Task.Run(() =>
+                    {
+                        Interlocked.CompareExchange(ref MessageDataRead, null, null)?
+                            .Invoke(this, new MessageDataEventArgs(codeBytes, e.CurrentLength, e.TotalLength));
+                    }, CancellationToken.None).Forget();
+                }
+                else
+                {
+                    Interlocked.CompareExchange(ref MessageDataRead, null, null)?
+                            .Invoke(this, new MessageDataEventArgs(codeBytes, e.CurrentLength, e.TotalLength));
+                }
             }
 
             try
             {
-                while (true)
+                while (!Disposed)
                 {
                     try
                     {
@@ -221,8 +232,20 @@ namespace Soulseek.Network
                         message.AddRange(payloadBytes);
 
                         var messageBytes = message.ToArray();
-                        Interlocked.CompareExchange(ref MessageRead, null, null)?
-                            .Invoke(this, new MessageEventArgs(messageBytes));
+
+                        if (SoulseekClient.RaiseEventsAsynchronously)
+                        {
+                            Task.Run(() =>
+                            {
+                                Interlocked.CompareExchange(ref MessageRead, null, null)?
+                                    .Invoke(this, new MessageEventArgs(messageBytes));
+                            }, CancellationToken.None).Forget();
+                        }
+                        else
+                        {
+                            Interlocked.CompareExchange(ref MessageRead, null, null)?
+                                .Invoke(this, new MessageEventArgs(messageBytes));
+                        }
                     }
                     finally
                     {
@@ -240,8 +263,19 @@ namespace Soulseek.Network
         {
             await WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
 
-            Interlocked.CompareExchange(ref MessageWritten, null, null)?
-                .Invoke(this, new MessageEventArgs(bytes));
+            if (SoulseekClient.RaiseEventsAsynchronously)
+            {
+                Task.Run(() =>
+                {
+                    Interlocked.CompareExchange(ref MessageWritten, null, null)?
+                        .Invoke(this, new MessageEventArgs(bytes));
+                }, cancellationToken).Forget();
+            }
+            else
+            {
+                Interlocked.CompareExchange(ref MessageWritten, null, null)?
+                    .Invoke(this, new MessageEventArgs(bytes));
+            }
         }
     }
 }

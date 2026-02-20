@@ -39,6 +39,25 @@ namespace Soulseek.Diagnostics
         private DiagnosticLevel MinimumLevel { get; }
 
         /// <summary>
+        ///     Creates a <see cref="DiagnosticLevel.Trace"/> diagnostic message.
+        /// </summary>
+        /// <param name="message">The desired message.</param>
+        public void Trace(string message)
+        {
+            RaiseEvent(DiagnosticLevel.Trace, message);
+        }
+
+        /// <summary>
+        ///     Creates a <see cref="DiagnosticLevel.Trace"/> diagnostic message.
+        /// </summary>
+        /// <param name="message">The desired message.</param>
+        /// <param name="exception">An optional Exception.</param>
+        public void Trace(string message, Exception exception)
+        {
+            RaiseEvent(DiagnosticLevel.Trace, message, exception);
+        }
+
+        /// <summary>
         ///     Creates a <see cref="DiagnosticLevel.Debug"/> diagnostic message.
         /// </summary>
         /// <param name="message">The desired message.</param>

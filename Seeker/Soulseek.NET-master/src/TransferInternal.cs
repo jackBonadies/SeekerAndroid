@@ -19,6 +19,7 @@ namespace Soulseek
 {
     using System;
     using System.Net;
+    using System.Threading.Tasks;
     using Soulseek.Network.Tcp;
 
     /// <summary>
@@ -26,14 +27,14 @@ namespace Soulseek
     /// </summary>
     internal sealed class TransferInternal
     {
-        private readonly int progressUpdateLimit = 100;
-        private readonly double speedAlpha = 2f / 50;
+        private readonly int progressUpdateLimit = 1000;
+        private readonly double speedAlpha = 2f / 10;
         private double lastProgressBytes = 0;
-        private long startOffset = 0;
         private DateTime? lastProgressTime = null;
         private bool speedInitialized = false;
         private TransferStates state = TransferStates.None;
         public double currentSpeed;
+        private long startOffset = 0;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TransferInternal"/> class.
@@ -51,6 +52,8 @@ namespace Soulseek
             Token = token;
 
             Options = options ?? new TransferOptions();
+
+            WaitKey = new WaitKey(Constants.WaitKey.Transfer, Direction, Username, Filename, Token);
         }
 
         /// <summary>
@@ -87,7 +90,15 @@ namespace Soulseek
         /// <summary>
         ///     Gets the UTC time at which the transfer transitioned into the <see cref="TransferStates.Completed"/> state.
         /// </summary>
-        public DateTime? EndTime { get; private set; }
+        /// <remarks>
+        ///     Should ONLY be set when the State transitions into Completed.
+        /// </remarks>
+        public DateTime? EndTime { get; private set; } = null;
+
+        /// <summary>
+        ///     Gets or sets the <see cref="Exception"/> that caused the failure of the transfer, if applicable.
+        /// </summary>
+        public Exception Exception { get; set; }
 
         /// <summary>
         ///     Gets the filename of the file to be transferred.
@@ -127,22 +138,30 @@ namespace Soulseek
         /// <summary>
         ///     Gets or sets the start offset of the transfer, in bytes.
         /// </summary>
-        public long StartOffset 
-        { 
+        public long StartOffset
+        {
             get
             {
                 return startOffset;
             }
             set
             {
-                lastProgressBytes = value;
                 startOffset = value;
+
+                // fast-forward the transfer up to StartOffset so percent completion
+                // and transfer speed computation works properly
+                BytesTransferred = value;
+                lastProgressBytes = value;
             }
         }
 
         /// <summary>
         ///     Gets the UTC time at which the transfer transitioned into the <see cref="TransferStates.InProgress"/> state.
         /// </summary>
+        /// <remarks>
+        ///     Should ONLY be set when the State transitions into InProgress, or if it transitions into Completed
+        ///     without having first transitioned into InProgress.
+        /// </remarks>
         public DateTime? StartTime { get; private set; }
 
         /// <summary>
@@ -157,17 +176,28 @@ namespace Soulseek
 
             set
             {
-                if (!state.HasFlag(TransferStates.InProgress) && value.HasFlag(TransferStates.InProgress))
+                var time = DateTime.UtcNow;
+
+                if (value.HasFlag(TransferStates.InProgress) && !StartTime.HasValue)
                 {
-                    StartTime = DateTime.UtcNow;
-                    EndTime = null;
+                    StartTime = time;
                 }
-                else if (!state.HasFlag(TransferStates.Completed) && value.HasFlag(TransferStates.Completed))
+                else if (value.HasFlag(TransferStates.Completed) && !EndTime.HasValue)
                 {
-                    EndTime = DateTime.UtcNow;
+                    EndTime = time;
+
+                    // in case the transfer never transitioned into InProgress, set StartTime too
+                    StartTime ??= time;
                 }
 
                 state = value;
+
+                // ensure the average is calculated properly when the transfer ends, regardless of whether
+                // an outside caller is calling UpdateProgress (as they should?)
+                if (state.HasFlag(TransferStates.Completed))
+                {
+                    UpdateProgress(BytesTransferred);
+                }
             }
         }
 
@@ -184,7 +214,12 @@ namespace Soulseek
         /// <summary>
         ///     Gets the wait key for the transfer.
         /// </summary>
-        public WaitKey WaitKey => new WaitKey(Constants.WaitKey.Transfer, Direction, Username, Filename, Token);
+        public WaitKey WaitKey { get; }
+
+        /// <summary>
+        ///     Gets the task completion source used to end the transfer if/when the remote client reports that it has failed or been rejected.
+        /// </summary>
+        public TaskCompletionSource<bool> RemoteTaskCompletionSource { get; } = new TaskCompletionSource<bool>();
 
         /// <summary>
         ///     Updates the transfer progress.
@@ -194,15 +229,43 @@ namespace Soulseek
         {
             BytesTransferred = bytesTransferred;
 
-            var ts = DateTime.UtcNow - (lastProgressTime ?? StartTime);
-
-            if (ts.HasValue && ((!speedInitialized && bytesTransferred > 0) || ts.Value.TotalMilliseconds >= progressUpdateLimit || State.HasFlag(TransferStates.Completed)))
+            // that's odd! the transfer hasn't transitioned into InProgress yet. just ignore it..
+            if (!StartTime.HasValue)
             {
-                currentSpeed = (bytesTransferred - lastProgressBytes) / (ts.Value.TotalMilliseconds / 1000d);
+                return;
+            }
+
+            // if the state is Completed, we're guaranteed to have both StartTime and EndTime
+            // it's possible that StartTime = EndTime, and if that's the case, substitute 1ms for the duration
+            if (State.HasFlag(TransferStates.Completed))
+            {
+                var duration = Math.Max(1, (EndTime.Value - StartTime.Value).TotalMilliseconds) / 1000d;
+                var totalSpeed = (BytesTransferred - StartOffset) / duration;
+                AverageSpeed = totalSpeed;
+
+                return;
+            }
+
+            // if we've transferred all of the data but not yet transitioned into Completed, we won't have an EndTime
+            // yet, so we'll have to use the current time; the transition to Completed will happen soon!
+            if (Size.HasValue && BytesTransferred >= Size.Value)
+            {
+                var duration = Math.Max(1, (DateTime.UtcNow - StartTime.Value).TotalMilliseconds) / 1000d;
+                var totalSpeed = (BytesTransferred - StartOffset) / duration;
+                AverageSpeed = totalSpeed;
+
+                return;
+            }
+
+            var ts = DateTime.UtcNow - (lastProgressTime ?? StartTime.Value);
+
+            if (ts.TotalMilliseconds >= progressUpdateLimit)
+            {
+                currentSpeed = (BytesTransferred - lastProgressBytes) / (ts.TotalMilliseconds / 1000d);
                 AverageSpeed = !speedInitialized ? currentSpeed : ((currentSpeed - AverageSpeed) * speedAlpha) + AverageSpeed;
                 speedInitialized = true;
-                lastProgressTime = DateTime.UtcNow; //71ns
-                lastProgressBytes = bytesTransferred;
+                lastProgressTime = DateTime.UtcNow;
+                lastProgressBytes = BytesTransferred;
             }
         }
     }

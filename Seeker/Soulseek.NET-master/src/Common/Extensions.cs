@@ -19,7 +19,6 @@ namespace Soulseek
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
     using System.Security.Cryptography;
@@ -55,7 +54,7 @@ namespace Soulseek
         /// <param name="task">The task to continue.</param>
         public static void Forget(this Task task)
         {
-            task.ContinueWith(t => { });
+            task.ContinueWith(t => { }, TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace Soulseek
         public static void ForgetButThrowWhenFaulted<T>(this Task task)
             where T : Exception
         {
-            task.ContinueWith(t => { throw (T)Activator.CreateInstance(typeof(T), t.Exception.Message, t.Exception); }, TaskContinuationOptions.OnlyOnFaulted);
+            task.ContinueWith(t => { throw (T)Activator.CreateInstance(typeof(T), t.Exception.Message, t.Exception); }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.RunContinuationsAsynchronously);
         }
 
         /// <summary>
@@ -93,8 +92,15 @@ namespace Soulseek
         /// <param name="timer">The timer to reset.</param>
         public static void Reset(this Timer timer)
         { //this was null when I did a search..
-            timer.Stop();
-            timer.Start();
+            try
+            {
+                timer.Stop();
+                timer.Start();
+            }
+            catch (ObjectDisposedException)
+            {
+                // noop
+            }
         }
 
         /// <summary>
@@ -102,7 +108,6 @@ namespace Soulseek
         /// </summary>
         /// <param name="str">The string to hash.</param>
         /// <returns>The MD5 hash of the input string.</returns>
-        [SuppressMessage("Microsoft.NetCore.CSharp.Analyzers", "CA5351", Justification = "Required by the Soulseek protocol.")]
         public static string ToMD5Hash(this string str)
         {
             using MD5 md5Hash = MD5.Create();

@@ -25,10 +25,12 @@ namespace Soulseek
         /// <summary>
         ///     Initializes a new instance of the <see cref="UserStatus"/> class.
         /// </summary>
+        /// <param name="username">The username of the user.</param>
         /// <param name="presence">The user's network presence.</param>
         /// <param name="isPrivileged">A value indicating whether the user is privileged.</param>
-        public UserStatus(UserPresence presence, bool isPrivileged)
+        public UserStatus(string username, UserPresence presence, bool isPrivileged)
         {
+            Username = username;
             Presence = presence;
             IsPrivileged = isPrivileged;
         }
@@ -42,5 +44,10 @@ namespace Soulseek
         ///     Gets the user's network presence.
         /// </summary>
         public UserPresence Presence { get; }
+
+        /// <summary>
+        ///     Gets the username of the user.
+        /// </summary>
+        public string Username { get; }
     }
 }

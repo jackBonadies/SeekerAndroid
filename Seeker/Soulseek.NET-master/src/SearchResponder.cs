@@ -21,7 +21,6 @@ namespace Soulseek
     using System.Threading;
     using System.Threading.Tasks;
     using Soulseek.Diagnostics;
-    using Soulseek.Messaging.Messages;
     using Soulseek.Network;
 
     /// <summary>
@@ -165,7 +164,27 @@ namespace Soulseek
                     throw;
                 }
 
-                await peerConnection.WriteAsync(searchResponse.ToByteArray()).ConfigureAwait(false);
+                // clients may choose to return a RawSearchResponse to the resolver. this is a way for clients to send a byte array directly to the network,
+                // bypassing serialization. the use case is a bit imaginary, but the same was done for RawBrowseResponse to allow slskd to cache the browse
+                // response to disk, avoiding serializing to json and deserializing to BrowseResponse each time; it's a performance optimization. this seemed
+                // like a good idea at the time but now that i'm reviewing it ~1.5 years later i'm wondering what i was thinking :)
+                if (searchResponse is RawSearchResponse rawSearchResponse)
+                {
+                    await peerConnection.WriteAsync(rawSearchResponse.Length, rawSearchResponse.Stream).ConfigureAwait(false);
+
+                    try
+                    {
+                        rawSearchResponse?.Stream?.Dispose();
+                    }
+                    catch
+                    {
+                        // noop
+                    }
+                }
+                else
+                {
+                    await peerConnection.WriteAsync(searchResponse.ToByteArray()).ConfigureAwait(false);
+                }
 
                 Diagnostic.Debug($"Sent response containing {searchResponse.FileCount + searchResponse.LockedFileCount} files to {username} for query '{query}' with token {token}");
                 ResponseDelivered?.Invoke(this, new SearchRequestResponseEventArgs(username, token, query, searchResponse));
@@ -183,13 +202,18 @@ namespace Soulseek
         /// <summary>
         ///     Sends the pending response matching the specified <paramref name="responseToken"/>, if one exists.
         /// </summary>
+        /// <remarks>
+        ///     This overload is called by the listener when an incoming connection is established with a pierce firewall token,
+        ///     and if that token doesn't match a pending solicitation, and if the token matches a cached search response.  In this case,
+        ///     the connection is retrieved from the cache and used to send the response.
+        /// </remarks>
         /// <param name="responseToken">The token matching the pending response to send.</param>
         /// <returns>The operation context, including a value indicating whether a response was successfully sent.</returns>
         public async Task<bool> TryRespondAsync(int responseToken)
         {
             if (SoulseekClient.Options.SearchResponseCache != default)
             {
-                var cached = false;
+                bool cached;
                 (string Username, int Token, string Query, SearchResponse SearchResponse) record;
 
                 try

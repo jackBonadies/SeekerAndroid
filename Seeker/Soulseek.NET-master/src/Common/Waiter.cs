@@ -22,6 +22,7 @@ namespace Soulseek
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.CSharp.RuntimeBinder;
 
     /// <summary>
     ///     Enables await-able server messages.
@@ -129,6 +130,13 @@ namespace Soulseek
         }
 
         /// <summary>
+        ///     Returns a value indicating whether the waiter has any waits for the specified <paramref name="key"/>.
+        /// </summary>
+        /// <param name="key">The unique WaitKey for the wait.</param>
+        /// <returns>A value indicating whether any waits exist for the key.</returns>
+        public bool HasWait(WaitKey key) => Waits.TryGetValue(key, out _);
+
+        /// <summary>
         ///     Throws the specified <paramref name="exception"/> on the oldest wait matching the specified <paramref name="key"/>.
         /// </summary>
         /// <param name="key">The unique WaitKey for the wait.</param>
@@ -233,51 +241,58 @@ namespace Soulseek
 
         private void Disposition(WaitKey key, Action<PendingWait> action)
         {
-            if (Waits.TryGetValue(key, out var queue) && queue.TryDequeue(out var wait))
+            try
             {
-                action(wait);
-                wait.Dispose();
-
-                if (Locks.TryGetValue(key, out var recordLock))
+                if (Waits.TryGetValue(key, out var queue) && queue.TryDequeue(out var wait))
                 {
-                    // enter a read lock first; TryPeek and TryDequeue are atomic so there's no risky operation until later.
-                    recordLock.EnterUpgradeableReadLock();
+                    action(wait);
+                    wait.Dispose();
 
-                    try
+                    if (Locks.TryGetValue(key, out var recordLock))
                     {
-                        // clean up entries in the Waits and Locks dictionaries if the corresponding ConcurrentQueue is empty.
-                        // this is tricky, because we don't want to remove a record if another thread is in the process of
-                        // enqueueing a new wait.
-                        if (queue.IsEmpty)
-                        {
-                            // enter the write lock to prevent Wait() (which obtains a read lock) from enqueing any more waits
-                            // before we can delete the dictionary record. it's ok and expected that Wait() might add this record
-                            // back to the dictionary as soon as this unblocks; we're preventing new waits from being discarded if
-                            // they are added by another thread just prior to the TryRemove() operation below.
-                            recordLock.EnterWriteLock();
+                        // enter a read lock first; TryPeek and TryDequeue are atomic so there's no risky operation until later.
+                        recordLock.EnterUpgradeableReadLock();
 
-                            try
+                        try
+                        {
+                            // clean up entries in the Waits and Locks dictionaries if the corresponding ConcurrentQueue is empty.
+                            // this is tricky, because we don't want to remove a record if another thread is in the process of
+                            // enqueueing a new wait.
+                            if (queue.IsEmpty)
                             {
-                                // check the queue again to ensure Wait() didn't enqueue anything between the last check and when
-                                // we entered the write lock. this is guarateed to be safe since we now have exclusive access to
-                                // the record and it should be impossible to remove a record containing a non-empty queue
-                                if (queue.IsEmpty)
+                                // enter the write lock to prevent Wait() (which obtains a read lock) from enqueing any more waits
+                                // before we can delete the dictionary record. it's ok and expected that Wait() might add this record
+                                // back to the dictionary as soon as this unblocks; we're preventing new waits from being discarded if
+                                // they are added by another thread just prior to the TryRemove() operation below.
+                                recordLock.EnterWriteLock();
+
+                                try
                                 {
-                                    Waits.TryRemove(key, out _);
-                                    Locks.TryRemove(key, out _);
+                                    // check the queue again to ensure Wait() didn't enqueue anything between the last check and when
+                                    // we entered the write lock. this is guarateed to be safe since we now have exclusive access to
+                                    // the record and it should be impossible to remove a record containing a non-empty queue
+                                    if (queue.IsEmpty)
+                                    {
+                                        Waits.TryRemove(key, out _);
+                                        Locks.TryRemove(key, out _);
+                                    }
+                                }
+                                finally
+                                {
+                                    recordLock.ExitWriteLock();
                                 }
                             }
-                            finally
-                            {
-                                recordLock.ExitWriteLock();
-                            }
+                        }
+                        finally
+                        {
+                            recordLock.ExitUpgradeableReadLock();
                         }
                     }
-                    finally
-                    {
-                        recordLock.ExitUpgradeableReadLock();
-                    }
                 }
+            }
+            catch (RuntimeBinderException ex)
+            {
+                throw new SoulseekClientException($"Failed to bind Wait Types for key {key}; this is likely a mismatch in the Types specified in the Wait() and the Complete(), which needs investigation. Please file a GitHub issue https://github.com/jpdillingham/Soulseek.NET. Exception message: {ex.Message}", ex);
             }
         }
 
@@ -351,8 +366,11 @@ namespace Soulseek
                 {
                     if (disposing)
                     {
+                        // this will be null if the wait is disposed before Register() is called,
+                        // which can happen if a transfer fails very fast (e.g. if the remote client rejects it)
+                        TimeoutTokenSource?.Dispose();
+
                         CancellationTokenRegistration.Dispose();
-                        TimeoutTokenSource.Dispose();
                         TimeoutTokenRegistration.Dispose();
                     }
 

@@ -92,10 +92,7 @@ namespace Soulseek.Network
         /// <summary>
         ///     Gets a new or existing message connection to the specified <paramref name="username"/>.
         /// </summary>
-        /// <remarks>
-        ///     If a connection doesn't exist, a new direct connection is attempted first, and, if unsuccessful, an indirect
-        ///     connection is attempted.
-        /// </remarks>
+        /// <remarks>If a connection doesn't exist, a new connection is attempted using direct and indirect methods concurrently.</remarks>
         /// <param name="username">The username of the user to which to connect.</param>
         /// <param name="ipEndPoint">The remote IP endpoint of the connection.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
@@ -103,12 +100,9 @@ namespace Soulseek.Network
         Task<IMessageConnection> GetOrAddMessageConnectionAsync(string username, IPEndPoint ipEndPoint, CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Gets a new or existing message connection to the specified <paramref name="username"/>.
+        ///     Gets a new or existing message connection to the specified <paramref name="username"/> using the specified <paramref name="solicitationToken"/>.
         /// </summary>
-        /// <remarks>
-        ///     If a connection doesn't exist, a new direct connection is attempted first, and, if unsuccessful, an indirect
-        ///     connection is attempted.
-        /// </remarks>
+        /// <remarks>If a connection doesn't exist, a new connection is attempted using direct and indirect methods concurrently.</remarks>
         /// <param name="username">The username of the user to which to connect.</param>
         /// <param name="ipEndPoint">The remote IP endpoint of the connection.</param>
         /// <param name="solicitationToken">The optional token for the indirect connection solicitation.</param>
@@ -148,5 +142,12 @@ namespace Soulseek.Network
         ///     Removes and disposes all active and queued connections.
         /// </summary>
         void RemoveAndDisposeAll();
+
+        /// <summary>
+        ///     Invalidates the cached message connection to the specified <paramref name="username"/>, if one exists.
+        /// </summary>
+        /// <param name="username">The username of the user for which the connection should be removed.</param>
+        /// <returns>A value indicating whether a connection record was invalidated.</returns>
+        bool TryInvalidateMessageConnectionCache(string username);
     }
 }

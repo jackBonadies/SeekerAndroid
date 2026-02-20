@@ -20,13 +20,13 @@ namespace Soulseek.Messaging.Messages
     using System.Collections.Generic;
 
     /// <summary>
-    ///     Factory for search response messages. This class helps keep message abstractions from leaking into the public API via
-    ///     <see cref="SearchResponse"/>, which is a public class.
+    ///     Factory for browse response messages. This class helps keep message abstractions from leaking into the public API via
+    ///     <see cref="BrowseResponse"/>, which is a public class.
     /// </summary>
     internal static class BrowseResponseFactory
     {
         /// <summary>
-        ///     Creates a new instance of <see cref="SearchResponse"/> from the specified <paramref name="bytes"/>.
+        ///     Creates a new instance of <see cref="BrowseResponse"/> from the specified <paramref name="bytes"/>.
         /// </summary>
         /// <param name="bytes">The byte array from which to parse.</param>
         /// <returns>The parsed instance.</returns>

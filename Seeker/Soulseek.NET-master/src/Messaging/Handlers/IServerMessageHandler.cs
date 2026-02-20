@@ -26,14 +26,19 @@ namespace Soulseek.Messaging.Handlers
     internal interface IServerMessageHandler : IMessageHandler
     {
         /// <summary>
-        ///     Occurs when a global message is received.
+        ///     Occurs when the server requests a distributed network reset.
         /// </summary>
-        event EventHandler<string> GlobalMessageReceived;
+        event EventHandler DistributedNetworkReset;
 
         /// <summary>
         ///     Occurs when the server sends a list of excluded ("banned") search phrases.
         /// </summary>
         event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
+
+        /// <summary>
+        ///     Occurs when a global message is received.
+        /// </summary>
+        event EventHandler<string> GlobalMessageReceived;
 
         /// <summary>
         ///     Occurs when user data is received
@@ -137,13 +142,23 @@ namespace Soulseek.Messaging.Handlers
         event EventHandler<RoomTickerRemovedEventArgs> RoomTickerRemoved;
 
         /// <summary>
+        ///     Occurs when the server sends operational information.
+        /// </summary>
+        event EventHandler<ServerInfo> ServerInfoReceived;
+
+        /// <summary>
         ///     Occurs when a user fails to connect.
         /// </summary>
         event EventHandler<UserCannotConnectEventArgs> UserCannotConnect;
 
         /// <summary>
+        ///     Occurs when a user's statistics change.
+        /// </summary>
+        event EventHandler<UserStatistics> UserStatisticsChanged;
+
+        /// <summary>
         ///     Occurs when a watched user's status changes.
         /// </summary>
-        event EventHandler<UserStatusChangedEventArgs> UserStatusChanged;
+        event EventHandler<UserStatus> UserStatusChanged;
     }
 }

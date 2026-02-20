@@ -45,12 +45,15 @@ namespace Soulseek.Messaging.Messages
         {
             Username = username;
             IPEndPoint = endpoint;
+
+            IPAddress = IPEndPoint.Address;
+            Port = IPEndPoint.Port;
         }
 
         /// <summary>
         ///     Gets the IP address of the peer.
         /// </summary>
-        public IPAddress IPAddress => IPEndPoint.Address;
+        public IPAddress IPAddress { get; }
 
         /// <summary>
         ///     Gets the IP endpoint of the peer.
@@ -60,7 +63,7 @@ namespace Soulseek.Messaging.Messages
         /// <summary>
         ///     Gets the port on which the peer is listening.
         /// </summary>
-        public int Port => IPEndPoint.Port;
+        public int Port { get; }
 
         /// <summary>
         ///     Gets the requested peer username.

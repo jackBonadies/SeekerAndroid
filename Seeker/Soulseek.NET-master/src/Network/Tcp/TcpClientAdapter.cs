@@ -249,9 +249,12 @@ namespace Soulseek.Network.Tcp
                             throw new ProxyException("Server requests authorization but none was provided");
                         }
 
-                        var creds = new List<byte>() { AUTH_VERSION };
+                        var creds = new List<byte>
+                        {
+                            AUTH_VERSION,
+                            (byte)username.Length,
+                        };
 
-                        creds.Add((byte)username.Length);
                         creds.AddRange(Encoding.ASCII.GetBytes(username));
 
                         creds.Add((byte)password.Length);

@@ -57,7 +57,7 @@ namespace Soulseek.Network
         /// <param name="connection">The accepted connection.</param>
         public async void HandleConnection(object sender, IConnection connection)
         {
-            Diagnostic.Debug($"Accepted incoming connection from {connection.IPEndPoint.Address}:{SoulseekClient.Listener.Port} (id: {connection.Id})");
+            Diagnostic.Debug($"Accepted incoming connection from {connection.IPEndPoint.Address} on {SoulseekClient.Listener.IPAddress}:{SoulseekClient.Listener.Port} (id: {connection.Id})");
 
             try
             {
@@ -81,12 +81,26 @@ namespace Soulseek.Network
                     }
                     else if (peerInit.ConnectionType == Constants.ConnectionType.Transfer)
                     {
+                        // slightly misleading name; this hands the incoming connection off instead of establishing new
                         var (transferConnection, remoteToken) = await SoulseekClient.PeerConnectionManager.GetTransferConnectionAsync(
                             peerInit.Username,
                             peerInit.Token,
                             connection).ConfigureAwait(false);
 
-                        SoulseekClient.Waiter.Complete(new WaitKey(Constants.WaitKey.DirectTransfer, peerInit.Username, remoteToken), transferConnection);
+                        var waitKey = new WaitKey(Constants.WaitKey.DirectTransfer, peerInit.Username, remoteToken);
+
+                        // check to see if we are expecting this token, and if so complete the wait and start the upload
+                        if (SoulseekClient.Waiter.HasWait(waitKey))
+                        {
+                            SoulseekClient.Waiter.Complete(new WaitKey(Constants.WaitKey.DirectTransfer, peerInit.Username, remoteToken), transferConnection);
+                        }
+                        else
+                        {
+                            // either a random client connected and tried to download something without being told it could,
+                            // or a client tried to initiate a transfer as a last-ditch effort to "save" an upload
+                            Diagnostic.Debug($"Unexpected transfer connection for token {peerInit.Token} from {peerInit.Username} ({connection.IPEndPoint.Address}:{SoulseekClient.Listener.Port}) (id: {connection.Id})");
+                            transferConnection.Disconnect("Transfer connection rejected: unknown token");
+                        }
                     }
                     else if (peerInit.ConnectionType == Constants.ConnectionType.Distributed)
                     {
@@ -110,16 +124,15 @@ namespace Soulseek.Network
                         Diagnostic.Debug($"Distributed PierceFirewall with token {pierceFirewall.Token} received from {distributedUsername} ({connection.IPEndPoint.Address}:{SoulseekClient.Listener.Port}) (id: {connection.Id})");
                         SoulseekClient.Waiter.Complete(new WaitKey(Constants.WaitKey.SolicitedDistributedConnection, distributedUsername, pierceFirewall.Token), connection);
                     }
-                    else if (SoulseekClient.Options.SearchResponseCache != default)
+                    else if (SoulseekClient.Options.SearchResponseCache != null && SoulseekClient.Options.SearchResponseCache.TryGet(pierceFirewall.Token, out var cachedSearchResponse))
                     {
-                        if (SoulseekClient.Options.SearchResponseCache.TryGet(pierceFirewall.Token, out var cachedSearchResponse))
-                        {
-                            // users may connect to retrieve search results long after we've given up waiting for them.  if this is the case, accept the connection,
-                            // cache it with the manager for potential reuse, then try to send the pending response.
-                            Diagnostic.Debug($"PierceFirewall matching pending search response received from {cachedSearchResponse.Username} ({connection.IPEndPoint.Address}:{SoulseekClient.Listener.Port}) (id: {connection.Id})");
-                            await SoulseekClient.PeerConnectionManager.AddOrUpdateMessageConnectionAsync(cachedSearchResponse.Username, connection).ConfigureAwait(false);
-                            await SoulseekClient.SearchResponder.TryRespondAsync(pierceFirewall.Token).ConfigureAwait(false);
-                        }
+                        // users may connect to retrieve search results long after we've given up waiting for them.  if this is the case, accept the connection,
+                        // cache it with the manager for potential reuse, then try to send the pending response.
+                        var (username, _, _, _) = cachedSearchResponse;
+
+                        Diagnostic.Debug($"PierceFirewall matching pending search response received from {username} ({connection.IPEndPoint.Address}:{SoulseekClient.Listener.Port}) (id: {connection.Id})");
+                        await SoulseekClient.PeerConnectionManager.AddOrUpdateMessageConnectionAsync(username, connection).ConfigureAwait(false);
+                        await SoulseekClient.SearchResponder.TryRespondAsync(pierceFirewall.Token).ConfigureAwait(false);
                     }
                     else
                     {

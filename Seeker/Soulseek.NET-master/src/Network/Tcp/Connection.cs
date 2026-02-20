@@ -46,6 +46,18 @@ namespace Soulseek.Network.Tcp
             TcpClient = tcpClient ?? new TcpClientAdapter(new TcpClient(AddressFamily.InterNetworkV6));
             TcpClient.Client.DualMode = true;
 
+            // invoke the configuration delegate to allow implementing code to configure
+            // the socket.  .NET standard has a limited feature set with respect to SetSocketOptions()
+            // and there's a vast number of possible tweaks here, so delegating to implementing code
+            // is pretty much the only option.
+            Options.ConfigureSocket(TcpClient.Client);
+
+            // this should call SetSocketOptions on the socket (Client)
+            TcpClient.Client.ReceiveTimeout = Options.InactivityTimeout;
+            TcpClient.Client.SendTimeout = Options.InactivityTimeout;
+
+            WriteQueueSemaphore = new SemaphoreSlim(Options.WriteQueueSize);
+
             if (Options.InactivityTimeout > 0)
             {
                 InactivityTimer = new SystemTimer()
@@ -145,7 +157,7 @@ namespace Soulseek.Network.Tcp
             {
                 if (TcpClient == null || !TcpClient.Connected)
                 {
-                    Disconnect("The server connection was closed unexpectedly");
+                    Disconnect("The connection was closed unexpectedly", new ConnectionException("The connection was closed unexpectedly"));
                 }
             };
 
@@ -154,7 +166,13 @@ namespace Soulseek.Network.Tcp
                 State = ConnectionState.Connected;
                 InactivityTimer?.Start();
                 WatchdogTimer.Start();
+
                 Stream = TcpClient.GetStream();
+
+                // these should also call SetSocketOptions on the socket. doing it twice to make sure!
+                // read and write timeouts can cause the client to hang, even if the inactivity timer disconnects
+                Stream.WriteTimeout = Options.InactivityTimeout;
+                Stream.ReadTimeout = Options.InactivityTimeout;
             }
         }
 
@@ -219,6 +237,11 @@ namespace Soulseek.Network.Tcp
         public ConnectionTypes Type { get; set; }
 
         /// <summary>
+        ///     Gets the current depth of the double buffered write queue.
+        /// </summary>
+        public int WriteQueueDepth => Options.WriteQueueSize - WriteQueueSemaphore.CurrentCount;
+
+        /// <summary>
         ///     Gets or sets a value indicating whether the object is disposed.
         /// </summary>
         protected bool Disposed { get; set; } = false;
@@ -227,6 +250,11 @@ namespace Soulseek.Network.Tcp
         ///     Gets or sets the timer used to monitor for transfer inactivity.
         /// </summary>
         protected SystemTimer InactivityTimer { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the time at which the last activity took place.
+        /// </summary>
+        protected DateTime LastActivityTime { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         ///     Gets or sets the network stream for the connection.
@@ -243,13 +271,9 @@ namespace Soulseek.Network.Tcp
         /// </summary>
         protected SystemTimer WatchdogTimer { get; set; }
 
-        /// <summary>
-        ///     Gets or sets the time at which the last activity took place.
-        /// </summary>
-        protected DateTime LastActivityTime { get; set; } = DateTime.UtcNow;
-
         private TaskCompletionSource<string> DisconnectTaskCompletionSource { get; } = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-
+        private SemaphoreSlim WriteQueueSemaphore { get; set; }
+        private bool WriteQueueFull { get; set; }
         private SemaphoreSlim WriteSemaphore { get; set; } = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         /// <summary>
@@ -339,7 +363,13 @@ namespace Soulseek.Network.Tcp
 
                 InactivityTimer?.Start();
                 WatchdogTimer.Start();
+
                 Stream = TcpClient.GetStream();
+
+                // these should also call SetSocketOptions on the socket. doing it twice to make sure!
+                // read and write timeouts can cause the client to hang, even if the inactivity timer disconnects
+                Stream.ReadTimeout = Options.InactivityTimeout;
+                Stream.WriteTimeout = Options.InactivityTimeout;
 
                 ChangeState(ConnectionState.Connected, $"Connected to {IPEndPoint}");
             }
@@ -443,6 +473,7 @@ namespace Soulseek.Network.Tcp
         /// <param name="length">The number of bytes to read.</param>
         /// <param name="outputStream">The stream to which the read data is to be written.</param>
         /// <param name="governor">The delegate used to govern transfer speed.</param>
+        /// <param name="reporter">The delegate used to report transfer statistics.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A Task representing the asynchronous operation, including the read bytes.</returns>
         /// <exception cref="ArgumentException">Thrown when the specified <paramref name="length"/> is less than 1.</exception>
@@ -455,7 +486,7 @@ namespace Soulseek.Network.Tcp
         ///     is not connected.
         /// </exception>
         /// <exception cref="ConnectionReadException">Thrown when an unexpected error occurs.</exception>
-        public Task ReadAsync(long length, Stream outputStream, Func<CancellationToken, Task> governor, CancellationToken? cancellationToken = null)
+        public Task ReadAsync(long length, Stream outputStream, Func<int, CancellationToken, Task<int>> governor, Action<int, int, int> reporter = null, CancellationToken? cancellationToken = null)
         {
             if (length < 0)
             {
@@ -482,7 +513,7 @@ namespace Soulseek.Network.Tcp
                 throw new InvalidOperationException($"Invalid attempt to send to a disconnected or transitioning connection (current state: {State})");
             }
 
-            return ReadInternalAsync(length, outputStream, governor ?? ((t) => Task.CompletedTask), cancellationToken ?? CancellationToken.None);
+            return ReadInternalAsync(length, outputStream, governor ?? ((s, t) => Task.FromResult(int.MaxValue)), reporter, cancellationToken ?? CancellationToken.None);
         }
 
         /// <summary>
@@ -543,6 +574,7 @@ namespace Soulseek.Network.Tcp
         /// <param name="length">The number of bytes to write.</param>
         /// <param name="inputStream">The stream from which the written data is to be read.</param>
         /// <param name="governor">The delegate used to govern transfer speed.</param>
+        /// <param name="reporter">The delegate used to report transfer statistics.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>A Task representing the asynchronous operation.</returns>
         /// <exception cref="ArgumentException">Thrown when the specified <paramref name="length"/> is less than 1.</exception>
@@ -555,7 +587,7 @@ namespace Soulseek.Network.Tcp
         ///     is not connected.
         /// </exception>
         /// <exception cref="ConnectionWriteException">Thrown when an unexpected error occurs.</exception>
-        public Task WriteAsync(long length, Stream inputStream, Func<CancellationToken, Task> governor, CancellationToken? cancellationToken = null)
+        public Task WriteAsync(long length, Stream inputStream, Func<int, CancellationToken, Task<int>> governor = null, Action<int, int, int> reporter = null, CancellationToken? cancellationToken = null)
         {
             if (length <= 0)
             {
@@ -582,7 +614,7 @@ namespace Soulseek.Network.Tcp
                 throw new InvalidOperationException($"Invalid attempt to send to a disconnected or transitioning connection (current state: {State})");
             }
 
-            return WriteInternalAsync(length, inputStream, governor ?? ((t) => Task.CompletedTask), cancellationToken ?? CancellationToken.None);
+            return WriteInternalAsync(length, inputStream, governor ?? ((s, t) => Task.FromResult(int.MaxValue)), reporter, cancellationToken ?? CancellationToken.None);
         }
 
         /// <summary>
@@ -637,6 +669,9 @@ namespace Soulseek.Network.Tcp
                     WatchdogTimer.Dispose();
                     Stream?.Dispose();
                     TcpClient?.Dispose();
+
+                    WriteSemaphore?.Dispose();
+                    WriteQueueSemaphore?.Dispose();
                 }
 
                 Disposed = true;
@@ -646,45 +681,44 @@ namespace Soulseek.Network.Tcp
         private async Task<byte[]> ReadInternalAsync(long length, CancellationToken cancellationToken)
         {
 #if NETSTANDARD2_0
-            using var stream = new MemoryStream();
+            using (var stream = new MemoryStream())
 #else
-            await using var stream = new MemoryStream();
+            var stream = new MemoryStream();
+            await using (stream.ConfigureAwait(false))
 #endif
-
-            await ReadInternalAsync(length, stream, (c) => Task.CompletedTask, cancellationToken).ConfigureAwait(false); //cannot access a disposed object TODO:ERROR
-            return stream.ToArray();
+            {
+                await ReadInternalAsync(length, stream, (s, c) => Task.FromResult(int.MaxValue), null, cancellationToken).ConfigureAwait(false);
+                return stream.ToArray();
+            }
         }
 
-        private async Task ReadInternalAsync(long length, Stream outputStream, Func<CancellationToken, Task> governor, CancellationToken cancellationToken)
+        private async Task ReadInternalAsync(long length, Stream outputStream, Func<int, CancellationToken, Task<int>> governor, Action<int, int, int> reporter, CancellationToken cancellationToken)
         {
             ResetInactivityTime();
 
+#if NETSTANDARD2_0
             var buffer = new byte[Options.ReadBufferSize];
+#else
+            var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(Options.ReadBufferSize);
+#endif
+
             long totalBytesRead = 0;
 
             try
             {
-                while (totalBytesRead < length)
+                while (!Disposed && totalBytesRead < length)
                 {
-                    await governor(cancellationToken).ConfigureAwait(false);
-
                     var bytesRemaining = length - totalBytesRead;
                     var bytesToRead = bytesRemaining >= buffer.Length ? buffer.Length : (int)bytesRemaining; // cast to int is safe because of the check against buffer length.
-#if DEBUG
-                    if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
-                    {
-                        Console.WriteLine("server pre read bytes low level: " + bytesToRead);
-                        Console.WriteLine(this.Id);
-                        Console.WriteLine(TcpClient.Client.RemoteEndPoint.ToString() + TcpClient.Client.LocalEndPoint.ToString());
-                    }
+
+                    var bytesGranted = Math.Min(bytesToRead, await governor(bytesToRead, cancellationToken).ConfigureAwait(false));
+
+#if NETSTANDARD2_0
+                    var bytesRead = await Stream.ReadAsync(buffer, 0, bytesGranted, cancellationToken).ConfigureAwait(false);
+#else
+                    var bytesRead = await Stream.ReadAsync(new Memory<byte>(buffer, 0, bytesGranted), cancellationToken).ConfigureAwait(false);
 #endif
-                    var bytesRead = await Stream.ReadAsync(buffer, 0, bytesToRead, cancellationToken).ConfigureAwait(false);
-#if DEBUG
-                    if (IPEndPoint.Address.ToString() == "2607:7700:0:b::d04c:aa3b")
-                    {
-                        Console.WriteLine("server post read bytes low level");
-                    }
-#endif
+
                     if (bytesRead == 0)
                     {
 #if DEBUG
@@ -696,16 +730,29 @@ namespace Soulseek.Network.Tcp
                         throw new ConnectionException("Remote connection closed");
                     }
 
-                    totalBytesRead += bytesRead;
-
 #if NETSTANDARD2_0
                     await outputStream.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
 #else
-                    await outputStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
+                    await outputStream.WriteAsync(new Memory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
 #endif
 
-                    Interlocked.CompareExchange(ref DataRead, null, null)?
-                        .Invoke(this, new ConnectionDataEventArgs(totalBytesRead, length));
+                    totalBytesRead += bytesRead;
+
+                    reporter?.Invoke(bytesToRead, bytesGranted, bytesRead);
+
+                    if (SoulseekClient.RaiseEventsAsynchronously)
+                    {
+                        Task.Run(() =>
+                        {
+                            Interlocked.CompareExchange(ref DataRead, null, null)?
+                                .Invoke(this, new ConnectionDataEventArgs(totalBytesRead, length));
+                        }, cancellationToken).Forget();
+                    }
+                    else
+                    {
+                        Interlocked.CompareExchange(ref DataRead, null, null)?
+                            .Invoke(this, new ConnectionDataEventArgs(totalBytesRead, length));
+                    }
 
                     ResetInactivityTime();
                 }
@@ -729,6 +776,12 @@ namespace Soulseek.Network.Tcp
 
                 throw new ConnectionReadException($"Failed to read {length} bytes from {IPEndPoint}: {ex.Message}", ex);
             }
+#if NETSTANDARD2_1_OR_GREATER
+            finally
+            {
+                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+            }
+#endif
         }
 
         private void ResetInactivityTime()
@@ -740,40 +793,72 @@ namespace Soulseek.Network.Tcp
         private async Task WriteInternalAsync(byte[] bytes, CancellationToken cancellationToken)
         {
 #if NETSTANDARD2_0
-            using var stream = new MemoryStream(bytes);
+            using (var stream = new MemoryStream(bytes))
 #else
-            await using var stream = new MemoryStream(bytes);
+            var stream = new MemoryStream(bytes);
+            await using (stream.ConfigureAwait(false))
 #endif
-
-            await WriteInternalAsync(bytes.Length, stream, (c) => Task.CompletedTask, cancellationToken).ConfigureAwait(false);
+            {
+                await WriteInternalAsync(bytes.Length, stream, (s, c) => Task.FromResult(int.MaxValue), null, cancellationToken).ConfigureAwait(false);
+            }
         }
 
-        private async Task WriteInternalAsync(long length, Stream inputStream, Func<CancellationToken, Task> governor, CancellationToken cancellationToken)
+        private async Task WriteInternalAsync(long length, Stream inputStream, Func<int, CancellationToken, Task<int>> governor, Action<int, int, int> reporter, CancellationToken cancellationToken)
         {
+            // a failure to allocate memory will throw, so we need to do it within the try/catch
+            // declare and initialize it here so it's available in the finally block
+            byte[] buffer = Array.Empty<byte>();
+
+            // in the case of a bad (or failing) connection, it is possible for us to continue to write data, particularly
+            // distributed search requests, to the connection for quite a while before the underlying socket figures out that it
+            // is in a bad state. when this happens memory usage skyrockets. see https://github.com/slskd/slskd/issues/251 for
+            // more information.  note that this isn't for synchronization, it's to maintain a count of waiting writes.
+            if (WriteQueueFull || !await WriteQueueSemaphore.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+            {
+                // note: the semaphore check and this latch are not atomic! it's possible for one thread to fail to get the semaphore,
+                // and for the next to succeed (if one is released in the finally) before we set this to true. if that happens,
+                // *something* below will fail and the exception will bubble out (and if it doesn't throw, it probably got sent)
+                WriteQueueFull = true;
+
+                Disconnect("The write buffer is full");
+                throw new ConnectionWriteDroppedException($"Dropped buffered message to {IPEndPoint}; the write buffer is full");
+            }
+
             // obtain the write semaphore for this connection.  this keeps concurrent writes
             // from interleaving, which will mangle the messages on the receiving end
             await WriteSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            ResetInactivityTime();
-
-            var inputBuffer = new byte[Options.WriteBufferSize];
-            long totalBytesWritten = 0;
 
             try
             {
-                while (totalBytesWritten < length)
-                {
-                    await governor(cancellationToken).ConfigureAwait(false);
+                ResetInactivityTime();
 
-                    var bytesRemaining = length - totalBytesWritten;
-
-                    var bytesToRead = bytesRemaining >= inputBuffer.Length ? inputBuffer.Length : (int)bytesRemaining;
 #if NETSTANDARD2_0
-                    var bytesRead = await inputStream.ReadAsync(inputBuffer, 0, bytesToRead, cancellationToken).ConfigureAwait(false);
+                buffer = new byte[Options.WriteBufferSize];
 #else
-                    var bytesRead = await inputStream.ReadAsync(inputBuffer.AsMemory(0, bytesToRead), cancellationToken).ConfigureAwait(false);
+                buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(Options.WriteBufferSize);
 #endif
 
-                    await Stream.WriteAsync(inputBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                long totalBytesWritten = 0;
+
+                while (totalBytesWritten < length)
+                {
+                    if (Disposed || State == ConnectionState.Disconnecting || State == ConnectionState.Disconnected)
+                    {
+                        throw new ConnectionWriteException($"Write aborted after {totalBytesWritten} bytes written; the connection has been or is being {(Disposed ? "disposed" : "disconnected")}");
+                    }
+
+                    var bytesRemaining = length - totalBytesWritten;
+                    var bytesToRead = bytesRemaining >= buffer.Length ? buffer.Length : (int)bytesRemaining;
+
+                    var bytesGranted = Math.Min(bytesToRead, await governor(bytesToRead, cancellationToken).ConfigureAwait(false));
+
+#if NETSTANDARD2_0
+                    var bytesRead = await inputStream.ReadAsync(buffer, 0, bytesGranted, cancellationToken).ConfigureAwait(false);
+                    await Stream.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+#else
+                    var bytesRead = await inputStream.ReadAsync(new Memory<byte>(buffer, 0, bytesGranted), cancellationToken).ConfigureAwait(false);
+                    await Stream.WriteAsync(new ReadOnlyMemory<byte>(buffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
+#endif
 
                     totalBytesWritten += bytesRead;
 #if DEBUG
@@ -785,8 +870,21 @@ namespace Soulseek.Network.Tcp
                     }
 #endif
 
-                    Interlocked.CompareExchange(ref DataWritten, null, null)?
-                        .Invoke(this, new ConnectionDataEventArgs(totalBytesWritten, length));
+                    reporter?.Invoke(bytesToRead, bytesGranted, bytesRead);
+
+                    if (SoulseekClient.RaiseEventsAsynchronously)
+                    {
+                        Task.Run(() =>
+                        {
+                            Interlocked.CompareExchange(ref DataWritten, null, null)?
+                                .Invoke(this, new ConnectionDataEventArgs(totalBytesWritten, length));
+                        }, cancellationToken).Forget();
+                    }
+                    else
+                    {
+                        Interlocked.CompareExchange(ref DataWritten, null, null)?
+                            .Invoke(this, new ConnectionDataEventArgs(totalBytesWritten, length));
+                    }
 
                     ResetInactivityTime();
                 }
@@ -804,7 +902,15 @@ namespace Soulseek.Network.Tcp
             }
             finally
             {
-                WriteSemaphore.Release();
+#if NETSTANDARD2_1_OR_GREATER
+                System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+#endif
+
+                if (!Disposed)
+                {
+                    WriteQueueSemaphore.Release();
+                    WriteSemaphore.Release();
+                }
             }
         }
     }

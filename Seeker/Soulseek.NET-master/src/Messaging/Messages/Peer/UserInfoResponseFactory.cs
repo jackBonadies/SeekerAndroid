@@ -53,7 +53,7 @@ namespace Soulseek
             var queueLength = reader.ReadInteger();
             var hasFreeUploadSlot = reader.ReadByte() > 0;
 
-            return new UserInfo(description, hasPicture, picture, uploadSlots, queueLength, hasFreeUploadSlot);
+            return new UserInfo(description, uploadSlots, queueLength, hasFreeUploadSlot, picture);
         }
 
         /// <summary>

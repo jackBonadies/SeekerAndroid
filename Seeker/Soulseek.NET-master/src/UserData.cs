@@ -28,17 +28,17 @@ namespace Soulseek
         /// <param name="username">The username of the user.</param>
         /// <param name="status">The status of the user.</param>
         /// <param name="averageSpeed">The average upload speed of the user.</param>
-        /// <param name="downloadCount">The number of active user downloads.</param>
+        /// <param name="uploadCount">The number of uploads tracked by the server for this user.</param>
         /// <param name="fileCount">The number of files shared by the user.</param>
         /// <param name="directoryCount">The number of directories shared by the user.</param>
         /// <param name="countryCode">The user's country code.</param>
         /// <param name="slotsFree">The number of the user's free download slots, if provided.</param>
-        public UserData(string username, UserPresence status, int averageSpeed, long downloadCount, int fileCount, int directoryCount, string countryCode, int? slotsFree = null)
+        public UserData(string username, UserPresence status, int averageSpeed, long uploadCount, int fileCount, int directoryCount, string countryCode, int? slotsFree = null)
         {
             Username = username;
             Status = status;
             AverageSpeed = averageSpeed;
-            DownloadCount = downloadCount;
+            UploadCount = uploadCount;
             FileCount = fileCount;
             DirectoryCount = directoryCount;
             SlotsFree = slotsFree;
@@ -61,11 +61,6 @@ namespace Soulseek
         public int DirectoryCount { get; }
 
         /// <summary>
-        ///     Gets the number of active user downloads.
-        /// </summary>
-        public long DownloadCount { get; }
-
-        /// <summary>
         ///     Gets the number of files shared by the user.
         /// </summary>
         public int FileCount { get; }
@@ -79,6 +74,11 @@ namespace Soulseek
         ///     Gets the status of the user (0 = offline, 1 = away, 2 = online).
         /// </summary>
         public UserPresence Status { get; set; }
+
+        /// <summary>
+        ///     Gets the number of uploads tracked by the server for this user.
+        /// </summary>
+        public long UploadCount { get; }
 
         /// <summary>
         ///     Gets the username of the user.

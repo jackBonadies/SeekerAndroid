@@ -36,6 +36,7 @@ namespace Soulseek.Diagnostics
             Message = message;
             Exception = exception;
             Timestamp = DateTime.UtcNow;
+            IncludesException = Exception != null;
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace Soulseek.Diagnostics
         /// <summary>
         ///     Gets a value indicating whether an <see cref="Exception"/> is included with the event.
         /// </summary>
-        public bool IncludesException => Exception != null;
+        public bool IncludesException { get; }
 
         /// <summary>
         ///     Gets the diagnostic level of the event.

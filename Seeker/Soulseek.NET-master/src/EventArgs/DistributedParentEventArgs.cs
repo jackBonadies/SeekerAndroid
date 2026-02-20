@@ -37,6 +37,7 @@ namespace Soulseek
             IPEndPoint = ipEndPoint;
             BranchLevel = branchLevel;
             BranchRoot = branchRoot;
+            IsBranchRoot = Username == BranchRoot && BranchLevel == 0;
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets a value indicating whether the parent is a branch root.
         /// </summary>
-        public bool IsBranchRoot => Username == BranchRoot && BranchLevel == 0;
+        public bool IsBranchRoot { get; }
 
         /// <summary>
         ///     Gets the username associated with the connection.

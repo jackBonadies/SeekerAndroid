@@ -1,4 +1,4 @@
-﻿// <copyright file="CannotJoinRoom.cs" company="JP Dillingham">
+﻿// <copyright file="CannotJoinRoomNotification.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -20,13 +20,13 @@ namespace Soulseek.Messaging.Messages
     /// <summary>
     ///     A message indicating an unsuccessful attempt to join a chat room.
     /// </summary>
-    internal sealed class CannotJoinRoom : IIncomingMessage
+    internal sealed class CannotJoinRoomNotification : IIncomingMessage
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CannotJoinRoom"/> class.
+        ///     Initializes a new instance of the <see cref="CannotJoinRoomNotification"/> class.
         /// </summary>
         /// <param name="roomName">The name of the room which could not be joined.</param>
-        public CannotJoinRoom(string roomName)
+        public CannotJoinRoomNotification(string roomName)
         {
             RoomName = roomName;
         }
@@ -37,23 +37,23 @@ namespace Soulseek.Messaging.Messages
         public string RoomName { get; }
 
         /// <summary>
-        ///     Creates a new instance of <see cref="CannotJoinRoom"/> from the specified <paramref name="bytes"/>.
+        ///     Creates a new instance of <see cref="CannotJoinRoomNotification"/> from the specified <paramref name="bytes"/>.
         /// </summary>
         /// <param name="bytes">The byte array from which to parse.</param>
         /// <returns>The parsed instance.</returns>
-        public static CannotJoinRoom FromByteArray(byte[] bytes)
+        public static CannotJoinRoomNotification FromByteArray(byte[] bytes)
         {
             var reader = new MessageReader<MessageCode.Server>(bytes);
             var code = reader.ReadCode();
 
             if (code != MessageCode.Server.CannotJoinRoom)
             {
-                throw new MessageException($"Message Code mismatch creating {nameof(CannotJoinRoom)} (expected: {(int)MessageCode.Server.CannotJoinRoom}, received: {(int)code})");
+                throw new MessageException($"Message Code mismatch creating {nameof(CannotJoinRoomNotification)} (expected: {(int)MessageCode.Server.CannotJoinRoom}, received: {(int)code})");
             }
 
             var roomName = reader.ReadString();
 
-            return new CannotJoinRoom(roomName);
+            return new CannotJoinRoomNotification(roomName);
         }
     }
 }

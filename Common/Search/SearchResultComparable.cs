@@ -62,9 +62,9 @@ namespace Seeker.Search
                 }
             }
             //next highest - free upload slots. for now just they are free or not.
-            if ((x.FreeUploadSlots == 0 && y.FreeUploadSlots != 0) || (x.FreeUploadSlots != 0 && y.FreeUploadSlots == 0))
+            if (x.HasFreeUploadSlot != y.HasFreeUploadSlot)
             {
-                if (x.FreeUploadSlots == 0)
+                if (!x.HasFreeUploadSlot)
                 {
                     //x is worse
                     return 1;

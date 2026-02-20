@@ -45,13 +45,30 @@ namespace Soulseek
             IsLatin1Decoded = isLatin1Decoded;
             IsDirectoryLatin1Decoded = isDirectoryLatin1Decoded;
 
+            foreach (var attribute in Attributes)
+            {
+                switch (attribute.Type)
+                {
+                    case FileAttributeType.BitDepth:
+                        BitDepth = attribute.Value;
+                        break;
+                    case FileAttributeType.BitRate:
+                        BitRate = attribute.Value;
+                        break;
+                    case FileAttributeType.VariableBitRate:
+                        IsVariableBitRate = attribute.Value != 0;
+                        break;
+                    case FileAttributeType.Length:
+                        Length = attribute.Value;
+                        break;
+                    case FileAttributeType.SampleRate:
+                        SampleRate = attribute.Value;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
-
-        //public File DeepCopy()
-        //{
-        //    File f = new File(this.Code,this.Filename,this.Size,this.Extension,this.Attributes);
-        //    return f;
-        //}
 
         //for serializer
         private File()
@@ -72,12 +89,12 @@ namespace Soulseek
         /// <summary>
         ///     Gets the value of the <see cref="FileAttributeType.BitDepth"/> attribute.
         /// </summary>
-        public int? BitDepth => GetAttributeValue(FileAttributeType.BitDepth);
+        public int? BitDepth { get; }
 
         /// <summary>
         ///     Gets the value of the <see cref="FileAttributeType.BitRate"/> attribute.
         /// </summary>
-        public int? BitRate => GetAttributeValue(FileAttributeType.BitRate);
+        public int? BitRate { get; }
 
 
         /// <summary>
@@ -113,38 +130,21 @@ namespace Soulseek
         ///     Gets a value indicating whether the <see cref="FileAttributeType.VariableBitRate"/> attribute value indicates a
         ///     file with a variable bit rate.
         /// </summary>
-        public bool? IsVariableBitRate
-        {
-            get
-            {
-                var val = GetAttributeValue(FileAttributeType.VariableBitRate);
-                return val == null ? (bool?)null : val != 0;
-            }
-        }
+        public bool? IsVariableBitRate { get; }
 
         /// <summary>
         ///     Gets the value of the <see cref="FileAttributeType.Length"/> attribute.
         /// </summary>
-        public int? Length => GetAttributeValue(FileAttributeType.Length);
+        public int? Length { get; }
 
         /// <summary>
         ///     Gets the value of the <see cref="FileAttributeType.SampleRate"/> attribute.
         /// </summary>
-        public int? SampleRate => GetAttributeValue(FileAttributeType.SampleRate);
+        public int? SampleRate { get; }
 
         /// <summary>
         ///     Gets the file size in bytes.
         /// </summary>
         public long Size { get; }
-
-        /// <summary>
-        ///     Returns the value of the specified attribute <paramref name="type"/>.
-        /// </summary>
-        /// <param name="type">The attribute to return.</param>
-        /// <returns>The value of the specified attribute.</returns>
-        public int? GetAttributeValue(FileAttributeType type)
-        {
-            return Attributes.FirstOrDefault(a => a.Type == type)?.Value;
-        }
     }
 }

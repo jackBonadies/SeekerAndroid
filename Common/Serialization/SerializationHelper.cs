@@ -67,6 +67,7 @@ namespace Seeker
                         new UserListItemFormatter(),
                         new UserStatusFormatter(),
                         new UserInfoFormatter(),
+                        new UserDataFormatter(),
                         MessagePack.Formatters.TypelessFormatter.Instance
                     },
                     new IFormatterResolver[]

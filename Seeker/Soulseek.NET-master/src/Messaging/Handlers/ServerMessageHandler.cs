@@ -51,6 +51,11 @@ namespace Soulseek.Messaging.Handlers
         public event EventHandler<DiagnosticEventArgs> DiagnosticGenerated;
 
         /// <summary>
+        ///     Occurs when the server requests a distributed network reset.
+        /// </summary>
+        public event EventHandler DistributedNetworkReset;
+
+        /// <summary>
         ///     Occurs when the server sends a list of excluded ("banned") search phrases.
         /// </summary>
         public event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
@@ -162,14 +167,24 @@ namespace Soulseek.Messaging.Handlers
         public event EventHandler<RoomTickerRemovedEventArgs> RoomTickerRemoved;
 
         /// <summary>
+        ///     Occurs when the server sends operational information.
+        /// </summary>
+        public event EventHandler<ServerInfo> ServerInfoReceived;
+
+        /// <summary>
         ///     Occurs when a user fails to connect.
         /// </summary>
         public event EventHandler<UserCannotConnectEventArgs> UserCannotConnect;
 
         /// <summary>
+        ///     Occurs when a user's statistics change.
+        /// </summary>
+        public event EventHandler<UserStatistics> UserStatisticsChanged;
+
+        /// <summary>
         ///     Occurs when a watched user's status changes.
         /// </summary>
-        public event EventHandler<UserStatusChangedEventArgs> UserStatusChanged;
+        public event EventHandler<UserStatus> UserStatusChanged;
 
         private IDiagnosticFactory Diagnostic { get; }
         private SoulseekClient SoulseekClient { get; }
@@ -203,8 +218,20 @@ namespace Soulseek.Messaging.Handlers
                 switch (code)
                 {
                     case MessageCode.Server.ParentMinSpeed:
+                        var parentMinSpeed = IntegerResponse.FromByteArray<MessageCode.Server>(message);
+                        ServerInfoReceived?.Invoke(this, new ServerInfo(parentMinSpeed: parentMinSpeed));
+                        break;
+
                     case MessageCode.Server.ParentSpeedRatio:
+                        var parentSpeedRatio = IntegerResponse.FromByteArray<MessageCode.Server>(message);
+                        ServerInfoReceived?.Invoke(this, new ServerInfo(parentSpeedRatio: parentSpeedRatio));
+                        break;
+
                     case MessageCode.Server.WishlistInterval:
+                        var wishlistInterval = IntegerResponse.FromByteArray<MessageCode.Server>(message);
+                        ServerInfoReceived?.Invoke(this, new ServerInfo(wishlistInterval: wishlistInterval));
+                        break;
+
                     case MessageCode.Server.CheckPrivileges:
                         //if(MessageCode.Server.WishlistInterval == code)
                         //{
@@ -241,7 +268,10 @@ namespace Soulseek.Messaging.Handlers
 
                     case MessageCode.Server.GetUserStats:
                         UserData userData = GetUserStatsCommand.FromByteArray(message);
-                        UserDataReceived?.Invoke(this,userData);
+                        UserDataReceived?.Invoke(this, userData);
+                        var statsForWait = UserStatisticsResponseFactory.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, statsForWait.Username), statsForWait);
+                        UserStatisticsChanged?.Invoke(this, statsForWait);
                         break;
 
                     case MessageCode.Server.PrivateRoomToggle:
@@ -269,7 +299,7 @@ namespace Soulseek.Messaging.Handlers
                         break;
 
                     case MessageCode.Server.RoomList:
-                        var roomList = RoomListResponse.FromByteArray(message);
+                        var roomList = RoomListResponseFactory.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code), roomList);
                         RoomListReceived?.Invoke(this, roomList);
                         break;
@@ -286,7 +316,6 @@ namespace Soulseek.Messaging.Handlers
 
                     case MessageCode.Server.PrivilegedUsers:
                         var privilegedUserList = PrivilegedUserListNotification.FromByteArray(message);
-                        SoulseekClient.Waiter.Complete(new WaitKey(code), privilegedUserList);
                         PrivilegedUserListReceived?.Invoke(this, privilegedUserList);
                         break;
 
@@ -325,6 +354,15 @@ namespace Soulseek.Messaging.Handlers
 
                         break;
 
+                    case MessageCode.Server.DistributedReset:
+                        Diagnostic.Info($"Distributed network reset received from the server");
+                        DistributedNetworkReset?.Invoke(this, EventArgs.Empty);
+
+                        SoulseekClient.DistributedConnectionManager.RemoveAndDisposeAll();
+                        SoulseekClient.DistributedConnectionManager.ResetStatus();
+
+                        break;
+
                     case MessageCode.Server.CannotConnect:
                         var cannotConnect = CannotConnect.FromByteArray(message);
                         Diagnostic.Debug($"Received CannotConnect message for token {cannotConnect.Token}{(!string.IsNullOrEmpty(cannotConnect.Username) ? $" from user {cannotConnect.Username}" : string.Empty)}");
@@ -339,7 +377,7 @@ namespace Soulseek.Messaging.Handlers
                         break;
 
                     case MessageCode.Server.CannotJoinRoom:
-                        var cannotJoinRoom = CannotJoinRoom.FromByteArray(message);
+                        var cannotJoinRoom = CannotJoinRoomNotification.FromByteArray(message);
                         SoulseekClient.Waiter.Throw(
                             new WaitKey(MessageCode.Server.JoinRoom, cannotJoinRoom.RoomName),
                             new RoomJoinForbiddenException($"The server rejected the request to join room {cannotJoinRoom.RoomName}"));
@@ -357,10 +395,10 @@ namespace Soulseek.Messaging.Handlers
 
                                 // ensure that we are expecting at least one file from this user before we connect. the response
                                 // doesn't contain any other identifying information about the file.
-                                if (!SoulseekClient.Downloads.IsEmpty && SoulseekClient.Downloads.Values.Any(d => d.Username == connectToPeerResponse.Username))
+                                if (!SoulseekClient.DownloadDictionary.IsEmpty && SoulseekClient.DownloadDictionary.Values.Any(d => d.Username == connectToPeerResponse.Username))
                                 {
                                     var (connection, remoteToken) = await SoulseekClient.PeerConnectionManager.GetTransferConnectionAsync(connectToPeerResponse).ConfigureAwait(false);
-                                    var download = SoulseekClient.Downloads.Values.FirstOrDefault(v => v.RemoteToken == remoteToken && v.Username == connectToPeerResponse.Username);
+                                    var download = SoulseekClient.DownloadDictionary.Values.FirstOrDefault(v => v.RemoteToken == remoteToken && v.Username == connectToPeerResponse.Username);
 
                                     if (download != default(TransferInternal))
                                     {
@@ -400,15 +438,15 @@ namespace Soulseek.Messaging.Handlers
 
                         break;
 
-                    case MessageCode.Server.AddUser:
-                        var addUserResponse = AddUserResponse.FromByteArray(message);
-                        SoulseekClient.Waiter.Complete(new WaitKey(code, addUserResponse.Username), addUserResponse);
+                    case MessageCode.Server.WatchUser:
+                        var watchUserResponse = WatchUserResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, watchUserResponse.Username), watchUserResponse);
                         break;
 
                     case MessageCode.Server.GetStatus:
-                        var statsResponse = UserStatusResponse.FromByteArray(message);
-                        SoulseekClient.Waiter.Complete(new WaitKey(code, statsResponse.Username), statsResponse);
-                        UserStatusChanged?.Invoke(this, new UserStatusChangedEventArgs(statsResponse));
+                        var status = UserStatusResponseFactory.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, status.Username), status);
+                        UserStatusChanged?.Invoke(this, status);
                         break;
 
                     case MessageCode.Server.PrivateMessage:
@@ -435,6 +473,11 @@ namespace Soulseek.Messaging.Handlers
                     case MessageCode.Server.LeaveRoom:
                         var leaveRoomResponse = LeaveRoomResponse.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code, leaveRoomResponse.RoomName));
+
+                        // the server doesn't send a UserLeftRoom message when the current user is the one who left, whereas we do
+                        // get a UserJoinedRoom message when the current user joins a room. to keep the API consistent, raise
+                        // RoomLeft to mimic this behavior client side. this may result in duplicate events if the server behavior changes.
+                        RoomLeft?.Invoke(this, new RoomLeftEventArgs(leaveRoomResponse.RoomName, SoulseekClient.Username));
                         break;
 
                     case MessageCode.Server.SayInChatRoom:
@@ -502,10 +545,23 @@ namespace Soulseek.Messaging.Handlers
                         var searchRequest = ServerSearchRequest.FromByteArray(message);
 
                         // sometimes (most of the time?) a room search will result in a request to ourselves (assuming we are
-                        // joined to it)
+                        // joined to it), and we can also search our own shares. the vast majority of other search requests
+                        // will come from the distributed network, and in those cases we will ignore any search request
+                        // originating from our own client. in this case we might respond.
                         if (searchRequest.Username == SoulseekClient.Username)
                         {
-                            break;
+                            // check the list of searches that are underway to see if there's one that 1) matches this token,
+                            // 2) has a scope of User, and 3) has a subject list that contains our username. if all of the
+                            // above are true, we deliberately searched ourselves and therefore will return results.
+                            if (SoulseekClient.Searches.Values
+                                .Any(s => s.Token == searchRequest.Token
+                                    && s.Scope.Type == SearchScopeType.User
+                                    && s.Scope.Subjects.Any(subject => subject.Equals(SoulseekClient.Username, StringComparison.OrdinalIgnoreCase))))
+                            {
+                                await SoulseekClient.SearchResponder.TryRespondAsync(searchRequest.Username, searchRequest.Token, searchRequest.Query).ConfigureAwait(false);
+                            }
+
+                            break; // we didn't deliberately search ourselves, so don't respond
                         }
 
                         await SoulseekClient.SearchResponder.TryRespondAsync(searchRequest.Username, searchRequest.Token, searchRequest.Query).ConfigureAwait(false);

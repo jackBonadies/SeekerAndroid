@@ -1,4 +1,4 @@
-﻿// <copyright file="AddUserRequest.cs" company="JP Dillingham">
+﻿// <copyright file="DownloadDeniedEventArgs.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -15,37 +15,34 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace Soulseek.Messaging.Messages
+namespace Soulseek
 {
     /// <summary>
-    ///     Adds a user to the server-side watch list.
+    ///     Event arguments for events raised when a user reports that an upload has failed.
     /// </summary>
-    internal sealed class AddUserRequest : IOutgoingMessage
+    public class DownloadDeniedEventArgs : UserEventArgs
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="AddUserRequest"/> class.
+        ///     Initializes a new instance of the <see cref="DownloadDeniedEventArgs"/> class.
         /// </summary>
-        /// <param name="username">The username of the user to add.</param>
-        public AddUserRequest(string username)
+        /// <param name="username">The username associated with the event.</param>
+        /// <param name="filename">The filename associated with the event.</param>
+        /// <param name="message">The message associated with the event.</param>
+        public DownloadDeniedEventArgs(string username, string filename, string message)
+            : base(username)
         {
-            Username = username;
+            Filename = filename;
+            Message = message;
         }
 
         /// <summary>
-        ///     Gets the username of the user to add.
+        ///     Gets the filename associated with the event.
         /// </summary>
-        public string Username { get; }
+        public string Filename { get; }
 
         /// <summary>
-        ///     Constructs a <see cref="byte"/> array from this message.
+        ///     Gets the message associated with the event.
         /// </summary>
-        /// <returns>The constructed byte array.</returns>
-        public byte[] ToByteArray()
-        {
-            return new MessageBuilder()
-                .WriteCode(MessageCode.Server.AddUser)
-                .WriteString(Username)
-                .Build();
-        }
+        public string Message { get; }
     }
 }

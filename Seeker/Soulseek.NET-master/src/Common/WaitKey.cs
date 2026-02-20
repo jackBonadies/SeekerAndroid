@@ -31,17 +31,18 @@ namespace Soulseek
         public WaitKey(params object[] tokenParts)
         {
             TokenParts = tokenParts;
+            Token = string.Join(":", TokenParts);
         }
 
         /// <summary>
         ///     Gets the wait token.
         /// </summary>
-        public string Token => string.Join(":", TokenParts);
+        public string Token { get; }
 
         /// <summary>
         ///     Gets the parts which make up the key.
         /// </summary>
-        public object[] TokenParts { get; private set; }
+        public object[] TokenParts { get; }
 
         public static bool operator !=(WaitKey lhs, WaitKey rhs)
         {

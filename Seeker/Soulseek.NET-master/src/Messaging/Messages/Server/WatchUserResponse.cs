@@ -1,4 +1,4 @@
-﻿// <copyright file="AddUserResponse.cs" company="JP Dillingham">
+﻿// <copyright file="WatchUserResponse.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -20,15 +20,15 @@ namespace Soulseek.Messaging.Messages
     /// <summary>
     ///     The response to an add user request.
     /// </summary>
-    internal sealed class AddUserResponse : IIncomingMessage
+    internal sealed class WatchUserResponse : IIncomingMessage
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="AddUserResponse"/> class.
+        ///     Initializes a new instance of the <see cref="WatchUserResponse"/> class.
         /// </summary>
         /// <param name="username">The username of the added peer.</param>
         /// <param name="exists">A value indicating whether the username exists on the network.</param>
         /// <param name="userData">If <see cref="Exists"/>, the user's data.</param>
-        public AddUserResponse(string username, bool exists, UserData userData = null)
+        public WatchUserResponse(string username, bool exists, UserData userData = null)
         {
             Username = username;
             Exists = exists;
@@ -51,18 +51,18 @@ namespace Soulseek.Messaging.Messages
         public string Username { get; }
 
         /// <summary>
-        ///     Creates a new instance of <see cref="AddUserResponse"/> from the specified <paramref name="bytes"/>.
+        ///     Creates a new instance of <see cref="WatchUserResponse"/> from the specified <paramref name="bytes"/>.
         /// </summary>
         /// <param name="bytes">The byte array from which to parse.</param>
         /// <returns>The created instance.</returns>
-        public static AddUserResponse FromByteArray(byte[] bytes)
+        public static WatchUserResponse FromByteArray(byte[] bytes)
         {
             var reader = new MessageReader<MessageCode.Server>(bytes);
             var code = reader.ReadCode();
 
-            if (code != MessageCode.Server.AddUser)
+            if (code != MessageCode.Server.WatchUser)
             {
-                throw new MessageException($"Message Code mismatch creating {nameof(AddUserResponse)} (expected: {(int)MessageCode.Server.AddUser}, received: {(int)code})");
+                throw new MessageException($"Message Code mismatch creating {nameof(WatchUserResponse)} (expected: {(int)MessageCode.Server.WatchUser}, received: {(int)code})");
             }
 
             var username = reader.ReadString();
@@ -78,7 +78,7 @@ namespace Soulseek.Messaging.Messages
                 var downloadCount = reader.ReadLong();
                 var fileCount = reader.ReadInteger();
                 var directoryCount = reader.ReadInteger();
-                var countryCode = string.Empty;
+                string countryCode = null;
                 if (reader.HasMoreData)
                 {
                     countryCode = reader.ReadString();
@@ -87,7 +87,7 @@ namespace Soulseek.Messaging.Messages
                 user = new UserData(username, status, averageSpeed, downloadCount, fileCount, directoryCount, countryCode);
             }
 
-            return new AddUserResponse(username, exists, user);
+            return new WatchUserResponse(username, exists, user);
         }
     }
 }

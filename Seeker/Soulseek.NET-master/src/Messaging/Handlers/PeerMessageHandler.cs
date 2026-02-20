@@ -18,6 +18,7 @@
 namespace Soulseek.Messaging.Handlers
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net;
     using System.Threading.Tasks;
@@ -48,6 +49,16 @@ namespace Soulseek.Messaging.Handlers
         ///     Occurs when an internal diagnostic message is generated.
         /// </summary>
         public event EventHandler<DiagnosticEventArgs> DiagnosticGenerated;
+
+        /// <summary>
+        ///     Occurs when a user reports that a download has been denied.
+        /// </summary>
+        public event EventHandler<DownloadDeniedEventArgs> DownloadDenied;
+
+        /// <summary>
+        ///     Occurs when a user reports that a download has failed.
+        /// </summary>
+        public event EventHandler<DownloadFailedEventArgs> DownloadFailed;
 
         private IDiagnosticFactory Diagnostic { get; }
         private SoulseekClient SoulseekClient { get; }
@@ -109,17 +120,19 @@ namespace Soulseek.Messaging.Handlers
                         try
                         {
                             outgoingInfo = await SoulseekClient.Options
-                                .UserInfoResponseResolver(connection.Username, connection.IPEndPoint).ConfigureAwait(false);
+                                .UserInfoResolver(connection.Username, connection.IPEndPoint).ConfigureAwait(false);
                         }
                         catch (Exception ex)
                         {
                             outgoingInfo = await new SoulseekClientOptions()
-                                .UserInfoResponseResolver(connection.Username, connection.IPEndPoint).ConfigureAwait(false);
+                                .UserInfoResolver(connection.Username, connection.IPEndPoint).ConfigureAwait(false);
 
                             Diagnostic.Warning($"Failed to resolve user info response: {ex.Message}", ex);
                         }
 
                         await connection.WriteAsync(outgoingInfo.ToByteArray()).ConfigureAwait(false);
+                        Diagnostic.Info($"User info sent to {connection.Username}");
+
                         break;
 
                     case MessageCode.Peer.SearchRequest:
@@ -134,7 +147,20 @@ namespace Soulseek.Messaging.Handlers
                         {
                             var peerSearchResponse = await SoulseekClient.Options.SearchResponseResolver(connection.Username, searchRequest.Token, SearchQuery.FromText(searchRequest.Query)).ConfigureAwait(false);
 
-                            if (peerSearchResponse != null && peerSearchResponse.FileCount + peerSearchResponse.LockedFileCount > 0)
+                            if (peerSearchResponse is RawSearchResponse rawSearchResponse)
+                            {
+                                await connection.WriteAsync(rawSearchResponse.Length, rawSearchResponse.Stream).ConfigureAwait(false);
+
+                                try
+                                {
+                                    rawSearchResponse.Stream.Dispose();
+                                }
+                                catch
+                                {
+                                    // noop
+                                }
+                            }
+                            else if (peerSearchResponse != null && peerSearchResponse.FileCount + peerSearchResponse.LockedFileCount > 0)
                             {
                                 await connection.WriteAsync(peerSearchResponse.ToByteArray()).ConfigureAwait(false);
                             }
@@ -161,16 +187,35 @@ namespace Soulseek.Messaging.Handlers
                             Diagnostic.Warning($"Failed to resolve browse response: {ex.Message}", ex);
                         }
 
-                        await connection.WriteAsync(browseResponse.ToByteArray()).ConfigureAwait(false);
+                        if (browseResponse is RawBrowseResponse rawBrowseResponse)
+                        {
+                            await connection.WriteAsync(rawBrowseResponse.Length, rawBrowseResponse.Stream).ConfigureAwait(false);
+
+                            try
+                            {
+                                rawBrowseResponse.Stream.Dispose();
+                            }
+                            catch
+                            {
+                                // noop
+                            }
+                        }
+                        else
+                        {
+                            await connection.WriteAsync(browseResponse.ToByteArray()).ConfigureAwait(false);
+                        }
+
+                        Diagnostic.Info($"Share contents sent to {connection.Username}");
+
                         break;
 
                     case MessageCode.Peer.FolderContentsRequest:
                         var folderContentsRequest = FolderContentsRequest.FromByteArray(message);
-                        Directory outgoingFolderContents = null;
+                        IEnumerable<Directory> outgoingFolderContents = null;
 
                         try
                         {
-                            outgoingFolderContents = await SoulseekClient.Options.DirectoryContentsResponseResolver(
+                            outgoingFolderContents = await SoulseekClient.Options.DirectoryContentsResolver(
                                 connection.Username,
                                 connection.IPEndPoint,
                                 folderContentsRequest.Token,
@@ -183,16 +228,17 @@ namespace Soulseek.Messaging.Handlers
 
                         if (outgoingFolderContents != null)
                         {
-                            var folderContentsResponseMessage = new FolderContentsResponse(folderContentsRequest.Token, outgoingFolderContents);
+                            var folderContentsResponseMessage = new FolderContentsResponse(folderContentsRequest.Token, folderContentsRequest.DirectoryName, outgoingFolderContents);
 
                             await connection.WriteAsync(folderContentsResponseMessage).ConfigureAwait(false);
+                            Diagnostic.Info($"Folder contents for {folderContentsRequest.DirectoryName} sent to {connection.Username}");
                         }
 
                         break;
 
                     case MessageCode.Peer.FolderContentsResponse:
                         var folderContentsResponse = FolderContentsResponse.FromByteArray(message);
-                        SoulseekClient.Waiter.Complete(new WaitKey(MessageCode.Peer.FolderContentsResponse, connection.Username, folderContentsResponse.Token), folderContentsResponse.Directory);
+                        SoulseekClient.Waiter.Complete(new WaitKey(MessageCode.Peer.FolderContentsResponse, connection.Username, folderContentsResponse.Token), folderContentsResponse.Directories);
                         break;
 
                     case MessageCode.Peer.InfoResponse:
@@ -213,7 +259,7 @@ namespace Soulseek.Messaging.Handlers
 
                         if (queueRejected)
                         {
-                            await connection.WriteAsync(new QueueFailedResponse(queueDownloadRequest.Filename, queueRejectionMessage)).ConfigureAwait(false);
+                            await connection.WriteAsync(new UploadDenied(queueDownloadRequest.Filename, queueRejectionMessage)).ConfigureAwait(false);
                         }
                         else
                         {
@@ -227,7 +273,7 @@ namespace Soulseek.Messaging.Handlers
 
                         if (transferRequest.Direction == TransferDirection.Upload)
                         {
-                            if (!SoulseekClient.Downloads.IsEmpty && SoulseekClient.Downloads.Values.Any(d => d.Username == connection.Username && d.Filename == transferRequest.Filename))
+                            if (!SoulseekClient.DownloadDictionary.IsEmpty && SoulseekClient.DownloadDictionary.Values.Any(d => d.Username == connection.Username && d.Filename == transferRequest.Filename))
                             {
                                 SoulseekClient.Waiter.Complete(new WaitKey(MessageCode.Peer.TransferRequest, connection.Username, transferRequest.Filename), transferRequest);
                             }
@@ -245,7 +291,7 @@ namespace Soulseek.Messaging.Handlers
                             if (transferRejected)
                             {
                                 await connection.WriteAsync(new TransferResponse(transferRequest.Token, transferRejectionMessage)).ConfigureAwait(false);
-                                await connection.WriteAsync(new QueueFailedResponse(transferRequest.Filename, transferRejectionMessage)).ConfigureAwait(false);
+                                await connection.WriteAsync(new UploadDenied(transferRequest.Filename, transferRejectionMessage)).ConfigureAwait(false);
                             }
                             else
                             {
@@ -256,9 +302,13 @@ namespace Soulseek.Messaging.Handlers
 
                         break;
 
-                    case MessageCode.Peer.QueueFailed:
-                        var queueFailedResponse = QueueFailedResponse.FromByteArray(message);
-                        SoulseekClient.Waiter.Throw(new WaitKey(MessageCode.Peer.TransferRequest, connection.Username, queueFailedResponse.Filename), new TransferRejectedException(queueFailedResponse.Message));
+                    case MessageCode.Peer.UploadDenied:
+                        var uploadDeniedResponse = UploadDenied.FromByteArray(message);
+
+                        Diagnostic.Debug($"Download of {uploadDeniedResponse.Filename} from {connection.Username} was denied: {uploadDeniedResponse.Message}");
+                        SoulseekClient.Waiter.Throw(new WaitKey(MessageCode.Peer.TransferRequest, connection.Username, uploadDeniedResponse.Filename), new TransferRejectedException(uploadDeniedResponse.Message));
+
+                        DownloadDenied?.Invoke(this, new DownloadDeniedEventArgs(connection.Username, uploadDeniedResponse.Filename, uploadDeniedResponse.Message));
                         break;
 
                     case MessageCode.Peer.PlaceInQueueResponse:
@@ -274,15 +324,13 @@ namespace Soulseek.Messaging.Handlers
 
                     case MessageCode.Peer.UploadFailed:
                         var uploadFailedResponse = UploadFailed.FromByteArray(message);
+
                         var msg = $"Download of {uploadFailedResponse.Filename} reported as failed by {connection.Username}";
-
-                        var download = SoulseekClient.Downloads.Values.FirstOrDefault(d => d.Username == connection.Username && d.Filename == uploadFailedResponse.Filename);
-                        if (download != null)
-                        {
-                            SoulseekClient.Waiter.Throw(new WaitKey(MessageCode.Peer.TransferRequest, download.Username, download.Filename), new TransferException(msg));
-                        }
-
                         Diagnostic.Debug(msg);
+
+                        SoulseekClient.Waiter.Throw(new WaitKey(MessageCode.Peer.TransferRequest, connection.Username, uploadFailedResponse.Filename), new TransferException(msg));
+
+                        DownloadFailed?.Invoke(this, new DownloadFailedEventArgs(connection.Username, uploadFailedResponse.Filename));
                         break;
 
                     default:
@@ -332,8 +380,9 @@ namespace Soulseek.Messaging.Handlers
         /// <param name="args">The message event args.</param>
         public void HandleMessageWritten(object sender, MessageEventArgs args)
         {
+            var connection = (IMessageConnection)sender;
             var code = new MessageReader<MessageCode.Peer>(args.Message).ReadCode();
-            Diagnostic.Debug($"Peer message sent: {code}");
+            Diagnostic.Debug($"Peer message sent: {code} ({connection.IPEndPoint}) (id: {connection.Id})");
         }
 
         private async Task<(bool Rejected, string RejectionMessage)> TryEnqueueDownloadAsync(string username, IPEndPoint ipEndPoint, string filename)
@@ -344,7 +393,7 @@ namespace Soulseek.Messaging.Handlers
             try
             {
                 await SoulseekClient.Options
-                    .EnqueueDownloadAction(username, ipEndPoint, filename).ConfigureAwait(false);
+                    .EnqueueDownload(username, ipEndPoint, filename).ConfigureAwait(false);
             }
             catch (DownloadEnqueueException ex)
             {
@@ -371,7 +420,7 @@ namespace Soulseek.Messaging.Handlers
 
             try
             {
-                placeInQueue = await SoulseekClient.Options.PlaceInQueueResponseResolver(connection.Username, connection.IPEndPoint, filename).ConfigureAwait(false);
+                placeInQueue = await SoulseekClient.Options.PlaceInQueueResolver(connection.Username, connection.IPEndPoint, filename).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-﻿// <copyright file="StartPublicChat.cs" company="JP Dillingham">
+﻿// <copyright file="DownloadFailedEventArgs.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -15,29 +15,27 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace Soulseek.Messaging.Messages
+namespace Soulseek
 {
     /// <summary>
-    ///     Starts receiving public chat messages.
+    ///     Event arguments for events raised when a user reports that an upload has failed.
     /// </summary>
-    internal sealed class StartPublicChat : IOutgoingMessage
+    public class DownloadFailedEventArgs : UserEventArgs
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="StartPublicChat"/> class.
+        ///     Initializes a new instance of the <see cref="DownloadFailedEventArgs"/> class.
         /// </summary>
-        public StartPublicChat()
+        /// <param name="username">The username associated with the event.</param>
+        /// <param name="filename">The filename associated with the event.</param>
+        public DownloadFailedEventArgs(string username, string filename)
+            : base(username)
         {
+            Filename = filename;
         }
 
         /// <summary>
-        ///     Constructs a <see cref="byte"/> array from this message.
+        ///     Gets the filename associated with the event.
         /// </summary>
-        /// <returns>The constructed byte array.</returns>
-        public byte[] ToByteArray()
-        {
-            return new MessageBuilder()
-                .WriteCode(MessageCode.Server.AskPublicChat)
-                .Build();
-        }
+        public string Filename { get; }
     }
 }

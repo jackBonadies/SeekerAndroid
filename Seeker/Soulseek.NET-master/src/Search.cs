@@ -25,15 +25,17 @@ namespace Soulseek
         /// <summary>
         ///     Initializes a new instance of the <see cref="Search"/> class.
         /// </summary>
-        /// <param name="searchText">The text for which to search.</param>
+        /// <param name="query">The search query.</param>
+        /// <param name="scope">The scope of the search.</param>
         /// <param name="token">The unique search token.</param>
         /// <param name="state">The state of the search.</param>
         /// <param name="responseCount">The current number of responses received.</param>
         /// <param name="fileCount">The total number of files contained within received responses.</param>
         /// <param name="lockedFileCount">The total number of locked files contained within received responses.</param>
-        public Search(string searchText, int token, SearchStates state, int responseCount, int fileCount, int lockedFileCount)
+        public Search(SearchQuery query, SearchScope scope, int token, SearchStates state, int responseCount, int fileCount, int lockedFileCount)
         {
-            SearchText = searchText;
+            Query = query;
+            Scope = scope;
             Token = token;
             State = state;
             ResponseCount = responseCount;
@@ -47,7 +49,8 @@ namespace Soulseek
         /// <param name="searchInternal">The internal instance from which to copy data.</param>
         internal Search(SearchInternal searchInternal)
             : this(
-                searchInternal.SearchText,
+                searchInternal.Query,
+                searchInternal.Scope,
                 searchInternal.Token,
                 searchInternal.State,
                 searchInternal.ResponseCount,
@@ -67,14 +70,19 @@ namespace Soulseek
         public int LockedFileCount { get; }
 
         /// <summary>
+        ///     Gets the search query.
+        /// </summary>
+        public SearchQuery Query { get; }
+
+        /// <summary>
         ///     Gets the current number of responses received.
         /// </summary>
         public int ResponseCount { get; }
 
         /// <summary>
-        ///     Gets the text for which to search.
+        ///     Gets the scope of the saerch.
         /// </summary>
-        public string SearchText { get; }
+        public SearchScope Scope { get; }
 
         /// <summary>
         ///     Gets the state of the search.

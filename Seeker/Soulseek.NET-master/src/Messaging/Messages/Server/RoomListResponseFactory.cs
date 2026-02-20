@@ -1,4 +1,4 @@
-﻿// <copyright file="RoomListResponse.cs" company="JP Dillingham">
+﻿// <copyright file="RoomListResponseFactory.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ namespace Soulseek.Messaging.Messages
     /// <summary>
     ///     A list of available chat rooms.
     /// </summary>
-    internal sealed class RoomListResponse : IIncomingMessage
+    internal sealed class RoomListResponseFactory : IIncomingMessage
     {
         /// <summary>
         ///     Creates a new list of rooms from the specified <paramref name="bytes"/>.
@@ -36,7 +36,7 @@ namespace Soulseek.Messaging.Messages
 
             if (code != MessageCode.Server.RoomList)
             {
-                throw new MessageException($"Message Code mismatch creating {nameof(RoomListResponse)} (expected: {(int)MessageCode.Server.RoomList}, received: {(int)code}");
+                throw new MessageException($"Message Code mismatch creating {nameof(RoomListResponseFactory)} (expected: {(int)MessageCode.Server.RoomList}, received: {(int)code}");
             }
 
             var rooms = ReadRoomInfoList(reader);

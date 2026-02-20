@@ -17,41 +17,59 @@
 
 namespace Soulseek
 {
+    using System;
+    using System.Net.Sockets;
+
     /// <summary>
     ///     Options for connections.
     /// </summary>
     public class ConnectionOptions
     {
+        private readonly Action<Socket> defaultConfigureSocket =
+            (s) => { };
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="ConnectionOptions"/> class.
         /// </summary>
         /// <param name="readBufferSize">The read buffer size for underlying TCP connections.</param>
         /// <param name="writeBufferSize">The write buffer size for underlying TCP connections.</param>
+        /// <param name="writeQueueSize">The size of the write queue for double buffered writes.</param>
         /// <param name="connectTimeout">The connection timeout, in milliseconds, for client and peer TCP connections.</param>
         /// <param name="inactivityTimeout">The inactivity timeout, in milliseconds, for peer TCP connections.</param>
         /// <param name="proxyOptions">Optional SOCKS 5 proxy configuration options.</param>
         /// <param name="tcpKeepAlive">Tcp Keep Alive.</param>
+        /// <param name="configureSocket">The delegate invoked during instantiation to configure the server Socket instance.</param>
         public ConnectionOptions(
             int readBufferSize = 16384,
             int writeBufferSize = 16384,
+            int writeQueueSize = 250,
             int connectTimeout = 10000,
             int inactivityTimeout = 15000,
             ProxyOptions proxyOptions = null,
-            bool tcpKeepAlive = false)
+            bool tcpKeepAlive = false,
+            Action<Socket> configureSocket = null)
         {
             ReadBufferSize = readBufferSize;
             WriteBufferSize = writeBufferSize;
+            WriteQueueSize = writeQueueSize;
+
             ConnectTimeout = connectTimeout;
             InactivityTimeout = inactivityTimeout;
 
             ProxyOptions = proxyOptions;
             TcpKeepAlive = tcpKeepAlive;
+            ConfigureSocket = configureSocket ?? defaultConfigureSocket;
         }
 
         /// <summary>
         ///     Gets or sets a value indicating whether to use Tcp Keep Alive
         /// </summary>
         public bool TcpKeepAlive { get; set; }
+
+        /// <summary>
+        ///     Gets the delegate invoked during instantiation to configure the server Socket instance.
+        /// </summary>
+        public Action<Socket> ConfigureSocket { get; }
 
         /// <summary>
         ///     Gets the connection timeout, in milliseconds, for client and peer TCP connections. (Default = 10000).
@@ -83,12 +101,25 @@ namespace Soulseek
         public int WriteBufferSize { get; }
 
         /// <summary>
-        ///     Returns this instance with <see cref="InactivityTimeout"/> fixed to -1, disabling it.
+        ///     Gets the size of the write queue for double buffered writes. (Default = 250).
         /// </summary>
-        /// <returns>This instance with InactivityTimeout disabled.</returns>
+        public int WriteQueueSize { get; }
+
+        /// <summary>
+        ///     Returns a new instance with <see cref="InactivityTimeout"/> fixed to -1, disabling it.
+        /// </summary>
+        /// <returns>A new instance with InactivityTimeout disabled.</returns>
         public ConnectionOptions WithoutInactivityTimeout()
         {
-            return new ConnectionOptions(ReadBufferSize, WriteBufferSize, ConnectTimeout, inactivityTimeout: -1, ProxyOptions, TcpKeepAlive);
+            return new ConnectionOptions(
+                readBufferSize: ReadBufferSize,
+                writeBufferSize: WriteBufferSize,
+                writeQueueSize: WriteQueueSize,
+                connectTimeout: ConnectTimeout,
+                inactivityTimeout: -1,
+                proxyOptions: ProxyOptions,
+                tcpKeepAlive: TcpKeepAlive,
+                configureSocket: ConfigureSocket);
         }
     }
 }

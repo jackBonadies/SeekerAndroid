@@ -72,7 +72,7 @@ namespace UnitTestCommon
             Assert.IsNotNull(result[0].UserData);
             Assert.AreEqual(294836, result[0].UserData.AverageSpeed);
             Assert.AreEqual(6892, result[0].UserData.FileCount);
-            Assert.AreEqual(152, result[0].UserData.DownloadCount);
+            Assert.AreEqual(152, result[0].UserData.UploadCount);
             Assert.AreEqual(UserPresence.Online, result[0].UserData.Status);
             Assert.AreEqual(Seeker.UserRole.Friend, result[0].Role);
         }

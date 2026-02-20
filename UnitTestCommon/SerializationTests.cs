@@ -21,9 +21,9 @@ namespace UnitTestCommon
                 new UserListItem("user1", Seeker.UserRole.Friend)
                 {
                     DoesNotExist = true,
-                    UserStatus = new UserStatus(UserPresence.Offline, true),
+                    UserStatus = new UserStatus("user1", UserPresence.Offline, true),
                     UserData = new UserData("user1", UserPresence.Online, 100, 11, 12, 14, "en", 4),
-                    UserInfo = new UserInfo("testing", true, new byte[] { 0x10, 0x11 }, 1, 3, true)
+                    UserInfo = new UserInfo("testing", 1, 3, true, new byte[] { 0x10, 0x11 })
                 },
                 new UserListItem("user2", Seeker.UserRole.Ignored)
                 {
@@ -176,7 +176,7 @@ namespace UnitTestCommon
 
             var responses = new List<SearchResponse>
             {
-                new SearchResponse("testuser", 123, 2, 50000, 5L, files, lockedFiles)
+                new SearchResponse("testuser", 123, true, 50000, 5, files, lockedFiles)
             };
 
             var bytes = SerializationHelper.SaveSearchResponsesToByteArray(responses);
@@ -189,7 +189,7 @@ namespace UnitTestCommon
                 Assert.AreEqual(1, restored.Count);
                 Assert.AreEqual("testuser", restored[0].Username);
                 Assert.AreEqual(123, restored[0].Token);
-                Assert.AreEqual(2, restored[0].FreeUploadSlots);
+                Assert.AreEqual(true, restored[0].HasFreeUploadSlot);
                 Assert.AreEqual(50000, restored[0].UploadSpeed);
 
                 var restoredFiles = restored[0].Files.ToList();
