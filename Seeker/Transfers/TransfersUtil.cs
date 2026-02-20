@@ -195,7 +195,7 @@ namespace Seeker.Transfers
 
             Logger.Debug($"DownloadFileAsync: {fullfilename}");
             Task dlTask = null;
-            Action<TransferStateChangedEventArgs> updateForEnqueue = new Action<TransferStateChangedEventArgs>( (args) =>
+            Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
             {
                 if (args.Transfer.State.HasFlag(TransferStates.Queued) || args.Transfer.State == TransferStates.Initializing)
                 {
