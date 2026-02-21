@@ -133,6 +133,7 @@ namespace Soulseek
             Func<string, IPEndPoint, Task<UserInfo>> userInfoResolver = null,
             Func<string, IPEndPoint, string, Task> enqueueDownload = null,
             Func<string, IPEndPoint, string, Task<int?>> placeInQueueResolver = null,
+            Func<string, Task<IPAddress>> addressResolver = null,
             bool raiseEventsAsynchronously = false)
         {
             EnableListener = enableListener;
@@ -208,6 +209,7 @@ namespace Soulseek
             UserInfoResolver = userInfoResolver ?? defaultUserInfoResolver;
             EnqueueDownload = enqueueDownload ?? defaultEnqueueDownload;
             PlaceInQueueResolver = placeInQueueResolver ?? defaultPlaceInQueueResolver;
+            AddressResolver = addressResolver;
 
             RaiseEventsAsynchronously = raiseEventsAsynchronously;
         }
@@ -347,6 +349,11 @@ namespace Soulseek
         ///     Gets the delegate used to resolve the <see cref="PlaceInQueueResponse"/> for an incoming request.
         /// </summary>
         public Func<string, IPEndPoint, string, Task<int?>> PlaceInQueueResolver { get; }
+
+        /// <summary>
+        ///     Gets the delegate used to resolve an <see cref="IPAddress"/> from a hostname. (Default = Dns.GetHostEntry).
+        /// </summary>
+        public Func<string, Task<IPAddress>> AddressResolver { get; }
 
         /// <summary>
         ///     Gets the search response cache to use when a response is not able to be delivered immediately.
@@ -499,7 +506,8 @@ namespace Soulseek
             Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>> directoryContentsResolver = null,
             Func<string, IPEndPoint, Task<UserInfo>> userInfoResolver = null,
             Func<string, IPEndPoint, string, Task> enqueueDownload = null,
-            Func<string, IPEndPoint, string, Task<int?>> placeInQueueResolver = null)
+            Func<string, IPEndPoint, string, Task<int?>> placeInQueueResolver = null,
+            Func<string, Task<IPAddress>> addressResolver = null)
         {
             return new SoulseekClientOptions(
                 enableListener: enableListener ?? EnableListener,
@@ -531,7 +539,8 @@ namespace Soulseek
                 directoryContentsResolver: directoryContentsResolver ?? DirectoryContentsResolver,
                 userInfoResolver: userInfoResolver ?? UserInfoResolver,
                 enqueueDownload: enqueueDownload ?? EnqueueDownload,
-                placeInQueueResolver: placeInQueueResolver ?? PlaceInQueueResolver);
+                placeInQueueResolver: placeInQueueResolver ?? PlaceInQueueResolver,
+                addressResolver: addressResolver ?? AddressResolver);
         }
     }
 }

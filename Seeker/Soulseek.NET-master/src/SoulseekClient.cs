@@ -42,20 +42,6 @@ namespace Soulseek
     public class SoulseekClient : ISoulseekClient
     {
     	private const string DefaultAddress = "server.slsknet.org";
-#pragma warning disable S2223 // Non-constant static fields should not be visible
-#pragma warning disable SA1310 // Field names should not contain underscore
-#pragma warning disable SA1401 // Fields should be private
-#pragma warning disable CA2211 // Non-constant fields should not be visible
-#pragma warning disable SA1600 // Elements should be documented
-#pragma warning disable S1104 // Fields should not have public accessibility
-        public static bool DNS_LOOKUP_FAILED = false;
-#pragma warning restore S1104 // Fields should not have public accessibility
-#pragma warning restore SA1600 // Elements should be documented
-#pragma warning restore CA2211 // Non-constant fields should not be visible
-#pragma warning restore SA1401 // Fields should be private
-#pragma warning restore SA1310 // Field names should not contain underscore
-#pragma warning restore S2223 // Non-constant static fields should not be visible
-
         private const int DefaultPort = 2271;
 
         /// <summary>
@@ -361,11 +347,6 @@ namespace Soulseek
         ///     Occurs when a global message is received.
         /// </summary>
         public event EventHandler<string> GlobalMessageReceived;
-
-        /// <summary>
-        ///     Occurs when a global message is received.
-        /// </summary>
-        public event EventHandler<UserData> UserDataReceived;
 
         /// <summary>
         ///     Occurs when the client is forcefully disconnected from the server, probably because another client logged in with
@@ -1103,39 +1084,21 @@ namespace Soulseek
             {
                 throw new InvalidOperationException($"The client is already connected");
             }
-			//TODO2026
-            DNS_LOOKUP_FAILED = false;
+
             if (!IPAddress.TryParse(address, out IPAddress ipAddress))
             {
                 try
                 {
-                    Action getIp = new Action(() => {
-                        try
-                        {
-                            ipAddress = Dns.GetHostEntry(address).AddressList[0];
-                        }
-                        catch
-                        {
-                            DNS_LOOKUP_FAILED = true;
-                            //i think this happens when no internet.  when we do have internet AND dns problems then it just hangs instead.
-                        }
-                    });
-                    Task t = new Task(getIp);
-                    t.Start();
-                    if(t.Wait(2000)&& !DNS_LOOKUP_FAILED)
+                    if (Options.AddressResolver != null)
                     {
-                        //we do nothing, it should set the ip address
-                        
+                        ipAddress = Options.AddressResolver(address).Result;
                     }
                     else
                     {
-                        //IPAddress manualIP = null;
-                        IPAddress.TryParse("208.76.170.59", out ipAddress);
-                        DNS_LOOKUP_FAILED = true;
+                        ipAddress = Dns.GetHostEntry(address).AddressList[0];
                     }
-                    //ipAddress = Dns.GetHostEntry(address).AddressList[0];
                 }
-                catch (SocketException ex)
+                catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
                 {
                     throw new AddressException($"Failed to resolve address '{address}': {ex.Message}", ex);
                 }
@@ -2735,35 +2698,6 @@ namespace Soulseek
                 throw new SoulseekClientException($"Failed to set shared counts to {directories} directories and {files} files: {ex.Message}", ex);
             }
         }
-
-        /// <summary>
-        /// Custom, to get our upload speed
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task GetUserDataAsync(string username, CancellationToken? cancellationToken = null)
-        {
-            if (username == null || username == string.Empty)
-            {
-                throw new ArgumentOutOfRangeException("username cannot be null or empty");
-            }
-
-            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
-            {
-                throw new InvalidOperationException($"The server connection must be connected and logged in to set shared counts (currently: {State})");
-            }
-
-            try
-            {
-                return ServerConnection.WriteAsync(new GetUserStatsCommand(username), cancellationToken ?? CancellationToken.None);
-            }
-            catch (Exception ex) when (!(ex is OperationCanceledException) && !(ex is TimeoutException))
-            {
-                throw new SoulseekClientException($"Failed to get user data: {ex.Message}", ex);
-            }
-        }
-
 
         /// <summary>
         ///     Asynchronously informs the server of the current online <paramref name="status"/> of the client.
@@ -5083,4 +5017,3 @@ namespace Soulseek
         }
     }
 }
-

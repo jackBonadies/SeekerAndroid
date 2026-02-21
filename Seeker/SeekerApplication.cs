@@ -83,6 +83,23 @@ namespace Seeker
             }
         }
 
+        public static bool DnsLookupFailed;
+
+        private static async Task<IPAddress> ResolveAddressAsync(string address)
+        {
+            DnsLookupFailed = false;
+            var dnsTask = Dns.GetHostEntryAsync(address);
+            var completed = await Task.WhenAny(dnsTask, Task.Delay(3000)).ConfigureAwait(false);
+
+            if (completed == dnsTask && dnsTask.Status == TaskStatus.RanToCompletion)
+            {
+                return dnsTask.Result.AddressList[0];
+            }
+
+            DnsLookupFailed = true;
+            return IPAddress.Parse("208.76.170.59");
+        }
+
         public const bool AUTO_CONNECT_ON = true;
         public static bool LOG_DIAGNOSTICS
         {
@@ -171,6 +188,7 @@ namespace Seeker
                         listenPort: PreferencesState.ListenerPort,
                         maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
                         serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
+                        addressResolver: ResolveAddressAsync,
                         userInfoResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
                 SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;

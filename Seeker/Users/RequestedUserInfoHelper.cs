@@ -114,7 +114,7 @@ namespace Seeker
             {
                 RequestedUserList.Add(new UserListItem(uname));
             }
-            SeekerState.SoulseekClient.GetUserDataAsync(uname);
+            SeekerState.SoulseekClient.GetUserStatisticsAsync(uname);
             SeekerState.SoulseekClient.GetUserInfoAsync(uname).ContinueWith(new Action<Task<UserInfo>>(
                 (Task<UserInfo> userInfoTask) =>
                 {

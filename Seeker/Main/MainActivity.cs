@@ -1272,7 +1272,7 @@ namespace Seeker
                         return;
                     }
                     SharedFileService.InformServerOfSharedFiles(); //dont need to get the result of this one.
-                    SeekerState.SoulseekClient.GetUserDataAsync(PreferencesState.Username); //the result of this one if from an event handler..
+                    SeekerState.SoulseekClient.GetUserStatisticsAsync(PreferencesState.Username); //the result of this one if from an event handler..
                     //.ContinueWith(
                     //    (Task<UserData> userDataTask) =>
                     //    {

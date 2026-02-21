@@ -229,20 +229,20 @@ namespace Seeker
         private void UpdateLoginUI(Task t)
         {
             //all logins go to here...
-            if (SoulseekClient.DNS_LOOKUP_FAILED && (t != null && t.Status == TaskStatus.Faulted)) //task can be null and so if DNS lookup fails this will be a nullref...
+            if (SeekerApplication.DnsLookupFailed && (t != null && t.Status == TaskStatus.Faulted)) //task can be null and so if DNS lookup fails this will be a nullref...
             {
                 //this can happen if we do not have internet....
 
             }
-            else if (SoulseekClient.DNS_LOOKUP_FAILED)
+            else if (SeekerApplication.DnsLookupFailed)
             {
                 var action = new Action(() =>
                 {
                     Toast.MakeText(SeekerState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
-                    //Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
+                    Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
                 SeekerState.MainActivityRef.RunOnUiThread(action);
-                SoulseekClient.DNS_LOOKUP_FAILED = false; // dont have to keep showing this... wait for next failure for it to be set...
+                SeekerApplication.DnsLookupFailed = false; // dont have to keep showing this... wait for next failure for it to be set...
             }
 
             Console.WriteLine("Update Login UI");
