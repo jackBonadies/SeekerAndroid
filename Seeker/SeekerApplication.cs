@@ -845,6 +845,7 @@ namespace Seeker
             {
                 Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
+            Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
             //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
             if (relevantItem != null)
             {

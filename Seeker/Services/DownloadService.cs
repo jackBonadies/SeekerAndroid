@@ -512,6 +512,7 @@ namespace Seeker.Services
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
+                Logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status);
                 try
                 {
                     Action action = null;
@@ -794,7 +795,7 @@ namespace Seeker.Services
 
                         if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SeekerState.AutoRetryDownload) && retriable))
                         {
-                            Logger.Debug("!! retry the download " + e.dlInfo.fullFilename);
+                            Logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
                             //Logger.Debug("!!! try undo mojibake " + tryUndoMojibake);
                             try
                             {
@@ -1160,14 +1161,17 @@ namespace Seeker.Services
             }
             else
             {
+                System.IO.Stream stream;
                 if (partialLength > 0)
                 {
-                    return SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wa");
+                    stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wa");
                 }
                 else
                 {
-                    return SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
+                    stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
                 }
+
+                return new PositionTrackingStream(stream, 0);
             }
         }
 
