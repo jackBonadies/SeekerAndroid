@@ -863,6 +863,8 @@ namespace Seeker.Services
                     {
                         Logger.Firebase("Very bad. No memory stream or incomplete URI available for saving file.");
                     }
+                    e.dlInfo.TransferItemReference.IncompleteParentUri = null; //not needed anymore.
+                    e.dlInfo.TransferItemReference.IncompleteUri = null;
                     e.dlInfo.TransferItemReference.FinalUri = finalUri;
                 }
                 finally
