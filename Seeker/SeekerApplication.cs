@@ -866,11 +866,6 @@ namespace Seeker
                 {
                     relevantItem.InProcessing = true;
                 }
-                if (relevantItem.State.HasFlag(TransferStates.Succeeded))
-                {
-                    relevantItem.IncompleteParentUri = null; //not needed anymore.
-                    relevantItem.IncompleteUri = null;
-                }
                 //if(relevantItem.Size==-1)
                 //{
                 //    if(e.Transfer.Size!=0)

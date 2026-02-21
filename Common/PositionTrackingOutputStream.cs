@@ -9,12 +9,12 @@ namespace Common
     /// Wraps a write-only stream (e.g. Android OutputStreamInvoker) to track Position,
     /// which the Slsk.net library reads for download progress reporting.
     /// </summary>
-    public class PositionTrackingStream : Stream
+    public class PositionTrackingOutputStream : Stream
     {
         private readonly Stream _inner;
         private long _position;
 
-        public PositionTrackingStream(Stream inner, long initialPosition = 0)
+        public PositionTrackingOutputStream(Stream inner, long initialPosition = 0)
         {
             _inner = inner;
             _position = initialPosition;

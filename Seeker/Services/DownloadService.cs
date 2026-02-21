@@ -1173,7 +1173,7 @@ namespace Seeker.Services
                     stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
                 }
 
-                return new PositionTrackingStream(stream, 0);
+                return new PositionTrackingOutputStream(stream, 0);
             }
         }
 
