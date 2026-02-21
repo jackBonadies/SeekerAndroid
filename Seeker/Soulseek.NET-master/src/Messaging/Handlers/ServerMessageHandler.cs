@@ -263,7 +263,6 @@ namespace Soulseek.Messaging.Handlers
 
                     case MessageCode.Server.ExcludedSearchPhrases:
                         var excludedSearchPhraseList = ExcludedSearchPhrasesNotification.FromByteArray(message);
-                        SoulseekClient.Waiter.Complete(new WaitKey(code), excludedSearchPhraseList);
                         ExcludedSearchPhrasesReceived?.Invoke(this, excludedSearchPhraseList);
                         break;
 

@@ -73,7 +73,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets the status of the user (0 = offline, 1 = away, 2 = online).
         /// </summary>
-        public UserPresence Status { get; set; }
+        public UserPresence Status { get; }
 
         /// <summary>
         ///     Gets the number of uploads tracked by the server for this user.

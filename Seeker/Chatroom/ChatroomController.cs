@@ -484,13 +484,15 @@ namespace Seeker.Chatroom
                 //its threadsafe to enumerate a concurrent dictionary values, use get enumerator, etc.
                 foreach (var kvp in ChatroomController.JoinedRoomData)
                 {
-                    //readonly so safe.
                     bool roomUserFound = false;
-                    foreach (var uData in kvp.Value.Users)
+                    var oldRoomData = kvp.Value;
+                    foreach (var uData in oldRoomData.Users)
                     {
                         if (uData.Username == e.Username)
                         {
-                            uData.Status = e.Presence;
+                            var updatedUsers = oldRoomData.Users.Select(u =>
+                                u.Username == e.Username ? u.WithStatus(e.Presence) : u);
+                            JoinedRoomData[kvp.Key] = new Soulseek.RoomData(oldRoomData.Name, updatedUsers, oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
                             roomUserFound = true;
                             break;
                         }

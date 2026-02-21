@@ -81,7 +81,7 @@ namespace Seeker.Chatroom
                     {
                         return;
                     }
-                    UI_userDataList[previousPosition].Status = e.Status;
+                    UI_userDataList[previousPosition] = UI_userDataList[previousPosition].WithStatus(e.Status);
                     if (PreferencesState.SortChatroomUsersBy != SortOrderChatroomUsers.OnlineStatus)
                     {
                         //position wont change

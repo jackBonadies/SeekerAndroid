@@ -192,7 +192,6 @@ namespace Soulseek
             StartingToken = startingToken;
 
             ServerConnectionOptions = (serverConnectionOptions ?? new ConnectionOptions()).WithoutInactivityTimeout();
-            ServerConnectionOptions.TcpKeepAlive = true; //always true for server
             PeerConnectionOptions = peerConnectionOptions ?? new ConnectionOptions();
             TransferConnectionOptions = transferConnectionOptions ?? new ConnectionOptions();
             IncomingConnectionOptions = incomingConnectionOptions ?? new ConnectionOptions();
@@ -212,33 +211,6 @@ namespace Soulseek
 
             RaiseEventsAsynchronously = raiseEventsAsynchronously;
         }
-
-        public void SetSharedHandlers(
-            Func<string, IPEndPoint, Task<BrowseResponse>> browseResponseResolver,
-            Func<string, int, SearchQuery, Task<SearchResponse>> searchResponseResolver,
-            Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>> directoryContentsResolver,
-            Func<string, IPEndPoint, string, Task> enqueueDownload
-            )
-        {
-            BrowseResponseResolver = browseResponseResolver ?? defaultBrowseResponseResolver;
-            DirectoryContentsResolver = directoryContentsResolver;
-
-            //UserInfoResolver = userInfoResolver ?? defaultUserInfoResolver;
-            EnqueueDownload = enqueueDownload ?? defaultEnqueueDownload;
-            SearchResponseResolver = searchResponseResolver;
-        }
-
-        public void NullSharedHandlers()
-        {
-            SearchResponseResolver = null;
-
-            BrowseResponseResolver = defaultBrowseResponseResolver;
-            DirectoryContentsResolver = null;
-
-            //UserInfoResolver = defaultUserInfoResolver;
-            EnqueueDownload = defaultEnqueueDownload;
-        }
-         
 
         /// <summary>
         ///     Gets a value indicating whether to accept distributed child connections. (Default = accept).
@@ -265,7 +237,7 @@ namespace Soulseek
         ///     Gets the delegate used to resolve the response for an incoming browse request. (Default = a response with no files
         ///     or directories).
         /// </summary>
-        public Func<string, IPEndPoint, Task<BrowseResponse>> BrowseResponseResolver { get; set;}
+        public Func<string, IPEndPoint, Task<BrowseResponse>> BrowseResponseResolver { get; }
 
         /// <summary>
         ///     Gets a value indicating whether duplicated distributed search requests should be discarded. (Default = discard duplicates).
@@ -276,7 +248,7 @@ namespace Soulseek
         ///     Gets the delegate used to resolve the response for an incoming directory contents request. (Default = a response
         ///     with an empty directory).
         /// </summary>
-        public Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>> DirectoryContentsResolver { get; set;}
+        public Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>> DirectoryContentsResolver { get; }
 
         /// <summary>
         ///     Gets the number of allowed distributed children. (Default = 100).
@@ -305,7 +277,7 @@ namespace Soulseek
         ///     This delegate must throw an Exception to indicate a rejected download. If the thrown Exception is of type
         ///     <see cref="DownloadEnqueueException"/> the message will be sent to the client, otherwise a default message will be sent.
         /// </remarks>
-        public Func<string, IPEndPoint, string, Task> EnqueueDownload { get; set;}
+        public Func<string, IPEndPoint, string, Task> EnqueueDownload { get; }
 
         /// <summary>
         ///     Gets the options for incoming connections.
@@ -384,7 +356,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets the delegate used to resolve the <see cref="SearchResponse"/> for an incoming request. (Default = do not respond).
         /// </summary>
-        public Func<string, int, SearchQuery, Task<SearchResponse>> SearchResponseResolver { get; set;}
+        public Func<string, int, SearchQuery, Task<SearchResponse>> SearchResponseResolver { get; }
 
         /// <summary>
         ///     Gets the options for the server message connection.
@@ -409,7 +381,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets the delegate used to resolve the <see cref="UserInfo"/> for an incoming request. (Default = a blank/zeroed response).
         /// </summary>
-        public Func<string, IPEndPoint, Task<UserInfo>> UserInfoResolver { get; set;}
+        public Func<string, IPEndPoint, Task<UserInfo>> UserInfoResolver { get; }
 
         /// <summary>
         ///     Gets a value indicating whether to raise events asynchronously.

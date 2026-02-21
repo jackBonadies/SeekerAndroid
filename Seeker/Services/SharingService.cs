@@ -18,23 +18,44 @@ namespace Seeker.Services
     /// </summary>
     public static class SharingService
     {
+        private static bool _isActive;
+
+        private static readonly Func<string, int, SearchQuery, Task<SearchResponse>> NoOpSearchResolver =
+            (u, t, q) => Task.FromResult<SearchResponse>(null);
+
+        private static readonly Func<string, IPEndPoint, Task<BrowseResponse>> NoOpBrowseResolver =
+            (u, i) => Task.FromResult(new BrowseResponse(Enumerable.Empty<Soulseek.Directory>()));
+
+        private static readonly Func<string, IPEndPoint, int, string, Task<IEnumerable<Soulseek.Directory>>> NoOpDirectoryResolver =
+            (u, i, t, d) => Task.FromResult(Enumerable.Empty<Soulseek.Directory>());
+
+        private static readonly Func<string, IPEndPoint, string, Task> NoOpEnqueueDownload =
+            (u, i, f) => Task.CompletedTask;
+
         public static void TurnOnSharing()
         {
-            SeekerState.SoulseekClient.Options.SetSharedHandlers(BrowseResponseResolver, SearchResponseResolver, DirectoryContentsResponseResolver, DownloadService.EnqueueDownloadAction);
+            SeekerState.SoulseekClient.ReconfigureOptionsAsync(new SoulseekClientOptionsPatch(
+                searchResponseResolver: SearchResponseResolver,
+                browseResponseResolver: BrowseResponseResolver,
+                directoryContentsResolver: DirectoryContentsResponseResolver,
+                enqueueDownload: DownloadService.EnqueueDownloadAction));
+            _isActive = true;
         }
 
         public static void TurnOffSharing()
         {
-            SeekerState.SoulseekClient.Options.NullSharedHandlers();
+            SeekerState.SoulseekClient.ReconfigureOptionsAsync(new SoulseekClientOptionsPatch(
+                searchResponseResolver: NoOpSearchResolver,
+                browseResponseResolver: NoOpBrowseResolver,
+                directoryContentsResolver: NoOpDirectoryResolver,
+                enqueueDownload: NoOpEnqueueDownload));
+            _isActive = false;
         }
 
         /// <summary>
         /// Check if sharing is currently active (i.e. handlers are set).
         /// </summary>
-        public static bool IsSharingActive()
-        {
-            return SeekerState.SoulseekClient.Options.SearchResponseResolver != null;
-        }
+        public static bool IsSharingActive() => _isActive;
 
         private static Task<BrowseResponse> BrowseResponseResolver(string username, IPEndPoint endpoint)
         {

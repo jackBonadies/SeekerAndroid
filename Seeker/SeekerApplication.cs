@@ -43,6 +43,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using static Android.Provider.ContactsContract;
@@ -55,6 +56,31 @@ namespace Seeker
         public static Context ApplicationContext = null;
         public SeekerApplication(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
         {
+        }
+
+        private static readonly ConnectionOptions ServerConnectionOptionsWithKeepAlive =
+            new ConnectionOptions(configureSocket: ConfigureTcpKeepAlive);
+
+        private static void ConfigureTcpKeepAlive(Socket socket)
+        {
+            try
+            {
+                int size = 4;
+                byte[] keepAlive = new byte[size * 3];
+
+                // Turn keepalive on
+                Buffer.BlockCopy(BitConverter.GetBytes(1U), 0, keepAlive, 0, size);
+                // Amount of time without activity before sending a keepalive (3s)
+                Buffer.BlockCopy(BitConverter.GetBytes(3000U), 0, keepAlive, size, size);
+                // Keepalive interval (2s)
+                Buffer.BlockCopy(BitConverter.GetBytes(2000U), 0, keepAlive, size * 2, size);
+
+                socket.IOControl(IOControlCode.KeepAliveValues, keepAlive, null);
+            }
+            catch (Exception)
+            {
+                // if we can't set keep alive, just continue on.
+            }
         }
 
         public const bool AUTO_CONNECT_ON = true;
@@ -144,6 +170,7 @@ namespace Seeker
                         acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
                         listenPort: PreferencesState.ListenerPort,
                         maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+                        serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
                         userInfoResolver: UserInfoResponseHandler));
                 SetDiagnosticState(LOG_DIAGNOSTICS);
                 SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
