@@ -1174,5 +1174,12 @@
     <string name="error_dialog_content">
         Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.
     </string>
+    <string name="section_downloads">Downloads</string>
+    <string name="section_search">Search</string>
+    <string name="section_general">General</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_sharing">Sharing</string>
+    <string name="section_network">Network</string>
+    <string name="section_account">Account</string>
 </resources>
 

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.divider.MaterialDivider
+        style="@style/SettingsDivider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        style="@style/SettingsSectionHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/section_sharing" />
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/SettingsCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sharingLayoutParent">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="10dp"
+                android:id="@+id/sharingLayout"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal|fill_horizontal|center">
+
+                <CheckBox
+                    style="@style/SettingsCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/enable_sharing"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="2dp"
+                    android:id="@+id/enableSharing" />
+
+                <ImageView
+                    style="@style/SettingsHelpIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="2dp"
+                    android:id="@+id/moreInfoButton" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_marginStart="48dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="2dp"
+                android:padding="6dp"
+                android:background="?attr/rounded_input_edit"
+                android:layout_width="match_parent"
+                android:id="@+id/dlChangeSharedDirectoryLayout"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/noSharedFolders"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textColor="?attr/normalTextColor"
+                    android:text="@string/NoSharedAdd"
+                    android:layout_marginBottom="6dp"
+                    android:background="?attr/the_rounded_corner_dialog_background_drawable" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:background="?attr/the_rounded_corner_dialog_background_drawable"
+                    android:layout_marginBottom="6dp"
+                    android:id="@+id/uploadFoldersRecyclerView"
+                    android:minHeight="20dp"
+                    android:visibility="gone"
+                    android:paddingBottom="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        style="@style/SettingsSmallButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/addUploadDirectory"
+                        android:layout_weight="3"
+                        android:layout_marginEnd="4dp"
+                        android:text="Add" />
+
+                    <Button
+                        style="@style/SettingsSmallButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/clearAllDirectories"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/clear" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginStart="32dp"
+                android:gravity="center_horizontal"
+                android:id="@+id/sharingSubLayout2"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_height="wrap_content">
+
+                    <ProgressBar
+                        android:id="@+id/progressBarSharedStatus"
+                        android:indeterminate="true"
+                        android:progressTint="?attr/mainTextColor"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="center"
+                        android:scaleX=".8"
+                        android:scaleY=".8"
+                        android:layout_height="wrap_content" />
+
+                    <ImageView
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:srcCompat="@drawable/ic_filter_list_black_32dp"
+                        android:id="@+id/sharedStatus"
+                        android:tint="?attr/mainTextColor" />
+                </FrameLayout>
+
+                <Button
+                    style="@style/SettingsSmallButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/RescanShares"
+                    android:maxEms="10"
+                    android:layout_marginStart="16dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_marginBottom="10dp"
+                    android:id="@+id/rescanShares" />
+
+                <Button
+                    style="@style/SettingsSmallButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/browse_yourself"
+                    android:maxEms="10"
+                    android:layout_marginStart="6dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_marginBottom="10dp"
+                    android:id="@+id/browseSelfButton" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/PauseSharingIfMetered"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/shareOnlyOnUnmetered" />
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/auto_clear_complete_uploads"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/autoClearCompleteUploads" />
+
+</merge>

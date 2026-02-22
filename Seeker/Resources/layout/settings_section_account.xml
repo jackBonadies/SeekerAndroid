@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.divider.MaterialDivider
+        style="@style/SettingsDivider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        style="@style/SettingsSectionHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/section_account" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/privLayout"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Privileges: STATUSDUMMY"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:textColor="?attr/normalTextColorNonTinted"
+            android:paddingStart="4dp"
+            android:paddingEnd="10dp"
+            android:id="@+id/privStatusView" />
+
+        <Button
+            style="@style/SettingsSmallButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Get"
+            android:id="@+id/getPriv"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp" />
+
+        <Button
+            style="@style/SettingsSmallButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Check"
+            android:id="@+id/checkPriv"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp" />
+
+        <ImageView
+            style="@style/SettingsHelpIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/privHelp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/enableDiagnosticsLayout"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal|fill_horizontal|center">
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/EnableDiagnostics"
+            android:layout_gravity="center"
+            android:id="@+id/enableDiagnostics" />
+
+        <ImageView
+            style="@style/SettingsHelpIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:id="@+id/moreInfoDiagnostics" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="12dp"
+        android:id="@+id/forceManageStoragePermissionLayout"
+        android:orientation="horizontal">
+
+        <Button
+            style="@style/SettingsSmallButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ForceFilesystemPermission"
+            android:gravity="center_vertical"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:id="@+id/forceFilesystemPermission" />
+
+        <ImageView
+            style="@style/SettingsHelpIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="6dp"
+            android:id="@+id/moreInfoButtonForceFilesystemPermission" />
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/change_password"
+        android:layout_marginStart="10dp"
+        android:foreground="@drawable/button"
+        style="@style/SeekerButtonStyle"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/changePassword" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_your_user_info"
+        android:layout_marginStart="10dp"
+        android:foreground="@drawable/button"
+        style="@style/SeekerButtonStyle"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/editUserInfoButton" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/ImportExternalClientData"
+        android:layout_marginStart="10dp"
+        android:foreground="@drawable/button"
+        style="@style/SeekerButtonStyle"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/importDataButton" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/exportClientData"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal|fill_horizontal|center">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ExportClientData"
+            android:layout_marginStart="10dp"
+            android:foreground="@drawable/button"
+            style="@style/SeekerButtonStyle"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/exportDataButton" />
+
+        <ImageView
+            style="@style/SettingsHelpIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginBottom="2dp"
+            android:id="@+id/moreInfoExport" />
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/restore_default_settings"
+        android:layout_marginStart="10dp"
+        android:foreground="@drawable/button"
+        style="@style/SeekerButtonStyle"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/restoreDefaults" />
+
+</merge>

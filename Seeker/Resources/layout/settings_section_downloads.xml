@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        style="@style/SettingsSectionHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/section_downloads" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:id="@+id/directoryLayout"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:id="@+id/dlChangeDirectoryLayout"
+            android:shrinkColumns="0">
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@string/CurrentDownloadFolder_"
+                        android:textColor="?attr/normalTextColor"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_gravity="center_horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="folderPathDummy"
+                        android:layout_marginBottom="4dp"
+                        android:id="@+id/completeFolderPath"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:inputType="none"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:background="?the_rounded_corner_background_drawable"
+                        android:textColor="?attr/normalTextColor" />
+                </LinearLayout>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Change"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    style="@style/SeekerButtonStyle"
+                    android:foreground="@drawable/button"
+                    android:id="@+id/changeDirSettings" />
+            </TableRow>
+        </TableLayout>
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/CreateCompleteAndIncomplete"
+            android:layout_gravity="center"
+            android:id="@+id/createCompleteAndIncompleteDirectories" />
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/CreateUsernameSubfolders"
+            android:layout_gravity="center"
+            android:id="@+id/createUsernameSubfolders" />
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/DoNotCreateSubfoldersForSingleDownloads"
+            android:layout_gravity="center"
+            android:id="@+id/doNotCreateSubfoldersForSingleDownloads" />
+    </LinearLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/SettingsCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/incompleteFolderLayout">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:id="@+id/incompleteFolderSubLayout"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal|fill_horizontal|center">
+
+                <CheckBox
+                    style="@style/SettingsCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ManuallySetIncompleteFolder"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="4dp"
+                    android:id="@+id/manuallySetIncomplete" />
+            </LinearLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_horizontal"
+                android:id="@+id/incompleteSublayout2"
+                android:shrinkColumns="0">
+
+                <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginStart="10dp"
+                        android:id="@+id/incompleteDirectoryLayout"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:text="@string/CurrentIncompleteFolder"
+                            android:textColor="?attr/normalTextColor"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:layout_gravity="center_horizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="incompleteFolderPathDummy"
+                            android:id="@+id/incompleteFolderPath"
+                            android:layout_marginBottom="4dp"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:inputType="none"
+                            android:paddingTop="2dp"
+                            android:paddingBottom="2dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp"
+                            android:background="?the_rounded_corner_background_drawable"
+                            android:textColor="?attr/normalTextColor" />
+                    </LinearLayout>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/Change"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        style="@style/SeekerButtonStyle"
+                        android:foreground="@drawable/button"
+                        android:id="@+id/changeIncompleteDirSettings" />
+                </TableRow>
+            </TableLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="12dp"
+                android:id="@+id/clearIncompleteSubLayout"
+                android:orientation="horizontal">
+
+                <Button
+                    style="@style/SettingsSmallButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ClearFolder"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:id="@+id/clearIncompleteFolder" />
+
+                <ImageView
+                    style="@style/SettingsHelpIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginBottom="6dp"
+                    android:id="@+id/moreInfoButtonClearIncomplete" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/memoryFileDownloadSwitch"
+        android:orientation="horizontal">
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/file_backed_downloads"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/memoryFileDownloadSwitchCheckBox" />
+
+        <ImageView
+            style="@style/SettingsHelpIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="0dp"
+            android:id="@+id/memoryFileDownloadSwitchIcon" />
+    </LinearLayout>
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/auto_clear_complete"
+        android:layout_gravity="center"
+        android:id="@+id/autoClearComplete" />
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/AutoRetryFailedOfflineOnline"
+        android:layout_gravity="center"
+        android:id="@+id/autoRetryBackOnline" />
+
+</merge>

@@ -1176,5 +1176,12 @@ Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.
     <string name="error_dialog_content">
         Es ist ein Fehler aufgetreten.  \n\nBitte erwägen Sie einen Bericht an den Entwickler zu senden.  \n\nAlle Informationen über die Schritte und Bedingungen, die zu diesem Problem führen, sind sehr hilfreich.
     </string>
+    <string name="section_downloads">Downloads</string>
+    <string name="section_search">Search</string>
+    <string name="section_general">General</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_sharing">Sharing</string>
+    <string name="section_network">Network</string>
+    <string name="section_account">Account</string>
 </resources>
 

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.divider.MaterialDivider
+        style="@style/SettingsDivider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        style="@style/SettingsSectionHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/section_general" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="2dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/keepAliveLayout"
+        android:orientation="horizontal">
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start_service_on_startup"
+            android:maxEms="12"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/startServiceOnStartupCheckBox" />
+
+        <Button
+            style="@style/SettingsSmallButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="START/STOPDUMMY"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/startServiceOnStartupButton" />
+
+        <ImageView
+            style="@style/SettingsHelpIcon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="16dp"
+            android:id="@+id/helpServiceOnStartup" />
+    </LinearLayout>
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/allow_private_room_invitations"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/allowPrivateRoomInvitations" />
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/show_notifs_on_folder_complete"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/showNotificationOnFolderDownload" />
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/show_bottom_notifs_complete"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/showToastNotificationOnDownload" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/recentUserHistoryLayout"
+        android:orientation="horizontal">
+
+        <CheckBox
+            style="@style/SettingsCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/RememberRecent"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/rememberRecentUsers" />
+
+        <Button
+            style="@style/SettingsSmallButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ClearRecentUsers"
+            android:layout_gravity="center_vertical"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/clearRecentUsers" />
+    </LinearLayout>
+
+    <CheckBox
+        style="@style/SettingsCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/AwayOnInactivity"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/autoSetAwayStatus" />
+
+</merge>

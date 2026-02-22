@@ -226,6 +226,14 @@ Directory Count: {5}"
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
+    <string name="section_downloads">Downloads</string>
+    <string name="section_search">Search</string>
+    <string name="section_general">General</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_sharing">Sharing</string>
+    <string name="section_network">Network</string>
+    <string name="section_account">Account</string>
+
     <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max Search Results:</string>
     <string name="only_show_free_slots">

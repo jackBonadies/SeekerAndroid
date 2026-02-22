@@ -1173,5 +1173,12 @@ Nombre de dossiers : {5}
     <string name="error_dialog_content">
         Seeker a eu un problème. \n\nVeuillez envisager d\'envoyer un signalement au développeur.\n\nToute information à propos des étapes / conditions menant à ce problème serait grandement appréciée.
     </string>
+    <string name="section_downloads">Downloads</string>
+    <string name="section_search">Search</string>
+    <string name="section_general">General</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_sharing">Sharing</string>
+    <string name="section_network">Network</string>
+    <string name="section_account">Account</string>
 </resources>
 

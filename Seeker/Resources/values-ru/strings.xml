@@ -1175,5 +1175,12 @@
     <string name="error_dialog_content">
         Seeker столкнулся с проблемой. \n\nПожалуйста, поделитесь отчетом с разработчиками. \n\nЛюбая дополнительная информация, а также описание шагов для воспроизведения приветствуются.
     </string>
+    <string name="section_downloads">Downloads</string>
+    <string name="section_search">Search</string>
+    <string name="section_general">General</string>
+    <string name="section_appearance">Appearance</string>
+    <string name="section_sharing">Sharing</string>
+    <string name="section_network">Network</string>
+    <string name="section_account">Account</string>
 </resources>
 
