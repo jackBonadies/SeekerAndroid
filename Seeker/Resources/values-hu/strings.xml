@@ -990,8 +990,8 @@ Könyvtárak száma: {5}\"
     <string name="AwayOnInactivity">
         Automatically Set Status to Away on Inactivity
     </string>
-    <string name="DayVarient_">Day Varient:</string>
-    <string name="NightVarient_">Night Varient:</string>
+    <string name="DayVarient_">Day Variant:</string>
+    <string name="NightVarient_">Night Variant:</string>
     <string name="NoSharedAdd">
         No Shared Folders. Tap \'Add\' to get started.
     </string>
