@@ -1116,7 +1116,7 @@ Könyvtárak száma: {5}\"
     <string name="Automatic">Automatic</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Manually Set Incomplete Folder
+        Override Incomplete Folder Location
     </string>
     <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
     <string name="ClearFolder">Clear Folder</string>

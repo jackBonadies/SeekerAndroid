@@ -1123,7 +1123,7 @@ Liczba katalogów: {5}\"
     <string name="Automatic">Automatyczny</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Manually Set Incomplete Folder
+        Override Incomplete Folder Location
     </string>
     <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
     <string name="ClearFolder">Czyść folder</string>

@@ -1125,7 +1125,7 @@ Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.
     <string name="Automatic">Automatisch</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Manually Set Incomplete Folder
+        Override Incomplete Folder Location
     </string>
     <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
     <string name="ClearFolder">Ordner leeren</string>
