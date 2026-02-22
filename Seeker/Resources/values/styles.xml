@@ -33,9 +33,8 @@
         <item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_4f58c4</item>
         <item name="rounded_top_purple">@drawable/rounded_top_purple_4f58c4</item>
         
-        <item name="whitePurpleForNavBar">#bcc1f7</item>
+        <item name="whitePurpleForNavBar">#858ddd</item>
 
-        <item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_bcc1f7</item>
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
 
@@ -76,6 +75,18 @@
     <item name="android:paddingLeft">10dp</item>
     <item name="android:paddingRight">10dp</item>
     <item name="android:background">?attr/rounded_button</item>
+  </style>
+
+  <style name="BottomNavActiveIndicator" parent="">
+    <item name="android:color">?attr/whitePurpleForNavBar</item>
+    <item name="android:width">56dp</item>
+    <item name="android:height">32dp</item>
+    <item name="shapeAppearance">@style/ShapeAppearance.BottomNavIndicator</item>
+  </style>
+
+  <style name="ShapeAppearance.BottomNavIndicator" parent="">
+    <item name="cornerFamily">rounded</item>
+    <item name="cornerSize">50%</item>
   </style>
 
   <style name="navTextInactive">

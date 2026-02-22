@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
     android:background="?attr/pseudo_window_background_color"
     android:layout_height="match_parent">
 <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
     android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay"
     android:layout_height="wrap_content">
 
@@ -54,13 +54,14 @@
         android:id="@+id/navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
             app:itemIconTint="#ffffffff"
       app:labelVisibilityMode="labeled"
         android:layout_marginEnd="0dp"
         android:layout_marginStart="0dp"
             android:layout_marginBottom="0dp"
         android:background="?attr/mainPurpleForNavBar"
-            app:itemBackground="?attr/bottom_nav_tab_background"
+            app:itemActiveIndicatorStyle="@style/BottomNavActiveIndicator"
         app:itemTextAppearanceActive="@style/navTextActive"
         app:itemTextAppearanceInactive="@style/navTextInactive"
         android:layout_alignParentBottom="true"

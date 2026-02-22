@@ -36,8 +36,9 @@
 		<item name="rounded_button">@drawable/rounded_button_4f58c4</item>
         <item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_4f58c4</item>
         <item name="rounded_top_purple">@drawable/rounded_top_purple_4f58c4</item>
-          <item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_bcc1f7</item>
-         
+
+         <item name="whitePurpleForNavBar">#858ddd</item>
+
          <item name="checkBoxColor">@color/colorAccent</item>
 
          <item name="mainPurpleForNavBar">?attr/mainPurple</item>

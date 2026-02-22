@@ -35,7 +35,6 @@
 	<attr name="the_rounded_corner_background_drawable" format="reference" />
 	<attr name="the_rounded_corner_dialog_background_drawable" format="reference" />
 	<attr name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific" format="reference" />
-	<attr name="bottom_nav_tab_background" format="reference" />
 	<attr name="buttonEnabledDisabledTextColor" format="reference" />
 	<attr name="header_cell_shape_bottom" format="reference" />
 	<attr name="CustomSelector" format="reference" />
