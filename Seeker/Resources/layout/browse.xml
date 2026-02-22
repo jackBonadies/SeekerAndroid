@@ -115,6 +115,7 @@
         android:layout_height="wrap_content"
         android:backgroundTint="?attr/mainPurple"
         android:background="?attr/mainPurple"
+        app:tint="@android:color/white"
         app:layout_anchor="@id/bottomSheet"
         app:borderWidth="0dp"
         app:fabSize="mini"

@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">?attr/mainPurpleStatusBar</item>
@@ -18,7 +18,7 @@
 
     <style
         name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
-        parent="Widget.Design.TextInputLayout"
+        parent=""
     >
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
@@ -84,6 +84,11 @@
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
         <item name="android:background">?attr/rounded_button</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">0dp</item>
     </style>
 
     <style name="BottomNavActiveIndicator" parent="">
@@ -110,10 +115,10 @@
 
     <style
         name="AppTheme.AppBarOverlay"
-        parent="ThemeOverlay.AppCompat.Dark.ActionBar"
+        parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"
     />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 
     <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
     <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>

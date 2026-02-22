@@ -1,5 +1,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="?attr/pseudo_window_background_color"
@@ -21,6 +22,7 @@
             android:background="?attr/mainPurple"
             android:minHeight="100dp"
             android:theme="?attr/actionBarTheme"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp"
         />

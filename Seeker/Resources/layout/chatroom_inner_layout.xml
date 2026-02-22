@@ -95,6 +95,7 @@
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:background="?attr/selectableItemBackground"
+            app:backgroundTint="@null"
             android:text="@string/send_message"
             android:textColor="?attr/buttonEnabledDisabledTextColor"
         />

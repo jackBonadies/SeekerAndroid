@@ -424,7 +424,7 @@
         <!--<item name="dialogBackground">#52000000</item>-->
     </style>
 
-    <style name="MyAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="MyAlertDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
         <item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
         <item name="android:textColorSecondary">?attr/cellTextColor</item>
         <item name="android:textColorPrimary">?attr/cellTextColor</item>
