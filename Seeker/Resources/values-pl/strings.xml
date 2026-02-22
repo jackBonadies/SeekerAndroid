@@ -18,7 +18,7 @@
     <string name="saerch_user_list">Szukaj listy użytkownika</string>
     <string name="search_room">Szukaj pokoju</string>
     <string name="search_room_">Szukaj pokoju {0}</string>
-    <string name="search_user_">Szukaj Użytkownika</string>
+    <string name="search_user_">Szukaj Użytkownika {0}</string>
     <string name="wishlist_search">Wyszukiwanie na liście życzeń</string>
 
     <string name="no_account">

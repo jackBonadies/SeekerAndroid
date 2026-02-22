@@ -17,8 +17,8 @@
 
     <string name="saerch_user_list">Претражите листу корисника</string>
     <string name="search_room">Претрагу Соба</string>
-    <string name="search_room_">Претрагу Соба</string>
-    <string name="search_user_">Претрагу корисник</string>
+    <string name="search_room_">Претрагу Соба {0}</string>
+    <string name="search_user_">Претрагу корисник {0}</string>
     <string name="wishlist_search">Листа жеља</string>
 
     <string name="no_account">

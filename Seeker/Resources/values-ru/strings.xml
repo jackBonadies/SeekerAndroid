@@ -1117,7 +1117,7 @@
 
     <string name="Succeeded">Выполнено</string>
     <string name="Aborted">Отменено</string>
-    <string name="Num_FilesRemaining">файла(ов) осталось</string>
+    <string name="Num_FilesRemaining">{0} файла(ов) осталось</string>
     <string name="X_of_Y_Remaining">Осталось {0} из {1}</string>
     <string name="SetLanguage">Язык:</string>
     <string name="Automatic">Автоматически</string>
