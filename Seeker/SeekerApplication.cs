@@ -254,9 +254,10 @@ namespace Seeker
                 {
                     Java.Util.Locale locale = appLocales.Get(0);
                     string lang = locale.Language; // ex. fr, uk
-                    if (lang == "pt")
+                    string country = locale.Country; // ex. BR, PT, CN
+                    if (!string.IsNullOrEmpty(country))
                     {
-                        return PreferencesState.FieldLangPtBr;
+                        return lang + "-r" + country; // e.g. pt-rBR, pt-rPT, zh-rCN
                     }
                     return lang;
                 }

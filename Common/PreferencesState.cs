@@ -38,15 +38,26 @@ namespace Common
 
         // Language constants
         public const string FieldLangAuto = "Auto";
-        public const string FieldLangEn = "en";
-        public const string FieldLangPtBr = "pt-rBR";
-        public const string FieldLangFr = "fr";
-        public const string FieldLangRu = "ru";
-        public const string FieldLangEs = "es";
-        public const string FieldLangUk = "uk";
+        public const string FieldLangAr = "ar";
+        public const string FieldLangCa = "ca";
         public const string FieldLangCs = "cs";
+        public const string FieldLangDa = "da";
+        public const string FieldLangDe = "de";
+        public const string FieldLangEn = "en";
+        public const string FieldLangEs = "es";
+        public const string FieldLangFr = "fr";
+        public const string FieldLangHu = "hu";
         public const string FieldLangIt = "it";
+        public const string FieldLangJa = "ja";
         public const string FieldLangNl = "nl";
+        public const string FieldLangNo = "no";
+        public const string FieldLangPl = "pl";
+        public const string FieldLangPtBr = "pt-rBR";
+        public const string FieldLangPtPt = "pt-rPT";
+        public const string FieldLangRu = "ru";
+        public const string FieldLangSr = "sr";
+        public const string FieldLangUk = "uk";
+        public const string FieldLangZhCn = "zh-rCN";
 
         // Transfers
         public static bool AutoClearCompleteDownloads = false;

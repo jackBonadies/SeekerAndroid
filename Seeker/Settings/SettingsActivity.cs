@@ -120,7 +120,29 @@ namespace Seeker
             // ("onItemSelected method is also invoked when the view is being build")
             Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
             languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština", "italiano" };
+            String[] languageSpinnerOptionsStrings = new String[] {
+                SeekerApplication.GetString(Resource.String.Automatic),
+                "العربية",        // Arabic
+                "Català",          // Catalan
+                "čeština",         // Czech
+                "Dansk",           // Danish
+                "Deutsch",         // German
+                "English",
+                "Español",         // Spanish
+                "Français",        // French
+                "italiano",        // Italian
+                "Magyar",          // Hungarian
+                "Nederlands",      // Dutch
+                "Norsk",           // Norwegian
+                "Polski",          // Polish
+                "Português (Brazil)",
+                "Português (Portugal)",
+                "ру́сский язы́к",   // Russian
+                "Srpski",          // Serbian
+                "українська мо́ва", // Ukrainian
+                "简体中文",         // Chinese Simplified
+                "日本語",           // Japanese
+            };
             ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
             SetSpinnerPositionLangauge(languageSpinner);
@@ -2447,32 +2469,65 @@ namespace Seeker
                 case PreferencesState.FieldLangAuto:
                     s.SetSelection(0);
                     break;
-                case PreferencesState.FieldLangEn:
+                case PreferencesState.FieldLangAr:
                     s.SetSelection(1);
                     break;
-                case PreferencesState.FieldLangPtBr:
+                case PreferencesState.FieldLangCa:
                     s.SetSelection(2);
                     break;
-                case PreferencesState.FieldLangFr:
+                case PreferencesState.FieldLangCs:
                     s.SetSelection(3);
                     break;
-                case PreferencesState.FieldLangRu:
+                case PreferencesState.FieldLangDa:
                     s.SetSelection(4);
                     break;
-                case PreferencesState.FieldLangEs:
+                case PreferencesState.FieldLangDe:
                     s.SetSelection(5);
                     break;
-                case PreferencesState.FieldLangUk:
+                case PreferencesState.FieldLangEn:
                     s.SetSelection(6);
                     break;
-                case PreferencesState.FieldLangNl:
+                case PreferencesState.FieldLangEs:
                     s.SetSelection(7);
                     break;
-                case PreferencesState.FieldLangCs:
+                case PreferencesState.FieldLangFr:
                     s.SetSelection(8);
                     break;
                 case PreferencesState.FieldLangIt:
                     s.SetSelection(9);
+                    break;
+                case PreferencesState.FieldLangHu:
+                    s.SetSelection(10);
+                    break;
+                case PreferencesState.FieldLangNl:
+                    s.SetSelection(11);
+                    break;
+                case PreferencesState.FieldLangNo:
+                    s.SetSelection(12);
+                    break;
+                case PreferencesState.FieldLangPl:
+                    s.SetSelection(13);
+                    break;
+                case PreferencesState.FieldLangPtBr:
+                    s.SetSelection(14);
+                    break;
+                case PreferencesState.FieldLangPtPt:
+                    s.SetSelection(15);
+                    break;
+                case PreferencesState.FieldLangRu:
+                    s.SetSelection(16);
+                    break;
+                case PreferencesState.FieldLangSr:
+                    s.SetSelection(17);
+                    break;
+                case PreferencesState.FieldLangUk:
+                    s.SetSelection(18);
+                    break;
+                case PreferencesState.FieldLangZhCn:
+                    s.SetSelection(19);
+                    break;
+                case PreferencesState.FieldLangJa:
+                    s.SetSelection(20);
                     break;
                 default:
                     s.SetSelection(0);
@@ -2487,23 +2542,45 @@ namespace Seeker
                 case 0:
                     return PreferencesState.FieldLangAuto;
                 case 1:
-                    return PreferencesState.FieldLangEn;
+                    return PreferencesState.FieldLangAr;
                 case 2:
-                    return PreferencesState.FieldLangPtBr;
+                    return PreferencesState.FieldLangCa;
                 case 3:
-                    return PreferencesState.FieldLangFr;
-                case 4:
-                    return PreferencesState.FieldLangRu;
-                case 5:
-                    return PreferencesState.FieldLangEs;
-                case 6:
-                    return PreferencesState.FieldLangUk;
-                case 7:
-                    return PreferencesState.FieldLangNl;
-                case 8:
                     return PreferencesState.FieldLangCs;
+                case 4:
+                    return PreferencesState.FieldLangDa;
+                case 5:
+                    return PreferencesState.FieldLangDe;
+                case 6:
+                    return PreferencesState.FieldLangEn;
+                case 7:
+                    return PreferencesState.FieldLangEs;
+                case 8:
+                    return PreferencesState.FieldLangFr;
                 case 9:
                     return PreferencesState.FieldLangIt;
+                case 10:
+                    return PreferencesState.FieldLangHu;
+                case 11:
+                    return PreferencesState.FieldLangNl;
+                case 12:
+                    return PreferencesState.FieldLangNo;
+                case 13:
+                    return PreferencesState.FieldLangPl;
+                case 14:
+                    return PreferencesState.FieldLangPtBr;
+                case 15:
+                    return PreferencesState.FieldLangPtPt;
+                case 16:
+                    return PreferencesState.FieldLangRu;
+                case 17:
+                    return PreferencesState.FieldLangSr;
+                case 18:
+                    return PreferencesState.FieldLangUk;
+                case 19:
+                    return PreferencesState.FieldLangZhCn;
+                case 20:
+                    return PreferencesState.FieldLangJa;
                 default:
                     return PreferencesState.FieldLangAuto;
             }
