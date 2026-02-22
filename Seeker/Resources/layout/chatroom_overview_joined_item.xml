@@ -20,6 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/roomName"
+			android:maxLines="1"
+			android:ellipsize="end"
             android:text="roomNameDummy"
             android:textSize="22sp"
         />
@@ -40,6 +42,7 @@
         android:layout_marginStart="20dp"
         android:layout_weight="1.3"
         android:text="1000"
+        android:layout_gravity="right"
         android:id="@+id/usersInRoom"
         android:textSize="22sp"
         app:autoSizeMinTextSize="12sp"

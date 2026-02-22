@@ -51,7 +51,7 @@ namespace Seeker.Messages
 
             MessageController.MessageReceived += OnMessageReceived;
             rootView = inflater.Inflate(Resource.Layout.messages_inner_layout, container, false);
-
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(rootView, new BottomOnlyInsetsListener());
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)MessagesActivity.MessagesActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_inner_list_menu);

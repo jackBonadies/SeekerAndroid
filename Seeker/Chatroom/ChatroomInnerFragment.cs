@@ -419,6 +419,7 @@ namespace Seeker.Chatroom
             //}
 
             rootView = inflater.Inflate(Resource.Layout.chatroom_inner_layout, container, false);
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(rootView, new BottomOnlyInsetsListener());
             currentTickerView = rootView.FindViewById<TextView>(Resource.Id.current_ticker);
             currentTickerView.Click += CurrentTickerView_Click;
 

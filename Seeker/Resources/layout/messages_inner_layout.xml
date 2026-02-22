@@ -25,7 +25,6 @@
 
     <RelativeLayout
         android:id="@+id/layout_gchat_chatbox"
-        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_weight="0"
         android:layout_height="wrap_content"
