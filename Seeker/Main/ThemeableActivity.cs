@@ -1,13 +1,15 @@
 ﻿using Android.Content;
+using Android.Hardware.Lights;
 using Android.OS;
+using Android.Views;
+using Android.Widget;
 using AndroidX.AppCompat.App;
-using System;
-using Seeker.Helpers;
-
+using AndroidX.Core.View;
 using Common;
+using Seeker.Helpers;
+using System;
 namespace Seeker
 {
-    //TODOORG seperate class
     public class ThemeableActivity : AppCompatActivity
     {
         private WeakReference<ThemeableActivity> ourWeakRef;
@@ -33,6 +35,11 @@ namespace Seeker
             ourWeakRef = new WeakReference<ThemeableActivity>(this, false);
 
             SeekerApplication.Activities.Add(ourWeakRef);
+            
+            // the equivalent to calling edgeToEdge = true so api < 35 behaves the same
+            WindowCompat.SetDecorFitsSystemWindows(Window!, false);
+            Window!.SetStatusBarColor(Android.Graphics.Color.Transparent);
+            Window!.SetNavigationBarColor(Android.Graphics.Color.Transparent);
             base.OnCreate(savedInstanceState);
         }
 

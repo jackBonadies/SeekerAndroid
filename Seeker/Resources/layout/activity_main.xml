@@ -6,10 +6,11 @@
     android:background="?attr/pseudo_window_background_color"
     android:layout_height="match_parent">
 <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbarLayout"
-    android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
-        android:theme="@style/AppTheme.AppBarOverlay"
+	android:id="@+id/appbarLayout"
+	android:layout_width="match_parent"
+	android:fitsSystemWindows="true"
+	android:background="?attr/mainPurple"
+	android:theme="@style/AppTheme.AppBarOverlay"
     android:layout_height="wrap_content">
 
   <androidx.appcompat.widget.Toolbar

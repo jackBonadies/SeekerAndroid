@@ -10,6 +10,8 @@
 
     <com.google.android.material.appbar.AppBarLayout
     android:id="@+id/appbarLayout"
+		android:fitsSystemWindows="true"
+		android:background="?attr/mainPurple"
     android:layout_width="match_parent"
     android:theme="@style/AppTheme.AppBarOverlay"
     android:layout_height="wrap_content">

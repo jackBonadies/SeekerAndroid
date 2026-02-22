@@ -44,6 +44,7 @@ using AndroidX.Activity;
 
 using Common;
 using Common.Messages;
+using ActivityFlags = Android.Content.ActivityFlags;
 namespace Seeker
 {
 

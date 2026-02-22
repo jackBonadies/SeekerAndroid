@@ -8,6 +8,8 @@
         <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
         android:layout_width="match_parent"
+		android:fitsSystemWindows="true"
+		android:background="?attr/mainPurple"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:layout_height="wrap_content">
 
@@ -50,22 +52,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+		android:fitsSystemWindows="true"
         android:orientation="horizontal">
 
         <Button
-  android:layout_margin="2dp"
+            android:layout_margin="2dp"
             android:id="@+id/prev_button"
             android:layout_width="0dp"
-                                android:foreground="@drawable/button"
-        style="@style/SeekerButtonStyle"
+            android:foreground="@drawable/button"
+            style="@style/SeekerButtonStyle"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/prev" />
 
         <Button
             
-                    android:foreground="@drawable/button"
-        style="@style/SeekerButtonStyle"
+            android:foreground="@drawable/button"
+            style="@style/SeekerButtonStyle"
             android:id="@+id/next_button"
             android:layout_width="0dp"
             android:layout_weight="1"

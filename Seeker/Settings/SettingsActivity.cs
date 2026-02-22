@@ -17,10 +17,6 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Services;
-using Seeker.Helpers;
-using Seeker.Managers;
-using Seeker.UPnP;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -34,16 +30,21 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.Content;
+using AndroidX.Core.View;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Common.Share;
+using Seeker.Helpers;
+using Seeker.Managers;
+using Seeker.Services;
+using Seeker.UPnP;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
-using Common.Share;
 
 namespace Seeker
 {
@@ -271,8 +272,6 @@ namespace Seeker
 
 
             base.OnCreate(savedInstanceState);
-
-
 
             SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.settings_layout);

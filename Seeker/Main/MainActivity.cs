@@ -57,6 +57,7 @@ using log = Android.Util.Log;
 using Seeker.Serialization;
 using AndroidX.Activity;
 using Seeker.Transfers;
+using ActivityFlags = Android.Content.ActivityFlags;
 
 //using System.IO;
 //readme:
