@@ -207,7 +207,7 @@
     <string name="remember_search_history">Зберігати історію пошуку</string>
     <string name="clear_search_history">Очистити історію пошуку</string>
     <string name="file_backed_downloads">Файл резервного завантаження</string>
-    <string name="night_mode_options">Тема:</string>
+    <string name="night_mode_options">Тема</string>
     <string name="enable_sharing">Увімкнути спільний доступ</string>
     <string name="set_shared_folder">Папка спільного доступу</string>
     <string name="browse_yourself">Переглянути</string>
@@ -997,8 +997,8 @@
     <string name="AwayOnInactivity">
         Автоматично встановлювати для статусу значення «Пішов» у разі бездіяльності
     </string>
-    <string name="DayVarient_">Денний варіант:</string>
-    <string name="NightVarient_">Нічний варіант:</string>
+    <string name="DayVarient_">Денний варіант</string>
+    <string name="NightVarient_">Нічний варіант</string>
     <string name="NoSharedAdd">
         Немає спільних папок. Натисніть «Додати», щоб почати.
     </string>
@@ -1119,7 +1119,7 @@
     <string name="Aborted">Перервано</string>
     <string name="Num_FilesRemaining">Залишилося файлів: {0}</string>
     <string name="X_of_Y_Remaining">Залишилося {0} з {1}</string>
-    <string name="SetLanguage">Language:</string>
+    <string name="SetLanguage">Language</string>
     <string name="Automatic">Автоматично</string>
 
     <string name="ManuallySetIncompleteFolder">

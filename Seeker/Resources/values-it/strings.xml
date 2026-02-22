@@ -207,7 +207,7 @@ Numero Cartelle: {5}\"
     <string name="remember_search_history">Memorizza cronologia ricerca</string>
     <string name="clear_search_history">Svuota cronologia</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Modalità notte:</string>
+    <string name="night_mode_options">Modalità notte</string>
     <string name="enable_sharing">Abilita Condivisione</string>
     <string name="set_shared_folder">Imposta cartella condivisa</string>
     <string name="browse_yourself">Sfoglia te stesso</string>
@@ -997,8 +997,8 @@ Numero Cartelle: {5}\"
     <string name="AwayOnInactivity">
         Automatically Set Status to Away on Inactivity
     </string>
-    <string name="DayVarient_">Day Variant:</string>
-    <string name="NightVarient_">Night Variant:</string>
+    <string name="DayVarient_">Day Variant</string>
+    <string name="NightVarient_">Night Variant</string>
     <string name="NoSharedAdd">
         No Shared Folders. Tap \'Add\' to get started.
     </string>
@@ -1119,7 +1119,7 @@ Numero Cartelle: {5}\"
     <string name="Aborted">Annullato</string>
     <string name="Num_FilesRemaining">{0} File rimanenti</string>
     <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
-    <string name="SetLanguage">Lingua:</string>
+    <string name="SetLanguage">Lingua</string>
     <string name="Automatic">Automatico</string>
 
     <string name="ManuallySetIncompleteFolder">

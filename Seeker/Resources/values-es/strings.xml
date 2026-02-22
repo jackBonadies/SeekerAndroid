@@ -207,7 +207,7 @@ Directorio: {5}
     <string name="remember_search_history">Recordar historial de búsqueda</string>
     <string name="clear_search_history">Borrar el historial de búsqueda</string>
     <string name="file_backed_downloads">Archivar descargas respaldadas</string>
-    <string name="night_mode_options">Opción modo nocturno:</string>
+    <string name="night_mode_options">Opción modo nocturno</string>
     <string name="enable_sharing">Habilitar compartir</string>
     <string name="set_shared_folder">Seleccione la carpeta compartida</string>
     <string name="browse_yourself">Navegar por ti</string>
@@ -997,8 +997,8 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="AwayOnInactivity">
         Establecer automáticamente el estado ausente en inactividad
     </string>
-    <string name="DayVarient_">Variante diurna:</string>
-    <string name="NightVarient_">Variante nocturna:</string>
+    <string name="DayVarient_">Variante diurna</string>
+    <string name="NightVarient_">Variante nocturna</string>
     <string name="NoSharedAdd">
         No hay Carpetas Compartidas. Pulse \'Añadir\' para empezar.
     </string>
@@ -1119,7 +1119,7 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="Aborted">Cancelado</string>
     <string name="Num_FilesRemaining">{0} archivos restantes</string>
     <string name="X_of_Y_Remaining">{0} de {1} restantes</string>
-    <string name="SetLanguage">Idioma:</string>
+    <string name="SetLanguage">Idioma</string>
     <string name="Automatic">Automático</string>
 
     <string name="ManuallySetIncompleteFolder">

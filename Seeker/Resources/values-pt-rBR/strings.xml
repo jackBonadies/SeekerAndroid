@@ -207,7 +207,7 @@ Contador de diretórios: {5}
     <string name="remember_search_history">Lembrar histórico de pesquisas</string>
     <string name="clear_search_history">Apagar histórico de busca</string>
     <string name="file_backed_downloads">Transferências com backup de arquivos</string>
-    <string name="night_mode_options">Opção de modo noturno:</string>
+    <string name="night_mode_options">Opção de modo noturno</string>
     <string name="enable_sharing">Ativar compartilhamento</string>
     <string name="set_shared_folder">Definir pasta compartilhada</string>
     <string name="browse_yourself">Navegar por conta própria</string>
@@ -996,8 +996,8 @@ Contador de diretórios: {5}
     <string name="AwayOnInactivity">
         Definir automaticamente o status como ausente em inatividade
     </string>
-    <string name="DayVarient_">Variante do dia:</string>
-    <string name="NightVarient_">Variante noturna:</string>
+    <string name="DayVarient_">Variante do dia</string>
+    <string name="NightVarient_">Variante noturna</string>
     <string name="NoSharedAdd">
         Não há pastas compartilhadas. Toque em \'Adicionar\' para começar.
     </string>
@@ -1118,7 +1118,7 @@ Contador de diretórios: {5}
     <string name="Aborted">Cancelado</string>
     <string name="Num_FilesRemaining">{0} arquivos restante(s)</string>
     <string name="X_of_Y_Remaining">{0} de {1} restantes</string>
-    <string name="SetLanguage">Idioma:</string>
+    <string name="SetLanguage">Idioma</string>
     <string name="Automatic">Automático</string>
 
     <string name="ManuallySetIncompleteFolder">

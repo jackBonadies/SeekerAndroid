@@ -208,7 +208,7 @@
     <string name="remember_search_history">Сохранять историю поиска</string>
     <string name="clear_search_history">Очистить историю поиска</string>
     <string name="file_backed_downloads">Файл резервных загрузок</string>
-    <string name="night_mode_options">Ночной режим:</string>
+    <string name="night_mode_options">Ночной режим</string>
     <string name="enable_sharing">Включить доступ к файлам</string>
     <string name="set_shared_folder">Папка общего доступа</string>
     <string name="browse_yourself">Просмотр себя</string>
@@ -997,8 +997,8 @@
     <string name="AwayOnInactivity">
         Автоматически переводить статус в режим \"Отсутствие\"
     </string>
-    <string name="DayVarient_">Дневной скин:</string>
-    <string name="NightVarient_">Ночной скин:</string>
+    <string name="DayVarient_">Дневной скин</string>
+    <string name="NightVarient_">Ночной скин</string>
     <string name="NoSharedAdd">
         Нет общих папок. Нажмите \'Добавить\', чтобы начать.
     </string>
@@ -1119,7 +1119,7 @@
     <string name="Aborted">Отменено</string>
     <string name="Num_FilesRemaining">{0} файла(ов) осталось</string>
     <string name="X_of_Y_Remaining">Осталось {0} из {1}</string>
-    <string name="SetLanguage">Язык:</string>
+    <string name="SetLanguage">Язык</string>
     <string name="Automatic">Автоматически</string>
 
     <string name="ManuallySetIncompleteFolder">

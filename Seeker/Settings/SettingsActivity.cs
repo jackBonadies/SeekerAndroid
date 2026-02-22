@@ -118,8 +118,8 @@ namespace Seeker
             // goes to system settings to change per app language, it triggers 
             // ItemSelected with the old values (resetting the language preference)
             // ("onItemSelected method is also invoked when the view is being build")
-            Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
-            languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
+            AutoCompleteTextView languageSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.languageSpinner);
+            languageSpinner.ItemClick -= LanguageSpinner_ItemSelected;
             String[] languageSpinnerOptionsStrings = new String[] {
                 SeekerApplication.GetString(Resource.String.Automatic),
                 "العربية",        // Arabic
@@ -143,11 +143,10 @@ namespace Seeker
                 "简体中文",         // Chinese Simplified
                 "日本語",           // Japanese
             };
-            ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
+            ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
-            SetSpinnerPositionLangauge(languageSpinner);
-            languageSpinner.ItemSelected += LanguageSpinner_ItemSelected;
-            //languageSpinner.Post(new Action(() => { languageSpinner.ItemSelected += LanguageSpinner_ItemSelected; }));
+            SetSpinnerPositionLangauge(languageSpinner, languageSpinnerOptionsStrings);
+            languageSpinner.ItemClick += LanguageSpinner_ItemSelected;
 
         }
 
@@ -421,31 +420,31 @@ namespace Seeker
             SetSpinnerPosition(searchNumSpinner);
             searchNumSpinner.ItemSelected += SearchNumSpinner_ItemSelected;
 
-            Spinner dayNightMode = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
-            dayNightMode.ItemSelected -= DayNightMode_ItemSelected;
+            AutoCompleteTextView dayNightMode = FindViewById<AutoCompleteTextView>(Resource.Id.nightModeSpinner);
+            dayNightMode.ItemClick -= DayNightMode_ItemSelected;
             String[] dayNightOptionsStrings = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
-            ArrayAdapter<String> dayNightOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayNightOptionsStrings);
+            ArrayAdapter<String> dayNightOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, dayNightOptionsStrings);
             dayNightMode.Adapter = dayNightOptions;
-            SetSpinnerPositionDayNight(dayNightMode);
-            dayNightMode.ItemSelected += DayNightMode_ItemSelected;
+            SetSpinnerPositionDayNight(dayNightMode, dayNightOptionsStrings);
+            dayNightMode.ItemClick += DayNightMode_ItemSelected;
 
 
-            Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
-            dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
+            AutoCompleteTextView dayVarientSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.dayVarientSpinner);
+            dayVarientSpinner.ItemClick -= DayVarient_ItemSelected;
             String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
-            ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayVarientSpinnerOptionsStrings);
+            ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, dayVarientSpinnerOptionsStrings);
             dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
-            SetSpinnerPositionDayVarient(dayVarientSpinner);
-            dayVarientSpinner.ItemSelected += DayVarient_ItemSelected;
+            SetSpinnerPositionDayVarient(dayVarientSpinner, dayVarientSpinnerOptionsStrings);
+            dayVarientSpinner.ItemClick += DayVarient_ItemSelected;
 
 
-            Spinner nightVarientSpinner = FindViewById<Spinner>(Resource.Id.nightVarientSpinner);
-            nightVarientSpinner.ItemSelected -= NightVarient_ItemSelected;
+            AutoCompleteTextView nightVarientSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.nightVarientSpinner);
+            nightVarientSpinner.ItemClick -= NightVarient_ItemSelected;
             String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
-            ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, nightVarientSpinnerOptionsStrings);
+            ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, nightVarientSpinnerOptionsStrings);
             nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
-            SetSpinnerPositionNightVarient(nightVarientSpinner);
-            nightVarientSpinner.ItemSelected += NightVarient_ItemSelected;
+            SetSpinnerPositionNightVarient(nightVarientSpinner, nightVarientSpinnerOptionsStrings);
+            nightVarientSpinner.ItemClick += NightVarient_ItemSelected;
 
 
 
@@ -717,7 +716,7 @@ namespace Seeker
             this.StartActivityForResult(intent, SAVE_SEEKER_SETTINGS);
         }
 
-        private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
             string selection = GetLanguageStringFromPosition(e.Position);
             if (SeekerApplication.GetLegacyLanguageString() == selection)
@@ -2320,7 +2319,7 @@ namespace Seeker
         }
 
 
-        private void DayVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void DayVarient_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
             var oldVarient = PreferencesState.DayModeVarient;
             PreferencesState.DayModeVarient = (DayThemeType)(e.Position);
@@ -2336,7 +2335,7 @@ namespace Seeker
             }
         }
 
-        private void NightVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void NightVarient_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
             var oldVarient = PreferencesState.NightModeVarient;
             switch (e.Position)
@@ -2365,7 +2364,7 @@ namespace Seeker
 
 
 
-        private void DayNightMode_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void DayNightMode_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
 
             Logger.Debug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + PreferencesState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
@@ -2453,86 +2452,89 @@ namespace Seeker
             s.SetSelection(selectionIndex);
         }
 
-        private void SetSpinnerPositionDayNight(Spinner s)
+        private void SetSpinnerPositionDayNight(AutoCompleteTextView s, String[] options)
         {
-            s.SetSelection(Math.Max(PreferencesState.DayNightMode, 0)); //-1 -> 0
+            int pos = Math.Max(PreferencesState.DayNightMode, 0); //-1 -> 0
+            s.SetText(options[pos], false);
         }
-        private void SetSpinnerPositionDayVarient(Spinner s)
+        private void SetSpinnerPositionDayVarient(AutoCompleteTextView s, String[] options)
         {
-            s.SetSelection((int)(PreferencesState.DayModeVarient));
+            s.SetText(options[(int)(PreferencesState.DayModeVarient)], false);
         }
 
-        private void SetSpinnerPositionLangauge(Spinner s)
+        private void SetSpinnerPositionLangauge(AutoCompleteTextView s, String[] options)
         {
+            int pos = 0;
             switch (SeekerApplication.GetLegacyLanguageString())
             {
                 case PreferencesState.FieldLangAuto:
-                    s.SetSelection(0);
+                    pos = 0;
                     break;
                 case PreferencesState.FieldLangAr:
-                    s.SetSelection(1);
+                    pos = 1;
                     break;
                 case PreferencesState.FieldLangCa:
-                    s.SetSelection(2);
+                    pos = 2;
                     break;
                 case PreferencesState.FieldLangCs:
-                    s.SetSelection(3);
+                    pos = 3;
                     break;
                 case PreferencesState.FieldLangDa:
-                    s.SetSelection(4);
+                    pos = 4;
                     break;
                 case PreferencesState.FieldLangDe:
-                    s.SetSelection(5);
+                    pos = 5;
                     break;
                 case PreferencesState.FieldLangEn:
-                    s.SetSelection(6);
+                    pos = 6;
                     break;
                 case PreferencesState.FieldLangEs:
-                    s.SetSelection(7);
+                    pos = 7;
                     break;
                 case PreferencesState.FieldLangFr:
-                    s.SetSelection(8);
+                    pos = 8;
                     break;
                 case PreferencesState.FieldLangIt:
-                    s.SetSelection(9);
+                    pos = 9;
                     break;
                 case PreferencesState.FieldLangHu:
-                    s.SetSelection(10);
+                    pos = 10;
                     break;
                 case PreferencesState.FieldLangNl:
-                    s.SetSelection(11);
+                    pos = 11;
                     break;
                 case PreferencesState.FieldLangNo:
-                    s.SetSelection(12);
+                    pos = 12;
                     break;
                 case PreferencesState.FieldLangPl:
-                    s.SetSelection(13);
+                    pos = 13;
                     break;
                 case PreferencesState.FieldLangPtBr:
-                    s.SetSelection(14);
+                    pos = 14;
                     break;
                 case PreferencesState.FieldLangPtPt:
-                    s.SetSelection(15);
+                    pos = 15;
                     break;
                 case PreferencesState.FieldLangRu:
-                    s.SetSelection(16);
+                    pos = 16;
                     break;
                 case PreferencesState.FieldLangSr:
-                    s.SetSelection(17);
+                    pos = 17;
                     break;
                 case PreferencesState.FieldLangUk:
-                    s.SetSelection(18);
+                    pos = 18;
                     break;
                 case PreferencesState.FieldLangZhCn:
-                    s.SetSelection(19);
+                    pos = 19;
                     break;
                 case PreferencesState.FieldLangJa:
-                    s.SetSelection(20);
+                    pos = 20;
                     break;
                 default:
-                    s.SetSelection(0);
+                    pos = 0;
                     break;
             }
+            s.SetText(options[pos], false);
         }
 
         private string GetLanguageStringFromPosition(int pos)
@@ -2586,21 +2588,22 @@ namespace Seeker
             }
         }
 
-        private void SetSpinnerPositionNightVarient(Spinner s)
+        private void SetSpinnerPositionNightVarient(AutoCompleteTextView s, String[] options)
         {
+            int pos;
             switch (PreferencesState.NightModeVarient)
             {
                 case NightThemeType.AmoledClassicPurple:
-                    s.SetSelection(3);
+                    pos = 3;
                     break;
                 case NightThemeType.AmoledGrey:
-                    s.SetSelection(4);
+                    pos = 4;
                     break;
                 default:
-                    s.SetSelection((int)(PreferencesState.NightModeVarient));
+                    pos = (int)(PreferencesState.NightModeVarient);
                     break;
             }
-
+            s.SetText(options[pos], false);
         }
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -2633,8 +2636,9 @@ namespace Seeker
             (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !PreferencesState.MemoryBackedDownload;
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
             SetSpinnerPosition(searchNumSpinner);
-            Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
-            SetSpinnerPositionDayNight(daynightSpinner);
+            AutoCompleteTextView daynightSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.nightModeSpinner);
+            String[] dayNightResetOptions = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
+            SetSpinnerPositionDayNight(daynightSpinner, dayNightResetOptions);
         }
 
         private void SearchNumSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)

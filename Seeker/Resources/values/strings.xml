@@ -253,7 +253,7 @@ Directory Count: {5}"
     <string name="remember_search_history">Remember Search History</string>
     <string name="clear_search_history">Clear Search History</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Night Mode Option:</string>
+    <string name="night_mode_options">Night Mode</string>
     <string name="enable_sharing">Enable Sharing</string>
     <string name="set_shared_folder">Set Shared Folder</string>
     <string name="browse_yourself">Browse Self</string>
@@ -1099,8 +1099,8 @@ The standard way of requesting folder access does not always persist permissions
     <string name="AwayOnInactivity">
         Automatically Set Status to Away on Inactivity
     </string>
-    <string name="DayVarient_">Day Variant:</string>
-    <string name="NightVarient_">Night Variant:</string>
+    <string name="DayVarient_">Day Variant</string>
+    <string name="NightVarient_">Night Variant</string>
     <string name="NoSharedAdd">
         No Shared Folders. Tap \'Add\' to get started.
     </string>
@@ -1221,7 +1221,7 @@ The standard way of requesting folder access does not always persist permissions
     <string name="Aborted">Aborted</string>
     <string name="Num_FilesRemaining">{0} files remaining</string>
     <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
-    <string name="SetLanguage">Language:</string>
+    <string name="SetLanguage">Language</string>
     <string name="Automatic">Automatic</string>
 
     <string name="ManuallySetIncompleteFolder">

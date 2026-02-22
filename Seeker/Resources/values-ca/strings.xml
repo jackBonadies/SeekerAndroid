@@ -207,7 +207,7 @@ Recompte de directoris: {5}\"
     <string name="remember_search_history">Recordeu l\'historial de cerques</string>
     <string name="clear_search_history">Esborra l\'historial de cerques</string>
     <string name="file_backed_downloads">Descàrregues amb còpia de seguretat de fitxers</string>
-    <string name="night_mode_options">Opció de mode nocturn:</string>
+    <string name="night_mode_options">Opció de mode nocturn</string>
     <string name="enable_sharing">Activa la compartició</string>
     <string name="set_shared_folder">Estableix la carpeta compartida</string>
     <string name="browse_yourself">Navega per si mateix</string>
@@ -997,8 +997,8 @@ Recompte de directoris: {5}\"
     <string name="AwayOnInactivity">
         Automatically Set Status to Away on Inactivity
     </string>
-    <string name="DayVarient_">Day Variant:</string>
-    <string name="NightVarient_">Night Variant:</string>
+    <string name="DayVarient_">Day Variant</string>
+    <string name="NightVarient_">Night Variant</string>
     <string name="NoSharedAdd">
         No Shared Folders. Tap \'Add\' to get started.
     </string>
@@ -1119,7 +1119,7 @@ Recompte de directoris: {5}\"
     <string name="Aborted">Aborted</string>
     <string name="Num_FilesRemaining">{0} files remaining</string>
     <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
-    <string name="SetLanguage">Language:</string>
+    <string name="SetLanguage">Language</string>
     <string name="Automatic">Automatic</string>
 
     <string name="ManuallySetIncompleteFolder">

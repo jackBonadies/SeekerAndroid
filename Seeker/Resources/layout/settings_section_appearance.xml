@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.divider.MaterialDivider
         style="@style/SettingsDivider"
@@ -12,144 +13,73 @@
         android:layout_height="wrap_content"
         android:text="@string/section_appearance" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/languageLayout"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/SetLanguage"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
+        android:id="@+id/languageLayout">
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/SetLanguage"
-            android:layout_marginStart="10dp"
-            android:layout_weight="0.4"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:textColor="?attr/normalTextColorNonTinted"
-            android:paddingEnd="10dp"
-            android:id="@+id/languageText" />
-
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.4"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:inputType="none"
             android:id="@+id/languageSpinner" />
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/nightModeOptionLayout"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/night_mode_options"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
+        android:id="@+id/nightModeOptionLayout">
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/night_mode_options"
-            android:layout_marginStart="10dp"
-            android:layout_weight="0.4"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="2dp"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:textColor="?attr/normalTextColorNonTinted"
-            android:paddingEnd="10dp"
-            android:id="@+id/nightModeText" />
-
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.4"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="2dp"
+            android:inputType="none"
             android:id="@+id/nightModeSpinner" />
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/dayModeVarientLayout"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/DayVarient_"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
+        android:id="@+id/dayModeVarientLayout">
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/DayVarient_"
-            android:layout_marginStart="10dp"
-            android:layout_weight="0.4"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="2dp"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:textColor="?attr/normalTextColorNonTinted"
-            android:paddingEnd="10dp"
-            android:id="@+id/dayModeVarientText" />
-
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.4"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="2dp"
+            android:inputType="none"
             android:id="@+id/dayVarientSpinner" />
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/nightModeVarientLayout"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:hint="@string/NightVarient_"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
+        android:id="@+id/nightModeVarientLayout">
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/NightVarient_"
-            android:layout_marginStart="10dp"
-            android:layout_weight="0.4"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:textColor="?attr/normalTextColorNonTinted"
-            android:paddingEnd="10dp"
-            android:id="@+id/nightVarientText" />
-
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="0.4"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
+            android:inputType="none"
             android:id="@+id/nightVarientSpinner" />
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
 </merge>

@@ -207,7 +207,7 @@ Nombre de dossiers : {5}
     <string name="remember_search_history">Conserve l\'Historique de Recherche</string>
     <string name="clear_search_history">Efface l\'Historique de Recherche</string>
     <string name="file_backed_downloads">Téléchargements en Fichier</string>
-    <string name="night_mode_options">Thème de Nuit:</string>
+    <string name="night_mode_options">Thème de Nuit</string>
     <string name="enable_sharing">Activer le Partage</string>
     <string name="set_shared_folder">Définir le Dossier Partagé</string>
     <string name="browse_yourself">Parcourir ses Fichiers</string>
@@ -756,8 +756,8 @@ Nombre de dossiers : {5}
 <br><br>Version: {0}.]]>
     </string>
     <string name="force_filesystem_message">
-        <![CDATA[La méthode standard pour demander l'accès aux dossiers ne conserve pas toujours les autorisations. Si vous constatez que Seeker redemande l'accès au dossier de téléchargement ou au dossier partagé, ce bouton demandera les anciennes autorisations, qui seront toujours conservées.
-<br><br>Cette fonction nécessite la version F-Droid IzzyDroid de Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Télécharger ici</a>). Le Google Play Store n'autorise pas les applications à demander cette autorisation.]]>
+        <![CDATA[La méthode standard pour demander l\'accès aux dossiers ne conserve pas toujours les autorisations. Si vous constatez que Seeker redemande l\'accès au dossier de téléchargement ou au dossier partagé, ce bouton demandera les anciennes autorisations, qui seront toujours conservées.
+<br><br>Cette fonction nécessite la version F-Droid IzzyDroid de Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Télécharger ici</a>). Le Google Play Store n\'autorise pas les applications à demander cette autorisation.]]>
     </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Vous devez être connecté pour voir le contenu des dossiers
@@ -996,8 +996,8 @@ Nombre de dossiers : {5}
     <string name="AwayOnInactivity">
         Toujours changer le statut à \'\'Inactif\'\' si inactif
     </string>
-    <string name="DayVarient_">Thème de Jour:</string>
-    <string name="NightVarient_">Autre Thème de Nuit:</string>
+    <string name="DayVarient_">Thème de Jour</string>
+    <string name="NightVarient_">Autre Thème de Nuit</string>
     <string name="NoSharedAdd">
         Aucun dossier partagé. Commencez par cliquer sur \"Ajouter\".
     </string>
@@ -1118,7 +1118,7 @@ Nombre de dossiers : {5}
     <string name="Aborted">Annulé</string>
     <string name="Num_FilesRemaining">{0} fichiers restants</string>
     <string name="X_of_Y_Remaining">{0} sur {1} restants</string>
-    <string name="SetLanguage">Langue :</string>
+    <string name="SetLanguage">Langue</string>
     <string name="Automatic">Automatique</string>
 
     <string name="ManuallySetIncompleteFolder">

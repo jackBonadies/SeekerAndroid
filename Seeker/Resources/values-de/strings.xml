@@ -209,7 +209,7 @@ Ordneranzahl: {5}\"
     <string name="remember_search_history">Suchverlauf merken</string>
     <string name="clear_search_history">Suchverlauf leeren</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Night Mode Option:</string>
+    <string name="night_mode_options">Night Mode Option</string>
     <string name="enable_sharing">Enable Sharing</string>
     <string name="set_shared_folder">Sharingordner festlegen</string>
     <string name="browse_yourself">Selbst durchsuchen</string>
@@ -999,8 +999,8 @@ Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.
     <string name="AwayOnInactivity">
         Automatically Set Status to Away on Inactivity
     </string>
-    <string name="DayVarient_">Day Variant:</string>
-    <string name="NightVarient_">Night Variant:</string>
+    <string name="DayVarient_">Day Variant</string>
+    <string name="NightVarient_">Night Variant</string>
     <string name="NoSharedAdd">
         No Shared Folders. Tap \'Add\' to get started.
     </string>
@@ -1121,7 +1121,7 @@ Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.
     <string name="Aborted">Abgebrochen</string>
     <string name="Num_FilesRemaining">{0} Dateien übrig</string>
     <string name="X_of_Y_Remaining">{0} von {1} übrig</string>
-    <string name="SetLanguage">Sprache:</string>
+    <string name="SetLanguage">Sprache</string>
     <string name="Automatic">Automatisch</string>
 
     <string name="ManuallySetIncompleteFolder">
