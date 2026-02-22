@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Seeker</string>
     <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
@@ -17,91 +17,52 @@
     <string name="search_room_">Найти комнату {0}</string>
     <string name="search_user_">Найти пользователя {0}</string>
     <string name="wishlist_search">Поиск по Избранным</string>
-    <string name="no_account">
-        У вас нет учетной записи? Просто введите уникальное имя пользователя, и для вас будет создан аккаунт.
-    </string>
-    <string name="memory_file_backed">
-        Примечание: При загрузке с резервным копированием файлов результаты частичной загрузки сохраняются в папке \"Soulseek
-        Incomplete\" и переносятся в папку \"Complete\" после завершения загрузки.
+    <string name="no_account">У вас нет учетной записи? Просто введите уникальное имя пользователя, и для вас будет создан аккаунт.</string>
+    <string name="memory_file_backed">Примечание: При загрузке с резервным копированием файлов результаты частичной загрузки сохраняются в папке \"Soulseek Incomplete\" и переносятся в папку \"Complete\" после завершения загрузки.
 \n\nЭто позволяет (1) приостанавливать и возобновлять загрузку с того места, на котором вы остановились (2) загружать большие файлы без ошибок памяти (и вообще меньше потреблять оперативной памяти).
-\n\nВыключив эту функцию, результаты частичной загрузки хранятся в памяти до тех пор, пока не будут завершены, затем они сохраняются на диск.
-    </string>
-    <string name="keep_alive_service">
-        Эта служба позволяет Seeker работать в фоновом режиме.
+\n\nВыключив эту функцию, результаты частичной загрузки хранятся в памяти до тех пор, пока не будут завершены, затем они сохраняются на диск.</string>
+    <string name="keep_alive_service">Эта служба позволяет Seeker работать в фоновом режиме.
 \n\nЭто необходимо для того, чтобы отвечать на поисковые запросы (при совместном использовании), получать сообщения из чата и результаты из избранных запросов в фоновом режиме.
 \n\nЭто не нужно для загрузки или выгрузки в фоновом режиме (для этого уже есть служба, которая будет работать всегда).
-\n\n\nЕдинственным недостатком является то, что это может расходовать больше батареи. В таком случае можно отключить эту функцию по умолчанию и запускать ее только по мере необходимости.
-    </string>
-    <string name="listening">
-        Эта настройка позволяет Seeker принимать входящие подключения, чтобы мы могли подключаться к клиентам без открытых портов.
+\n\n\nЕдинственным недостатком является то, что это может расходовать больше батареи. В таком случае можно отключить эту функцию по умолчанию и запускать ее только по мере необходимости.</string>
+    <string name="listening">Эта настройка позволяет Seeker принимать входящие подключения, чтобы мы могли подключаться к клиентам без открытых портов.
 \n\nНа практике это означает, что до тех пор, пока мы успешно прослушиваем (отображается в \"Проверить Статус\"), мы получим больше результатов поиска, быть в состоянии загрузить от других людей, загружать для большего количества пользователей и т. д.
-\n\nSeeker будет пытаться автоматически пересылать порты через UPnP (именно это делает официальный клиент для рабочего стола). Если вы НЕ используете Wifi - он не будет работать. Если вы используете VPN, то, пожалуйста, найдите способ перенаправления портов для вашего конкретного VPN. Если ваш маршрутизатор не включен UPnP, то вам будет необходимо указать порт вручную.
-    </string>
-    <string name="sharing_dialog">
-        Несколько замечаний по поводу обмена файлами.  Когда каталог загрузки создается впервые, приложение должно прочитать файлы и разобрать их таким образом, чтобы это было удобно для последующего поиска и просмотра.  Это может занять до нескольких минут.  Убедитесь, что файлы, которыми вы делитесь, не содержат никакой частной или конфиденциальной информации (в основном используйте те же суждения, что и для официального клиента soulseek).
-    </string>
-    <string name="privileges_more_info">
-        Привилегии позволяют поддерживать создателя Soulseek (Nir) и центральный сервер, от которого зависит это приложение.
+\n\nSeeker будет пытаться автоматически пересылать порты через UPnP (именно это делает официальный клиент для рабочего стола). Если вы НЕ используете Wifi - он не будет работать. Если вы используете VPN, то, пожалуйста, найдите способ перенаправления портов для вашего конкретного VPN. Если ваш маршрутизатор не включен UPnP, то вам будет необходимо указать порт вручную.</string>
+    <string name="sharing_dialog">Несколько замечаний по поводу обмена файлами.  Когда каталог загрузки создается впервые, приложение должно прочитать файлы и разобрать их таким образом, чтобы это было удобно для последующего поиска и просмотра.  Это может занять до нескольких минут.  Убедитесь, что файлы, которыми вы делитесь, не содержат никакой частной или конфиденциальной информации (в основном используйте те же суждения, что и для официального клиента soulseek).</string>
+    <string name="privileges_more_info">Привилегии позволяют поддерживать создателя Soulseek (Nir) и центральный сервер, от которого зависит это приложение.
 \n\nЭто также позволяет опережать в очереди на загрузку пользователей, не имеющих привилегий.
-\n\n\nПримечание: любые пожертвования не идут создателю этого неофициального клиента для андроид, Seeker. В настоящее время я не принимаю пожертвования.
-    </string>
-    <string name="no_messages">
-        Нет сообщений. Нажмите «+», чтобы начать.
-    </string>
+\n\n\nПримечание: любые пожертвования не идут создателю этого неофициального клиента для андроид, Seeker. В настоящее время я не принимаю пожертвования.</string>
+    <string name="no_messages">Нет сообщений. Нажмите «+», чтобы начать.</string>
     <string name="messages">Сообщения</string>
     <string name="browse_files">Обзор файлов</string>
-    <string name="chatroomListLoading">
-        Запрашиваем список доступных чат комнат. Пожалуйста, подождите...
-    </string>
-    <string name="privateRoomCreation">
-        Создаем новую приватную комнату...
-    </string>
+    <string name="chatroomListLoading">Запрашиваем список доступных чат комнат. Пожалуйста, подождите...</string>
+    <string name="privateRoomCreation">Создаем новую приватную комнату...</string>
     <string name="requesting_room_list">Обновить список комнат</string>
-    <string name="requesting_user_info">
-        Запрос информации о пользователе
-    </string>
+    <string name="requesting_user_info">Запрос информации о пользователе</string>
     <string name="room_list_received">Список комнат получен</string>
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Избранное</string>
-    <string name="wishlist_bold">
-        <b>Избранное</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Избранное (пусто)</b>
-    </string>
-    <string name="user_info_bio">
-        <b>Информация о пользователе:</b>
-    </string>
-    <string name="user_info_picture">
-        <b>Изображение</b>
-    </string>
-    <string name="user_info_stats_header">
-        <b>Информация</b>
-    </string>
-    <string name="unsaved_changes_title">
-        Отменить несохранённые изменения?
-    </string>
-    <string name="unsaved_changes_body">
-        У вас есть несохраненные изменения.
-Вы уверены, что хотите отказаться от них?
-    </string>
-    <string name="user_status_string">
-        Загрузка слотов: {0}
-\nБесплатно для загрузки: {1}
-\nОчереди загрузок: {2}
-\nСкорость загрузки: {3}
-\nЧисло файлов: {4}
-\nЧисло директорий: {5}
-    </string>
+    <string name="wishlist_bold"><b>Избранное</b></string>
+    <string name="wishlist_empty_bold"><b>Избранное (пусто)</b></string>
+    <string name="user_info_bio"><b>Информация о пользователе:</b></string>
+    <string name="user_info_picture"><b>Изображение</b></string>
+    <string name="user_info_stats_header"><b> Информация </b></string>
+    <string name="unsaved_changes_title">Отменить несохранённые изменения?</string>
+    <string name="unsaved_changes_body">У вас есть несохраненные изменения.
+Вы уверены, что хотите отказаться от них?</string>
+    <string name="user_status_string">Загрузка слотов: {0}
+Бесплатно для загрузки: {1}
+Очереди загрузок: {2}
+Скорость загрузки: {3}
+Число файлов: {4}
+Число директорий: {5}</string>
     <string name="add_user">Добавить пользователя</string>
-    <string name="empty_browse_directory">
-        Эта вкладка используется для обзора пользовательских директорий.\n\nДля начала работы поищите что-нибудь в \"Поиске\" или нажмите кнопку \'+\'.
-    </string>
+    <string name="empty_browse_directory">Эта вкладка используется для обзора пользовательских директорий.\n\nДля начала работы поищите что-нибудь в \"Поиске\" или нажмите кнопку \'+\'.</string>
     <string name="clear">Очистить</string>
     <string name="get_user_info">Получить информацию о пользователе</string>
     <string name="quick_info">Краткая информация</string>
-    <string name="filer_files">Фильтр файлов</string>
+    <string name="filer_files">Фильтр файлов </string>
     <string name="enter_user_to_browse">Введите имя пользователя</string>
     <!--
   These are search targets
@@ -120,9 +81,7 @@
     <string name="chatroom_disconnected">Связь прервана...</string>
     <!--Where placeholder {0} is time -->
     <string name="chatroom_disconnected_at">Мы отключились в [{0}]</string>
-    <string name="chatroom_reconnected_at">
-        Соединение восстановлено в [{0}]
-    </string>
+    <string name="chatroom_reconnected_at">Соединение восстановлено в [{0}]</string>
     <string name="chatroom_loading_ticker">Загрузка текущего тикера...</string>
     <string name="chatroom_enter_message">Введите сообщение</string>
     <string name="send_message">Отправить</string>
@@ -131,21 +90,11 @@
     <string name="create_chatroom_name">Имя комнаты</string>
     <string name="create_chatroom_private">Сделать приватной</string>
     <string name="search_here">Поиск</string>
-    <string name="seeker_needs_dl_dir">
-        Seeker нуждается в доступе к каталогу для сохранения загруженных файлов
-    </string>
-    <string name="seeker_needs_dl_dir_content">
-        Пожалуйста, выберите директорию загрузки (по умолчанию это папка с музыкой)
-    </string>
-    <string name="seeker_needs_dl_dir_error">
-        Необходимо выбрать каталог для размещения загрузок. Это необходимо для размещения загруженных файлов.
-    </string>
-    <string name="seeker_needs_dl_dir_choose_settings">
-        Пожалуйста, укажите директорию для загрузок в настройках.
-    </string>
-    <string name="seeker_cannot_access_files">
-        Нет доступа к файловой системе. Выберите директорию для загрузок либо на странице входа в систему, либо в настройках.
-    </string>
+    <string name="seeker_needs_dl_dir">Seeker нуждается в доступе к каталогу для сохранения загруженных файлов</string>
+    <string name="seeker_needs_dl_dir_content">Пожалуйста, выберите директорию загрузки (по умолчанию это папка с музыкой)</string>
+    <string name="seeker_needs_dl_dir_error">Необходимо выбрать директорию для размещения загруженных файлов</string>
+    <string name="seeker_needs_dl_dir_choose_settings">Пожалуйста, укажите директорию для загрузок в настройках.</string>
+    <string name="seeker_cannot_access_files">Нет доступа к файловой системе. Выберите директорию для загрузок либо на странице входа в систему, либо в настройках.</string>
     <!--
   Download Dialog Columns
   -->
@@ -159,15 +108,11 @@
     <string name="download_selected">Скачать выбранные</string>
     <string name="request_directories">Каталог запросов</string>
     <string name="close_download_diag">Закрыть</string>
-    <string name="add_about_me">
-        Нажмите, чтобы добавить информацию о себе
-    </string>
+    <string name="add_about_me">Нажмите, чтобы добавить информацию о себе</string>
     <string name="select_image">Выбрать изображение</string>
     <string name="clear_image">Очистить изображение</string>
     <string name="no_image_chosen">Отсутствует</string>
-    <string name="enter_user_to_invite_to_room">
-        Введите имя пользователя для приглашения
-    </string>
+    <string name="enter_user_to_invite_to_room">Введите имя пользователя для приглашения</string>
     <string name="inviteuser">Пригласить пользователя</string>
     <string name="invite_user">Пригласить пользователя:</string>
     <string name="give_up_room">Распустить комнату</string>
@@ -180,9 +125,7 @@
     <string name="PleaseWait_">Пожалуйста, подождите...</string>
     <string name="choose_a_download_folder">Выберите папку для загрузок</string>
     <string name="settings">Настройки</string>
-    <string name="enter_user_to_message">
-        Введите имя пользователя, чтобы написать
-    </string>
+    <string name="enter_user_to_message">Введите имя пользователя, чтобы написать</string>
     <!--Search Result Styles-->
     <string name="search_result_style">Вид результата:</string>
     <string name="search_result_style_expanded">Развернутый: раскрытый</string>
@@ -192,30 +135,18 @@
     <string name="new_search_tab">Новая вкладка</string>
     <string name="filter_search_results_here">Введите фильтр...</string>
     <string name="persist_it">Закрепить</string>
-    <string name="type_chatroom_ticker_message">
-        Введите закрепленное сообщение
-    </string>
+    <string name="type_chatroom_ticker_message">Введите закрепленное сообщение</string>
     <string name="change_download_folder">Изменить папку для загрузок</string>
-    <string name="max_search_results">Макс. кол-во результатов поиска:</string>
-    <string name="only_show_free_slots">
-        Показывать только результаты пользователей с бесплатными слотами
-    </string>
-    <string name="start_service_on_startup">
-        Запускать сервис при запуске клиента
-    </string>
-    <string name="allow_private_room_invitations">
-        Пригласить в приватную комнату
-    </string>
-    <string name="show_bottom_notifs_complete">
-        Показывать уведомления для завершенных файлов
-    </string>
-    <string name="show_notifs_on_folder_complete">
-        Показывать уведомления для завершенных папок
-    </string>
+    <string name="max_search_results">Макс. кол-во результатов поиска: </string>
+    <string name="only_show_free_slots">Показывать только результаты пользователей с бесплатными слотами</string>
+    <string name="start_service_on_startup">Запускать сервис при запуске клиента</string>
+    <string name="allow_private_room_invitations">Пригласить в приватную комнату </string>
+    <string name="show_bottom_notifs_complete">Показывать уведомления для завершенных файлов </string>
+    <string name="show_notifs_on_folder_complete">Показывать уведомления для завершенных папок</string>
     <string name="remember_search_history">Сохранять историю поиска</string>
     <string name="clear_search_history">Очистить историю поиска</string>
     <string name="file_backed_downloads">Файл резервных загрузок</string>
-    <string name="night_mode_options">Ночной режим:</string>
+    <string name="night_mode_options">Ночной режим: </string>
     <string name="enable_sharing">Включить доступ к файлам</string>
     <string name="set_shared_folder">Папка общего доступа</string>
     <string name="browse_yourself">Просмотр себя</string>
@@ -223,38 +154,22 @@
     <string name="change_port">Сменить порт</string>
     <string name="port">Порт</string>
     <string name="check_your_port_status">Проверить статус</string>
-    <string name="use_pnp_for_port_forwarding">
-        Использовать UPnP для проброса порта
-    </string>
-    <string name="edit_your_user_info">
-        Редактировать информацию пользователя
-    </string>
+    <string name="use_pnp_for_port_forwarding">Использовать UPnP для проброса порта</string>
+    <string name="edit_your_user_info">Редактировать информацию пользователя</string>
     <string name="restore_default_settings">Восстановить по умолчанию</string>
-    <string name="no_transfers_yet">
-        Пока здесь нет загрузок. Если вы что-нибудь загрузите, оно появится здесь
-    </string>
+    <string name="no_transfers_yet">Пока здесь нет загрузок. Если вы что-нибудь загрузите, оно появится здесь</string>
     <string name="user_has_no_bio">У пользователя нет биографии.</string>
     <string name="user_has_no_pic">Пользователь не имеет изображения.</string>
     <string name="no_pic_set">Изображение не выбрано</string>
     <string name="select_pic">Выберите изображение</string>
     <string name="success_set_pic">Изображение успешно установлено</string>
-    <string name="error_no_file_manager_image">
-        ОШИБКА - не установлен файловый менеджер, способный выбрать изображение. Пожалуйста, установите его.
-    </string>
-    <string name="error_no_file_manager_dir">
-        ОШИБКА - не установлен файловый менеджер, способный выбрать каталог. Пожалуйста, установите его.
-    </string>
-    <string name="error_no_file_manager_dir_manage_storage">
-        ОШИБКА - не установлен файловый менеджер, способный выбрать каталог. Пожалуйста, установите его. Еслина вашем устройстве нету опции (всплывающего меню) \"выбрать приложение\", тогда, пожалуйста, установите Seeker из Fdroid (IzzyOnDroid), у которого будет доступ к вашему внешнему накопителею.
-    </string>
+    <string name="error_no_file_manager_image">ОШИБКА - не установлен файловый менеджер, способный выбрать изображение. Пожалуйста, установите его.</string>
+    <string name="error_no_file_manager_dir">ОШИБКА - не установлен файловый менеджер, способный выбрать каталог. Пожалуйста, установите его.</string>
+    <string name="error_no_file_manager_dir_manage_storage">ОШИБКА - не установлен файловый менеджер, способный выбрать каталог. Пожалуйста, установите его. Еслина вашем устройстве нету опции (всплывающего меню) \"выбрать приложение\", тогда, пожалуйста, установите Seeker из Fdroid (IzzyOnDroid), у которого будет доступ к вашему внешнему накопителею.</string>
     <string name="error_image_doesnt_exist">Изображение не существует</string>
-    <string name="error_image_too_large">
-        Изображение слишком велико. Пожалуйста, выберите меньшее изображение. ( &lt; 5MB).
-    </string>
+    <string name="error_image_too_large">Изображение слишком велико. Пожалуйста, выберите меньшее изображение. (&lt;5MB).</string>
     <string name="no_room_tickers">Пока нет тикеров...</string>
-    <string name="user_list_empty">
-        Список пользователей пуст. Пожалуйста, добавьте пользователя в список.
-    </string>
+    <string name="user_list_empty">Список пользователей пуст. Пожалуйста, добавьте пользователя в список.</string>
     <string name="no_user">Пользователь не выбран</string>
     <string name="no_room">Комната не выбрана</string>
     <string name="no_search_results">Ничего не найдено</string>
@@ -267,143 +182,74 @@
     <string name="download_is_starting">Загрузка началась...</string>
     <string name="directory_is_empty">Каталог пуст</string>
     <string name="nothing_selected">Ничего не выбрано</string>
-    <string name="nothing_selected_extra">
-        "Не выбрано - нажмите для выбора"
-    </string>
+    <string name="nothing_selected_extra">"Не выбрано - нажмите для выбора"</string>
     <string name="failed_to_connect">Не удалось подключиться</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        В настоящее время реализована только загрузка файлов. Каталоги загружать не получится
-    </string>
-    <string name="cannot_download_from_self">
-        Не удается загрузить от себя
-    </string>
-    <string name="must_type_a_username_to_browse">
-        Необходимо ввести имя пользователя для просмотра
-    </string>
-    <string name="must_type_a_username_to_message">
-        Необходимо ввести имя пользователя, чтобы написать сообщение
-    </string>
-    <string name="must_type_a_username_to_invite">
-        Необходимо ввести имя пользователя для приглашения
-    </string>
-    <string name="must_type_a_username_to_add">
-        Чтобы добавить пользователя, введите его имя
-    </string>
-    <string name="must_type_ticker_text">
-        Введите текст закрепленного сообщения
-    </string>
-    <string name="must_type_chatroom_name">
-        Необходимо ввести название чат комнаты
-    </string>
-    <string name="must_type_text_to_send">
-        Необходимо ввести текст для отправки
-    </string>
+    <string name="not_recursive_dirs_avaialbe_to_download">В настоящее время реализована только загрузка файлов. Каталоги загружать не получится</string>
+    <string name="cannot_download_from_self">Не удается загрузить от себя</string>
+    <string name="must_type_a_username_to_browse">Необходимо ввести имя пользователя для просмотра</string>
+    <string name="must_type_a_username_to_message">Необходимо ввести имя пользователя, чтобы написать сообщение</string>
+    <string name="must_type_a_username_to_invite">Необходимо ввести имя пользователя для приглашения</string>
+    <string name="must_type_a_username_to_add">Чтобы добавить пользователя, введите его имя</string>
+    <string name="must_type_ticker_text">Введите текст закрепленного сообщения</string>
+    <string name="must_type_chatroom_name">Необходимо ввести название чат комнаты</string>
+    <string name="must_type_text_to_send">Необходимо ввести текст для отправки</string>
     <string name="error">Ошибка</string>
-    <string name="error_">Ошибка:</string>
+    <string name="error_">Ошибка: </string>
     <string name="error_duplicate">Ошибка: Обнаружен дубликат запроса</string>
-    <string name="error_browse_at_location">
-        Ошибка при получении пользовательских каталогов в указанном месте
-    </string>
-    <string name="error_duplicates">
-        Ошибка: дубликат передачи. Если вы хотите повторить загрузку, нажмите на него и удерживайте.
-    </string>
-    <string name="room_data_still_loading">
-        Слишком быстро! Все еще загружаем данные комнаты...
-    </string>
+    <string name="error_browse_at_location">Ошибка при получении пользовательских каталогов в указанном месте</string>
+    <string name="error_duplicates">Ошибка: дубликат передачи. Если вы хотите повторить загрузку, нажмите на него и удерживайте.</string>
+    <string name="room_data_still_loading">Слишком быстро! Все еще загружаем данные комнаты...</string>
     <string name="loading_current_ticker">Загрузка текущего тикера...</string>
-    <string name="must_be_logged_to_browse">
-        Необходимо войти для просмотра пользователя
-    </string>
-    <string name="must_be_logged_to_get_room_list">
-        Необходимо войти в систему, чтобы получить список чатов
-    </string>
-    <string name="must_be_logged_to_request_user_info">
-        Для запроса информации пользователя необходимо войти в систему
-    </string>
-    <string name="must_be_logged_to_create_room">
-        Для создания чата необходимо войти в систему
-    </string>
-    <string name="must_be_logged_to_add_or_remove_user">
-        Необходимо войти в систему, чтобы добавить или удалить пользователя
-    </string>
-    <string name="must_be_logged_to_set_ticker">
-        Необходимо войти для установки тикера
-    </string>
-    <string name="must_be_logged_to_send_message">
-        Для отправки сообщения необходимо войти в систему
-    </string>
-    <string name="must_be_logged_to_toggle_priv_invites">
-        Необходимо войти в систему, чтобы включить приватные приглашения
-    </string>
-    <string name="must_be_logged_in_to_check_privileges">
-        Необходимо войти для проверки привилегий
-    </string>
-    <string name="must_be_logged_in_to_get_privileges">
-        Необходимо войти для получения привилегий
-    </string>
+    <string name="must_be_logged_to_browse">Необходимо войти для просмотра пользователя</string>
+    <string name="must_be_logged_to_get_room_list">Необходимо войти в систему, чтобы получить список чатов</string>
+    <string name="must_be_logged_to_request_user_info">Для запроса информации пользователя необходимо войти в систему</string>
+    <string name="must_be_logged_to_create_room">Для создания чата необходимо войти в систему</string>
+    <string name="must_be_logged_to_add_or_remove_user">Необходимо войти в систему, чтобы добавить или удалить пользователя</string>
+    <string name="must_be_logged_to_set_ticker">Необходимо войти для установки тикера</string>
+    <string name="must_be_logged_to_send_message">Для отправки сообщения необходимо войти в систему</string>
+    <string name="must_be_logged_to_toggle_priv_invites">Необходимо войти в систему, чтобы включить приватные приглашения</string>
+    <string name="must_be_logged_in_to_check_privileges">Необходимо войти для проверки привилегий</string>
+    <string name="must_be_logged_in_to_get_privileges">Необходимо войти для получения привилегий</string>
     <string name="checking_priv_">Проверка привилегий...</string>
     <string name="already_added_user_">Пользователь уже добавлен: {0}</string>
     <string name="must_be_logged_to_search">Войти перед поиском</string>
-    <string name="create_and_refresh">
-        Создана комната, список комнат обновляется
-    </string>
+    <string name="create_and_refresh">Создана комната, список комнат обновляется</string>
     <string name="setting_ticker">Установка тикера...</string>
     <string name="failed_to_set_ticker">Не удалось закрепить сообщение</string>
     <string name="successfully_set_ticker">Тикер успешно установлен</string>
-    <string name="folder_request_timed_out">
-        Время запроса на папку истекло
-    </string>
+    <string name="folder_request_timed_out">Время запроса на папку истекло</string>
     <string name="folder_request_failed">Ошибка запроса папки</string>
     <string name="folder_request_already_have">У нас уже есть вся папка</string>
     <string name="saved">Сохранено</string>
     <string name="no_changes_to_save">Нет изменений для сохранения</string>
-    <string name="request_user_error_empty">
-        Имя пользователя не может быть пустым
-    </string>
-    <string name="temporary_disconnected">
-        Мы временно отключились. Переподключение
-    </string>
+    <string name="request_user_error_empty">Имя пользователя не может быть пустым</string>
+    <string name="temporary_disconnected">Мы временно отключились. Переподключение</string>
     <string name="failed_to_undo">Ошибка отмены</string>
     <string name="enabling_listener">Включение слушателя</string>
     <string name="disabling_listener">Отключение слушателя</string>
     <string name="add_user_title">Добавить пользователей:</string>
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Успешно установлена общая папка с каталогами {0} и {1} файлами.
-    </string>
-    <string name="parsing_files_wait">
-        Анализ файлов... Занимает несколько секунд...
-    </string>
-    <string name="port_out_of_range">
-        Номер порта вне диапазона. Убедитесь, что он находится между 1024 и 65535.
-    </string>
-    <string name="port_failed_parse">
-        Не удалось разобрать номер порта. Убедитесь, что это числовое значение без специальных символов.
-    </string>
+    <string name="ignore_user_title">Игнорировать пользователей:</string>
+    <string name="success_setting_shared_dir_fnum_dnum">Успешно установлена общая папка с каталогами {0} и {1} файлами.</string>
+    <string name="parsing_files_wait">Анализ файлов... Занимает несколько секунд...</string>
+    <string name="port_out_of_range">Номер порта вне диапазона. Убедитесь, что он находится между 1024 и 65535.</string>
+    <string name="port_failed_parse">Не удалось разобрать номер порта. Убедитесь, что это числовое значение без специальных символов.</string>
     <string name="not_sharing">Вы не передаете ни одного файла</string>
-    <string name="failed_to_parse_shares_post">
-        Ваши файлы в директории не были обработаны
-    </string>
+    <string name="failed_to_parse_shares_post">Ваши файлы в директории не были обработаны</string>
     <string name="error_reading_dir">Ошибка чтения каталога</string>
     <string name="error_not_a_dir">Ошибка: Не каталог</string>
-    <string name="successfully_changed_dl_dir">
-        Успешно изменена директория загрузки на \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Ошибка разбора файлов, не удалось установить общую директорию
-    </string>
+    <string name="successfully_changed_dl_dir">Успешно изменена директория загрузки на \"{0}\"</string>
+    <string name="error_parsing_files_shared_dir">Ошибка разбора файлов, не удалось установить общую директорию</string>
     <string name="follow_system">Как в системных настройках</string>
     <string name="always_light">Светлая тема</string>
     <string name="always_dark">Тёмная тема</string>
     <!-- info -->
-    <string name="queue_length_">Длина очереди:</string>
-    <string name="upload_slots_">Бесплатные слоты:</string>
+    <string name="queue_length_">Длина очереди: </string>
+    <string name="upload_slots_">Бесплатные слоты: </string>
     <string name="today">Cегодня</string>
     <string name="pending_">Ожидает...</string>
     <string name="failed">Ошибка</string>
     <!--For someone translating, position {0} to where the words membership or ownership will occur -->
-    <string name="must_be_logged_to_drop_private">
-        Необходимо войти в систему, чтобы сбросить {0} из личной комнаты
-    </string>
+    <string name="must_be_logged_to_drop_private">Необходимо войти в систему, чтобы сбросить {0} из личной комнаты</string>
     <string name="failed_to_remove">Не удалось удалить {0}</string>
     <string name="successfully_removed">Успешно удален {0}</string>
     <!--For someone translating, position {0} to where the words membership or ownership will occur and {1} is where the roomanme will occur -->
@@ -415,38 +261,20 @@
     <string name="startup_room_on">{0} Теперь установлен при запуске</string>
     <string name="notif_room_off">Уведомления отключены для: {0}</string>
     <string name="notif_room_on">Уведомления включены для: {0}</string>
-    <string name="new_room_message_received">
-        Новое сообщение в комнате {0}
-    </string>
-    <string name="removing_mod">
-        Удаление пользователя как модератора в {0}
-    </string>
-    <string name="adding_mod">
-        Добавление пользователя как модератора в {0}
-    </string>
+    <string name="new_room_message_received">Новое сообщение в комнате {0}</string>
+    <string name="removing_mod">Удаление пользователя как модератора в {0}</string>
+    <string name="adding_mod">Добавление пользователя как модератора в {0}</string>
     <string name="inviting_user_to">Приглашение пользователя в {0}</string>
     <string name="removing_user_from">Удаление пользователя или {0}</string>
     <string name="leaving_room">Выход из комнаты: {0}</string>
     <string name="adding_user_">Добавление пользователя: {0}</string>
-    <string name="error_adding_user_timeout">
-        Ошибка добавления пользователя: таймаут
-    </string>
-    <string name="error_adding_user_not_found">
-        Ошибка при добавлении пользователя: пользователь не найден
-    </string>
+    <string name="error_adding_user_timeout">Ошибка добавления пользователя: таймаут</string>
+    <string name="error_adding_user_not_found">Ошибка при добавлении пользователя: пользователь не найден</string>
     <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
-    <string name="setting_priv_invites">
-        Установка приватных приглашений: {0}
-    </string>
-    <string name="failed_setting_priv_invites">
-        Не удалось установить разрешить приватные приглашения: {0}
-    </string>
-    <string name="network_error_setting_listener">
-        Ошибка сети при установке слушателя на {0}
-    </string>
-    <string name="network_error_setting_listener_port">
-        Ошибка сети при смене слушателя на {0}
-    </string>
+    <string name="setting_priv_invites">Установка приватных приглашений: {0}</string>
+    <string name="failed_setting_priv_invites">Не удалось установить разрешить приватные приглашения: {0}</string>
+    <string name="network_error_setting_listener">Ошибка сети при установке слушателя на {0}</string>
+    <string name="network_error_setting_listener_port">Ошибка сети при смене слушателя на {0}</string>
     <string name="allowed">Разрешить</string>
     <string name="denied">Запрещен</string>
     <string name="get_folder">Скачать папку</string>
@@ -454,134 +282,67 @@
     <string name="success_added_mod">Успешно добавлен модератор</string>
     <string name="failed_added_mod">Не удалось добавить модератора</string>
     <string name="success_invite_user">Пользователь успешно приглашен</string>
-    <string name="failed_invite_user">
-        Не удалось пригласить пользователя
-    </string>
+    <string name="failed_invite_user">Не удалось пригласить пользователя</string>
     <string name="success_remove_mod">Модератор успешно удален</string>
     <string name="failed_remove_mod">Не удалось удалить модератора</string>
     <string name="success_removed_user">Пользователь успешно удален</string>
     <string name="failed_removed_user">Не удалось удалить пользователя</string>
-    <string name="wishlist_tab_error">
-        Данная вкладка отсутствует в Избранных
-    </string>
-    <string name="perform_search_first">
-        Сначала необходимо выполнить поиск для добавления в Избранное
-    </string>
-    <string name="added_to_wishlist">
-        Добавлен поисковый запрос \"{0}\" в Избранные
-    </string>
-    <string name="wishlist_tab_target">
-        Не удается изменить область для поиска в Избранных
-    </string>
-    <string name="search_tab_error">
-        Данной вкладки поиска больше не существует
-    </string>
-    <string name="error_sharing">
-        Ошибка разбора файлов, не удалось установить общую директорию
-    </string>
-    <string name="success_sharing">
-        Совместное использование успешно установлено
-    </string>
+    <string name="wishlist_tab_error">Данная вкладка отсутствует в Избранных</string>
+    <string name="perform_search_first">Сначала необходимо выполнить поиск для добавления в Избранное</string>
+    <string name="added_to_wishlist">Добавлен поисковый запрос \"{0}\" в Избранные</string>
+    <string name="wishlist_tab_target">Не удается изменить область для поиска в Избранных</string>
+    <string name="search_tab_error">Данной вкладки поиска больше не существует</string>
+    <string name="error_sharing">Ошибка разбора файлов, не удалось установить общую директорию</string>
+    <string name="success_sharing">Совместное использование успешно установлено</string>
     <string name="sharing_off">Функция общего доступа отключена</string>
     <string name="sharing_currently_parsing">Идет анализ файлов...</string>
-    <string name="sharing_disabled_failure_parsing">
-        Совместное использование отключено. Не удалось разобрать ресурсы.
-    </string>
-    <string name="sharing_disabled_share_not_set">
-        Функция общего доступа отключена. Каталог общего доступа не установлен.
-    </string>
-    <string name="sharing_disabled_error">
-        Ошибка: Функция общего доступа отключена.
-    </string>
+    <string name="sharing_disabled_failure_parsing">Совместное использование отключено. Не удалось разобрать ресурсы.</string>
+    <string name="sharing_disabled_share_not_set">Функция общего доступа отключена. Каталог общего доступа не установлен.</string>
+    <string name="sharing_disabled_error">Ошибка: Функция общего доступа отключена.</string>
     <string name="change_target">Сменить область поиска</string>
     <string name="change_result_style">Изменить стиль результатов</string>
     <string name="add_to_wish">Добавить в Избранное</string>
     <string name="remove_from_ignored">Удалить из игнорируемых</string>
-    <string name="failed_to_send_message">
-        Не удалось отправить сообщение
-    </string>
-    <string name="empty_message_error">
-        Невозможно отправить пустое сообщение
-    </string>
-    <string name="browse_user_contacting">
-        Связываемся с пользователем для получения списка каталогов. По завершении он появится во вкладке \"Обзор\".
-    </string>
-    <string name="browse_user_timeout">
-        Истекло время ожидания запроса каталога пользователя
-    </string>
-    <string name="browse_user_nodirectconnection">
-        Запрос каталога пользователя не удался - невозможно установить прямое соединение с узлом
-    </string>
-    <string name="browse_user_wefailedtoparse">
-        Не удалось проанализировать ответ браузера
-    </string>
+    <string name="failed_to_send_message">Не удалось отправить сообщение</string>
+    <string name="empty_message_error">Невозможно отправить пустое сообщение</string>
+    <string name="browse_user_contacting">Связываемся с пользователем для получения списка каталогов. По завершении он появится во вкладке \"Обзор\".</string>
+    <string name="browse_user_timeout">Истекло время ожидания запроса каталога пользователя</string>
+    <string name="browse_user_nodirectconnection">Запрос каталога пользователя не удался - невозможно установить прямое соединение с узлом</string>
+    <string name="browse_user_wefailedtoparse">Не удалось проанализировать ответ браузера</string>
     <string name="browse_response_received">Получен ответ</string>
-    <string name="browse_none">
-        Пользователь не делится ни одним каталогом
-    </string>
-    <string name="browse_onlylocked">
-        Пользователь делится только заблокированными каталогами
-    </string>
-    <string name="kicked_due_to_other_client">
-        Отключение... другой клиент использует это имя пользователя?
-    </string>
-    <string name="port_already_in_use">
-        Не удалось настроить слушателя. Возможно, порт, уже используется.
-    </string>
-    <string name="dns_failed">
-        DNS поиск сервера завершился неудачей. Переключение по жесткому IP адресу.
-    </string>
+    <string name="browse_none">Пользователь не делится ни одним каталогом</string>
+    <string name="browse_onlylocked">Пользователь делится только заблокированными каталогами</string>
+    <string name="kicked_due_to_other_client">Отключение... другой клиент использует это имя пользователя?</string>
+    <string name="port_already_in_use">Не удалось настроить слушателя. Возможно, порт, уже используется.</string>
+    <string name="dns_failed">DNS поиск сервера завершился неудачей. Переключение по жесткому IP адресу.</string>
     <string name="bad_user_pass">Неверное имя пользователя или пароль</string>
+    <string name="invalid_username">Недоступное имя пользователя</string>
+    <string name="invalid_password">Неверный пароль</string>
+    <string name="user_too_long">Имя пользователя должно быть короче 30 символов</string>
+    <string name="user_invalid_char">Имя пользователя не может содержать специальные символы</string>
     <string name="network_unreachable">Сеть недоступна</string>
     <string name="cannot_login">Вход не выполнен</string>
-    <string name="no_empty_user_pass">
-        Логин и пароль не могут быть пустыми
-    </string>
-    <string name="dns_failed_2">
-        Не удалось определить ip-адрес сервера soulseek.
-    </string>
+    <string name="no_empty_user_pass">Логин и пароль не могут быть пустыми</string>
+    <string name="dns_failed_2">Не удалось определить ip-адрес сервера soulseek.</string>
     <!--In this case the placeholder {0} is for the username-->
-    <string name="added_to_ignore">
-        Добавлен пользователь \"{0}\" в список исключений
-    </string>
-    <string name="already_added_to_ignore">
-        Пользователь \"{0}\" уже добавлен в список игнорируемых
-    </string>
-    <string name="failed_to_establish_connection_to_peer">
-        Не удалось установить соединение {0}
-    </string>
-    <string name="user_info_received">
-        Получена информация пользователя {0}
-    </string>
-    <string name="user_info_failed_conn">
-        Не удалось получить информацию пользователя: {0} Не удалось установить соединение.
-    </string>
-    <string name="user_info_failed_offline">
-        Не удалось получить информацию о пользователе: {0} Пользователь не в сети.
-    </string>
-    <string name="user_info_failed_timeout">
-        Не удалось получить информацию для пользователя: {0} Истекло время соединения.
-    </string>
-    <string name="deleted_message_history_with">
-        Удалена история сообщений {0}
-    </string>
+    <string name="added_to_ignore">Добавлен пользователь \"{0}\" в список исключений</string>
+    <string name="already_added_to_ignore">Пользователь \"{0}\" уже добавлен в список игнорируемых</string>
+    <string name="failed_to_establish_connection_to_peer">Не удалось установить соединение {0}</string>
+    <string name="user_info_received">Получена информация пользователя {0}</string>
+    <string name="user_info_failed_conn">Не удалось получить информацию пользователя: {0} Не удалось установить соединение.</string>
+    <string name="user_info_failed_offline">Не удалось получить информацию о пользователе: {0} Пользователь не в сети.</string>
+    <string name="user_info_failed_timeout">Не удалось получить информацию для пользователя: {0} Истекло время соединения.</string>
+    <string name="deleted_message_history_with">Удалена история сообщений {0}</string>
     <string name="welcome">Здравствуйте, {0}</string>
-    <string name="failed_to_establish_direct_or_indirect">
-        Не удалось установить прямую или косвенную связь с пользователем
-    </string>
-    <string name="remote_conn_closed">
-        Ошибка чтения: удаленное соединение закрыто
-    </string>
+    <string name="failed_to_establish_direct_or_indirect">Не удалось установить прямую или косвенную связь с пользователем</string>
+    <string name="remote_conn_closed">Ошибка чтения: удаленное соединение закрыто</string>
     <string name="network_down">Сетевая подсистема выключена</string>
-    <string name="reported_as_failed">
-        Ошибка: Передача не удалась загрузчиком
-    </string>
+    <string name="reported_as_failed">Ошибка: Передача не удалась загрузчиком</string>
     <string name="error_no_space">Ошибка: на устройстве нет места.</string>
-    <string name="error_unspecified">
-        Задача не выполнена из-за необработанного исключения
-    </string>
+    <string name="error_unspecified">Задача не выполнена из-за необработанного исключения</string>
     <string name="timeout_peer">Таймаут с пиром</string>
     <string name="transfer_rejected">Запрос на перевод отклонён</string>
+    <string name="transfer_rejected_file_not_shared">Запрос на перевод отклонен. Причина: файлом не делятся</string>
     <string name="delete_messages">Удалить сообщения</string>
     <string name="delete_all_messages">Удалить все сообщения</string>
     <string name="deleted_all_messages">Удалена вся история сообщений</string>
@@ -611,6 +372,7 @@
     <string name="invite">Пригласить</string>
     <string name="cancel">Отменить</string>
     <string name="close">Закрыть</string>
+    <string name="report">Пожаловаться</string>
     <string name="create_chatroom">Создать комнату</string>
     <string name="refresh_room_list">Обновить список комнат</string>
     <string name="away">Нет на месте</string>
@@ -633,9 +395,7 @@
     <string name="msg_user">Написать пользователю</string>
     <string name="copy_image">Скопировать изображение</string>
     <string name="save_image">Сохранить изображение</string>
-    <string name="success_save">
-        Изображение пользователя успешно сохранено.
-    </string>
+    <string name="success_save">Изображение пользователя успешно сохранено.</string>
     <!--Internal File Selector-->
     <string name="select_folder">Выберите папку</string>
     <string name="current_location_">Текущее местоположение:</string>
@@ -644,19 +404,13 @@
     <string name="listener_off">Слушатель отключен</string>
     <string name="upnp_not_ran">UPnP не запущен</string>
     <string name="upnp_currently_running">UPnP запущен</string>
-    <string name="no_upnp_devices_found">
-        Не найдено совместимых UPnP устройств
-    </string>
+    <string name="no_upnp_devices_found">Не найдено совместимых UPnP устройств</string>
     <string name="upnp_wifi_only">UPnP только для wifi</string>
     <string name="upnp_no_wifi_conn">Нет подключения к Wi-Fi</string>
-    <string name="failed_to_set">
-        Не удалось задать соответствие на UPnP устройстве
-    </string>
+    <string name="failed_to_set">Не удалось задать соответствие на UPnP устройстве</string>
     <string name="upnp_success">UPnP успешно переслан порт</string>
     <string name="upnp_last_success">UPnP был успешно запущен</string>
-    <string name="attempting_to_find_and_open">
-        Попытка найти и открыть порт через UPnP
-    </string>
+    <string name="attempting_to_find_and_open">Попытка найти и открыть порт через UPnP</string>
     <string name="upnp_search_finished">Поиск UPnP завершен</string>
     <!--Sharing-->
     <!--Transfer States-->
@@ -673,20 +427,14 @@
     <string name="resume_dl">Возобновить загрузку</string>
     <string name="refresh_queue_pos">Обновить позицию очереди</string>
     <string name="play_file">Открыть файл</string>
-    <string name="chosen_transfer_doesnt_exist">
-        Элемент передачи выбран больше не существует.
-    </string>
+    <string name="chosen_transfer_doesnt_exist">Элемент передачи выбран больше не существует.</string>
     <string name="position_is_still_">Позиция в очереди: {0}</string>
-    <string name="failed_to_play">
-        Не удалось воспроизвести файл в проигрывателе по умолчанию
-    </string>
+    <string name="failed_to_play">Не удалось воспроизвести файл в проигрывателе по умолчанию</string>
     <!--Notification-->
     <string name="download_in_progress">Идет загрузка</string>
     <string name="transfers_in_progress">Выполняется передач...</string>
     <string name="seeker_running">Seeker запущен</string>
-    <string name="seeker_running_content">
-        Seeker работает в фоновом режиме
-    </string>
+    <string name="seeker_running_content">Seeker работает в фоновом режиме</string>
     <!--Privileges-->
     <string name="privileges">Привилегии</string>
     <string name="yes">Да</string>
@@ -704,9 +452,7 @@
     <string name="status">Статус</string>
     <string name="view_users">Просмотр пользователей</string>
     <string name="view_self">Просмотр самому</string>
-    <string name="view_all_tickers">
-        Просмотреть все закреплённые сообщения
-    </string>
+    <string name="view_all_tickers">Просмотреть все закреплённые сообщения</string>
     <string name="resume_all">Возобновить все</string>
     <string name="pause_all">Приостановить все</string>
     <string name="retry_all_failed">Повторить поиск</string>
@@ -719,20 +465,12 @@
     <string name="upload_f_string">Загружено {0} {1} пользователю: {2}</string>
     <string name="about_title">О программе</string>
     <string name="give_privileges">Дать привилегии</string>
-    <string name="error_days_entered_no_parse">
-        Количество должно быть целым числом.
-    </string>
-    <string name="error_days_entered_not_positive">
-        Количество должно быть положительным числом.
-    </string>
-    <string name="error_insufficient_days">
-        У вас нет {0} дней для отправки.
-    </string>
+    <string name="error_days_entered_no_parse">Количество должно быть целым числом.</string>
+    <string name="error_days_entered_not_positive">Количество должно быть положительным числом.</string>
+    <string name="error_insufficient_days">У вас нет {0} дней для отправки.</string>
     <string name="give_to_">Отправить {0}</string>
     <string name="error_give_priv">Не удалось предоставить привилегии</string>
-    <string name="give_priv_success">
-        Дней привилегий \"{0}\" успешно предоставлено \"{1}\"
-    </string>
+    <string name="give_priv_success">Дней привилегий \"{0}\" успешно предоставлено \"{1}\"</string>
     <string name="sending__">Отправка...</string>
     <string name="give_hint"># количество дней</string>
     <string name="type_notes_here">Введите здесь заметки о пользователе</string>
@@ -740,63 +478,39 @@
     <string name="add_note">Добавить комментарий</string>
     <string name="note_title">{0} Примечание</string>
     <string name="more_options">Дополнительные параметры</string>
-    <string name="remove_from_user_list">
-        Удалить из списка пользователей
-    </string>
+    <string name="remove_from_user_list">Удалить из списка пользователей</string>
     <string name="filter_is_on">Фильтр включён</string>
-    <string name="filter_is_on_body">
-        Вы хотите загрузить полную папку или просто отфильтрованные элементы?
-    </string>
+    <string name="filter_is_on_body">Вы хотите загрузить полную папку или просто отфильтрованные элементы?</string>
     <string name="all">Все</string>
     <string name="just_filtered">Только отфильтрованные</string>
     <string name="item_total_singular">{0} всего</string>
     <string name="item_total_plural">{0} элементов всего</string>
-    <string name="subfolders_warning">
-        Эта папка содержит вложенные папки, Скачивать все файлы также и в подпапках ({0}) или только в текущей папке ({1})?
-    </string>
-    <string name="subfolders_warning_queue_paused">
-        Эта папка содержит вложенные папки. Скачивать файлы из подпапок тоже ({0}) или только из текущей папки ({1})?
-    </string>
+    <string name="subfolders_warning">Эта папка содержит вложенные папки, Скачивать все файлы также и в подпапках ({0}) или только в текущей папке ({1})?</string>
+    <string name="subfolders_warning_queue_paused">Эта папка содержит вложенные папки. Скачивать файлы из подпапок тоже ({0}) или только из текущей папки ({1})?</string>
     <string name="current_folder_only">Только текущая папка</string>
-    <string name="must_be_logged_in_to_give_privileges">
-        Необходимо войти в систему для предоставления привилегий
-    </string>
-    <string
-        name="about_body"
-    ><![CDATA[Seeker - бесплатный android-клиент Soulseek с открытым исходным кодом. Здесь никогда не будет рекламы или платных функций.
+    <string name="must_be_logged_in_to_give_privileges">Необходимо войти в систему для предоставления привилегий</string>
+    <string name="about_body"><![CDATA[Seeker - бесплатный android-клиент Soulseek с открытым исходным кодом. Здесь никогда не будет рекламы или платных функций.
 <br><br>Пожалуйста, помогите перевести Seeker <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">здесь</a>.
 <br><br>Исходный код <a href="https://crowdin.com/project/seeker">здесь</a>.
 <br><br>Версия: {0}.]]></string>
-    <string name="must_be_logged_in_to_get_dir_contents">
-        Необходимо войти в систему, чтобы получить содержимое каталога
-    </string>
+    <string name="force_filesystem_message"><![CDATA[Разрешение на доступ к папкам на устройстве стандартным способом иногда сбрасывается. Если Seeker будет повторно запрашивать доступ к Общей папке или к папке Загрузок, воспользуйтесь этой кнопкой, чтобы запросить разрешения старого формата, которые точно не пропадут.<br><br>Эта функция работает только в версии Seeker из IzzyOnDroid F-Droid(<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">ссылка для скачивания</a>). Версия из Google Play не имеет возможности запрашивать доступ таким образом.]]></string>
+    <string name="must_be_logged_in_to_get_dir_contents">Необходимо войти в систему, чтобы получить содержимое каталога</string>
     <string name="note">Примечание</string>
-    <string name="removed_user_from_ignored_list">
-        Удаление пользователя \"{0}\" из чёрного списка
-    </string>
-    <string name="successfully_changed_incomplete_dir">
-        Неполный каталог успешно изменен на \"{0}\"
-    </string>
-    <string name="no_uploads_yet">
-        Пока здесь нет раздач. Если вы чем-нибудь поделитесь, оно появится здесь
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        Пока здесь нет раздач. Вы не делитесь файлами
-    </string>
-    <string name="auto_clear_complete">
-        Автоматически очищать завершенные загрузки
-    </string>
-    <string name="auto_clear_complete_uploads">
-        Автоматически очищать завершенные загрузки
-    </string>
+    <string name="removed_user_from_ignored_list">Удаление пользователя \"{0}\" из чёрного списка </string>
+    <string name="removed_user">Удален пользователь: \"{0}\"</string>
+    <string name="successfully_changed_incomplete_dir">Неполный каталог успешно изменен на \"{0}\"</string>
+    <string name="no_uploads_yet">Пока здесь нет раздач. Если вы чем-нибудь поделитесь, оно появится здесь</string>
+    <string name="no_uploads_yet_not_sharing">Пока здесь нет раздач. Вы не делитесь файлами</string>
+    <string name="no_uploads_yet_failed_to_set_up_shared_files">В настоящее время вы ничего не отдаёте: ошибка настройки общего доступа</string>
+    <string name="auto_clear_complete">Автоматически очищать завершенные загрузки</string>
+    <string name="auto_clear_complete_uploads">Автоматически очищать завершенные загрузки</string>
     <string name="download_remaining">{0} Осталась загрузка</string>
     <string name="downloads_remaining">{0} Остались загрузки</string>
     <string name="upload_remaining">{0} Осталась выгрузка</string>
     <string name="uploads_remaining">{0} Остались выгрузки</string>
     <string name="uploads_in_progress">Идёт выгрузка</string>
-    <string name="search_tabs_bold">
-        <b>Поиск вкладок</b>
-    </string>
+    <string name="search_tabs_bold">    <b>Поиск вкладок</b>
+  </string>
     <string name="shutdown">Выключить</string>
     <string name="set_online_alert">Установить оповещение</string>
     <string name="remove_online_alert">Удалить Оповещение</string>
@@ -804,19 +518,12 @@
     <string name="publicRoomCreation">Создаем публичную комнату...</string>
     <string name="failed_user_offline">Ошибка - Пользователь не в сети</string>
     <string name="failed_denied">Ошибка - Отказано</string>
-    <string name="concurrent_dialog">
-        Ограничить количество одновременных загрузок. Например, если макс. одновременно - 1 и вы загружаете 2 папки от разных пользователей, вторая папка начнется после завершения первой папки. Это может быть полезно для тех, кто имеет низкую пропускную способность, чтобы не задерживать других пользователей и завершить более поздние загрузки раньше.
-    </string>
-    <string name="clear_incomplete_dialog">
-        Это удалит все ненужные файлы из папки с незавершенными загрузками. Seeker пытается выполнить это по умолчанию, но иногда это невозможно, поэтому эту кнопку можно использовать для освобождения файлов / пространства.
-    </string>
-    <string name="diagnostics_more_info">
-        Это сохранит диагностическую информацию в текстовый файл с именем \"seeker_diagnostics.txt\", который будет расположен в корне выбранной папки для загрузки.
-		\n\nЭто может быть полезно для решения проблем с устранением неполадок. Если проблемы носят сетевой характер, возможно, потребуется перезапустить приложение после включения этой опции для получения полных результатов.
-    </string>
-    <string name="folder_X_from_user_Y_finished">
-        {0} от {1} успешно завершено.
-    </string>
+    <string name="re_requesting">Повторный запрос</string>
+    <string name="concurrent_dialog">Ограничить количество одновременных загрузок. Например, если макс. одновременно - 1 и вы загружаете 2 папки от разных пользователей, вторая папка начнется после завершения первой папки. Это может быть полезно для тех, кто имеет низкую пропускную способность, чтобы не задерживать других пользователей и завершить более поздние загрузки раньше.</string>
+    <string name="clear_incomplete_dialog">Это удалит все ненужные файлы из папки с незавершенными загрузками. Seeker пытается выполнить это по умолчанию, но иногда это невозможно, поэтому эту кнопку можно использовать для освобождения файлов / пространства.</string>
+    <string name="diagnostics_more_info">Это сохранит диагностическую информацию в текстовый файл с именем \"seeker_diagnostics.txt\", который будет расположен в корне выбранной папки для загрузки.
+		\n\nЭто может быть полезно для решения проблем с устранением неполадок. Если проблемы носят сетевой характер, возможно, потребуется перезапустить приложение после включения этой опции для получения полных результатов.</string>
+    <string name="folder_X_from_user_Y_finished">{0} от {1} успешно завершено.</string>
     <string name="sort_results_by">Сортировать по</string>
     <string name="sort_results_by_">Сортировать по:</string>
     <string name="next">Следующий</string>
@@ -841,13 +548,9 @@
     <string name="Reselect">Выбрать повторно</string>
     <string name="RemoveFolder">Удалить папку</string>
     <string name="FolderError">Ошибка папки</string>
-    <string name="ErrorForFolder">Ошибка в папке:</string>
-    <string name="AreYouSureClearAllDirectories">
-        Вы уверены, что хотите очистить все {0} директории из списка?
-    </string>
-    <string name="ErrorDownloadDirNotProperlySet">
-        Ошибка: Папка загрузок установлена неправильно.
-    </string>
+    <string name="ErrorForFolder">Ошибка в папке: </string>
+    <string name="AreYouSureClearAllDirectories">Вы уверены, что хотите очистить все {0} директории из списка?</string>
+    <string name="ErrorDownloadDirNotProperlySet">Ошибка: Папка загрузок установлена неправильно.</string>
     <string name="CopySelectedURLs">Скопировать выбранные URL</string>
     <string name="CopySelectedURL">Скопировать выбранный URL</string>
     <string name="CopyURL">Копировать ссылку</string>
@@ -856,9 +559,7 @@
     <string name="LinksCopied">Ссылки скопированы</string>
     <string name="ShowFolderInfo">Показать информацию о папке</string>
     <string name="NothingToCopy">Нечего копировать</string>
-    <string name="ThisFolderContainsSubfolders">
-        Папка содержит вложенные папки
-    </string>
+    <string name="ThisFolderContainsSubfolders">Папка содержит вложенные папки</string>
     <string name="QueuedForDownload">В очереди для скачивания</string>
     <string name="QueueFolderAsPaused">Папка в очереди на паузу</string>
     <!--meaning duration of song / songs-->
@@ -873,64 +574,33 @@
     <string name="theUserLeft">покинул комнату</string>
     <string name="theUserWentAway">ушел</string>
     <string name="theUserCameBack">вернулся</string>
-    <string name="messageWillSendOnReConnect">
-        Сообщение будет отправлено при восстановлении соединения
-    </string>
+    <string name="messageWillSendOnReConnect">Сообщение будет отправлено при восстановлении соединения</string>
     <string name="SortUsersBy">Сортировка пользователей</string>
     <string name="FilterUsers">Фильтр пользователей...</string>
     <string name="Total_">Всего:</string>
-    <string name="CannotBrowseUsernameOffline">
-        Невозможно просмотреть {0}, пользователь не в сети.
-    </string>
-    <string name="FailedToBrowseUsernameUnspecifiedError">
-        Не удалось просмотреть {0} из-за неизвестной ошибки.
-    </string>
-    <string name="BrowseOnlyEmptyDir">
-        Пользователь, {0}, делится только пустым каталогом.
-    </string>
+    <string name="CannotBrowseUsernameOffline">Невозможно просмотреть {0}, пользователь не в сети.</string>
+    <string name="FailedToBrowseUsernameUnspecifiedError">Не удалось просмотреть {0} из-за неизвестной ошибки.</string>
+    <string name="BrowseOnlyEmptyDir">Пользователь, {0}, делится только пустым каталогом.</string>
     <string name="DownloadIsQueued">Загрузка в очереди</string>
-    <string name="GetFolderDoesntWorkForLockedShares">
-        Папка Get не работает для заблокированных акций. Необходимо вместо этого использовать «Обзор» или «Переместить в папке».
-    </string>
+    <string name="GetFolderDoesntWorkForLockedShares">Папка Get не работает для заблокированных акций. Необходимо вместо этого использовать «Обзор» или «Переместить в папке».</string>
     <string name="ImportWizard">Мастер импорта</string>
     <string name="Import">Импорт</string>
-    <string name="SuccessfullyParsed">
-        Успешно разобрались, нажмите \"Далее\" для продолжения
-    </string>
-    <string name="FailedToParseContactDev">
-        Не удалось проанализировать файл. Убедитесь, что файл действителен. Свяжитесь с разработчиком для получения дополнительной помощи.
-    </string>
-    <string name="FailedToParseReasonContactDev">
-        Не удалось проанализировать файл. {0}. Свяжитесь с разработчиком для получения дополнительной помощи.
-    </string>
-    <string name="NoSuitableFileManager">
-        Не найден подходящий файловый менеджер
-    </string>
-    <string name="SuccessfullyImported">
-        Данные клиента успешно импортированы
-    </string>
-    <string name="SelectUserNotes">
-        Выберите следующие заметки пользователя для добавления
-    </string>
+    <string name="SuccessfullyParsed">Успешно разобрались, нажмите \"Далее\" для продолжения</string>
+    <string name="FailedToParseContactDev">Не удалось проанализировать файл. Убедитесь, что файл действителен. Свяжитесь с разработчиком для получения дополнительной помощи.</string>
+    <string name="FailedToParseReasonContactDev">Не удалось проанализировать файл. {0}. Свяжитесь с разработчиком для получения дополнительной помощи.</string>
+    <string name="NoSuitableFileManager">Не найден подходящий файловый менеджер</string>
+    <string name="SuccessfullyImported">Данные клиента успешно импортированы</string>
+    <string name="SelectUserNotes">Выберите следующие заметки пользователя для добавления</string>
     <string name="FolderFinishedDownloading">Загрузка папки завершена</string>
     <string name="FinishedDownloading">Завершена загрузка</string>
-    <string name="PermissionsIssueShared">
-        Проблемы с доступом к конечной папке. Пожалуйста, перейдите в настройки и снова выберите конечную папку.
-    </string>
-    <string name="SharedFolderIssuesAllFailed">
-        Проблема доступа к общим папкам. Нажмите на папки для получения дополнительной информации.
-    </string>
+    <string name="PermissionsIssueShared">Проблемы с доступом к конечной папке. Пожалуйста, перейдите в настройки и снова выберите конечную папку.</string>
+    <string name="SharedFolderIssuesAllFailed">Проблема доступа к общим папкам. Нажмите на папки для получения дополнительной информации.</string>
     <string name="UserXIsOffline">Пользователь {0} не в сети</string>
-    <string name="CannotConnectUserX">
-        Не удаётся подключиться к пользователю {0}
-    </string>
-    <string name="TimeoutQueueUserX">
-        Таймаут получения позиции в очереди {0}
-    </string>
-    <string name="PermissionErrorShared">
-        Ошибка доступа, невозможно записать (Пожалуйста, выберите заново).
-    </string>
+    <string name="CannotConnectUserX">Не удаётся подключиться к пользователю {0}</string>
+    <string name="TimeoutQueueUserX">Таймаут получения позиции в очереди {0}</string>
+    <string name="PermissionErrorShared">Ошибка доступа, невозможно записать (Пожалуйста, выберите заново).</string>
     <string name="FolderNoExistShared">Папки не существует</string>
+    <string name="FolderNotAccessible">Папка недоступна. Пожалуйста, выберите папку повторно. </string>
     <string name="UnknownErrorShared">Неизвестная ошибка. Подробнее.</string>
     <string name="MessagesWithUser">Сообщения {0}</string>
     <string name="DateAddedAsc">Дата Добавлена (Asc)</string>
@@ -938,67 +608,39 @@
     <string name="Name">Имя</string>
     <string name="OnlineStatus">Статус пользователя</string>
     <string name="NoUsersFound">Не найден пользователь</string>
-    <string name="UsingThisWizardLong">
-        С помощью этого мастера можно импортировать клиентские данные из SoulseekQT или Nicotine+.\n\nЧтобы получить клиентские данные изSoulseekQT, перейдите в Настройки &gt; Дополнения &gt; \'Экспорт данных конфигурации клиента\', тип файла должен быть .scd1. Для Nicotine+ перейдите в Настройки &gt; Экспорт, тип файла может быть .tar.bz2 или файл конфигурации сырой.\n\nSeeker импортирует список пользователей, список Игнорируемых / Неразделяемых, список Избранных запросов и заметки Пользователя. Далее можно будет выбрать один из них и экспортировать.\n\nНажмите \'Импорт\', чтобы начать.
-    </string>
-    <string name="CurrentDownloadFolder_">Текущая папка для загрузок:</string>
-    <string name="CreateCompleteAndIncomplete">
-        Создать директории Soulseek_Complete и Soulseek_Incomplete
-    </string>
-    <string name="CreateUsernameSubfolders">
-        Создать подпапки с именем пользователя
-    </string>
+    <string name="UsingThisWizardLong">С помощью этого мастера можно импортировать клиентские данные из SoulseekQT или Nicotine+.\n\nЧтобы получить клиентские данные изSoulseekQT, перейдите в Настройки &gt; Дополнения &gt; \'Экспорт данных конфигурации клиента\', тип файла должен быть .scd1. Для Nicotine+ перейдите в Настройки &gt; Экспорт, тип файла может быть .tar.bz2 или файл конфигурации сырой.\n\nSeeker импортирует список пользователей, список Игнорируемых / Неразделяемых, список Избранных запросов и заметки Пользователя. Далее можно будет выбрать один из них и экспортировать.\n\nНажмите \'Импорт\', чтобы начать.</string>
+    <string name="CurrentDownloadFolder_">Текущая папка для загрузок: </string>
+    <string name="CreateCompleteAndIncomplete">Создать директории Soulseek_Complete и Soulseek_Incomplete</string>
+    <string name="CreateUsernameSubfolders">Создать подпапки с именем пользователя</string>
+    <string name="DoNotCreateSubfoldersForSingleDownloads">Не создавать папки для единичных загрузок</string>
     <string name="ShowSmartFilters">Показать умные фильтры</string>
-    <string name="ShowPrivateLockedSearch">
-        Показывать приватные (закрытые) файлы в результатах поиска
-    </string>
-    <string name="ShowPrivateLockedBrowse">
-        Показать приватные (закрытые) файлы при просмотре ответа
-    </string>
+    <string name="ShowPrivateLockedSearch">Показывать приватные (закрытые) файлы в результатах поиска</string>
+    <string name="ShowPrivateLockedBrowse">Показать приватные (закрытые) файлы при просмотре ответа</string>
     <string name="RememberRecent">Запоминать последних пользователей</string>
     <string name="ClearRecentUsers">Очистить недавних пользователей</string>
-    <string name="AutoRetryFailedOfflineOnline">
-        Автоповтор неудачных загрузок, когда пользователь возвращается в онлайн
-    </string>
-    <string name="AwayOnInactivity">
-        Автоматически переводить статус в режим \"Отсутствие\"
-    </string>
-    <string name="DayVarient_">Дневной скин:</string>
-    <string name="NightVarient_">Ночной скин:</string>
-    <string name="NoSharedAdd">
-        Нет общих папок. Нажмите \'Добавить\', чтобы начать.
-    </string>
+    <string name="AutoRetryFailedOfflineOnline">Автоповтор неудачных загрузок, когда пользователь возвращается в онлайн</string>
+    <string name="AwayOnInactivity">Автоматически переводить статус в режим \"Отсутствие\"</string>
+    <string name="DayVarient_">Дневной скин: </string>
+    <string name="NightVarient_">Ночной скин: </string>
+    <string name="NoSharedAdd">Нет общих папок. Нажмите \'Добавить\', чтобы начать.</string>
     <string name="RescanShares">Rescan Shares</string>
-    <string name="PauseSharingIfMetered">
-        Приостановить совместный доступ при подключении по счетчику (мобильное соединение)
-    </string>
+    <string name="PauseSharingIfMetered">Приостановить совместный доступ при подключении по счетчику (мобильное соединение)</string>
     <string name="LimitDownloadSpeed">Ограничение скорости закачки</string>
     <string name="LimitUploadSpeed">Ограничить скорость раздачи</string>
-    <string name="LimitConcurrentDownloads">
-        Ограничить одновременные загрузки
-    </string>
+    <string name="LimitConcurrentDownloads">Ограничить одновременные загрузки</string>
     <string name="EnableDiagnostics">Разрешить диагностику</string>
-    <string name="ImportExternalClientData">
-        Импортировать данные клиента
-    </string>
-    <string name="LockedUserListOnly">
-        Заблокировано (скачивать могут только списки пользователей)
-    </string>
-    <string name="HiddenUserListOnly">
-        Скрытый (только список пользователей может просматривать)
-    </string>
+    <string name="ImportExternalClientData">Импортировать данные клиента</string>
+    <string name="LockedUserListOnly">Заблокировано (скачивать могут только списки пользователей)</string>
+    <string name="HiddenUserListOnly">Скрытый (только список пользователей может просматривать)</string>
     <string name="OverrideFolderName">Переопределить имя папки</string>
     <string name="CustomFolderName">Название папки</string>
-    <string name="QueueSelectedAsPaused">
-        Очередь отмечена как остановленная
-    </string>
+    <string name="QueueSelectedAsPaused">Очередь отмечена как остановленная</string>
     <string name="UserOptions">Настройки пользователя</string>
     <string name="Options">Настройки</string>
     <string name="Save">Сохранить</string>
     <string name="SortOrder">Порядок сортировки</string>
-    <string name="ClearAllCompleteAndAborted">
-        Очистить все завершенные и прерванные
-    </string>
+    <string name="AddUserToIgnored">Игнорировать пользователя</string>
+    <string name="ClearAllCompleteAndAborted">Очистить все завершенные и прерванные</string>
     <string name="AbortAll">Отменить все</string>
     <string name="BatchSelect">Выделить несколько</string>
     <string name="ShowSize">Показать размер</string>
@@ -1008,65 +650,37 @@
     <string name="RetryFailed">Повторить поиск</string>
     <string name="InvertSelection">Инвертировать выбор</string>
     <string name="SelectAll">Выбрать всё</string>
-    <string name="MaxConcurrentIs">Макс. # одновременных загрузок:</string>
+    <string name="MaxConcurrentIs">Макс. # одновременных загрузок: </string>
     <string name="PerTransfer">За передачу</string>
     <string name="Global">Общие</string>
     <string name="ConfigureSmartFilters">Настройка умных фильтров</string>
     <string name="NotSet">Не задано</string>
     <string name="AppLocalStorage">Локальное хранилище</string>
     <string name="NotInUse">Не используется</string>
-    <string name="IncompleteFolderEmpty">
-        Папка с незавершенными загрузками пуста
-    </string>
-    <string name="NoEligibleToClear">
-        Нет подходящих элементов для очистки
-    </string>
-    <string name="ChangeDownloadSpeed">
-        Изменить скорость загрузки (кб/с):
-    </string>
+    <string name="IncompleteFolderEmpty">Папка с незавершенными загрузками пуста</string>
+    <string name="NoEligibleToClear">Нет подходящих элементов для очистки</string>
+    <string name="ChangeDownloadSpeed">Изменить скорость загрузки (кб/с):</string>
     <string name="ChangeUploadSpeed">Изменить скорость отдачи (кб/с):</string>
     <string name="EnterSpeed">Скорость ввода Кб/с</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Введите Max для одновременного скачивания
-    </string>
-    <string name="BrowseWhich">
-        Искать в публичных директориях или в списках пользователей?
-    </string>
+    <string name="EnterMaxDownloadSimultaneously">Введите Max для одновременного скачивания</string>
+    <string name="BrowseWhich">Искать в публичных директориях или в списках пользователей?</string>
     <string name="WaitForParsing">Дождитесь обработки файлов.</string>
     <string name="finishingUp">Завершение</string>
     <string name="XFilesParsed">{0} файлов обработано</string>
     <string name="ErrorAlreadyAdded">Ошибка: Каталог уже добавлен.</string>
     <string name="UploadFolderOptions">Загрузить параметры папки</string>
-    <string name="CannotChangeNameNotUnique">
-        Нельзя изменить имя. Не уникально.
-    </string>
+    <string name="CannotChangeNameNotUnique">Нельзя изменить имя. Не уникально.</string>
     <string name="AlreadyParsing">Уже анализируется</string>
     <string name="DirectoryNotSet">Каталог не задан</string>
-    <string name="FailedGettingAccess">
-        Не удалось получить доступ к каталогу
-    </string>
-    <string name="AdditionalFiles">
-        {0} дополнительных файлов с момента последнего сканирования.
-    </string>
-    <string name="OneAdditionalFile">
-        1 дополнительный файл с момента последнего сканирования.
-    </string>
-    <string name="NoMediaStore">
-        Нет доступа к медиа-магазину. Обработка будет неоптимизированной
-    </string>
-    <string name="NoPermissionsForDir">
-        Невозможно установить директорию без соответствующих прав доступа
-    </string>
+    <string name="FailedGettingAccess">Не удалось получить доступ к каталогу</string>
+    <string name="AdditionalFiles">{0} дополнительных файлов с момента последнего сканирования.</string>
+    <string name="OneAdditionalFile">1 дополнительный файл с момента последнего сканирования.</string>
+    <string name="NoMediaStore">Нет доступа к медиа-магазину. Обработка будет неоптимизированной</string>
+    <string name="NoPermissionsForDir">Невозможно установить директорию без соответствующих прав доступа</string>
     <string name="No">Нет</string>
-    <string name="MustBeLoggedInToImport">
-        Для импорта данных необходимо войти в систему и подключиться.
-    </string>
-    <string name="MustBeLoggedInToRetryDL">
-        Нужно войти и подключиться к системе, чтобы повторить загрузку.
-    </string>
-    <string name="FailedDownloadDirectoryNotSet">
-        Ошибка: директория для загрузок указана неправильно.
-    </string>
+    <string name="MustBeLoggedInToImport">Для импорта данных необходимо войти в систему и подключиться.</string>
+    <string name="MustBeLoggedInToRetryDL">Нужно войти и подключиться к системе, чтобы повторить загрузку.</string>
+    <string name="FailedDownloadDirectoryNotSet">Ошибка: директория для загрузок указана неправильно.</string>
     <string name="CopyLink">Скопировать ссылку</string>
     <string name="DownloadFile">Скачать файл</string>
     <string name="IgnoreUnshareUser">Отписаться от пользователя</string>
@@ -1088,20 +702,28 @@
     <string name="X_of_Y_Remaining">Осталось {0} из {1}</string>
     <string name="SetLanguage">Язык:</string>
     <string name="Automatic">Автоматически</string>
-    <string name="ManuallySetIncompleteFolder">
-        Вручную установить папку для незавершенных загрузок
-    </string>
-    <string name="CurrentIncompleteFolder">
-        Текущая папка для незавершенных загрузок:
-    </string>
+    <string name="ManuallySetIncompleteFolder">Вручную установить папку для незавершенных загрузок</string>
+    <string name="CurrentIncompleteFolder">Текущая папка для незавершенных загрузок:</string>
     <string name="ClearFolder">Очистить папку</string>
     <string name="HideSize">Скрыть размер</string>
     <string name="HideSpeed">Скрыть скорость</string>
     <string name="Num_Selected">{0} Выбрано</string>
     <string name="ExportClientData">Экспорт данных</string>
-    <string name="export_more_info">
-        Экспортировать список пользователей, список заблокированных/заглушенных пользователей, комментарии к пользователям и список избранных запросов в формате XML.
-Полезно при бэкапе данных или их переносе на другой телефон
-    </string>
+    <string name="export_more_info">Экспортировать список пользователей, список заблокированных/заглушенных пользователей, комментарии к пользователям и список избранных запросов в формате XML.
+Полезно при бэкапе данных или их переносе на другой телефон</string>
     <string name="successfully_exported">Данные успешно экспортированы</string>
+    <string name="ForceFilesystemPermission">Разрешить доступ ко всем файлам</string>
+    <string name="permission_already_successfully_granted">Разрешение уже предоставлено</string>
+    <string name="permission_successfully_granted">Разрешение предоставлено</string>
+    <string name="permission_failed">Не удалось предоставить разрешение</string>
+    <string name="bitrate">Битрейт</string>
+    <string name="setUpSharing">Настроить общий доступ</string>
+    <string name="change_password">Сменить пароль</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="cannot_be_empty">Не может быть пустым</string>
+    <string name="must_be_logged_in_generic">Для выполнения этого действия необходимо авторизоваться</string>
+    <string name="must_be_logged_in_to_change_password">Для изменения пароля необходимо авторизоваться</string>
+    <string name="failed_to_change_password">Не удалось сменить пароль</string>
+    <string name="password_successfully_updated">Пароль успешно обновлён</string>
+    <string name="error_dialog_content">Seeker столкнулся с проблемой. \n\nПожалуйста, поделитесь отчетом с разработчиками. \n\nЛюбая дополнительная информация, а также описание шагов для воспроизведения приветствуются.</string>
 </resources>
