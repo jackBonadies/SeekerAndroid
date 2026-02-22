@@ -1,25 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/abc_control_padding_material">
-
-
+    android:padding="@dimen/abc_control_padding_material"
+>
     <EditText
         android:id="@+id/createChatroomName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:hint="@string/create_chatroom_name"
         android:imeOptions="actionDone"
-        android:inputType="text" />
+        android:inputType="text"
+    />
     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+        android:theme="@style/checkBoxStyle"
         android:id="@+id/createChatroomPrivate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,6 +26,5 @@ android:theme="@style/checkBoxStyle"
         android:layout_gravity="end"
         android:layout_marginEnd="20dp"
         android:text="@string/create_chatroom_private"
-        />
-
+    />
 </LinearLayout>

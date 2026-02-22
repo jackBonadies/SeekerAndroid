@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/abc_control_padding_material">     
-
+    android:padding="@dimen/abc_control_padding_material"
+>
     <EditText
         android:minLines="1"
         android:lines="4"
@@ -15,6 +16,5 @@
         android:hint="@string/type_notes_here"
         android:inputType="textMultiLine"
         android:id="@+id/editUserNote"
-        />
-
+    />
 </FrameLayout>

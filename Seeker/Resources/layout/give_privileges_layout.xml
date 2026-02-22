@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/abc_control_padding_material">
-
-
+    android:padding="@dimen/abc_control_padding_material"
+>
     <EditText
-    android:id="@+id/givePrivilegesEditText"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:singleLine="true"
-    android:layout_marginStart="20dp"
-    android:layout_marginEnd="20dp"
-    android:hint="@string/give_hint"
-    android:imeOptions="actionSend"
-    android:inputType="number" />
-
+        android:id="@+id/givePrivilegesEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:hint="@string/give_hint"
+        android:imeOptions="actionSend"
+        android:inputType="number"
+    />
 </FrameLayout>

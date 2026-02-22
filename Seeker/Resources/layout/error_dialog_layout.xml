@@ -1,53 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:padding="16dp"
-    android:layout_height="match_parent">
-
-
+    android:layout_height="match_parent"
+>
     <TextView
         android:id="@+id/seekerEncounteredErrorTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/error_dialog_content"
         android:textSize="18sp"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="24dp"
+    />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
-    android:padding="16dp"
-    android:layout_height="match_parent">
-
-
-    <Button
-        android:foreground="@drawable/button"
-        style="@style/SeekerButtonStyle"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
-        android:id="@+id/btnClose"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.4"
-        android:text="@string/close"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:padding="16dp"
+        android:layout_height="match_parent"
+    >
+        <Button
+            android:foreground="@drawable/button"
+            style="@style/SeekerButtonStyle"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:id="@+id/btnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:text="@string/close"
         />
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+        />
 
-
-    <Button
-        android:foreground="@drawable/button"
-        style="@style/SeekerButtonStyle"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
-        android:id="@+id/btnReport"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.4"
-        android:text="@string/report"/>
-        </LinearLayout>
-
+        <Button
+            android:foreground="@drawable/button"
+            style="@style/SeekerButtonStyle"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:id="@+id/btnReport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.4"
+            android:text="@string/report"
+        />
+    </LinearLayout>
 </LinearLayout>

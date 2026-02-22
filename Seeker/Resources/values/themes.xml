@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-	<!--<style name="OutlinedRoundedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <!--<style name="OutlinedRoundedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
 	</style>
 
@@ -9,339 +9,435 @@
 		<item name="cornerSize">8dp</item>
 	</style>-->
 
+    <style name="DefaultLight" parent="AppTheme.NoActionBar">
+        <!--looks fine in light case-->
+        <item name="android:navigationBarColor" tools:targetApi="21">
+            #FF000000
+        </item>
 
-	<style name="DefaultLight" parent="AppTheme.NoActionBar">
+        <item name="normalTextColor">#000000</item>
+        <item name="normalTextColorNonTinted">#000000</item>
 
-		<!--looks fine in light case-->
-		<item name="android:navigationBarColor" tools:targetApi="21">#FF000000</item>
+        <!--<item name="dialogBackground">#52000000</item>-->
+        <item name="cellbackColor">#00000000</item>
+        <item name="cellback">#ffffff</item>
+        <item name="CustomSelector">@drawable/CustomSelector_ffffff</item>
+        <item name="cellbackColorDownloadDialog">#00000000</item>
+        <item name="expandIconColor">#959BDC</item>
+        <item name="cellStroke">#994f58c4</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_994f58c4
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_994f58c4</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_994f58c4</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_994f58c4
+        </item>
+        <item name="cell_shape_dldiag">
+            @drawable/cell_shape_dldiag_994f58c4
+        </item>
 
+        <item name="rounded_input_edit">
+            @drawable/rounded_text_input_background_light
+        </item>
 
+        <item name="android_default_notification_blue_color">#4978B8</item>
+        <item name="android_default_notification_complementary_color">
+            #B88949
+        </item>
+        <item name="seeker_notification_other_person_color">#6449B7</item>
 
-		<item name="normalTextColor">#000000</item>
-		<item name="normalTextColorNonTinted">#000000</item>
+        <item name="floating_action_bar_to_bottom_icon">#5F5F5F</item>
+        <item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
 
-		<!--<item name="dialogBackground">#52000000</item>-->
-		<item name="cellbackColor">#00000000</item>
-		<item name="cellback">#ffffff</item>
-		<item name="CustomSelector">@drawable/CustomSelector_ffffff</item>
-		<item name="cellbackColorDownloadDialog">#00000000</item>
-		<item name="expandIconColor">#959BDC</item>
-		<item name="cellStroke">#994f58c4</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_994f58c4</item>
-		<item name="cell_shape">@drawable/cell_shape_994f58c4</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_994f58c4</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_994f58c4</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_994f58c4</item>
+        <item name="dialog_background">#ffffffff</item>
 
+        <item name="pseudo_window_background_color">#00000000</item>
 
-		<item name="rounded_input_edit">@drawable/rounded_text_input_background_light</item>
+        <item name="secondaryColor">#cccccc</item>
+        <item name="cellTextColor">#2c3e50</item>
+        <item name="cellTextColorSubdued">#cc2c3e50</item>
+        <item name="slightestContrastColor">#e0e0e0</item>
+        <item name="slightContrastColor">#c7c7c7</item>
+        <item name="mainTextColor">#4f58c4</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_4f58c4
+        </item>
 
+        <item name="mainTextColorHinted">#959BDC</item>
 
+        <item name="the_rounded_corner_background_drawable">
+            @drawable/rounded_corner_background_light
+        </item>
+        <item name="the_rounded_corner_dialog_background_drawable">
+            @drawable/rounded_corner_dialog_background_light
+        </item>
+        <item
+            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
+        >
+            ?attr/the_rounded_corner_dialog_background_drawable
+        </item>
+    </style>
 
-		<item name="android_default_notification_blue_color">#4978B8</item>
-		<item name="android_default_notification_complementary_color">#B88949</item>
-		<item name="seeker_notification_other_person_color">#6449B7</item>
+    <style name="DefaultLight_Blue" parent="DefaultLight">
+        <item name="mainPurple">#126291</item>
+        <item name="swipeToRefreshProgress">#126291</item>
 
+        <item name="mainPurpleStatusBar">#10496b</item>
 
+        <item name="seeker_notification_other_person_color">#47B2A4</item>
 
-		<item name="floating_action_bar_to_bottom_icon">#5F5F5F</item>
-		<item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
+        <!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
+        <item name="rounded_bottom_left_purple">
+            @drawable/rounded_bottom_left_purple_126291
+        </item>
+        <item name="rounded_button">@drawable/rounded_button_126291</item>
+        <item name="rounded_bottom_right_purple">
+            @drawable/rounded_bottom_right_purple_126291
+        </item>
+        <item name="rounded_top_purple">
+            @drawable/rounded_top_purple_126291
+        </item>
 
+        <item name="whitePurpleForNavBar">#4c8aae</item>
 
+        <item name="mainTextColorHinted">#86b2cb</item>
+        <item name="mainTextColor">#126291</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_126291
+        </item>
+        <item name="slskAccent">#679DC6</item>
+        <item name="cellStroke">#9086b2cb</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_9086b2cb
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_9086b2cb</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_9086b2cb</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_9086b2cb
+        </item>
+        <item name="cell_shape_dldiag">
+            @drawable/cell_shape_dldiag_9086b2cb
+        </item>
+        <item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#4496ee</item>
+        <!--<item name="colorAccent">#054568</item>-->
+    </style>
 
+    <style name="DefaultLight_Red" parent="DefaultLight">
+        <item name="mainPurple">#B22525</item>
+        <item name="swipeToRefreshProgress">#B22525</item>
+        <item name="mainPurpleStatusBar">#7B0000</item>
+        <!--<item name="buttonStyle">@drawable/buttonStyle_B22525</item>-->
+        <item name="rounded_bottom_left_purple">
+            @drawable/rounded_bottom_left_purple_B22525
+        </item>
+        <item name="rounded_button">@drawable/rounded_button_B22525</item>
+        <item name="rounded_bottom_right_purple">
+            @drawable/rounded_bottom_right_purple_B22525
+        </item>
+        <item name="rounded_top_purple">
+            @drawable/rounded_top_purple_B22525
+        </item>
+        <item name="whitePurpleForNavBar">#c44e4e</item>
+        <item name="mainTextColorHinted">#d57676</item>
+        <item name="mainTextColor">#B22525</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_B22525
+        </item>
+        <item name="expandIconColor">#90d57676</item>
+        <item name="slskAccent">#d57676</item>
+        <item name="cellStroke">#90d57676</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_90d57676
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_90d57676</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_90d57676</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_90d57676
+        </item>
+        <item name="cell_shape_dldiag">
+            @drawable/cell_shape_dldiag_90d57676
+        </item>
 
-		<item name="dialog_background">#ffffffff</item>
+        <item name="seeker_notification_other_person_color">#B54848</item>
 
-		<item name="pseudo_window_background_color">#00000000</item>
+        <item name="colorAccent">#d57676</item>
+        <item name="checkBoxColor">#FC4C02</item>
+    </style>
 
-		<item name="secondaryColor">#cccccc</item>
-		<item name="cellTextColor">#2c3e50</item>
-		<item name="cellTextColorSubdued">#cc2c3e50</item>
-		<item name="slightestContrastColor">#e0e0e0</item>
-		<item name="slightContrastColor">#c7c7c7</item>
-		<item name="mainTextColor">#4f58c4</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_4f58c4</item>
+    <style name="DefaultDark_Blue" parent="DefaultDark">
+        <item name="mainPurple">#126291</item>
+        <item name="mainPurpleStatusBar">#10496b</item>
+        <!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
+        <item name="rounded_bottom_left_purple">
+            @drawable/rounded_bottom_left_purple_126291
+        </item>
+        <item name="rounded_button">@drawable/rounded_button_126291</item>
+        <item name="rounded_bottom_right_purple">
+            @drawable/rounded_bottom_right_purple_126291
+        </item>
+        <item name="rounded_top_purple">
+            @drawable/rounded_top_purple_126291
+        </item>
+        <item name="colorAccent">#86b2cb</item>
+        <item name="whitePurpleForNavBar">#4c8aae</item>
+        <item name="mainTextColor">#86b2cb</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_86b2cb
+        </item>
 
-		<item name="mainTextColorHinted">#959BDC</item>
+        <item name="slskAccent">#679DC6</item>
+        <item name="cellStroke">#86b2cb</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_86b2cb
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_86b2cb</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_86b2cb</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_86b2cb
+        </item>
+        <item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_86b2cb</item>
 
-		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_light</item>
-		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_light</item>
-		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
+        <item name="seeker_notification_other_person_color">#8ACFC6</item>
 
-	</style>
+        <item name="expandIconColor">#86b2cb</item>
+        <item name="mainTextColorHinted">#86b2cb</item>
+    </style>
 
-	<style name="DefaultLight_Blue" parent="DefaultLight">
-		<item name="mainPurple">#126291</item>
-		<item name="swipeToRefreshProgress">#126291</item>
+    <style name="DefaultDark_Grey" parent="DefaultDark">
+        <item name="mainPurple">#202124</item>
+        <item name="mainPurpleStatusBar">#000000</item>
+        <!--<item name="buttonStyle">@drawable/buttonStyle_202124</item>-->
+        <item name="rounded_bottom_left_purple">
+            @drawable/rounded_bottom_left_purple_202124
+        </item>
+        <item name="rounded_button">@drawable/rounded_button_202124</item>
+        <item name="rounded_bottom_right_purple">
+            @drawable/rounded_bottom_right_purple_202124
+        </item>
+        <item name="rounded_top_purple">
+            @drawable/rounded_top_purple_202124
+        </item>
+        <item name="mainPurpleForNavBar">#202124</item>
+        <!--a grey accent looks very bad-->
+        <item name="colorAccent">#86b2cb</item>
+        <item name="whitePurpleForNavBar">#556070</item>
 
-		<item name="mainPurpleStatusBar">#10496b</item>
+        <item name="mainTextColor">#dddddd</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_dddddd
+        </item>
 
+        <item name="cellStroke">#424242</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_424242
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_424242</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_424242</item>
+        <item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_424242</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_424242
+        </item>
 
-		<item name="seeker_notification_other_person_color">#47B2A4</item>
+        <item name="expandIconColor">#a0abb1</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="slskAccent">#2A4C6D</item>
+        <item
+            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
+        >
+            @drawable/rounded_corner_dialog_background_dark_303030
+        </item>
 
+        <item name="cellbackColorDownloadDialog">#ff303030</item>
+    </style>
 
-		<!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
-		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_126291</item>
-		<item name="rounded_button">@drawable/rounded_button_126291</item>
-		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_126291</item>
-		<item name="rounded_top_purple">@drawable/rounded_top_purple_126291</item>
+    <style name="Amoled_Grey" parent="Amoled">
+        <item name="mainPurple">#333333</item>
+        <item name="mainPurpleStatusBar">#0c0c0c</item>
 
-		<item name="whitePurpleForNavBar">#4c8aae</item>
+        <!--<item name="buttonStyle">@drawable/buttonStyle_333333</item>-->
+        <item name="rounded_bottom_left_purple">
+            @drawable/rounded_bottom_left_purple_333333
+        </item>
+        <item name="rounded_button">@drawable/rounded_button_333333</item>
+        <item name="rounded_bottom_right_purple">
+            @drawable/rounded_bottom_right_purple_333333
+        </item>
+        <item name="rounded_top_purple">
+            @drawable/rounded_top_purple_333333
+        </item>
+        <item name="mainPurpleForNavBar">#333333</item>
+        <item name="colorAccent">#86b2cb</item>
+        <item name="whitePurpleForNavBar">#556070</item>
+        <item name="expandIconColor">#424242</item>
+        <item name="mainTextColor">#dddddd</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_dddddd
+        </item>
 
-		<item name="mainTextColorHinted">#86b2cb</item>
-		<item name="mainTextColor">#126291</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_126291</item>
-		<item name="slskAccent">#679DC6</item>
-		<item name="cellStroke">#9086b2cb</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_9086b2cb</item>
-		<item name="cell_shape">@drawable/cell_shape_9086b2cb</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_9086b2cb</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_9086b2cb</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_9086b2cb</item>
-		<item name="colorAccent">#86b2cb</item>
-		<item name="checkBoxColor">#4496ee</item>
-		<!--<item name="colorAccent">#054568</item>-->
-	</style>
+        <item name="cellStroke">#424242</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_424242
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_424242_amoled</item>
+        <item name="cell_shape_end">
+            @drawable/cell_shape_end_424242_amoled
+        </item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_424242_amoled
+        </item>
+        <item name="cell_shape_dldiag">
+            @drawable/cell_shape_dldiag_424242_amoled
+        </item>
 
-	<style name="DefaultLight_Red" parent="DefaultLight">
-		<item name="mainPurple">#B22525</item>
-		<item name="swipeToRefreshProgress">#B22525</item>
-		<item name="mainPurpleStatusBar">#7B0000</item>
-		<!--<item name="buttonStyle">@drawable/buttonStyle_B22525</item>-->
-		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_B22525</item>
-		<item name="rounded_button">@drawable/rounded_button_B22525</item>
-		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_B22525</item>
-		<item name="rounded_top_purple">@drawable/rounded_top_purple_B22525</item>
-		<item name="whitePurpleForNavBar">#c44e4e</item>
-		<item name="mainTextColorHinted">#d57676</item>
-		<item name="mainTextColor">#B22525</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_B22525</item>
-		<item name="expandIconColor">#90d57676</item>
-		<item name="slskAccent">#d57676</item>
-		<item name="cellStroke">#90d57676</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_90d57676</item>
-		<item name="cell_shape">@drawable/cell_shape_90d57676</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_90d57676</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_90d57676</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_90d57676</item>
+        <item name="expandIconColor">#9086b2cb</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="slskAccent">#2A4C6D</item>
+        <item name="normalTextColor">#FFFFFF</item>
+    </style>
 
-		<item name="seeker_notification_other_person_color">#B54848</item>
-
-		<item name="colorAccent">#d57676</item>
-		<item name="checkBoxColor">#FC4C02</item>
-	</style>
-
-
-
-	<style name="DefaultDark_Blue" parent="DefaultDark">
-		<item name="mainPurple">#126291</item>
-		<item name="mainPurpleStatusBar">#10496b</item>
-		<!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
-		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_126291</item>
-		<item name="rounded_button">@drawable/rounded_button_126291</item>
-		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_126291</item>
-		<item name="rounded_top_purple">@drawable/rounded_top_purple_126291</item>
-		<item name="colorAccent">#86b2cb</item>
-		<item name="whitePurpleForNavBar">#4c8aae</item>
-		<item name="mainTextColor">#86b2cb</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_86b2cb</item>
-
-		<item name="slskAccent">#679DC6</item>
-		<item name="cellStroke">#86b2cb</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_86b2cb</item>
-		<item name="cell_shape">@drawable/cell_shape_86b2cb</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_86b2cb</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_86b2cb</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_86b2cb</item>
-
-		<item name="seeker_notification_other_person_color">#8ACFC6</item>
-
-	    <item name="expandIconColor">#86b2cb</item>
-		<item name="mainTextColorHinted">#86b2cb</item>
-	</style>
-
-	<style name="DefaultDark_Grey" parent="DefaultDark">
-		<item name="mainPurple">#202124</item>
-		<item name="mainPurpleStatusBar">#000000</item>
-		<!--<item name="buttonStyle">@drawable/buttonStyle_202124</item>-->
-		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_202124</item>
-		<item name="rounded_button">@drawable/rounded_button_202124</item>
-		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_202124</item>
-		<item name="rounded_top_purple">@drawable/rounded_top_purple_202124</item>
-		<item name="mainPurpleForNavBar">#202124</item>
-		<!--a grey accent looks very bad-->
-		<item name="colorAccent">#86b2cb</item>
-		<item name="whitePurpleForNavBar">#556070</item>
-
-		<item name="mainTextColor">#dddddd</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_dddddd</item>
-
-		<item name="cellStroke">#424242</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_424242</item>
-		<item name="cell_shape">@drawable/cell_shape_424242</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_424242</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_424242</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_424242</item>
-
-		<item name="expandIconColor">#a0abb1</item>
-		<item name="mainTextColorHinted">#dddddd</item>
-		<item name="slskAccent">#2A4C6D</item>
-		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">@drawable/rounded_corner_dialog_background_dark_303030</item>
-		
-
-		<item name="cellbackColorDownloadDialog">#ff303030</item>
-	</style>
-
-	<style name="Amoled_Grey" parent="Amoled">
-		<item name="mainPurple">#333333</item>
-		<item name="mainPurpleStatusBar">#0c0c0c</item>
-
-		<!--<item name="buttonStyle">@drawable/buttonStyle_333333</item>-->
-		<item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_333333</item>
-		<item name="rounded_button">@drawable/rounded_button_333333</item>
-		<item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_333333</item>
-		<item name="rounded_top_purple">@drawable/rounded_top_purple_333333</item>
-		<item name="mainPurpleForNavBar">#333333</item>
-		<item name="colorAccent">#86b2cb</item>
-		<item name="whitePurpleForNavBar">#556070</item>
-		<item name="expandIconColor">#424242</item>
-		<item name="mainTextColor">#dddddd</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_dddddd</item>
-
-		<item name="cellStroke">#424242</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_424242</item>
-		<item name="cell_shape">@drawable/cell_shape_424242_amoled</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_424242_amoled</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_424242_amoled</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_424242_amoled</item>
-
-		<item name="expandIconColor">#9086b2cb</item>
-		<item name="mainTextColorHinted">#dddddd</item>
-		<item name="slskAccent">#2A4C6D</item>
-		<item name="normalTextColor">#FFFFFF</item>
-	</style>
-
-	<style name="DefaultDark" parent="AppTheme.NoActionBar">
-
-		<!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
+    <style name="DefaultDark" parent="AppTheme.NoActionBar">
+        <!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
 			I assume this is because other apps were setting it, and we werent. so remedy this here.-->
-		<item name="android:navigationBarColor" tools:targetApi="21">#FF000000</item>
+        <item name="android:navigationBarColor" tools:targetApi="21">
+            #FF000000
+        </item>
 
-		<item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
-		<item name="floating_action_bar_to_bottom_background">#202020</item>
+        <item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
+        <item name="floating_action_bar_to_bottom_background">#202020</item>
 
-		<item name="android_default_notification_blue_color">#8AB4F8</item>
-		<item name="android_default_notification_complementary_color">#f8ce8a</item>
+        <item name="android_default_notification_blue_color">#8AB4F8</item>
+        <item name="android_default_notification_complementary_color">
+            #f8ce8a
+        </item>
 
-		<item name="seeker_notification_other_person_color">#AF9AF4</item>
+        <item name="seeker_notification_other_person_color">#AF9AF4</item>
 
-		<item name="pseudo_window_background_color">#00000000</item>
-		<item name="expandIconColor">#ffffffff</item>
-		<item name="normalTextColor">#FFFFFF</item>
-		<item name="normalTextColorNonTinted">#FFFFFF</item>
-		<item name="cellStroke">#959BDC</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_959BDC</item>
-		<item name="cell_shape">@drawable/cell_shape_959BDC</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_959BDC</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_959BDC</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_959BDC</item>
-		<!--<item name="dialogBackground">#52000000</item>-->
-		<item name="cellbackColor">#ff303030</item>
-		<item name="cellback">#ff303030</item>
-		<item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
+        <item name="pseudo_window_background_color">#00000000</item>
+        <item name="expandIconColor">#ffffffff</item>
+        <item name="normalTextColor">#FFFFFF</item>
+        <item name="normalTextColorNonTinted">#FFFFFF</item>
+        <item name="cellStroke">#959BDC</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_959BDC
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_959BDC</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_959BDC</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_959BDC
+        </item>
+        <item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_959BDC</item>
+        <!--<item name="dialogBackground">#52000000</item>-->
+        <item name="cellbackColor">#ff303030</item>
+        <item name="cellback">#ff303030</item>
+        <item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
 
-		<item name="cellbackColorDownloadDialog">#ff424242</item>
-		<item name="mainTextColor">#bcc1f7</item>
-		<item name="buttonEnabledDisabledTextColor">@drawable/buttonEnabledDisabledTextColor_bcc1f7</item>
+        <item name="cellbackColorDownloadDialog">#ff424242</item>
+        <item name="mainTextColor">#bcc1f7</item>
+        <item name="buttonEnabledDisabledTextColor">
+            @drawable/buttonEnabledDisabledTextColor_bcc1f7
+        </item>
 
-		<item name="rounded_input_edit">@drawable/rounded_text_input_background_dark</item>
+        <item name="rounded_input_edit">
+            @drawable/rounded_text_input_background_dark
+        </item>
 
+        <item name="dialog_background">#ff424242</item>
 
-		<item name="dialog_background">#ff424242</item>
+        <item name="secondaryColor">#ff424242</item>
+        <item name="cellTextColor">#ffffffff</item>
+        <item name="cellTextColorSubdued">#ccffffff</item>
+        <item name="slightestContrastColor">#4E4E4E</item>
+        <item name="slightContrastColor">#6d6d6d</item>
 
-		<item name="secondaryColor">#ff424242</item>
-		<item name="cellTextColor">#ffffffff</item>
-		<item name="cellTextColorSubdued">#ccffffff</item>
-		<item name="slightestContrastColor">#4E4E4E</item>
-		<item name="slightContrastColor">#6d6d6d</item>
+        <item name="the_rounded_corner_background_drawable">
+            @drawable/rounded_corner_background_dark
+        </item>
+        <item name="the_rounded_corner_dialog_background_drawable">
+            @drawable/rounded_corner_dialog_background_dark
+        </item>
+        <item
+            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
+        >
+            ?attr/the_rounded_corner_dialog_background_drawable
+        </item>
 
-		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark</item>
-		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark</item>
-		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
+        <item name="mainTextColorHinted">#bcc1f7</item>
+    </style>
 
-		<item name="mainTextColorHinted">#bcc1f7</item>
+    <style name="Amoled" parent="DefaultDark">
+        <item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
+        <item name="floating_action_bar_to_bottom_background">#303030</item>
+        <item name="swipeToRefreshBackground">#ff343434</item>
+        <item name="expandIconColor">#ffffffff</item>
+        <item name="normalTextColor">#bcc1f7</item>
+        <item name="normalTextColorNonTinted">#FFFFFF</item>
 
-	</style>
-
-
-
-	<style name="Amoled" parent="DefaultDark">
-
-		<item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
-		<item name="floating_action_bar_to_bottom_background">#303030</item>
-		<item name="swipeToRefreshBackground">#ff343434</item>
-		<item name="expandIconColor">#ffffffff</item>
-		<item name="normalTextColor">#bcc1f7</item>
-		<item name="normalTextColorNonTinted">#FFFFFF</item>
-		
-
-		<!--Setting the window background color causes real bad UI issues on API19 emulator
+        <!--Setting the window background color causes real bad UI issues on API19 emulator
 		    So therefore the pseudo window background color attribute is needed.
 		    Otherwise it will simply not draw the backgrouund causing a "smearing" effect
 			  where say a button when scrolling, the previously drawn buttons will not 
 			  invalidate.-->
-		<item name="android:windowBackground">#000000</item>
-		<item name="pseudo_window_background_color">#ff000000</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="pseudo_window_background_color">#ff000000</item>
 
+        <item name="cellStroke">#90959BDC</item>
+        <item name="header_cell_shape_bottom">
+            @drawable/header_cell_shape_bottom_90959BDC
+        </item>
+        <item name="cell_shape">@drawable/cell_shape_90959BDC</item>
+        <item name="cell_shape_end">@drawable/cell_shape_end_90959BDC</item>
+        <item name="cell_shape_end_dldiag">
+            @drawable/cell_shape_end_dldiag_90959BDC
+        </item>
+        <item name="cell_shape_dldiag">
+            @drawable/cell_shape_dldiag_90959BDC
+        </item>
 
-		<item name="cellStroke">#90959BDC</item>
-		<item name="header_cell_shape_bottom">@drawable/header_cell_shape_bottom_90959BDC</item>
-		<item name="cell_shape">@drawable/cell_shape_90959BDC</item>
-		<item name="cell_shape_end">@drawable/cell_shape_end_90959BDC</item>
-		<item name="cell_shape_end_dldiag">@drawable/cell_shape_end_dldiag_90959BDC</item>
-		<item name="cell_shape_dldiag">@drawable/cell_shape_dldiag_90959BDC</item>
+        <item name="cellbackColor">#ff000000</item>
+        <item name="cellback">#ff000000</item>
+        <item name="CustomSelector">@drawable/CustomSelector_ff000000</item>
 
+        <item name="cellbackColorDownloadDialog">#ff202020</item>
 
-		<item name="cellbackColor">#ff000000</item>
-		<item name="cellback">#ff000000</item>
-		<item name="CustomSelector">@drawable/CustomSelector_ff000000</item>
+        <item name="slightestContrastColor">#282828</item>
+        <item name="slightContrastColor">#4E4E4E</item>
 
+        <item name="dialog_background">#ff202020</item>
 
-		<item name="cellbackColorDownloadDialog">#ff202020</item>
+        <item name="secondaryColor">#ff202020</item>
+        <item name="cellTextColor">#ffE4E4E4</item>
+        <item name="cellTextColorSubdued">#ccE4E4E4</item>
 
-		<item name="slightestContrastColor">#282828</item>
-		<item name="slightContrastColor">#4E4E4E</item>
+        <item name="the_rounded_corner_background_drawable">
+            @drawable/rounded_corner_background_dark_amoled
+        </item>
+        <item name="the_rounded_corner_dialog_background_drawable">
+            @drawable/rounded_corner_dialog_background_dark_amoled
+        </item>
+        <item
+            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
+        >
+            ?attr/the_rounded_corner_dialog_background_drawable
+        </item>
+        <!--<item name="dialogBackground">#52000000</item>-->
+    </style>
 
-		<item name="dialog_background">#ff202020</item>
-		
-		<item name="secondaryColor">#ff202020</item>
-		<item name="cellTextColor">#ffE4E4E4</item>
-		<item name="cellTextColorSubdued">#ccE4E4E4</item>
+    <style name="MyAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
+        <item name="android:textColorSecondary">?attr/cellTextColor</item>
+        <item name="android:textColorPrimary">?attr/cellTextColor</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">
+            ?the_rounded_corner_dialog_background_drawable
+        </item>
+    </style>
 
-		<item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark_amoled</item>
-		<item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark_amoled</item>
-		<item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
-		<!--<item name="dialogBackground">#52000000</item>-->
-		
-		
-	</style>
-
-
-	<style name="MyAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
-		
-		<item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
-		<item name="android:textColorSecondary">?attr/cellTextColor</item>
-		<item name="android:textColorPrimary">?attr/cellTextColor</item>
-		<item name="colorAccent">@color/colorAccent</item>
-		<item name="android:windowBackground">?the_rounded_corner_dialog_background_drawable</item>
-	</style>
-
-	<!--<style name="MyAlertDialogThemeNonCompat" parent="@android:style/Theme.Dialog">
+    <!--<style name="MyAlertDialogThemeNonCompat" parent="@android:style/Theme.Dialog">
 		<item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
 		<item name="android:textColorSecondary">?attr/cellTextColor</item>
 		<item name="colorAccent">@color/colorAccent</item>
 		<item name="android:windowBackground">?the_rounded_corner_dialog_background_drawable</item>
 	</style>-->
-
-
 </resources>

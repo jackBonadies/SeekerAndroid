@@ -5,40 +5,35 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:id="@+id/linearLayoutSearchTabItem">
-
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:orientation="vertical"
-    android:layout_weight="8"
+    android:id="@+id/linearLayoutSearchTabItem"
+>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="8"
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
         android:paddingStart="4dp"
-    android:id="@+id/searchTabItemMain"
-    android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-    android:layout_height="wrap_content">
-
-
-    <TextView
-        android:id="@+id/lastSearchTerm"
-        android:textSize="18sp"
-        android:layout_width="fill_parent"
+        android:id="@+id/searchTabItemMain"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
         android:layout_height="wrap_content"
-        android:text="test artistsongDUMMY"
+    >
+        <TextView
+            android:id="@+id/lastSearchTerm"
+            android:textSize="18sp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="test artistsongDUMMY"
         />
-    <TextView
-        android:id="@+id/resultsText"
-        android:textSize="12sp"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="12 resultsDUMMY"
+        <TextView
+            android:id="@+id/resultsText"
+            android:textSize="12sp"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="12 resultsDUMMY"
         />
-
-
-
-
-</LinearLayout>
+    </LinearLayout>
 
     <ImageView
         android:layout_marginStart="6dp"
@@ -49,13 +44,9 @@
         app:srcCompat="@drawable/outline_cancel_white_24"
         android:id="@+id/searchTabItemRemove"
         android:tint="?attr/mainTextColor"
-        
         android:paddingBottom="4dp"
         android:paddingTop="4dp"
         android:paddingEnd="4dp"
         android:paddingStart="4dp"
-        
-        />
-
-
+    />
 </LinearLayout>

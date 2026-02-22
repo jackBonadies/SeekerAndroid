@@ -1,25 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-              android:id="@+id/chipLayout"
-android:paddingStart="4dp"
-android:paddingEnd="4dp"
-            android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:clickable="true"
+    android:id="@+id/chipLayout"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:clickable="true"
     android:focusable="true"
-    android:orientation="horizontal">
-
+    android:orientation="horizontal"
+>
     <CheckBox
-
-android:theme="@style/checkBoxStyle"
+        android:theme="@style/checkBoxStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/checkBoxEnable"
-        />
-
+    />
 
     <TextView
         android:layout_width="0dp"
@@ -27,23 +26,22 @@ android:theme="@style/checkBoxStyle"
         android:id="@+id/displayNameMain"
         android:paddingStart="12dp"
         android:paddingEnd="4dp"
-
-    android:textSize="20dp"
-    android:textColor="?attr/normalTextColorNonTinted"
+        android:textSize="20dp"
+        android:textColor="?attr/normalTextColorNonTinted"
         android:layout_margin="0dp"
         android:visibility="visible"
-            android:text="@string/Keywords"
+        android:text="@string/Keywords"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        />
+    />
 
-
-        <ImageView
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="0"
         android:tint="?attr/normalTextColorNonTinted"
         android:paddingEnd="4dp"
-        app:srcCompat="@drawable/drag_horizontal"/>
+        app:srcCompat="@drawable/drag_horizontal"
+    />
 </LinearLayout>

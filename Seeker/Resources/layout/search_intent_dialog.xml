@@ -1,64 +1,72 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    
-    android:layout_height="match_parent">
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-        android:padding="8dp"
+    android:layout_height="match_parent"
 >
-    <EditText
-        android:id="@+id/editText"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:ems="10"
-        android:gravity="start|top"
-        android:inputType="textMultiLine" />
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+    >
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:ems="10"
+            android:gravity="start|top"
+            android:inputType="textMultiLine"
+        />
         <LinearLayout
             app:layout_constraintBottom_toBottomOf="@id/editText"
             android:id="@+id/followingLinkLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/dialog_background"
-            android:orientation="vertical">
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/progressBarFollowingLink"
-        android:layout_width="match_parent"
-                        style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
+            android:orientation="vertical"
+        >
+            <androidx.core.widget.ContentLoadingProgressBar
+                android:id="@+id/progressBarFollowingLink"
+                android:layout_width="match_parent"
+                style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
                 android:indeterminate="true"
-        android:layout_height="wrap_content" />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+                android:layout_height="wrap_content"
+            />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+            >
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="13sp"
+                    android:text="Fetching artist and song title from link"
+                />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-                   android:textSize="13sp"
-            android:text="Fetching artist and song title from link" />
-
-        <TextView
-            android:id="@+id/textViewCancel"
+                <TextView
+                    android:id="@+id/textViewCancel"
                     android:layout_marginEnd="6dp"
-            android:layout_width="wrap_content"
+                    android:layout_width="wrap_content"
                     android:textStyle="bold"
                     android:clickable="true"
                     android:textSize="13sp"
-            android:layout_height="wrap_content"
-            android:text="@android:string/cancel" />
-</LinearLayout>
-    </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:layout_height="wrap_content"
+                    android:text="@android:string/cancel"
+                />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
+        android:orientation="horizontal"
+    >
         <Button
             android:id="@+id/searchCloseButton"
             android:layout_width="wrap_content"
@@ -66,14 +74,10 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:foreground="@drawable/button"
-
-android:background="?attr/rounded_bottom_left_purple"
-
-
+            android:background="?attr/rounded_bottom_left_purple"
             style="@style/SeekerButtonStyle"
-
-
-            android:text="@string/cancel" />
+            android:text="@string/cancel"
+        />
 
         <Button
             android:id="@+id/searchButton"
@@ -83,8 +87,8 @@ android:background="?attr/rounded_bottom_left_purple"
             android:layout_marginStart="4dp"
             android:foreground="@drawable/button"
             style="@style/SeekerButtonStyle"
-
-android:background="?attr/rounded_bottom_right_purple"
-            android:text="@string/searches_tab2" />
+            android:background="?attr/rounded_bottom_right_purple"
+            android:text="@string/searches_tab2"
+        />
     </LinearLayout>
 </LinearLayout>

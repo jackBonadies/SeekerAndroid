@@ -1,15 +1,10 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
-	<dimen name="step_pager_tab_width">32dp</dimen>
-	<dimen name="step_pager_tab_height">3dp</dimen>
-	<dimen name="step_pager_tab_spacing">4dp</dimen>
+    <dimen name="step_pager_tab_width">32dp</dimen>
+    <dimen name="step_pager_tab_height">3dp</dimen>
+    <dimen name="step_pager_tab_spacing">4dp</dimen>
 
-
-
-
-	<dimen name="browse_no_details_top_bottom">4dp</dimen>
-	<dimen name="browse_details_top">2dp</dimen>
-	<dimen name="browse_details_bottom">1dp</dimen>
-
-
+    <dimen name="browse_no_details_top_bottom">4dp</dimen>
+    <dimen name="browse_details_top">2dp</dimen>
+    <dimen name="browse_details_bottom">1dp</dimen>
 </resources>

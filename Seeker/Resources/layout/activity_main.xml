@@ -1,71 +1,73 @@
 <RelativeLayout
-      xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:background="?attr/pseudo_window_background_color"
-    android:layout_height="match_parent">
-<com.google.android.material.appbar.AppBarLayout
-	android:id="@+id/appbarLayout"
-	android:layout_width="match_parent"
-	android:fitsSystemWindows="true"
-	android:background="?attr/mainPurple"
-	android:theme="@style/AppTheme.AppBarOverlay"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+>
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbarLayout"
+        android:layout_width="match_parent"
+        android:fitsSystemWindows="true"
+        android:background="?attr/mainPurple"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_height="wrap_content"
+    >
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/mainPurpleForNavBar"
+            android:minHeight="100dp"
+            android:theme="?attr/actionBarTheme"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp"
+        />
+    </com.google.android.material.appbar.AppBarLayout>
 
-  <androidx.appcompat.widget.Toolbar
-      android:id="@+id/toolbar"
-      android:layout_width="match_parent"
-      android:layout_height="?attr/actionBarSize"
-      android:background="?attr/mainPurpleForNavBar"
-      android:minHeight="100dp"
-      android:theme="?attr/actionBarTheme"
-      tools:layout_editor_absoluteX="0dp"
-      tools:layout_editor_absoluteY="0dp" />
-
-</com.google.android.material.appbar.AppBarLayout>
-
-
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
         android:layout_below="@id/appbarLayout"
-    android:gravity="center_horizontal"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabs"
+        android:gravity="center_horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabMode="fixed"
-        app:tabGravity="fill" />
+    >
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+        />
 
-    <Seeker.ViewPagerFixed
-        android:id="@+id/pager"
-            
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        <Seeker.ViewPagerFixed
+            android:id="@+id/pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_above="@id/navigation"
-        tools:context="android.tabitytabs.TabLayoutActivity">
-    </Seeker.ViewPagerFixed>
+            tools:context="android.tabitytabs.TabLayoutActivity"
+        />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-    android:fitsSystemWindows="true"
+            android:id="@+id/navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
             app:itemIconTint="#ffffffff"
-      app:labelVisibilityMode="labeled"
-        android:layout_marginEnd="0dp"
-        android:layout_marginStart="0dp"
+            app:labelVisibilityMode="labeled"
+            android:layout_marginEnd="0dp"
+            android:layout_marginStart="0dp"
             android:layout_marginBottom="0dp"
-        android:background="?attr/mainPurpleForNavBar"
+            android:background="?attr/mainPurpleForNavBar"
             app:itemActiveIndicatorStyle="@style/BottomNavActiveIndicator"
-        app:itemTextAppearanceActive="@style/navTextActive"
-        app:itemTextAppearanceInactive="@style/navTextInactive"
-        android:layout_alignParentBottom="true"
-        app:menu="@menu/navigation_menu" />
-</RelativeLayout>
+            app:itemTextAppearanceActive="@style/navTextActive"
+            app:itemTextAppearanceInactive="@style/navTextInactive"
+            android:layout_alignParentBottom="true"
+            app:menu="@menu/navigation_menu"
+        />
+    </RelativeLayout>
 </RelativeLayout>

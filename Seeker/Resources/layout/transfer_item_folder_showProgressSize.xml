@@ -1,45 +1,45 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:id = "@+id/parentLayout"
-    android:layout_width = "fill_parent"
-    android:layout_height = "wrap_content"
-    >
+    android:id="@+id/parentLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+>
     <LinearLayout
         android:orientation="horizontal"
-        android:id = "@+id/relativeLayout1"
-        android:layout_width = "fill_parent"
-        android:layout_height = "wrap_content"
+        android:id="@+id/relativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingTop="2dp"
-        >
-
+    >
         <TextView
-            android:id = "@+id/textViewFoldername"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "3"
-            android:ellipsize = "end"
+            android:id="@+id/textViewFoldername"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:ellipsize="end"
             android:paddingLeft="3dp"
             android:paddingRight="3dp"
-
-            android:text = "1.5"
+            android:text="1.5"
             android:textColor="?attr/cellTextColor"
             android:textSize="12sp"
-            android:singleLine = "true" />
+            android:singleLine="true"
+        />
 
         <TextView
-            android:id = "@+id/textViewUser"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "1"
-            android:ellipsize = "end"
+            android:id="@+id/textViewUser"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:ellipsize="end"
             android:paddingLeft="2dp"
             android:paddingRight="2dp"
-            android:text = "2"
+            android:text="2"
             android:textSize="12sp"
             android:textColor="?attr/cellTextColor"
-            android:singleLine = "true" />
+            android:singleLine="true"
+        />
     </LinearLayout>
     <!--    <FrameLayout
             android:layout_width="match_parent"
@@ -63,43 +63,45 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:max="100"
 
-                />--><!--BACKGROUND AND SCALEY TOGETHER DO NOT WORK!!set 100 maximum value for the progress bar--><!--
+                />-->
+    <!--BACKGROUND AND SCALEY TOGETHER DO NOT WORK!!set 100 maximum value for the progress bar-->
+    <!--
     </FrameLayout>-->
 
     <LinearLayout
         android:orientation="horizontal"
-        android:id = "@+id/relativeLayout2"
-        android:layout_width = "fill_parent"
-        android:layout_height = "wrap_content"
-        >
-
+        android:id="@+id/relativeLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+    >
         <TextView
-            android:id = "@+id/textViewStatus"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "1.2"
-            android:ellipsize = "end"
+            android:id="@+id/textViewStatus"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:ellipsize="end"
             android:paddingLeft="3dp"
             android:paddingRight="3dp"
-            android:text = "None"
+            android:text="None"
             android:textColor="?attr/cellTextColor"
             android:textSize="12sp"
-            android:singleLine = "true" />
+            android:singleLine="true"
+        />
 
-
-<TextView
-            android:id = "@+id/textViewStatusAdditionalInfo"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "1.8"
-            android:ellipsize = "end"
+        <TextView
+            android:id="@+id/textViewStatusAdditionalInfo"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.8"
+            android:ellipsize="end"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text = "2"
+            android:text="2"
             android:textSize="12sp"
             android:textColor="?attr/cellTextColor"
-            android:singleLine = "true" />
- <!--               <ProgressBar
+            android:singleLine="true"
+        />
+        <!--               <ProgressBar
             android:id="@+id/simpleProgressBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -113,76 +115,70 @@
 
             />-->
 
-
-                                     <FrameLayout
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight = "1"
+            android:layout_weight="1"
             android:paddingLeft="2dp"
             android:paddingRight="5dp"
-            >
-        <ProgressBar
-            android:id="@+id/simpleProgressBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight = "1"
-            android:singleLine = "true"
-            android:scaleY="2.6"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:max="100"
-
+        >
+            <ProgressBar
+                android:id="@+id/simpleProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:scaleY="2.6"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:max="100"
             />
             <Seeker.TransfersFragment.ProgressSizeTextView
-                android:id = "@+id/textViewProgressSize"
+                android:id="@+id/textViewProgressSize"
                 android:text="30.1/42.8 MB"
                 android:textColor="@android:color/white"
                 android:textSize="10sp"
                 android:layout_gravity="center"
                 android:gravity="center_horizontal"
-                            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-             />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+            />
         </FrameLayout>
     </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
-        android:id = "@+id/relativeLayout3"
-        android:layout_width = "fill_parent"
-        android:layout_height = "wrap_content"
+        android:id="@+id/relativeLayout3"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:paddingBottom="2dp"
-        android:background = "?attr/header_cell_shape_bottom"
-        >
-
+        android:background="?attr/header_cell_shape_bottom"
+    >
         <TextView
-            android:id = "@+id/filesRemaining"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "1.2"
-            android:ellipsize = "end"
+            android:id="@+id/filesRemaining"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:ellipsize="end"
             android:paddingLeft="3dp"
             android:paddingRight="3dp"
-            android:text = "3 files remaining"
+            android:text="3 files remaining"
             android:textColor="?attr/cellTextColor"
             android:textSize="12sp"
-            android:singleLine = "true" />
-
+            android:singleLine="true"
+        />
 
         <TextView
-            android:id = "@+id/currentFile"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "2.8"
-            android:ellipsize = "end"
+            android:id="@+id/currentFile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2.8"
+            android:ellipsize="end"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text = "Current: filename..."
+            android:text="Current: filename..."
             android:textSize="12sp"
             android:textColor="?attr/cellTextColor"
-            android:singleLine = "true" />
-
+            android:singleLine="true"
+        />
     </LinearLayout>
-
-
-
 </LinearLayout>

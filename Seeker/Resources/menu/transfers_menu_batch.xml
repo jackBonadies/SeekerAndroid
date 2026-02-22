@@ -1,51 +1,52 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/action_cancel_and_clear_all_batch"
+        android:title="@string/cancel_and_clear_all"
+        app:showAsAction="always"
+        android:iconifiedByDefault="true"
+        android:icon="@drawable/trash_can_outline"
+    />
 
-xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/resume_selected_batch"
+        android:title="@string/ResumeSelected"
+        app:showAsAction="never"
+        android:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
-	<item android:id="@+id/action_cancel_and_clear_all_batch"
-  android:title="@string/cancel_and_clear_all"
-  app:showAsAction="always"
-  android:iconifiedByDefault="true"
-  android:icon="@drawable/trash_can_outline"
+    <item
+        android:id="@+id/pause_selected_batch"
+        android:title="@string/PauseSelected"
+        app:showAsAction="never"
+        android:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
- />
+    <item
+        android:id="@+id/retry_all_failed_batch"
+        android:title="@string/RetryFailed"
+        app:showAsAction="never"
+        android:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
+    <item
+        android:id="@+id/invert_selection"
+        android:title="@string/InvertSelection"
+        app:showAsAction="never"
+        android:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
-	<item android:id="@+id/resume_selected_batch"
-  android:title="@string/ResumeSelected"
-  app:showAsAction="never"
-  android:showAsAction="never"
-  android:iconifiedByDefault="false"
- />
-
-	<item android:id="@+id/pause_selected_batch"
-  android:title="@string/PauseSelected"
-  app:showAsAction="never"
-  android:showAsAction="never"
-  android:iconifiedByDefault="false"
- />
-
-
-	<item android:id="@+id/retry_all_failed_batch"
-	android:title="@string/RetryFailed"
-app:showAsAction="never"
-android:showAsAction="never"
-	android:iconifiedByDefault="false"
- />
-
-	<item android:id="@+id/invert_selection"
-	android:title="@string/InvertSelection"
-app:showAsAction="never"
-android:showAsAction="never"
-	android:iconifiedByDefault="false"
- />
-
-	<item android:id="@+id/select_all"
-	android:title="@string/SelectAll"
-app:showAsAction="never"
-android:showAsAction="never"
-	android:iconifiedByDefault="false"
- />
-
-
+    <item
+        android:id="@+id/select_all"
+        android:title="@string/SelectAll"
+        app:showAsAction="never"
+        android:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 </menu>

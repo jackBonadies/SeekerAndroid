@@ -1,97 +1,102 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="android.BrowseFragment"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:id="@+id/relativeLayout1">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:background="?attr/mainPurple"
-        android:minWidth="25px"
-        android:minHeight="0px"
-            android:elevation="4dp"
+>
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/recyclerViewHorizontalPath" />
+        android:layout_height="match_parent"
+        tools:context="android.BrowseFragment"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:id="@+id/relativeLayout1"
+    >
+        <androidx.recyclerview.widget.RecyclerView
+            android:background="?attr/mainPurple"
+            android:minWidth="25px"
+            android:minHeight="0px"
+            android:elevation="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/recyclerViewHorizontalPath"
+        />
         <View
-            android:layout_below = "@id/recyclerViewHorizontalPath"
+            android:layout_below="@id/recyclerViewHorizontalPath"
             android:background="#ffd4d4d4"
             android:id="@+id/recyclerViewHorizontalPathSep"
             android:layout_width="match_parent"
             android:elevation="4dp"
-            android:layout_height="1dp"/>
-    <ListView
-        android:layout_below = "@id/recyclerViewHorizontalPathSep"
-        android:minWidth="25px"
-        android:minHeight="25px"
-        
-        android:paddingBottom="120dp"
-        android:clipToPadding="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/listViewDirectories" />
-              <TextView
-      android:layout_width = "200dp"
-      android:layout_height = "wrap_content"
-      android:text = "@string/empty_browse_directory"
-      android:id = "@+id/noBrowseView"
-        android:textAlignment="center"
-      android:layout_centerHorizontal = "true"
-        android:paddingBottom="110dp"
-      android:layout_centerVertical="true"
-      android:textColor = "?attr/mainTextColorHinted"
-      android:textSize = "20dp" />
-
-</RelativeLayout>
-        <RelativeLayout
+            android:layout_height="1dp"
+        />
+        <ListView
+            android:layout_below="@id/recyclerViewHorizontalPathSep"
+            android:minWidth="25px"
+            android:minHeight="25px"
+            android:paddingBottom="120dp"
+            android:clipToPadding="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/listViewDirectories"
+        />
+        <TextView
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_browse_directory"
+            android:id="@+id/noBrowseView"
+            android:textAlignment="center"
+            android:layout_centerHorizontal="true"
+            android:paddingBottom="110dp"
+            android:layout_centerVertical="true"
+            android:textColor="?attr/mainTextColorHinted"
+            android:textSize="20dp"
+        />
+    </RelativeLayout>
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-    android:layout_marginTop="0dp"
+        android:layout_marginTop="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
         android:paddingTop="@dimen/abc_action_bar_content_inset_material"
         android:background="?attr/secondaryColor"
-        >
+    >
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:id="@+id/filterLineOne"
-      android:layout_marginStart="20dp"
-      android:layout_marginEnd="32dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="32dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="6dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+        >
             <EditText
-        android:layout_marginTop="0dp"
+                android:layout_marginTop="0dp"
                 android:id="@+id/filterText"
                 android:singleLine="true"
-                android:focusable = "true"
+                android:focusable="true"
                 android:imeOptions="actionDone"
-                android:textColorHighlight = "?attr/mainTextColor"
-                android:textColorHint = "?attr/mainTextColor"
+                android:textColorHighlight="?attr/mainTextColor"
+                android:textColorHint="?attr/mainTextColor"
                 android:hint="@string/filer_files"
                 android:layout_weight="2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+            />
 
-          <FrameLayout
-      android:layout_marginTop="0dp"
+            <FrameLayout
+                android:layout_marginTop="0dp"
                 android:layout_width="32dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+            />
         </LinearLayout>
     </RelativeLayout>
-<!--    <Button
+    <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="?attr/mainPurple"
@@ -105,7 +110,7 @@
         android:layout_margin="0dp"
         />-->
 
-   <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="?attr/mainPurple"
@@ -116,5 +121,5 @@
         app:layout_anchorGravity="top|right|end"
         android:id="@+id/bsbutton"
         android:layout_margin="16dp"
-        />
+    />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

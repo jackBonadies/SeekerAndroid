@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,7 +7,8 @@
     android:layout_height="wrap_content"
     android:padding="4dp"
     android:orientation="horizontal"
-    android:id="@+id/linearLayoutChatroomOverview">
+    android:id="@+id/linearLayoutChatroomOverview"
+>
     <TextView
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -15,7 +16,7 @@
         android:id="@+id/roomName"
         android:text="roomNameDummy"
         android:textSize="22sp"
-        />
+    />
     <TextView
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -27,5 +28,5 @@
         app:autoSizeMinTextSize="12sp"
         android:maxLines="1"
         app:autoSizeTextType="uniform"
-        />
+    />
 </LinearLayout>

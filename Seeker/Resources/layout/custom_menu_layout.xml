@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+>
     <ImageView
         app:srcCompat="@drawable/numeric_1_box_multiple_outline"
         android:id="@+id/search_tabs"
@@ -12,29 +14,28 @@
         android:paddingStart="0dp"
         android:layout_centerVertical="true"
         android:layout_width="30dp"
-        android:layout_height="30dp"/>
+        android:layout_height="30dp"
+    />
     <AutoCompleteTextView
         android:layout_toEndOf="@id/search_tabs"
-        android:layout_width = "fill_parent"
-        android:layout_height = "wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:id = "@+id/searchHere"
-        android:popupBackground = "?attr/cellback"
-        android:layout_weight="1" 
-        android:hint = "@string/search_here"
+        android:id="@+id/searchHere"
+        android:popupBackground="?attr/cellback"
+        android:layout_weight="1"
+        android:hint="@string/search_here"
         android:completionThreshold="0"
         android:singleLine="true"
-        android:focusable = "true"
+        android:focusable="true"
         android:imeOptions="actionSearch"
-        android:textColorHighlight = "@android:color/white"
-        android:textColorHint = "@android:color/white"
-
-        />
-<!--    <ImageView
+        android:textColorHighlight="@android:color/white"
+        android:textColorHint="@android:color/white"
+    />
+    <!--    <ImageView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:src="@android:drawable/ic_menu_search"
         android:contentDescription="search" />-->
-
 </RelativeLayout>

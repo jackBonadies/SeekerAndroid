@@ -1,128 +1,134 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
-  <LinearLayout
-    android:id="@+id/focusableLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:focusable="true"
-    android:focusableInTouchMode="true"/>
+>
+    <LinearLayout
+        android:id="@+id/focusableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+    />
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:descendantFocusability="beforeDescendants"
         android:focusableInTouchMode="true"
         tools:context="android.PageFragment"
-        android:id="@+id/relativeLayout1">
+        android:id="@+id/relativeLayout1"
+    >
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_below="@id/header1"
+            android:minWidth="25px"
+            android:minHeight="0px"
+            android:elevation="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/recyclerViewChips"
+        />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:layout_below = "@id/header1"
-        android:minWidth="25px"
-        android:minHeight="0px"
-        android:elevation="4dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        android:id="@+id/recyclerViewChips" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_below = "@id/recyclerViewChips"
+            android:layout_below="@id/recyclerViewChips"
             android:minWidth="25px"
             android:scrollbars="vertical"
-                  android:paddingBottom="80dp"
+            android:paddingBottom="80dp"
             android:clipToPadding="false"
             android:minHeight="25px"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/recyclerViewSearches" />
-
+            android:id="@+id/recyclerViewSearches"
+        />
     </RelativeLayout>
-        <RelativeLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-    android:layout_marginTop="0dp"
+        android:layout_marginTop="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
         android:paddingTop="@dimen/abc_action_bar_content_inset_material"
         android:background="?attr/secondaryColor"
-        >
+    >
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
             android:id="@+id/filterLineOne"
-      android:layout_marginStart="20dp"
-      android:layout_marginEnd="32dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="32dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="6dp"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+        >
             <EditText
-        android:layout_marginTop="0dp"
+                android:layout_marginTop="0dp"
                 android:id="@+id/filterText"
                 android:singleLine="true"
-                android:focusable = "true"
+                android:focusable="true"
                 android:imeOptions="actionDone"
-                android:textColorHighlight = "?attr/mainTextColor"
-                android:textColorHint = "?attr/mainTextColor"
+                android:textColorHighlight="?attr/mainTextColor"
+                android:textColorHint="?attr/mainTextColor"
                 android:hint="@string/filter_search_results_here"
                 android:layout_weight="2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+            />
 
-          <FrameLayout
-      android:layout_marginTop="0dp"
+            <FrameLayout
+                android:layout_marginTop="0dp"
                 android:layout_width="32dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+            />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
-      android:layout_marginStart="20dp"
-      android:layout_marginEnd="32dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="32dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="12dp"
             android:layout_below="@id/filterLineOne"
-            android:layout_height="wrap_content">
-
-                      <Button
-      android:layout_marginTop="0dp"
+            android:layout_height="wrap_content"
+        >
+            <Button
+                android:layout_marginTop="0dp"
                 style="@style/SeekerButtonStyle"
                 android:foreground="@drawable/button"
                 android:text="Show Smart Filters"
-        android:id="@+id/toggleSmartFilters"
+                android:id="@+id/toggleSmartFilters"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 android:minWidth="0dp"
                 android:textSize="12sp"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
-          <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-			<CheckBox
-
-  android:theme="@style/checkBoxStyle"
+                android:layout_height="match_parent"
+            />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+            />
+            <CheckBox
+                android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-          android:textSize="16sp"
-          android:id="@+id/stickyFilterCheckbox"
+                android:textSize="16sp"
+                android:id="@+id/stickyFilterCheckbox"
                 android:textColor="?attr/mainTextColor"
-                android:text="@string/persist_it"/>
-          <FrameLayout
-android:layout_marginTop="0dp"
-          android:layout_width="32dp"
-          android:layout_height="wrap_content"/>
-
+                android:text="@string/persist_it"
+            />
+            <FrameLayout
+                android:layout_marginTop="0dp"
+                android:layout_width="32dp"
+                android:layout_height="wrap_content"
+            />
         </LinearLayout>
     </RelativeLayout>
-<!--    <Button
+    <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="?attr/mainPurple"
@@ -136,7 +142,7 @@ android:layout_marginTop="0dp"
         android:layout_margin="0dp"
         />-->
 
-   <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:backgroundTint="?attr/mainPurple"
@@ -147,5 +153,5 @@ android:layout_marginTop="0dp"
         app:layout_anchorGravity="top|right|end"
         android:id="@+id/bsbutton"
         android:layout_margin="16dp"
-        />
+    />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

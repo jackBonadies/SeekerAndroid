@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/abc_control_padding_material">
-
-
-        <AutoCompleteTextView
-            android:id="@+id/inviteUserTextEdit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:popupBackground = "?attr/cellback"
-            android:completionThreshold="0"
-                android:layout_marginStart="20dp"
+    android:padding="@dimen/abc_control_padding_material"
+>
+    <AutoCompleteTextView
+        android:id="@+id/inviteUserTextEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:popupBackground="?attr/cellback"
+        android:completionThreshold="0"
+        android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
-            android:hint="@string/enter_user_to_invite_to_room"
-            android:imeOptions="actionSend"
-            android:inputType="text" />
-
+        android:hint="@string/enter_user_to_invite_to_room"
+        android:imeOptions="actionSend"
+        android:inputType="text"
+    />
 </FrameLayout>

@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/searchResultSelection"
     android:background="?attr/cellback"
     android:orientation="vertical"
@@ -8,10 +9,9 @@
     android:paddingStart="10dp"
     android:paddingEnd="10dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
-        <TextView
+    android:layout_height="match_parent"
+>
+    <TextView
         android:paddingBottom="2dp"
         android:paddingTop="2dp"
         android:paddingEnd="2dp"
@@ -21,62 +21,60 @@
         android:text="@string/search_result_style"
         android:textSize="22sp"
         android:textColor="?attr/mainTextColor"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
     />
 
-       <RadioGroup
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:id="@+id/radioGroup">
-         <RadioButton
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="@string/search_result_style_expanded"
-         android:id="@+id/radioButtonExpanded"
-         android:checked="false"
-                        android:layout_marginTop="6dp"
-
-        android:textSize="18sp"
+    <RadioGroup
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/radioGroup"
+    >
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_expanded"
+            android:id="@+id/radioButtonExpanded"
+            android:checked="false"
+            android:layout_marginTop="6dp"
+            android:textSize="18sp"
             android:buttonTint="?attr/slskAccent"
-        android:textColor="?attr/mainTextColor"
-            />
+            android:textColor="?attr/mainTextColor"
+        />
 
-      <RadioButton
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="@string/search_result_style_collapsed"
-         android:id="@+id/radioButtonCollapsed"
-         android:checked="false"
-        android:textSize="18sp"
-                        android:layout_marginTop="4dp"
-            android:buttonTint="?attr/slskAccent"
-        android:textColor="?attr/mainTextColor"
-          />
-      <RadioButton
-                        android:layout_marginTop="4dp"
-
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:id="@+id/radioButtonMedium"
-         android:checked="false"
-        android:text="@string/search_result_style_medium"
-        android:textSize="18sp"
-            android:buttonTint="?attr/slskAccent"
-        android:textColor="?attr/mainTextColor"
-            />
-
-      <RadioButton
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_collapsed"
+            android:id="@+id/radioButtonCollapsed"
+            android:checked="false"
+            android:textSize="18sp"
             android:layout_marginTop="4dp"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="@string/search_result_style_minimal"
-         android:id="@+id/radioButtonMinimal"
-         android:checked="false"
-        android:textSize="18sp"
             android:buttonTint="?attr/slskAccent"
-        android:textColor="?attr/mainTextColor"
-          />
-   </RadioGroup>
+            android:textColor="?attr/mainTextColor"
+        />
+        <RadioButton
+            android:layout_marginTop="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/radioButtonMedium"
+            android:checked="false"
+            android:text="@string/search_result_style_medium"
+            android:textSize="18sp"
+            android:buttonTint="?attr/slskAccent"
+            android:textColor="?attr/mainTextColor"
+        />
 
+        <RadioButton
+            android:layout_marginTop="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_minimal"
+            android:id="@+id/radioButtonMinimal"
+            android:checked="false"
+            android:textSize="18sp"
+            android:buttonTint="?attr/slskAccent"
+            android:textColor="?attr/mainTextColor"
+        />
+    </RadioGroup>
 </LinearLayout>

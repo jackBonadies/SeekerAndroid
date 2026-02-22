@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--For all properties see: https://aka.ms/android-menu-resource-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-
-    <item android:id="@+id/clearAllComplete"
-        android:title="@string/clear_all_complete" />
-    <item android:id="@+id/cancelAndClearAll"
-        android:title="@string/cancel_and_clear_all" />
-  <!--<item android:id="@+id/openDownloadsDir"
+    <item
+        android:id="@+id/clearAllComplete"
+        android:title="@string/clear_all_complete"
+    />
+    <item
+        android:id="@+id/cancelAndClearAll"
+        android:title="@string/cancel_and_clear_all"
+    />
+    <!--<item android:id="@+id/openDownloadsDir"
         android:title="Open Downloads Folder"/>-->
-  
 </menu>

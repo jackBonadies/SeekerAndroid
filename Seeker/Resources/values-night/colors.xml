@@ -1,41 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <resources>
     <color name="colorPrimary">#2c3e50</color>
     <color name="colorPrimaryDark">#1B3147</color>
     <color name="colorAccent">#3498db</color>
     <color name="cellbackSelected">#3498db</color>
-    
-    <color name="mainPurpleTransparent">#994f58c4</color><!--light transparency-->
+
+    <color name="mainPurpleTransparent">#994f58c4</color>
+    <!--light transparency-->
     <color name="lightPurpleNotTransparent">#959BDC</color>
 
+    <color name="androidStockMessagesNewBlue">#A8C7FA</color>
 
-	<color name="androidStockMessagesNewBlue">#A8C7FA</color>
-  
+    <color name="offline">#F7636A</color>
+    <color name="away">#FFCD87</color>
+    <color name="online">#89B38F</color>
 
-  <color name="offline">#F7636A</color>
-  <color name="away">#FFCD87</color>
-  <color name="online">#89B38F</color>
+    <color name="queueColor">#F7636A</color>
+    <color name="hardErrorRed">#cc0000</color>
+    <color name="colorButtonText">#dadada</color>
+    <color name="mainPurpleTurnedOff">#77437eab</color>
+    <color name="chatBoxSplitterElevation">#6E6E6E</color>
+    <color name="header_chatroom_list">#787878</color>
 
-  
-  <color name="queueColor">#F7636A</color>
-  <color name="hardErrorRed">#cc0000</color>
-  <color name="colorButtonText">#dadada</color>
-  <color name="mainPurpleTurnedOff">#77437eab</color>
-  <color name="chatBoxSplitterElevation">#6E6E6E</color>
-  <color name="header_chatroom_list">#787878</color>
+    <color name="defaultTextColor">#ffC1C1C1</color>
 
-	<color name="defaultTextColor">#ffC1C1C1</color>
+    <color name="subTextColor">#ffC7C7C7</color>
+    <color name="slightTint">#18ffffff</color>
 
+    <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
+    <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 
-
-	<color name="subTextColor">#ffC7C7C7</color>
-	<color name="slightTint">#18ffffff</color>
-
-	
-
-  <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
-  <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
-
-
-	<color name="chipSeparatorColor">#ffe0e0e0</color>
+    <color name="chipSeparatorColor">#ffe0e0e0</color>
 </resources>

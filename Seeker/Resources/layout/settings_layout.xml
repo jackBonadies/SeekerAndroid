@@ -1,4 +1,3 @@
-
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -6,16 +5,16 @@
     android:orientation="vertical"
     android:background="?attr/pseudo_window_background_color"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+>
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
-		android:fitsSystemWindows="true"
-		android:background="?attr/mainPurple"
+        android:fitsSystemWindows="true"
+        android:background="?attr/mainPurple"
         android:layout_width="match_parent"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:layout_height="wrap_content">
-
+        android:layout_height="wrap_content"
+    >
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/setting_toolbar"
             android:layout_width="match_parent"
@@ -24,10 +23,9 @@
             android:minHeight="100dp"
             android:theme="?attr/actionBarTheme"
             tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="0dp" />
-
+            tools:layout_editor_absoluteY="0dp"
+        />
     </com.google.android.material.appbar.AppBarLayout>
-
 
     <ScrollView
         android:paddingBottom="60dp"
@@ -35,58 +33,47 @@
         android:layout_width="fill_parent"
         android:id="@+id/mainScrollView"
         android:layout_below="@id/appbarLayout"
-        android:layout_height="fill_parent">
-
+        android:layout_height="fill_parent"
+    >
         <RelativeLayout
             android:orientation="vertical"
             android:padding="4dip"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-
-
-
-   
-
-
-
+            android:layout_height="match_parent"
+        >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center_horizontal"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/directoryLayout"
-                android:orientation="vertical">
-
+                android:orientation="vertical"
+            >
                 <TableLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    
                     android:layout_centerHorizontal="true"
                     android:gravity="center_horizontal"
                     android:id="@+id/dlChangeDirectoryLayout"
-                    android:shrinkColumns="0">
-
+                    android:shrinkColumns="0"
+                >
                     <TableRow
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center">
-
-
-
-
+                        android:gravity="center"
+                    >
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_marginEnd="10dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop = "10dp"
-                            android:layout_marginBottom = "10dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
                             android:layout_marginStart="10dp"
                             android:layout_centerHorizontal="true"
                             android:id="@+id/directoryLayout"
-                            android:orientation="vertical">
-
+                            android:orientation="vertical"
+                        >
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -95,7 +82,7 @@
                                 android:text="@string/CurrentDownloadFolder_"
                                 android:textColor="?attr/normalTextColor"
                                 android:textSize="12dp"
-                    />
+                            />
 
                             <TextView
                                 android:layout_gravity="center_horizontal"
@@ -113,11 +100,7 @@
                                 android:paddingEnd="4dp"
                                 android:background="?the_rounded_corner_background_drawable"
                                 android:textColor="?attr/normalTextColor"
-                    
-                    />
-
-
-
+                            />
                         </LinearLayout>
 
                         <Button
@@ -129,16 +112,14 @@
                             android:paddingBottom="4dp"
                             android:layout_marginStart="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginTop = "10dp"
-                            android:layout_marginBottom = "10dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
                             style="@style/SeekerButtonStyle"
                             android:foreground="@drawable/button"
                             android:id="@+id/changeDirSettings"
-       />
+                        />
                     </TableRow>
-
                 </TableLayout>
-
 
                 <CheckBox
                     android:layout_width="wrap_content"
@@ -150,11 +131,11 @@
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center"
-                    
                     android:theme="@style/checkBoxStyle"
-                    android:layout_marginTop = "10dp"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/createCompleteAndIncompleteDirectories"
-                    android:layout_marginBottom = "10dp"/>
+                    android:layout_marginBottom="10dp"
+                />
 
                 <CheckBox
                     android:theme="@style/checkBoxStyle"
@@ -167,10 +148,10 @@
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center"
-                    android:layout_marginTop = "10dp"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/createUsernameSubfolders"
-                    android:layout_marginBottom = "10dp"/>
-
+                    android:layout_marginBottom="10dp"
+                />
 
                 <CheckBox
                     android:theme="@style/checkBoxStyle"
@@ -183,11 +164,10 @@
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center"
-                    android:layout_marginTop = "10dp"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/doNotCreateSubfoldersForSingleDownloads"
-                    android:layout_marginBottom = "10dp"/>
-
-
+                    android:layout_marginBottom="10dp"
+                />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -195,25 +175,22 @@
                     android:layout_marginStart="6dp"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="6dp"
-                    
                     android:layout_marginEnd="10dp"
                     android:id="@+id/incompleteFolderLayout"
                     android:background="@drawable/border_group_box"
                     android:orientation="vertical"
                 >
-
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop = "2dp"
-                        android:layout_marginBottom = "2dp"
-                        
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
                         android:layout_centerHorizontal="true"
                         android:id="@+id/incompleteFolderSubLayout"
                         android:orientation="horizontal"
-                        android:gravity="center_horizontal|fill_horizontal|center">
+                        android:gravity="center_horizontal|fill_horizontal|center"
+                    >
                         <CheckBox
-                            
                             android:theme="@style/checkBoxStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -221,42 +198,38 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginTop = "10dp"
-                            android:layout_marginBottom = "4dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="4dp"
                             android:paddingStart="4dp"
                             android:paddingEnd="10dp"
                             android:id="@+id/manuallySetIncomplete"
-       />
-
-
+                        />
                     </LinearLayout>
 
                     <TableLayout
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop = "10dp"
+                        android:layout_marginTop="10dp"
                         android:layout_centerHorizontal="true"
                         android:gravity="center_horizontal"
                         android:id="@+id/incompleteSublayout2"
-                        android:shrinkColumns="0">
-
+                        android:shrinkColumns="0"
+                    >
                         <TableRow
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center">
-
-
+                            android:gravity="center"
+                        >
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop = "2dp"
-                                android:layout_marginBottom = "10dp"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginBottom="10dp"
                                 android:layout_marginStart="10dp"
-                                
                                 android:layout_centerHorizontal="true"
                                 android:id="@+id/incompleteDirectoryLayout"
-                                android:orientation="vertical">
-
+                                android:orientation="vertical"
+                            >
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
@@ -265,7 +238,7 @@
                                     android:textColor="?attr/normalTextColor"
                                     android:textSize="12dp"
                                     android:layout_marginBottom="4dp"
-                    />
+                                />
 
                                 <TextView
                                     android:layout_gravity="center_horizontal"
@@ -283,9 +256,7 @@
                                     android:paddingEnd="4dp"
                                     android:background="?the_rounded_corner_background_drawable"
                                     android:textColor="?attr/normalTextColor"
-                    
-                    />
-
+                                />
                             </LinearLayout>
 
                             <Button
@@ -297,24 +268,23 @@
                                 android:paddingBottom="4dp"
                                 android:layout_marginStart="10dp"
                                 android:layout_marginEnd="10dp"
-                                android:layout_marginTop = "10dp"
-                                android:layout_marginBottom = "10dp"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
                                 style="@style/SeekerButtonStyle"
                                 android:foreground="@drawable/button"
                                 android:id="@+id/changeIncompleteDirSettings"
-       />
-
+                            />
                         </TableRow>
                     </TableLayout>
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop = "0dp"
+                        android:layout_marginTop="0dp"
                         android:layout_gravity="center"
-                        android:layout_marginBottom = "12dp"
+                        android:layout_marginBottom="12dp"
                         android:id="@+id/clearIncompleteSubLayout"
                         android:orientation="horizontal"
-                   >
+                    >
                         <Button
                             android:layout_centerHorizontal="true"
                             android:layout_width="wrap_content"
@@ -328,50 +298,38 @@
                             android:gravity="center_vertical"
                             android:paddingEnd="7dp"
                             android:textAllCaps="false"
-                            android:layout_marginTop = "6dp"
-                            android:layout_marginBottom = "6dp"
+                            android:layout_marginTop="6dp"
+                            android:layout_marginBottom="6dp"
                             style="@style/SeekerButtonStyle"
                             android:foreground="@drawable/button"
                             android:id="@+id/clearIncompleteFolder"
-       />
-
+                        />
 
                         <ImageView
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:gravity="center_vertical"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginTop = "6dp"
+                            android:layout_marginTop="6dp"
                             android:layout_marginStart="10dp"
-                            android:layout_marginBottom = "6dp"
+                            android:layout_marginBottom="6dp"
                             android:id="@+id/moreInfoButtonClearIncomplete"
                             app:srcCompat="@drawable/help_circle_outline"
                             android:tint="?attr/mainTextColor"
-            />
-
-
+                        />
                     </LinearLayout>
-
                 </LinearLayout>
-
-
-
-
             </LinearLayout>
-
-
-
-
-
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/directoryLayout"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/searchResLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -379,15 +337,15 @@
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
+                    android:layout_marginTop="10dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_below="@id/changeDirSettings"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
                     android:id="@+id/searchResults"
-       />
+                />
                 <Spinner
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -395,25 +353,24 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="10dp"
                     android:layout_weight="0.4"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_toEndOf="@+id/searchResults"
                     android:layout_below="@id/changeDirSettings"
                     android:id="@+id/searchNumberSpinner"
-        />
+                />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/searchResLayout"
-                android:layout_marginTop = "4dp"
+                android:layout_marginTop="4dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/smartFilterLayout"
-                android:orientation="horizontal">
-
+                android:orientation="horizontal"
+            >
                 <CheckBox
-                    
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -425,9 +382,10 @@
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop = "10dp"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/smartFilterEnable"
-                    android:layout_marginBottom = "10dp"/>
+                    android:layout_marginBottom="10dp"
+                />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -443,16 +401,13 @@
                     android:paddingStart="7dp"
                     android:paddingEnd="7dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:id="@+id/configureSmartFilters"
-        />
-
-
+                />
             </LinearLayout>
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -464,14 +419,12 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/freeUploadSlots"
-                android:layout_marginBottom = "10dp"/>
-
-
+                android:layout_marginBottom="10dp"
+            />
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -483,14 +436,12 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/showLockedInSearch"
-                android:layout_marginBottom = "10dp"/>
-
-
+                android:layout_marginBottom="10dp"
+            />
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -502,24 +453,22 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/showLockedInBrowseResponse"
-                android:layout_marginBottom = "10dp"/>
-
-
-
+                android:layout_marginBottom="10dp"
+            />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/showLockedInBrowseResponse"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "2dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/keepAliveLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <CheckBox
-                    
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -528,12 +477,12 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:id="@+id/startServiceOnStartupCheckBox"
-       />
+                />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -548,28 +497,25 @@
                     android:paddingStart="7dp"
                     android:paddingEnd="7dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:id="@+id/startServiceOnStartupButton"
-        />
+                />
                 <ImageView
-                    android:layout_marginTop = "0dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginBottom = "0dp"
-                    android:layout_marginEnd = "16dp"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginEnd="16dp"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    
                     android:layout_gravity="center_vertical"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:id="@+id/helpServiceOnStartup"
                     android:tint="?attr/mainTextColor"
                 />
-
             </LinearLayout>
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -581,11 +527,11 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/allowPrivateRoomInvitations"
-                android:layout_marginBottom = "10dp"/>
+                android:layout_marginBottom="10dp"
+            />
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -597,12 +543,12 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/autoClearComplete"
-                android:layout_marginBottom = "10dp"/>
+                android:layout_marginBottom="10dp"
+            />
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -614,12 +560,12 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/autoClearCompleteUploads"
-                android:layout_marginBottom = "10dp"/>
+                android:layout_marginBottom="10dp"
+            />
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -631,13 +577,12 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/showNotificationOnFolderDownload"
-                android:layout_marginBottom = "10dp"/>
-
+                android:layout_marginBottom="10dp"
+            />
 
             <CheckBox
-                
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -649,19 +594,20 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/showToastNotificationOnDownload"
-                android:layout_marginBottom = "10dp"/>
-
+                android:layout_marginBottom="10dp"
+            />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/showToastNotificationOnDownload"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/searchHistoryLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <CheckBox
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
@@ -669,13 +615,13 @@
                     android:text="@string/remember_search_history"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:id="@+id/searchHistoryRemember"
-       />
+                />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -690,20 +636,21 @@
                     style="@style/SeekerButtonStyle"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:id="@+id/clearHistory"
-        />
+                />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/searchHistoryLayout"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/recentUserHistoryLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <CheckBox
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
@@ -711,13 +658,13 @@
                     android:text="@string/RememberRecent"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:id="@+id/rememberRecentUsers"
-       />
+                />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -732,21 +679,21 @@
                     style="@style/SeekerButtonStyle"
                     android:paddingStart="5dp"
                     android:paddingEnd="5dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:id="@+id/clearRecentUsers"
-        />
+                />
             </LinearLayout>
-
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/recentUserHistoryLayout"
-                android:layout_marginTop = "2dp"
+                android:layout_marginTop="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/memoryFileDownloadSwitch"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <CheckBox
                     android:theme="@style/checkBoxStyle"
                     android:layout_width="wrap_content"
@@ -754,17 +701,17 @@
                     android:text="@string/file_backed_downloads"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:id="@+id/memoryFileDownloadSwitchCheckBox"
-       />
+                />
                 <ImageView
-                    android:layout_marginTop = "0dp"
+                    android:layout_marginTop="0dp"
                     android:layout_marginStart="10dp"
-                    android:layout_marginBottom = "0dp"
+                    android:layout_marginBottom="0dp"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_gravity="center_vertical"
@@ -772,8 +719,6 @@
                     android:id="@+id/memoryFileDownloadSwitchIcon"
                     android:tint="?attr/mainTextColor"
                 />
-
-
             </LinearLayout>
 
             <CheckBox
@@ -788,10 +733,10 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/autoRetryBackOnline"
-                android:layout_marginBottom = "10dp"/>
-
+                android:layout_marginBottom="10dp"
+            />
 
             <CheckBox
                 android:theme="@style/checkBoxStyle"
@@ -805,18 +750,20 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/autoSetAwayStatus"
-                android:layout_marginBottom = "10dp"/>
+                android:layout_marginBottom="10dp"
+            />
 
-                <LinearLayout
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop = "2dp"
+                android:layout_marginTop="2dp"
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/autoSetAwayStatus"
                 android:id="@+id/languageLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -824,14 +771,14 @@
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_gravity="center_vertical"
                     android:paddingStart="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
                     android:paddingEnd="10dp"
                     android:id="@+id/languageText"
-       />
+                />
                 <Spinner
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -839,21 +786,22 @@
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.4"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_toEndOf="@+id/languageText"
                     android:id="@+id/languageSpinner"
-        />
+                />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/languageLayout"
-                android:layout_marginTop = "2dp"
+                android:layout_marginTop="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/nightModeOptionLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -861,14 +809,14 @@
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="2dp"
                     android:layout_gravity="center_vertical"
                     android:paddingStart="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
                     android:paddingEnd="10dp"
                     android:id="@+id/nightModeText"
-       />
+                />
                 <Spinner
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -876,23 +824,22 @@
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.4"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="2dp"
                     android:layout_toEndOf="@+id/nightModeText"
                     android:id="@+id/nightModeSpinner"
-        />
+                />
             </LinearLayout>
-
-
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/nightModeOptionLayout"
-                android:layout_marginTop = "2dp"
+                android:layout_marginTop="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/dayModeVarientLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -900,14 +847,14 @@
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="2dp"
                     android:layout_gravity="center_vertical"
                     android:paddingStart="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
                     android:paddingEnd="10dp"
                     android:id="@+id/dayModeVarientText"
-       />
+                />
                 <Spinner
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -915,21 +862,22 @@
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.4"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="2dp"
                     android:layout_toEndOf="@+id/dayModeVarientText"
                     android:id="@+id/dayVarientSpinner"
-        />
+                />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/dayModeVarientLayout"
-                android:layout_marginTop = "2dp"
+                android:layout_marginTop="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/nightModeVarientLayout"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+            >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -937,14 +885,14 @@
                     android:layout_marginStart="10dp"
                     android:layout_weight="0.4"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_gravity="center_vertical"
                     android:paddingStart="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
                     android:paddingEnd="10dp"
                     android:id="@+id/nightVarientText"
-       />
+                />
                 <Spinner
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -952,13 +900,12 @@
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0.4"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_toEndOf="@+id/nightVarientText"
                     android:id="@+id/nightVarientSpinner"
-        />
+                />
             </LinearLayout>
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -968,17 +915,17 @@
                 android:id="@+id/sharingLayoutParent"
                 android:background="@drawable/border_group_box"
                 android:orientation="vertical"
-                >
-
+            >
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/sharingLayout"
                     android:orientation="horizontal"
-                    android:gravity="center_horizontal|fill_horizontal|center">
+                    android:gravity="center_horizontal|fill_horizontal|center"
+                >
                     <CheckBox
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
@@ -987,48 +934,38 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="2dp"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/enableSharing"
-       />
-
+                    />
 
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="2dp"
                         android:id="@+id/moreInfoButton"
                         app:srcCompat="@drawable/help_circle_outline"
                         android:tint="?attr/mainTextColor"
-            />
-
-
-
-
-
-
-
+                    />
                 </LinearLayout>
 
-
-
-                        <LinearLayout
-                            android:orientation="vertical"
-                    android:layout_marginStart= "48dp"
-                    android:layout_marginTop= "12dp"
-                    android:layout_marginEnd= "16dp"
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_marginStart="48dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="16dp"
                     android:layout_marginBottom="2dp"
                     android:padding="6dp"
                     android:background="?attr/rounded_input_edit"
-                            android:layout_width="match_parent"
+                    android:layout_width="match_parent"
                     android:id="@+id/dlChangeSharedDirectoryLayout"
-                            android:layout_height="wrap_content">
-
+                    android:layout_height="wrap_content"
+                >
                     <TextView
                         android:id="@+id/noSharedFolders"
                         android:layout_width="match_parent"
@@ -1038,79 +975,73 @@
                         android:text="@string/NoSharedAdd"
                         android:layout_marginBottom="6dp"
                         android:background="?attr/the_rounded_corner_dialog_background_drawable"
-                        />
+                    />
 
-                            <androidx.recyclerview.widget.RecyclerView
-                        
+                    <androidx.recyclerview.widget.RecyclerView
                         android:background="?attr/the_rounded_corner_dialog_background_drawable"
                         android:layout_marginBottom="6dp"
-                                android:id="@+id/uploadFoldersRecyclerView"
-                                android:minHeight="20dp"
+                        android:id="@+id/uploadFoldersRecyclerView"
+                        android:minHeight="20dp"
                         android:visibility="gone"
                         android:paddingBottom="6dp"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
-                            </androidx.recyclerview.widget.RecyclerView>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <Button
-                                         android:minHeight="16dp"
-                                                    android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                            
-                            
-                                    android:id="@+id/addUploadDirectory"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="3"
-                                    android:layout_marginEnd="4dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                    />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                    >
+                        <Button
+                            android:minHeight="16dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:id="@+id/addUploadDirectory"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:layout_marginEnd="4dp"
                             android:textAllCaps="false"
-                                    android:foreground="@drawable/button"
-                                    style="@style/SeekerButtonStyle"
-                                    android:text="Add" />
+                            android:foreground="@drawable/button"
+                            style="@style/SeekerButtonStyle"
+                            android:text="Add"
+                        />
 
-                                <Button
-                            
-                                                                     android:minHeight="16dp"
-                                                    android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
+                        <Button
+                            android:minHeight="16dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
                             android:textAllCaps="false"
-                            
-                                    android:id="@+id/clearAllDirectories"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="4dp"
-                                    android:foreground="@drawable/button"
-                                    style="@style/SeekerButtonStyle"
-                                    android:text="@string/clear" />
-                            </LinearLayout>
-                        </LinearLayout>
-
-
-
-
+                            android:id="@+id/clearAllDirectories"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:foreground="@drawable/button"
+                            style="@style/SeekerButtonStyle"
+                            android:text="@string/clear"
+                        />
+                    </LinearLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "8dp"
-                    android:layout_marginBottom = "10dp"
-                    android:layout_marginStart= "32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginStart="32dp"
                     android:gravity="center_horizontal"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/sharingSubLayout2"
-                    android:orientation="horizontal">
-
+                    android:orientation="horizontal"
+                >
                     <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "6dp"
-                        android:layout_marginBottom = "10dp"
-                        android:layout_height="wrap_content">
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_height="wrap_content"
+                    >
                         <ProgressBar
                             android:id="@+id/progressBarSharedStatus"
                             android:indeterminate="true"
@@ -1119,22 +1050,20 @@
                             android:layout_gravity="center"
                             android:scaleX=".8"
                             android:scaleY=".8"
-
-                            android:layout_height="wrap_content"/>
-                    <ImageView
-                        android:layout_centerHorizontal="true"
-                        
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        app:srcCompat="@drawable/ic_filter_list_black_32dp"
-                        android:id="@+id/sharedStatus"
-                        android:tint="?attr/mainTextColor"
-                />
-                        </FrameLayout>
+                            android:layout_height="wrap_content"
+                        />
+                        <ImageView
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            app:srcCompat="@drawable/ic_filter_list_black_32dp"
+                            android:id="@+id/sharedStatus"
+                            android:tint="?attr/mainTextColor"
+                        />
+                    </FrameLayout>
                     <!--MaxEms added for translated strings-->
                     <Button
                         android:layout_centerHorizontal="true"
@@ -1153,11 +1082,11 @@
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "6dp"
+                        android:layout_marginTop="6dp"
                         android:layout_marginEnd="6dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginBottom="10dp"
                         android:id="@+id/rescanShares"
-        />
+                    />
 
                     <Button
                         android:layout_centerHorizontal="true"
@@ -1176,19 +1105,15 @@
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "6dp"
+                        android:layout_marginTop="6dp"
                         android:layout_marginEnd="6dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginBottom="10dp"
                         android:id="@+id/browseSelfButton"
-        />
-
-
+                    />
                 </LinearLayout>
-
             </LinearLayout>
 
-                        <CheckBox
-                
+            <CheckBox
                 android:theme="@style/checkBoxStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -1200,9 +1125,10 @@
                 android:paddingStart="4dp"
                 android:paddingEnd="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginTop = "10dp"
+                android:layout_marginTop="10dp"
                 android:id="@+id/shareOnlyOnUnmetered"
-                android:layout_marginBottom = "10dp"/>
+                android:layout_marginBottom="10dp"
+            />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1211,14 +1137,16 @@
                 android:layout_below="@id/shareOnlyOnUnmetered"
                 android:id="@+id/listeningLayout"
                 android:background="@drawable/border_group_box"
-                android:orientation="vertical">
+                android:orientation="vertical"
+            >
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/listeningRow1"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <CheckBox
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
@@ -1227,32 +1155,33 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/enableListening"
-            />
+                    />
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:id="@+id/listeningHelp"
                         app:srcCompat="@drawable/help_circle_outline"
                         android:tint="?attr/mainTextColor"
-            />
+                    />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginStart="26dp"
                     android:id="@+id/listeningRow2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1260,13 +1189,13 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/portView"
-            />
+                    />
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1283,12 +1212,7 @@
                         style="@style/SeekerButtonStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
-                        
-                        
-                        
-                        
-                        
-            />
+                    />
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1305,18 +1229,16 @@
                         style="@style/SeekerButtonStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
-                        
-                        
-                        
-            />
+                    />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginStart="26dp"
                     android:id="@+id/listeningRow3"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <CheckBox
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
@@ -1326,29 +1248,25 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/useUPnPCheckBox"
-            />
+                    />
                     <ImageView
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
-                        android:layout_marginEnd = "16dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginEnd="16dp"
                         android:layout_width="26dp"
                         android:layout_height="26dp"
                         android:id="@+id/UPnPStatus"
                         android:tint="?attr/mainTextColor"
-                        
-            />
+                    />
                 </LinearLayout>
             </LinearLayout>
-
-
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1357,14 +1275,16 @@
                 android:layout_below="@id/listeningLayout"
                 android:id="@+id/limitDownloadSpeedLayout"
                 android:background="@drawable/border_group_box"
-                android:orientation="vertical">
+                android:orientation="vertical"
+            >
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/dlSpeedRow1"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <CheckBox
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
@@ -1373,13 +1293,13 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/enable_dl_speed_limits"
-            />
+                    />
                     <!--                    <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
@@ -1397,11 +1317,12 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginStart="26dp"
                     android:layout_marginBottom="10dp"
                     android:id="@+id/dlSpeedSubLayout"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1409,13 +1330,13 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "2dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
                         android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/downloadSpeed"
-            />
+                    />
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1432,7 +1353,7 @@
                         style="@style/SeekerButtonStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
-            />
+                    />
                     <Spinner
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1441,14 +1362,9 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0.4"
                         android:id="@+id/dlPerTransfer"
-        />
-
+                    />
                 </LinearLayout>
-
             </LinearLayout>
-
-
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1457,14 +1373,16 @@
                 android:layout_below="@id/limitDownloadSpeedLayout"
                 android:id="@+id/limitUploadSpeedLayout"
                 android:background="@drawable/border_group_box"
-                android:orientation="vertical">
+                android:orientation="vertical"
+            >
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/ulSpeedRow1"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <CheckBox
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
@@ -1473,13 +1391,13 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
                         android:gravity="center_vertical"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/enable_ul_speed_limits"
-            />
+                    />
                     <!--                    <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
@@ -1497,11 +1415,12 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginStart="26dp"
                     android:layout_marginBottom="10dp"
                     android:id="@+id/ulSpeedSubLayout"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1509,13 +1428,13 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "2dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
                         android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/uploadSpeed"
-            />
+                    />
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1532,7 +1451,7 @@
                         style="@style/SeekerButtonStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
-            />
+                    />
                     <Spinner
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1541,10 +1460,8 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0.4"
                         android:id="@+id/ulPerTransfer"
-        />
-
+                    />
                 </LinearLayout>
-
             </LinearLayout>
 
             <LinearLayout
@@ -1555,17 +1472,17 @@
                 android:id="@+id/limitConcurrentDownloadsLayout"
                 android:background="@drawable/border_group_box"
                 android:orientation="vertical"
-                >
-
+            >
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "2dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
                     android:layout_centerHorizontal="true"
                     android:id="@+id/limitConcurrentDownloadsSublayout"
                     android:orientation="horizontal"
-                    android:gravity="center_horizontal|fill_horizontal|center">
+                    android:gravity="center_horizontal|fill_horizontal|center"
+                >
                     <CheckBox
                         android:theme="@style/checkBoxStyle"
                         android:layout_width="wrap_content"
@@ -1574,34 +1491,34 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="2dp"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
                         android:id="@+id/limitConcurrentDownloadsCheckBox"
-       />
-
+                    />
 
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:gravity="center_vertical"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginTop = "10dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="2dp"
                         android:id="@+id/moreInfoConcurrent"
                         app:srcCompat="@drawable/help_circle_outline"
                         android:tint="?attr/mainTextColor"
-            />
+                    />
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop = "12dp"
+                    android:layout_marginTop="12dp"
                     android:layout_marginStart="26dp"
                     android:layout_marginBottom="18dp"
                     android:id="@+id/limitConcurrentDownloadsSublayout2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                >
                     <!--layout_weight prevents the button from getting squashed (due to translation strings being longer)-->
                     <TextView
                         android:layout_width="wrap_content"
@@ -1610,15 +1527,14 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="10dp"
-                        android:layout_marginTop = "2dp"
-                        android:layout_marginBottom = "2dp"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
                         android:textColor="?attr/normalTextColorNonTinted"
                         android:paddingStart="4dp"
                         android:paddingEnd="10dp"
-                        
                         android:layout_weight="1"
                         android:id="@+id/concurrentDownloadsLabel"
-            />
+                    />
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -1635,10 +1551,9 @@
                         style="@style/SeekerButtonStyle"
                         android:paddingStart="7dp"
                         android:paddingEnd="7dp"
-            />
+                    />
                 </LinearLayout>
             </LinearLayout>
-
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -1646,8 +1561,8 @@
                 android:layout_centerHorizontal="true"
                 android:layout_below="@id/limitConcurrentDownloadsLayout"
                 android:id="@+id/privLayout"
-                android:layout_height="wrap_content">
-
+                android:layout_height="wrap_content"
+            >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -1655,13 +1570,13 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:textColor="?attr/normalTextColorNonTinted"
                     android:paddingStart="4dp"
                     android:paddingEnd="10dp"
                     android:id="@+id/privStatusView"
-     />
+                />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -1679,8 +1594,7 @@
                     style="@style/SeekerButtonStyle"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"
-                   
-        />
+                />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -1698,35 +1612,32 @@
                     style="@style/SeekerButtonStyle"
                     android:paddingStart="2dp"
                     android:paddingEnd="2dp"
-                   
-        />
+                />
 
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:gravity="center_vertical"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop = "10dp"
-                    android:layout_marginBottom = "10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:id="@+id/privHelp"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:tint="?attr/mainTextColor"
-            />
-
+                />
             </LinearLayout>
-
 
             <LinearLayout
                 android:layout_below="@id/privLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop = "2dp"
-                android:layout_marginBottom = "2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/enableDiagnosticsLayout"
                 android:orientation="horizontal"
-                android:gravity="center_horizontal|fill_horizontal|center">
-
+                android:gravity="center_horizontal|fill_horizontal|center"
+            >
                 <CheckBox
                     android:layout_below="@id/privLayout"
                     android:layout_width="wrap_content"
@@ -1739,75 +1650,70 @@
                     android:paddingEnd="10dp"
                     android:layout_gravity="center"
                     android:theme="@style/checkBoxStyle"
-                    android:layout_marginTop = "10dp"
+                    android:layout_marginTop="10dp"
                     android:id="@+id/enableDiagnostics"
-                    android:layout_marginBottom = "10dp"/>
-
+                    android:layout_marginBottom="10dp"
+                />
 
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:gravity="center_vertical"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop = "2dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
                     android:id="@+id/moreInfoDiagnostics"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:tint="?attr/mainTextColor"
-            />
+                />
             </LinearLayout>
 
-                                <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop = "0dp"
-                        android:layout_gravity="center"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                android:layout_gravity="center"
                 android:layout_centerHorizontal="true"
-                        android:layout_marginBottom = "12dp"
-                        android:id="@+id/forceManageStoragePermissionLayout"
+                android:layout_marginBottom="12dp"
+                android:id="@+id/forceManageStoragePermissionLayout"
                 android:layout_below="@id/enableDiagnosticsLayout"
-                        android:orientation="horizontal"
-                   >
-                        <Button
-                    
-                    
-                            android:layout_centerHorizontal="true"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/ForceFilesystemPermission"
-                            android:minHeight="16dp"
-                            android:textSize="12dp"
-                            android:paddingTop="8dp"
-                            android:paddingBottom="8dp"
-                            android:paddingStart="7dp"
-                            android:gravity="center_vertical"
-                            android:paddingEnd="7dp"
-                            android:textAllCaps="false"
-                            android:layout_marginTop = "6dp"
-                            android:layout_marginBottom = "6dp"
-                            style="@style/SeekerButtonStyle"
-                            android:foreground="@drawable/button"
-                            android:id="@+id/forceFilesystemPermission"
-       />
+                android:orientation="horizontal"
+            >
+                <Button
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ForceFilesystemPermission"
+                    android:minHeight="16dp"
+                    android:textSize="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:paddingStart="7dp"
+                    android:gravity="center_vertical"
+                    android:paddingEnd="7dp"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="6dp"
+                    style="@style/SeekerButtonStyle"
+                    android:foreground="@drawable/button"
+                    android:id="@+id/forceFilesystemPermission"
+                />
 
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginBottom="6dp"
+                    android:id="@+id/moreInfoButtonForceFilesystemPermission"
+                    app:srcCompat="@drawable/help_circle_outline"
+                    android:tint="?attr/mainTextColor"
+                />
+            </LinearLayout>
 
-                        <ImageView
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:gravity="center_vertical"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginTop = "6dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginBottom = "6dp"
-                            android:id="@+id/moreInfoButtonForceFilesystemPermission"
-                            app:srcCompat="@drawable/help_circle_outline"
-                            android:tint="?attr/mainTextColor"
-            />
-
-
-                    </LinearLayout>
-
-                        <Button
+            <Button
                 android:layout_below="@id/forceManageStoragePermissionLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -1818,11 +1724,10 @@
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:id="@+id/changePassword"
-       />
-
+            />
 
             <Button
                 android:layout_below="@id/changePassword"
@@ -1835,10 +1740,10 @@
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:id="@+id/editUserInfoButton"
-       />
+            />
 
             <Button
                 android:layout_below="@id/editUserInfoButton"
@@ -1851,53 +1756,50 @@
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:id="@+id/importDataButton"
-       />
+            />
 
-                        <LinearLayout
+            <LinearLayout
                 android:layout_below="@id/importDataButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop = "2dp"
-                android:layout_marginBottom = "2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
                 android:layout_centerHorizontal="true"
                 android:id="@+id/exportClientData"
                 android:orientation="horizontal"
-                android:gravity="center_horizontal|fill_horizontal|center">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ExportClientData"
-                android:layout_marginStart="10dp"
-                android:foreground="@drawable/button"
-                style="@style/SeekerButtonStyle"
-                android:paddingStart="7dp"
-                android:paddingEnd="7dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
-                android:id="@+id/exportDataButton"
-       />
-
+                android:gravity="center_horizontal|fill_horizontal|center"
+            >
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ExportClientData"
+                    android:layout_marginStart="10dp"
+                    android:foreground="@drawable/button"
+                    style="@style/SeekerButtonStyle"
+                    android:paddingStart="7dp"
+                    android:paddingEnd="7dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:id="@+id/exportDataButton"
+                />
 
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:gravity="center_vertical"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginTop = "2dp"
-                    android:layout_marginStart = "14dp"
-                    android:layout_marginBottom = "2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginBottom="2dp"
                     android:id="@+id/moreInfoExport"
                     app:srcCompat="@drawable/help_circle_outline"
                     android:tint="?attr/mainTextColor"
-            />
+                />
             </LinearLayout>
-
-
 
             <Button
                 android:layout_below="@id/exportClientData"
@@ -1910,14 +1812,10 @@
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop = "10dp"
-                android:layout_marginBottom = "10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
                 android:id="@+id/restoreDefaults"
-       />
-
-
+            />
         </RelativeLayout>
-
     </ScrollView>
-
 </RelativeLayout>

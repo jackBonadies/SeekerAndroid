@@ -1,33 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16dp"
         android:text="@string/UsingThisWizardLong"
-        />
-       <Button
+    />
+    <Button
         android:layout_gravity="center_horizontal"
         android:text="@string/Import"
         android:foreground="@drawable/button"
         android:id="@+id/importData"
-            android:layout_marginTop="20dp"
-
-        
+        android:layout_marginTop="20dp"
         style="@style/SeekerButtonStyle"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+    />
 
-      <androidx.core.widget.ContentLoadingProgressBar
+    <androidx.core.widget.ContentLoadingProgressBar
         android:layout_below="@id/recyclerViewChips"
-    android:layout_width="match_parent"
+        android:layout_width="match_parent"
         android:id="@+id/contentLoadingProgressBar1"
         android:layout_marginTop="20dp"
-    android:layout_height="wrap_content"
+        android:layout_height="wrap_content"
         style="@android:style/Widget.DeviceDefault.ProgressBar"
-    android:indeterminate="true" />
-
+        android:indeterminate="true"
+    />
 </LinearLayout>

@@ -1,8 +1,8 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android" 
-
-xmlns:app="http://schemas.android.com/apk/res-auto">
-
-  <!--<item android:id="@+id/action_search"
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <!--<item android:id="@+id/action_search"
        android:title="@string/action_settings"
        android:icon="@android:drawable/ic_menu_search"
        app:showAsAction="ifRoom|collapseActionView"
@@ -10,29 +10,35 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
        android:iconifiedByDefault="false"
        app:actionViewClass="androidx.appcompat.widget.SearchView" />-->
 
-  <item android:id="@+id/action_search"
-android:title="@string/searches_tab2"
-android:icon="@drawable/search_transition"
-app:showAsAction="always"
-android:iconifiedByDefault="true"
- />
+    <item
+        android:id="@+id/action_search"
+        android:title="@string/searches_tab2"
+        android:icon="@drawable/search_transition"
+        app:showAsAction="always"
+        android:iconifiedByDefault="true"
+    />
 
-
-  <!-- Settings, should always be in the overflow -->
-  <item android:id="@+id/action_search_target"
+    <!-- Settings, should always be in the overflow -->
+    <item
+        android:id="@+id/action_search_target"
         android:title="@string/change_target"
-        app:showAsAction="never"/>
-  <item android:id="@+id/action_change_result_style"
-   android:title="@string/change_result_style"
-   app:showAsAction="never"/>
+        app:showAsAction="never"
+    />
+    <item
+        android:id="@+id/action_change_result_style"
+        android:title="@string/change_result_style"
+        app:showAsAction="never"
+    />
 
-	<item android:id="@+id/action_sort_results_by"
-  android:title="@string/sort_results_by"
-  app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_sort_results_by"
+        android:title="@string/sort_results_by"
+        app:showAsAction="never"
+    />
 
-	<item android:id="@+id/action_add_to_wishlist"
-android:title="@string/add_to_wish"
-app:showAsAction="never"/>
-
-
+    <item
+        android:id="@+id/action_add_to_wishlist"
+        android:title="@string/add_to_wish"
+        app:showAsAction="never"
+    />
 </menu>

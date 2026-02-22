@@ -1,18 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--For all properties see: https://aka.ms/android-menu-resource-->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/save_user_action"
+        android:icon="@drawable/content_save_outline"
+        android:title="@string/Save"
+        app:showAsAction="always"
+    />
 
-  <item
-      android:id="@+id/save_user_action"
-      android:icon="@drawable/content_save_outline"
-      android:title="@string/Save"
-      app:showAsAction="always"/>
-
-  <item
- android:id="@+id/view_self_info_action"
- android:icon="@drawable/content_save_outline"
- android:title="@string/view_self"
- app:showAsAction="never"/>
-  
+    <item
+        android:id="@+id/view_self_info_action"
+        android:icon="@drawable/content_save_outline"
+        android:title="@string/view_self"
+        app:showAsAction="never"
+    />
 </menu>

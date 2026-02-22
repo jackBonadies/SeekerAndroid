@@ -1,104 +1,105 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/action_up_directory"
+        android:title="Up Directory"
+        android:icon="@drawable/baseline_arrow_upward_white_24"
+        app:showAsAction="always"
+        android:iconifiedByDefault="false"
+    />
 
-xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_browse_user"
+        android:title="@string/browse_user"
+        android:icon="@drawable/baseline_add_white_24"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
-  <item android:id="@+id/action_up_directory"
-android:title="Up Directory"
-android:icon="@drawable/baseline_arrow_upward_white_24"
-app:showAsAction="always"
-android:iconifiedByDefault="false"
- />
+    <item
+        android:id="@+id/action_download_files"
+        android:title="@string/download_folder"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
-  <item android:id="@+id/action_browse_user"
-android:title="@string/browse_user"
-android:icon="@drawable/baseline_add_white_24"
-app:showAsAction="never"
-android:iconifiedByDefault="false"
- />
+    <item
+        android:id="@+id/action_download_selected_files"
+        android:title="@string/download_selected"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
 
-  <item android:id="@+id/action_download_files"
-android:title="@string/download_folder"
-app:showAsAction="never"
-android:iconifiedByDefault="false"
- />
+    <item android:id="@+id/userOptions" android:title="@string/UserOptions">
+        <menu>
+            <item
+                android:id="@+id/action_add_user"
+                android:title="@string/add_user"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
-  <item android:id="@+id/action_download_selected_files"
-android:title="@string/download_selected"
-app:showAsAction="never"
-android:iconifiedByDefault="false"
- />
+            <item
+                android:id="@+id/action_add_note"
+                android:title="@string/add_note"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
+            <item
+                android:id="@+id/action_get_user_info"
+                android:title="@string/get_user_info"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
+            <item
+                android:id="@+id/action_message_user"
+                android:title="@string/msg_user"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
+        </menu>
+    </item>
 
-	<item android:id="@+id/userOptions"
-	 android:title="@string/UserOptions" >
+    <item android:id="@+id/moreOptions" android:title="@string/more_options">
+        <menu>
+            <item
+                android:id="@+id/action_queue_folder_paused"
+                android:title="@string/QueueFolderAsPaused"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
-		<menu>
+            <item
+                android:id="@+id/action_queue_selected_paused"
+                android:title="@string/QueueSelectedAsPaused"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
-				<item android:id="@+id/action_add_user"
-	android:title="@string/add_user"
-	app:showAsAction="never"
-	android:iconifiedByDefault="false"
-	 />
+            <item
+                android:id="@+id/action_show_folder_info"
+                android:title="@string/ShowFolderInfo"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
+            <item
+                android:id="@+id/action_copy_folder_url"
+                android:title="@string/CopyFolderURL"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
 
-	 				<item android:id="@+id/action_add_note"
-	android:title="@string/add_note"
-	app:showAsAction="never"
-	android:iconifiedByDefault="false"
-	 />
-
-	  <item android:id="@+id/action_get_user_info"
-	android:title="@string/get_user_info"
-	app:showAsAction="never"
-	android:iconifiedByDefault="false"
-	 />
-
-
-		<item android:id="@+id/action_message_user"
-	 android:title="@string/msg_user"
-	 app:showAsAction="never"
-	 android:iconifiedByDefault="false"
-	 />
- 		</menu>
- 	</item>
-
-	 	<item android:id="@+id/moreOptions"
-	 android:title="@string/more_options" >
-
-	 		<menu>
-
-				<item android:id="@+id/action_queue_folder_paused"
-	android:title="@string/QueueFolderAsPaused"
-	app:showAsAction="never"
-	android:iconifiedByDefault="false"
-	 />
-
-
-	 				<item android:id="@+id/action_queue_selected_paused"
-	android:title="@string/QueueSelectedAsPaused"
-	app:showAsAction="never"
-	android:iconifiedByDefault="false"
-	 />
-
-	  <item android:id="@+id/action_show_folder_info"
-	android:title="@string/ShowFolderInfo"
-	app:showAsAction="never"
-	android:iconifiedByDefault="false"
-	 />
-
-				<item android:id="@+id/action_copy_folder_url"
-		  android:title="@string/CopyFolderURL"
-		  app:showAsAction="never"
-		  android:iconifiedByDefault="false"
-	 />
-
-				<item android:id="@+id/action_copy_selected_url"
-	  android:title="@string/CopySelectedURL"
-	  app:showAsAction="never"
-	  android:iconifiedByDefault="false"
-	 />
-
- 		</menu>
- 	</item>
+            <item
+                android:id="@+id/action_copy_selected_url"
+                android:title="@string/CopySelectedURL"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
+        </menu>
+    </item>
 </menu>

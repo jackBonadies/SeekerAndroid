@@ -1,18 +1,19 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="?attr/pseudo_window_background_color"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-        
-        <com.google.android.material.appbar.AppBarLayout
+    android:layout_height="match_parent"
+>
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
         android:layout_width="match_parent"
-		android:fitsSystemWindows="true"
-		android:background="?attr/mainPurple"
+        android:fitsSystemWindows="true"
+        android:background="?attr/mainPurple"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:layout_height="wrap_content">
-
+        android:layout_height="wrap_content"
+    >
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/setting_toolbar"
             android:layout_width="match_parent"
@@ -21,8 +22,8 @@
             android:minHeight="100dp"
             android:theme="?attr/actionBarTheme"
             tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="0dp" />
-
+            tools:layout_editor_absoluteY="0dp"
+        />
     </com.google.android.material.appbar.AppBarLayout>
 
     <Seeker.StepPagerStrip
@@ -35,26 +36,30 @@
         android:paddingBottom="8dp"
         android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
         android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-        android:gravity="left" />
+        android:gravity="left"
+    />
 
     <Seeker.SwipeDisabledViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="4dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+    />
 
-    <View android:id="@+id/divider"
+    <View
+        android:id="@+id/divider"
         android:background="?android:attr/dividerHorizontal"
         android:layout_height="1dp"
-        android:layout_width="match_parent" />
+        android:layout_width="match_parent"
+    />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-		android:fitsSystemWindows="true"
-        android:orientation="horizontal">
-
+        android:fitsSystemWindows="true"
+        android:orientation="horizontal"
+    >
         <Button
             android:layout_margin="2dp"
             android:id="@+id/prev_button"
@@ -63,10 +68,10 @@
             style="@style/SeekerButtonStyle"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/prev" />
+            android:text="@string/prev"
+        />
 
         <Button
-            
             android:foreground="@drawable/button"
             style="@style/SeekerButtonStyle"
             android:id="@+id/next_button"
@@ -74,8 +79,7 @@
             android:layout_weight="1"
             android:layout_margin="2dp"
             android:layout_height="wrap_content"
-            android:text="@string/next" />
-
+            android:text="@string/next"
+        />
     </LinearLayout>
-
 </LinearLayout>

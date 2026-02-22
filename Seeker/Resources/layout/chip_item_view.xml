@@ -1,13 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-              android:id="@+id/chipLayout"
-android:paddingStart="4dp"
-android:paddingEnd="4dp"
-    android:orientation="horizontal">
-<com.google.android.material.chip.Chip
+    android:id="@+id/chipLayout"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:orientation="horizontal"
+>
+    <com.google.android.material.chip.Chip
         android:text="mp3"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -15,18 +17,19 @@ android:paddingEnd="4dp"
         app:chipBackgroundColor="@drawable/chip_background_state_color"
         android:textColor="@drawable/chip_text_color_state"
         style="@style/Widget.MaterialComponents.Chip.Filter"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+    />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/chipSeparator"
         android:paddingStart="4dp"
-    android:textSize="20dp"
-    android:textColor="@color/chipSeparatorColor"
+        android:textSize="20dp"
+        android:textColor="@color/chipSeparatorColor"
         android:layout_margin="0dp"
         android:visibility="visible"
-            android:text="•"
-android:textStyle="bold"
+        android:text="•"
+        android:textStyle="bold"
         android:layout_gravity="center_vertical"
-        />
+    />
 </LinearLayout>
