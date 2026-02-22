@@ -25,6 +25,7 @@
 
     <RelativeLayout
         android:id="@+id/layout_gchat_chatbox"
+        android:fitsSystemWindows="true"
         android:layout_width="match_parent"
         android:layout_weight="0"
         android:layout_height="wrap_content"
@@ -46,7 +47,7 @@
 
         <Button
             android:id="@+id/button_gchat_send"
-            android:layout_width="64dp"
+            android:layout_width="84dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:background="?attr/selectableItemBackground"
