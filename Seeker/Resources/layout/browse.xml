@@ -65,36 +65,26 @@
         android:paddingTop="@dimen/abc_action_bar_content_inset_material"
         android:background="?attr/secondaryColor"
     >
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:id="@+id/filterLineOne"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="32dp"
+            android:layout_marginEnd="20dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="6dp"
-            android:layout_height="wrap_content"
+            android:hint="@string/filer_files"
         >
-            <EditText
-                android:layout_marginTop="0dp"
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/filterText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:singleLine="true"
                 android:focusable="true"
                 android:imeOptions="actionDone"
-                android:textColorHighlight="?attr/mainTextColor"
-                android:textColorHint="?attr/mainTextColor"
-                android:hint="@string/filer_files"
-                android:layout_weight="2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
             />
-
-            <FrameLayout
-                android:layout_marginTop="0dp"
-                android:layout_width="32dp"
-                android:layout_height="wrap_content"
-            />
-        </LinearLayout>
+        </com.google.android.material.textfield.TextInputLayout>
     </RelativeLayout>
     <!--    <Button
         android:layout_width="wrap_content"

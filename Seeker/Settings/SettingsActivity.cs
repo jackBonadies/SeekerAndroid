@@ -3009,23 +3009,14 @@ namespace Seeker
             builder.SetTitle(Resource.String.UploadFolderOptions);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.upload_folder_options, this.FindViewById<ViewGroup>(Android.Resource.Id.Content) as ViewGroup, false);
             EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(Resource.Id.customFolderNameEditText);
+            var folderNameInputLayout = (View)custromFolderNameEditText.Parent.Parent;
             CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(Resource.Id.overrideFolderName);
             CheckBox hiddenCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.hiddenUserlistOnly);
             CheckBox lockedCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.lockedUserlistOnly);
             overrideFolderName.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) =>
             {
-                if (e.IsChecked)
-                {
-                    custromFolderNameEditText.Enabled = true;
-                    custromFolderNameEditText.Alpha = 1.0f;
-                }
-                else
-                {
-                    custromFolderNameEditText.Enabled = false;
-                    custromFolderNameEditText.Alpha = 0.5f;
-                }
-
-
+                folderNameInputLayout.Enabled = e.IsChecked;
+                folderNameInputLayout.Alpha = e.IsChecked ? 1.0f : 0.5f;
             };
             if (!string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride))
             {

@@ -55,17 +55,24 @@
                 android:id="@+id/roomListSpinner"
             />
         </LinearLayout>
-        <EditText
-            android:id="@+id/customRoomName"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/customRoomNameLayout"
             android:visibility="gone"
-            android:hint="@string/target_room_name"
-            android:singleLine="true"
-            android:layout_marginBottom="10dp"
-            android:focusable="true"
-            android:imeOptions="actionDone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-        />
+            android:layout_marginBottom="10dp"
+            android:hint="@string/target_room_name"
+        >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/customRoomName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:focusable="true"
+                android:imeOptions="actionDone"
+            />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/chosenUser"
