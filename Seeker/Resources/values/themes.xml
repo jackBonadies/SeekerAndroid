@@ -423,21 +423,4 @@
         </item>
         <!--<item name="dialogBackground">#52000000</item>-->
     </style>
-
-    <style name="MyAlertDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
-        <item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
-        <item name="android:textColorSecondary">?attr/cellTextColor</item>
-        <item name="android:textColorPrimary">?attr/cellTextColor</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">
-            ?the_rounded_corner_dialog_background_drawable
-        </item>
-    </style>
-
-    <!--<style name="MyAlertDialogThemeNonCompat" parent="@android:style/Theme.Dialog">
-		<item name="textColorAlertDialogListItem">?attr/cellTextColor</item>
-		<item name="android:textColorSecondary">?attr/cellTextColor</item>
-		<item name="colorAccent">@color/colorAccent</item>
-		<item name="android:windowBackground">?the_rounded_corner_dialog_background_drawable</item>
-	</style>-->
 </resources>
