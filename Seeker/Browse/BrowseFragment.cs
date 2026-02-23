@@ -1643,9 +1643,9 @@ namespace Seeker
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             Logger.InfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
-            builder.SetTitle(c.Resources.GetString(Resource.String.browse_user_files));
+            builder.SetTitle(c.Resources.GetString(Resource.String.browse_user));
 
-            View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.browse_chosen_user, (ViewGroup)this.View, false);
+            View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)this.View, false);
 
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);

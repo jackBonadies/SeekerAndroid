@@ -1252,7 +1252,7 @@ namespace Seeker
         {
             Context toUse = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
-            builder.SetTitle(Resource.String.sort_results_by_);
+            builder.SetTitle(Resource.String.sort_results_by);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeresultsortorder, this.rootView as ViewGroup, false); //TODO replace rootView with ActiveActivity.GetContent()
 
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortAvailability = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.availability);

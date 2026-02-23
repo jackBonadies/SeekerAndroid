@@ -108,7 +108,7 @@ Directorio: {5}
     <string name="target_room_name">Nombre de la sala</string>
     <string name="target_choose_user">Elegir usuario</string>
     <string name="username">Nombre de usuario</string>
-    <string name="search_target_">Buscar objetivo:</string>
+    <string name="search_target_">Buscar objetivo</string>
     <string name="custom_">Personalizado:</string>
 
     <string name="friends">Amigos</string>
@@ -161,7 +161,6 @@ Directorio: {5}
 
     <string name="enter_user_to_invite_to_room">Introducir usuario para invitar</string>
     <string name="inviteuser">Invitar usuario</string>
-    <string name="invite_user">Invitar usuario:</string>
 
     <string name="give_up_room">Abandonar sala</string>
     <string name="give_up_membership">Abandonar la membresía</string>
@@ -351,8 +350,8 @@ Directorio: {5}
     <string name="failed_to_undo">Error al deshacer</string>
     <string name="enabling_listener">Habilitando escucha</string>
     <string name="disabling_listener">Desactivando escucha</string>
-    <string name="add_user_title">Añadir usuario(s):</string>
-    <string name="ignore_user_title">Ignorar usuario(s):</string>
+    <string name="add_user_title">Añadir usuario(s)</string>
+    <string name="ignore_user_title">Ignorar usuario(s)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Directorio compartido correctamente establecido con {0} directorios y {1} archivos.
@@ -579,7 +578,6 @@ Directorio: {5}
     <string name="mod">Moderador</string>
 
     <string name="user_">Usuario:</string>
-    <string name="browse_user_files">Navegar usuario:</string>
     <string name="set_ticker">Asignar Ticker:</string>
     <string name="setticker">Asignar Ticker</string>
     <string name="chatrooms">Salas de chat</string>
@@ -827,7 +825,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     </string>
 
     <string name="sort_results_by">Ordenar por</string>
-    <string name="sort_results_by_">Ordenar por:</string>
 
     <string name="next">Siguiente</string>
     <string name="prev">Anterior</string>

@@ -110,7 +110,7 @@ Ordneranzahl: {5}\"
     <string name="target_room_name">Raumname</string>
     <string name="target_choose_user">Benutzer aussuchen</string>
     <string name="username">Benutzername</string>
-    <string name="search_target_">Ziel suchen:</string>
+    <string name="search_target_">Ziel suchen</string>
     <string name="custom_">Benutzerdefiniert:</string>
 
     <string name="friends">Freunde</string>
@@ -163,7 +163,6 @@ Ordneranzahl: {5}\"
 
     <string name="enter_user_to_invite_to_room">Benutzer zum Einladen eingeben</string>
     <string name="inviteuser">Spieler einladen</string>
-    <string name="invite_user">Lade Spieler ein:</string>
 
     <string name="give_up_room">Raum aufgeben</string>
     <string name="give_up_membership">Mitgliedschaft aufgeben</string>
@@ -353,8 +352,8 @@ Ordneranzahl: {5}\"
     <string name="failed_to_undo">Rückgängig fehlgeschlagen</string>
     <string name="enabling_listener">Enabling Listener</string>
     <string name="disabling_listener">Disabling Listener</string>
-    <string name="add_user_title">Benutzer hinzufügen:</string>
-    <string name="ignore_user_title">Benutzer ignorieren:</string>
+    <string name="add_user_title">Benutzer hinzufügen</string>
+    <string name="ignore_user_title">Benutzer ignorieren</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Successfully set Shared Directory with {0} directories and {1} files.
@@ -581,7 +580,6 @@ Ordneranzahl: {5}\"
     <string name="mod">Moderator</string>
 
     <string name="user_">Benutzer:</string>
-    <string name="browse_user_files">Benutzer durchsuchen:</string>
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
@@ -829,7 +827,6 @@ Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.
     </string>
 
     <string name="sort_results_by">Sort By</string>
-    <string name="sort_results_by_">Sort By:</string>
 
     <string name="next">Weiter</string>
     <string name="prev">Zurück</string>

@@ -602,7 +602,7 @@ namespace Seeker
 
         public void ShowEditTextDialogAddUserToList(bool toIgnored)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             // the reason the title is plural is because, using enter, you can add multiple users without closing the dialog.
             if (toIgnored)
             {
@@ -615,10 +615,8 @@ namespace Seeker
                 builder.SetTitle(addUser);
             }
 
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.add_user_to_userlist, (ViewGroup)this.FindViewById<ViewGroup>(Resource.Layout.user_list_activity_layout), false);
-            // Set up the input
+            var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, rootView, false);
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input, true);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text

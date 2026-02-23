@@ -109,7 +109,7 @@
     <string name="target_room_name">Название комнаты</string>
     <string name="target_choose_user">Выбрать пользователя</string>
     <string name="username">Имя пользователя</string>
-    <string name="search_target_">Область поиска:</string>
+    <string name="search_target_">Область поиска</string>
     <string name="custom_">Выбор:</string>
 
     <string name="friends">Друзья</string>
@@ -162,7 +162,6 @@
 
     <string name="enter_user_to_invite_to_room">Введите имя пользователя для приглашения</string>
     <string name="inviteuser">Пригласить пользователя</string>
-    <string name="invite_user">Пригласить пользователя:</string>
 
     <string name="give_up_room">Распустить комнату</string>
     <string name="give_up_membership">Выйти из комнаты</string>
@@ -352,8 +351,8 @@
     <string name="failed_to_undo">Ошибка отмены</string>
     <string name="enabling_listener">Включение слушателя</string>
     <string name="disabling_listener">Отключение слушателя</string>
-    <string name="add_user_title">Добавить пользователей:</string>
-    <string name="ignore_user_title">Игнорировать пользователей:</string>
+    <string name="add_user_title">Добавить пользователей</string>
+    <string name="ignore_user_title">Игнорировать пользователей</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Успешно установлена общая папка с каталогами {0} и {1} файлами.
@@ -580,7 +579,6 @@
     <string name="mod">Мод</string>
 
     <string name="user_">Пользователь:</string>
-    <string name="browse_user_files">Просмотр пользователя:</string>
     <string name="set_ticker">Закрепить сообщение:</string>
     <string name="setticker">Закрепить сообщение</string>
     <string name="chatrooms">Чаты</string>
@@ -827,7 +825,6 @@
     </string>
 
     <string name="sort_results_by">Сортировать по</string>
-    <string name="sort_results_by_">Сортировать по:</string>
 
     <string name="next">Следующий</string>
     <string name="prev">Назад</string>

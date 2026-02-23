@@ -1914,11 +1914,11 @@ namespace Seeker
                             recents.Remove(uli.Username);
                         }
                     }
-                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, recents);
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, recents);
                 }
                 else
                 {
-                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.autoSuggestionRow, SeekerState.RecentUsersManager.GetRecentUserList());
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, SeekerState.RecentUsersManager.GetRecentUserList());
                 }
             }
         }

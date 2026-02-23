@@ -108,7 +108,7 @@ Numero Cartelle: {5}\"
     <string name="target_room_name">Nome stanza</string>
     <string name="target_choose_user">Seleziona utente</string>
     <string name="username">Nome utente</string>
-    <string name="search_target_">Obiettivo Ricerca:</string>
+    <string name="search_target_">Obiettivo Ricerca</string>
     <string name="custom_">Personalizzato:</string>
 
     <string name="friends">Amici</string>
@@ -161,7 +161,6 @@ Numero Cartelle: {5}\"
 
     <string name="enter_user_to_invite_to_room">Inserisci l\'utente da invitare</string>
     <string name="inviteuser">Invita utente</string>
-    <string name="invite_user">Invita utente:</string>
 
     <string name="give_up_room">Abbandona la stanza</string>
     <string name="give_up_membership">Disiscriviti</string>
@@ -351,8 +350,8 @@ Numero Cartelle: {5}\"
     <string name="failed_to_undo">Failure to Undo</string>
     <string name="enabling_listener">Enabling Listener</string>
     <string name="disabling_listener">Disabling Listener</string>
-    <string name="add_user_title">Aggiungi utente(i):</string>
-    <string name="ignore_user_title">Ignora utente(i):</string>
+    <string name="add_user_title">Aggiungi utente(i)</string>
+    <string name="ignore_user_title">Ignora utente(i)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Successfully set Shared Directory with {0} directories and {1} files.
@@ -579,7 +578,6 @@ Numero Cartelle: {5}\"
     <string name="mod">Moderatore</string>
 
     <string name="user_">Utente:</string>
-    <string name="browse_user_files">Scorrere utenti:</string>
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Stanze</string>
@@ -827,7 +825,6 @@ Numero Cartelle: {5}\"
     </string>
 
     <string name="sort_results_by">Sort By</string>
-    <string name="sort_results_by_">Sort By:</string>
 
     <string name="next">Prossimo</string>
     <string name="prev">Precedente</string>

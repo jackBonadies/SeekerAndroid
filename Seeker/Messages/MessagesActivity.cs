@@ -223,14 +223,11 @@ namespace Seeker
                 return;
             }
 
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
-            builder.SetTitle(SeekerState.ActiveActivityRef.GetString(Resource.String.msg_user) + ":");
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
+            builder.SetTitle(SeekerState.ActiveActivityRef.GetString(Resource.String.msg_user));
             var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.message_chosen_user, rootView, false);
-            // Set up the input
-            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<EditText>(Resource.Id.chosenUserEditText);
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, rootView, false);
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);

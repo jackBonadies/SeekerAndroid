@@ -376,11 +376,10 @@ namespace Seeker.Serialization
                 var resourcesLayoutIds = new List<int>()
                         {
                 Resource.Layout.activity_main                                     ,
-                Resource.Layout.add_user_to_userlist                              ,
                 Resource.Layout.all_ticker_dialog                                 ,
+                Resource.Layout.autocomplete_user_dialog_content                  ,
                 Resource.Layout.autoSuggestionRow                                 ,
                 Resource.Layout.browse                                            ,
-                Resource.Layout.browse_chosen_user                                ,
                 Resource.Layout.browse_response_item                              ,
                 Resource.Layout.browse_response_item_dummy                        ,
                 Resource.Layout.changeresultsortorder                             ,
@@ -416,7 +415,6 @@ namespace Seeker.Serialization
                 Resource.Layout.import_item_view_dummy                            ,
                 Resource.Layout.import_list_layout                                ,
                 Resource.Layout.import_start_page                                 ,
-                Resource.Layout.invite_user_dialog_content                        ,
                 Resource.Layout.loggedin                                          ,
                 Resource.Layout.login                                             ,
                 Resource.Layout.material_progress_bar_pass_through                ,
@@ -428,7 +426,6 @@ namespace Seeker.Serialization
                 Resource.Layout.messages_inner_layout                             ,
                 Resource.Layout.messages_main_layout                              ,
                 Resource.Layout.messages_overview                                 ,
-                Resource.Layout.message_chosen_user                               ,
                 Resource.Layout.message_overview_item                             ,
                 Resource.Layout.message_overview_item_dummy                       ,
                 Resource.Layout.room_users_dialog                                 ,

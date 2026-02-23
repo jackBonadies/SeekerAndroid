@@ -108,7 +108,7 @@ Recompte de directoris: {5}\"
     <string name="target_room_name">Nom de la sala</string>
     <string name="target_choose_user">Trieu Usuari</string>
     <string name="username">Nom d’usuari</string>
-    <string name="search_target_">Objectiu de cerca:</string>
+    <string name="search_target_">Objectiu de cerca</string>
     <string name="custom_">Personalitzat:</string>
 
     <string name="friends">Amistats</string>
@@ -161,7 +161,6 @@ Recompte de directoris: {5}\"
 
     <string name="enter_user_to_invite_to_room">Introduïu l\'usuari per convidar</string>
     <string name="inviteuser">Convida l\'usuari</string>
-    <string name="invite_user">Convida l\'usuari:</string>
 
     <string name="give_up_room">Renuncia a l\'habitació</string>
     <string name="give_up_membership">Renuncia a la membresia</string>
@@ -351,8 +350,8 @@ Recompte de directoris: {5}\"
     <string name="failed_to_undo">No s\'ha pogut desfer</string>
     <string name="enabling_listener">Habilitant l\'Oient</string>
     <string name="disabling_listener">S\'està desactivant l\'oient</string>
-    <string name="add_user_title">Afegeix usuari(s):</string>
-    <string name="ignore_user_title">Ignora els usuaris:</string>
+    <string name="add_user_title">Afegeix usuari(s)</string>
+    <string name="ignore_user_title">Ignora els usuaris</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Definiu correctament el Directori compartit amb {0} directoris i {1} fitxers.
@@ -579,7 +578,6 @@ Recompte de directoris: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="browse_user_files">Browse User:</string>
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
@@ -827,7 +825,6 @@ Recompte de directoris: {5}\"
     </string>
 
     <string name="sort_results_by">Sort By</string>
-    <string name="sort_results_by_">Sort By:</string>
 
     <string name="next">Next</string>
     <string name="prev">Prev</string>

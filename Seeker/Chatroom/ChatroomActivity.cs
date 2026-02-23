@@ -460,13 +460,12 @@ namespace Seeker
         public void ShowInviteUserDialog(string roomToInvite)
         {
             Logger.InfoFirebase("ShowInviteUserDialog" + this.IsFinishing + this.IsDestroyed);
-            //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
-            builder.SetTitle(this.Resources.GetString(Resource.String.invite_user));
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
+            builder.SetTitle(this.Resources.GetString(Resource.String.inviteuser));
 
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.invite_user_dialog_content, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView, false);
 
-            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.inviteUserTextEdit);
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
 
             builder.SetView(viewInflated);

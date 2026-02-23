@@ -108,7 +108,7 @@ Contador de diretórios: {5}
     <string name="target_room_name">Nome da sala</string>
     <string name="target_choose_user">Escolher usuário</string>
     <string name="username">Nome de usuário</string>
-    <string name="search_target_">Alvo da pesquisa:</string>
+    <string name="search_target_">Alvo da pesquisa</string>
     <string name="custom_">Personalizado:</string>
 
     <string name="friends">Amigos</string>
@@ -161,7 +161,6 @@ Contador de diretórios: {5}
 
     <string name="enter_user_to_invite_to_room">Digite o usuário para convidar</string>
     <string name="inviteuser">Convidar usuário</string>
-    <string name="invite_user">Convidar usuário:</string>
 
     <string name="give_up_room">Abandonar sala</string>
     <string name="give_up_membership">Desistir de ser membro</string>
@@ -351,8 +350,8 @@ Contador de diretórios: {5}
     <string name="failed_to_undo">Falha ao desfazer</string>
     <string name="enabling_listener">Ativando ouvinte</string>
     <string name="disabling_listener">Desativando ouvinte</string>
-    <string name="add_user_title">Adicionar usuário(s):</string>
-    <string name="ignore_user_title">Ignorar usuário(s):</string>
+    <string name="add_user_title">Adicionar usuário(s)</string>
+    <string name="ignore_user_title">Ignorar usuário(s)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Definido com êxito o diretório compartilhado com {0} diretórios e {1} arquivos.
@@ -579,7 +578,6 @@ Contador de diretórios: {5}
     <string name="mod">Mod</string>
 
     <string name="user_">Usuário:</string>
-    <string name="browse_user_files">Procurar usuário:</string>
     <string name="set_ticker">Definir Ticker:</string>
     <string name="setticker">Definir Ticker</string>
     <string name="chatrooms">Salas de conversa</string>
@@ -826,7 +824,6 @@ Contador de diretórios: {5}
     </string>
 
     <string name="sort_results_by">Ordenar por</string>
-    <string name="sort_results_by_">Ordenar por:</string>
 
     <string name="next">Próximo</string>
     <string name="prev">Anterior</string>

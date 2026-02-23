@@ -13,7 +13,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username"
+        android:hint="@string/username"
         app:endIconMode="none"
     >
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -21,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:popupBackground="?attr/cellback"
             android:completionThreshold="0"
             android:imeOptions="actionGo"
             android:inputType="text"

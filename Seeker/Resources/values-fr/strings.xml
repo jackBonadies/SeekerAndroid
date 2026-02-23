@@ -108,7 +108,7 @@ Nombre de dossiers : {5}
     <string name="target_room_name">Nom du salon</string>
     <string name="target_choose_user">Choisir un Utilisateur</string>
     <string name="username">Nom d\'Utilisateur</string>
-    <string name="search_target_">Rechercher une Cible :</string>
+    <string name="search_target_">Rechercher une Cible</string>
     <string name="custom_">Personnalisé:</string>
 
     <string name="friends">Amis</string>
@@ -161,7 +161,6 @@ Nombre de dossiers : {5}
 
     <string name="enter_user_to_invite_to_room">Spécifier l\'utilisateur à inviter</string>
     <string name="inviteuser">Inviter utilisateur</string>
-    <string name="invite_user">Inviter utilisateur :</string>
 
     <string name="give_up_room">Quitter la salle</string>
     <string name="give_up_membership">Arrêter abonnement</string>
@@ -351,8 +350,8 @@ Nombre de dossiers : {5}
     <string name="failed_to_undo">Échec d\'annulation</string>
     <string name="enabling_listener">Activation de l\'écouteur</string>
     <string name="disabling_listener">Désactivation de l\'écouteur</string>
-    <string name="add_user_title">Ajouter un/des Utilisateur(s):</string>
-    <string name="ignore_user_title">Utilisateur(s) ignoré(s) :</string>
+    <string name="add_user_title">Ajouter un/des Utilisateur(s)</string>
+    <string name="ignore_user_title">Utilisateur(s) ignoré(s)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Répertoire partagé défini avec succès avec {0} répertoires et {1} fichiers.
@@ -579,7 +578,6 @@ Nombre de dossiers : {5}
     <string name="mod">Modo</string>
 
     <string name="user_">Utilisateur :</string>
-    <string name="browse_user_files">Parcourir utilisateur :</string>
     <string name="set_ticker">Changer le ticker :</string>
     <string name="setticker">Changer le ticker</string>
     <string name="chatrooms">Salons de discussion</string>
@@ -826,7 +824,6 @@ Nombre de dossiers : {5}
     </string>
 
     <string name="sort_results_by">Trier par</string>
-    <string name="sort_results_by_">Trier par :</string>
 
     <string name="next">Suivant</string>
     <string name="prev">Précédent</string>

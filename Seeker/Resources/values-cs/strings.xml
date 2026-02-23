@@ -108,7 +108,7 @@ Počet adresářů: {5}\"
     <string name="target_room_name">Název místnosti</string>
     <string name="target_choose_user">Vybrat uživatele</string>
     <string name="username">Přezdívka</string>
-    <string name="search_target_">Cíl vyhledávání:</string>
+    <string name="search_target_">Cíl vyhledávání</string>
     <string name="custom_">Vlastní:</string>
 
     <string name="friends">Přátelé</string>
@@ -161,7 +161,6 @@ Počet adresářů: {5}\"
 
     <string name="enter_user_to_invite_to_room">Zadejte uživatele pro pozvání</string>
     <string name="inviteuser">Pozvat uživatele</string>
-    <string name="invite_user">Pozvat uživatele:</string>
 
     <string name="give_up_room">Vzdát se místnosti</string>
     <string name="give_up_membership">Vzdát členství</string>
@@ -351,8 +350,8 @@ Počet adresářů: {5}\"
     <string name="failed_to_undo">Failure to Undo</string>
     <string name="enabling_listener">Enabling Listener</string>
     <string name="disabling_listener">Disabling Listener</string>
-    <string name="add_user_title">Přidat uživatele:</string>
-    <string name="ignore_user_title">Ignore User(s):</string>
+    <string name="add_user_title">Přidat uživatele</string>
+    <string name="ignore_user_title">Ignore User(s)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Successfully set Shared Directory with {0} directories and {1} files.
@@ -579,7 +578,6 @@ Počet adresářů: {5}\"
     <string name="mod">Moderátor</string>
 
     <string name="user_">Uživatel:</string>
-    <string name="browse_user_files">Procházet uživatele:</string>
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatovací místnost</string>
@@ -827,7 +825,6 @@ Počet adresářů: {5}\"
     </string>
 
     <string name="sort_results_by">Seřadit dle</string>
-    <string name="sort_results_by_">Seřadit dle:</string>
 
     <string name="next">Další</string>
     <string name="prev">Předch</string>

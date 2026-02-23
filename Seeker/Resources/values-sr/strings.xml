@@ -99,7 +99,7 @@ Directory Count: {5}\"
     <string name="target_room_name">Room Name</string>
     <string name="target_choose_user">Choose User</string>
     <string name="username">Username</string>
-    <string name="search_target_">Search Target:</string>
+    <string name="search_target_">Search Target</string>
     <string name="custom_">Custom:</string>
 
     <string name="friends">Friends</string>
@@ -152,7 +152,6 @@ Directory Count: {5}\"
 
     <string name="enter_user_to_invite_to_room">Enter User to Invite</string>
     <string name="inviteuser">Invite User</string>
-    <string name="invite_user">Invite User:</string>
 
     <string name="give_up_room">Give up Room</string>
     <string name="give_up_membership">Give up Membership</string>
@@ -342,8 +341,8 @@ Directory Count: {5}\"
     <string name="failed_to_undo">Failure to Undo</string>
     <string name="enabling_listener">Enabling Listener</string>
     <string name="disabling_listener">Disabling Listener</string>
-    <string name="add_user_title">Add User(s):</string>
-    <string name="ignore_user_title">Ignore User(s):</string>
+    <string name="add_user_title">Add User(s)</string>
+    <string name="ignore_user_title">Ignore User(s)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Successfully set Shared Directory with {0} directories and {1} files.
@@ -570,7 +569,6 @@ Directory Count: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="browse_user_files">Browse User:</string>
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
@@ -818,7 +816,6 @@ Directory Count: {5}\"
     </string>
 
     <string name="sort_results_by">Sort By</string>
-    <string name="sort_results_by_">Sort By:</string>
 
     <string name="next">Next</string>
     <string name="prev">Prev</string>

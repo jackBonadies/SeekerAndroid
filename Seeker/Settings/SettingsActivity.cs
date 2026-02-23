@@ -1536,7 +1536,7 @@ namespace Seeker
             AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
             if (changeDialogType == ChangeDialogType.ChangePort)
             {
-                builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
+                builder.SetTitle(this.GetString(Resource.String.change_port));
             }
             else if (changeDialogType == ChangeDialogType.ChangeDL)
             {

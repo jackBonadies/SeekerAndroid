@@ -108,7 +108,7 @@
     <string name="target_room_name">Назва кімнати</string>
     <string name="target_choose_user">Вибрати користувача</string>
     <string name="username">Ім\'я користувача</string>
-    <string name="search_target_">Мета пошуку:</string>
+    <string name="search_target_">Мета пошуку</string>
     <string name="custom_">Користувацький:</string>
 
     <string name="friends">Друзі</string>
@@ -161,7 +161,6 @@
 
     <string name="enter_user_to_invite_to_room">Ввести ім\'я користувача, щоб запросити</string>
     <string name="inviteuser">Запросити користувача</string>
-    <string name="invite_user">Запросити користувача:</string>
 
     <string name="give_up_room">Відмовитися від кімнати</string>
     <string name="give_up_membership">Вийти з кімнати</string>
@@ -351,8 +350,8 @@
     <string name="failed_to_undo">Неможливо скасувати</string>
     <string name="enabling_listener">Увімкнення слухача</string>
     <string name="disabling_listener">Вимкнення слухача</string>
-    <string name="add_user_title">Додати користувачів:</string>
-    <string name="ignore_user_title">Ігнорувати користувача(ів):</string>
+    <string name="add_user_title">Додати користувачів</string>
+    <string name="ignore_user_title">Ігнорувати користувача(ів)</string>
 
     <string name="success_setting_shared_dir_fnum_dnum">
         Успішно встановлено спільний каталог із {0} папками та {1} файлами.
@@ -579,7 +578,6 @@
     <string name="mod">Модератор</string>
 
     <string name="user_">Користувач:</string>
-    <string name="browse_user_files">Огляд користувача:</string>
     <string name="set_ticker">Встановити тикер:</string>
     <string name="setticker">Встановити тикер</string>
     <string name="chatrooms">Чат кімнати</string>
@@ -827,7 +825,6 @@
     </string>
 
     <string name="sort_results_by">Сортувати</string>
-    <string name="sort_results_by_">Сортувати за:</string>
 
     <string name="next">Далі</string>
     <string name="prev">Назад</string>
