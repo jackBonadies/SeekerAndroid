@@ -429,22 +429,22 @@ namespace Seeker
             dayNightMode.ItemClick += DayNightMode_ItemSelected;
 
 
-            AutoCompleteTextView dayVarientSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.dayVarientSpinner);
-            dayVarientSpinner.ItemClick -= DayVarient_ItemSelected;
-            String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
-            ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, dayVarientSpinnerOptionsStrings);
-            dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
-            SetSpinnerPositionDayVarient(dayVarientSpinner, dayVarientSpinnerOptionsStrings);
-            dayVarientSpinner.ItemClick += DayVarient_ItemSelected;
+            AutoCompleteTextView dayVariantSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.dayVarientSpinner);
+            dayVariantSpinner.ItemClick -= DayVariant_ItemSelected;
+            String[] dayVariantSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
+            ArrayAdapter<String> dayVariantSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, dayVariantSpinnerOptionsStrings);
+            dayVariantSpinner.Adapter = dayVariantSpinnerOptions;
+            SetSpinnerPositionDayVariant(dayVariantSpinner, dayVariantSpinnerOptionsStrings);
+            dayVariantSpinner.ItemClick += DayVariant_ItemSelected;
 
 
-            AutoCompleteTextView nightVarientSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.nightVarientSpinner);
-            nightVarientSpinner.ItemClick -= NightVarient_ItemSelected;
-            String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
-            ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, nightVarientSpinnerOptionsStrings);
-            nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
-            SetSpinnerPositionNightVarient(nightVarientSpinner, nightVarientSpinnerOptionsStrings);
-            nightVarientSpinner.ItemClick += NightVarient_ItemSelected;
+            AutoCompleteTextView nightVariantSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.nightVarientSpinner);
+            nightVariantSpinner.ItemClick -= NightVariant_ItemSelected;
+            String[] nightVariantSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
+            ArrayAdapter<String> nightVariantSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, nightVariantSpinnerOptionsStrings);
+            nightVariantSpinner.Adapter = nightVariantSpinnerOptions;
+            SetSpinnerPositionNightVariant(nightVariantSpinner, nightVariantSpinnerOptionsStrings);
+            nightVariantSpinner.ItemClick += NightVariant_ItemSelected;
 
 
 
@@ -2319,13 +2319,13 @@ namespace Seeker
         }
 
 
-        private void DayVarient_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
+        private void DayVariant_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
-            var oldVarient = PreferencesState.DayModeVarient;
-            PreferencesState.DayModeVarient = (DayThemeType)(e.Position);
-            if (oldVarient != PreferencesState.DayModeVarient)
+            var oldVariant = PreferencesState.DayModeVariant;
+            PreferencesState.DayModeVariant = (DayThemeType)(e.Position);
+            if (oldVariant != PreferencesState.DayModeVariant)
             {
-                PreferencesManager.SaveDayModeVarient();
+                PreferencesManager.SaveDayModeVariant();
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
@@ -2335,24 +2335,24 @@ namespace Seeker
             }
         }
 
-        private void NightVarient_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
+        private void NightVariant_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
-            var oldVarient = PreferencesState.NightModeVarient;
+            var oldVariant = PreferencesState.NightModeVariant;
             switch (e.Position)
             {
                 case 3:
-                    PreferencesState.NightModeVarient = NightThemeType.AmoledClassicPurple;
+                    PreferencesState.NightModeVariant = NightThemeType.AmoledClassicPurple;
                     break;
                 case 4:
-                    PreferencesState.NightModeVarient = NightThemeType.AmoledGrey;
+                    PreferencesState.NightModeVariant = NightThemeType.AmoledGrey;
                     break;
                 default:
-                    PreferencesState.NightModeVarient = (NightThemeType)(e.Position);
+                    PreferencesState.NightModeVariant = (NightThemeType)(e.Position);
                     break;
             }
-            if (oldVarient != PreferencesState.NightModeVarient)
+            if (oldVariant != PreferencesState.NightModeVariant)
             {
-                PreferencesManager.SaveNightModeVarient();
+                PreferencesManager.SaveNightModeVariant();
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
@@ -2457,9 +2457,9 @@ namespace Seeker
             int pos = Math.Max(PreferencesState.DayNightMode, 0); //-1 -> 0
             s.SetText(options[pos], false);
         }
-        private void SetSpinnerPositionDayVarient(AutoCompleteTextView s, String[] options)
+        private void SetSpinnerPositionDayVariant(AutoCompleteTextView s, String[] options)
         {
-            s.SetText(options[(int)(PreferencesState.DayModeVarient)], false);
+            s.SetText(options[(int)(PreferencesState.DayModeVariant)], false);
         }
 
         private void SetSpinnerPositionLangauge(AutoCompleteTextView s, String[] options)
@@ -2588,10 +2588,10 @@ namespace Seeker
             }
         }
 
-        private void SetSpinnerPositionNightVarient(AutoCompleteTextView s, String[] options)
+        private void SetSpinnerPositionNightVariant(AutoCompleteTextView s, String[] options)
         {
             int pos;
-            switch (PreferencesState.NightModeVarient)
+            switch (PreferencesState.NightModeVariant)
             {
                 case NightThemeType.AmoledClassicPurple:
                     pos = 3;
@@ -2600,7 +2600,7 @@ namespace Seeker
                     pos = 4;
                     break;
                 default:
-                    pos = (int)(PreferencesState.NightModeVarient);
+                    pos = (int)(PreferencesState.NightModeVariant);
                     break;
             }
             s.SetText(options[pos], false);

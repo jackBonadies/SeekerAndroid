@@ -43,8 +43,8 @@ namespace Common
         public const string M_DayNightMode = "Momento_DayNightMode";
         public const string M_Lanuage = "Momento_Lanuage";
         public const string M_LegacyLanguageMigrated = "Momento_LegacyLanugageMigrated";
-        public const string M_NightVarient = "Momento_NightModeVarient";
-        public const string M_DayVarient = "Momento_DayModeVarient";
+        public const string M_NightVariant = "Momento_NightModeVarient";
+        public const string M_DayVariant = "Momento_DayModeVarient";
         public const string M_AutoClearComplete = "Momento_AutoClearComplete";
         public const string M_AutoClearCompleteUploads = "Momento_AutoClearCompleteUploads";
         public const string M_RememberSearchHistory = "Momento_RememberSearchHistory";

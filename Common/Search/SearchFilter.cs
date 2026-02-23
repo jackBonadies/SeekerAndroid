@@ -59,26 +59,26 @@ namespace Seeker
         //the items in these filters are always OR'd
         public ChipFilter()
         {
-            AllVarientsFileType = new List<string>();
+            AllVariantsFileType = new List<string>();
             SpecificFileType = new List<string>();
             NumFiles = new List<int>();
             FileRanges = new List<Tuple<int, int>>();
             Keywords = new List<string>();
-            KeywordInvarient = new List<List<string>>();
+            KeywordInvariant = new List<List<string>>();
 
         }
-        public List<string> AllVarientsFileType;
+        public List<string> AllVariantsFileType;
         public List<string> SpecificFileType;
         public List<int> NumFiles;
         public List<Tuple<int, int>> FileRanges;
 
-        //these are the keywords.  keywords invarient will contain say "Paul and Jake", "Paul & Jake". they are OR'd inner.  both collections outer are AND'd.
+        //these are the keywords.  keywords invariant will contain say "Paul and Jake", "Paul & Jake". they are OR'd inner.  both collections outer are AND'd.
         public List<string> Keywords;
-        public List<List<string>> KeywordInvarient;
+        public List<List<string>> KeywordInvariant;
 
         public bool IsEmpty()
         {
-            return (AllVarientsFileType.Count == 0 && SpecificFileType.Count == 0 && NumFiles.Count == 0 && FileRanges.Count == 0 && Keywords.Count == 0 && KeywordInvarient.Count == 0);
+            return (AllVariantsFileType.Count == 0 && SpecificFileType.Count == 0 && NumFiles.Count == 0 && FileRanges.Count == 0 && Keywords.Count == 0 && KeywordInvariant.Count == 0);
         }
     }
 
@@ -118,7 +118,7 @@ namespace Seeker
                             //mp3 - all bc we dont split groups.
                             if (subChipString.EndsWith(" - all"))
                             {
-                                chipFilter.AllVarientsFileType.Add(subChipString.Replace(" - all", ""));
+                                chipFilter.AllVariantsFileType.Add(subChipString.Replace(" - all", ""));
                             }
                             else
                             {
@@ -128,7 +128,7 @@ namespace Seeker
                     }
                     else if (chip.DisplayText.EndsWith(" - all"))
                     {
-                        chipFilter.AllVarientsFileType.Add(chip.DisplayText.Replace(" - all", ""));
+                        chipFilter.AllVariantsFileType.Add(chip.DisplayText.Replace(" - all", ""));
                     }
                     else
                     {
@@ -143,7 +143,7 @@ namespace Seeker
                     }
                     else
                     {
-                        chipFilter.KeywordInvarient.Add(chip.Children);
+                        chipFilter.KeywordInvariant.Add(chip.Children);
                     }
                 }
             }
@@ -250,10 +250,10 @@ namespace Seeker
                     return false;
                 }
 
-                match = chipFilter.AllVarientsFileType.Count == 0 && chipFilter.SpecificFileType.Count == 0;
-                foreach (string varient in chipFilter.AllVarientsFileType)
+                match = chipFilter.AllVariantsFileType.Count == 0 && chipFilter.SpecificFileType.Count == 0;
+                foreach (string variant in chipFilter.AllVariantsFileType)
                 {
-                    if (s.GetDominantFileTypeAndBitRate(hideLocked, out _) == varient || s.GetDominantFileTypeAndBitRate(hideLocked, out _).Contains(varient + " "))
+                    if (s.GetDominantFileTypeAndBitRate(hideLocked, out _) == variant || s.GetDominantFileTypeAndBitRate(hideLocked, out _).Contains(variant + " "))
                     {
                         match = true;
                     }
@@ -279,7 +279,7 @@ namespace Seeker
                         return false;
                     }
                 }
-                foreach (List<string> keywordsInvar in chipFilter.KeywordInvarient)
+                foreach (List<string> keywordsInvar in chipFilter.KeywordInvariant)
                 {
                     //do any match?
                     bool anyMatch = false;

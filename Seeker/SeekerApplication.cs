@@ -1572,11 +1572,11 @@ namespace Seeker
             //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
             if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
             {
-                a.SetTheme(ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVarient));
+                a.SetTheme(ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVariant));
             }
             else
             {
-                a.SetTheme(ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVarient));
+                a.SetTheme(ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVariant));
             }
         }
 

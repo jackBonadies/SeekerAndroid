@@ -140,11 +140,11 @@ namespace Seeker
             {
                 if (isNightMode)
                 {
-                    return ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVarient);
+                    return ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVariant);
                 }
                 else
                 {
-                    switch (PreferencesState.NightModeVarient)
+                    switch (PreferencesState.NightModeVariant)
                     {
                         case NightThemeType.ClassicPurple:
                             return ThemeHelper.ToDayThemeProper(DayThemeType.ClassicPurple);
@@ -159,11 +159,11 @@ namespace Seeker
             {
                 if (!isNightMode)
                 {
-                    return ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVarient);
+                    return ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVariant);
                 }
                 else
                 {
-                    switch (PreferencesState.DayModeVarient)
+                    switch (PreferencesState.DayModeVariant)
                     {
                         case DayThemeType.ClassicPurple:
                             return ThemeHelper.ToNightThemeProper(NightThemeType.ClassicPurple);

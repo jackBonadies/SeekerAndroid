@@ -39,8 +39,8 @@ namespace Seeker
             PreferencesState.DayNightMode = prefs.GetInt(KeyConsts.M_DayNightMode, -1); // ModeNightFollowSystem
             PreferencesState.Language = prefs.GetString(KeyConsts.M_Lanuage, PreferencesState.FieldLangAuto);
             PreferencesState.LegacyLanguageMigrated = prefs.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
-            PreferencesState.NightModeVarient = (NightThemeType)(prefs.GetInt(KeyConsts.M_NightVarient, (int)NightThemeType.ClassicPurple));
-            PreferencesState.DayModeVarient = (DayThemeType)(prefs.GetInt(KeyConsts.M_DayVarient, (int)DayThemeType.ClassicPurple));
+            PreferencesState.NightModeVariant = (NightThemeType)(prefs.GetInt(KeyConsts.M_NightVariant, (int)NightThemeType.ClassicPurple));
+            PreferencesState.DayModeVariant = (DayThemeType)(prefs.GetInt(KeyConsts.M_DayVariant, (int)DayThemeType.ClassicPurple));
             PreferencesState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
             RestoreSmartFilterState(prefs);
         }
@@ -319,22 +319,22 @@ namespace Seeker
             }
         }
 
-        public static void SaveDayModeVarient()
+        public static void SaveDayModeVariant()
         {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutInt(KeyConsts.M_DayVarient, (int)PreferencesState.DayModeVarient);
+                editor.PutInt(KeyConsts.M_DayVariant, (int)PreferencesState.DayModeVariant);
                 editor.Commit();
             }
         }
 
-        public static void SaveNightModeVarient()
+        public static void SaveNightModeVariant()
         {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutInt(KeyConsts.M_NightVarient, (int)PreferencesState.NightModeVarient);
+                editor.PutInt(KeyConsts.M_NightVariant, (int)PreferencesState.NightModeVariant);
                 editor.Commit();
             }
         }
