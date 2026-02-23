@@ -1109,7 +1109,7 @@ namespace Seeker
         {
             SearchTabHelper.SearchTarget = SearchTarget.AllUsers;
             targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Gone;
-            chooseUserInput.Visibility = ViewStates.Gone;
+            chooseUserInputLayout.Visibility = ViewStates.Gone;
             SetSearchHintTarget(SearchTarget.AllUsers);
         }
 
@@ -1117,7 +1117,7 @@ namespace Seeker
         {
             SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
             targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Gone;
-            chooseUserInput.Visibility = ViewStates.Visible;
+            chooseUserInputLayout.Visibility = ViewStates.Visible;
             SetSearchHintTarget(SearchTarget.ChosenUser);
         }
 
@@ -1125,7 +1125,7 @@ namespace Seeker
         {
             SearchTabHelper.SearchTarget = SearchTarget.UserList;
             targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Gone;
-            chooseUserInput.Visibility = ViewStates.Gone;
+            chooseUserInputLayout.Visibility = ViewStates.Gone;
             SetSearchHintTarget(SearchTarget.UserList);
         }
 
@@ -1365,6 +1365,7 @@ namespace Seeker
 
 
         private AutoCompleteTextView chooseUserInput = null;
+        private View chooseUserInputLayout = null;
         private EditText customRoomName = null;
         private View customRoomNameLayout = null;
         private Spinner roomListSpinner = null;
@@ -1376,6 +1377,7 @@ namespace Seeker
             builder.SetTitle(Resource.String.search_target_);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
             chooseUserInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserInput);
+            chooseUserInputLayout = viewInflated.FindViewById<View>(Resource.Id.chosenUserInputLayout);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(chooseUserInput);
             customRoomName = viewInflated.FindViewById<EditText>(Resource.Id.customRoomName);
             customRoomNameLayout = viewInflated.FindViewById<View>(Resource.Id.customRoomNameLayout);
@@ -1399,23 +1401,23 @@ namespace Seeker
             {
                 case SearchTarget.AllUsers:
                     allUsers.Checked = true;
-                    chooseUserInput.Visibility = ViewStates.Gone;
+                    chooseUserInputLayout.Visibility = ViewStates.Gone;
                     targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Gone;
                     break;
                 case SearchTarget.UserList:
                     userList.Checked = true;
                     targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Gone;
-                    chooseUserInput.Visibility = ViewStates.Gone;
+                    chooseUserInputLayout.Visibility = ViewStates.Gone;
                     break;
                 case SearchTarget.ChosenUser:
                     chosenUser.Checked = true;
                     targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Gone;
-                    chooseUserInput.Visibility = ViewStates.Visible;
+                    chooseUserInputLayout.Visibility = ViewStates.Visible;
                     chooseUserInput.Text = SearchTabHelper.SearchTargetChosenUser;
                     break;
                 case SearchTarget.Room:
                     room.Checked = true;
-                    chooseUserInput.Visibility = ViewStates.Gone;
+                    chooseUserInputLayout.Visibility = ViewStates.Gone;
                     targetRoomLayout.Visibility = ViewStates.Visible;
                     if (roomListSpinner.SelectedItem.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.custom_))
                     {
@@ -1530,7 +1532,7 @@ namespace Seeker
             SearchTabHelper.SearchTargetChosenRoom = GetRoomListSpinnerSelection();
             SearchTabHelper.SearchTarget = SearchTarget.Room;
             targetRoomLayout.Visibility = customRoomNameLayout.Visibility = ViewStates.Visible;
-            chooseUserInput.Visibility = ViewStates.Gone;
+            chooseUserInputLayout.Visibility = ViewStates.Gone;
             if (roomListSpinner.SelectedItem.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.custom_))
             {
                 customRoomNameLayout.Visibility = ViewStates.Visible;
