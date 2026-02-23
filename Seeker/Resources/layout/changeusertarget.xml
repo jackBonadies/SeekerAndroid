@@ -31,47 +31,23 @@
             android:layout_height="wrap_content"
             android:text="@string/target_room"
         />
-        <LinearLayout
-            android:orientation="horizontal"
-            android:visibility="gone"
-            android:id="@+id/targetRoomLayout"
-            android:layout_marginBottom="0dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-        >
-            <TextView
-                android:text="@string/target_room_joined"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-            />
-            <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="4"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="10dp"
-                android:id="@+id/roomListSpinner"
-            />
-        </LinearLayout>
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:id="@+id/customRoomNameLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:id="@+id/targetRoomInputLayout"
             android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:hint="@string/target_room_name"
         >
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/customRoomName"
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/targetRoomInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:focusable="true"
+                android:completionThreshold="0"
                 android:imeOptions="actionDone"
+                android:inputType="text"
             />
         </com.google.android.material.textfield.TextInputLayout>
 
