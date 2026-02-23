@@ -220,7 +220,7 @@ namespace Seeker.Chatroom
         private static RoomUserListDialog RoomDialogInstance;
         public static void ShowSortRoomUserListDialog()
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
             builder.SetTitle(Resource.String.SortUsersBy);
 
             View viewInflated = LayoutInflater.From(SeekerState.ActiveActivityRef).Inflate(Resource.Layout.change_sort_room_user_list_dialog, SeekerState.ActiveActivityRef.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);

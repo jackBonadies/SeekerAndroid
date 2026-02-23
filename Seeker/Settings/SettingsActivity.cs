@@ -696,7 +696,7 @@ namespace Seeker
 
         private void MoreInfoExport_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.export_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -830,21 +830,21 @@ namespace Seeker
 
         private void MoreInfoDiagnostics_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.diagnostics_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void MoreInfoConcurrent_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.concurrent_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void MoreInfoButtonClearIncomplete_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.clear_incomplete_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -941,7 +941,7 @@ namespace Seeker
         private void ConfigSmartFilters_Click(object sender, EventArgs e)
         {
             Logger.InfoFirebase("ConfigSmartFilters_Click");
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             builder.SetTitle(Resource.String.ConfigureSmartFilters);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
@@ -1239,7 +1239,7 @@ namespace Seeker
 
         private void PrivHelp_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.privileges_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -1533,7 +1533,7 @@ namespace Seeker
         private void ShowChangeDialog(ChangeDialogType changeDialogType)
         {
             Logger.InfoFirebase("ShowChangePortDialog");
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             if (changeDialogType == ChangeDialogType.ChangePort)
             {
                 builder.SetTitle(this.GetString(Resource.String.change_port));
@@ -1778,14 +1778,14 @@ namespace Seeker
 
         private void ListeningMoreInfo_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.listening).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         public void MoreInfoForceFilesystem_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             var diag = builder.SetMessage(Resource.String.force_filesystem_message).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
@@ -1935,7 +1935,7 @@ namespace Seeker
 
         private void StartupServiceMoreInfo_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.keep_alive_service).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -2052,7 +2052,7 @@ namespace Seeker
 
         private void MemoryFileDownloadSwitchIcon_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.memory_file_backed).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -2075,7 +2075,7 @@ namespace Seeker
 
         private void MoreInfoButton_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.sharing_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }

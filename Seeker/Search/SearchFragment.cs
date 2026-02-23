@@ -817,23 +817,6 @@ namespace Seeker
                 }
             }
 
-            //actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.autoSuggestionRow, searchHistory);
-            //actv.KeyPress -= Actv_KeyPress;
-            //actv.KeyPress += Actv_KeyPress;
-
-            //List<SearchResponse> rowItems = new List<SearchResponse>();
-            //if (SearchTabHelper.FilteredResults)
-            //{
-            //    SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.FilteredResponses);
-            //    listView.Adapter = (customAdapter);
-            //}
-            //else
-            //{
-            //    SearchAdapter customAdapter = new SearchAdapter(Context, SearchTabHelper.SearchResponses);
-            //    listView.Adapter = (customAdapter);
-            //}
-
-
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recyclerViewTransferItems.SetItemAnimator(null); //todo
@@ -1251,7 +1234,7 @@ namespace Seeker
         public void ShowChangeSortOrderDialog()
         {
             Context toUse = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(toUse);
             builder.SetTitle(Resource.String.sort_results_by);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeresultsortorder, this.rootView as ViewGroup, false); //TODO replace rootView with ActiveActivity.GetContent()
 
@@ -1388,7 +1371,7 @@ namespace Seeker
         public void ShowChangeTargetDialog()
         {
             Context toUse = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(toUse, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(toUse);
             builder.SetTitle(Resource.String.search_target_);
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
             chooseUserInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserInput);

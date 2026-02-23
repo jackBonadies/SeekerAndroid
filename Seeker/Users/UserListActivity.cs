@@ -523,7 +523,7 @@ namespace Seeker
         private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
         public void ShowSortUserListDialog()
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             builder.SetTitle(this.Resources.GetString(Resource.String.SortUsersBy));
 
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.change_sort_order_dialog, this.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
