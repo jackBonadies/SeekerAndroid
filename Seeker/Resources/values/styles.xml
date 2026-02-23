@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">?attr/mainPurpleStatusBar</item>
@@ -58,7 +58,7 @@
 
     <style
         name="MaterialThemeForChip"
-        parent="Theme.MaterialComponents.Light.DarkActionBar"
+        parent="Theme.Material3.Light.NoActionBar"
     >
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -115,10 +115,10 @@
 
     <style
         name="AppTheme.AppBarOverlay"
-        parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        parent="ThemeOverlay.Material3.Dark.ActionBar"
     />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 
     <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
     <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
@@ -151,7 +151,7 @@
         <item name="android:layout_marginBottom">4dp</item>
     </style>
 
-    <style name="SettingsCard" parent="Widget.MaterialComponents.CardView">
+    <style name="SettingsCard" parent="Widget.Material3.CardView.Outlined">
         <item name="cardElevation">0dp</item>
         <item name="strokeWidth">1dp</item>
         <item name="strokeColor">?attr/slightContrastColor</item>
