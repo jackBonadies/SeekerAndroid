@@ -770,7 +770,7 @@ namespace Seeker
         {
             if (UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
             {
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                 var diag = builder.SetMessage(String.Format(SeekerApplication.GetString(Resource.String.AreYouSureClearAllDirectories), UploadDirectoryManager.UploadDirectories.Count))
                     .SetPositiveButton(Resource.String.yes, (object sender, DialogClickEventArgs e) =>
                     {
@@ -1840,7 +1840,7 @@ namespace Seeker
 
         private void BrowseSelfButton_LongClick(object sender, View.LongClickEventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.BrowseWhich)
                 .SetPositiveButton(Resource.String.public_room, (object sender, DialogClickEventArgs e) => { BrowseSelf(true, false); OnCloseClick(sender, e); })
                 .SetNegativeButton(Resource.String.target_user_list, (object sender, DialogClickEventArgs e) => { BrowseSelf(false, true); OnCloseClick(sender, e); })
@@ -2983,7 +2983,7 @@ namespace Seeker
         private static UploadDirectoryEntry UploadDirToReplaceOnReselect = null;
         public void ShowUploadDirectoryErrorDialog(UploadDirectoryEntry uploadInfo)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             builder.SetTitle(Resource.String.FolderError);
             string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.Info.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
@@ -3005,7 +3005,7 @@ namespace Seeker
 
         public void ShowUploadDirectoryOptionsDialog(UploadDirectoryEntry uploadDirEntry)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.UploadFolderOptions);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.upload_folder_options, this.FindViewById<ViewGroup>(Android.Resource.Id.Content) as ViewGroup, false);
             EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(Resource.Id.customFolderNameEditText);

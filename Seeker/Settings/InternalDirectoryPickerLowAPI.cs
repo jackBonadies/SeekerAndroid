@@ -392,7 +392,7 @@ namespace Seeker
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
         private AndroidX.AppCompat.App.AlertDialog.Builder CreateDirectoryChooserDialog(String title, List<String> listItems, EventHandler<AdapterView.ItemClickEventArgs> onClickListener)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder dialogBuilder = new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme);
+            var dialogBuilder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(_mContext);
             DisplayMetrics displayMetrics = new DisplayMetrics();
             _mContext.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
             float density = displayMetrics.Density; //I assume this is like 1 or 2
@@ -431,7 +431,7 @@ namespace Seeker
                 newDirButton.Click += (sender, args) =>
                 {
                     EditText input = new EditText(_mContext);
-                    new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme).SetTitle("New Folder Name").SetView(input).SetPositiveButton(SeekerApplication.GetString(Resource.String.okay), (o, eventArgs) =>
+                    new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(_mContext).SetTitle("New Folder Name").SetView(input).SetPositiveButton(SeekerApplication.GetString(Resource.String.okay), (o, eventArgs) =>
                     {
                         String newDirName = input.Text;
                         // Create new directory

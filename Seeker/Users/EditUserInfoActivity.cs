@@ -107,7 +107,7 @@ namespace Seeker
             if (!force && PendingText != PreferencesState.UserInfoBio)
             {
                 force = false;
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                 var diag = builder.SetMessage(Resource.String.unsaved_changes_body).SetTitle(Resource.String.unsaved_changes_title).SetPositiveButton(Resource.String.okay, OnOkayClick).SetNegativeButton(Resource.String.cancel, OnCancelClick).Create();
                 diag.Show();
             }

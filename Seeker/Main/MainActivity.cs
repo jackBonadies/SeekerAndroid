@@ -773,7 +773,7 @@ namespace Seeker
                 if (!canWrite)
                 {
 
-                    var b = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                    var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                     b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
                     b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
                     ManualResetEvent mre = new ManualResetEvent(false);
@@ -1179,7 +1179,7 @@ namespace Seeker
                     }
                     return true;
                 case Resource.Id.about_action:
-                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                    var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                     //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
@@ -1207,7 +1207,7 @@ namespace Seeker
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
             //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
             diag.Show();

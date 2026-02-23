@@ -945,7 +945,7 @@ namespace Seeker
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
                     //transferItems.CopyTo(tempArry);
                     //TODOASAP - hasfreeupload slots is now a boolean, fix the string.
-                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
+                    var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
                         searchResponse.QueueLength +
                         System.Environment.NewLine +

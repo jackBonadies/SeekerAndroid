@@ -971,7 +971,7 @@ namespace Seeker
             if (containsSubDirs)
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
                 // TODO2026
@@ -1067,7 +1067,7 @@ namespace Seeker
             if (BrowseFilter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 b.SetTitle(Resource.String.filter_is_on);
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -1486,7 +1486,7 @@ namespace Seeker
             string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
             string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
 
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
 
             void OnCloseClick(object sender, DialogClickEventArgs e)
             {
