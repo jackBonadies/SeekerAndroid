@@ -35,6 +35,7 @@ using AndroidX.DocumentFile.Provider;
 using AndroidX.RecyclerView.Widget;
 using Common;
 using Common.Share;
+using Google.Android.Material.Divider;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Services;
@@ -684,9 +685,10 @@ namespace Seeker
 
             mainScrollView = FindViewById<ScrollView>(Resource.Id.mainScrollView);
             sharingLayoutParent = FindViewById<ViewGroup>(Resource.Id.sharingLayoutParent);
+            var settingsDivider = FindViewById<View>(Resource.Id.settingsDivider);
             if (Intent != null && Intent.GetIntExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, -1) != -1)
             {
-                mainScrollView.Post(new Action(() => { mainScrollView.SmoothScrollTo(0, sharingLayoutParent.Top - 14); }));
+                mainScrollView.Post(new Action(() => { mainScrollView.SmoothScrollTo(0, settingsDivider.Top - 14); }));
             }
 
             UpdateLayoutParametersForScreenSize();

@@ -4,6 +4,7 @@
 
     <com.google.android.material.divider.MaterialDivider
         style="@style/SettingsDivider"
+        android:id="@+id/settingsDivider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
