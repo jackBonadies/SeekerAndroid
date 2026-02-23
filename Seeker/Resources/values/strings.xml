@@ -48,7 +48,7 @@
         This setting allows Seeker to accept incoming connections, so that we
         can connect to clients without open ports.
 \n\nWhat this means in practice is that as long as we are successfully
-        listening (indicated via \"Check Status\") we will recieve more search
+        listening (indicated via \"Check Status\") we will receive more search
         results, be able to download from more people, upload to more
         people, etc.
 \n\nSeeker will attempt to automatically forward ports via UPnP (this is what
@@ -347,7 +347,7 @@ Directory Count: {5}"
         on it in transfers.
     </string>
     <string name="room_data_still_loading">
-        Too fast! Still retreiving room data...
+        Too fast! Still retrieving room data...
     </string>
     <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
@@ -622,7 +622,7 @@ Directory Count: {5}"
         The task did not complete due to unhandled exception
     </string>
 
-    <string name="timeout_peer">Timout talking to peer</string>
+    <string name="timeout_peer">Timeout talking to peer</string>
     <string name="transfer_rejected">Transfer Request Rejected</string>
     <string name="transfer_rejected_file_not_shared">
         Transfer Request Rejected. Reason: File Not Shared
@@ -696,7 +696,7 @@ Directory Count: {5}"
     <!--Upnp-->
     <string name="upnp_off">UPnP is off</string>
     <string name="listener_off">Listener is off</string>
-    <string name="upnp_not_ran">UPnP has not been ran</string>
+    <string name="upnp_not_ran">UPnP has not been run</string>
     <string name="upnp_currently_running">UPnP is currently running</string>
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
@@ -754,7 +754,7 @@ Directory Count: {5}"
     <string name="days_left">{0} days</string>
     <string name="day_left">{0} day</string>
     <string name="priv_failed">Failed to get privileges</string>
-    <string name="timeout">Timout</string>
+    <string name="timeout">Timeout</string>
     <string name="priv_success">Successfully updated privileges</string>
     <string name="status">Status</string>
 
@@ -789,7 +789,7 @@ Directory Count: {5}"
     <string name="give_to_">Give to {0}</string>
     <string name="error_give_priv">Give Privileges Failed</string>
     <string name="give_priv_success">
-        Successly gave {0} days of privileges to {1}.
+        Successfully gave {0} days of privileges to {1}.
     </string>
     <string name="sending__">Sending...</string>
     <string name="give_hint"># of days</string>
@@ -895,7 +895,7 @@ The standard way of requesting folder access does not always persist permissions
         you download 2 folders from different users, the second folder will
         begin once the first is complete.  This can be useful for those with low
         bandwidth, to not tie up the upload queues of other users and to
-        completed more recent downloads faster.
+        complete more recent downloads faster.
     </string>
 
     <string name="clear_incomplete_dialog">
@@ -1248,10 +1248,10 @@ The standard way of requesting folder access does not always persist permissions
         Force Filesystem Permissions
     </string>
     <string name="permission_already_successfully_granted">
-        Permission has already been succesfully granted
+        Permission has already been successfully granted
     </string>
     <string name="permission_successfully_granted">
-        Permission succesfully granted
+        Permission successfully granted
     </string>
     <string name="permission_failed">Failed to grant permission</string>
 
