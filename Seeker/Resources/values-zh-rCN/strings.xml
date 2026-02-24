@@ -2,7 +2,7 @@
     <string name="app_name">Seeker</string>
     <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
 
-    <string name="home_tab">\?</string>
+    <string name="home_tab">传输</string>
     <string name="transfer_tab">传输</string>
     <string name="browse_tab">浏览</string>
     <string name="account_tab">账号</string>
