@@ -179,7 +179,7 @@ namespace Seeker
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                Toast.MakeText(this, Resource.String.upnp_success, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.upnp_success), ToastLength.Short);
                 SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
             });
         }
@@ -190,7 +190,7 @@ namespace Seeker
             {
                 if (PreferencesState.ListenerEnabled && PreferencesState.ListenerUPnpEnabled && UPnpManager.Instance.RunningStatus == UPnPRunningStatus.Finished && UPnpManager.Instance.DiagStatus != UPnPDiagStatus.Success)
                 {
-                    Toast.MakeText(this, Resource.String.upnp_search_finished, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.upnp_search_finished), ToastLength.Short);
                 }
                 SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
             });
@@ -865,7 +865,7 @@ namespace Seeker
             PreferencesState.LimitSimultaneousDownloads = e.IsChecked;
             this.UpdateConcurrentDownloadLimitsState();
             SaveMaxConcurrentDownloadsSettings();
-            Toast.MakeText(this, "This will take effect on next startup", ToastLength.Short).Show();
+            SeekerApplication.Toaster.ShowToast("This will take effect on next startup", ToastLength.Short);
         }
 
         private void ConcurrentDlBottom_Click(object sender, EventArgs e)
@@ -1019,7 +1019,7 @@ namespace Seeker
         {
             if (!PreferencesState.CurrentlyLoggedIn || !SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
             {
-                Toast.MakeText(this, Resource.String.MustBeLoggedInToImport, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.MustBeLoggedInToImport), ToastLength.Long);
                 return;
             }
             Intent intent = new Intent(this, typeof(ImportWizardActivity));
@@ -1248,7 +1248,7 @@ namespace Seeker
 
         private void CheckPriv_Click(object sender, EventArgs e)
         {
-            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
+            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
             PrivilegesManager.Instance.GetPrivilegesAPI(true);
         }
 
@@ -1256,7 +1256,7 @@ namespace Seeker
         {
             if (MainActivity.IsNotLoggedIn())
             {
-                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
@@ -1274,7 +1274,7 @@ namespace Seeker
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short);
                 return;
             }
 
@@ -1338,11 +1338,11 @@ namespace Seeker
             }
             if (e.IsChecked)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.enabling_listener, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.enabling_listener), ToastLength.Short);
             }
             else
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.disabling_listener, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.disabling_listener), ToastLength.Short);
             }
             PreferencesState.ListenerEnabled = e.IsChecked;
             UpdateListeningViewState();
@@ -1418,7 +1418,7 @@ namespace Seeker
                 {
                     if (SeekerState.RootDocumentFile == null)
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.ErrorDownloadDirNotProperlySet, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.ErrorDownloadDirNotProperlySet), ToastLength.Long);
                         return;
                     }
                     rootdir = SeekerState.RootDocumentFile;
@@ -1441,11 +1441,11 @@ namespace Seeker
 
             if (!folderExists)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.IncompleteFolderEmpty, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.IncompleteFolderEmpty), ToastLength.Long);
             }
             else if (folderExists && folderCount == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.NoEligibleToClear), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoEligibleToClear), ToastLength.Long);
             }
             else
             {
@@ -1454,7 +1454,7 @@ namespace Seeker
                 {
                     plural = "s";
                 }
-                Toast.MakeText(SeekerState.ActiveActivityRef, $"Cleared {folderCount} folder" + plural, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast($"Cleared {folderCount} folder" + plural, ToastLength.Long);
             }
         }
 
@@ -1576,12 +1576,12 @@ namespace Seeker
                     int portNum = -1;
                     if (!int.TryParse(input.Text, out portNum))
                     {
-                        Toast.MakeText(this, Resource.String.port_failed_parse, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.port_failed_parse), ToastLength.Long);
                         return;
                     }
                     if (portNum < 1024 || portNum > 65535)
                     {
-                        Toast.MakeText(this, Resource.String.port_out_of_range, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.port_out_of_range), ToastLength.Long);
                         return;
                     }
                     ReconfigureOptionsAPI(null, null, portNum);
@@ -1597,12 +1597,12 @@ namespace Seeker
                     int dlSpeedKbs = -1;
                     if (!int.TryParse(input.Text, out dlSpeedKbs))
                     {
-                        Toast.MakeText(this, "Speed failed to parse", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Speed failed to parse", ToastLength.Long);
                         return;
                     }
                     if (dlSpeedKbs < 64)
                     {
-                        Toast.MakeText(this, "Minimum Speed is 64 kb/s", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Minimum Speed is 64 kb/s", ToastLength.Long);
                         return;
                     }
                     if (changeDialogType == ChangeDialogType.ChangeDL)
@@ -1624,12 +1624,12 @@ namespace Seeker
                     int concurrentDL = -1;
                     if (!int.TryParse(input.Text, out concurrentDL))
                     {
-                        Toast.MakeText(this, "Failed to Parse Number", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Failed to Parse Number", ToastLength.Long);
                         return;
                     }
                     if (concurrentDL < 1)
                     {
-                        Toast.MakeText(this, "Must be greater than 0", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Must be greater than 0", ToastLength.Long);
                         return;
                     }
 
@@ -1638,7 +1638,7 @@ namespace Seeker
                     FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + PreferencesState.MaxSimultaneousLimit;
 
                     SaveMaxConcurrentDownloadsSettings();
-                    Toast.MakeText(this, "This will take effect on next startup", ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast("This will take effect on next startup", ToastLength.Short);
                     changeDialog.Dismiss();
                 }
 
@@ -1823,7 +1823,7 @@ namespace Seeker
 
             if (hasExternalStoragePermissions)
             {
-                Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.permission_already_successfully_granted), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.permission_already_successfully_granted), ToastLength.Long);
             }
             else
             {
@@ -1854,17 +1854,17 @@ namespace Seeker
         {
             if (!PreferencesState.SharingOn || SeekerState.SharedFileCache == null || UploadDirectoryManager.UploadDirectories.Count == 0)
             {
-                Toast.MakeText(this, Resource.String.not_sharing, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.not_sharing), ToastLength.Short);
                 return;
             }
             if (SeekerState.IsParsing)
             {
-                Toast.MakeText(this, Resource.String.WaitForParsing, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.WaitForParsing), ToastLength.Short);
                 return;
             }
             if (!SeekerState.SharedFileCache.SuccessfullyInitialized || SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username) == null)
             {
-                Toast.MakeText(this, Resource.String.failed_to_parse_shares_post, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_parse_shares_post), ToastLength.Short);
                 return;
             }
             string errorMsgToToast = string.Empty;
@@ -1886,7 +1886,7 @@ namespace Seeker
             TreeNode<Soulseek.Directory> tree = DownloadDialog.CreateTree(browseResponseToShow, false, null, null, PreferencesState.Username, out errorMsgToToast);
             if (errorMsgToToast != null && errorMsgToToast != string.Empty)
             {
-                Toast.MakeText(this, errorMsgToToast, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(errorMsgToToast, ToastLength.Short);
                 return;
             }
             if (tree != null)
@@ -1951,7 +1951,7 @@ namespace Seeker
             else
             {
                 string newstate = e.IsChecked ? this.GetString(Resource.String.allowed) : this.GetString(Resource.String.denied);
-                Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(this.GetString(Resource.String.setting_priv_invites), newstate), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.setting_priv_invites), newstate), ToastLength.Short);
                 ReconfigureOptionsAPI(e.IsChecked, null, null);
 
             }
@@ -1962,7 +1962,7 @@ namespace Seeker
             bool requiresConnection = allowPrivateInvites.HasValue;
             if (!PreferencesState.CurrentlyLoggedIn && requiresConnection) //note: you CAN in fact change listening and port without being logged in...
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_toggle_priv_invites, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_toggle_priv_invites), ToastLength.Short);
                 return;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
@@ -1978,7 +1978,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
@@ -2016,7 +2016,7 @@ namespace Seeker
                         if (allowPrivateInvites.HasValue)
                         {
                             string enabledDisabled = allowPrivateInvites.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long);
                             if (SeekerState.ActiveActivityRef is SettingsActivity settingsActivity)
                             {
                                 //set the check to false
@@ -2027,12 +2027,12 @@ namespace Seeker
                         if (enableTheListener.HasValue)
                         {
                             string enabledDisabled = enableTheListener.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener), enabledDisabled), ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener), enabledDisabled), ToastLength.Long);
                         }
 
                         if (listenerPort.HasValue)
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long);
                         }
 
 
@@ -2720,19 +2720,19 @@ namespace Seeker
                         if (f == null)
                         {
                             Logger.Firebase("api<21 f is null");
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_reading_dir), ToastLength.Long);
                             return;
                         }
                         else if (!f.Exists())
                         {
                             Logger.Firebase("api<21 f does not exist");
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_reading_dir), ToastLength.Long);
                             return;
                         }
                         else if (!f.IsDirectory)
                         {
                             Logger.Firebase("api<21 NOT A DIRECTORY");
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_not_a_dir, ToastLength.Long).Show(); });
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_not_a_dir), ToastLength.Long);
                             return;
                         }
 
@@ -2911,7 +2911,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long);
                 }
             }
         }
@@ -2938,7 +2938,7 @@ namespace Seeker
             this.RunOnUiThread(new Action(() =>
             {
                 SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long);
             }));
         }
 
@@ -2967,7 +2967,7 @@ namespace Seeker
             this.RunOnUiThread(new Action(() =>
             {
                 SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long);
             }));
         }
 
@@ -3061,7 +3061,7 @@ namespace Seeker
                         if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirEntry, false))
                         {
                             uploadDirEntry.Info.DisplayNameOverride = displayNameOld;
-                            Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.CannotChangeNameNotUnique), ToastLength.Long);
                             overrideNameChanged = false; //we prevented it
                         }
                     }
@@ -3075,7 +3075,7 @@ namespace Seeker
                         if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirEntry, false))
                         {
                             uploadDirEntry.Info.DisplayNameOverride = displayNameOld;
-                            Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.CannotChangeNameNotUnique), ToastLength.Long);
                             overrideNameChanged = false; //we prevented it
                         }
                     }
@@ -3114,28 +3114,19 @@ namespace Seeker
             {
                 if (SeekerState.IsParsing)
                 {
-                    this.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(this, Resource.String.AlreadyParsing, ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.AlreadyParsing), ToastLength.Long);
                     return;
                 }
                 if (UploadDirectoryManager.UploadDirectories.Count == 0)
                 {
-                    this.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(this, Resource.String.DirectoryNotSet, ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.DirectoryNotSet), ToastLength.Long);
                     return;
                 }
             }
 
             if (rescanClicked || newlyAddedUriIfApplicable != null)
             {
-                this.RunOnUiThread(new Action(() =>
-                {
-                    Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
-                }));
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.parsing_files_wait), ToastLength.Long);
             }
 
 
@@ -3161,10 +3152,7 @@ namespace Seeker
                 if (UploadDirectoryManager.UploadDirectories.Where(up => up.Info.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
                 {
                     //error!!
-                    this.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.ErrorAlreadyAdded, ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.ErrorAlreadyAdded), ToastLength.Long);
                     return;
                     //throw new Exception("Directory is already added!");
                 }
@@ -3240,11 +3228,11 @@ namespace Seeker
                         SetSharedFolderView();
                         if (!(e is DirectoryAccessFailure))
                         {
-                            Toast.MakeText(this, e.Message, ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(e.Message, ToastLength.Long);
                         }
                         else
                         {
-                            Toast.MakeText(this, Resource.String.FailedGettingAccess, ToastLength.Long).Show(); //TODO get error from UploadManager..
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.FailedGettingAccess), ToastLength.Long); //TODO get error from UploadManager..
                         }
 
                     }));
@@ -3281,7 +3269,7 @@ namespace Seeker
                             }
                         }
                     }
-                    Toast.MakeText(this, msg, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
                 }));
             }
             finally
@@ -3316,7 +3304,7 @@ namespace Seeker
                 {
                     if (rescanClicked)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.SharedFolderIssuesAllFailed, ToastLength.Long).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.SharedFolderIssuesAllFailed), ToastLength.Long);
                     }
                     else
                     {
@@ -3339,7 +3327,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.NoMediaStore, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoMediaStore), ToastLength.Short);
                     ShowDirSettings(null, DirectoryType.Upload);
                 }
             }
@@ -3359,7 +3347,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(this, Resource.String.NoPermissionsForDir, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoPermissionsForDir), ToastLength.Long);
                 }
             }
 
@@ -3376,7 +3364,7 @@ namespace Seeker
                     this.RunOnUiThread(new Action(() =>
                     {
                         SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long);
                     }));
                 }
             }
@@ -3402,7 +3390,7 @@ namespace Seeker
                     this.RunOnUiThread(new Action(() =>
                     {
                         SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long);
                     }));
                 }
             }
@@ -3451,7 +3439,7 @@ namespace Seeker
                         new XmlSerializer(typeof(SeekerImportExportData)).Serialize(writer, seekerImportExportData);
                     }
 
-                    Toast.MakeText(this, Resource.String.successfully_exported, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.successfully_exported), ToastLength.Short);
                 }
             }
 
@@ -3460,11 +3448,11 @@ namespace Seeker
                 bool hasPermision = HasManageStoragePermission(this);
                 if (hasPermision)
                 {
-                    Toast.MakeText(this, Resource.String.permission_successfully_granted, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.permission_successfully_granted), ToastLength.Short);
                 }
                 else
                 {
-                    Toast.MakeText(this, Resource.String.permission_failed, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.permission_failed), ToastLength.Short);
                 }
             }
         }

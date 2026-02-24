@@ -153,7 +153,7 @@ namespace Seeker
                                     {
                                         StartPageFragment.Instance.PostImportLoad();
                                         SetButtonText(this.pager.CurrentItem);
-                                        Toast.MakeText(this, Resource.String.SuccessfullyParsed, ToastLength.Long).Show();
+                                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.SuccessfullyParsed), ToastLength.Long);
                                     }
                                     else
                                     {
@@ -161,11 +161,11 @@ namespace Seeker
                                         SetButtonText(this.pager.CurrentItem);
                                         if (t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
                                         {
-                                            Toast.MakeText(this, String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev), npe.MessageToToast), ToastLength.Long).Show();
+                                            SeekerApplication.Toaster.ShowToast(String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev), npe.MessageToToast), ToastLength.Long);
                                         }
                                         else
                                         {
-                                            Toast.MakeText(this, Resource.String.FailedToParseContactDev, ToastLength.Long).Show();
+                                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.FailedToParseContactDev), ToastLength.Long);
                                         }
                                         Logger.Firebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
                                     }
@@ -205,7 +205,7 @@ namespace Seeker
                 catch (Android.Content.ActivityNotFoundException)
                 {
                     //toast nothing can handle
-                    Toast.MakeText(this, Resource.String.NoSuitableFileManager, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoSuitableFileManager), ToastLength.Long);
                 }
             }
         }
@@ -243,7 +243,7 @@ namespace Seeker
                     //finish
                     selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, selectedImportedData.Value.IgnoredBanned, ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems(), selectedImportedData.Value.UserNotes);
                     ImportSelectedData(selectedImportedData.Value);
-                    Toast.MakeText(this, Resource.String.SuccessfullyImported, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.SuccessfullyImported), ToastLength.Long);
                     MemoryCleanup();
                     this.Finish();
                     break;

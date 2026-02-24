@@ -448,10 +448,7 @@ namespace Seeker
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
             {
                 ChatroomController.RemoveRoomFromJoinedAndOthers(roomName);
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
-                });
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 ChatroomController.UpdateJoinedRooms();
             }
             else

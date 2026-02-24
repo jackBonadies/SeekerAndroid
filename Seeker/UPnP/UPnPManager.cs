@@ -159,17 +159,14 @@ namespace Seeker.UPnP
             }
             if (Feedback)
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                if (DiagStatus == UPnPDiagStatus.NoUpnpDevicesFound)
                 {
-                    if (DiagStatus == UPnPDiagStatus.NoUpnpDevicesFound)
-                    {
-                        Toast.MakeText(Context, Context.GetString(Resource.String.no_upnp_devices_found), ToastLength.Short).Show();
-                    }
-                    else if (DiagStatus == UPnPDiagStatus.UpnpDeviceFoundButFailedToMap)
-                    {
-                        Toast.MakeText(Context, Context.GetString(Resource.String.failed_to_set), ToastLength.Short).Show();
-                    }
-                });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_upnp_devices_found), ToastLength.Short);
+                }
+                else if (DiagStatus == UPnPDiagStatus.UpnpDeviceFoundButFailedToMap)
+                {
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_set), ToastLength.Short);
+                }
             }
             Feedback = false;
             Logger.Debug("finished " + DiagStatus.ToString());
@@ -307,7 +304,7 @@ namespace Seeker.UPnP
                 SearchStarted?.Invoke(null, new EventArgs());
                 if (Feedback)
                 {
-                    Toast.MakeText(Context, Context.GetString(Resource.String.attempting_to_find_and_open), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.attempting_to_find_and_open), ToastLength.Short);
                 }
 
                 CancelSearchAfterTime();

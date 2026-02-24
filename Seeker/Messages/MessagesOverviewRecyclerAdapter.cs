@@ -50,7 +50,7 @@ namespace Seeker.Messages
                     //error
                     bool isNull = MessagesActivity.DELETED_DATA == null;
                     Logger.Firebase("failure on undo uname:" + MessagesActivity.DELETED_USERNAME + " " + isNull + " " + MessagesActivity.DELETED_POSITION);
-                    Toast.MakeText(v.Context, Resource.String.failed_to_undo, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
                     return;
                 }
                 MessageController.Messages[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_DATA;

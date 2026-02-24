@@ -22,7 +22,7 @@ namespace Seeker
             {
                 if (!CommonHelpers.ParseSlskLinkString(SimpleHelpers.SlskLinkClickedData, out _, out _, out _, out bool isFile))
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to parse link", ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast("Failed to parse link", ToastLength.Long);
                     base.OnCreateContextMenu(menu, v, menuInfo);
                     return;
                 }
@@ -81,10 +81,7 @@ namespace Seeker
                         msgToToast = "Failed to follow link";
                     }
                     Logger.Debug(dirTask.Exception.InnerException.Message);
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, msgToToast, ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(msgToToast, ToastLength.Short);
                 }
                 Logger.Debug("DirectoryReceivedContAction faulted");
             }
@@ -118,11 +115,11 @@ namespace Seeker
                 {
                     if (thisFileOnly == null)
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast("Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short);
                     }
                     else
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, "Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast("Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short);
                     }
                     return;
                 }

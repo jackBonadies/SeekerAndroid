@@ -131,7 +131,7 @@ namespace Seeker
                     ShowEditTextMessageUserDialog();
                     return true;
                 case Resource.Id.action_add_to_user_list:
-                    UserListActivity.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { Toast.MakeText(this, Resource.String.success_added_user, ToastLength.Short).Show(); }));
+                    UserListActivity.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
                     return true;
                 case Resource.Id.action_search_files:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -164,7 +164,7 @@ namespace Seeker
                 case Resource.Id.action_delete_all_messages:
                     if (MessageController.Messages.Count == 0) //nullref
                     {
-                        Toast.MakeText(this, this.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
                         return true;
                     }
                     DELETED_DICTIONARY = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
@@ -192,7 +192,7 @@ namespace Seeker
                     //error
                     bool isNull = MessagesActivity.DELETED_DICTIONARY == null;
                     Logger.Firebase("failure on undo delete all. dict was null");
-                    Toast.MakeText(v.Context, Resource.String.failed_to_undo, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
                     return;
                 }
 
@@ -219,7 +219,7 @@ namespace Seeker
         {
             if (MainActivity.IsNotLoggedIn())
             {
-                Toast.MakeText(this, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
                 return;
             }
 
@@ -238,7 +238,7 @@ namespace Seeker
                 string userToMessage = input.Text;
                 if (userToMessage == null || userToMessage == string.Empty)
                 {
-                    Toast.MakeText(this, Resource.String.must_type_a_username_to_message, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_message), ToastLength.Short);
                     if ((sender as AndroidX.AppCompat.App.AlertDialog) == null)
                     {
                         messageUserDialog.Dismiss();

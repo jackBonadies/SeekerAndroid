@@ -183,7 +183,7 @@ namespace Seeker.Helpers
                     try
                     {
                         //may not be on UI thread if from wishlist timer elapsed...
-                        Toast.MakeText(c, "Failed to restore wishlist search results from disk", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Failed to restore wishlist search results from disk", ToastLength.Long);
                     }
                     catch
                     {

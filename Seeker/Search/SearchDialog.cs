@@ -96,7 +96,7 @@ namespace Seeker
                 this.SetControlState();
                 if (failed)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to parse search term from link. Contact Developer.", ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast("Failed to parse search term from link. Contact Developer.", ToastLength.Long);
                 }
             }
             );

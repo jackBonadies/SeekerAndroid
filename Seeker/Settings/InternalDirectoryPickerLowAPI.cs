@@ -443,7 +443,7 @@ namespace Seeker
                         }
                         else
                         {
-                            Toast.MakeText(_mContext, "Failed to create '" + newDirName + "' folder", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Failed to create '" + newDirName + "' folder", ToastLength.Short);
                         }
                     }).SetNegativeButton(SeekerApplication.GetString(Resource.String.cancel), (o, eventArgs) => { }).Show();
                 };

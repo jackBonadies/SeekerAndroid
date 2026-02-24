@@ -183,19 +183,13 @@ namespace Seeker.Services
                     {
                         Logger.Firebase("MainActivity error parsing: " + e.Message + "  " + e.StackTrace);
                     }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing), ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_sharing), ToastLength.Long);
                 }
 
                 if (success && SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized)
                 {
                     Logger.Debug("database full initialized.");
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing), ToastLength.Short).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_sharing), ToastLength.Short);
                     try
                     {
                         //setup soulseek client with handlers if all conditions met
@@ -208,17 +202,14 @@ namespace Seeker.Services
                 }
                 else if (!success)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                    if (string.IsNullOrEmpty(errorMessage))
                     {
-                        if (string.IsNullOrEmpty(errorMessage))
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_sharing), ToastLength.Short).Show();
-                        }
-                        else
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, errorMessage, ToastLength.Short).Show();
-                        }
-                    }));
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_sharing), ToastLength.Short);
+                    }
+                    else
+                    {
+                        SeekerApplication.Toaster.ShowToast(errorMessage, ToastLength.Short);
+                    }
                 }
 
                 if (uiUpdateAction != null)

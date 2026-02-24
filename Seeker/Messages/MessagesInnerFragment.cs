@@ -171,7 +171,7 @@ namespace Seeker.Messages
 
             if (string.IsNullOrEmpty(msg.MessageText))
             {
-                Toast.MakeText(contextToUse, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_text_to_send), ToastLength.Short);
                 if (fromDirectReplyAction)
                 {
                     MessageController.ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
@@ -181,7 +181,7 @@ namespace Seeker.Messages
             if (!PreferencesState.CurrentlyLoggedIn)
             {
                 Logger.Debug("not currently logged in");
-                Toast.MakeText(contextToUse, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
                 if (fromDirectReplyAction)
                 {
                     MessageController.ShowNotification(msg, true, true, "Failure - Currently Logged Out.");
@@ -197,7 +197,7 @@ namespace Seeker.Messages
                 {
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
-                        BroadcastFriendlyRunOnUiThread(() => { Toast.MakeText(contextToUse, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                     }
                     if (fromDirectReplyAction)
                     {
@@ -262,7 +262,7 @@ namespace Seeker.Messages
                     Logger.Debug("faulted " + t.Exception.ToString());
                     Logger.Debug("faulted " + t.Exception.InnerException.Message.ToString());
                     msg.SentMsgStatus = SentStatus.Failed;
-                    Toast.MakeText(broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext, Resource.String.failed_to_send_message, ToastLength.Long).Show(); //TODO
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_send_message), ToastLength.Long); //TODO
 
                     if (fromDirectReplyAction)
                     {

@@ -332,18 +332,7 @@ namespace Seeker
                         {
                             if (t.IsFaulted)
                             {
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                                {
-                                    if (Context != null)
-                                    {
-                                        Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-                                    else
-                                    {
-                                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                    }
-
-                                });
+                                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                 return;
                             }
                             if (ViewState.CurrentlySelectedDLFolder == null)
@@ -402,18 +391,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            if (Context != null)
-                            {
-                                Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                            }
-                            else
-                            {
-                                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                            }
-
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     if (ViewState.CurrentlySelectedDLFolder == null)
@@ -970,7 +948,7 @@ namespace Seeker
                 }
                 catch (System.Exception error)
                 {
-                    Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long).Show(); });
+                    Action a = new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
                     if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                     {
 
@@ -1080,7 +1058,7 @@ namespace Seeker
             Logger.Debug("item1 is null?" + (item1 == null).ToString());//tested
             if (item1 == null || indexToRefresh == -1)
             {
-                SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
+                SeekerApplication.Toaster.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
                 return;
             }
 
@@ -1121,7 +1099,7 @@ namespace Seeker
             }
             catch (System.Exception error)
             {
-                Action a = new Action(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                Action a = new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
                 if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                 {
 
@@ -1161,7 +1139,7 @@ namespace Seeker
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, "Must be logged in to " + msg, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast("Must be logged in to " + msg, ToastLength.Short);
                 return true;
             }
             return false;
@@ -1188,7 +1166,7 @@ namespace Seeker
 
                 if (position == -1)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                     return base.OnContextItemSelected(item);
                 }
 
@@ -1218,18 +1196,7 @@ namespace Seeker
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                                    {
-                                        if (Context != null)
-                                        {
-                                            Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                        }
-                                        else
-                                        {
-                                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                        }
-
-                                    });
+                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                     return;
                                 }
                                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
@@ -1261,7 +1228,7 @@ namespace Seeker
                             catch (ArgumentOutOfRangeException)
                             {
                                 //Logger.Firebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                                Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                                SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                                 return base.OnContextItemSelected(item);
                             }
                             recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
@@ -1279,7 +1246,7 @@ namespace Seeker
                         catch (ArgumentOutOfRangeException)
                         {
                             //Logger.Firebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
                         if (tItem is TransferItem tti)
@@ -1330,7 +1297,7 @@ namespace Seeker
                         catch (ArgumentOutOfRangeException)
                         {
                             //Logger.Firebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
 
@@ -1362,7 +1329,7 @@ namespace Seeker
                         catch (ArgumentOutOfRangeException)
                         {
                             //Logger.Firebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
                         try
@@ -1388,7 +1355,7 @@ namespace Seeker
                         catch (System.Exception e)
                         {
                             Logger.Firebase(e.Message + e.StackTrace);
-                            Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_play), ToastLength.Short); //normally bc no player is installed.
                         }
                         break;
                     case TransferContextMenuItem.BrowseAtLocation: //browse at location (browse at folder)
@@ -1411,7 +1378,7 @@ namespace Seeker
                             if (fi.IsEmpty())
                             {
                                 //since if auto clear is on, and the menu is already up, the final item in this folder can clear before we end up selecting something.
-                                Toast.MakeText(SeekerState.ActiveActivityRef, "Folder is empty.", ToastLength.Short).Show();
+                                SeekerApplication.Toaster.ShowToast("Folder is empty.", ToastLength.Short);
                                 return true;
                             }
                             string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
@@ -1446,18 +1413,7 @@ namespace Seeker
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                                    {
-                                        if (Context != null)
-                                        {
-                                            Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                        }
-                                        else
-                                        {
-                                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                        }
-
-                                    });
+                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                     return;
                                 }
                                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
@@ -1490,18 +1446,7 @@ namespace Seeker
                             {
                                 if (t.IsFaulted)
                                 {
-                                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                                    {
-                                        if (Context != null)
-                                        {
-                                            Toast.MakeText(Context, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                        }
-                                        else
-                                        {
-                                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                                        }
-
-                                    });
+                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                     return;
                                 }
                                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
@@ -1522,7 +1467,7 @@ namespace Seeker
                         catch (ArgumentOutOfRangeException)
                         {
                             //Logger.Firebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, "Selected transfer does not exist anymore.. try again.", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
                         TransferItem uploadToCancel = tItem as TransferItem;
@@ -1651,11 +1596,11 @@ namespace Seeker
                     {
                         if (queueLenOld == int.MaxValue)
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, "Position in queue is unknown.", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Position in queue is unknown.", ToastLength.Short);
                         }
                         else
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.position_is_still_), t.QueueLength), ToastLength.Short);
                         }
                     }
                     else

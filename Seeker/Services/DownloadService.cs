@@ -82,7 +82,7 @@ namespace Seeker.Services
                             {
                                 if (SeekerState.ActiveActivityRef != null)
                                 {
-                                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
+                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                 }
                             });
                             return;
@@ -115,7 +115,7 @@ namespace Seeker.Services
                             state = TransferStates.Errored | TransferStates.UserOffline | TransferStates.FallenFromQueue;
                             if (!silent)
                             {
-                                MainActivity.ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.UserXIsOffline), username), "_6_", username);
+                                SeekerApplication.Toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.UserXIsOffline), username), "_6_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
@@ -127,7 +127,7 @@ namespace Seeker.Services
                             state = TransferStates.Errored | TransferStates.CannotConnect | TransferStates.FallenFromQueue;
                             if (!silent)
                             {
-                                MainActivity.ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.CannotConnectUserX), username), "_7_", username);
+                                SeekerApplication.Toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.CannotConnectUserX), username), "_7_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException is System.TimeoutException)
@@ -135,7 +135,7 @@ namespace Seeker.Services
                             transitionToNextState = false; //they may just not be sending queue position messages.  that is okay, we can still connect to them just fine for download time.
                             if (!silent)
                             {
-                                MainActivity.ToastUIWithDebouncer(string.Format(SeekerApplication.GetString(Resource.String.TimeoutQueueUserX), username), "_8_", username, 6);
+                                SeekerApplication.Toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.TimeoutQueueUserX), username), "_8_", username, 6);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
@@ -144,14 +144,14 @@ namespace Seeker.Services
                             transitionToNextState = false;
                             if (!silent)
                             {
-                                MainActivity.ToastUIWithDebouncer(string.Format("Failed to get queue position for {0}: Connection was unexpectedly closed.", username), "_9_", username, 6);
+                                SeekerApplication.Toaster.ShowToastDebounced(string.Format("Failed to get queue position for {0}: Connection was unexpectedly closed.", username), "_9_", username, 6);
                             }
                         }
                         else
                         {
                             if (!silent)
                             {
-                                MainActivity.ToastUIWithDebouncer($"Error getting queue position from {username}", "_9_", username);
+                                SeekerApplication.Toaster.ShowToastDebounced($"Error getting queue position from {username}", "_9_", username);
                             }
                             Logger.Firebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
@@ -266,7 +266,7 @@ namespace Seeker.Services
                     }
                     catch (System.Exception error)
                     {
-                        Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                        Action a = new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
                         if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                         {
 
@@ -541,7 +541,7 @@ namespace Seeker.Services
                                 //disconnected error
                                 if (e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
                                 {
-                                    action = () => { MainActivity.ToastUIWithDebouncer(SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL), "_16_"); };
+                                    action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL), "_16_"); };
                                 }
                                 else
                                 {
@@ -581,7 +581,7 @@ namespace Seeker.Services
                         //transferItem.TryUndoMojibake = false;
                         if (task.Exception.InnerException is System.TimeoutException)
                         {
-                            action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.timeout_peer)); };
+                            action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.timeout_peer), ToastLength.Long); };
                         }
                         else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
                         {
@@ -612,7 +612,7 @@ namespace Seeker.Services
                         else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
                             Transfers.TransfersUtil.MarkTransferItemAsDirNotSet(transferItem);
-                            action = () => { MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
+                            action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
                         {
@@ -639,35 +639,35 @@ namespace Seeker.Services
                             // always set this since it only shows if we DO NOT retry
                             if (isFileNotShared)
                             {
-                                action = () => { MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_rejected_file_not_shared), "_2_"); }; //needed
+                                action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.transfer_rejected_file_not_shared), "_2_"); }; //needed
                             }
                             else
                             {
-                                action = () => { MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
+                                action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
                             }
                             Logger.Debug("rejected. is not shared: " + isFileNotShared);
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferException)
                         {
-                            action = () => { MainActivity.ToastUIWithDebouncer(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
+                            action = () => { SeekerApplication.Toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
                         }
                         else if (task.Exception.InnerException is Soulseek.UserOfflineException)
                         {
-                            action = () => { MainActivity.ToastUIWithDebouncer(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
+                            action = () => { SeekerApplication.Toaster.ShowToastDebounced(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
                         }
                         else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                                 task.Exception.InnerException.Message != null &&
                                 task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             Logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
-                            action = () => { MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
+                            action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                         {
                             retriable = true;
                             //Logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                            action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.remote_conn_closed), ToastLength.Long); };
                             if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                             {
                                 resetRetryCount = true;
@@ -679,7 +679,7 @@ namespace Seeker.Services
                             if (ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
                             {
                                 Logger.Debug("we do have internet");
-                                action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.remote_conn_closed)); };
+                                action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.remote_conn_closed), ToastLength.Long); };
                                 retriable = true;
                                 if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                                 {
@@ -688,7 +688,7 @@ namespace Seeker.Services
                             }
                             else
                             {
-                                action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.network_down)); };
+                                action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.network_down), ToastLength.Long); };
                             }
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
@@ -708,13 +708,13 @@ namespace Seeker.Services
                             retriable = true;
                             //Logger.Firebase("Reported as failed by uploader");
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.reported_as_failed)); };
+                            action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.reported_as_failed), ToastLength.Long); };
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             //Logger.Firebase("failed to establish a direct or indirect message connection");
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
+                            action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
                         }
                         else
                         {
@@ -731,7 +731,7 @@ namespace Seeker.Services
                                 Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                                 if (task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
                                 {
-                                    action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                    action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_no_space), ToastLength.Long); };
                                     unknownException = false;
                                 }
 
@@ -742,7 +742,7 @@ namespace Seeker.Services
 
                                     if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)") || task.Exception.InnerException.InnerException.Message.Contains("Read error: Disk full."))
                                     {
-                                        action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_space)); };
+                                        action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_no_space), ToastLength.Long); };
                                         unknownException = false;
                                     }
 
@@ -826,7 +826,7 @@ namespace Seeker.Services
                         if (action == null)
                         {
                             //action = () => { MainActivity.ToastUI(msgDebug1); MainActivity.ToastUI(msgDebug2); };
-                            action = () => { MainActivity.ToastUI(SeekerState.ActiveActivityRef.GetString(Resource.String.error_unspecified)); };
+                            action = () => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_unspecified), ToastLength.Long); };
                         }
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
                         //System.Console.WriteLine(task.Exception.ToString());
@@ -841,7 +841,7 @@ namespace Seeker.Services
 
                     if (!PreferencesState.DisableDownloadToastNotification)
                     {
-                        action = () => { MainActivity.ToastUI(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading)); };
+                        action = () => { SeekerApplication.Toaster.ShowToast(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading), ToastLength.Long); };
                         SeekerState.ActiveActivityRef.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
@@ -1116,7 +1116,7 @@ namespace Seeker.Services
 
                 if (rootdir == null && !SeekerState.UseLegacyStorage())
                 {
-                    SeekerState.MainActivityRef.RunOnUiThread(() => { MainActivity.ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_cannot_access_files), ToastLength.Long);
                 }
 
                 //BACKUP IF FOLDER DIR IS NULL
@@ -1456,7 +1456,7 @@ namespace Seeker.Services
 
                 if (rootdir == null && !SeekerState.UseLegacyStorage())
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { MainActivity.ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_cannot_access_files)); });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_cannot_access_files), ToastLength.Long);
                 }
 
                 //BACKUP IF FOLDER DIR IS NULL
@@ -1498,7 +1498,7 @@ namespace Seeker.Services
                         catch (Exception e)
                         {
                             Logger.Firebase("CRITICAL FILESYSTEM ERROR pre" + e.Message);
-                            SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                            SeekerApplication.Toaster.ShowToast("Error Saving File", ToastLength.Long);
                             Logger.Debug(e.Message + " " + uriOfIncomplete.Path);
                         }
                     }
@@ -1543,12 +1543,12 @@ namespace Seeker.Services
                                         //no errors until you tried to move it. then you would get "alreay exists" since (if Create Complete and Incomplete folders is checked and 
                                         //the incomplete dir isnt changed) then the destination is the same as the incomplete file (since the incomplete and complete folders
                                         //couldnt be created.  This error is misleading though so do a more generic error.
-                                        SeekerApplication.ShowToast($"Filesystem Error for file {realName}.", ToastLength.Long);
+                                        SeekerApplication.Toaster.ShowToast($"Filesystem Error for file {realName}.", ToastLength.Long);
                                         Logger.Debug("complete and incomplete locations are the same");
                                     }
                                     else
                                     {
-                                        SeekerApplication.ShowToast(string.Format("File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.", realName, uri.LastPathSegment.ToString()), ToastLength.Long);
+                                        SeekerApplication.Toaster.ShowToast(string.Format("File {0} already exists at {1}.  Delete it and try again if you want to overwrite it.", realName, uri.LastPathSegment.ToString()), ToastLength.Long);
                                     }
                                 }
                                 catch (Exception e2)
@@ -1579,7 +1579,7 @@ namespace Seeker.Services
                                     catch (Exception secondTryErr)
                                     {
                                         Logger.Firebase("Legacy backup failed - CRITICAL FILESYSTEM ERROR pre" + secondTryErr.Message);
-                                        SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                        SeekerApplication.Toaster.ShowToast("Error Saving File", ToastLength.Long);
                                         Logger.Debug(secondTryErr.Message + " " + uriOfIncomplete.Path);
                                     }
                                 }
@@ -1587,7 +1587,7 @@ namespace Seeker.Services
                                 {
                                     Logger.InfoFirebase("uri!=null");
                                     Logger.Firebase("CRITICAL FILESYSTEM ERROR " + e.Message + " path child: " + Android.Net.Uri.Decode(uriOfIncomplete.ToString()) + " path parent: " + Android.Net.Uri.Decode(parentUriOfIncomplete.ToString()) + " path dest: " + Android.Net.Uri.Decode(folderDir1?.Uri?.ToString()));
-                                    SeekerApplication.ShowToast("Error Saving File", ToastLength.Long);
+                                    SeekerApplication.Toaster.ShowToast("Error Saving File", ToastLength.Long);
                                     Logger.Debug(e.Message + " " + uriOfIncomplete.Path); //Unknown Authority happens when source is file :/// storage/emulated/0/Android/data/com.companyname.andriodapp1/files/Soulseek%20Incomplete/
                                 }
                             }

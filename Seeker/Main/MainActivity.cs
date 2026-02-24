@@ -429,7 +429,7 @@ namespace Seeker
                         else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                         {
                             Logger.Firebase("doesnt contain key");
-                            Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_error), ToastLength.Long);
                         }
                         else
                         {
@@ -1035,7 +1035,7 @@ namespace Seeker
                     }
                     else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
                     {
-                        Toast.MakeText(this, this.GetString(Resource.String.wishlist_tab_error), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_error), ToastLength.Long);
                     }
                     else
                     {
@@ -1389,11 +1389,11 @@ namespace Seeker
                     {
                         if (contextToUseForMessage == null)
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
                         }
                         else
                         {
-                            Toast.MakeText(contextToUseForMessage, msg, ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
                         }
                     }
                     return true;
@@ -1416,20 +1416,14 @@ namespace Seeker
             {
                 if (!silent)
                 {
-                    Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                    tst.Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
                 }
             }
             else
             {
                 if (!silent)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(
-                    () =>
-                    {
-                        Toast tst = Toast.MakeText(c, c.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                        tst.Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
                 }
             }
             //if we are still not connected then creating the task will throw. 
@@ -1443,8 +1437,7 @@ namespace Seeker
             {
                 if (!silent)
                 {
-                    Toast tst2 = Toast.MakeText(c, c.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                    tst2.Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                 }
             }
             connectTask = null;
@@ -1552,7 +1545,7 @@ namespace Seeker
             {
                 Action showDirectoryButton = new Action(() =>
                 {
-                    ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_error), ToastLength.Long);
                     AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
                     if (!PreferencesState.CurrentlyLoggedIn)
                     {
@@ -1560,7 +1553,7 @@ namespace Seeker
                     }
                     if (StaticHacks.LoginFragment.View == null)//this can happen...
                     {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
-                        ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_choose_settings));
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_choose_settings), ToastLength.Long);
                         Logger.Firebase("StaticHacks.LoginFragment.View is null");
                         return;
                     }
@@ -1637,7 +1630,7 @@ namespace Seeker
 
                 Action reiterate = new Action(() =>
                 {
-                    ToastUI(SeekerState.MainActivityRef.GetString(Resource.String.seeker_needs_dl_dir_error));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_error), ToastLength.Long);
                 });
 
                 Action hideButton = new Action(() =>
@@ -1806,7 +1799,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long);
                 }
 
 

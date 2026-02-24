@@ -290,7 +290,7 @@ namespace Seeker
 
                     if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.search_tab_error, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.search_tab_error), ToastLength.Long);
                         SearchTabHelper.CurrentTab = lastTab;
                         fromTab = lastTab;
                         return;
@@ -393,7 +393,7 @@ namespace Seeker
                 case Resource.Id.action_search_target:
                     if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
                     {
-                        Toast.MakeText(this.Context, Resource.String.wishlist_tab_target, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_target), ToastLength.Long);
                         return true;
                     }
                     ShowChangeTargetDialog();
@@ -448,11 +448,11 @@ namespace Seeker
             //here we "fork" the current search, adding it to the wishlist
             if (SearchTabHelper.LastSearchTerm == string.Empty || SearchTabHelper.LastSearchTerm == null)
             {
-                Toast.MakeText(this.Context, Resource.String.perform_search_first, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.perform_search_first), ToastLength.Long);
                 return;
             }
             SearchTabHelper.AddWishlistSearchTabFromCurrent();
-            Toast.MakeText(this.Context, string.Format(this.Context.GetString(Resource.String.added_to_wishlist), SearchTabHelper.LastSearchTerm), ToastLength.Long).Show();
+            SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.added_to_wishlist), SearchTabHelper.LastSearchTerm), ToastLength.Long);
             this.SetCustomViewTabNumberImageViewState();
         }
 
@@ -2104,8 +2104,7 @@ namespace Seeker
                 }
 
                 Logger.Firebase(msg + " showEditDialog" + e.Message);
-                Action a = new Action(() => { Toast.MakeText(SeekerState.ActiveActivityRef, "Error, please try again: " + msg, ToastLength.Long).Show(); });
-                SeekerState.ActiveActivityRef.RunOnUiThread(a);
+                SeekerApplication.Toaster.ShowToast("Error, please try again: " + msg, ToastLength.Long);
             }
         }
 
@@ -2207,11 +2206,7 @@ namespace Seeker
             {
                 if (SeekerState.UserList == null || SeekerState.UserList.Count == 0)
                 {
-                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.MainActivityRef, Resource.String.user_list_empty, ToastLength.Short).Show();
-                    }
-                    ));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.user_list_empty), ToastLength.Short);
                     return;
                 }
                 scope = new SearchScope(SearchScopeType.User, SeekerState.UserList.Select(item => item.Username).ToArray());
@@ -2220,10 +2215,7 @@ namespace Seeker
             {
                 if (SearchTabHelper.SearchTargetChosenUser == string.Empty)
                 {
-                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.MainActivityRef, Resource.String.no_user, ToastLength.Short).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_user), ToastLength.Short);
                     return;
                 }
                 scope = new SearchScope(SearchScopeType.User, new string[] { SearchTabHelper.SearchTargetChosenUser });
@@ -2232,10 +2224,7 @@ namespace Seeker
             {
                 if (SearchTabHelper.SearchTargetChosenRoom == string.Empty)
                 {
-                    SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.MainActivityRef, Resource.String.no_room, ToastLength.Short).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_room), ToastLength.Short);
                     return;
                 }
                 scope = new SearchScope(SearchScopeType.Room, new string[] { SearchTabHelper.SearchTargetChosenRoom });
@@ -2301,10 +2290,7 @@ namespace Seeker
                     }
                     if ((!t.IsCanceled) && t.Result.Item2.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                        {
-                            Toast.MakeText(SeekerState.MainActivityRef, Resource.String.no_search_results, ToastLength.Short).Show();
-                        }));
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_search_results), ToastLength.Short);
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
 
@@ -2416,7 +2402,7 @@ namespace Seeker
                         errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
 
-                    Toast.MakeText(SeekerState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(errorMsg, ToastLength.Short);
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     Logger.Debug("transitionDrawable: RESET transition");
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
@@ -2439,7 +2425,7 @@ namespace Seeker
                         errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
                     }
                     Logger.Debug("transitionDrawable: RESET transition");
-                    Toast.MakeText(SeekerState.ActiveActivityRef, errorMsg, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(errorMsg, ToastLength.Short);
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
                         transitionDrawable.ResetTransition();
@@ -2462,7 +2448,7 @@ namespace Seeker
                     SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
                     Logger.Debug("transitionDrawable: RESET transition");
 
-                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.search_error_unspecified, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.search_error_unspecified), ToastLength.Short);
                     Logger.Firebase("tabpageradapter searchclick: " + ue.Message);
 
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
@@ -2511,8 +2497,7 @@ namespace Seeker
             {
                 if (!fromWishlist)
                 {
-                    Toast tst = Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_search, ToastLength.Long);
-                    tst.Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_search), ToastLength.Long);
                     Logger.Debug("transitionDrawable: RESET transition");
                     transitionDrawable.ResetTransition();
 
@@ -2539,10 +2524,7 @@ namespace Seeker
                     {
                         if (!fromWishlist)
                         {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            {
-                                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                            });
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         }
                         return;
                     }

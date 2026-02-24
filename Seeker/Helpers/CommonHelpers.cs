@@ -452,7 +452,7 @@ namespace Seeker
                 string txt = input.Text;
                 if (string.IsNullOrEmpty(txt) && textRequired)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_type_ticker_text), ToastLength.Short);
                     //(sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
@@ -494,7 +494,7 @@ namespace Seeker
                         {
                             emptyTextErrorString = "Input Required";
                         }
-                        SeekerApplication.ShowToast(emptyTextErrorString, ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(emptyTextErrorString, ToastLength.Short);
                     }
                     else
                     {
@@ -598,7 +598,7 @@ namespace Seeker
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.remove_user))
             {
-                MainActivity.ToastUI_short(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion));
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion), ToastLength.Short);
                 UserListService.Instance.RemoveUser(usernameInQuestion);
                 SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
                 return true;
@@ -809,7 +809,7 @@ namespace Seeker
                 if (e.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                 {
                     Logger.Firebase("viewUri: " + e.Message + httpUri.ToString());
-                    SeekerApplication.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
+                    SeekerApplication.Toaster.ShowToast(string.Format("No application found to handle url \"{0}\".  Please install or enable web browser.", httpUri.ToString()), ToastLength.Long);
                 }
             }
         }
@@ -1008,7 +1008,7 @@ namespace Seeker
                 {
                     notLoggedInToast = SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_in_generic);
                 }
-                Toast.MakeText(SeekerState.ActiveActivityRef, notLoggedInToast, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(notLoggedInToast, ToastLength.Short);
                 return false;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -1022,10 +1022,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(() => { action(); });
@@ -1050,18 +1047,18 @@ namespace Seeker
                         {
                             if (t.Exception.InnerException is TimeoutException)
                             {
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
                             }
                             else
                             {
                                 Logger.Firebase("Failed to change password" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
+                                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_change_password), ToastLength.Long);
                             }
                             return;
                         }
                         else
                         {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.password_successfully_updated), ToastLength.Long);
                             PreferencesState.Password = newPassword;
                             PreferencesManager.SavePassword();
                         }
@@ -1082,22 +1079,22 @@ namespace Seeker
             int numDaysInt = int.MinValue;
             if (!int.TryParse(numDays, out numDaysInt))
             {
-                MainActivity.ToastUI(Resource.String.error_days_entered_no_parse);
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_days_entered_no_parse), ToastLength.Long);
                 return false;
             }
             if (numDaysInt <= 0)
             {
-                MainActivity.ToastUI(Resource.String.error_days_entered_not_positive);
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_days_entered_not_positive), ToastLength.Long);
                 return false;
             }
             if (PrivilegesManager.Instance.GetRemainingDays() < numDaysInt)
             {
-                MainActivity.ToastUI(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt));
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.error_insufficient_days), numDaysInt), ToastLength.Long);
                 return false;
             }
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_give_privileges, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_give_privileges), ToastLength.Short);
                 return false;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -1111,12 +1108,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-
-                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
@@ -1133,7 +1125,7 @@ namespace Seeker
 
         private static void GivePrivilegesLogic(string username, int numDaysInt)
         {
-            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
+            SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
             SeekerState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
                 ((Task t) =>
                 {
@@ -1141,12 +1133,12 @@ namespace Seeker
                     {
                         if (t.Exception.InnerException is TimeoutException)
                         {
-                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                            SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
                         }
                         else
                         {
                             Logger.Firebase(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv) + t.Exception.InnerException.Message);
-                            SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
+                            SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_give_priv), ToastLength.Long);
                         }
                         return;
                     }
@@ -1155,7 +1147,7 @@ namespace Seeker
                         //now there is a chance the user does not exist or something happens.  in which case our days will be incorrect...
                         PrivilegesManager.Instance.SubtractDays(numDaysInt);
 
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
+                        SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.give_priv_success), numDaysInt, username), ToastLength.Long);
 
                         //it could be a good idea to then GET privileges to see if it actually went through... but I think this is good enough...
                         //in the rare case that it fails they do get a message so they can figure it out

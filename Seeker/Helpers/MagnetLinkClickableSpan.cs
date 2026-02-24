@@ -23,7 +23,7 @@ namespace Seeker
             }
             catch (Android.Content.ActivityNotFoundException e)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, "No Activity Found to handle Magnet Links.  Please Install a BitTorrent Client.", ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast("No Activity Found to handle Magnet Links.  Please Install a BitTorrent Client.", ToastLength.Long);
             }
         }
     }

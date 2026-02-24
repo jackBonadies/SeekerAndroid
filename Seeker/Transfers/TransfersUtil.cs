@@ -19,7 +19,7 @@ namespace Seeker.Transfers
         {
             if (username == PreferencesState.Username)
             {
-                SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long);
+                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long);
                 return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
             }
 
@@ -48,17 +48,17 @@ namespace Seeker.Transfers
 
             if (allExist)
             {
-                SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short);
+                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short);
             }
             else
             {
                 if (queuePaused)
                 {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.QueuedForDownload), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.QueuedForDownload), ToastLength.Short);
                 }
                 else
                 {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short);
                 }
             }
 
@@ -235,7 +235,7 @@ namespace Seeker.Transfers
                     {
                         MarkTransferItemAsDirNotSet(dlInfo.TransferItemReference);
                     }
-                    MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_");
+                    SeekerApplication.Toaster.ShowToastDebounced(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_");
                     waitForNext = Task.CompletedTask;
                     return Task.FromException(ex);
                 }

@@ -249,7 +249,7 @@ namespace Seeker
                     string fullDirName = dataItemsForListView[0].Node.Data.Name;
                     string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
-                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
@@ -722,11 +722,11 @@ namespace Seeker
         {
             if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
             {
-                Toast.MakeText(this.Context, Resource.String.NothingToCopy, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Long);
             }
             else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
             {
-                Toast.MakeText(this.Context, Resource.String.nothing_selected, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
             else
             {
@@ -787,11 +787,11 @@ namespace Seeker
                 CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
                 if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
                 {
-                    Toast.MakeText(this.Context, Resource.String.LinksCopied, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinksCopied), ToastLength.Short);
                 }
                 else
                 {
-                    Toast.MakeText(this.Context, Resource.String.LinkCopied, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                 }
             }
 
@@ -802,11 +802,11 @@ namespace Seeker
         {
             if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
             {
-                Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
             }
             else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
             {
-                Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
             else
             {
@@ -866,7 +866,7 @@ namespace Seeker
                     {
                         if (t.IsFaulted)
                         {
-                            SeekerApplication.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                            SeekerApplication.Toaster.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                             return;
                         }
                         TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
@@ -885,7 +885,7 @@ namespace Seeker
             {
                 if (recusiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
                 DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
@@ -894,7 +894,7 @@ namespace Seeker
             {
                 if (topLevelFullFileInfoOnly.Count == 0)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
                 DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
@@ -905,7 +905,7 @@ namespace Seeker
         {
             if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
 
@@ -1065,7 +1065,7 @@ namespace Seeker
 
             if (dataItemsForDownload.Count == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
             if (BrowseFilter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
@@ -1116,14 +1116,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-                            //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
-
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
@@ -1251,7 +1244,7 @@ namespace Seeker
                     if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
                     {
                         //dont let them do this... if this happens then there is no way to get back up...
-                        Toast.MakeText(SeekerState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short);
                         return;
                     }
                     SaveScrollPosition();
@@ -1473,7 +1466,7 @@ namespace Seeker
                         //bool isDir = itemSelected.IsDirectory();
                         string slskLink = CommonHelpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                         return true;
                 }
             }
@@ -1569,7 +1562,7 @@ namespace Seeker
                     if (staringPoint == null)
                     {
                         Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null");
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
@@ -1667,7 +1660,7 @@ namespace Seeker
                 string usernameToBrowse = input.Text;
                 if (string.IsNullOrWhiteSpace(usernameToBrowse))
                 {
-                    Toast.MakeText(this.Activity != null ? this.Activity : SeekerState.MainActivityRef, SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short);
                     if (sender is AndroidX.AppCompat.App.AlertDialog aDiag1) //actv
                     {
                         aDiag1.Dismiss();

@@ -51,16 +51,16 @@ namespace Seeker
                 if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
                 {
                     Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
-                    SeekerApplication.ShowToast("Is Connected", ToastLength.Long);
+                    SeekerApplication.Toaster.ShowToast("Is Connected", ToastLength.Long);
                     NetworkInfo info = cm.GetNetworkInfo(ConnectivityType.Wifi);
                     if (info.IsConnected)
                     {
-                        SeekerApplication.ShowToast("Is Connected Wifi", ToastLength.Long);
+                        SeekerApplication.Toaster.ShowToast("Is Connected Wifi", ToastLength.Long);
                     }
                     info = cm.GetNetworkInfo(ConnectivityType.Mobile);
                     if (info.IsConnected)
                     {
-                        SeekerApplication.ShowToast("Is Connected Mobile", ToastLength.Long);
+                        SeekerApplication.Toaster.ShowToast("Is Connected Mobile", ToastLength.Long);
                     }
                 }
                 else
@@ -68,12 +68,12 @@ namespace Seeker
                     if (cm.ActiveNetworkInfo != null)
                     {
                         Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
-                        SeekerApplication.ShowToast("Is Disconnected", ToastLength.Long);
+                        SeekerApplication.Toaster.ShowToast("Is Disconnected", ToastLength.Long);
                     }
                     else
                     {
                         Logger.Debug("info: Is Disconnected(null)");
-                        SeekerApplication.ShowToast("Is Disconnected (null)", ToastLength.Long);
+                        SeekerApplication.Toaster.ShowToast("Is Disconnected (null)", ToastLength.Long);
                     }
                 }
 #endif

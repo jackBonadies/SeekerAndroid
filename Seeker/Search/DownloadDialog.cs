@@ -287,7 +287,7 @@ namespace Seeker
             }
             catch (InvalidOperationException)
             {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
             Action<Task<BrowseResponse>> continueWithAction = new Action<Task<BrowseResponse>>((br) =>
@@ -308,34 +308,34 @@ namespace Seeker
                 if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
                 {
                     //timeout
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_timeout), ToastLength.Short);
                     return;
                 }
                 else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException is TimeoutException)
                 {
                     //timeout - this time when the connection was established, but the user has not written to us in over 15 (timeout) seconds. I tested and generally this is fixed by simply retrying.
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_timeout), ToastLength.Short);
                     return;
                 }
                 else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException != null && br.Exception.InnerException.InnerException.ToString().ToLower().Contains("network subsystem is down"))
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.network_down), ToastLength.Short).Show(); });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.network_down), ToastLength.Short);
                     return;
                 }
                 else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short);
                     return;
                 }
                 else if (br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short).Show(); });
+                    SeekerApplication.Toaster.ShowToast(String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short);
                     return;
                 }
                 else if (br.IsFaulted)
                 {
                     //shouldnt get here
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
+                    SeekerApplication.Toaster.ShowToast(String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short);
                     Logger.Firebase("browse response faulted: " + username + br.Exception?.Message);
                     return;
                 }
@@ -357,11 +357,11 @@ namespace Seeker
                         //error case
                         if (errorString != null && errorString != string.Empty)
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, errorString, ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(errorString, ToastLength.Long);
                         }
                         else
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_wefailedtoparse), ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_wefailedtoparse), ToastLength.Long);
                         }
                         return;
                     }
@@ -397,7 +397,7 @@ namespace Seeker
                         }
                         catch
                         {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_response_received), ToastLength.Short);
                         }
                     }
 
@@ -427,7 +427,7 @@ namespace Seeker
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_dir_contents), ToastLength.Short);
                 return;
             }
 
@@ -438,11 +438,7 @@ namespace Seeker
                 {
                     if (!(connectionTask.Exception.InnerException is FaultPropagationException)) //i.e. only show it once.
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                        {
-                            Toast tst2 = Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                            tst2.Show();
-                        }));
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                     }
                     throw new FaultPropagationException();
                 }
@@ -497,7 +493,7 @@ namespace Seeker
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -513,7 +509,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
@@ -729,7 +725,7 @@ namespace Seeker
         {
             if (this.customAdapter.SelectedPositions.Count == 0)
             {
-                Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
                 return;
             }
 
@@ -751,7 +747,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     Logger.Debug("DownloadDialog Dl_Click");
@@ -863,11 +859,11 @@ namespace Seeker
                     {
                         if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
                         {
-                            Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_timed_out), ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_timed_out), ToastLength.Short);
                         }
                         Logger.Debug(dirTask.Exception.InnerException.Message);
                     }
-                    Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_failed), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_failed), ToastLength.Short);
                     Logger.Debug("DirectoryReceivedContAction faulted");
                 }
                 else
@@ -877,7 +873,7 @@ namespace Seeker
                     var directory = dirTask.Result.First();
                     if (listView.Count == directory.Files.Count)
                     {
-                        Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_already_have), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_already_have), ToastLength.Short);
                         return;
                     }
                     this.UpdateSearchResponseWithFullDirectory(directory);
@@ -907,7 +903,7 @@ namespace Seeker
                 }
                 if (!PreferencesState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short);
                     stopRefreshing();
                     return;
                 }
@@ -978,7 +974,7 @@ namespace Seeker
                     {
                         if (this.customAdapter.SelectedPositions.Count == 0)
                         {
-                            Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
                             return true;
                         }
                         var filesToDownload = GetFilesToDownload(true);

@@ -317,7 +317,7 @@ namespace Seeker
                 //clipboardManager.PrimaryClip = clip;
                 case 1: //"Save Image"
                     SaveImage(userInfo.Picture);
-                    Toast.MakeText(this, Resource.String.success_save, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_save), ToastLength.Short);
                     return true;
             }
             return base.OnContextItemSelected(item);
@@ -340,7 +340,7 @@ namespace Seeker
                 //  which doesnt, a .txt, etc.). Nicotine for example allows any file to be selected.
                 if (loadedBitmap == null)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast("Failed to decode the user's picture.", ToastLength.Long);
                     string uname = userData != null ? userData.Username : "no user";
                     Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
                     return;

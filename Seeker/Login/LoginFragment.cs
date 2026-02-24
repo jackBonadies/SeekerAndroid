@@ -121,7 +121,7 @@ namespace Seeker
                     }
                     catch (InvalidOperationException)
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.we_are_already_logging_in, ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.we_are_already_logging_in), ToastLength.Short);
                         Logger.Firebase("We are already logging in");
                     }
                     //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, PreferencesState.Username, PreferencesState.Password);
@@ -238,7 +238,7 @@ namespace Seeker
             {
                 var action = new Action(() =>
                 {
-                    Toast.MakeText(SeekerState.MainActivityRef, Resource.String.dns_failed, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dns_failed), ToastLength.Long);
                     Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
                 SeekerState.MainActivityRef.RunOnUiThread(action);
@@ -359,7 +359,7 @@ namespace Seeker
                 var action = new Action(() =>
                 {
                     string message = msg;
-                    Toast.MakeText(SeekerState.MainActivityRef, msg, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
                     PreferencesState.CurrentlyLoggedIn = false; //this should maybe be removed???
                     PreferencesState.Username = null;
                     PreferencesState.Password = null;
@@ -404,7 +404,7 @@ namespace Seeker
                 //Android.Net.DnsResolver.Instance.Query(null, "vps.slsknet.org",Android.Net.DnsResolverFlag.Empty,this.Context.MainExecutor,null,this);
                 if (string.IsNullOrEmpty(this.usernameTextEdit.Text) || string.IsNullOrEmpty(this.passwordTextEdit.Text))
                 {
-                    Toast.MakeText(this.Activity, Resource.String.no_empty_user_pass, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_empty_user_pass), ToastLength.Long);
                     return;
                 }
                 login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
@@ -430,7 +430,7 @@ namespace Seeker
             }
             catch (AddressException)
             {
-                Toast.MakeText(this.Activity, Resource.String.dns_failed_2, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dns_failed_2), ToastLength.Long);
                 PreferencesState.CurrentlyLoggedIn = false;
                 return;
             }
@@ -445,7 +445,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(this.Activity, err.Message, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(err.Message, ToastLength.Long);
                     PreferencesState.CurrentlyLoggedIn = false;
                     return;
                 }
@@ -495,7 +495,7 @@ namespace Seeker
                 {
                     message = ex.Message;
                 }
-                Toast.MakeText(this.Activity, message, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(message, ToastLength.Long);
                 PreferencesState.CurrentlyLoggedIn = false;
             }
 

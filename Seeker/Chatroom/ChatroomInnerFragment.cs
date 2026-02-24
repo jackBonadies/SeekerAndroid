@@ -776,7 +776,7 @@ namespace Seeker.Chatroom
                     Logger.Debug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                     }
                     throw new FaultPropagationException();
                 }
@@ -788,18 +788,12 @@ namespace Seeker.Chatroom
 
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
-                });
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
             if (string.IsNullOrEmpty(msg.MessageText))
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.empty_message_error), ToastLength.Short).Show();
-                });
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.empty_message_error), ToastLength.Short);
                 return;
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())

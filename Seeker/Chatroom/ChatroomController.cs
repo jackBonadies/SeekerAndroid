@@ -216,7 +216,7 @@ namespace Seeker.Chatroom
                 if (t.IsFaulted)
                 {
                     msg.SentMsgStatus = SentStatus.Failed;
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
                 }
                 else
                 {
@@ -323,7 +323,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short);
                 }
                 AutoJoinRoomNames.Remove(roomName);
             }
@@ -331,7 +331,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short);
                 }
                 AutoJoinRoomNames.Add(roomName);
             }
@@ -344,7 +344,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_off), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_off), roomName), ToastLength.Short);
                 }
                 NotifyRoomNames.Remove(roomName);
             }
@@ -352,7 +352,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_on), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_on), roomName), ToastLength.Short);
                 }
                 NotifyRoomNames.Add(roomName);
             }
@@ -869,10 +869,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short);
                 }
                 return;
             }
@@ -880,10 +877,7 @@ namespace Seeker.Chatroom
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.requesting_room_list), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
                 }
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -899,7 +893,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
@@ -934,10 +928,7 @@ namespace Seeker.Chatroom
                     RoomListParsed = GetParsedList(RoomList);
                     if (feedback)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.room_list_received), ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_list_received), ToastLength.Short);
                     }
                     RoomListReceived?.Invoke(null, new EventArgs());
                 }
@@ -953,24 +944,21 @@ namespace Seeker.Chatroom
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short);
                 return;
             }
             if (feedback)
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                    if (isPrivate)
                     {
-                        if (isPrivate)
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
-                        }
-                        else
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.publicRoomCreation), ToastLength.Short).Show();
-                        }
-                    });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.privateRoomCreation), ToastLength.Short);
+                    }
+                    else
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.publicRoomCreation), ToastLength.Short);
+                    }
                 }
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -986,7 +974,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { CreateRoomLogic(roomName, isPrivate, feedback); }));
@@ -1002,7 +990,7 @@ namespace Seeker.Chatroom
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short);
                 return;
             }
             if (feedback)
@@ -1030,7 +1018,7 @@ namespace Seeker.Chatroom
                         {
                             msg = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.removing_user_from);
                         }
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(msg, roomName), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(string.Format(msg, roomName), ToastLength.Short);
 
                     });
                 }
@@ -1048,7 +1036,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead); }));
@@ -1095,10 +1083,7 @@ namespace Seeker.Chatroom
             }
             catch (Exception e)
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
-                });
+                SeekerApplication.Toaster.ShowToast(failureMsg, ToastLength.Short);
                 return;
             }
             task.ContinueWith((Task task) =>
@@ -1107,10 +1092,7 @@ namespace Seeker.Chatroom
                 {
                     //TODO
 
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(failureMsg, ToastLength.Short);
 
                 }
                 else
@@ -1119,10 +1101,7 @@ namespace Seeker.Chatroom
 
                     if (feedback)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, successMsg, ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(successMsg, ToastLength.Short);
                     }
 
                 }
@@ -1155,10 +1134,7 @@ namespace Seeker.Chatroom
 
                     if (feedback)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.create_and_refresh), ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.create_and_refresh), ToastLength.Short);
                     }
                     if (!JoinedRoomNames.Contains(roomName))
                     {
@@ -1184,7 +1160,7 @@ namespace Seeker.Chatroom
             if (!PreferencesState.CurrentlyLoggedIn)
             {
                 string membership = ownership ? ownershipString : membershipString;
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short);
                 return;
             }
             if (feedback)
@@ -1192,10 +1168,7 @@ namespace Seeker.Chatroom
                 if (SeekerState.ActiveActivityRef != null)
                 {
                     string membership = ownership ? ownershipString : membershipString;
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short);
                 }
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -1211,7 +1184,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { DropMembershipOrOwnershipLogic(roomName, ownership, feedback); }));
@@ -1244,7 +1217,7 @@ namespace Seeker.Chatroom
                     string ownershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.ownership);
                     string membershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.membership);
                     string membership = ownership ? ownershipString : membershipString;
-                    SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
                     Logger.Firebase("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
                 }
                 return;
@@ -1258,7 +1231,7 @@ namespace Seeker.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
                     }
                     Logger.Firebase("DropMembershipOrOwnershipLogic " + task.Exception);
                 }
@@ -1267,7 +1240,7 @@ namespace Seeker.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
                     }
 
                 }
@@ -1278,17 +1251,14 @@ namespace Seeker.Chatroom
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short);
                 return;
             }
             if (feedback)
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.setting_ticker), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.setting_ticker), ToastLength.Short);
                 }
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -1304,7 +1274,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { SetTickerLogic(roomName, tickerMessage, feedback); }));
@@ -1327,7 +1297,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                 }
                 return;
             }
@@ -1337,7 +1307,7 @@ namespace Seeker.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                     }
                 }
                 else
@@ -1345,7 +1315,7 @@ namespace Seeker.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
                     }
                 }
             });
@@ -1365,10 +1335,7 @@ namespace Seeker.Chatroom
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 }
             }
             if (MainActivity.CurrentlyLoggedInButDisconnectedState())
@@ -1384,7 +1351,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin); }));

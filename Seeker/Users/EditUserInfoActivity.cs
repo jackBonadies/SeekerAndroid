@@ -64,12 +64,12 @@ namespace Seeker
                 case Resource.Id.save_user_action:
                     if (PendingText == PreferencesState.UserInfoBio)
                     {
-                        Toast.MakeText(this, this.Resources.GetString(Resource.String.no_changes_to_save), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_changes_to_save), ToastLength.Short);
                     }
                     else
                     {
                         SaveBio();
-                        Toast.MakeText(this, this.Resources.GetString(Resource.String.saved), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.saved), ToastLength.Short);
                         this.InvalidateOptionsMenu();
                     }
                     return true;
@@ -173,7 +173,7 @@ namespace Seeker
             }
             else
             {
-                Toast.MakeText(this, this.GetString(Resource.String.no_pic_set), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_pic_set), ToastLength.Short);
             }
         }
 
@@ -190,7 +190,7 @@ namespace Seeker
             {
                 if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                 {
-                    Toast.MakeText(this, this.GetString(Resource.String.error_no_file_manager_image), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_no_file_manager_image), ToastLength.Long);
                 }
                 else
                 {
@@ -221,7 +221,7 @@ namespace Seeker
                     if (chosenFile == null || (!SeekerState.PreOpenDocumentTree() && !chosenFile.Exists())) //i.e. its not an error if <21 and does not exist.
                     {
                         Logger.Firebase("selected image does not exist !!!!");
-                        Toast.MakeText(this, this.GetString(Resource.String.error_image_doesnt_exist), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_image_doesnt_exist), ToastLength.Long);
                         return;
                     }
                     string name = chosenFile.Name;
@@ -231,7 +231,7 @@ namespace Seeker
                     //obviously as far as actually displaying a bitmap (ours or another users) on our screen, we need to check bounds etc.
                     if (length > 1024 * 1024 * 5)
                     {
-                        Toast.MakeText(this, this.GetString(Resource.String.error_image_too_large), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_image_too_large), ToastLength.Long);
                         return;
                     }
                     System.IO.Stream inputStream = this.ContentResolver.OpenInputStream(data.Data);
@@ -282,7 +282,7 @@ namespace Seeker
                     }
                     pictureText.Text = PreferencesState.UserInfoPictureName;
                     pictureText.Invalidate();
-                    Toast.MakeText(this, this.GetString(Resource.String.success_set_pic), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_set_pic), ToastLength.Long);
                 }
                 else if (resultCode == Result.Canceled)
                 {

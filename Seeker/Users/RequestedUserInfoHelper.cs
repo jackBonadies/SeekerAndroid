@@ -66,12 +66,12 @@ namespace Seeker
         {
             if (uname == string.Empty)
             {
-                Toast.MakeText(SeekerApplication.ApplicationContext, Resource.String.request_user_error_empty, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.request_user_error_empty), ToastLength.Short);
                 return;
             }
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerApplication.ApplicationContext, Resource.String.must_be_logged_to_request_user_info, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_request_user_info), ToastLength.Short);
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
@@ -109,7 +109,7 @@ namespace Seeker
 
         public static void RequestUserInfoLogic(string uname)
         {
-            Toast.MakeText(SeekerApplication.ApplicationContext, Resource.String.requesting_user_info, ToastLength.Short).Show();
+            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_user_info), ToastLength.Short);
             lock (RequestedUserList)
             {
                 RequestedUserList.Add(new UserListItem(uname));
@@ -145,24 +145,15 @@ namespace Seeker
 
                         if (e.InnerException is SoulseekClientException && e.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            {
-                                Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.user_info_failed_conn), uname), ToastLength.Long).Show();
-                            });
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.user_info_failed_conn), uname), ToastLength.Long);
                         }
                         else if (e.InnerException is UserOfflineException)
                         {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            {
-                                Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.user_info_failed_offline), uname), ToastLength.Long).Show();
-                            });
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.user_info_failed_offline), uname), ToastLength.Long);
                         }
                         else if (e.InnerException is TimeoutException)
                         {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            {
-                                Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.user_info_failed_timeout), uname), ToastLength.Long).Show();
-                            });
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.user_info_failed_timeout), uname), ToastLength.Long);
                         }
                         else
                         {

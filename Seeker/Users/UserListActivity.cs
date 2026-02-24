@@ -407,7 +407,7 @@ namespace Seeker
         {
             if (!massImportCase)
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.adding_user_), username), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.adding_user_), username), ToastLength.Short);
             }
 
             Action<Task<Soulseek.UserData>> continueWithAction = (Task<Soulseek.UserData> t) =>
@@ -417,24 +417,18 @@ namespace Seeker
                     //failed to add user
                     if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.ToLower().Contains("the wait timed out"))
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(c, Resource.String.error_adding_user_timeout, ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_adding_user_timeout), ToastLength.Short);
                     }
                     else if (t.Exception != null && t.Exception != null && t.Exception.InnerException is Soulseek.UserNotFoundException)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                        if (!massImportCase)
                         {
-                            if (!massImportCase)
-                            {
-                                Toast.MakeText(c, Resource.String.error_adding_user_not_found, ToastLength.Short).Show();
-                            }
-                            else
-                            {
-                                Toast.MakeText(c, String.Format("Error adding {0}: user not found", username), ToastLength.Short).Show();
-                            }
-                        });
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_adding_user_not_found), ToastLength.Short);
+                        }
+                        else
+                        {
+                            SeekerApplication.Toaster.ShowToast(String.Format("Error adding {0}: user not found", username), ToastLength.Short);
+                        }
                     }
                 }
                 else
@@ -463,19 +457,19 @@ namespace Seeker
 
             if (username == string.Empty || username == null)
             {
-                Toast.MakeText(c, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_add), ToastLength.Short);
                 return;
             }
 
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(c, Resource.String.must_be_logged_to_add_or_remove_user, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short);
                 return;
             }
 
             if (UserListService.Instance.ContainsUser(username))
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_), username), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.already_added_user_), username), ToastLength.Short);
                 return;
             }
 
@@ -487,7 +481,7 @@ namespace Seeker
                     Logger.Debug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
                     if (!(t.Exception.InnerException is FaultPropagationException))
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                     }
                     throw new FaultPropagationException();
                 }
@@ -628,7 +622,7 @@ namespace Seeker
                 {
                     if (string.IsNullOrEmpty(input.Text))
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_add), ToastLength.Short);
                         return;
                     }
 

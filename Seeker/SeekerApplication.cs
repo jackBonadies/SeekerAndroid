@@ -573,7 +573,7 @@ namespace Seeker
                 if (!diagnosticFilesystemErrorShown)
                 {
                     Logger.Firebase("failed to write to diagnostic file " + ex.Message + line + ex.StackTrace);
-                    Toast.MakeText(SeekerApplication.ApplicationContext, "Failed to write to diagnostic file.", ToastLength.Long);
+                    SeekerApplication.Toaster.ShowToast("Failed to write to diagnostic file.", ToastLength.Long);
                     diagnosticFilesystemErrorShown = true;
                 }
             }
@@ -1211,7 +1211,7 @@ namespace Seeker
                     Logger.Debug("Kicked Kicked Kicked");
                     if (SeekerState.ActiveActivityRef != null)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.kicked_due_to_other_client), ToastLength.Long);
                     }
                     return; //DO NOT RETRY!!! or will do an infinite loop!
                 }
@@ -1263,10 +1263,7 @@ namespace Seeker
                 }
                 else
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.port_already_in_use), ToastLength.Short).Show(); //todo is this supposed to be here...
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.port_already_in_use), ToastLength.Short); //todo is this supposed to be here...
                 }
             }
         }
@@ -1390,11 +1387,11 @@ namespace Seeker
         {
             if (SeekerApplication.AddToIgnoreList(username))
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.added_to_ignore), username), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.added_to_ignore), username), ToastLength.Short);
             }
             else
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short);
             }
         }
         public static Task OurCurrentLoginTask = null;
@@ -1618,7 +1615,7 @@ namespace Seeker
         {
             if (RemoveFromIgnoreList(username))
             {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.removed_user_from_ignored_list), username), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.removed_user_from_ignored_list), username), ToastLength.Short);
             }
             else
             {

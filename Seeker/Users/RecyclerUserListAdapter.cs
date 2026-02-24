@@ -239,7 +239,7 @@ namespace Seeker.Users
 
         public void ViewUserStatus_LongClick(object sender, View.LongClickEventArgs e)
         {
-            Toast.MakeText(SeekerState.ActiveActivityRef, (sender as ImageView).TooltipText, ToastLength.Short).Show();
+            SeekerApplication.Toaster.ShowToast((sender as ImageView).TooltipText, ToastLength.Short);
         }
 
         //both item.UserStatus and item.UserData have status

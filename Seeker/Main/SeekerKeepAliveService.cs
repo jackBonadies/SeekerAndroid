@@ -77,7 +77,7 @@ namespace Seeker
                 bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
                 Logger.Firebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
-                SeekerApplication.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
+                SeekerApplication.Toaster.ShowToast($"StartForeground failed - is foreground: {foreground}", ToastLength.Long);
 #endif
             }
 

@@ -449,7 +449,7 @@ namespace Seeker
         {
             if (!ChatroomController.JoinedRoomData.ContainsKey(roomInfo.Name))
             {
-                Toast.MakeText(this, this.Resources.GetString(Resource.String.room_data_still_loading), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_data_still_loading), ToastLength.Short);
                 return;
             }
             var roomUserListDialog = new RoomUserListDialog(roomInfo.Name, isPrivate);
@@ -476,7 +476,7 @@ namespace Seeker
                 string userToAdd = input.Text;
                 if (userToAdd == null || userToAdd == string.Empty)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short);
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
@@ -687,7 +687,7 @@ namespace Seeker
                 bool isPrivate = chatPrivateCheckBox.Checked;
                 if (chatname == null || chatname == string.Empty)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.must_type_chatroom_name), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_chatroom_name), ToastLength.Short);
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
