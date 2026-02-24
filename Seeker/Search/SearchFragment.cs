@@ -593,7 +593,7 @@ namespace Seeker
             //    contextToUse = SeekerState.ActiveActivityRef;
             //}
 
-            actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.autoSuggestionRow, searchHistory);
+            actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.search_dropdown_item, searchHistory);
             actv.KeyPress -= Actv_KeyPressHELPER;
             actv.KeyPress += Actv_KeyPressHELPER;
             actv.FocusChange += MainActivity_FocusChange;
@@ -1659,7 +1659,7 @@ namespace Seeker
             if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
             {
                 AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.autoSuggestionRow, searchHistory);
+                actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, searchHistory);
             }
         }
 
@@ -2492,7 +2492,7 @@ namespace Seeker
                         return;
                     }
                 }
-                actv.Adapter = new ArrayAdapter<string>(SearchFragment.Instance.context, Resource.Layout.autoSuggestionRow, searchHistory); //refresh adapter
+                actv.Adapter = new ArrayAdapter<string>(SearchFragment.Instance.context, Resource.Layout.search_dropdown_item, searchHistory); //refresh adapter
             }
         }
 
