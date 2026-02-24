@@ -581,7 +581,7 @@ Nombre de dossiers : {5}
     <string name="set_ticker">Changer le ticker :</string>
     <string name="setticker">Changer le ticker</string>
     <string name="chatrooms">Salons de discussion</string>
-    <string name="create_chatroom_">Créer un salon de discussion :</string>
+    <string name="create_chatroom_">Créer un salon de discussion</string>
     <string name="edit_info">Modifier les infos</string>
 
     <string name="okay">OK</string>

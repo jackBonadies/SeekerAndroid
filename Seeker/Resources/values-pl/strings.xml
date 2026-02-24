@@ -581,7 +581,7 @@ Liczba katalogów: {5}\"
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
-    <string name="create_chatroom_">Create Chatroom:</string>
+    <string name="create_chatroom_">Create Chatroom</string>
     <string name="edit_info">Edit Info</string>
 
     <string name="okay">OK</string>

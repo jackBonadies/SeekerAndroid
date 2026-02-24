@@ -581,7 +581,7 @@ Počet adresářů: {5}\"
     <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatovací místnost</string>
-    <string name="create_chatroom_">Vytvořit místnost:</string>
+    <string name="create_chatroom_">Vytvořit místnost</string>
     <string name="edit_info">Upravit informace</string>
 
     <string name="okay">OK</string>

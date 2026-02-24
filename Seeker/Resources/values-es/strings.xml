@@ -581,7 +581,7 @@ Directorio: {5}
     <string name="set_ticker">Asignar Ticker:</string>
     <string name="setticker">Asignar Ticker</string>
     <string name="chatrooms">Salas de chat</string>
-    <string name="create_chatroom_">Crear sala de chat:</string>
+    <string name="create_chatroom_">Crear sala de chat</string>
     <string name="edit_info">Editar información</string>
 
     <string name="okay">Aceptar</string>
