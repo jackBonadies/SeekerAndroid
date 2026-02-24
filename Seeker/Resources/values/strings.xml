@@ -160,13 +160,13 @@ Directory Count: {5}"
     <string name="search_here">Search Here</string>
 
     <string name="seeker_needs_dl_dir">
-        Seeker needs Access to a Directory to Save Downloaded Files
+        Choose Download Location
     </string>
     <string name="seeker_needs_dl_dir_content">
-        Please Choose a Download Directory (Default is the Music Folder)
+        Select a folder where Seeker will save downloaded files
     </string>
     <string name="seeker_needs_dl_dir_error">
-        Must select a directory to place downloaded files
+        A download folder is required to save files
     </string>
     <string name="seeker_needs_dl_dir_choose_settings">
         Please set a download directory in Settings.
