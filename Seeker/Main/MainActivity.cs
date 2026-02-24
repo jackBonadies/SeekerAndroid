@@ -1912,87 +1912,11 @@ namespace Seeker
         //}
 
 
-        public static void ToastUI(int msgCode)
-        {
-            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(msgCode), ToastLength.Long).Show();
-        }
-
-        public static void ToastUI_short(int msgCode)
-        {
-            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(msgCode), ToastLength.Short).Show();
-        }
-
         private static bool HasNonASCIIChars(string str)
         {
             return (System.Text.Encoding.UTF8.GetByteCount(str) != str.Length);
         }
 
-
-        /// <summary>
-        /// This is to solve the problem of, are all the toasts part of the same session?  
-        /// For example if you download a locked folder of 20 files, you will get immediately 20 toasts
-        /// So our logic is, if you just did a message, wait a full second before showing anything more.
-        /// </summary>
-        /// <param name="msgToToast"></param>
-        /// <param name="caseOrCode"></param>
-        /// <param name="usernameIfApplicable"></param>
-        /// <param name="seconds">might be useful to increase this if something has a lot of variance even if requested at the same time, like a timeout.</param>
-        public static void ToastUIWithDebouncer(string msgToToast, string caseOrCode, string usernameIfApplicable = "", int seconds = 1)
-        {
-            long curTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            //if it does not exist then updatedTime will be curTime.  If it does exist but is older than a second then updated time will also be curTime.  In those two cases, show the toast.
-            Logger.Debug("curtime " + curTime);
-            bool stale = false;
-            long updatedTime = ToastUIDebouncer.AddOrUpdate(caseOrCode + usernameIfApplicable, curTime, (key, oldValue) =>
-            {
-
-                Logger.Debug("key exists: " + (curTime - oldValue).ToString());
-
-                stale = (curTime - oldValue) < (seconds * 1000);
-                if (stale)
-                {
-                    Logger.Debug("stale");
-                }
-
-                return stale ? oldValue : curTime;
-            });
-            Logger.Debug("updatedTime " + updatedTime);
-            if (!stale)
-            {
-                ToastUI(msgToToast);
-            }
-        }
-        private static System.Collections.Concurrent.ConcurrentDictionary<string, long> ToastUIDebouncer = new System.Collections.Concurrent.ConcurrentDictionary<string, long>();
-
-        public static void ToastUI(string msg)
-        {
-            if (OnUIthread())
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Long).Show();
-            }
-            else
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Long).Show();
-                });
-            }
-        }
-
-        public static void ToastUI_short(string msg)
-        {
-            if (OnUIthread())
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Short).Show();
-            }
-            else
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, msg, ToastLength.Short).Show();
-                    });
-            }
-        }
 
         /// <summary>
         /// 

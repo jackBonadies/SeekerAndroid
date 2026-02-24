@@ -1287,18 +1287,6 @@ namespace Seeker
         //    }
         //}
 
-        public static void ShowToast(string msg, ToastLength toastLength)
-        {
-            if (SeekerState.ActiveActivityRef == null)
-            {
-                Logger.Debug("cant show toast, active activity ref is null");
-            }
-            else
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, msg, toastLength).Show(); });
-            }
-        }
-
         public static string GetString(int resId)
         {
             return SeekerApplication.ApplicationContext.GetString(resId);
