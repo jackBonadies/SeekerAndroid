@@ -23,7 +23,6 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/mainPurple"
             android:minHeight="100dp"
-            android:theme="?attr/actionBarTheme"
             app:popupTheme="@style/AppTheme.PopupOverlay"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp"

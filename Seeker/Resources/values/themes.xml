@@ -14,6 +14,11 @@
         <item name="android:navigationBarColor" tools:targetApi="21">
             #FF000000
         </item>
+        <!--<item name="colorPrimary">#3598D8</item>-->
+        <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorSurface">#FEF7FF</item>
+        <item name="colorOnSurface">?attr/normalTextColor</item>
+		<item name="colorOnBackground">?attr/normalTextColor</item>
 
         <item name="normalTextColor">#000000</item>
         <item name="normalTextColorNonTinted">#000000</item>

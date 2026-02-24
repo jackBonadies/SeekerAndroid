@@ -524,6 +524,10 @@ namespace Seeker
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
             {
                 Logger.Debug("IME ACTION: " + e.ActionId.ToString());
+                if (rootView == null || SeekerState.MainActivityRef == null)
+                {
+                    return;
+                }
                 rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 rootView.FindViewById<View>(Resource.Id.relativeLayout1).RequestFocus();
                 //overriding this, the keyboard fails to go down by default for some reason.....
