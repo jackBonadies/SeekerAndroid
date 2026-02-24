@@ -990,6 +990,7 @@ namespace Seeker
                 //task.ContinueWith(SeekerState.MainActivityRef.DownloadContinuationActionUI(new DownloadAddedEventArgs(new DownloadInfo(item1.Username,item1.FullFilename,item1.Size,task, cancellationTokenSource))));
                 item.Progress = 0; //no longer red... some good user feedback
                 item.Failed = false;
+                item.TransferItemExtra &= ~TransferItemExtras.DirNotSet;
 
             }
 
@@ -1140,6 +1141,7 @@ namespace Seeker
             item1.Progress = 0; //no longer red... some good user feedback
             item1.QueueLength = int.MaxValue; //let the State Changed update this for us...
             item1.Failed = false;
+            item1.TransferItemExtra &= ~TransferItemExtras.DirNotSet;
             var refreshOnlySelected = new Action(() =>
             {
 

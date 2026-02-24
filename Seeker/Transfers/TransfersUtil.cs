@@ -88,7 +88,7 @@ namespace Seeker.Transfers
                 var e = new DownloadAddedEventArgs(dlInfo);
                 Action<Task> continuationActionSaveFile = DownloadService.DownloadContinuationActionUI(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
-                // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next 
+                // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next
                 await waitForNext;
             }
         }
@@ -225,7 +225,20 @@ namespace Seeker.Transfers
                 long partialLength = 0;
                 Android.Net.Uri incompleteUri = null;
                 Android.Net.Uri incompleteUriDirectory = null;
-                DownloadService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
+                try
+                {
+                    DownloadService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
+                }
+                catch (DownloadDirectoryNotSetException ex)
+                {
+                    if (dlInfo?.TransferItemReference != null)
+                    {
+                        MarkTransferItemAsDirNotSet(dlInfo.TransferItemReference);
+                    }
+                    MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_");
+                    waitForNext = Task.CompletedTask;
+                    return Task.FromException(ex);
+                }
 
                 if (dlInfo?.TransferItemReference != null)
                 {
@@ -248,5 +261,12 @@ namespace Seeker.Transfers
         }
 
 
+        public static void MarkTransferItemAsDirNotSet(TransferItem item)
+        {
+            item.Failed = true;
+            item.State = Soulseek.TransferStates.Errored;
+            item.TransferItemExtra |= TransferItemExtras.DirNotSet;
+            item.InProcessing = false;
+        }
     }
 }

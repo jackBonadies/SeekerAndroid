@@ -15,5 +15,10 @@ namespace Seeker.Transfers
         /// for single items" is checked.
         /// </summary>
         NoSubfolder = 1,
+
+        /// <summary>
+        /// The download directory was not set when the download was attempted.
+        /// </summary>
+        DirNotSet = 2,
     }
 }

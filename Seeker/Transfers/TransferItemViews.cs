@@ -7,6 +7,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -641,6 +642,10 @@ namespace Seeker
             else if (item is TransferItem && state.HasFlag(TransferStates.CannotConnect))
             {
                 viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.CannotConnect);
+            }
+            else if (item is TransferItem ti2 && ti2.TransferItemExtra.HasFlag(TransferItemExtras.DirNotSet))
+            {
+                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.DirectoryNotSet);
             }
             else
             {

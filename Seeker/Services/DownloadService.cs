@@ -611,6 +611,7 @@ namespace Seeker.Services
                         }
                         else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
+                            Transfers.TransfersUtil.MarkTransferItemAsDirNotSet(transferItem);
                             action = () => { MainActivity.ToastUIWithDebouncer(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
