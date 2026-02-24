@@ -107,10 +107,13 @@ namespace Seeker
             set => Common.PreferencesState.LogDiagnostics = value;
         }
 
+        public static IToaster Toaster { get; private set; }
+
         public override void OnCreate()
         {
             base.OnCreate();
             ApplicationContext = this;
+            Toaster = new AndroidToaster();
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
