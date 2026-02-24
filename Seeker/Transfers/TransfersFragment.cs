@@ -1196,9 +1196,9 @@ namespace Seeker
                     return base.OnContextItemSelected(item);
                 }
 
-                switch (item.ItemId)
+                switch ((TransferContextMenuItem)item.ItemId)
                 {
-                    case 0: //single transfer only
+                    case TransferContextMenuItem.RetryResumeDownload: //single transfer only
                         //retry download (resume download)
                         if (NotLoggedInShowMessageGaurd("start transfer"))
                         {
@@ -1239,7 +1239,7 @@ namespace Seeker
                         }
                         //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
                         break;
-                    case 1:
+                    case TransferContextMenuItem.ClearFromList:
                         //clear complete?
                         //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                         Logger.InfoFirebase("Clear Complete item pressed");
@@ -1266,7 +1266,7 @@ namespace Seeker
                             //refreshListView();
                         }
                         break;
-                    case 2: //cancel and clear (downloads) OR abort and clear (uploads)
+                    case TransferContextMenuItem.CancelAndClear: //cancel and clear (downloads) OR abort and clear (uploads)
                         //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                         Logger.InfoFirebase("Cancel and Clear item pressed");
                         ITransferItem tItem = null;
@@ -1315,7 +1315,7 @@ namespace Seeker
                             Logger.InfoFirebase("Cancel and Clear item pressed - bad item");
                         }
                         break;
-                    case 3:
+                    case TransferContextMenuItem.RefreshQueuePosition:
                         if (NotLoggedInShowMessageGaurd("get queue position"))
                         {
                             return true;
@@ -1351,7 +1351,7 @@ namespace Seeker
                             }
                         }
                         break;
-                    case 4:
+                    case TransferContextMenuItem.PlayFile:
                         tItem = null;
                         try
                         {
@@ -1377,7 +1377,7 @@ namespace Seeker
                                 uriToUse = Android.Net.Uri.Parse((tItem as TransferItem).FinalUri);
                             }
                             Intent playFileIntent = new Intent(Intent.ActionView);
-                            //playFileIntent.SetDataAndType(uriToUse,"audio/*");  
+                            //playFileIntent.SetDataAndType(uriToUse,"audio/*");
                             playFileIntent.SetDataAndType(uriToUse, CommonHelpers.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
                             playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
                             //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
@@ -1389,7 +1389,7 @@ namespace Seeker
                             Toast.MakeText(this.Context, Resource.String.failed_to_play, ToastLength.Short).Show(); //normally bc no player is installed.
                         }
                         break;
-                    case 7: //browse at location (browse at folder)
+                    case TransferContextMenuItem.BrowseAtLocation: //browse at location (browse at folder)
                         if (NotLoggedInShowMessageGaurd("browse folder"))
                         {
                             return true;
@@ -1427,7 +1427,7 @@ namespace Seeker
                             DownloadDialog.RequestFilesApi(fi.Username, this.View, action, startingDir);
                         }
                         break;
-                    case 100: //resume folder
+                    case TransferContextMenuItem.ResumeFolder: //resume folder
                         if (NotLoggedInShowMessageGaurd("resume folder"))
                         {
                             return true;
@@ -1466,12 +1466,12 @@ namespace Seeker
                             DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
                         }
                         break;
-                    case 101: //pause folder or abort uploads (uploads)
+                    case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
                         int index = TransferItemManagerWrapped.GetIndexForFolderItem(ti as FolderItem);
                         recyclerTransferAdapter.NotifyItemChanged(index);
                         break;
-                    case 102: //retry failed downloads from folder
+                    case TransferContextMenuItem.RetryFailedFiles: //retry failed downloads from folder
                         if (NotLoggedInShowMessageGaurd("retry folder"))
                         {
                             return true;
@@ -1510,7 +1510,7 @@ namespace Seeker
                             DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
                         }
                         break;
-                    case 103: //abort upload
+                    case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");
                         tItem = null;
                         try
@@ -1534,7 +1534,7 @@ namespace Seeker
                             recyclerTransferAdapter.NotifyItemChanged(position);
                         }
                         break;
-                    case 104: //ignore (unshare) user
+                    case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
                         Logger.InfoFirebase("Unshare User item pressed");
                         IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
                         foreach (var tiToCancel in tItems)
@@ -1553,7 +1553,7 @@ namespace Seeker
                         }
                         SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
                         break;
-                    case 105: //batch selection mode
+                    case TransferContextMenuItem.BatchSelect: //batch selection mode
                         TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                         ForceOutIfZeroSelected = true;
                         //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);

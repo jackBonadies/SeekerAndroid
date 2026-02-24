@@ -219,6 +219,30 @@ namespace Seeker
 
         }
 
+        public enum TransferContextMenuItem
+        {
+            RetryResumeDownload = 0,
+            ClearFromList = 1,
+            CancelAndClear = 2,
+            RefreshQueuePosition = 3,
+            PlayFile = 4,
+            UserOptions = 5,
+            BrowseUser = 6,
+            BrowseAtLocation = 7,
+            SearchUserFiles = 8,
+            AddRemoveUser = 9,
+            MessageUser = 10,
+            GetUserInfo = 11,
+            UserNote = 12,
+            GivePrivileges = 13,
+            ResumeFolder = 100,
+            PauseFolderOrAbortUploads = 101,
+            RetryFailedFiles = 102,
+            AbortUpload = 103,
+            IgnoreUnshareUser = 104,
+            BatchSelect = 105,
+        }
+
         public const int UNIQUE_TRANSFER_GROUP_ID = 303;
         public class TransferViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
         {
@@ -279,22 +303,22 @@ namespace Seeker
                     {
                         if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 0, 0, Resource.String.resume_dl);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.resume_dl);
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 0, 0, Resource.String.retry_dl);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.retry_dl);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 100, 0, Resource.String.ResumeFolder);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ResumeFolder, 0, Resource.String.ResumeFolder);
                         }
                         else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.PauseFolder);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.PauseFolder);
                         }
                     }
                 }
@@ -304,14 +328,14 @@ namespace Seeker
                     {
                         if (tvh != null && ti != null && !(SimpleHelpers.IsUploadCompleteOrAborted(ti.State)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 103, 0, Resource.String.AbortUpload);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.AbortUpload, 0, Resource.String.AbortUpload);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && !(SimpleHelpers.IsUploadCompleteOrAborted(folderItemState))) ;
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 101, 0, Resource.String.AbortUploads);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.AbortUploads);
                         }
                     }
                 }
@@ -321,23 +345,23 @@ namespace Seeker
                     {
                         if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.cancel_and_clear);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.cancel_and_clear);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
                         }
                     }
                 }
@@ -347,23 +371,23 @@ namespace Seeker
                     {
                         if (tvh != null && ti != null && (SimpleHelpers.IsUploadCompleteOrAborted(ti.State)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
                             //if completed then we dont need to show the cancel option...
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.AbortandClearUpload);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.AbortandClearUpload);
                         }
                     }
                     else
                     {
                         if (tvh != null && fi != null && (SimpleHelpers.IsUploadCompleteOrAborted(folderItemState)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 1, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
                         }
                         else
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 2, 2, Resource.String.AbortandClearUploads);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.AbortandClearUploads);
                         }
                     }
                 }
@@ -386,7 +410,7 @@ namespace Seeker
                                 }
                                 else
                                 {
-                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 3, 3, Resource.String.refresh_queue_pos);
+                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RefreshQueuePosition, 3, Resource.String.refresh_queue_pos);
                                 }
                             }
                         }
@@ -406,7 +430,7 @@ namespace Seeker
                                 }
                                 else
                                 {
-                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 3, 3, Resource.String.refresh_queue_pos);
+                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RefreshQueuePosition, 3, Resource.String.refresh_queue_pos);
                                 }
                             }
                         }
@@ -419,7 +443,7 @@ namespace Seeker
                     {
                         if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri != string.Empty)
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 4, 4, Resource.String.play_file);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PlayFile, 4, Resource.String.play_file);
                         }
                     }
                     else
@@ -427,26 +451,26 @@ namespace Seeker
                         if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
                         {
                             //no op
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 102, 4, Resource.String.RetryFailedFiles);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryFailedFiles, 4, Resource.String.RetryFailedFiles);
                         }
                     }
                 }
-                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, 5, 5, Resource.String.UserOptions);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 6, 6, Resource.String.browse_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 7, 7, Resource.String.browse_at_location);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 8, 8, Resource.String.search_user_files);
-                CommonHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 9, 9, tvh.InnerTransferItem.GetUsername(), false);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 10, 10, Resource.String.msg_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, 11, 11, Resource.String.get_user_info);
-                CommonHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, 12, 12, tvh.InnerTransferItem.GetUsername());
-                CommonHelpers.AddGivePrivilegesIfApplicable(subMenu, 13);
+                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.UserOptions, 5, Resource.String.UserOptions);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BrowseUser, 6, Resource.String.browse_user);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BrowseAtLocation, 7, Resource.String.browse_at_location);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.SearchUserFiles, 8, Resource.String.search_user_files);
+                CommonHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.AddRemoveUser, 9, tvh.InnerTransferItem.GetUsername(), false);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.MessageUser, 10, Resource.String.msg_user);
+                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.GetUserInfo, 11, Resource.String.get_user_info);
+                CommonHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.UserNote, 12, tvh.InnerTransferItem.GetUsername());
+                CommonHelpers.AddGivePrivilegesIfApplicable(subMenu, (int)TransferContextMenuItem.GivePrivileges);
 
                 if (isUpload)
                 {
-                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, 104, 6, Resource.String.IgnoreUnshareUser);
+                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.IgnoreUnshareUser, 6, Resource.String.IgnoreUnshareUser);
                 }
                 //finally batch selection mode
-                menu.Add(UNIQUE_TRANSFER_GROUP_ID, 105, 16, Resource.String.BatchSelect);
+                menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BatchSelect, 16, Resource.String.BatchSelect);
 
                 //if (!isUpload)
                 //{
