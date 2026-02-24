@@ -98,7 +98,7 @@
         parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"
     />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />
 
     <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
     <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
