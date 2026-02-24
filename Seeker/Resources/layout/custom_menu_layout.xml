@@ -16,7 +16,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
     />
-    <AutoCompleteTextView
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
         android:layout_toEndOf="@id/search_tabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -26,8 +26,9 @@
         android:background="@drawable/search_bar_background"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:layout_centerVertical="true"
-        android:popupBackground="?attr/cellback"
         android:layout_weight="1"
         android:hint="@string/search_here"
         android:completionThreshold="0"

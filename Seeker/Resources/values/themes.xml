@@ -298,6 +298,13 @@
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
+        <item name="colorPrimary">#3598D8</item>
+        <item name="colorOnPrimary">#303030</item>
+        <item name="colorSurface">#303030</item>
+        <item name="colorOnSurface">?attr/normalTextColor</item>
+		<item name="colorOnBackground">?attr/normalTextColor</item>
+        <item name="mainTextColor">#bcc1f7</item>
+
         <!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
 			I assume this is because other apps were setting it, and we werent. so remedy this here.-->
         <item name="android:navigationBarColor" tools:targetApi="21">
@@ -314,7 +321,7 @@
 
         <item name="seeker_notification_other_person_color">#AF9AF4</item>
 
-        <item name="pseudo_window_background_color">#00000000</item>
+        <item name="pseudo_window_background_color">#ff303030</item>
         <item name="expandIconColor">#ffffffff</item>
         <item name="normalTextColor">#FFFFFF</item>
         <item name="normalTextColorNonTinted">#FFFFFF</item>
@@ -334,7 +341,6 @@
         <item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
 
         <item name="cellbackColorDownloadDialog">#ff424242</item>
-        <item name="mainTextColor">#bcc1f7</item>
         <item name="buttonEnabledDisabledTextColor">
             @drawable/buttonEnabledDisabledTextColor_bcc1f7
         </item>
@@ -367,6 +373,7 @@
     </style>
 
     <style name="Amoled" parent="DefaultDark">
+        <item name="colorSurface">#000000</item>
         <item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
         <item name="floating_action_bar_to_bottom_background">#303030</item>
         <item name="swipeToRefreshBackground">#ff343434</item>

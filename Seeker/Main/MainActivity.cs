@@ -2440,17 +2440,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
 
-                    //string initText = string.Empty;
-                    //if (this.SupportActionBar?.CustomView != null) //it is null on device rotation...
-                    //{
-                    //    AutoCompleteTextView v = this.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                    //    if(v!=null)
-                    //    {
-                    //        initText = v.Text;
-                    //    }
-                    //}
-                    //the SupportActionBar.CustomView will still be here if we leave tabs and come back.. so just set the text on it again.
-
                     this.SupportActionBar.SetDisplayShowCustomEnabled(true);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(false);
                     this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
