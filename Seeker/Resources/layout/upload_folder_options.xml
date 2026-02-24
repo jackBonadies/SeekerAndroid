@@ -6,21 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 >
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/lockedUserlistOnly"
         android:text="@string/LockedUserListOnly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
     />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/hiddenUserlistOnly"
         android:text="@string/HiddenUserListOnly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
     />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/overrideFolderName"
         android:text="@string/OverrideFolderName"
         android:layout_width="wrap_content"

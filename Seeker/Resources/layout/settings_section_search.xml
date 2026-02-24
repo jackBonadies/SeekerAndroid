@@ -55,7 +55,7 @@
         android:id="@+id/smartFilterLayout"
         android:orientation="horizontal">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
             android:id="@+id/configureSmartFilters" />
     </LinearLayout>
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
         android:layout_gravity="center_vertical"
         android:id="@+id/freeUploadSlots" />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -90,7 +90,7 @@
         android:layout_gravity="center_vertical"
         android:id="@+id/showLockedInSearch" />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -106,7 +106,7 @@
         android:id="@+id/searchHistoryLayout"
         android:orientation="horizontal">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

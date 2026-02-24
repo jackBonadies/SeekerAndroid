@@ -80,7 +80,7 @@
             </TableRow>
         </TableLayout>
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
             android:layout_gravity="center"
             android:id="@+id/createCompleteAndIncompleteDirectories" />
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
             android:layout_gravity="center"
             android:id="@+id/createUsernameSubfolders" />
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -125,7 +125,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_horizontal|fill_horizontal|center">
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     style="@style/SettingsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -240,7 +240,7 @@
         android:id="@+id/memoryFileDownloadSwitch"
         android:orientation="horizontal">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -258,7 +258,7 @@
             android:id="@+id/memoryFileDownloadSwitchIcon" />
     </LinearLayout>
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -266,7 +266,7 @@
         android:layout_gravity="center"
         android:id="@+id/autoClearComplete" />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

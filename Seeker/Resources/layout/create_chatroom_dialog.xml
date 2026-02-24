@@ -25,8 +25,7 @@
             android:inputType="text"
         />
     </com.google.android.material.textfield.TextInputLayout>
-    <CheckBox
-        android:theme="@style/checkBoxStyle"
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/createChatroomPrivate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -22,7 +22,7 @@
         android:id="@+id/keepAliveLayout"
         android:orientation="horizontal">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             android:id="@+id/helpServiceOnStartup" />
     </LinearLayout>
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
         android:layout_gravity="start"
         android:id="@+id/allowPrivateRoomInvitations" />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
         android:layout_gravity="start"
         android:id="@+id/showNotificationOnFolderDownload" />
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
         android:id="@+id/recentUserHistoryLayout"
         android:orientation="horizontal">
 
-        <CheckBox
+        <com.google.android.material.checkbox.MaterialCheckBox
             style="@style/SettingsCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -107,7 +107,7 @@
             android:id="@+id/clearRecentUsers" />
     </LinearLayout>
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         style="@style/SettingsCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

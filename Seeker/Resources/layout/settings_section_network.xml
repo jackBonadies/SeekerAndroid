@@ -32,7 +32,7 @@
                 android:id="@+id/listeningRow1"
                 android:orientation="horizontal">
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     style="@style/SettingsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -99,7 +99,7 @@
                 android:id="@+id/listeningRow3"
                 android:orientation="horizontal">
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     style="@style/SettingsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -141,7 +141,7 @@
                 android:id="@+id/dlSpeedRow1"
                 android:orientation="horizontal">
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     style="@style/SettingsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -214,7 +214,7 @@
                 android:id="@+id/ulSpeedRow1"
                 android:orientation="horizontal">
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     style="@style/SettingsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -289,7 +289,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_horizontal|fill_horizontal|center">
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     style="@style/SettingsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
