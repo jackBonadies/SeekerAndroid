@@ -14,7 +14,32 @@ using Common;
 namespace Seeker.Transfers
 {
     public static class TransfersUtil
-    {    
+    {
+        public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
+
+           
+        public static void ClearDownloadAddedEventsFromTarget(object target)
+        {
+            if (DownloadAddedUINotify == null)
+            {
+                return;
+            }
+            else
+            {
+                foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
+                {
+                    if (d.Target == null) //i.e. static
+                    {
+                        continue;
+                    }
+                    if (d.Target.GetType() == target.GetType())
+                    {
+                        DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
+                    }
+                }
+            }
+        }
+
         public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
         {
             if (username == PreferencesState.Username)
@@ -154,12 +179,12 @@ namespace Seeker.Transfers
                 if (queuePaused)
                 {
                     transferItem.State = TransferStates.Cancelled;
-                    MainActivity.InvokeDownloadAddedUINotify(new DownloadAddedEventArgs(null)); //otherwise the ui will not refresh.
+                    DownloadAddedUINotify?.Invoke(null, new DownloadAddedEventArgs(null));
                 }
                 else
                 {
                     var e = new DownloadAddedEventArgs(downloadInfo);
-                    MainActivity.InvokeDownloadAddedUINotify(e);
+                    DownloadAddedUINotify?.Invoke(null, e);
                 }
             }
             catch (Exception e)

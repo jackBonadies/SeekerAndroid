@@ -1960,7 +1960,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex += TransferStateChanged;
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
-            MainActivity.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
+            DownloadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
             DownloadService.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
@@ -2008,7 +2008,7 @@ namespace Seeker
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
             DownloadService.TransferItemQueueUpdated -= TranferQueueStateChanged;
-            MainActivity.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
+            DownloadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
 
@@ -2018,8 +2018,8 @@ namespace Seeker
         public override void OnCreate(Bundle savedInstanceState)
         {
 
-            MainActivity.ClearDownloadAddedEventsFromTarget(this);
-            MainActivity.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
+            TransfersUtil.ClearDownloadAddedEventsFromTarget(this);
+            TransfersUtil.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
             //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
             //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
             //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 

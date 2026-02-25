@@ -311,6 +311,7 @@ namespace Seeker.Services
 
         public static EventHandler<TransferItem> TransferItemQueueUpdated; //for transferItemPage to update its recyclerView
 
+        public static event EventHandler<TransferItem> TransferAddedUINotify;
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
             string fileS = numFiles == 1 ? SeekerState.ActiveActivityRef.GetString(Resource.String.file) : SeekerState.ActiveActivityRef.GetString(Resource.String.files);
@@ -463,7 +464,7 @@ namespace Seeker.Services
 
             if (!exists) //else the state will simply be updated a bit later. 
             {
-                MainActivity.RaiseTransferAddedUINotify(transferItem);
+                TransferAddedUINotify?.Invoke(null, transferItem);
             }
             // accept all download requests, and begin the upload immediately.
             // normally there would be an internal queue, and uploads would be handled separately.

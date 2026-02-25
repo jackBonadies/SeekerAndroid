@@ -99,37 +99,7 @@ namespace Seeker
         }
 
 
-        public static event EventHandler<TransferItem> TransferAddedUINotify;
-        public static void RaiseTransferAddedUINotify(TransferItem item) => TransferAddedUINotify?.Invoke(null, item);
 
-        public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
-
-        public static void InvokeDownloadAddedUINotify(DownloadAddedEventArgs e)
-        {
-            DownloadAddedUINotify?.Invoke(null, e);
-        }
-
-        public static void ClearDownloadAddedEventsFromTarget(object target)
-        {
-            if (DownloadAddedUINotify == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
-                {
-                    if (d.Target == null) //i.e. static
-                    {
-                        continue;
-                    }
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Presentable Filename, Uri.ToString(), length
@@ -1908,7 +1878,6 @@ namespace Seeker
         //    e.dlInfo.downloadTask.ContinueWith(continuationActionSaveFile);
 
         //    TransfersFragment.TransferItemManagerDL.Add(transferItem);
-        //    MainActivity.DownloadAddedUINotify?.Invoke(null, e);
         //}
 
 
