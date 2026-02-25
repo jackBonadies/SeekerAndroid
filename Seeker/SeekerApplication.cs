@@ -492,6 +492,24 @@ namespace Seeker
             }
         }
 
+        public static void DebugLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
+        {
+            Logger.Debug(e.Message);
+        }
+
+        public static void SoulseekClient_ErrorLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
+        {
+            if (e?.Message != null)
+            {
+                if (e.Message.Contains("Operation timed out"))
+                {
+                    //this happens to me all the time and it is literally fine
+                    return;
+                }
+            }
+            Logger.Firebase(e.Message);
+        }
+
         private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
         {
             //by default e.Handled == false. and this does go on to crash the process (which is good imo, I only want this for logging purposes).

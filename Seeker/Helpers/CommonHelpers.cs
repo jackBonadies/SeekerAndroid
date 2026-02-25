@@ -1182,6 +1182,19 @@ namespace Seeker
             dialog.Show();
         }
 
+        public static void ShowSimpleAlertDialog(Context c, int messageResourceString, int actionResourceString)
+        {
+
+            void OnCloseClick(object sender, DialogClickEventArgs e)
+            {
+                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+            }
+
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
+            //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
+            diag.Show();
+        }
 
         public static void ShowEditAddNoteDialog(string username, Action uiUpdateAction = null)
         {

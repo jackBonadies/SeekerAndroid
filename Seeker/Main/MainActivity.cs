@@ -307,6 +307,7 @@ namespace Seeker
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
 
+            //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
             if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
             {
@@ -334,201 +335,40 @@ namespace Seeker
                 //file picker with legacy case
                 if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
                 {
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    Android.Net.Uri chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                    bool canWrite = false;
-                    try
-                    {
-                        //a phone failed 4 times with //POCO X3 Pro
-                        //Android 11(SDK 30)
-                        //Caused by: java.lang.IllegalArgumentException: 
-                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.SaveDataDirectoryUriIsFromTree)
-                        {
-                            canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
-                        }
-                        else
-                        {
-                            //on changing the code and restarting for api 22 
-                            //persistenduripermissions is empty
-                            //and exists is false, cannot list files
-
-                            //var list1 = this.ContentResolver.PersistedUriPermissions;
-                            //foreach(var item1 in list1)
-                            //{
-                            //    string content1 = item1.Uri.Path;
-                            //}
-
-
-                            canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        if (chosenUri != null)
-                        {
-                            //legacy DocumentFile.FromTreeUri failed with URI: /tree/2A6B-256B:Seeker/Soulseek Complete Invalid URI: /tree/2A6B-256B:Seeker/Soulseek Complete
-                            //legacy DocumentFile.FromTreeUri failed with URI: /tree/raw:/storage/emulated/0/Download/Soulseek Downloads Invalid URI: /tree/raw:/storage/emulated/0/Download/Soulseek Downloads
-                            Logger.Firebase("legacy DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
-                        }
-                        else
-                        {
-                            Logger.Firebase("legacy DocumentFile.FromTreeUri failed with null URI");
-                        }
-                    }
+                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+                    bool canWrite = CheckDirectoryForWritePermission(chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download");
                     if (canWrite)
                     {
-                        if (SeekerState.PreOpenDocumentTree())
-                        {
-                            SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path));
-                        }
-                        else
-                        {
-                            SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, chosenUri);
-                        }
-                    }
-                    else
-                    {
-                        Logger.Firebase("cannot write" + chosenUri?.ToString() ?? "null");
+                        SeekerState.RootDocumentFile = SeekerState.OpenRootFile(this, chosenUri);
                     }
                 }
 
                 //now for incomplete
                 if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
                 {
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    Android.Net.Uri chosenIncompleteUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                    bool canWrite = false;
-                    try
-                    {
-                        //a phone failed 4 times with //POCO X3 Pro
-                        //Android 11(SDK 30)
-                        //Caused by: java.lang.IllegalArgumentException: 
-                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
-                        {
-                            canWrite = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path)).CanWrite();
-                        }
-                        else
-                        {
-                            //on changing the code and restarting for api 22 
-                            //persistenduripermissions is empty
-                            //and exists is false, cannot list files
-
-                            //var list1 = this.ContentResolver.PersistedUriPermissions;
-                            //foreach(var item1 in list1)
-                            //{
-                            //    string content1 = item1.Uri.Path;
-                            //}
-
-
-                            canWrite = DocumentFile.FromTreeUri(this, chosenIncompleteUri).CanWrite();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        if (chosenIncompleteUri != null)
-                        {
-                            Logger.Firebase("legacy Incomplete DocumentFile.FromTreeUri failed with URI: " + chosenIncompleteUri.ToString() + " " + e.Message);
-                        }
-                        else
-                        {
-                            Logger.Firebase("legacy Incomplete DocumentFile.FromTreeUri failed with null URI");
-                        }
-                    }
+                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
+                    bool canWrite = CheckDirectoryForWritePermission(chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete");
                     if (canWrite)
                     {
-                        if (SeekerState.PreOpenDocumentTree())
-                        {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(chosenIncompleteUri.Path));
-                        }
-                        else
-                        {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, chosenIncompleteUri);
-                        }
-                    }
-                    else
-                    {
-                        Logger.Firebase("cannot write incomplete" + chosenIncompleteUri?.ToString() ?? "null");
+                        SeekerState.RootIncompleteDocumentFile = SeekerState.OpenRootFile(this, chosenUri);
                     }
                 }
-
-
             }
             else
             {
-
-                Android.Net.Uri res = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
+                Android.Net.Uri res = null; 
                 if (string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
                 {
-                    //try
-                    //{
-                    //    //storage/emulated/0/music
-                    //    Java.IO.File f = new Java.IO.File(@"/storage/emulated/0/Music");///Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
-                    //    //res = f.ToURI();
-                    //    res = Android.Net.Uri.FromFile(f);//Parse(f.ToURI().ToString());
-                    //}
-                    //catch
-                    //{
-                    //    res = Android.Net.Uri.Parse(defaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
-                    //}
                     res = Android.Net.Uri.Parse(defaultMusicUri);
                 }
                 else
                 {
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
                     res = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                 }
 
-                bool canWrite = false;
-                try
-                {
-                    //a phone failed 4 times with //POCO X3 Pro
-                    //Android 11(SDK 30)
-                    //Caused by: java.lang.IllegalArgumentException: 
-                    //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                    //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                    if (SeekerState.PreOpenDocumentTree() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //this will never get hit..
-                    {
-                        canWrite = DocumentFile.FromFile(new Java.IO.File(res.Path)).CanWrite();
-                    }
-                    else
-                    {
-                        canWrite = DocumentFile.FromTreeUri(this, res).CanWrite();
-                    }
-
-                    // if canwrite is false then if we try to create a file we get null.
-                    //if (PreferencesState.SaveDataDirectoryUriIsFromTree)
-                    //{
-                    //    SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
-
-                    //}
-                    //else
-                    //{
-                    //    SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(res.Path));
-                    //}
-
-                    //var file1 = SeekerState.RootDocumentFile.CreateFile("text/plain", "testing_1234.txt");
-
-
-                }
-                catch (Exception e)
-                {
-                    if (res != null)
-                    {
-                        Logger.Firebase("DocumentFile.FromTreeUri failed with URI: " + res.ToString() + " " + e.Message);
-                    }
-                    else
-                    {
-                        Logger.Firebase("DocumentFile.FromTreeUri failed with null URI");
-                    }
-                }
-                //if (DocumentFile.FromTreeUri(this, Uri.TryCreate("",UriKind.Absolute)))
+                bool canWrite = CheckDirectoryForWritePermission(res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download");
                 if (!canWrite)
                 {
-
                     var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                     b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
                     b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
@@ -558,9 +398,6 @@ namespace Seeker
                     b.SetPositiveButton(Resource.String.okay, eventHandler);
                     b.SetCancelable(false);
                     b.Show();
-
-
-                    //this.SendBroadcast(storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent());
                 }
                 else
                 {
@@ -591,34 +428,7 @@ namespace Seeker
 
                 if (manualSet)
                 {
-                    bool canWriteIncomplete = false;
-                    try
-                    {
-                        //a phone failed 4 times with //POCO X3 Pro
-                        //Android 11(SDK 30)
-                        //Caused by: java.lang.IllegalArgumentException: 
-                        //at android.provider.DocumentsContract.getTreeDocumentId(DocumentsContract.java:1278)
-                        //at androidx.documentfile.provider.DocumentFile.fromTreeUri(DocumentFile.java:136)
-                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
-                        {
-                            canWriteIncomplete = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path)).CanWrite();
-                        }
-                        else
-                        {
-                            canWriteIncomplete = DocumentFile.FromTreeUri(this, incompleteRes).CanWrite();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        if (incompleteRes != null)
-                        {
-                            Logger.Firebase("DocumentFile.FromTreeUri failed with incomplete URI: " + incompleteRes.ToString() + " " + e.Message);
-                        }
-                        else
-                        {
-                            Logger.Firebase("DocumentFile.FromTreeUri failed with incomplete null URI");
-                        }
-                    }
+                    bool canWriteIncomplete = CheckDirectoryForWritePermission(incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete");
                     if (canWriteIncomplete)
                     {
                         if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
@@ -632,6 +442,38 @@ namespace Seeker
                     }
                 }
             }
+        }
+
+        private bool CheckDirectoryForWritePermission(Android.Net.Uri chosenUri, bool directoryUriFromTree, string context)
+        {
+            bool canWrite = false;
+            try
+            {
+                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
+                {
+                    canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
+                }
+                else
+                {
+                    canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
+                }
+            }
+            catch (Exception e)
+            {
+                if (chosenUri != null)
+                {
+                    Logger.Firebase($"{context} DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
+                }
+                else
+                {
+                    Logger.Firebase($"{context} DocumentFile.FromTreeUri failed with null URI");
+                }
+            }
+            if (!canWrite)
+            {
+                Logger.Firebase($"canWrite = false for {context} Uri: " + chosenUri.ToString());
+            }
+            return canWrite;
         }
 
         private void HandleWishlistIntent()
@@ -879,27 +721,6 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// This is responsible for filing the PMs into the data structure...
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SoulseekClient_PrivateMessageReceived(object sender, PrivateMessageReceivedEventArgs e)
-        {
-            AddMessage(e);
-            //string msg = e.Message;
-            //throw new NotImplementedException();
-        }
-
-        private void AddMessage(PrivateMessageReceivedEventArgs messageEvent)
-        {
-
-        }
-
-        private void Navigator_ViewAttachedToWindow(object sender, View.ViewAttachedToWindowEventArgs e)
-        {
-            // throw new NotImplementedException();
-        }
         private void OnCloseClick(object sender, DialogClickEventArgs e)
         {
             (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
@@ -962,21 +783,6 @@ namespace Seeker
 
             return base.OnOptionsItemSelected(item);
         }
-
-        public static void ShowSimpleAlertDialog(Context c, int messageResourceString, int actionResourceString)
-        {
-
-            void OnCloseClick(object sender, DialogClickEventArgs e)
-            {
-                (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-            }
-
-            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
-            //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-            var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
-            diag.Show();
-        }
-
 
         public const string UPLOADS_CHANNEL_ID = "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
@@ -1054,24 +860,7 @@ namespace Seeker
             }
         }
 
-        public static void DebugLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
-        {
-            Logger.Debug(e.Message);
-        }
-
-        public static void SoulseekClient_ErrorLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
-        {
-            if (e?.Message != null)
-            {
-                if (e.Message.Contains("Operation timed out"))
-                {
-                    //this happens to me all the time and it is literally fine
-                    return;
-                }
-            }
-            Logger.Firebase(e.Message);
-        }
-
+        // TODO2026 move
         public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
@@ -1102,6 +891,7 @@ namespace Seeker
             }
         }
 
+        // TODO2026 move
         public static bool ShowMessageAndCreateReconnectTask(Context c, bool silent, out Task connectTask)
         {
             if (c == null)
@@ -1140,6 +930,7 @@ namespace Seeker
             return false;
         }
 
+        // TODO2026 move
         public static bool CurrentlyLoggedInButDisconnectedState()
         {
             return (PreferencesState.CurrentlyLoggedIn &&
@@ -1500,47 +1291,6 @@ namespace Seeker
             }
         }
 
-        private void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)
-        {
-            e.Handled = false; //make sure we still crash.. we just want to clean up..
-            try
-            {
-                //save transfers state !!!
-                TransfersFragment.SaveTransferItems(sharedPreferences);
-            }
-            catch
-            {
-
-            }
-            try
-            {
-                //stop dl service..
-                Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                Logger.Debug("Stop Service");
-                this.StopService(downloadServiceIntent);
-            }
-            catch
-            {
-
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static bool OnUIthread()
-        {
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            {
-                return Looper.MainLooper.IsCurrentThread;
-            }
-            else
-            {
-                return Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread();
-            }
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -1583,6 +1333,7 @@ namespace Seeker
             }
         }
 
+        // TODO2026 fix the whole hacks
         public static void UpdateUIForLoggedIn(View rootView = null, EventHandler BttnClick = null, View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler SettingClick = null)
         {
             var action = new Action(() =>
@@ -1683,9 +1434,26 @@ namespace Seeker
             }
         }
 
+        // TODO2026 move these..
         public static bool IsNotLoggedIn()
         {
             return (!PreferencesState.CurrentlyLoggedIn) || PreferencesState.Username == null || PreferencesState.Password == null || PreferencesState.Username == string.Empty;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public static bool OnUIthread()
+        {
+            if (OperatingSystem.IsAndroidVersionAtLeast(23))
+            {
+                return Looper.MainLooper.IsCurrentThread;
+            }
+            else
+            {
+                return Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread();
+            }
         }
 
 

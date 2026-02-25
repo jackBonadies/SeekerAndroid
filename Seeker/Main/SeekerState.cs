@@ -5,6 +5,7 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
+using AndroidX.DocumentFile.Provider;
 using AndroidX.Fragment.App;
 using Common;
 using Common.Share;
@@ -210,6 +211,18 @@ namespace Seeker
                         BrowseResponseReceived -= (EventHandler<BrowseResponseEvent>)d;
                     }
                 }
+            }
+        }
+
+        public static DocumentFile OpenRootFile(Context context, Android.Net.Uri chosenUri)
+        {
+            if (SeekerState.PreOpenDocumentTree())
+            {
+                return DocumentFile.FromFile(new Java.IO.File(chosenUri.Path));
+            }
+            else
+            {
+                return DocumentFile.FromTreeUri(context, chosenUri);
             }
         }
     }
