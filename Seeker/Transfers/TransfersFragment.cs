@@ -295,7 +295,7 @@ namespace Seeker
                     if (SessionService.CurrentlyLoggedInButDisconnectedState())
                     {
                         Task t;
-                        if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                        if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                         {
                             return base.OnContextItemSelected(item);
                         }
@@ -354,7 +354,7 @@ namespace Seeker
             if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1026,7 +1026,7 @@ namespace Seeker
                         if (SessionService.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1243,7 +1243,7 @@ namespace Seeker
                         if (SessionService.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1276,7 +1276,7 @@ namespace Seeker
                         if (SessionService.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }

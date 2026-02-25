@@ -199,7 +199,7 @@ namespace Seeker
             {
                 Logger.Debug("CurrentlyLoggedInButDisconnectedState");
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(c, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }

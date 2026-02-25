@@ -1971,7 +1971,7 @@ namespace Seeker
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }

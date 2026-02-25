@@ -415,7 +415,7 @@ namespace Seeker
             if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }
@@ -501,7 +501,7 @@ namespace Seeker
             if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }

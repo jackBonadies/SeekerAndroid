@@ -283,7 +283,7 @@ namespace Seeker.Services
             if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     t.ContinueWith(new Action<Task>((Task t) =>
                     {
@@ -327,7 +327,7 @@ namespace Seeker.Services
             if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     t.ContinueWith(new Action<Task>((Task t) =>
                     {

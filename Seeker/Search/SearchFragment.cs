@@ -2515,7 +2515,7 @@ namespace Seeker
                 //    return;
                 //}
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, fromWishlist, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(fromWishlist, out t))
                 {
                     return;
                 }

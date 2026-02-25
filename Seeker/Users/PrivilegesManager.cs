@@ -204,7 +204,7 @@ namespace Seeker.Managers
             if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }

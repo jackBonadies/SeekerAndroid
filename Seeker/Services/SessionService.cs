@@ -20,25 +20,11 @@ namespace Seeker.Services
                 (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
         }
 
-        public static bool ShowMessageAndCreateReconnectTask(Context c, bool silent, out Task connectTask)
+        public static bool ShowMessageAndCreateReconnectTask(bool silent, out Task connectTask)
         {
-            if (c == null)
+            if (!silent)
             {
-                c = SeekerState.MainActivityRef;
-            }
-            if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) //tested..
-            {
-                if (!silent)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                }
-            }
-            else
-            {
-                if (!silent)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                }
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
             }
             //if we are still not connected then creating the task will throw.
             //also if the async part of the task fails we will get task.faulted.
