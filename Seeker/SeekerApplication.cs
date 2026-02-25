@@ -259,9 +259,10 @@ namespace Seeker
 
 
                 SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
-                SoulseekClient.ErrorLogHandler += MainActivity.SoulseekClient_ErrorLogHandler;
-
-                SoulseekClient.DebugLogHandler += MainActivity.DebugLogHandler;
+                #if DEBUG
+                SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
+                SoulseekClient.DebugLogHandler += DebugLogHandler;
+                #endif
 
                 SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
                 SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
@@ -273,10 +274,6 @@ namespace Seeker
             SimpleHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
             SimpleHelpers.UserListService = UserListService.Instance;
-
-            //shouldnt we also connect??? TODO TODO
-
-
         }
 
         private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
