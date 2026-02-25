@@ -54,6 +54,23 @@ namespace Seeker
     public partial class SeekerApplication : Application
     {
         public static Context ApplicationContext = null;
+
+        public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
+        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_Transfer = null;
+        public static System.Timers.Timer KeepAliveInactivityKillTimer = null;
+
+        public static void KeepAliveInactivityKillTimerEllapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (CpuKeepAlive_Transfer != null)
+            {
+                CpuKeepAlive_Transfer.Release();
+            }
+            if (WifiKeepAlive_Transfer != null)
+            {
+                WifiKeepAlive_Transfer.Release();
+            }
+            KeepAliveInactivityKillTimer.Stop();
+        }
         public SeekerApplication(IntPtr javaReference, Android.Runtime.JniHandleOwnership transfer) : base(javaReference, transfer)
         {
         }
@@ -174,6 +191,31 @@ namespace Seeker
             if (SeekerKeepAliveService.WifiKeepAlive_FullService == null)
             {
                 SeekerKeepAliveService.WifiKeepAlive_FullService = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
+            }
+
+            try
+            {
+                if (CpuKeepAlive_Transfer == null)
+                {
+                    CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
+                    CpuKeepAlive_Transfer.SetReferenceCounted(false);
+                }
+                if (WifiKeepAlive_Transfer == null)
+                {
+                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
+                    WifiKeepAlive_Transfer.SetReferenceCounted(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Firebase("error init keepalives: " + e.Message + e.StackTrace);
+            }
+            if (KeepAliveInactivityKillTimer == null)
+            {
+                KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
+                                                                                        //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
+                KeepAliveInactivityKillTimer.Elapsed += KeepAliveInactivityKillTimerEllapsed;
+                KeepAliveInactivityKillTimer.AutoReset = false;
             }
 
             SeekerApplication.SetNetworkState(this);
@@ -604,26 +646,26 @@ namespace Seeker
 
         public static void AcquireTransferLocksAndResetTimer()
         {
-            if (MainActivity.CpuKeepAlive_Transfer != null && !MainActivity.CpuKeepAlive_Transfer.IsHeld)
+            if (CpuKeepAlive_Transfer != null && !CpuKeepAlive_Transfer.IsHeld)
             {
-                MainActivity.CpuKeepAlive_Transfer.Acquire();
+                CpuKeepAlive_Transfer.Acquire();
             }
-            if (MainActivity.WifiKeepAlive_Transfer != null && !MainActivity.WifiKeepAlive_Transfer.IsHeld)
+            if (WifiKeepAlive_Transfer != null && !WifiKeepAlive_Transfer.IsHeld)
             {
-                MainActivity.WifiKeepAlive_Transfer.Acquire();
+                WifiKeepAlive_Transfer.Acquire();
             }
 
-            if (MainActivity.KeepAliveInactivityKillTimer != null)
+            if (KeepAliveInactivityKillTimer != null)
             {
-                MainActivity.KeepAliveInactivityKillTimer.Stop(); //can be null
-                MainActivity.KeepAliveInactivityKillTimer.Start(); //reset the timer..
+                KeepAliveInactivityKillTimer.Stop(); //can be null
+                KeepAliveInactivityKillTimer.Start(); //reset the timer..
             }
             else
             {
-                MainActivity.KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
+                KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
                                                                                                      //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
-                MainActivity.KeepAliveInactivityKillTimer.Elapsed += MainActivity.KeepAliveInactivityKillTimerEllapsed;
-                MainActivity.KeepAliveInactivityKillTimer.AutoReset = false;
+                KeepAliveInactivityKillTimer.Elapsed += KeepAliveInactivityKillTimerEllapsed;
+                KeepAliveInactivityKillTimer.AutoReset = false;
             }
         }
 
@@ -632,17 +674,17 @@ namespace Seeker
             //if all transfers are done..
             if (!SeekerState.UploadKeepAliveServiceRunning && !SeekerState.DownloadKeepAliveServiceRunning)
             {
-                if (MainActivity.CpuKeepAlive_Transfer != null)
+                if (CpuKeepAlive_Transfer != null)
                 {
-                    MainActivity.CpuKeepAlive_Transfer.Release();
+                    CpuKeepAlive_Transfer.Release();
                 }
-                if (MainActivity.WifiKeepAlive_Transfer != null)
+                if (WifiKeepAlive_Transfer != null)
                 {
-                    MainActivity.WifiKeepAlive_Transfer.Release();
+                    WifiKeepAlive_Transfer.Release();
                 }
-                if (MainActivity.KeepAliveInactivityKillTimer != null)
+                if (KeepAliveInactivityKillTimer != null)
                 {
-                    MainActivity.KeepAliveInactivityKillTimer.Stop();
+                    KeepAliveInactivityKillTimer.Stop();
                 }
             }
         }
@@ -830,8 +872,8 @@ namespace Seeker
         {
             try
             {
-                MainActivity.KeepAliveInactivityKillTimer.Stop();
-                MainActivity.KeepAliveInactivityKillTimer.Start();
+                KeepAliveInactivityKillTimer.Stop();
+                KeepAliveInactivityKillTimer.Start();
             }
             catch (System.Exception err)
             {
@@ -1034,8 +1076,8 @@ namespace Seeker
             //Logger.Debug("TRANSFER PROGRESS UPDATED"); //this typically happens once every 10 ms or even less and thats in debug mode.  in fact sometimes it happens 4 times in 1 ms.
             try
             {
-                MainActivity.KeepAliveInactivityKillTimer.Stop(); //lot of nullref here...
-                MainActivity.KeepAliveInactivityKillTimer.Start();
+                KeepAliveInactivityKillTimer.Stop(); //lot of nullref here...
+                KeepAliveInactivityKillTimer.Start();
             }
             catch (System.Exception err)
             {

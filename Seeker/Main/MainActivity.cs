@@ -134,78 +134,6 @@ namespace Seeker
 
         }
 
-
-        /// <summary>
-        /// returns a list of searchable names (final dir + filename) for other's searches, and then the URI so android can actually get that file.
-        /// </summary>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        public void traverseDocumentFile(DocumentFile dir, List<Tuple<string, string, long, string>> pairs, Dictionary<string, List<Tuple<string, string, long>>> auxilaryDuplicatesList, bool isRootCase, string volName, ref int directoryCount)
-        {
-            if (dir.Exists())
-            {
-                DocumentFile[] files = dir.ListFiles();
-                for (int i = 0; i < files.Length; ++i)
-                {
-                    DocumentFile file = files[i];
-                    if (file.IsDirectory)
-                    {
-                        directoryCount++;
-                        traverseDocumentFile(file, pairs, auxilaryDuplicatesList, false, volName, ref directoryCount);
-                    }
-                    else
-                    {
-                        // do something here with the file
-                        //Logger.Debug(file.Uri.ToString()); //encoded string representation //content://com.android.externalstorage.documents/tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20x.mp3
-                        //Logger.Debug(file.Uri.Path.ToString()); //gets decoded path // /tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181x.mp3
-                        //Logger.Debug(Android.Net.Uri.Decode(file.Uri.ToString())); // content://com.android.externalstorage.documents/tree/primary:Soulseek Complete/document/primary:Soulseek Complete/41-60/14-B-181x.mp3
-                        //Logger.Debug(file.Uri.EncodedPath);  // /tree/primary%3ASoulseek%20Complete/document/primary%3ASoulseek%20Complete%2F41-60%2F14-B-181%20x.mp3 
-                        //Logger.Debug(file.Uri.LastPathSegment); // primary:Soulseek Complete/41-60/14-B-181 Welcome To New York-Taylor Swift.mp3
-
-                        string fullPath = file.Uri.Path.ToString().Replace('/', '\\');
-                        string presentableName = file.Uri.LastPathSegment.Replace('/', '\\');
-
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(fullPath) + @"\" + SimpleHelpers.GetFileNameFromFile(fullPath);
-                        if (isRootCase && (volName != null))
-                        {
-                            if (searchableName.Substring(0, volName.Length) == volName)
-                            {
-                                if (searchableName.Length != volName.Length) //i.e. if its just "primary:"
-                                {
-                                    searchableName = searchableName.Substring(volName.Length);
-                                }
-                            }
-                        }
-                        pairs.Add(new Tuple<string, string, long, string>(searchableName, file.Uri.ToString(), file.Length(), presentableName));
-                    }
-                }
-            }
-        }
-
-        public void traverseFile(Java.IO.File dir)
-        {
-            if (dir.Exists())
-            {
-                Java.IO.File[] files = dir.ListFiles();
-                for (int i = 0; i < files.Length; ++i)
-                {
-                    Java.IO.File file = files[i];
-                    if (file.IsDirectory)
-                    {
-                        traverseFile(file);
-                    }
-                    else
-                    {
-                        // do something here with the file
-                        Logger.Debug(file.Path);
-                        Logger.Debug(file.AbsolutePath);
-                        Logger.Debug(file.CanonicalPath);
-                    }
-                }
-            }
-        }
-
-
         public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
         public const int SETTINGS_EXTERNAL = 0x430;
         public const int DEFAULT_SEARCH_RESULTS = 250;
@@ -217,34 +145,15 @@ namespace Seeker
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
+
         private AndroidX.ViewPager.Widget.ViewPager pager = null;
 
-        public static PowerManager.WakeLock CpuKeepAlive_Transfer = null;
-        public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_Transfer = null;
-        public static System.Timers.Timer KeepAliveInactivityKillTimer = null;
-
-        public static void KeepAliveInactivityKillTimerEllapsed(object sender, System.Timers.ElapsedEventArgs e)
-        {
-            if (CpuKeepAlive_Transfer != null)
-            {
-                CpuKeepAlive_Transfer.Release();
-            }
-            if (WifiKeepAlive_Transfer != null)
-            {
-                WifiKeepAlive_Transfer.Release();
-            }
-            KeepAliveInactivityKillTimer.Stop();
-        }
 
 
         private ISharedPreferences sharedPreferences;
         private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         protected override void OnCreate(Bundle savedInstanceState)
         {
-
-            //basically if the Intent created the MainActivity, then we want to handle it (i.e. if from "Search Here")
-            //however, if we say rotate the device or leave and come back to it (and the activity got destroyed in the mean time) then
-            //it will re-handle the activity each time.  We can check if it is truly "new" by looking at the savedInstanceState.
             bool reborn = false;
             if (savedInstanceState == null)
             {
@@ -255,47 +164,11 @@ namespace Seeker
                 reborn = true;
                 Logger.Debug("Main Activity On Create REBORN");
             }
-
-
-            try
-            {
-                if (CpuKeepAlive_Transfer == null)
-                {
-                    CpuKeepAlive_Transfer = ((PowerManager)this.GetSystemService(Context.PowerService)).NewWakeLock(WakeLockFlags.Partial, "Seeker Download CPU_Keep_Alive");
-                    CpuKeepAlive_Transfer.SetReferenceCounted(false);
-                }
-                if (WifiKeepAlive_Transfer == null)
-                {
-                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
-                    WifiKeepAlive_Transfer.SetReferenceCounted(false);
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Firebase("error init keepalives: " + e.Message + e.StackTrace);
-            }
-            if (KeepAliveInactivityKillTimer == null)
-            {
-                KeepAliveInactivityKillTimer = new System.Timers.Timer(60 * 1000 * 10); //kill after 10 mins of no activity..
-                                                                                        //remember that this is a fallback. for when foreground service is still running but nothing is happening otherwise.
-                KeepAliveInactivityKillTimer.Elapsed += KeepAliveInactivityKillTimerEllapsed;
-                KeepAliveInactivityKillTimer.AutoReset = false;
-            }
-
-            //FirebaseCrash.Report();
-            //Logger.Firebase("This happened......"));
-
-            //this.Window.SetSoftInputMode();
-
             base.OnCreate(savedInstanceState);
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
             SetContentView(Resource.Layout.activity_main);
 
-            //SerializationTests.TestInflateAll(this);
-
-            //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.my_toolbar);
-            //SetSupportActionBar(myToolbar);
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
 
@@ -313,20 +186,6 @@ namespace Seeker
             System.Console.WriteLine("Testing.....");
 
             sharedPreferences = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
-
-            //if (uiModeManager.NightMode == UiModeManager.ModeNightYes)
-            //{
-            //    // System is in Night mode
-            //}
-            //else if (uiModeManager.NightMode == Android.App.UiNightMode.Yes)
-            //{
-            //    // System is in Day mode
-            //}
-
-
-            //this.RequestPostNotificationPermissionsIfApplicable();
-
-            //restoreSeekerState(savedInstanceState);
 
             TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
 
