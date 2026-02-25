@@ -673,14 +673,14 @@ namespace Seeker.Messages
                 }));
             });
 
-            if (SoulseekService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Logger.Debug("currently logged in but disconnected...");
 
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!SoulseekService.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
                 {
                     return;
                 }
@@ -688,7 +688,7 @@ namespace Seeker.Messages
             }
             else
             {
-                if (SoulseekService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
+                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
                 {
                     Logger.Debug("on finish log in we will do it");
                     return;

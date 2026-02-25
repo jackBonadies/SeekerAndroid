@@ -1981,12 +1981,12 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { Seeker.Services.SoulseekService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
                 }));
             }
             else
             {
-                Seeker.Services.SoulseekService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+                Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
             }
         }
 

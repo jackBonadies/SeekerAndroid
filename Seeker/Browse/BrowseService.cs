@@ -46,12 +46,12 @@ namespace Seeker.Browse
             });
 
 
-            if (SoulseekService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task conTask;
-                if (!SoulseekService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out conTask))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out conTask))
                 {
                     return;
                 }
@@ -59,7 +59,7 @@ namespace Seeker.Browse
             }
             else
             {
-                if (SoulseekService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
+                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
                 {
                     Logger.Debug("on finish log in we will do it");
                     return;
@@ -79,12 +79,12 @@ namespace Seeker.Browse
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
-            if (SoulseekService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!SoulseekService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -281,12 +281,12 @@ namespace Seeker.Browse
 
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
-            if (SoulseekService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!SoulseekService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

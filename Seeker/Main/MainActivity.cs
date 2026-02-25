@@ -861,16 +861,16 @@ namespace Seeker
         }
 
         public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
-            => SoulseekService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(action, msg, contextToUseForMessage);
+            => SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(action, msg, contextToUseForMessage);
 
         public static bool ShowMessageAndCreateReconnectTask(Context c, bool silent, out Task connectTask)
-            => SoulseekService.ShowMessageAndCreateReconnectTask(c, silent, out connectTask);
+            => SessionService.ShowMessageAndCreateReconnectTask(c, silent, out connectTask);
 
         public static bool CurrentlyLoggedInButDisconnectedState()
-            => SoulseekService.CurrentlyLoggedInButDisconnectedState();
+            => SessionService.CurrentlyLoggedInButDisconnectedState();
 
         public static void SetStatusApi(bool away)
-            => SoulseekService.SetStatusApi(away);
+            => SessionService.SetStatusApi(away);
 
         private void UpdateForScreenSize()
         {
@@ -1333,7 +1333,7 @@ namespace Seeker
         }
 
         public static bool IsNotLoggedIn()
-            => SoulseekService.IsNotLoggedIn();
+            => SessionService.IsNotLoggedIn();
 
         /// <summary>
         /// 

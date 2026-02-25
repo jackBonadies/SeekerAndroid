@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 namespace Seeker.Services
 {
     /// <summary>
-    /// SoulseekClient connection state and status operations.
+    /// Session lifecycle: login state, reconnect, status, and client configuration.
     /// </summary>
-    public static class SoulseekService
+    public static class SessionService
     {
         public static bool CurrentlyLoggedInButDisconnectedState()
         {
