@@ -912,7 +912,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
+                UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
                 Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
             }
         }

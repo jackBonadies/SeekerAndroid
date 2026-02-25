@@ -114,14 +114,14 @@ namespace Seeker
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            CommonHelpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
-            CommonHelpers.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
+            UiHelpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
+            UiHelpers.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
             return base.OnPrepareOptionsMenu(menu);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
             {
                 return true;
             }
@@ -341,7 +341,7 @@ namespace Seeker
 
             messageUserDialog = builder.Create();
             messageUserDialog.Show();
-            CommonHelpers.DoNotEnablePositiveUntilText(messageUserDialog, input);
+            UiHelpers.DoNotEnablePositiveUntilText(messageUserDialog, input);
         }
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)

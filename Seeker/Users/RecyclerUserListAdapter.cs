@@ -156,14 +156,14 @@ namespace Seeker.Users
             if (isIgnored)
             {
                 SeekerState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
-                CommonHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                UiHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
             }
             else
             {
                 SeekerState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
-                CommonHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
-                CommonHelpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
-                CommonHelpers.AddGivePrivilegesIfApplicable(menu, -1);
+                UiHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
+                UiHelpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
+                UiHelpers.AddGivePrivilegesIfApplicable(menu, -1);
             }
         }
     }

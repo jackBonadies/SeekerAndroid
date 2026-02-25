@@ -437,5 +437,12 @@ namespace Seeker
             KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();
         }
         public static ReadOnlyCollection<string> KNOWN_TYPES;
+
+        public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
+        {
+            int end = path.LastIndexOf("\\");
+            string clipped = path.Substring(0, end);
+            return clipped; //"raw:\\storage\\emulated\\0\\Download"
+        }
     }
 }

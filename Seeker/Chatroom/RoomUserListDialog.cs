@@ -477,7 +477,7 @@ namespace Seeker.Chatroom
             var userdata = longClickedUserData;
             if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
                     Logger.Debug("Handled by commons");
                     return base.OnContextItemSelected(item);

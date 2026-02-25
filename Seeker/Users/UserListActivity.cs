@@ -84,7 +84,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
                     Logger.Debug("handled by commons");
                     return true;
@@ -703,7 +703,7 @@ namespace Seeker
             // Set up the buttons
 
             var dialog = builder.Show();
-            CommonHelpers.DoNotEnablePositiveUntilText(dialog, input);
+            UiHelpers.DoNotEnablePositiveUntilText(dialog, input);
         }
 
 

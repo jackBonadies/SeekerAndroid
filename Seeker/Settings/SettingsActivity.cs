@@ -1167,14 +1167,14 @@ namespace Seeker
         {
             string friendlyName = SimpleHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
             currentCompleteFolderView.Text = friendlyName;
-            CommonHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
+            UiHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
         }
 
         private void SetIncompleteFolderView()
         {
             string friendlyName = SimpleHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
             currentIncompleteFolderView.Text = friendlyName;
-            CommonHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
+            UiHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
         }
 
         private void SetSharedFolderView()
@@ -1290,11 +1290,11 @@ namespace Seeker
                 }
                 else
                 {
-                    CommonHelpers._dialogInstance?.Dismiss(); // todo: why?
+                    UiHelpers._dialogInstance?.Dismiss(); // todo: why?
                 }
             }
 
-            CommonHelpers.ShowSimpleDialog(
+            UiHelpers.ShowSimpleDialog(
                 this,
                 Resource.Layout.edit_text_password_dialog_content,
                 this.Resources.GetString(Resource.String.change_password),
@@ -2907,7 +2907,7 @@ namespace Seeker
                 //show error message...
                 if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
                 {
-                    MainActivity.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
+                    UiHelpers.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
                 }
                 else
                 {

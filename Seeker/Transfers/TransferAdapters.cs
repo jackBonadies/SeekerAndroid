@@ -459,11 +459,11 @@ namespace Seeker
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BrowseUser, 6, Resource.String.browse_user);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BrowseAtLocation, 7, Resource.String.browse_at_location);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.SearchUserFiles, 8, Resource.String.search_user_files);
-                CommonHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.AddRemoveUser, 9, tvh.InnerTransferItem.GetUsername(), false);
+                UiHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.AddRemoveUser, 9, tvh.InnerTransferItem.GetUsername(), false);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.MessageUser, 10, Resource.String.msg_user);
                 subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.GetUserInfo, 11, Resource.String.get_user_info);
-                CommonHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.UserNote, 12, tvh.InnerTransferItem.GetUsername());
-                CommonHelpers.AddGivePrivilegesIfApplicable(subMenu, (int)TransferContextMenuItem.GivePrivileges);
+                UiHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.UserNote, 12, tvh.InnerTransferItem.GetUsername());
+                UiHelpers.AddGivePrivilegesIfApplicable(subMenu, (int)TransferContextMenuItem.GivePrivileges);
 
                 if (isUpload)
                 {

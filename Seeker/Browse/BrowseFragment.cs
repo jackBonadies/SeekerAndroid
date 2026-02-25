@@ -179,7 +179,7 @@ namespace Seeker
         {
             int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
 
-            CommonHelpers.SetMenuTitles(menu, username);
+            UiHelpers.SetMenuTitles(menu, username);
 
             if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
             {
@@ -213,7 +213,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -1056,7 +1056,7 @@ namespace Seeker
                 DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, BrowseFilter.IsFiltered);
                 if (itemSelected == null)
                 {
-                    CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
+                    UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
                     return; //else nullref
                 }
                 PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
@@ -1758,7 +1758,7 @@ namespace Seeker
             try
             {
                 BrowseFragment.browseUserDialog.Show();
-                CommonHelpers.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
+                UiHelpers.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
 
             }
             catch (WindowManagerBadTokenException e)

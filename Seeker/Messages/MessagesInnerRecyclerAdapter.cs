@@ -269,7 +269,7 @@ namespace Seeker.Messages
             {
                 viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
             }
-            CommonHelpers.SetMessageTextView(viewMessage, msg);
+            UiHelpers.SetMessageTextView(viewMessage, msg);
         }
 
         public Message DataItem;
@@ -307,7 +307,7 @@ namespace Seeker.Messages
         {
             DataItem = msg;
             viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
-            CommonHelpers.SetMessageTextView(viewMessage, msg);
+            UiHelpers.SetMessageTextView(viewMessage, msg);
         }
         public Message DataItem;
     }

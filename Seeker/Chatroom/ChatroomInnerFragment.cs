@@ -148,7 +148,7 @@ namespace Seeker.Chatroom
             //}
             //Logger.Debug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
             string username = MessagesLongClickData.Username;
-            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, this.View))
+            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, this.View))
             {
                 Logger.Debug("Handled by commons");
                 return base.OnContextItemSelected(item);

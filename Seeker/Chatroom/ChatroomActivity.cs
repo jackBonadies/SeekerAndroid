@@ -567,7 +567,7 @@ namespace Seeker
             try
             {
                 dialogInstance.Show();
-                CommonHelpers.DoNotEnablePositiveUntilText(dialogInstance, input);
+                UiHelpers.DoNotEnablePositiveUntilText(dialogInstance, input);
             }
             catch (WindowManagerBadTokenException e)
             {
@@ -633,11 +633,11 @@ namespace Seeker
                 }
                 else
                 {
-                    CommonHelpers._dialogInstance?.Dismiss(); // TODO why?
+                    UiHelpers._dialogInstance?.Dismiss(); // TODO why?
                 }
             }
 
-            CommonHelpers.ShowSimpleDialog(
+            UiHelpers.ShowSimpleDialog(
                 this,
                 Resource.Layout.edit_text_dialog_content,
                 this.Resources.GetString(Resource.String.set_ticker),
@@ -726,7 +726,7 @@ namespace Seeker
             try
             {
                 dialogInstance.Show();
-                CommonHelpers.DoNotEnablePositiveUntilText(dialogInstance, chatNameInput);
+                UiHelpers.DoNotEnablePositiveUntilText(dialogInstance, chatNameInput);
             }
             catch (WindowManagerBadTokenException e)
             {

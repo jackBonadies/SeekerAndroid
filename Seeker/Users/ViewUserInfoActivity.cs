@@ -42,13 +42,13 @@ namespace Seeker
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            CommonHelpers.SetMenuTitles(menu, UserToView);
+            UiHelpers.SetMenuTitles(menu, UserToView);
             return base.OnPrepareOptionsMenu(menu);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
+            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
             {
                 return true;
             }

@@ -1170,7 +1170,7 @@ namespace Seeker
                     return base.OnContextItemSelected(item);
                 }
 
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SeekerState.ActiveActivityRef, this.View))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SeekerState.ActiveActivityRef, this.View))
                 {
                     Logger.Debug("handled by commons");
                     return base.OnContextItemSelected(item);

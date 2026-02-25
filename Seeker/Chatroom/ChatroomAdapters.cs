@@ -235,13 +235,13 @@ namespace Seeker
 
             menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
             menu.Add(1, 1, 1, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
-            CommonHelpers.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
+            UiHelpers.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
             var subMenu = menu.AddSubMenu(3, 3, 3, SeekerState.ActiveActivityRef.GetString(Resource.String.more_options));
             subMenu.Add(4, 4, 4, Resource.String.search_user_files);
             subMenu.Add(5, 5, 5, Resource.String.browse_user);
             subMenu.Add(6, 6, 6, Resource.String.get_user_info);
             subMenu.Add(7, 7, 7, Resource.String.msg_user);
-            CommonHelpers.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
+            UiHelpers.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
         }
 
         public GroupMessageInnerViewReceived messageInnerView;
@@ -294,7 +294,7 @@ namespace Seeker
         {
             DataItem = msg;
             viewTimeStamp.Text = CommonHelpers.GetNiceDateTimeGroupChat(msg.LocalDateTime);
-            CommonHelpers.SetMessageTextView(viewMessage, msg);
+            UiHelpers.SetMessageTextView(viewMessage, msg);
             if (msg.SameAsLastUser)
             {
                 viewUsername.Visibility = ViewStates.Gone;
