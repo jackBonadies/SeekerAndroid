@@ -146,7 +146,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed");
                 }
-                DownloadService.DeleteParentIfEmpty(parent);
+                FileSystemService.DeleteParentIfEmpty(parent);
             }
             else
             {
@@ -160,7 +160,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed LEGACY");
                 }
-                DownloadService.DeleteParentIfEmpty(parent);
+                FileSystemService.DeleteParentIfEmpty(parent);
             }
         }
 

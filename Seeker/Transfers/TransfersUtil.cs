@@ -13,6 +13,8 @@ using Seeker.Helpers;
 using Common;
 namespace Seeker.Transfers
 {
+    // sort of a wrapper around the download logic and adding transfers
+    // dep - slskclient, dlService, TransfersFragment.TransferItemManagerDL., IToaster
     public static class TransfersUtil
     {
         public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -252,7 +254,7 @@ namespace Seeker.Transfers
                 Android.Net.Uri incompleteUriDirectory = null;
                 try
                 {
-                    DownloadService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
+                    FileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
                 }
                 catch (DownloadDirectoryNotSetException ex)
                 {
@@ -275,7 +277,7 @@ namespace Seeker.Transfers
                         username: username,
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<System.IO.Stream>(
-                            DownloadService.OpenIncompleteStream(incompleteUri, partialLength)),
+                            FileSystemService.OpenIncompleteStream(incompleteUri, partialLength)),
                         size: size,
                         startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
