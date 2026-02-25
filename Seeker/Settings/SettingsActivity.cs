@@ -77,7 +77,7 @@ namespace Seeker
         public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
         private List<Tuple<int, int>> positionNumberPairs = new List<Tuple<int, int>>();
-        private CheckBox allowPrivateRoomInvitations;
+        internal CheckBox allowPrivateRoomInvitations;
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
@@ -1981,75 +1981,13 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { Seeker.Services.SoulseekService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
                 }));
             }
             else
             {
-                ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+                Seeker.Services.SoulseekService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
             }
-        }
-
-        private static void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
-        {
-            //Toast.MakeText(this.Context, "Contacting user for directory list. Will appear in browse tab when complete", ToastLength.Short).Show();
-            Task<bool> reconfigTask = null;
-            try
-            {
-                Soulseek.SoulseekClientOptionsPatch patch = new Soulseek.SoulseekClientOptionsPatch(acceptPrivateRoomInvitations: allowPrivateInvites, enableListener: enableTheListener, listenPort: listenerPort);
-
-                reconfigTask = SeekerState.SoulseekClient.ReconfigureOptionsAsync(patch);
-            }
-            catch (Exception e)
-            {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                Logger.Firebase("reconfigure options: " + e.Message + e.StackTrace);
-                Logger.Debug("reconfigure options FAILED" + e.Message + e.StackTrace);
-                return;
-            }
-            Action<Task<bool>> continueWithAction = new Action<Task<bool>>((reconfigTask) =>
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    if (reconfigTask.IsFaulted)
-                    {
-                        Logger.Debug("reconfigure options FAILED");
-                        if (allowPrivateInvites.HasValue)
-                        {
-                            string enabledDisabled = allowPrivateInvites.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long);
-                            if (SeekerState.ActiveActivityRef is SettingsActivity settingsActivity)
-                            {
-                                //set the check to false
-                                settingsActivity.allowPrivateRoomInvitations.Checked = PreferencesState.AllowPrivateRoomInvitations; //old value
-                            }
-                        }
-
-                        if (enableTheListener.HasValue)
-                        {
-                            string enabledDisabled = enableTheListener.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener), enabledDisabled), ToastLength.Long);
-                        }
-
-                        if (listenerPort.HasValue)
-                        {
-                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long);
-                        }
-
-
-
-                    }
-                    else
-                    {
-                        if (allowPrivateInvites.HasValue)
-                        {
-                            Logger.Debug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
-                            PreferencesState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
-                            PreferencesManager.SaveAllowPrivateRoomInvitations();
-                        }
-                    }
-                });
-            });
-            reconfigTask.ContinueWith(continueWithAction);
         }
 
         private void MemoryFileDownloadSwitchIcon_Click(object sender, EventArgs e)

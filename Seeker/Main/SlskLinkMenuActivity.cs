@@ -57,78 +57,7 @@ namespace Seeker
         //}
 
         public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)
-        {
-            if (dirTask.IsFaulted)
-            {
-                //failed to follow link..
-                if (dirTask.Exception?.InnerException?.Message != null)
-                {
-                    string msgToToast = string.Empty;
-                    if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
-                    {
-                        msgToToast = "Failed to Add Download - Request timed out";
-                    }
-                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
-                    {
-                        msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
-                    }
-                    else if (dirTask.Exception.InnerException is Soulseek.UserOfflineException)
-                    {
-                        msgToToast = $"Failed to Add Download - User {_uname} is offline";
-                    }
-                    else
-                    {
-                        msgToToast = "Failed to follow link";
-                    }
-                    Logger.Debug(dirTask.Exception.InnerException.Message);
-                    SeekerApplication.Toaster.ShowToast(msgToToast, ToastLength.Short);
-                }
-                Logger.Debug("DirectoryReceivedContAction faulted");
-            }
-            else
-            {
-                List<FullFileInfo> fullFileInfos = new List<FullFileInfo>();
-
-                //the filenames for these files are NOT the fullname.
-                //the fullname is dirTask.Result.Name "\\" f.Filename
-                var directory = dirTask.Result.First();
-                foreach (var f in directory.Files)
-                {
-                    string fullFilename = directory.Name + "\\" + f.Filename;
-                    if (thisFileOnly == null)
-                    {
-                        fullFileInfos.Add(new FullFileInfo() { Depth = 1, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
-                    }
-                    else
-                    {
-                        if (fullFilename == thisFileOnly)
-                        {
-                            //add
-                            fullFileInfos.Add(new FullFileInfo() { Depth = 1, FullFileName = fullFilename, Size = f.Size, wasFilenameLatin1Decoded = f.IsLatin1Decoded, wasFolderLatin1Decoded = directory.DecodedViaLatin1 });
-                            break;
-                        }
-                    }
-                }
-
-
-                if (fullFileInfos.Count == 0)
-                {
-                    if (thisFileOnly == null)
-                    {
-                        SeekerApplication.Toaster.ShowToast("Nothing to download. Browse at this location to ensure that the file exists and is not locked.", ToastLength.Short);
-                    }
-                    else
-                    {
-                        SeekerApplication.Toaster.ShowToast("Nothing to download. Browse at this location to ensure that the directory contains files and they are not locked.", ToastLength.Short);
-                    }
-                    return;
-                }
-
-                BrowseFragment.DownloadListOfFiles(fullFileInfos, false, _uname);
-
-
-            }
-        }
+            => Browse.BrowseService.DownloadFilesLogic(dirTask, _uname, thisFileOnly);
 
         public override bool OnContextItemSelected(IMenuItem item)
         {

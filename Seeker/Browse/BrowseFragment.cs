@@ -1102,32 +1102,7 @@ namespace Seeker
         /// <param name="queuePaused"></param>
         /// <param name="_username"></param>
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
-        {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
-                {
-                    return;
-                }
-
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
-                }));
-            }
-            else
-            {
-                DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
-            }
-        }
+            => Browse.BrowseService.DownloadListOfFiles(slskFiles, queuePaused, _username);
 
         private void UpDirectory(object sender, System.EventArgs e)
         {

@@ -940,5 +940,156 @@ namespace Seeker.Services
             return continuationActionSaveFile;
         }
 
+        public static void AddToUserOffline(string username)
+        {
+            if (TransferState.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
+            {
+                return;
+            }
+            else
+            {
+                lock (TransferState.UsersWhereDownloadFailedDueToOffline)
+                {
+                    TransferState.UsersWhereDownloadFailedDueToOffline[username] = 0x0;
+                }
+                try
+                {
+                    SeekerState.SoulseekClient.WatchUserAsync(username);
+                }
+                catch (System.Exception)
+                {
+                    // noop
+                    // if user is not logged in then next time they log in the user will be added...
+                }
+            }
+        }
+
+        public static void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis = null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
+        {
+            var TransferItemManagerDL = TransfersFragment.TransferItemManagerDL;
+            var ViewState = TransfersViewState.Instance;
+
+            IEnumerable<TransferItem> transferItemConditionList = new List<TransferItem>();
+            if (batchSelectedOnly)
+            {
+                if (batchSelectedTis == null)
+                {
+                    throw new System.Exception("No batch selected transfer items provided");
+                }
+                transferItemConditionList = batchSelectedTis;
+            }
+            else if (all)
+            {
+                if (selectFailed)
+                {
+                    transferItemConditionList = TransferItemManagerDL.GetListOfFailed().Select(tup => tup.Item1);
+                }
+                else
+                {
+                    transferItemConditionList = TransferItemManagerDL.GetListOfPaused().Select(tup => tup.Item1);
+                }
+            }
+            else
+            {
+                if (selectFailed)
+                {
+                    transferItemConditionList = TransferItemManagerDL.GetListOfFailedFromFolder(specifiedFolderOnly).Select(tup => tup.Item1);
+                }
+                else
+                {
+                    transferItemConditionList = TransferItemManagerDL.GetListOfPausedFromFolder(specifiedFolderOnly).Select(tup => tup.Item1);
+                }
+            }
+            bool exceptionShown = false;
+            foreach (TransferItem item in transferItemConditionList)
+            {
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                try
+                {
+                    TransferState.SetupCancellationToken(item, cancellationTokenSource, out _);
+                    var dlInfo = new DownloadInfo(item.Username, item.FullFilename, item.Size, null, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item };
+                    Task task = DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
+                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
+                }
+                catch (DuplicateTransferException)
+                {
+                    //happens due to button mashing...
+                    return;
+                }
+                catch (System.Exception error)
+                {
+                    Action a = new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                    if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
+                    {
+
+                    }
+                    else
+                    {
+                        Logger.Firebase(error.Message + " OnContextItemSelected");
+                    }
+                    if (!exceptionShown)
+                    {
+                        SeekerState.ActiveActivityRef.RunOnUiThread(a);
+                        exceptionShown = true;
+                    }
+                    return; //otherwise null ref with task!
+                }
+                item.Progress = 0; //no longer red... some good user feedback
+                item.Failed = false;
+                item.TransferItemExtra &= ~TransferItemExtras.DirNotSet;
+
+            }
+
+            var refreshOnlySelected = new Action(() =>
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(
+                    () =>
+                    {
+                        var uiState = ViewState.CreateDLUIState();
+                        HashSet<int> indicesToUpdate = new HashSet<int>();
+                        foreach (TransferItem ti in transferItemConditionList)
+                        {
+                            int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti, uiState);
+                            if (pos == -1)
+                            {
+                                Logger.Debug("pos == -1!!");
+                                continue;
+                            }
+
+                            if (indicesToUpdate.Contains(pos))
+                            {
+                                Logger.Debug($"skipping same pos {pos}");
+                            }
+                            else
+                            {
+                                indicesToUpdate.Add(pos);
+                            }
+                        }
+                        if (ViewState.InUploadsMode)
+                        {
+                            return;
+                        }
+                        foreach (int i in indicesToUpdate)
+                        {
+                            Logger.Debug($"updating {i}");
+                            if (StaticHacks.TransfersFrag != null)
+                            {
+                                StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
+                            }
+                        }
+
+
+
+                    });
+            });
+            lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState())) //TODO: test
+            { //also can update this to do a partial refresh...
+                if (StaticHacks.TransfersFrag != null)
+                {
+                    StaticHacks.TransfersFrag.refreshListView(refreshOnlySelected);
+                }
+            }
+        }
+
     }
 }

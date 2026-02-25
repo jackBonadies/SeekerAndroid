@@ -860,119 +860,17 @@ namespace Seeker
             }
         }
 
-        // TODO2026 move
         public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
-        {
-            lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
-            {
-                //old: SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.Connecting) || SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggingIn). this is not good enough since you can still pass this if you are connected but not yet Logging In!
-                if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-                {
-                    //Logger.Debug("IsLoggingInTaskCurrentlyBeingPerformed: TRUE");
-                    SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
-                    if (msg != null)
-                    {
-                        if (contextToUseForMessage == null)
-                        {
-                            SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
-                        }
-                        else
-                        {
-                            SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
-                        }
-                    }
-                    return true;
-                }
-                else
-                {
-                    //Logger.Debug("IsLoggingInTaskCurrentlyBeingPerformed: FALSE");
-                    return false;
-                }
-            }
-        }
+            => SoulseekService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(action, msg, contextToUseForMessage);
 
-        // TODO2026 move
         public static bool ShowMessageAndCreateReconnectTask(Context c, bool silent, out Task connectTask)
-        {
-            if (c == null)
-            {
-                c = SeekerState.MainActivityRef;
-            }
-            if (Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread()) //tested..
-            {
-                if (!silent)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                }
-            }
-            else
-            {
-                if (!silent)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
-                }
-            }
-            //if we are still not connected then creating the task will throw. 
-            //also if the async part of the task fails we will get task.faulted.
-            try
-            {
-                connectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
-                return true;
-            }
-            catch
-            {
-                if (!silent)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                }
-            }
-            connectTask = null;
-            return false;
-        }
+            => SoulseekService.ShowMessageAndCreateReconnectTask(c, silent, out connectTask);
 
-        // TODO2026 move
         public static bool CurrentlyLoggedInButDisconnectedState()
-        {
-            return (PreferencesState.CurrentlyLoggedIn &&
-                (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
-        }
+            => SoulseekService.CurrentlyLoggedInButDisconnectedState();
 
         public static void SetStatusApi(bool away)
-        {
-            if (IsNotLoggedIn())
-            {
-                return;
-            }
-            if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-            {
-                //dont log in just for this.
-                //but if we later connect while still in the background, it may be best to set a flag.
-                //do it when we log in... since we could not set it now...
-                SeekerState.PendingStatusChangeToAwayOnline = away ? SeekerState.PendingStatusChange.AwayPending : SeekerState.PendingStatusChange.OnlinePending;
-                return;
-            }
-            try
-            {
-                SeekerState.SoulseekClient.SetStatusAsync(away ? UserPresence.Away : UserPresence.Online).ContinueWith((Task t) =>
-                {
-                    if (t.IsCompletedSuccessfully)
-                    {
-                        SeekerState.PendingStatusChangeToAwayOnline = SeekerState.PendingStatusChange.NothingPending;
-                        SeekerState.OurCurrentStatusIsAway = away;
-                        string statusString = away ? "away" : "online"; //not user facing
-                        Logger.Debug($"We successfully changed our status to {statusString}");
-                    }
-                    else
-                    {
-                        Logger.Debug("SetStatusApi FAILED " + t.Exception?.Message);
-                    }
-                });
-            }
-            catch (Exception e)
-            {
-                Logger.Debug("SetStatusApi FAILED " + e.Message + e.StackTrace);
-            }
-        }
+            => SoulseekService.SetStatusApi(away);
 
         private void UpdateForScreenSize()
         {
@@ -1434,11 +1332,8 @@ namespace Seeker
             }
         }
 
-        // TODO2026 move these..
         public static bool IsNotLoggedIn()
-        {
-            return (!PreferencesState.CurrentlyLoggedIn) || PreferencesState.Username == null || PreferencesState.Password == null || PreferencesState.Username == string.Empty;
-        }
+            => SoulseekService.IsNotLoggedIn();
 
         /// <summary>
         /// 

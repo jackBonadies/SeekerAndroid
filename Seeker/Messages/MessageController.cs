@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Seeker.Services;
 
 using Common;
 using Common.Messages;
@@ -503,7 +504,7 @@ namespace Seeker.Messages
 
         public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "", Context broadcastContext = null)
         {
-            MessagesInnerFragment.BroadcastFriendlyRunOnUiThread(() =>
+            BroadcastFriendlyRunOnUiThread(() =>
             {
                 ShowNotificationLogic(msg, fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
             });
@@ -605,6 +606,146 @@ namespace Seeker.Messages
                 UnreadUsernames.TryRemove(username, out _);
                 SaveUnreadStateDict(SeekerState.SharedPreferences);
             }
+        }
+
+        public static void BroadcastFriendlyRunOnUiThread(Action action)
+        {
+            if (SeekerState.ActiveActivityRef != null)
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(action);
+            }
+            else
+            {
+                new Handler(Looper.MainLooper).Post(action);
+            }
+        }
+
+        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
+        {
+            //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
+            //then soulseekclient will be good, but the activeActivityRef will be null. so use the broadcastContext.
+
+            Android.Content.Context contextToUse = broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext;
+
+            Logger.Debug("is soulseekclient null: " + (SeekerState.SoulseekClient == null).ToString());
+            Logger.Debug("is ActiveActivityRef null: " + (SeekerState.ActiveActivityRef == null).ToString());
+
+
+            if (string.IsNullOrEmpty(msg.MessageText))
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_text_to_send), ToastLength.Short);
+                if (fromDirectReplyAction)
+                {
+                    ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
+                }
+                return;
+            }
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                Logger.Debug("not currently logged in");
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
+                if (fromDirectReplyAction)
+                {
+                    ShowNotification(msg, true, true, "Failure - Currently Logged Out.");
+                }
+                return;
+            }
+
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
+            {
+
+                Logger.Debug("our continue with action is occuring!...");
+                if (t.IsFaulted)
+                {
+                    if (!(t.Exception.InnerException is FaultPropagationException))
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                    }
+                    if (fromDirectReplyAction)
+                    {
+                        ShowNotification(msg, true, true, "Failure - Cannot Log In.");
+                    }
+                    throw new FaultPropagationException();
+                }
+                BroadcastFriendlyRunOnUiThread(new Action(() =>
+                {
+                    SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
+                }));
+            });
+
+            if (SoulseekService.CurrentlyLoggedInButDisconnectedState())
+            {
+                Logger.Debug("currently logged in but disconnected...");
+
+                //we disconnected. login then do the rest.
+                //this is due to temp lost connection
+                Task t;
+                if (!SoulseekService.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
+                {
+                    return;
+                }
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
+            }
+            else
+            {
+                if (SoulseekService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
+                {
+                    Logger.Debug("on finish log in we will do it");
+                    return;
+                }
+                else
+                {
+                    SendMessageLogic(msg, fromDirectReplyAction);
+                }
+            }
+
+        }
+
+        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Android.Content.Context broadcastContext = null) //you can start out with a message...
+        {
+            Logger.Debug("SendMessageLogic");
+
+            string usernameToMessage = msg.Username;
+            if (Messages.Keys.Contains(usernameToMessage))
+            {
+                Messages[usernameToMessage].Add(msg);
+            }
+            else
+            {
+                Messages[usernameToMessage] = new List<Message>(); //our first message to them..
+                Messages[usernameToMessage].Add(msg);
+            }
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            RaiseMessageReceived(msg);
+            Action<Task> continueWithAction = new Action<Task>((Task t) =>
+            {
+                if (t.IsFaulted)
+                {
+                    Logger.Debug("faulted " + t.Exception.ToString());
+                    Logger.Debug("faulted " + t.Exception.InnerException.Message.ToString());
+                    msg.SentMsgStatus = SentStatus.Failed;
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_send_message), ToastLength.Long); //TODO
+
+                    if (fromDirectReplyAction)
+                    {
+                        ShowNotification(msg, true, true, "Failure - Cannot Send Message.", broadcastContext);
+                    }
+                }
+                else
+                {
+                    Logger.Debug("did not fault");
+                    msg.SentMsgStatus = SentStatus.Success;
+
+                    if (fromDirectReplyAction)
+                    {
+                        ShowNotification(msg, true, false, string.Empty, broadcastContext);
+                    }
+                }
+                SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                RaiseMessageReceived(msg);
+            });
+            Logger.Debug("useranme to mesasge " + usernameToMessage);
+            SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
         }
     }
 }
