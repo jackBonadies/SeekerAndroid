@@ -108,12 +108,14 @@ namespace Seeker
         }
 
         public static IToaster Toaster { get; private set; }
+        public static IStringProvider StringProvider { get; private set; }
 
         public override void OnCreate()
         {
             base.OnCreate();
             ApplicationContext = this;
             Toaster = new AndroidToaster();
+            StringProvider = new AndroidStringProvider();
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft

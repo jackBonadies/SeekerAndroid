@@ -19,7 +19,7 @@ namespace Seeker.Transfers
         {
             if (username == PreferencesState.Username)
             {
-                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.cannot_download_from_self), ToastLength.Long);
+                SeekerApplication.Toaster.ShowToastLong(StringKey.cannot_download_from_self);
                 return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
             }
 
@@ -48,17 +48,17 @@ namespace Seeker.Transfers
 
             if (allExist)
             {
-                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_duplicate), ToastLength.Short);
+                SeekerApplication.Toaster.ShowToastShort(StringKey.error_duplicate);
             }
             else
             {
                 if (queuePaused)
                 {
-                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.QueuedForDownload), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToastShort(StringKey.QueuedForDownload);
                 }
                 else
                 {
-                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.download_is_starting), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToastShort(StringKey.download_is_starting);
                 }
             }
 
@@ -235,7 +235,7 @@ namespace Seeker.Transfers
                     {
                         MarkTransferItemAsDirNotSet(dlInfo.TransferItemReference);
                     }
-                    SeekerApplication.Toaster.ShowToastDebounced(SeekerState.ActiveActivityRef.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_");
+                    SeekerApplication.Toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_");
                     waitForNext = Task.CompletedTask;
                     return Task.FromException(ex);
                 }
