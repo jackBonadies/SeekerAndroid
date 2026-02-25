@@ -106,7 +106,7 @@ namespace Seeker.Messages
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -121,7 +121,7 @@ namespace Seeker.Messages
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -146,20 +146,12 @@ namespace Seeker.Messages
             base.OnSaveInstanceState(outState);
         }
 
-        public static void BroadcastFriendlyRunOnUiThread(Action action)
-            => MessageController.BroadcastFriendlyRunOnUiThread(action);
-
-        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
-            => MessageController.SendMessageAPI(msg, fromDirectReplyAction, broadcastContext);
-
-        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Android.Content.Context broadcastContext = null)
-            => MessageController.SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
 
 
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }

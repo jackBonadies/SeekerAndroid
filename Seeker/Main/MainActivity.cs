@@ -860,17 +860,6 @@ namespace Seeker
             }
         }
 
-        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
-            => SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(action, msg, contextToUseForMessage);
-
-        public static bool ShowMessageAndCreateReconnectTask(Context c, bool silent, out Task connectTask)
-            => SessionService.ShowMessageAndCreateReconnectTask(c, silent, out connectTask);
-
-        public static bool CurrentlyLoggedInButDisconnectedState()
-            => SessionService.CurrentlyLoggedInButDisconnectedState();
-
-        public static void SetStatusApi(bool away)
-            => SessionService.SetStatusApi(away);
 
         private void UpdateForScreenSize()
         {
@@ -1332,8 +1321,6 @@ namespace Seeker
             }
         }
 
-        public static bool IsNotLoggedIn()
-            => SessionService.IsNotLoggedIn();
 
         /// <summary>
         /// 

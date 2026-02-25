@@ -1,3 +1,4 @@
+using Seeker.Services;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Android.App;
@@ -411,10 +412,10 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(notLoggedInToast, ToastLength.Short);
                 return false;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }
@@ -497,10 +498,10 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_give_privileges), ToastLength.Short);
                 return false;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return false; //if we get here we already did a toast message.
                 }

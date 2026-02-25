@@ -55,7 +55,7 @@ namespace Seeker.Transfers
         private static void TransfersTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             Logger.Debug("TransfersTimerElapsed");
-            if (MainActivity.IsNotLoggedIn())
+            if (SessionService.IsNotLoggedIn())
             {
                 return;
             }

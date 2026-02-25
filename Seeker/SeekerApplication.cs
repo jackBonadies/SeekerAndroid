@@ -897,7 +897,7 @@ namespace Seeker
             if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
             {
                 //user offline.
-                TransfersFragment.AddToUserOffline(e.Transfer.Username);
+                Seeker.Services.DownloadService.AddToUserOffline(e.Transfer.Username);
             }
 
             TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
@@ -1525,7 +1525,7 @@ namespace Seeker
                         }
                         else
                         {
-                            MainActivity.SetStatusApi(true);
+                            SessionService.SetStatusApi(true);
                         }
                     }
 
@@ -2116,7 +2116,7 @@ namespace Seeker
                         {
                             try
                             {
-                                TransfersFragment.DownloadRetryAllConditionLogic(false, false, null, true, items);
+                                Seeker.Services.DownloadService.DownloadRetryAllConditionLogic(false, false, null, true, items);
                             }
                             catch (Exception e)
                             {

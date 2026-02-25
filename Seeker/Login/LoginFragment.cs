@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Services;
 using Android.Content;
 using Android.OS;
 using Android.Views;
@@ -97,7 +98,7 @@ namespace Seeker
             HasOptionsMenu = true;
             Logger.Debug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
-            if (MainActivity.IsNotLoggedIn())//you are not logged in if username or password is null
+            if (SessionService.IsNotLoggedIn())//you are not logged in if username or password is null
             {
                 PreferencesState.CurrentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);

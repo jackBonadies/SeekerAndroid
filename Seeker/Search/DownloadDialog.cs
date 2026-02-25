@@ -271,30 +271,6 @@ namespace Seeker
             }
         }
 
-        private static void RequestFilesLogic(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation)
-        {
-            Browse.BrowseService.RequestFilesApi(username, viewForSnackBar, goSnackBarAction, atLocation);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="dirname"></param>
-        /// <param name="isLegacy"></param>
-        /// <param name="continueWithAction"></param>
-        /// <exception cref="FaultPropagationException"></exception>
-        /// <remarks>
-        /// Older versions of Nicotine do not send us the token we sent them (the token we get is always 1).
-        /// This will result in a timeout error.
-        /// Regarding fixing the case where older Nicotine and older slsk.net send us a Latin1 encoded string
-        /// that is ambigious (i.e. fÃ¶r) if we sent it back properly we get a timeout.  I dont think its worth
-        /// retrying since the versions of Nicotine that send us a Latin1 string are the same versions that send
-        /// the token = 1.  Also, even if it did work, the the user would only get the folder after a full 30 second timeout.  
-        /// </remarks>
-        public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<IReadOnlyCollection<Directory>>> continueWithAction)
-            => Browse.BrowseService.GetFolderContentsAPI(username, dirname, isLegacy, continueWithAction);
-
         private void ReqFiles_Click(object sender, EventArgs e)
         {
             Action<View> action = new Action<View>((v) =>
@@ -302,15 +278,8 @@ namespace Seeker
                 this.Dismiss();
                 ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
-            RequestFilesApi(searchResponse.Username, this.View, action, null);
+            Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, null);
         }
-
-
-        public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)
-            => Browse.BrowseService.RequestFilesApi(username, viewForSnackBar, goSnackBarAction, atLocation);
-
-        public static TreeNode<Directory> CreateTree(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, out string errorMsgToToast)
-            => Browse.BrowseService.CreateTree(b, filter, wordsToAvoid, wordsToInclude, username, out errorMsgToToast);
 
 
 
@@ -411,12 +380,12 @@ namespace Seeker
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
         {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }
@@ -584,7 +553,7 @@ namespace Seeker
                     stopRefreshing();
                     return;
                 }
-                GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
+                Browse.BrowseService.GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
             catch (Exception ex)
             {
@@ -612,7 +581,7 @@ namespace Seeker
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;
                     }
-                    RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
+                    Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();

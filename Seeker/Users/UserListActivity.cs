@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Messages;
 using Seeker.Users;
@@ -102,7 +103,7 @@ namespace Seeker
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
-                    DownloadDialog.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
+                    BrowseService.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -403,11 +404,6 @@ namespace Seeker
             //return base.OnNavigateUp();
         }
 
-        public static void AddUserLogic(Context c, string username, Action UIaction, bool massImportCase = false)
-            => UserListService.AddUserLogic(c, username, UIaction, massImportCase);
-
-        public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
-            => UserListService.AddUserAPI(c, username, UIaction, massImportCase);
 
         public static SortOrder UserListSortOrder
         {
@@ -535,7 +531,7 @@ namespace Seeker
                     {
                         SeekerState.RecentUsersManager.AddUserToTop(input.Text, true);
                     }
-                    AddUserAPI(SeekerState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
                 }
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>

@@ -1,3 +1,4 @@
+using Seeker.Browse;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -495,7 +496,7 @@ namespace Seeker
             else if (contextMenuTitle == activity.GetString(Resource.String.add_to_user_list) ||
                 contextMenuTitle == activity.GetString(Resource.String.add_user))
             {
-                UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
+                UserListService.AddUserAPI(SeekerState.ActiveActivityRef, usernameInQuestion, uiUpdateActionAdded_Removed);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_user_list) ||
@@ -527,7 +528,7 @@ namespace Seeker
                     activity.StartActivity(intent);
                     //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                 });
-                DownloadDialog.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
+                BrowseService.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.get_user_info))

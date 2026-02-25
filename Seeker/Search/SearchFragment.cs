@@ -1,4 +1,5 @@
 ﻿using Seeker.Chatroom;
+using Seeker.Services;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
 using Seeker.Search;
@@ -2506,7 +2507,7 @@ namespace Seeker
                 SearchTabHelper.CurrentlySearching = false;
                 return;
             }
-            else if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            else if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //re-connect if from wishlist as well. just do it quietly.
                 //if (fromWishlist)
@@ -2514,7 +2515,7 @@ namespace Seeker
                 //    return;
                 //}
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, fromWishlist, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, fromWishlist, out t))
                 {
                     return;
                 }

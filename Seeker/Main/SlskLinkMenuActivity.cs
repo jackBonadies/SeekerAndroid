@@ -51,13 +51,6 @@ namespace Seeker
             base.OnContextMenuClosed(menu);
         }
 
-        //public static void DownloadFilesActionEntry(Task<Directory> dirTask)
-        //{
-        //    DownloadFilesLogic(dirTask,null);
-        //}
-
-        public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)
-            => Browse.BrowseService.DownloadFilesLogic(dirTask, _uname, thisFileOnly);
 
         public override bool OnContextItemSelected(IMenuItem item)
         {
@@ -73,7 +66,7 @@ namespace Seeker
                         //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
 
-                    DownloadDialog.RequestFilesApi(username, null, action, dirPath);
+                    Browse.BrowseService.RequestFilesApi(username, null, action, dirPath);
                     return true;
                 case FromSlskLinkCopyLink:
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, SimpleHelpers.SlskLinkClickedData);
@@ -83,13 +76,13 @@ namespace Seeker
                     Action<Task<IReadOnlyCollection<Directory>>> ContAction = null;
                     if (isFile)
                     {
-                        ContAction = (Task<IReadOnlyCollection<Directory>> t) => { DownloadFilesLogic(t, _username, fullFilePath); };
+                        ContAction = (Task<IReadOnlyCollection<Directory>> t) => { Browse.BrowseService.DownloadFilesLogic(t, _username, fullFilePath); };
                     }
                     else
                     {
-                        ContAction = (Task<IReadOnlyCollection<Directory>> t) => { DownloadFilesLogic(t, _username, null); };
+                        ContAction = (Task<IReadOnlyCollection<Directory>> t) => { Browse.BrowseService.DownloadFilesLogic(t, _username, null); };
                     }
-                    DownloadDialog.GetFolderContentsAPI(_username, _dirPath, false, ContAction);
+                    Browse.BrowseService.GetFolderContentsAPI(_username, _dirPath, false, ContAction);
                     return true;
             }
             return base.OnContextItemSelected(item);

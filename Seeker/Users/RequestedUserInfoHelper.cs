@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
+using Seeker.Services;
 using Android.Content;
 using Android.Views;
 using Android.Widget;
@@ -81,10 +82,10 @@ namespace Seeker
                 return;
             }
 
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

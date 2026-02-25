@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Android.Content;
 using Android.OS;
 using Android.Text;
@@ -258,7 +259,7 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
-                    UserListActivity.AddUserAPI(SeekerState.MainActivityRef, username, null);
+                    UserListService.AddUserAPI(SeekerState.MainActivityRef, username, null);
                     return true;
                 case Resource.Id.action_get_user_info:
                     RequestedUserInfoHelper.RequestUserInfoApi(username);
@@ -853,12 +854,12 @@ namespace Seeker
                         }
                     }
                 }
-                if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                if (SessionService.CurrentlyLoggedInButDisconnectedState())
                 {
                     //we disconnected. login then do the rest.
                     //this is due to temp lost connection
                     Task t;
-                    if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                    if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                     {
                         return;
                     }
@@ -889,7 +890,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
+                Browse.BrowseService.DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
             }
             else
             {
@@ -898,7 +899,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
+                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
             }
         }
 
@@ -1095,14 +1096,6 @@ namespace Seeker
 
         }
 
-        /// <summary>
-        /// Safe entrypoint for anyone to call.
-        /// </summary>
-        /// <param name="slskFiles"></param>
-        /// <param name="queuePaused"></param>
-        /// <param name="_username"></param>
-        public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
-            => Browse.BrowseService.DownloadListOfFiles(slskFiles, queuePaused, _username);
 
         private void UpDirectory(object sender, System.EventArgs e)
         {
@@ -1648,7 +1641,7 @@ namespace Seeker
                     return;
                 }
                 SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
-                DownloadDialog.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
+                BrowseService.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();

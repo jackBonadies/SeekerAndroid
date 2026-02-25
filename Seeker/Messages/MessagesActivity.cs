@@ -17,6 +17,8 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Services;
+using Seeker.Browse;
 using Seeker.Helpers;
 using Android.App;
 using Android.Content;
@@ -131,7 +133,7 @@ namespace Seeker
                     ShowEditTextMessageUserDialog();
                     return true;
                 case Resource.Id.action_add_to_user_list:
-                    UserListActivity.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
+                    UserListService.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
                     return true;
                 case Resource.Id.action_search_files:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -149,7 +151,7 @@ namespace Seeker
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
-                    DownloadDialog.RequestFilesApi(MessagesInnerFragment.Username, snackView, action, null);
+                    BrowseService.RequestFilesApi(MessagesInnerFragment.Username, snackView, action, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -217,7 +219,7 @@ namespace Seeker
 
         public void ShowEditTextMessageUserDialog()
         {
-            if (MainActivity.IsNotLoggedIn())
+            if (SessionService.IsNotLoggedIn())
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
                 return;
@@ -256,7 +258,7 @@ namespace Seeker
                 this.ChangeToInnerFragment(userToMessage);
 
 
-                //DownloadDialog.RequestFilesApi(userToMessage, this.View, goSnackBarAction, null);
+                //BrowseService.RequestFilesApi(userToMessage, this.View, goSnackBarAction, null);
 
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -627,7 +629,7 @@ namespace Seeker
                     string replyText = remoteInputBundle.GetString("key_text_result");
                     //Message msg = new Message(PreferencesState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     Logger.Debug("direct reply " + replyText + " " + uname);
-                    MessagesInnerFragment.SendMessageAPI(new Message(uname, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
+                    MessageController.SendMessageAPI(new Message(uname, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);
 
 
                 }

@@ -1,4 +1,5 @@
 ﻿using Android.Content;
+using Seeker.Browse;
 using Seeker.Services;
 using Android.Content.Res;
 using Android.Graphics;
@@ -25,15 +26,6 @@ namespace Seeker
     {
         private View rootView = null;
 
-        /// <summary>
-        /// We add these to this dict so we can (1) AddUser to get their statuses and (2) efficiently check them when
-        /// we get user status changed events.
-        /// This dict may contain a greater number of users than strictly necessary.  as it is just used to save time, 
-        /// and having additional users here will not cause any issues.  (i.e. in case where other user was offline then the 
-        /// user cleared that download, no harm as it will check and see there are no downloads to retry and just remove user)
-        /// </summary>
-        public static void AddToUserOffline(string username)
-            => DownloadService.AddToUserOffline(username);
 
         public static TransferItemManager TransferItemManagerDL; //for downloads
         public static TransferItemManager TransferItemManagerUploads; //for uploads
@@ -300,10 +292,10 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_resume_all:
                     Logger.InfoFirebase("resume all Pressed");
-                    if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                    if (SessionService.CurrentlyLoggedInButDisconnectedState())
                     {
                         Task t;
-                        if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                        if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                         {
                             return base.OnContextItemSelected(item);
                         }
@@ -316,11 +308,11 @@ namespace Seeker
                             }
                             if (ViewState.CurrentlySelectedDLFolder == null)
                             {
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, true, null, false); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(false, true, null, false); });
                             }
                             else
                             {
-                                DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
+                                DownloadService.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
                             }
                         }));
                     }
@@ -328,11 +320,11 @@ namespace Seeker
                     {
                         if (ViewState.CurrentlySelectedDLFolder == null)
                         {
-                            DownloadRetryAllConditionLogic(false, true, null, false);
+                            DownloadService.DownloadRetryAllConditionLogic(false, true, null, false);
                         }
                         else
                         {
-                            DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
+                            DownloadService.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
                         }
                     }
                     return true;
@@ -359,10 +351,10 @@ namespace Seeker
             //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
             var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
             Logger.InfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                 {
                     return;
                 }
@@ -375,11 +367,11 @@ namespace Seeker
                     }
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
                     }
                     else
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
+                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
                     }
                 }));
             }
@@ -387,11 +379,11 @@ namespace Seeker
             {
                 if (ViewState.CurrentlySelectedDLFolder == null)
                 {
-                    DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
+                    DownloadService.DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
                 }
                 else
                 {
-                    DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
+                    DownloadService.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
                 }
             }
         }
@@ -875,8 +867,6 @@ namespace Seeker
         }
 
 
-        public static void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis = null)
-            => DownloadService.DownloadRetryAllConditionLogic(selectFailed, all, specifiedFolderOnly, batchSelectedOnly, batchSelectedTis);
 
 
         private void DownloadRetryLogic(ITransferItem transferItem)
@@ -1033,10 +1023,10 @@ namespace Seeker
                             return true;
                         }
 
-                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        if (SessionService.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1219,7 +1209,7 @@ namespace Seeker
                                 ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                             });
 
-                            DownloadDialog.RequestFilesApi(ttti.Username, this.View, action, startingDir);
+                            BrowseService.RequestFilesApi(ttti.Username, this.View, action, startingDir);
                         }
                         else if (ti is FolderItem fi)
                         {
@@ -1241,7 +1231,7 @@ namespace Seeker
                                 ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                             });
 
-                            DownloadDialog.RequestFilesApi(fi.Username, this.View, action, startingDir);
+                            BrowseService.RequestFilesApi(fi.Username, this.View, action, startingDir);
                         }
                         break;
                     case TransferContextMenuItem.ResumeFolder: //resume folder
@@ -1250,10 +1240,10 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("resume folder Pressed");
-                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        if (SessionService.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1264,12 +1254,12 @@ namespace Seeker
                                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                     return;
                                 }
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
                             }));
                         }
                         else
                         {
-                            DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
+                            DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
                         }
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
@@ -1283,10 +1273,10 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("retry folder Pressed");
-                        if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                        if (SessionService.CurrentlyLoggedInButDisconnectedState())
                         {
                             Task t;
-                            if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                            if (!SessionService.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
                             {
                                 return base.OnContextItemSelected(item);
                             }
@@ -1297,12 +1287,12 @@ namespace Seeker
                                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                                     return;
                                 }
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
+                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
                             }));
                         }
                         else
                         {
-                            DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
+                            DownloadService.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
                         }
                         break;
                     case TransferContextMenuItem.AbortUpload: //abort upload

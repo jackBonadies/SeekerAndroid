@@ -1,4 +1,5 @@
 ﻿using Seeker.Helpers;
+using Seeker.Browse;
 using Seeker.Messages;
 using Android.App;
 using Android.Content;
@@ -505,7 +506,7 @@ namespace Seeker.Chatroom
                         this.StartActivity(intent);
                     });
                     View snackView = this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom);
-                    DownloadDialog.RequestFilesApi(userdata.Username, snackView, action, null);
+                    BrowseService.RequestFilesApi(userdata.Username, snackView, action, null);
                     return true;
                 case 4: //search users files
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;

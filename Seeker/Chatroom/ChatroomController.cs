@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Seeker.Services;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -880,12 +881,12 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -961,12 +962,12 @@ namespace Seeker.Chatroom
                     }
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1023,12 +1024,12 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1171,12 +1172,12 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1261,12 +1262,12 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.setting_ticker), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -1338,12 +1339,12 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Messages;
 using Android.App;
@@ -77,7 +78,7 @@ namespace Seeker
 
 
                     //do browse thing...
-                    DownloadDialog.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
+                    BrowseService.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -95,7 +96,7 @@ namespace Seeker
                     this.StartActivity(intentMsg);
                     return true;
                 case Resource.Id.addUser:
-                    UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();

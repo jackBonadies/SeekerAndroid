@@ -270,7 +270,7 @@ namespace Seeker
             {
                 lock (SeekerState.UserList)
                 {
-                    UserListActivity.AddUserAPI(this, uname, null, true);
+                    UserListService.AddUserAPI(this, uname, null, true);
                 }
             }
             foreach (var unote in selectedData.UserNotes)

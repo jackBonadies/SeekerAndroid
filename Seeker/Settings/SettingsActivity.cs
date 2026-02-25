@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -1254,7 +1255,7 @@ namespace Seeker
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if (MainActivity.IsNotLoggedIn())
+            if (SessionService.IsNotLoggedIn())
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
@@ -1883,7 +1884,7 @@ namespace Seeker
                 browseResponseToShow = SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username);
             }
 
-            TreeNode<Soulseek.Directory> tree = DownloadDialog.CreateTree(browseResponseToShow, false, null, null, PreferencesState.Username, out errorMsgToToast);
+            TreeNode<Soulseek.Directory> tree = BrowseService.CreateTree(browseResponseToShow, false, null, null, PreferencesState.Username, out errorMsgToToast);
             if (errorMsgToToast != null && errorMsgToToast != string.Empty)
             {
                 SeekerApplication.Toaster.ShowToast(errorMsgToToast, ToastLength.Short);
@@ -1965,12 +1966,12 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_toggle_priv_invites), ToastLength.Short);
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
+            if (SessionService.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

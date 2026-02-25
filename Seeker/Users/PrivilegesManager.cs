@@ -1,4 +1,5 @@
 ﻿using Android.Content;
+using Seeker.Services;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
@@ -200,10 +201,10 @@ namespace Seeker.Managers
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_check_privileges), ToastLength.Short);
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }

@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Seeker.Services;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -162,7 +163,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.AddToIgnoreListFeedback(this.Activity, username);
                     break;
                 case 2://"Add User"
-                    UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, username, null);
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, username, null);
                     break;
 
             }
@@ -796,13 +797,13 @@ namespace Seeker.Chatroom
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.empty_message_error), ToastLength.Short);
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Logger.Debug("CurrentlyLoggedInButDisconnectedState: TRUE");
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
                 {
                     return;
                 }
@@ -810,7 +811,7 @@ namespace Seeker.Chatroom
             }
             else
             {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
+                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
                 {
                     return;
                 }
