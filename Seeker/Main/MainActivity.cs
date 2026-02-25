@@ -340,17 +340,8 @@ namespace Seeker
                 }
             }
 
-
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
-
-
-            //UploadDirectoryManager.UploadDirectories = new List<UploadDirectoryInfo>();
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirit%20x/document/864A-C3E8%3AMusic%2F%5B2000%5D%20Spirix", true, true, false, null));
-            //UploadDirectoryManager.//UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/primary%3AMusic/document/primary%3AMusic", true, false, false, null));
-            //UploadDirectoryManager.UploadDirectories.Add(new UploadDirectoryInfo(@"content://com.android.externalstorage.documents/tree/864A-C3E8%3AMusic/document/864A-C3E8%3AMusic", true, false, false, "Music (1)"));
-
 
             //if we have all the conditions to share, then set sharing up.
             if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
@@ -363,41 +354,13 @@ namespace Seeker
                 SeekerState.AttemptedToSetUpSharing = true;
             }
 
-
-            //this.DeleteSharedPreferences("SoulSeekPrefs");
-
-            //Mono.Nat.NatUtility.DeviceFound += NatUtility_DeviceFound; //error bad message parsePAL_UPNP_SOAP_E_INVALID_ARGS. was able to look at all the current wifi port mappings however :)
-            //Mono.Nat.NatUtility.StartDiscovery();
-
-
-            //InternetGatewayDevice[] IGDs = InternetGatewayDevice.getDevices(60000);
-            //if (IGDs != null)
-            //{
-            //    for (int i = 0; i < IGDs.Length; i++)
-            //    {
-
-            //    }
-            //}
-            //Android.Net.Wifi.WifiManager wm = this.GetSystemService(WifiService);
-            //wm.
-            //Mono.Nat.NatUtility.UnknownDeviceFound += NatUtility_DeviceFound;
-
-
-
             SeekerState.SharedPreferences = sharedPreferences;
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
 
             UpdateForScreenSize();
 
-            //#if DEBUG //todo remove
-
-            //WishlistController.SearchIntervalMilliseconds = 1000*30;
-            //WishlistController.Initialize();
-
-            //#endif
-
-
+            // TODO2026 should this be moved to SeekerApplication
             if (SeekerState.UseLegacyStorage())
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
