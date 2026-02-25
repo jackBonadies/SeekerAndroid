@@ -125,14 +125,11 @@ namespace Seeker
         }
 
         public static IToaster Toaster { get; private set; }
-        public static IStringProvider StringProvider { get; private set; }
-
         public override void OnCreate()
         {
             base.OnCreate();
             ApplicationContext = this;
             Toaster = new AndroidToaster();
-            StringProvider = new AndroidStringProvider();
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
@@ -1426,6 +1423,32 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short);
             }
         }
+        public static void SetUpLoginContinueWith(Task t)
+        {
+            if (t == null)
+            {
+                return;
+            }
+            if (SharedFileService.MeetsSharingConditions())
+            {
+
+                Action<Task> getAndSetLoggedInInfoAction = new Action<Task>((Task t) =>
+                {
+                    //we want to
+                    //UpdateStatus ??
+                    //inform server if we are sharing..
+                    //get our upload speed..
+                    if (t.Status == TaskStatus.Faulted || t.IsFaulted || t.IsCanceled)
+                    {
+                        return;
+                    }
+                    SharedFileService.InformServerOfSharedFiles();
+                    SeekerState.SoulseekClient.GetUserStatisticsAsync(PreferencesState.Username);
+                });
+                t.ContinueWith(getAndSetLoggedInInfoAction);
+            }
+        }
+
         public static Task OurCurrentLoginTask = null;
         public static object OurCurrentLoginTaskSyncObject = new object();
         public static Task ConnectAndPerformPostConnectTasks(string username, string password)

@@ -213,6 +213,8 @@ namespace Seeker
                 //    //-clicking app icon or intent filter
                 //    Logger.Debug("new task | launched from history");
                 //}
+                SeekerState.MainActivityRef = this; //set these early. they are needed
+                SeekerState.ActiveActivityRef = this;
 
 
                 if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
@@ -241,45 +243,7 @@ namespace Seeker
                 }
                 else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
                 {
-                    SeekerState.MainActivityRef = this; //set these early. they are needed
-                    SeekerState.ActiveActivityRef = this;
-
-                    Logger.InfoFirebase("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false).ToString());
-                    Logger.InfoFirebase("from wishlist clicked");
-                    int currentPage = pager.CurrentItem;
-                    int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
-                    if (currentPage == 1) //this is the case even if process previously got am state killed.
-                    {
-                        Logger.InfoFirebase("from wishlist clicked - current page");
-                        if (tabID == int.MaxValue)
-                        {
-                            Logger.Firebase("tabID == int.MaxValue");
-                        }
-                        else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
-                        {
-                            Logger.Firebase("doesnt contain key");
-                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_error), ToastLength.Long);
-                        }
-                        else
-                        {
-                            if (SearchFragment.Instance?.IsResumed ?? false) //!??! this logic is backwards...
-                            {
-                                Logger.Debug("we are on the search page but we need to wait for OnResume search frag");
-                                goToSearchTab = tabID; //we read this we resume
-                            }
-                            else
-                            {
-                                SearchFragment.Instance.GoToTab(tabID, false, true);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Logger.InfoFirebase("from wishlist clicked - different page");
-                        //when we move to the page, lets move to our tab, if its not the current one..
-                        goToSearchTab = tabID; //we read this when we move tab...
-                        pager.SetCurrentItem(1, false);
-                    }
+                    HandleWishlistIntent();
                 }
                 else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
                 {
@@ -670,6 +634,46 @@ namespace Seeker
             }
         }
 
+        private void HandleWishlistIntent()
+        {
+            Logger.InfoFirebase("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false).ToString());
+            Logger.InfoFirebase("from wishlist clicked");
+            int currentPage = pager.CurrentItem;
+            int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
+            if (currentPage == 1) //this is the case even if process previously got am state killed.
+            {
+                Logger.InfoFirebase("from wishlist clicked - current page");
+                if (tabID == int.MaxValue)
+                {
+                    Logger.Firebase("tabID == int.MaxValue");
+                }
+                else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
+                {
+                    Logger.Firebase("doesnt contain key");
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_error), ToastLength.Long);
+                }
+                else
+                {
+                    if (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false))
+                    {
+                        Logger.Debug("we are on the search page but we need to wait for OnResume search frag");
+                        goToSearchTab = tabID; //we read this we resume
+                    }
+                    else
+                    {
+                        SearchFragment.Instance.GoToTab(tabID, false, true);
+                    }
+                }
+            }
+            else
+            {
+                Logger.InfoFirebase("from wishlist clicked - different page");
+                //when we move to the page, lets move to our tab, if its not the current one..
+                goToSearchTab = tabID; //we read this when we move tab...
+                pager.SetCurrentItem(1, false);
+            }
+        }
+
         public void FallbackFileSelection(int requestCode)
         {
             //Create FolderOpenDialog
@@ -815,39 +819,7 @@ namespace Seeker
             Intent = intent.PutExtra("ALREADY_HANDLED", true);
             if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
             {
-                Logger.InfoFirebase("is null: " + (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false)).ToString());
-                Logger.InfoFirebase("from wishlist clicked");
-                int currentPage = pager.CurrentItem;
-                int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
-                if (currentPage == 1)
-                {
-                    if (tabID == int.MaxValue)
-                    {
-                        Logger.Firebase("tabID == int.MaxValue");
-                    }
-                    else if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabID))
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_error), ToastLength.Long);
-                    }
-                    else
-                    {
-                        if (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false))
-                        {
-                            Logger.Debug("we are on the search page but we need to wait for OnResume search frag");
-                            goToSearchTab = tabID; //we read this we resume
-                        }
-                        else
-                        {
-                            SearchFragment.Instance.GoToTab(tabID, false, true);
-                        }
-                    }
-                }
-                else
-                {
-                    //when we move to the page, lets move to our tab, if its not the current one..
-                    goToSearchTab = tabID; //we read this when we move tab...
-                    pager.SetCurrentItem(1, false);
-                }
+                HandleWishlistIntent();
             }
             else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2))) //else every rotation will change Downloads to Uploads.
             {
@@ -1010,28 +982,6 @@ namespace Seeker
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
         public const string UPLOADS_NOTIF_EXTRA = "From Upload";
 
-
-
-
-
-        ///// <summary>
-        ///// this is for global uploading event handling only.  the tabpageadapter is the one for downloading... and for upload tranferpage specific events
-        ///// </summary>
-        ///// <param name="sender"></param>
-        ///// <param name="e"></param>
-        //private void Upload_TransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
-        //{
-        //    if (e.Transfer.Direction == TransferDirection.Download)
-        //    {
-        //        return;
-        //    }
-        //    //the transfer has average speed already calcuated for us... it also has remainingtime for us too :)
-        //}
-
-
-
-
-
         /// <summary>
         ///     Creates and returns an <see cref="IEnumerable{T}"/> of <see cref="Soulseek.Directory"/> in response to a remote request.
         /// </summary>
@@ -1039,52 +989,6 @@ namespace Seeker
         /// <param name="endpoint">The IP endpoint of the requesting user.</param>
         /// <returns>A Task resolving an IEnumerable of Soulseek.Directory.</returns>
 
-        /// <summary>
-        /// Do this on any changes (like in Settings) but also on Login.
-        /// </summary>
-        /// <param name="informServerOfChangeIfThereIsAChange"></param>
-        /// <param name="force">force if we are chaning the upload directory...</param>
-
-        public void SetUpLoginContinueWith(Task t)
-        {
-            if (t == null)
-            {
-                return;
-            }
-            if (SharedFileService.MeetsSharingConditions())
-            {
-
-                Action<Task> getAndSetLoggedInInfoAction = new Action<Task>((Task t) =>
-                {
-                    //we want to 
-                    //UpdateStatus ??
-                    //inform server if we are sharing..
-                    //get our upload speed..
-                    if (t.Status == TaskStatus.Faulted || t.IsFaulted || t.IsCanceled)
-                    {
-                        return;
-                    }
-                    SharedFileService.InformServerOfSharedFiles(); //dont need to get the result of this one.
-                    SeekerState.SoulseekClient.GetUserStatisticsAsync(PreferencesState.Username); //the result of this one if from an event handler..
-                    //.ContinueWith(
-                    //    (Task<UserData> userDataTask) =>
-                    //    {
-                    //        if(userDataTask.IsFaulted)
-                    //        {
-                    //            Logger.Firebase("userDataTask is faulted " + userDataTask.Exception);
-                    //            return;
-                    //        }
-                    //        else
-                    //        {
-                    //            //userDataTask.Result.AverageSpeed;
-                    //        }
-
-                    //    });
-
-                });
-                t.ContinueWith(getAndSetLoggedInInfoAction);
-            }
-        }
 
         public bool OnBrowseTab()
         {
@@ -1320,13 +1224,6 @@ namespace Seeker
                 SupportFragmentManager.BeginTransaction().Detach(f).Attach(f).CommitNow();
                 //supportFragmentManager.beginTransaction().detach(fragment).attach(fragment).commitNow()
             }
-        }
-
-
-
-        public static string GetLastPathSegment(string uri)
-        {
-            return Android.Net.Uri.Parse(uri).LastPathSegment;
         }
 
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
@@ -1627,87 +1524,6 @@ namespace Seeker
 
             }
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="e"></param>
-        ///// <param name="c"></param>
-        //public static void ShowAlert(Exception e, Context c)
-        //{
-        //    var b = new Android.App.AlertDialog.Builder(c);
-        //    b.SetTitle("An Unhandled Exception Occured"); 
-        //    b.SetMessage(e.Message + 
-        //        System.Environment.NewLine + 
-        //        System.Environment.NewLine + 
-        //        e.StackTrace);
-        //    b.Show();
-        //}
-
-        //public void LogWriter(string logMessage)
-        //{
-        //    LogWrite(logMessage);
-        //}
-        //public void LogWrite(string logMessage)
-        //{
-        //    var m_exePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        //    try
-        //    {
-        //        using (System.IO.StreamWriter w = System.IO.File.AppendText(m_exePath + "\\" + "log.txt"))
-        //        {
-        //            w.WriteLine("Testing testing testing");
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
-        //    }
-        //}
-
-        //public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
-        //{
-        //    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
-        //    {
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        FinishAndRemoveTask();
-        //    }
-        //}
-
-        //public static void SeekerState_DownloadAdded(object sender, DownloadAddedEventArgs e)
-        //{
-        //    Logger.Debug("SeekerState_DownloadAdded");
-        //    TransferItem transferItem = new TransferItem();
-        //    transferItem.Filename = Helpers.GetFileNameFromFile(e.dlInfo.fullFilename);
-        //    transferItem.FolderName = Helpers.GetFolderNameFromFile(e.dlInfo.fullFilename);
-        //    transferItem.Username = e.dlInfo.username;
-        //    transferItem.FullFilename = e.dlInfo.fullFilename;
-        //    transferItem.Size = e.dlInfo.Size;
-        //    transferItem.QueueLength = e.dlInfo.QueueLength;
-        //    e.dlInfo.TransferItemReference = transferItem;
-
-        //    TransfersFragment.SetupCancellationToken(transferItem, e.dlInfo.CancellationTokenSource, out _);
-        //    //transferItem.CancellationTokenSource = e.dlInfo.CancellationTokenSource;
-        //    //if (!CancellationTokens.TryAdd(ProduceCancellationTokenKey(transferItem), e.dlInfo.CancellationTokenSource))
-        //    //{
-        //    //    //likely old already exists so just replace the old one
-        //    //    CancellationTokens[ProduceCancellationTokenKey(transferItem)] = e.dlInfo.CancellationTokenSource;
-        //    //}
-
-        //    //once task completes, write to disk
-        //    Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
-        //    e.dlInfo.downloadTask.ContinueWith(continuationActionSaveFile);
-
-        //    TransfersFragment.TransferItemManagerDL.Add(transferItem);
-        //}
-
-
-        private static bool HasNonASCIIChars(string str)
-        {
-            return (System.Text.Encoding.UTF8.GetByteCount(str) != str.Length);
-        }
-
 
         /// <summary>
         /// 

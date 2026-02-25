@@ -127,7 +127,7 @@ namespace Seeker
                     //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, PreferencesState.Username, PreferencesState.Password);
                     login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
                     login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                    SeekerState.MainActivityRef.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
+                    SeekerApplication.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
                 }
                 else if (!StaticHacks.LoggingIn || StaticHacks.UpdateUI)
                 {
