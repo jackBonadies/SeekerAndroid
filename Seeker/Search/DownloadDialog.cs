@@ -30,6 +30,7 @@ using Common.Browse;
 using Google.Android.Material.Snackbar;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
+using Seeker.Services;
 using Seeker.Transfers;
 using Soulseek;
 using System;
@@ -794,7 +795,7 @@ namespace Seeker
 
         private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
         {
-            var task = TransfersUtil.CreateDownloadAllTask(files, queuePaused, username);
+            var task = DownloadService.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }

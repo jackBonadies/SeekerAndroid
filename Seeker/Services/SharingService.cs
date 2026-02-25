@@ -38,7 +38,7 @@ namespace Seeker.Services
                 searchResponseResolver: SearchResponseResolver,
                 browseResponseResolver: BrowseResponseResolver,
                 directoryContentsResolver: DirectoryContentsResponseResolver,
-                enqueueDownload: DownloadService.EnqueueDownloadAction));
+                enqueueDownload: UploadService.EnqueueDownloadAction));
             _isActive = true;
         }
 

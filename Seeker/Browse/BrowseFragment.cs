@@ -29,6 +29,7 @@ using Common;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Services;
 using Seeker.Transfers;
 using Soulseek;
 using System;
@@ -869,12 +870,12 @@ namespace Seeker
                             SeekerApplication.Toaster.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                             return;
                         }
-                        TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
+                        DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                     }));
                 }
                 else
                 {
-                    TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
+                    DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                 }
             }
         }
@@ -1119,12 +1120,12 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
-                    TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
+                    DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
                 }));
             }
             else
             {
-                TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
+                DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
             }
         }
 

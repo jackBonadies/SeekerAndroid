@@ -1779,7 +1779,7 @@ namespace Seeker
                         NotificationUploadTracker.Add(e.Transfer.Username, notifInfo);
                     }
 
-                    Notification n = Seeker.Services.DownloadService.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
+                    Notification n = Seeker.Services.UploadService.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
                     NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.MainActivityRef);
                     nmc.Notify(e.Transfer.Username.GetHashCode(), n);
                 }

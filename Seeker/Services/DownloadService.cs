@@ -1,28 +1,282 @@
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Provider;
-using Java.IO;
 using Android.Widget;
-using AndroidX.Core.App;
-using AndroidX.DocumentFile.Provider;
 using Seeker.Helpers;
 using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using static Android.Provider.DocumentsContract;
 
 using Common;
 namespace Seeker.Services
 {
-    // Download queue, enqueue, and continuation logic
+    // Owns the entire download lifecycle: initiate, queue-poll, complete/retry/save
     public static class DownloadService
     {
+        public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
+
+
+        public static void ClearDownloadAddedEventsFromTarget(object target)
+        {
+            if (DownloadAddedUINotify == null)
+            {
+                return;
+            }
+            else
+            {
+                foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
+                {
+                    if (d.Target == null) //i.e. static
+                    {
+                        continue;
+                    }
+                    if (d.Target.GetType() == target.GetType())
+                    {
+                        DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
+                    }
+                }
+            }
+        }
+
+        public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
+        {
+            if (username == PreferencesState.Username)
+            {
+                SeekerApplication.Toaster.ShowToastLong(StringKey.cannot_download_from_self);
+                return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
+            }
+
+            Task task = new Task(() =>
+            {
+                EnqueueFiles(files, queuePaused, username);
+            });
+
+            return task;
+        }
+
+        public static async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
+        {
+            bool allExist = true; //only show the transfer exists if all transfers in question do already exist
+            var isSingle = files.Count() == 1;
+            List<DownloadInfo> downloadInfos = new List<DownloadInfo>();
+            foreach (FullFileInfo file in files)
+            {
+                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, out bool transferExists);
+                downloadInfos.Add(dlInfo);
+                if (!transferExists)
+                {
+                    allExist = false;
+                }
+            }
+
+            if (allExist)
+            {
+                SeekerApplication.Toaster.ShowToastShort(StringKey.error_duplicate);
+            }
+            else
+            {
+                if (queuePaused)
+                {
+                    SeekerApplication.Toaster.ShowToastShort(StringKey.QueuedForDownload);
+                }
+                else
+                {
+                    SeekerApplication.Toaster.ShowToastShort(StringKey.download_is_starting);
+                }
+            }
+
+            if (!allExist && !queuePaused)
+            {
+                await DownloadFiles(downloadInfos, files, username);
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="username"></param>
+        /// <remarks>
+        /// Previously we would fireoff DownloadFileAsync tasks one after another.
+        /// This would cause files do download out of order and other side effects.
+        /// Update the logic to be more similar to slskd.
+        /// </remarks>
+        private static async Task DownloadFiles(List<DownloadInfo> dlInfos, FullFileInfo[] files, string username)
+        {
+            for (int i = 0; i < dlInfos.Count; i++)
+            {
+                var dlInfo = dlInfos[i];
+                var file = files[i];
+                var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, dlInfo, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
+                var e = new DownloadAddedEventArgs(dlInfo);
+                Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
+                dlTask.ContinueWith(continuationActionSaveFile);
+                // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next
+                await waitForNext;
+            }
+        }
+
+
+        /// <summary>
+        /// Adds a transfer to the database. Does not
+        /// </summary>
+        public static DownloadInfo AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
+        {
+            errorExists = false;
+            Task dlTask = null;
+            System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
+            bool exists = false;
+            TransferItem transferItem = null;
+            DownloadInfo downloadInfo = null;
+            System.Threading.CancellationTokenSource oldCts = null;
+            try
+            {
+
+                downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
+
+                transferItem = new TransferItem();
+                transferItem.Filename = SimpleHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
+                transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
+                transferItem.Username = downloadInfo.username;
+                transferItem.FullFilename = downloadInfo.fullFilename;
+                transferItem.Size = downloadInfo.Size;
+                transferItem.QueueLength = downloadInfo.QueueLength;
+                transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
+                transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
+                if (isSingle && PreferencesState.NoSubfolderForSingle)
+                {
+                    transferItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
+                }
+
+                if (!queuePaused)
+                {
+                    try
+                    {
+                        TransferState.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
+                    }
+                    catch (Exception errr)
+                    {
+                        Logger.Firebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                    }
+                }
+                transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
+                Logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
+                downloadInfo.TransferItemReference = transferItem;
+
+                if (queuePaused)
+                {
+                    transferItem.State = TransferStates.Cancelled;
+                    DownloadAddedUINotify?.Invoke(null, new DownloadAddedEventArgs(null));
+                }
+                else
+                {
+                    var e = new DownloadAddedEventArgs(downloadInfo);
+                    DownloadAddedUINotify?.Invoke(null, e);
+                }
+            }
+            catch (Exception e)
+            {
+                if (!exists)
+                {
+                    TransfersFragment.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
+                }
+                else
+                {
+                    errorExists = exists;
+                }
+                if (oldCts != null)
+                {
+                    TransferState.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
+                }
+            }
+            return downloadInfo;
+        }
+
+        /// <summary>
+        /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
+        /// its the same as the old SeekerState.SoulseekClient.DownloadAsync but with a few bells and whistles...
+        /// </summary>
+        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, out Task waitForNext, DownloadInfo dlInfo, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
+        {
+            var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            Logger.Debug($"DownloadFileAsync: {fullfilename}");
+            Task dlTask = null;
+            Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
+            {
+                if (args.Transfer.State.HasFlag(TransferStates.Queued) || args.Transfer.State == TransferStates.Initializing)
+                {
+                    Logger.Debug($"Queued / Init: {fullfilename} We can proceed to download next file.");
+                    waitUntilEnqueue.TrySetResult(true);
+                }
+            });
+            if (PreferencesState.MemoryBackedDownload)
+            {
+                var memStream = new MemoryStream();
+                if (dlInfo != null)
+                {
+                    dlInfo.OutputMemoryStream = memStream;
+                }
+                dlTask =
+                    SeekerState.SoulseekClient.DownloadAsync(
+                        username: username,
+                        remoteFilename: fullfilename,
+                        outputStreamFactory: () => Task.FromResult<Stream>((Stream)memStream),
+                        size: size,
+                        options: new TransferOptions(governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
+                        cancellationToken: cts.Token);
+            }
+            else
+            {
+                long partialLength = 0;
+                Android.Net.Uri incompleteUri = null;
+                Android.Net.Uri incompleteUriDirectory = null;
+                try
+                {
+                    FileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
+                }
+                catch (DownloadDirectoryNotSetException ex)
+                {
+                    if (dlInfo?.TransferItemReference != null)
+                    {
+                        MarkTransferItemAsDirNotSet(dlInfo.TransferItemReference);
+                    }
+                    SeekerApplication.Toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_");
+                    waitForNext = Task.CompletedTask;
+                    return Task.FromException(ex);
+                }
+
+                if (dlInfo?.TransferItemReference != null)
+                {
+                    dlInfo.TransferItemReference.IncompleteUri = incompleteUri?.ToString();
+                    dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory?.ToString();
+                }
+
+                dlTask = SeekerState.SoulseekClient.DownloadAsync(
+                        username: username,
+                        remoteFilename: fullfilename,
+                        outputStreamFactory: () => Task.FromResult<System.IO.Stream>(
+                            FileSystemService.OpenIncompleteStream(incompleteUri, partialLength)),
+                        size: size,
+                        startOffset: partialLength,
+                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
+                        cancellationToken: cts.Token);
+            }
+            waitForNext = Task.WhenAny(waitUntilEnqueue.Task, dlTask);
+            return dlTask;
+        }
+
+
+        public static void MarkTransferItemAsDirNotSet(TransferItem item)
+        {
+            item.Failed = true;
+            item.State = Soulseek.TransferStates.Errored;
+            item.TransferItemExtra |= TransferItemExtras.DirNotSet;
+            item.InProcessing = false;
+        }
+
         public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
 
@@ -257,7 +511,7 @@ namespace Seeker.Services
                         transferItemInQuestion.QueueLength = int.MaxValue;
                         TransferState.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                         var dlInfo = new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, null, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion };
-                        Task task = TransfersUtil.DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1());
+                        Task task = DownloadFileAsync(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: transferItemInQuestion.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: transferItemInQuestion.ShouldEncodeFolderLatin1());
                         task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
                     }
                     catch (DuplicateTransferException)
@@ -312,198 +566,6 @@ namespace Seeker.Services
 
         public static EventHandler<TransferItem> TransferItemQueueUpdated; //for transferItemPage to update its recyclerView
 
-        public static event EventHandler<TransferItem> TransferAddedUINotify;
-        public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
-        {
-            string fileS = numFiles == 1 ? SeekerState.ActiveActivityRef.GetString(Resource.String.file) : SeekerState.ActiveActivityRef.GetString(Resource.String.files);
-            string titleText = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.upload_f_string), numFiles, fileS, username);
-            string directoryString = string.Empty;
-            if (directories.Count == 1)
-            {
-                directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directory) + ": " + directories[0];
-            }
-            else
-            {
-                directoryString = SeekerState.ActiveActivityRef.GetString(Resource.String.from_directories) + ": " + directories[0];
-                for (int i = 0; i < directories.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        continue;
-                    }
-                    directoryString += ", " + directories[i];
-                }
-            }
-            string contextText = directoryString;
-            Intent notifIntent = new Intent(context, typeof(MainActivity));
-            notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(MainActivity.UPLOADS_NOTIF_EXTRA, 2);
-            PendingIntent pendingIntent =
-                PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
-            Notification notification = null;
-            if (OperatingSystem.IsAndroidVersionAtLeast(26))
-            {
-                notification =
-                      new Notification.Builder(context, MainActivity.UPLOADS_CHANNEL_ID)
-                      .SetContentTitle(titleText)
-                      .SetContentText(contextText)
-                      .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                      .SetContentIntent(pendingIntent)
-                      .SetOnlyAlertOnce(true) //maybe
-                      .SetTicker(titleText).Build();
-            }
-            else
-            {
-                notification =
-#pragma warning disable CS0618 // Type or member is obsolete
-                  new Notification.Builder(context)
-#pragma warning restore CS0618 // Type or member is obsolete
-                  .SetContentTitle(titleText)
-                  .SetContentText(contextText)
-                  .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                  .SetContentIntent(pendingIntent)
-                  .SetOnlyAlertOnce(true) //maybe
-                  .SetTicker(titleText).Build();
-            }
-
-            return notification;
-        }
-
-        /// <summary>
-        ///     Invoked upon a remote request to download a file.    THE ORIGINAL BUT WITHOUT ITRANSFERTRACKER!!!!
-        /// </summary>
-        /// <param name="username">The username of the requesting user.</param>
-        /// <param name="endpoint">The IP endpoint of the requesting user.</param>
-        /// <param name="filename">The filename of the requested file.</param>
-      //  /// <param name="tracker">(for example purposes) the ITransferTracker used to track progress.</param>
-        /// <returns>A Task representing the asynchronous operation.</returns>
-        /// <exception cref="DownloadEnqueueException">Thrown when the download is rejected.  The Exception message will be passed to the remote user.</exception>
-        /// <exception cref="Exception">Thrown on any other Exception other than a rejection.  A generic message will be passed to the remote user for security reasons.</exception>
-        public static Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename)
-        {
-            if (SeekerApplication.IsUserInIgnoreList(username))
-            {
-                return Task.CompletedTask;
-            }
-
-            //if a user tries to download a file from our browseResponse then their filename will be
-            //  "Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\y\\x\\09 Between Songs 4.mp3" 
-            //so check if it contains the uploadDataDirectoryUri
-
-            //if(filename.Contains(uploadDirfolderName))
-            //{
-            //    string newFolderName = Helpers.GetFolderNameFromFile(filename);
-            //    string newFileName = Helpers.GetFileNameFromFile(filename);
-            //    keyFilename = newFolderName + @"\" + newFileName;
-            //}
-
-            //the filename is basically "the key"
-            _ = endpoint;
-            string errorMsg = null;
-            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SeekerState.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);//SeekerState.SharedFileCache.FullInfo.Where((Tuple<string,string,long> fullInfoTuple) => {return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault(); //make this a method call GetFullInfo and check Aux dict
-            if (ourFileInfo == null)
-            {
-                Logger.Firebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);
-                throw new DownloadEnqueueException($"File not found.");
-            }
-
-            DocumentFile ourFile = null;
-            Android.Net.Uri ourUri = Android.Net.Uri.Parse(ourFileInfo.Item2);
-
-            if (ourFileInfo.Item4 || ourFileInfo.Item5)
-            {
-                //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
-                //CHECK USER LIST
-                if (!SimpleHelpers.UserListService.ContainsUser(username))
-                {
-                    throw new DownloadEnqueueException($"File not shared");
-                }
-            }
-
-            if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(filename)) //IsFromTree method!
-            {
-                ourFile = DocumentFile.FromFile(new Java.IO.File(ourUri.Path));
-            }
-            else
-            {
-                ourFile = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, ourUri);
-            }
-            //var localFilename = filename.ToLocalOSPath();
-            //var fileInfo = new FileInfo(localFilename);
-
-
-
-            if (!ourFile.Exists())
-            {
-                //Console.WriteLine($"[UPLOAD REJECTED] File {localFilename} not found.");
-                throw new DownloadEnqueueException($"File not found.");
-            }
-
-            //if (tracker.TryGet(TransferDirection.Upload, username, filename, out _))
-            //{
-            //    // in this case, a re-requested file is a no-op.  normally we'd want to respond with a 
-            //    // PlaceInQueueResponse
-            //    //Console.WriteLine($"[UPLOAD RE-REQUESTED] [{username}/{filename}]");
-            //    return Task.CompletedTask;
-            //}
-
-            // create a new cancellation token source so that we can cancel the upload from the UI.
-            var cts = new CancellationTokenSource();
-            //var topts = new TransferOptions(stateChanged: (e) => tracker.AddOrUpdate(e, cts), progressUpdated: (e) => tracker.AddOrUpdate(e, cts), governor: (t, c) => Task.Delay(1, c));
-
-            TransferItem transferItem = new TransferItem();
-            transferItem.Username = username;
-            transferItem.FullFilename = filename;
-            transferItem.Filename = SimpleHelpers.GetFileNameFromFile(filename);
-            transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(filename);
-            transferItem.CancellationTokenSource = cts;
-            transferItem.Size = ourFile.Length();
-            transferItem.isUpload = true;
-            transferItem = TransfersFragment.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
-
-            if (!exists) //else the state will simply be updated a bit later. 
-            {
-                TransferAddedUINotify?.Invoke(null, transferItem);
-            }
-            // accept all download requests, and begin the upload immediately.
-            // normally there would be an internal queue, and uploads would be handled separately.
-            Task.Run(async () =>
-            {
-                CancellationTokenSource oldCts = null;
-                try
-                {
-                    //using var stream = new FileStream(fileInfo.FullName, FileMode.Open, FileAccess.Read);
-
-                    TransferState.SetupCancellationToken(transferItem, cts, out oldCts);
-
-                    var uploadUri = ourFile.Uri;
-                    await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
-                        inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
-                        options: new TransferOptions(governor: SpeedLimitHelper.OurUploadGovernor), cancellationToken: cts.Token); //THE FILENAME THAT YOU PASS INTO HERE MUST MATCH EXACTLY
-                                                                                                                                   //ELSE THE CLIENT WILL REJECT IT.  //MUST MATCH EXACTLY THE ONE THAT WAS REQUESTED THAT IS..
-
-                }
-                catch (DuplicateTransferException dup) //not tested
-                {
-                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
-                }
-                catch (DuplicateTokenException dup)
-                {
-                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _); //if there is a duplicate you do not want to overwrite the good cancellation token with a meaningless one. so restore the old one.
-                }
-            }).ContinueWith(t =>
-            {
-                //Console.WriteLine($"[UPLOAD FAILED] {t.Exception}");
-            }, TaskContinuationOptions.NotOnRanToCompletion); // fire and forget
-
-            // return a completed task so that the invoking code can respond to the remote client.
-            return Task.CompletedTask;
-        }
-
         /// <summary>
         /// This RETURNS the task for Continuewith
         /// </summary>
@@ -535,8 +597,8 @@ namespace Seeker.Services
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                                 var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
-                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, cancellationTokenSource, out _, retryDlInfo, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(retryDlInfo)));
+                                Task retryTask = DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, cancellationTokenSource, out _, retryDlInfo, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
+                                retryTask.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(retryDlInfo)));
                             }
                             catch (System.Exception e)
                             {
@@ -613,7 +675,7 @@ namespace Seeker.Services
                         }
                         else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
-                            Transfers.TransfersUtil.MarkTransferItemAsDirNotSet(transferItem);
+                            MarkTransferItemAsDirNotSet(transferItem);
                             action = () => { SeekerApplication.Toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
@@ -806,8 +868,8 @@ namespace Seeker.Services
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                                 var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
-                                Task retryTask = TransfersUtil.DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, out _, retryDlInfo, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
-                                retryTask.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(retryDlInfo)));
+                                Task retryTask = DownloadFileAsync(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, cancellationTokenSource, out _, retryDlInfo, 1, e.dlInfo.TransferItemReference.ShouldEncodeFileLatin1(), e.dlInfo.TransferItemReference.ShouldEncodeFolderLatin1());
+                                retryTask.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(retryDlInfo)));
                                 return; //i.e. dont toast anything just retry.
                             }
                             catch (System.Exception e)

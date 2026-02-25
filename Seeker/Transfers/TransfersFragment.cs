@@ -938,7 +938,7 @@ namespace Seeker
                 {
                     TransferState.SetupCancellationToken(item, cancellationTokenSource, out _);
                     var dlInfo = new DownloadInfo(item.Username, item.FullFilename, item.Size, null, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item };
-                    Task task = TransfersUtil.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
+                    Task task = DownloadService.DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
                     task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
                 }
                 catch (DuplicateTransferException)
@@ -1089,7 +1089,7 @@ namespace Seeker
 
                 TransferState.SetupCancellationToken(item1, cancellationTokenSource, out _);
                 var dlInfo = new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, null, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 };
-                Task task = TransfersUtil.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
+                Task task = DownloadService.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
                 task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo))); //if paused do retry counter 0.
             }
             catch (DuplicateTransferException)
@@ -1960,7 +1960,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex += TransferStateChanged;
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
-            DownloadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
+            UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
             DownloadService.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
@@ -2008,7 +2008,7 @@ namespace Seeker
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
             DownloadService.TransferItemQueueUpdated -= TranferQueueStateChanged;
-            DownloadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
+            UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
 
@@ -2018,8 +2018,8 @@ namespace Seeker
         public override void OnCreate(Bundle savedInstanceState)
         {
 
-            TransfersUtil.ClearDownloadAddedEventsFromTarget(this);
-            TransfersUtil.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
+            DownloadService.ClearDownloadAddedEventsFromTarget(this);
+            DownloadService.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
             //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
             //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
             //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
