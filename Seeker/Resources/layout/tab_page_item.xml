@@ -11,11 +11,11 @@
     android:paddingBottom="4dp"
 >
     <LinearLayout
+        android:id="@+id/searchTabRowBg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@drawable/search_tab_row_bg"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
     >
