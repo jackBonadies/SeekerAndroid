@@ -148,6 +148,7 @@ namespace Seeker
         public ImageView removeSearch;
         private TextView lastSearchTerm;
         private TextView numResults;
+        private View pillIndicator;
         public SearchTabViewHolder ViewHolder;
         public int SearchId = int.MaxValue;
         public SearchTabView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -171,6 +172,7 @@ namespace Seeker
             numResults = FindViewById<TextView>(Resource.Id.resultsText);
             removeSearch = FindViewById<ImageView>(Resource.Id.searchTabItemRemove);
             searchTabLayout = FindViewById<LinearLayout>(Resource.Id.searchTabItemMain);
+            pillIndicator = FindViewById<View>(Resource.Id.tabPillIndicator);
         }
 
         public void setItem(int i)
@@ -198,6 +200,11 @@ namespace Seeker
             {
                 lastSearchTerm.Text = "[No Search]";
             }
+
+            bool isActive = (i == SearchTabHelper.CurrentTab);
+            pillIndicator.SetBackgroundResource(isActive
+                ? Resource.Drawable.search_tab_pill_active
+                : Resource.Drawable.search_tab_pill_inactive);
         }
     }
 

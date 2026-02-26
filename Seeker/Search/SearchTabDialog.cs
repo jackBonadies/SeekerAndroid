@@ -51,9 +51,7 @@ namespace Seeker
             this.SetStyle((int)Android.App.DialogFragmentStyle.NoTitle, 0);
             //this.Dialog.SetTitle("Search Tab");
             recyclerViewSearches = view.FindViewById<RecyclerView>(Resource.Id.searchesRecyclerView);
-            recyclerViewSearches.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             recyclerViewWishlists = view.FindViewById<RecyclerView>(Resource.Id.wishlistsRecyclerView);
-            recyclerViewWishlists.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             recycleSearchesLayoutManager = new LinearLayoutManager(this.Activity);
             recyclerViewSearches.SetLayoutManager(recycleSearchesLayoutManager);
             recycleWishlistsLayoutManager = new LinearLayoutManager(this.Activity);
@@ -66,27 +64,16 @@ namespace Seeker
             wishlistTitle = view.FindViewById<TextView>(Resource.Id.wishlistTitle);
             if (wishTabIds.Count == 0)
             {
-                wishlistTitle.SetText(Resource.String.wishlist_empty_bold);
+                wishlistTitle.SetText(Resource.String.wishlist_empty_header);
             }
             else
             {
-                wishlistTitle.SetText(Resource.String.wishlist_bold);
+                wishlistTitle.SetText(Resource.String.wishlist_header);
             }
             recyclerViewSearches.SetAdapter(recycleSearchesAdapter);
             recyclerViewWishlists.SetAdapter(recycleWishesAdapter);
             newSearch = view.FindViewById<Button>(Resource.Id.createNewSearch);
             newSearch.Click += NewSearch_Click;
-            //newSearch.CompoundDrawablePadding = 6;
-            Android.Graphics.Drawables.Drawable drawable = null;
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                drawable = this.Context.Resources.GetDrawable(Resource.Drawable.ic_add_black_24dp, this.Context.Theme);
-            }
-            else
-            {
-                drawable = this.Context.Resources.GetDrawable(Resource.Drawable.ic_add_black_24dp);
-            }
-            newSearch.SetCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
 
         }
 

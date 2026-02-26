@@ -1,22 +1,31 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
 >
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:padding="@dimen/abc_action_bar_content_inset_material"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
     >
         <TextView
-            android:text="@string/search_tabs_bold"
-            android:textSize="22sp"
+            android:text="@string/search_tabs_header"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="?attr/mainTextColorHinted"
+            android:letterSpacing="0.05"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingBottom="6dp"
+        />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/slightContrastColor"
+            android:layout_marginBottom="4dp"
         />
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchesRecyclerView"
@@ -26,37 +35,43 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawablePadding="6dp"
-            android:paddingStart="30dp"
-            android:paddingEnd="30dp"
             android:id="@+id/createNewSearch"
-            style="@style/SeekerButtonStyle"
             android:text="@string/new_search_tab"
+            android:textColor="?attr/mainPurple"
+            android:background="@drawable/search_tab_new_search_outline"
+            android:drawableStart="@drawable/ic_add_circle_outline"
+            android:drawablePadding="8dp"
+            android:drawableTint="?attr/mainPurple"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_marginTop="4dp"
+            android:textAllCaps="false"
+            android:stateListAnimator="@null"
         />
         <TextView
             android:layout_marginTop="20dp"
-            android:text="@string/wishlist_bold"
+            android:text="@string/wishlist_header"
             android:id="@+id/wishlistTitle"
-            android:textSize="22sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="?attr/mainTextColorHinted"
+            android:letterSpacing="0.05"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingBottom="6dp"
+        />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/slightContrastColor"
+            android:layout_marginBottom="4dp"
         />
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/wishlistsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
         />
-        <!--    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/baseline_add_white_24"
-        app:iconGravity="textStart"
-        app:iconPadding="10dp"
-        app:iconTint="#ffffff"
-        style="@style/SeekerButtonStyle"
-        android:id="@+id/createNewWish"
-        android:text="Add Wish">
-
-    </Button>-->
     </LinearLayout>
 </ScrollView>
