@@ -105,27 +105,26 @@ namespace Seeker.Services
         }
 
         /// <summary>
-        /// Extended reconnect-then-act pattern. Handles disconnected OR mid-login states.
+        /// Extended reconnect-then-act pattern. Handles disconnected, mid-login, and connected states.
         /// The caller provides a continuation that handles both fault propagation and the real action.
         /// </summary>
-        /// <returns>true if the continuation was chained (disconnected or mid-login); false if caller should run action directly.</returns>
-        public static bool RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
+        public static void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
         {
             if (CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
                 if (!ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return true; // reconnect failed, but we handled it (toast shown) — caller should not run action
-                }
+                    return;
                 SeekerApplication.OurCurrentLoginTask = t.ContinueWith(continuationAction);
-                return true;
             }
             else if (IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(continuationAction, loggingInMsg, contextForMsg))
             {
-                return true;
+                // chained onto login task
             }
-            return false;
+            else
+            {
+                continuationAction(Task.CompletedTask);
+            }
         }
 
         public static void SetStatusApi(bool away)

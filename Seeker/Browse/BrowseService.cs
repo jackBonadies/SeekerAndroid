@@ -46,11 +46,7 @@ namespace Seeker.Browse
             });
 
 
-            if (!SessionService.RunWithReconnect(actualActionToPerform))
-            {
-                Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
-                t.ContinueWith(continueWithAction);
-            }
+            SessionService.RunWithReconnect(actualActionToPerform);
         }
 
         public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)

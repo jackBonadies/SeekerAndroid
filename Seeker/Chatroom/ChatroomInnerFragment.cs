@@ -797,10 +797,7 @@ namespace Seeker.Chatroom
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.empty_message_error), ToastLength.Short);
                 return;
             }
-            if (!SessionService.RunWithReconnect(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
-            {
-                ChatroomController.SendChatroomMessageLogic(roomName, msg);
-            }
+            SessionService.RunWithReconnect(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect));
 
         }
 

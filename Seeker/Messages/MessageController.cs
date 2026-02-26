@@ -673,10 +673,7 @@ namespace Seeker.Messages
                 }));
             });
 
-            if (!SessionService.RunWithReconnect(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
-            {
-                SendMessageLogic(msg, fromDirectReplyAction);
-            }
+            SessionService.RunWithReconnect(actualActionToPerform, "Message will send on connection re-establishment", contextToUse);
 
         }
 
