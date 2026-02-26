@@ -7,55 +7,66 @@
     android:orientation="horizontal"
     android:id="@+id/linearLayoutSearchTabItem"
     android:gravity="center_vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
 >
-    <View
-        android:id="@+id/tabPillIndicator"
-        android:layout_width="4dp"
-        android:layout_height="28dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/search_tab_pill_inactive"
-    />
-
     <LinearLayout
-        android:layout_width="0dp"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:id="@+id/searchTabItemMain"
-        android:clickable="true"
-        android:foreground="?android:attr/selectableItemBackground"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/search_tab_row_bg"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
     >
-        <TextView
-            android:id="@+id/lastSearchTerm"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="test artistsongDUMMY"
+        <View
+            android:id="@+id/tabPillIndicator"
+            android:layout_width="5dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/search_tab_pill_inactive"
         />
-        <TextView
-            android:id="@+id/resultsText"
-            android:textSize="12sp"
-            android:textColor="?attr/mainTextColorHinted"
-            android:layout_width="fill_parent"
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:id="@+id/searchTabItemMain"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
             android:layout_height="wrap_content"
-            android:text="12 resultsDUMMY"
+        >
+            <TextView
+                android:id="@+id/lastSearchTerm"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="test artistsongDUMMY"
+            />
+            <TextView
+                android:id="@+id/resultsText"
+                android:textSize="12sp"
+                android:textColor="?attr/mainTextColorHinted"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="12 resultsDUMMY"
+            />
+        </LinearLayout>
+
+        <ImageView
+            android:layout_marginStart="6dp"
+            android:layout_width="30dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layout_height="30dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_close_small"
+            android:id="@+id/searchTabItemRemove"
+            android:tint="?attr/mainTextColorHinted"
+            android:padding="6dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/search_tab_close_circle_bg"
         />
     </LinearLayout>
-
-    <ImageView
-        android:layout_marginStart="6dp"
-        android:layout_width="32dp"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:layout_height="32dp"
-        android:clickable="true"
-        app:srcCompat="@drawable/ic_close_small"
-        android:id="@+id/searchTabItemRemove"
-        android:tint="?attr/mainTextColorHinted"
-        android:padding="6dp"
-        android:layout_marginEnd="4dp"
-    />
 </LinearLayout>

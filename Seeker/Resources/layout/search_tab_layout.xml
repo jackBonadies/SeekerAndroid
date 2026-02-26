@@ -32,24 +32,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
         />
-        <Button
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/createNewSearch"
-            android:text="@string/new_search_tab"
-            android:textColor="?attr/mainPurple"
-            android:background="@drawable/search_tab_new_search_outline"
-            android:drawableStart="@drawable/ic_add_circle_outline"
-            android:drawablePadding="8dp"
-            android:drawableTint="?attr/mainPurple"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_marginTop="4dp"
-            android:textAllCaps="false"
-            android:stateListAnimator="@null"
-        />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+        >
+            <TextView
+                android:text="@string/new_search_tab"
+                android:textSize="14sp"
+                android:textColor="?attr/mainTextColorHinted"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+            />
+            <ImageView
+                android:id="@+id/createNewSearch"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:background="@drawable/search_tab_add_circle_bg"
+                app:srcCompat="@drawable/ic_plus"
+                android:tint="#ffffff"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+            />
+        </LinearLayout>
         <TextView
             android:layout_marginTop="20dp"
             android:text="@string/wishlist_header"

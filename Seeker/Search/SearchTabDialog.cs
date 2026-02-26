@@ -24,8 +24,7 @@ namespace Seeker
         public SearchTabItemRecyclerAdapter recycleSearchesAdapter = null;
         public SearchTabItemRecyclerAdapter recycleWishesAdapter = null;
 
-        private Button newSearch = null;
-        private Button newWishlist = null;
+        private ImageView newSearch = null;
 
         private TextView wishlistTitle = null;
 
@@ -72,7 +71,9 @@ namespace Seeker
             }
             recyclerViewSearches.SetAdapter(recycleSearchesAdapter);
             recyclerViewWishlists.SetAdapter(recycleWishesAdapter);
-            newSearch = view.FindViewById<Button>(Resource.Id.createNewSearch);
+            newSearch = view.FindViewById<ImageView>(Resource.Id.createNewSearch);
+            newSearch.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(
+                new Android.Graphics.Color(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple)));
             newSearch.Click += NewSearch_Click;
 
         }
