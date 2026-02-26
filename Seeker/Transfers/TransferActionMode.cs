@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using ActionMode = AndroidX.AppCompat.View.ActionMode;
+
 namespace Seeker
 {
     public partial class TransfersFragment

@@ -312,7 +312,7 @@ namespace Seeker
                     ForceOutIfZeroSelected = false;
                     //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                     //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
-                    TransfersActionMode = SeekerState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                    TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
                     TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), 0);
                     TransfersActionMode.Invalidate();
@@ -623,7 +623,7 @@ namespace Seeker
 
         // TODO2026
         public static ActionModeCallback TransfersActionModeCallback = null;
-        public static ActionMode TransfersActionMode = null;
+        public static AndroidX.AppCompat.View.ActionMode TransfersActionMode = null;
 
         public void SetRecyclerAdapter(bool restoreState = false)
         {
@@ -1235,7 +1235,7 @@ namespace Seeker
                         ForceOutIfZeroSelected = true;
                         //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
                         //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
-                        TransfersActionMode = SeekerState.MainActivityRef.StartActionMode(TransfersActionModeCallback);
+                        TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                         recyclerTransferAdapter.IsInBatchSelectMode = true;
                         ToggleItemBatchSelect(recyclerTransferAdapter, position);
                         break;
