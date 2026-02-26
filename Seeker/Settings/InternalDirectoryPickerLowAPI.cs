@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Environment = Android.OS.Environment;
+using Seeker.Helpers;
 //using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
 namespace Seeker
@@ -102,7 +103,7 @@ namespace Seeker
                 }
                 if (rootFolder != "storage")
                 {
-                    MainActivity.LogFirebase("sdcard root is: " + rootFolder);
+                    Logger.Firebase("sdcard root is: " + rootFolder);
                 }
                 _mSdcardDirectory = @"/" + rootFolder + @"/";
                 //this allows one to press '..' to go above the typical emulated root.
@@ -368,7 +369,7 @@ namespace Seeker
             }
             else
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                if (OperatingSystem.IsAndroidVersionAtLeast(23))
                 {
                     return GetColorFromInteger(AndroidX.Core.Content.ContextCompat.GetColor(c, typedValue.ResourceId));
                 }
@@ -391,7 +392,7 @@ namespace Seeker
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
         private AndroidX.AppCompat.App.AlertDialog.Builder CreateDirectoryChooserDialog(String title, List<String> listItems, EventHandler<AdapterView.ItemClickEventArgs> onClickListener)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder dialogBuilder = new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme);
+            var dialogBuilder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(_mContext);
             DisplayMetrics displayMetrics = new DisplayMetrics();
             _mContext.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
             float density = displayMetrics.Density; //I assume this is like 1 or 2
@@ -430,7 +431,7 @@ namespace Seeker
                 newDirButton.Click += (sender, args) =>
                 {
                     EditText input = new EditText(_mContext);
-                    new AndroidX.AppCompat.App.AlertDialog.Builder(_mContext, Resource.Style.MyAlertDialogTheme).SetTitle("New Folder Name").SetView(input).SetPositiveButton(SeekerApplication.GetString(Resource.String.okay), (o, eventArgs) =>
+                    new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(_mContext).SetTitle("New Folder Name").SetView(input).SetPositiveButton(SeekerApplication.GetString(Resource.String.okay), (o, eventArgs) =>
                     {
                         String newDirName = input.Text;
                         // Create new directory
@@ -442,7 +443,7 @@ namespace Seeker
                         }
                         else
                         {
-                            Toast.MakeText(_mContext, "Failed to create '" + newDirName + "' folder", ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast("Failed to create '" + newDirName + "' folder", ToastLength.Short);
                         }
                     }).SetNegativeButton(SeekerApplication.GetString(Resource.String.cancel), (o, eventArgs) => { }).Show();
                 };

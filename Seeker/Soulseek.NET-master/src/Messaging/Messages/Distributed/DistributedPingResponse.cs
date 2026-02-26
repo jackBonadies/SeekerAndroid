@@ -51,7 +51,12 @@ namespace Soulseek.Messaging.Messages
                 throw new MessageException($"Message Code mismatch creating {nameof(DistributedPingResponse)} (expected: {(int)MessageCode.Distributed.Ping}, received: {(int)code})");
             }
 
-            var token = reader.ReadInteger();
+            int token = 0;
+
+            if (reader.HasMoreData)
+            {
+                token = reader.ReadInteger();
+            }
 
             return new DistributedPingResponse(token);
         }

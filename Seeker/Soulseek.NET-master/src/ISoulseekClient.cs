@@ -62,6 +62,16 @@ namespace Soulseek
         event EventHandler<DistributedChildEventArgs> DistributedChildDisconnected;
 
         /// <summary>
+        ///     Occurs when the server requests a distributed network reset.
+        /// </summary>
+        event EventHandler DistributedNetworkReset;
+
+        /// <summary>
+        ///     Occurs when the state of the distributed network changes.
+        /// </summary>
+        event EventHandler<DistributedNetworkInfo> DistributedNetworkStateChanged;
+
+        /// <summary>
         ///     Occurs when a new parent is adopted.
         /// </summary>
         event EventHandler<DistributedParentEventArgs> DistributedParentAdopted;
@@ -72,14 +82,24 @@ namespace Soulseek
         event EventHandler<DistributedParentEventArgs> DistributedParentDisconnected;
 
         /// <summary>
-        ///     Occurs when a global message is received.
+        ///     Occurs when a user reports that a download has been denied.
         /// </summary>
-        event EventHandler<string> GlobalMessageReceived;
+        event EventHandler<DownloadDeniedEventArgs> DownloadDenied;
+
+        /// <summary>
+        ///     Occurs when a user reports that a download has failed.
+        /// </summary>
+        event EventHandler<DownloadFailedEventArgs> DownloadFailed;
 
         /// <summary>
         ///     Occurs when the server sends a list of excluded ("banned") search phrases.
         /// </summary>
         event EventHandler<IReadOnlyCollection<string>> ExcludedSearchPhrasesReceived;
+
+        /// <summary>
+        ///     Occurs when a global message is received.
+        /// </summary>
+        event EventHandler<string> GlobalMessageReceived;
 
         /// <summary>
         ///     Occurs when the client is logged in.
@@ -227,15 +247,30 @@ namespace Soulseek
         event EventHandler<UserCannotConnectEventArgs> UserCannotConnect;
 
         /// <summary>
+        ///     Occurs when a user's statistics change.
+        /// </summary>
+        public event EventHandler<UserStatistics> UserStatisticsChanged;
+
+        /// <summary>
         ///     Occurs when a watched user's status changes.
         /// </summary>
-        /// <remarks>Add a user to the server watch list with <see cref="AddUserAsync(string, CancellationToken?)"/>.</remarks>
-        event EventHandler<UserStatusChangedEventArgs> UserStatusChanged;
+        /// <remarks>Add a user to the server watch list with <see cref="WatchUserAsync(string, CancellationToken?)"/>.</remarks>
+        event EventHandler<UserStatus> UserStatusChanged;
 
         /// <summary>
         ///     Gets the unresolved server address.
         /// </summary>
         string Address { get; }
+
+        /// <summary>
+        ///     Gets information about the distributed network.
+        /// </summary>
+        DistributedNetworkInfo DistributedNetwork { get; }
+
+        /// <summary>
+        ///     Gets a snapshot of current downloads.
+        /// </summary>
+        IReadOnlyCollection<Transfer> Downloads { get; }
 
         /// <summary>
         ///     Gets the resolved server address.
@@ -260,12 +295,17 @@ namespace Soulseek
         /// <summary>
         ///     Gets information sent by the server upon login.
         /// </summary>
-        public ServerInfo ServerInfo { get; }
+        ServerInfo ServerInfo { get; }
 
         /// <summary>
         ///     Gets the current state of the underlying TCP connection.
         /// </summary>
         SoulseekClientStates State { get; }
+
+        /// <summary>
+        ///     Gets a snapshot of current uploads.
+        /// </summary>
+        IReadOnlyCollection<Transfer> Uploads { get; }
 
         /// <summary>
         ///     Gets the name of the currently signed in user.
@@ -333,26 +373,6 @@ namespace Soulseek
         Task AddPrivateRoomModeratorAsync(string roomName, string username, CancellationToken? cancellationToken = null);
 
         /// <summary>
-        ///     Asynchronously adds the specified <paramref name="username"/> to the server watch list for the current session.
-        /// </summary>
-        /// <remarks>
-        ///     Once a user is added the server will begin sending status updates for that user, which will generate
-        ///     <see cref="UserStatusChanged"/> events.
-        /// </remarks>
-        /// <param name="username">The username of the user to add.</param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation, including the server response.</returns>
-        /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="username"/> is null, empty, or consists only of whitespace.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
-        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
-        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
-        /// <exception cref="UserNotFoundException">Thrown when the specified user is not registered.</exception>
-        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        Task<UserData> AddUserAsync(string username, CancellationToken? cancellationToken = null);
-
-        /// <summary>
         ///     Asynchronously fetches the list of files shared by the specified <paramref name="username"/> with the optionally
         ///     specified <paramref name="cancellationToken"/>.
         /// </summary>
@@ -402,7 +422,7 @@ namespace Soulseek
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when a connection is already in the process of being established.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is already connected.</exception>
-        /// <exception cref="ListenPortException">Thrown when the specified listen port can't be bound.</exception>
+        /// <exception cref="ListenException">Thrown when binding a listener to the specified address and/or port fails.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="LoginRejectedException">Thrown when the login is rejected by the remote server.</exception>
@@ -431,12 +451,32 @@ namespace Soulseek
         /// <exception cref="InvalidOperationException">Thrown when a connection is already in the process of being established.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is already connected.</exception>
         /// <exception cref="AddressException">Thrown when the provided address can't be resolved.</exception>
-        /// <exception cref="ListenPortException">Thrown when the specified listen port can't be bound.</exception>
+        /// <exception cref="ListenException">Thrown when binding a listener to the specified address and/or port fails.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="LoginRejectedException">Thrown when the login is rejected by the remote server.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
         Task ConnectAsync(string address, int port, string username, string password, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously establishes and caches a connection to the specified <paramref name="username"/>. If a connection
+        ///     is already cached, it is returned unless the <paramref name="invalidateCache"/> option is specified.
+        /// </summary>
+        /// <param name="username">The user to which to connect.</param>
+        /// <param name="invalidateCache">
+        ///     A value indicating whether to establish a new connection, regardless of whether one is cached.
+        /// </param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task ConnectToUserAsync(string username, bool invalidateCache = false, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Disconnects the client from the server.
@@ -446,24 +486,38 @@ namespace Soulseek
         void Disconnect(string message = null, Exception exception = null);
 
         /// <summary>
-        ///     Asynchronously downloads the specified <paramref name="filename"/> from the specified <paramref name="username"/>
-        ///     using the specified unique <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>.
+        ///     <para>
+        ///         Asynchronously downloads the specified <paramref name="remoteFilename"/> from the specified
+        ///         <paramref name="username"/> using the specified unique <paramref name="token"/> and optionally specified
+        ///         <paramref name="cancellationToken"/> to the specified <paramref name="localFilename"/>.
+        ///     </para>
+        ///     <para>
+        ///         If the destination file exists and <paramref name="startOffset"/> is greater than zero, the existing file is
+        ///         appended. Otherwise, it is overwritten.
+        ///     </para>
         /// </summary>
         /// <remarks>
         ///     If <paramref name="size"/> is omitted, the size provided by the remote client is used. Transfers initiated without
         ///     specifying a size are limited to 4gb or less due to a shortcoming of the SoulseekQt client.
         /// </remarks>
         /// <param name="username">The user from which to download the file.</param>
-        /// <param name="filename">The file to download.</param>
+        /// <param name="remoteFilename">The file to download, as reported by the remote user.</param>
+        /// <param name="localFilename">The fully qualified filename of the destination file.</param>
         /// <param name="size">The size of the file, in bytes.</param>
         /// <param name="startOffset">The offset at which to start the download, in bytes.</param>
         /// <param name="token">The unique download token.</param>
         /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <param name="streamTask">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation, including a byte array containing the file contents.</returns>
+        /// <returns>
+        ///     The Task representing the asynchronous operation, including the transfer context and a byte array containing the
+        ///     file contents.
+        /// </returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
+        ///     Thrown when the <paramref name="username"/>, <paramref name="remoteFilename"/>, or
+        ///     <paramref name="localFilename"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when <paramref name="startOffset"/> is greater than zero but <paramref name="size"/> is not specified.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     Thrown when the specified <paramref name="size"/> or <paramref name="startOffset"/> is less than zero.
@@ -471,56 +525,65 @@ namespace Soulseek
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
         /// <exception cref="DuplicateTransferException">
-        ///     Thrown when a download of the specified <paramref name="filename"/> from the specified <paramref name="username"/>
-        ///     is already in progress.
+        ///     Thrown when a download of the specified <paramref name="remoteFilename"/> from the specified
+        ///     <paramref name="username"/> is already in progress.
         /// </exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="TransferSizeMismatchException">
+        ///     Thrown when the remote size of the transfer is different from the specified size.
+        /// </exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        //Task<byte[]> DownloadAsync(string username, string filename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null, Task<Tuple<System.IO.Stream,long>> streamTask=null);
+        Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
 
         /// <summary>
-        ///     Asynchronously downloads the specified <paramref name="filename"/> from the specified <paramref name="username"/>
-        ///     using the specified unique <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>
-        ///     to the specified <paramref name="outputStream"/>.
+        ///     Asynchronously downloads the specified <paramref name="remoteFilename"/> from the specified
+        ///     <paramref name="username"/> using the specified unique <paramref name="token"/> and optionally specified
+        ///     <paramref name="cancellationToken"/> to the <see cref="Stream"/> created by the specified <paramref name="outputStreamFactory"/>.
         /// </summary>
         /// <remarks>
         ///     If <paramref name="size"/> is omitted, the size provided by the remote client is used. Transfers initiated without
         ///     specifying a size are limited to 4gb or less due to a shortcoming of the SoulseekQt client.
         /// </remarks>
         /// <param name="username">The user from which to download the file.</param>
-        /// <param name="filename">The file to download.</param>
-        /// <param name="outputStream">The stream to which to write the file contents.</param>
+        /// <param name="remoteFilename">The file to download, as reported by the remote user.</param>
+        /// <param name="outputStreamFactory">A delegate used to create the stream to which to write the file contents.</param>
         /// <param name="size">The size of the file, in bytes.</param>
         /// <param name="startOffset">The offset at which to start the download, in bytes.</param>
         /// <param name="token">The unique download token.</param>
         /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation, including a byte array containing the file contents.</returns>
+        /// <returns>The Task representing the asynchronous operation, including the transfer context.</returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
+        ///     Thrown when the <paramref name="username"/> or <paramref name="remoteFilename"/> is null, empty, or consists only
+        ///     of whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when <paramref name="startOffset"/> is greater than zero but <paramref name="size"/> is not specified.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     Thrown when the specified <paramref name="size"/> or <paramref name="startOffset"/> is less than zero.
         /// </exception>
-        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="outputStream"/> is null.</exception>
-        /// <exception cref="InvalidOperationException">
-        ///     Thrown when the specified <paramref name="outputStream"/> is not writeable.
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when the specified <paramref name="outputStreamFactory"/> is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
         /// <exception cref="DuplicateTransferException">
-        ///     Thrown when a download of the specified <paramref name="filename"/> from the specified <paramref name="username"/>
-        ///     is already in progress.
+        ///     Thrown when a download of the specified <paramref name="remoteFilename"/> from the specified
+        ///     <paramref name="username"/> is already in progress.
         /// </exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="TransferSizeMismatchException">
+        ///     Thrown when the remote size of the transfer is different from the specified size.
+        /// </exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        //Task DownloadAsync(string username, string filename, Stream outputStream, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+        Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Asynchronously removes the currently logged in user from the list of members in the specified private <paramref name="roomName"/>.
@@ -553,6 +616,204 @@ namespace Soulseek
         Task DropPrivateRoomOwnershipAsync(string roomName, CancellationToken? cancellationToken = null);
 
         /// <summary>
+        ///     <para>
+        ///         Asynchronously enqueues a download for the specified <paramref name="remoteFilename"/> from the specified
+        ///         <paramref name="username"/> using the specified unique <paramref name="token"/> and optionally specified
+        ///         <paramref name="cancellationToken"/>. to the specified <paramref name="localFilename"/>.
+        ///     </para>
+        ///     <para>
+        ///         If the destination file exists and <paramref name="startOffset"/> is greater than zero, the existing file is
+        ///         appended. Otherwise, it is overwritten.
+        ///     </para>
+        ///     <para>
+        ///         Functionally the same as
+        ///         <see cref="DownloadAsync(string, string, string, long?, long, int?, TransferOptions, CancellationToken?)"/>,
+        ///         but returns the download Task as soon as the download has been remotely enqueued.
+        ///     </para>
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         If <paramref name="size"/> is omitted, the size provided by the remote client is used. Transfers initiated
+        ///         without specifying a size are limited to 4gb or less due to a shortcoming of the SoulseekQt client.
+        ///     </para>
+        ///     <para>
+        ///         The operation will be blocked if <see cref="SoulseekClientOptions.MaximumConcurrentDownloads"/> is exceeded,
+        ///         and will not continue until the number of active downloads has decreased below the limit.
+        ///     </para>
+        /// </remarks>
+        /// <param name="username">The user from which to download the file.</param>
+        /// <param name="remoteFilename">The file to download, as reported by the remote user.</param>
+        /// <param name="localFilename">The fully qualified filename of the destination file.</param>
+        /// <param name="size">The size of the file, in bytes.</param>
+        /// <param name="startOffset">The offset at which to start the download, in bytes.</param>
+        /// <param name="token">The unique download token.</param>
+        /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>
+        ///     The Task representing the asynchronous operation, including the transfer context and a byte array containing the
+        ///     file contents.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/>, <paramref name="remoteFilename"/>, or
+        ///     <paramref name="localFilename"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown when the specified <paramref name="size"/> or <paramref name="startOffset"/> is less than zero.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
+        /// <exception cref="DuplicateTransferException">
+        ///     Thrown when a download of the specified <paramref name="remoteFilename"/> from the specified
+        ///     <paramref name="username"/> is already in progress.
+        /// </exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="TransferSizeMismatchException">
+        ///     Thrown when the remote size of the transfer is different from the specified size.
+        /// </exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<Task<Transfer>> EnqueueDownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     <para>
+        ///         Asynchronously enqueues a download for the specified <paramref name="remoteFilename"/> from the specified
+        ///         <paramref name="username"/> using the specified unique <paramref name="token"/> and optionally specified
+        ///         <paramref name="cancellationToken"/> to the <see cref="Stream"/> created by the specified <paramref name="outputStreamFactory"/>.
+        ///     </para>
+        ///     <para>
+        ///         Functionally the same as
+        ///         <see cref="DownloadAsync(string, string, Func{Task{Stream}}, long?, long, int?, TransferOptions, CancellationToken?)"/>,
+        ///         but returns the download Task as soon as the download has been remotely enqueued.
+        ///     </para>
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         If <paramref name="size"/> is omitted, the size provided by the remote client is used. Transfers initiated
+        ///         without specifying a size are limited to 4gb or less due to a shortcoming of the SoulseekQt client.
+        ///     </para>
+        ///     <para>
+        ///         The operation will be blocked if <see cref="SoulseekClientOptions.MaximumConcurrentDownloads"/> is exceeded,
+        ///         and will not continue until the number of active downloads has decreased below the limit.
+        ///     </para>
+        /// </remarks>
+        /// <param name="username">The user from which to download the file.</param>
+        /// <param name="remoteFilename">The file to download, as reported by the remote user.</param>
+        /// <param name="outputStreamFactory">A delegate used to create the stream to which to write the file contents.</param>
+        /// <param name="size">The size of the file, in bytes.</param>
+        /// <param name="startOffset">The offset at which to start the download, in bytes.</param>
+        /// <param name="token">The unique download token.</param>
+        /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous download operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> or <paramref name="remoteFilename"/> is null, empty, or consists only
+        ///     of whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     Thrown when the specified <paramref name="size"/> or <paramref name="startOffset"/> is less than zero.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when the specified <paramref name="outputStreamFactory"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
+        /// <exception cref="DuplicateTransferException">
+        ///     Thrown when a download of the specified <paramref name="remoteFilename"/> from the specified
+        ///     <paramref name="username"/> is already in progress.
+        /// </exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="TransferSizeMismatchException">
+        ///     Thrown when the remote size of the transfer is different from the specified size.
+        /// </exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<Task<Transfer>> EnqueueDownloadAsync(string username, string remoteFilename, Func<Task<Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     <para>
+        ///         Asynchronously enqueues an upload for the specified <paramref name="remoteFilename"/> from the specified
+        ///         <paramref name="localFilename"/> to the the specified <paramref name="username"/> using the specified unique
+        ///         <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>.
+        ///     </para>
+        ///     <para>
+        ///         Functionally the same as
+        ///         <see cref="UploadAsync(string, string, string, int?, TransferOptions, CancellationToken?)"/>, but returns the
+        ///         upload Task as soon as the upload has been locally enqueued.
+        ///     </para>
+        /// </summary>
+        /// <param name="username">The user to which to upload the file.</param>
+        /// <param name="remoteFilename">The filename of the file to upload, as requested by the remote user.</param>
+        /// <param name="localFilename">The fully qualified filename of the file to upload.</param>
+        /// <param name="token">The unique upload token.</param>
+        /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous upload operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/>, <paramref name="remoteFilename"/>, or
+        ///     <paramref name="localFilename"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        ///     Thrown when the specified <paramref name="localFilename"/> can not be found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
+        /// <exception cref="DuplicateTransferException">
+        ///     Thrown when an upload of the specified <paramref name="remoteFilename"/> to the specified
+        ///     <paramref name="username"/> is already in progress.
+        /// </exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<Task<Transfer>> EnqueueUploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     <para>
+        ///         Asynchronously enqueues an upload for the specified <paramref name="remoteFilename"/> from the
+        ///         <see cref="Stream"/> created by the specified <paramref name="inputStreamFactory"/> to the the specified
+        ///         <paramref name="username"/> using the specified unique <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>.
+        ///     </para>
+        ///     <para>
+        ///         Functionally the same as
+        ///         <see cref="UploadAsync(string, string, long, Func{long, Task{Stream}}, int?, TransferOptions, CancellationToken?)"/>,
+        ///         but returns the upload Task as soon as the upload has been locally enqueued.
+        ///     </para>
+        /// </summary>
+        /// <param name="username">The user to which to upload the file.</param>
+        /// <param name="remoteFilename">The filename of the file to upload, as requested by the remote user.</param>
+        /// <param name="size">The size of the file to upload, in bytes.</param>
+        /// <param name="inputStreamFactory">A delegate used to create the stream from which to retrieve the file contents.</param>
+        /// <param name="token">The unique upload token.</param>
+        /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous upload operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> or <paramref name="remoteFilename"/> is null, empty, or consists only
+        ///     of whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentException">Thrown when the specified <paramref name="size"/> is less than 1.</exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when the specified <paramref name="inputStreamFactory"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
+        /// <exception cref="DuplicateTransferException">
+        ///     Thrown when an upload of the specified <paramref name="remoteFilename"/> to the specified
+        ///     <paramref name="username"/> is already in progress.
+        /// </exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<Task<Transfer>> EnqueueUploadAsync(string username, string remoteFilename, long size, Func<long, Task<Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+
+        /// <summary>
         ///     Asynchronously fetches the contents of the specified <paramref name="directoryName"/> from the specified <paramref name="username"/>.
         /// </summary>
         /// <param name="username">The user from which to fetch the directory contents.</param>
@@ -569,26 +830,26 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        Task<Directory> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false);
+        Task<IReadOnlyCollection<Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false);
 
-        ///// <summary>
-        /////     Asynchronously fetches the current place of the specified <paramref name="filename"/> in the queue of the
-        /////     specified <paramref name="username"/>.
-        ///// </summary>
-        ///// <param name="username">The user whose queue to check.</param>
-        ///// <param name="filename">The file to check.</param>
-        ///// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        ///// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
-        ///// <exception cref="ArgumentException">
-        /////     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
-        ///// </exception>
-        ///// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
-        ///// <exception cref="TransferNotFoundException">Thrown when a corresponding download is not active.</exception>
-        ///// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
-        ///// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
-        ///// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
-        ///// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        //Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool isLegacy = false);
+        /// <summary>
+        ///     Asynchronously fetches the current place of the specified <paramref name="filename"/> in the queue of the
+        ///     specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">The user whose queue to check.</param>
+        /// <param name="filename">The file to check.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TransferNotFoundException">Thrown when a corresponding download is not active.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false);
 
         /// <summary>
         ///     Gets the next token for use in client operations.
@@ -671,6 +932,26 @@ namespace Soulseek
         Task<bool> GetUserPrivilegedAsync(string username, CancellationToken? cancellationToken = null);
 
         /// <summary>
+        ///     Asynchronously fetches statistics for the specified <paramref name="username"/>.
+        /// </summary>
+        /// <remarks>
+        ///     Statistics are returned for any given username, regardless of online status, even if no user with that name exists
+        ///     or has ever existed. All values are zero in the case of an unknown user, and presumably the last reported values
+        ///     are returned when a user exists but is offline.
+        /// </remarks>
+        /// <param name="username">The username of the user for which to fetch statistics.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation, including the server response.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null);
+
+        /// <summary>
         ///     Asynchronously fetches the status of the specified <paramref name="username"/>.
         /// </summary>
         /// <param name="username">The username of the user for which to fetch the status.</param>
@@ -741,6 +1022,8 @@ namespace Soulseek
         ///     Thrown when the <paramref name="roomName"/> is null, empty, or consists only of whitespace.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="RoomJoinForbiddenException">Thrown when the server rejects the request.</exception>
+        /// <exception cref="NoResponseException">Thrown when the server does not respond to the request.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
@@ -749,6 +1032,7 @@ namespace Soulseek
         /// <summary>
         ///     Asynchronously leaves the chat room with the specified <paramref name="roomName"/>.
         /// </summary>
+        /// <remarks>When successful, a corresponding <see cref="RoomLeft"/> event will be raised.</remarks>
         /// <param name="roomName">The name of the chat room to leave.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The Task representing the asynchronous operation, including the server response.</returns>
@@ -756,6 +1040,7 @@ namespace Soulseek
         ///     Thrown when the <paramref name="roomName"/> is null, empty, or consists only of whitespace.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="NoResponseException">Thrown when the server does not respond to the request.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
@@ -789,9 +1074,9 @@ namespace Soulseek
         ///         </list>
         ///     </para>
         ///     <para>
-        ///         Enabling or disabling the listener or changing the listen port takes effect immediately. Remaining options
-        ///         will be updated immediately, but any objects instantiated will not be updated (for example, established
-        ///         connections will retain the options with which they were instantiated).
+        ///         Enabling or disabling the listener or changing the listen address and/or port takes effect immediately.
+        ///         Remaining options will be updated immediately, but any objects instantiated will not be updated (for example,
+        ///         established connections will retain the options with which they were instantiated).
         ///     </para>
         /// </remarks>
         /// <param name="patch">A patch containing the updated options.</param>
@@ -801,7 +1086,7 @@ namespace Soulseek
         ///     required for the new options to fully take effect.
         /// </returns>
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="patch"/> is null.</exception>
-        /// <exception cref="ArgumentException">Thrown when the specified listen port can't be bound.</exception>
+        /// <exception cref="ListenException">Thrown when binding a listener to the specified address and/or port fails.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
         Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null);
 
@@ -847,7 +1132,7 @@ namespace Soulseek
         /// <param name="token">The unique search token.</param>
         /// <param name="options">The operation <see cref="SearchOptions"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation, including the search results.</returns>
+        /// <returns>The Task representing the asynchronous operation, including the search context and results.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="query"/> is null.</exception>
         /// <exception cref="ArgumentException">
         ///     Thrown when the search text of the specified <paramref name="query"/> is null, empty, or consists of only whitespace..
@@ -857,32 +1142,32 @@ namespace Soulseek
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an unhandled Exception is encountered during the operation.</exception>
-        Task<IReadOnlyCollection<SearchResponse>> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null);
+        Task<(Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Asynchronously searches for the specified <paramref name="query"/> using the specified unique
         ///     <paramref name="token"/> and with the optionally specified <paramref name="options"/> and <paramref name="cancellationToken"/>.
         /// </summary>
         /// <param name="query">The search query.</param>
-        /// <param name="responseReceived">The delegate to invoke for each response.</param>
+        /// <param name="responseHandler">The delegate to invoke for each response.</param>
         /// <param name="scope">the search scope.</param>
         /// <param name="token">The unique search token.</param>
         /// <param name="options">The operation <see cref="SearchOptions"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation, including the search results.</returns>
+        /// <returns>The Task representing the asynchronous operation, including the search context.</returns>
         /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="query"/> is null.</exception>
         /// <exception cref="ArgumentException">
         ///     Thrown when the search text of the specified <paramref name="query"/> is null, empty, or consists of only whitespace..
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     Thrown when the specified <paramref name="responseReceived"/> delegate is null.
+        ///     Thrown when the specified <paramref name="responseHandler"/> delegate is null.
         /// </exception>
         /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an unhandled Exception is encountered during the operation.</exception>
-        Task SearchAsync(SearchQuery query, Action<SearchResponse> responseReceived, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null);
+        Task<Search> SearchAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Asynchronously sends the specified private <paramref name="message"/> to the specified <paramref name="username"/>.
@@ -892,7 +1177,7 @@ namespace Soulseek
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The Task representing the asynchronous operation.</returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="username"/> or <paramref name="message"/> is null, empty, or consists only of whitespace.
+        ///     Thrown when the <paramref name="username"/> or <paramref name="message"/> is null or empty.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
@@ -908,7 +1193,7 @@ namespace Soulseek
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The Task representing the asynchronous operation.</returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="roomName"/> or <paramref name="message"/> is null, empty, or consists only of whitespace.
+        ///     Thrown when the <paramref name="roomName"/> or <paramref name="message"/> is null or empty.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
@@ -939,7 +1224,7 @@ namespace Soulseek
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The Task representing the asynchronous operation.</returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="roomName"/> or <paramref name="message"/> is null, empty, or consists only of whitespace.
+        ///     Thrown when the <paramref name="roomName"/> or <paramref name="message"/> is null or empty.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
@@ -998,67 +1283,108 @@ namespace Soulseek
         Task StopPublicChatAsync(CancellationToken? cancellationToken = null);
 
         /// <summary>
-        ///     Asynchronously uploads the specified <paramref name="filename"/> containing <paramref name="data"/> to the the
-        ///     specified <paramref name="username"/> using the specified unique <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>.
+        ///     Asynchronously removes the specified <paramref name="username"/> from the server watch list for the current session.
         /// </summary>
-        /// <param name="username">The user to which to upload the file.</param>
-        /// <param name="filename">The filename of the file to upload.</param>
-        /// <param name="data">The file contents.</param>
-        /// <param name="token">The unique upload token.</param>
-        /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
+        /// <remarks>
+        ///     Once a user is removed the server will no longer send status updates for that user, ending
+        ///     <see cref="UserStatusChanged"/> events for that user.
+        /// </remarks>
+        /// <param name="username">The username of the user to unwatch.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <returns>The Task representing the asynchronous operation, including the server response.</returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     Thrown when the specified <paramref name="data"/> is null or of zero length.
+        ///     Thrown when the <paramref name="username"/> is null, empty, or consists only of whitespace.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
-        /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
-        /// <exception cref="DuplicateTransferException">
-        ///     Thrown when an upload of the specified <paramref name="filename"/> to the specified <paramref name="username"/> is
-        ///     already in progress.
-        /// </exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
-        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
-        /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        Task UploadAsync(string username, string filename, byte[] data, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+        Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null);
 
         /// <summary>
-        ///     Asynchronously uploads the specified <paramref name="filename"/> from the specified <paramref name="inputStream"/>
-        ///     to the the specified <paramref name="username"/> using the specified unique <paramref name="token"/> and
-        ///     optionally specified <paramref name="cancellationToken"/>.
+        ///     Asynchronously uploads the specified <paramref name="remoteFilename"/> from the specified
+        ///     <paramref name="localFilename"/> to the the specified <paramref name="username"/> using the specified unique
+        ///     <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>.
         /// </summary>
         /// <param name="username">The user to which to upload the file.</param>
-        /// <param name="filename">The filename of the file to upload.</param>
-        /// <param name="length">The size of the file to upload, in bytes.</param>
-        /// <param name="inputStream">The stream from which to retrieve the file contents.</param>
+        /// <param name="remoteFilename">The filename of the file to upload, as requested by the remote user.</param>
+        /// <param name="localFilename">The fully qualified filename of the file to upload.</param>
         /// <param name="token">The unique upload token.</param>
         /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <returns>The Task representing the asynchronous operation, including the transfer context.</returns>
         /// <exception cref="ArgumentException">
-        ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
+        ///     Thrown when the <paramref name="username"/>, <paramref name="remoteFilename"/>, or
+        ///     <paramref name="localFilename"/> is null, empty, or consists only of whitespace.
         /// </exception>
-        /// <exception cref="ArgumentException">Thrown when the specified <paramref name="length"/> is less than 1.</exception>
-        /// <exception cref="ArgumentNullException">Thrown when the specified <paramref name="inputStream"/> is null.</exception>
-        /// <exception cref="InvalidOperationException">
-        ///     Thrown when the specified <paramref name="inputStream"/> is not readable.
+        /// <exception cref="FileNotFoundException">
+        ///     Thrown when the specified <paramref name="localFilename"/> can not be found.
         /// </exception>
         /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
         /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
         /// <exception cref="DuplicateTransferException">
-        ///     Thrown when an upload of the specified <paramref name="filename"/> to the specified <paramref name="username"/> is
-        ///     already in progress.
+        ///     Thrown when an upload of the specified <paramref name="remoteFilename"/> to the specified
+        ///     <paramref name="username"/> is already in progress.
         /// </exception>
         /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        Task UploadAsync(string username, string filename, long length, Stream inputStream, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+        Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously uploads the specified <paramref name="remoteFilename"/> from the <see cref="Stream"/> created by
+        ///     the specified <paramref name="inputStreamFactory"/> to the the specified <paramref name="username"/> using the
+        ///     specified unique <paramref name="token"/> and optionally specified <paramref name="cancellationToken"/>.
+        /// </summary>
+        /// <param name="username">The user to which to upload the file.</param>
+        /// <param name="remoteFilename">The filename of the file to upload, as requested by the remote user.</param>
+        /// <param name="size">The size of the file to upload, in bytes.</param>
+        /// <param name="inputStreamFactory">A delegate used to create the stream from which to retrieve the file contents.</param>
+        /// <param name="token">The unique upload token.</param>
+        /// <param name="options">The operation <see cref="TransferOptions"/>.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation, including the transfer context.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> or <paramref name="remoteFilename"/> is null, empty, or consists only
+        ///     of whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentException">Thrown when the specified <paramref name="size"/> is less than 1.</exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown when the specified <paramref name="inputStreamFactory"/> is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="DuplicateTokenException">Thrown when the specified or generated token is already in use.</exception>
+        /// <exception cref="DuplicateTransferException">
+        ///     Thrown when an upload of the specified <paramref name="remoteFilename"/> to the specified
+        ///     <paramref name="username"/> is already in progress.
+        /// </exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
+        /// <exception cref="TransferRejectedException">Thrown when the transfer is rejected.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously adds the specified <paramref name="username"/> to the server watch list for the current session.
+        /// </summary>
+        /// <remarks>
+        ///     Once a user is added the server will begin sending status updates for that user, which will generate
+        ///     <see cref="UserStatusChanged"/> events.
+        /// </remarks>
+        /// <param name="username">The username of the user to watch.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation, including the server response.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="username"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="UserNotFoundException">Thrown when the specified user is not registered.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null);
     }
 }

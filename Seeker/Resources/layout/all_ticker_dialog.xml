@@ -1,15 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-        <ListView
-        android:layout_below = "@id/header1"
+    android:layout_height="match_parent"
+>
+    <ListView
+        android:layout_below="@id/header1"
         android:minWidth="25px"
         android:minHeight="25px"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="120dp"
         android:clipToPadding="false"
-        android:id="@+id/listViewTickers" />
+        android:id="@+id/listViewTickers"
+    />
 </LinearLayout>

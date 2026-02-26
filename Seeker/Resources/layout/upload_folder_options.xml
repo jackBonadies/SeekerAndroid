@@ -1,39 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:padding="@dimen/abc_action_bar_content_inset_material"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <CheckBox
+    android:layout_height="match_parent"
+>
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/lockedUserlistOnly"
         android:text="@string/LockedUserListOnly"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+    />
 
-        <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/hiddenUserlistOnly"
         android:text="@string/HiddenUserListOnly"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+    />
 
-            <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/overrideFolderName"
         android:text="@string/OverrideFolderName"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+    />
 
-            <EditText
-            android:id="@+id/customFolderNameEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-        android:layout_marginTop="0dp"
-            android:layout_marginStart="30dp"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:hint="@string/CustomFolderName"
         android:enabled="false"
         android:alpha=".5"
-            android:textSize="16dp"
-            android:hint="@string/CustomFolderName"
+    >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/customFolderNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
             android:imeOptions="actionDone"
-            android:inputType="text" />
+            android:inputType="text"
+        />
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

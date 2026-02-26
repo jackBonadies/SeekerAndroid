@@ -1,20 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_height="wrap_content">
-
-<com.google.android.material.progressindicator.CircularProgressIndicator
-    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-        
+>
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:trackCornerRadius="5dp"
         app:indicatorSize="120dp"
         app:trackThickness="6dp"
         app:indicatorColor="#3498DB"
         android:indeterminateOnly="true"
-
-        />
-
+    />
 </LinearLayout>

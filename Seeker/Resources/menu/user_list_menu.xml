@@ -1,8 +1,8 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
-
-xmlns:app="http://schemas.android.com/apk/res-auto">
-
-  <!--<item android:id="@+id/action_search"
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <!--<item android:id="@+id/action_search"
        android:title="@string/action_settings"
        android:icon="@android:drawable/ic_menu_search"
        app:showAsAction="ifRoom|collapseActionView"
@@ -10,29 +10,31 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
        android:iconifiedByDefault="false"
        app:actionViewClass="androidx.appcompat.widget.SearchView" />-->
 
+    <!-- "Mark Favorite", should appear as action button if possible -->
+    <item
+        android:id="@+id/add_user_action"
+        android:icon="@drawable/baseline_add_white_24"
+        android:title="@string/add_user"
+        app:showAsAction="always"
+    />
 
-  <!-- "Mark Favorite", should appear as action button if possible -->
-  <item
-      android:id="@+id/add_user_action"
-      android:icon="@drawable/baseline_add_white_24"
-      android:title="@string/add_user"
-      app:showAsAction="always"/>
+    <item
+        android:id="@+id/sort_user_list_action"
+        android:icon="@drawable/baseline_add_white_24"
+        android:title="@string/SortOrder"
+        app:showAsAction="never"
+    />
 
-	<item
-	android:id="@+id/sort_user_list_action"
-	android:icon="@drawable/baseline_add_white_24"
-	android:title="@string/SortOrder"
-	app:showAsAction="never"/>
+    <item
+        android:id="@+id/add_user_to_ignored_action"
+        android:icon="@drawable/baseline_add_white_24"
+        android:title="@string/AddUserToIgnored"
+        app:showAsAction="never"
+    />
 
-	<item
-android:id="@+id/add_user_to_ignored_action"
-android:icon="@drawable/baseline_add_white_24"
-android:title="@string/AddUserToIgnored"
-app:showAsAction="never"/>
-
-  <!-- Settings, should always be in the overflow --><!--
+    <!-- Settings, should always be in the overflow -->
+    <!--
   <item android:id="@+id/action_settings"
         android:title="@string/abc_menu_enter_shortcut_label"
         app:showAsAction="always"/>-->
-
 </menu>

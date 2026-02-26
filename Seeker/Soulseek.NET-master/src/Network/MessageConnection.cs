@@ -132,7 +132,7 @@ namespace Soulseek.Network
         /// <summary>
         ///     Gets the username of the peer associated with the connection, if applicable.
         /// </summary>
-        public string Username { get; private set; } = string.Empty;
+        public string Username { get; } = string.Empty;
 
         /// <summary>
         ///     Begins the internal continuous read loop, if it has not yet started.
@@ -191,22 +191,26 @@ namespace Soulseek.Network
             ReadingContinuously = true;
             byte[] codeBytes = null;
 
-            #if DEBUG
-            if(IsServerConnection)
-            {
-                Console.WriteLine("seeker - begin reading continuously from server");
-            }
-            #endif
-
             void RaiseMessageDataRead(object sender, ConnectionDataEventArgs e)
             {
-                Interlocked.CompareExchange(ref MessageDataRead, null, null)?
-                    .Invoke(this, new MessageDataEventArgs(codeBytes, e.CurrentLength, e.TotalLength));
+                if (SoulseekClient.RaiseEventsAsynchronously)
+                {
+                    Task.Run(() =>
+                    {
+                        Interlocked.CompareExchange(ref MessageDataRead, null, null)?
+                            .Invoke(this, new MessageDataEventArgs(codeBytes, e.CurrentLength, e.TotalLength));
+                    }, CancellationToken.None).Forget();
+                }
+                else
+                {
+                    Interlocked.CompareExchange(ref MessageDataRead, null, null)?
+                            .Invoke(this, new MessageDataEventArgs(codeBytes, e.CurrentLength, e.TotalLength));
+                }
             }
 
             try
             {
-                while (true)
+                while (!Disposed)
                 {
                     try
                     {
@@ -215,20 +219,10 @@ namespace Soulseek.Network
                         var lengthBytes = await ReadAsync(4, CancellationToken.None).ConfigureAwait(false);
                         var length = BitConverter.ToInt32(lengthBytes, 0);
                         message.AddRange(lengthBytes);
-#if DEBUG
-                        if (IsServerConnection)
-                        {
-                            Console.WriteLine("seeker - server 4 bytes");
-                        }
-#endif
+
                         codeBytes = await ReadAsync(CodeLength, CancellationToken.None).ConfigureAwait(false);
                         message.AddRange(codeBytes);
-#if DEBUG
-                        if (IsServerConnection)
-                        {
-                            Console.WriteLine("seeker - server rest of message");
-                        }
-#endif
+
                         RaiseMessageDataRead(this, new ConnectionDataEventArgs(0, length - CodeLength));
 
                         Interlocked.CompareExchange(ref MessageReceived, null, null)?
@@ -240,8 +234,20 @@ namespace Soulseek.Network
                         message.AddRange(payloadBytes);
 
                         var messageBytes = message.ToArray();
-                        Interlocked.CompareExchange(ref MessageRead, null, null)?
-                            .Invoke(this, new MessageEventArgs(messageBytes));
+
+                        if (SoulseekClient.RaiseEventsAsynchronously)
+                        {
+                            Task.Run(() =>
+                            {
+                                Interlocked.CompareExchange(ref MessageRead, null, null)?
+                                    .Invoke(this, new MessageEventArgs(messageBytes));
+                            }, CancellationToken.None).Forget();
+                        }
+                        else
+                        {
+                            Interlocked.CompareExchange(ref MessageRead, null, null)?
+                                .Invoke(this, new MessageEventArgs(messageBytes));
+                        }
                     }
                     finally
                     {
@@ -249,23 +255,8 @@ namespace Soulseek.Network
                     }
                 }
             }
-#if ADB_LOGCAT
-            catch(Exception e)
-            {
-                //if (IsServerConnection)
-                //{
-                //    Console.WriteLine("seeker - exception reading continuously from server" + e.Message + e.StackTrace.ToString());
-                //    Console.WriteLine(e.Message + e.StackTrace.ToString());
-                //}
-                throw e;
-            }
-#endif
             finally
             {
-                //if (IsServerConnection)
-                //{
-                //    Console.WriteLine("seeker - end reading continuously from server");
-                //}
                 ReadingContinuously = false;
             }
         }
@@ -274,8 +265,19 @@ namespace Soulseek.Network
         {
             await WriteAsync(bytes, cancellationToken).ConfigureAwait(false);
 
-            Interlocked.CompareExchange(ref MessageWritten, null, null)?
-                .Invoke(this, new MessageEventArgs(bytes));
+            if (SoulseekClient.RaiseEventsAsynchronously)
+            {
+                Task.Run(() =>
+                {
+                    Interlocked.CompareExchange(ref MessageWritten, null, null)?
+                        .Invoke(this, new MessageEventArgs(bytes));
+                }, cancellationToken).Forget();
+            }
+            else
+            {
+                Interlocked.CompareExchange(ref MessageWritten, null, null)?
+                    .Invoke(this, new MessageEventArgs(bytes));
+            }
         }
     }
 }

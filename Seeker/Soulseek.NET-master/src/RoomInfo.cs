@@ -64,19 +64,4 @@ namespace Soulseek
         /// </summary>
         public IReadOnlyCollection<string> Users { get; }
     }
-
-    /// <summary>
-    /// Dummy RoomInfoCategory for Adapter
-    /// </summary>
-    public class RoomInfoCategory : RoomInfo
-    {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="RoomInfoCategory"/> class.
-        /// </summary>
-        /// <param name="name">The category name.</param>
-        /// <param name="userCount">The number of users in the room.</param>
-        public RoomInfoCategory(string name) : base(name, null)
-        {
-        }
-    }
 }

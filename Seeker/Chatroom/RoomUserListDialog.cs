@@ -1,4 +1,5 @@
 ﻿using Seeker.Helpers;
+using Seeker.Browse;
 using Seeker.Messages;
 using Android.App;
 using Android.Content;
@@ -8,10 +9,12 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Common.Messages;
 
 namespace Seeker.Chatroom
 {
@@ -79,8 +82,8 @@ namespace Seeker.Chatroom
                     {
                         return;
                     }
-                    UI_userDataList[previousPosition].Status = e.Status;
-                    if (ChatroomController.SortChatroomUsersBy != ChatroomController.SortOrderChatroomUsers.OnlineStatus)
+                    UI_userDataList[previousPosition] = UI_userDataList[previousPosition].WithStatus(e.Status);
+                    if (PreferencesState.SortChatroomUsersBy != SortOrderChatroomUsers.OnlineStatus)
                     {
                         //position wont change
                         roomUserListAdapter.NotifyItemChanged(previousPosition);
@@ -90,7 +93,7 @@ namespace Seeker.Chatroom
                         bool wasAtTop = recycleLayoutManager.FindFirstCompletelyVisibleItemPosition() == 0;
                         int positionOfTopItem = recycleLayoutManager.FindFirstVisibleItemPosition();
 
-                        UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                        UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, PreferencesState.PutFriendsOnTop, PreferencesState.SortChatroomUsersBy)); //resort so the new item goes into place...
                         int newPosition = -1;
                         for (int i = 0; i < UI_userDataList.Count; i++)
                         {
@@ -112,12 +115,12 @@ namespace Seeker.Chatroom
 
                         if (wasAtTop)
                         {
-                            MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                            Logger.Debug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
                             recycleLayoutManager.ScrollToPosition(0);
                         }
                         else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                         {
-                            MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                            Logger.Debug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
                             recycleLayoutManager.OnRestoreInstanceState(p);
                         }
 
@@ -157,9 +160,9 @@ namespace Seeker.Chatroom
                     {
                         if (uname.Contains(FilterText))
                         {
-                            Soulseek.ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
+                            ChatroomUserData cud = ChatroomController.GetChatroomUserData(udata, Soulseek.UserRole.Normal);
                             UI_userDataList.Add(cud);
-                            UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                            UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, PreferencesState.PutFriendsOnTop, PreferencesState.SortChatroomUsersBy)); //resort so the new item goes into place...
                             int itemInsertedAt = UI_userDataList.IndexOf(cud);
                             roomUserListAdapter.NotifyItemInserted(itemInsertedAt);
                         }
@@ -177,7 +180,7 @@ namespace Seeker.Chatroom
                         }
                         if (indexToRemove == -1)
                         {
-                            MainActivity.LogDebug("not there" + uname);
+                            Logger.Debug("not there" + uname);
                             return;
                         }
                         UI_userDataList.RemoveAt(indexToRemove);
@@ -188,7 +191,7 @@ namespace Seeker.Chatroom
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("EXCEPTION UpdateData " + e.Message + e.StackTrace);
+                Logger.Firebase("EXCEPTION UpdateData " + e.Message + e.StackTrace);
             }
         }
 
@@ -218,7 +221,7 @@ namespace Seeker.Chatroom
         private static RoomUserListDialog RoomDialogInstance;
         public static void ShowSortRoomUserListDialog()
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
             builder.SetTitle(Resource.String.SortUsersBy);
 
             View viewInflated = LayoutInflater.From(SeekerState.ActiveActivityRef).Inflate(Resource.Layout.change_sort_room_user_list_dialog, SeekerState.ActiveActivityRef.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
@@ -231,15 +234,15 @@ namespace Seeker.Chatroom
             radioGroupChangeUserSort.CheckedChange += RadioGroupChangeUserSort_CheckedChange;
 
             CheckBox alwaysPlaceFriendsAtTopCheckBox = viewInflated.FindViewById<CheckBox>(Resource.Id.alwaysPlaceFriendsAtTop);
-            alwaysPlaceFriendsAtTopCheckBox.Checked = ChatroomController.PutFriendsOnTop;
+            alwaysPlaceFriendsAtTopCheckBox.Checked = PreferencesState.PutFriendsOnTop;
             alwaysPlaceFriendsAtTopCheckBox.CheckedChange += AlwaysPlaceFriendsAtTopCheckBox_CheckedChange;
 
-            switch (ChatroomController.SortChatroomUsersBy)
+            switch (PreferencesState.SortChatroomUsersBy)
             {
-                case ChatroomController.SortOrderChatroomUsers.Alphabetical:
+                case SortOrderChatroomUsers.Alphabetical:
                     alphaOrder.Checked = true;
                     break;
-                case ChatroomController.SortOrderChatroomUsers.OnlineStatus:
+                case SortOrderChatroomUsers.OnlineStatus:
                     onlineStatus.Checked = true;
                     break;
             }
@@ -268,41 +271,31 @@ namespace Seeker.Chatroom
 
         private static void AlwaysPlaceFriendsAtTopCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            bool putFriendsAtTop = ChatroomController.PutFriendsOnTop;
-            ChatroomController.PutFriendsOnTop = e.IsChecked;
-            if (putFriendsAtTop != ChatroomController.PutFriendsOnTop)
+            bool putFriendsAtTop = PreferencesState.PutFriendsOnTop;
+            PreferencesState.PutFriendsOnTop = e.IsChecked;
+            if (putFriendsAtTop != PreferencesState.PutFriendsOnTop)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, ChatroomController.PutFriendsOnTop);
-                    editor.Commit();
-                }
+                PreferencesManager.SavePutFriendsOnTop();
                 RoomDialogInstance.RefreshUserListFull();
             }
         }
 
         private static void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
         {
-            ChatroomController.SortOrderChatroomUsers prev = ChatroomController.SortChatroomUsersBy;
+            SortOrderChatroomUsers prev = PreferencesState.SortChatroomUsersBy;
             switch (e.CheckedId)
             {
                 case Resource.Id.onlineStatus:
-                    ChatroomController.SortChatroomUsersBy = ChatroomController.SortOrderChatroomUsers.OnlineStatus;
+                    PreferencesState.SortChatroomUsersBy = SortOrderChatroomUsers.OnlineStatus;
                     break;
                 case Resource.Id.alphaOrder:
-                    ChatroomController.SortChatroomUsersBy = ChatroomController.SortOrderChatroomUsers.Alphabetical;
+                    PreferencesState.SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical;
                     break;
             }
 
-            if (prev != ChatroomController.SortChatroomUsersBy)
+            if (prev != PreferencesState.SortChatroomUsersBy)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutInt(KeyConsts.M_RoomUserListSortOrder, (int)ChatroomController.SortChatroomUsersBy);
-                    editor.Commit();
-                }
+                PreferencesManager.SaveSortChatroomUsersBy();
                 RoomDialogInstance.RefreshUserListFull();
             }
         }
@@ -418,7 +411,7 @@ namespace Seeker.Chatroom
         private Action GetUpdateUserListRoomActionAddedRemoved(Soulseek.UserData longClickedUserData)
         {
             Action a = null;
-            if (ChatroomController.PutFriendsOnTop)
+            if (PreferencesState.PutFriendsOnTop)
             {
                 a = new Action(() =>
                 {
@@ -438,7 +431,7 @@ namespace Seeker.Chatroom
                     {
                         return;
                     }
-                    UI_userDataList.Sort(new ChatroomController.ChatroomUserDataComparer(ChatroomController.PutFriendsOnTop, ChatroomController.SortChatroomUsersBy)); //resort so the new item goes into place...
+                    UI_userDataList.Sort(new ChatroomUserDataComparer(UserListService.Instance, PreferencesState.PutFriendsOnTop, PreferencesState.SortChatroomUsersBy)); //resort so the new item goes into place...
                     int newPosition = -1;
                     for (int i = 0; i < UI_userDataList.Count; i++)
                     {
@@ -460,12 +453,12 @@ namespace Seeker.Chatroom
 
                     if (wasAtTop)
                     {
-                        MainActivity.LogDebug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
+                        Logger.Debug("case where that person would otherwise be hidden, so we fix it by moving up seamlessly.");
                         recycleLayoutManager.ScrollToPosition(0);
                     }
                     else if (positionOfTopItem == previousPosition && positionOfTopItem != newPosition)
                     {
-                        MainActivity.LogDebug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
+                        Logger.Debug("case where the recyclerview tries to disorientingly scroll to that person, so we fix it by not doing that..");
                         recycleLayoutManager.OnRestoreInstanceState(p);
                     }
                 });
@@ -485,9 +478,9 @@ namespace Seeker.Chatroom
             var userdata = longClickedUserData;
             if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
                 {
-                    MainActivity.LogDebug("Handled by commons");
+                    Logger.Debug("Handled by commons");
                     return base.OnContextItemSelected(item);
                 }
             }
@@ -513,7 +506,7 @@ namespace Seeker.Chatroom
                         this.StartActivity(intent);
                     });
                     View snackView = this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom);
-                    DownloadDialog.RequestFilesApi(userdata.Username, snackView, action, null);
+                    BrowseService.RequestFilesApi(userdata.Username, snackView, action, null);
                     return true;
                 case 4: //search users files
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;

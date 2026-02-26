@@ -85,25 +85,40 @@ namespace Soulseek
         Rejected = 512,
 
         /// <summary>
-        ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
+        ///     Completed due to unexpected circumstances.
         /// </summary>
-        UserOffline = 1024,
+        Aborted = 1024,
+
+        /// <summary>
+        ///     Queued locally, due to user-defined constraints.
+        /// </summary>
+        Locally = 2048,
+
+        /// <summary>
+        ///     Queued remotely.
+        /// </summary>
+        Remotely = 4096,
 
         /// <summary>
         ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
         /// </summary>
-        CannotConnect = 2048,
+        UserOffline = 8192,
+
+        /// <summary>
+        ///     This is similar to Rejected, in that it is a reason for failure.  It will always be accompanied by Errored.
+        /// </summary>
+        CannotConnect = 16384,
 
         /// <summary>
         ///     Fallen from Queue.  This is when a transfer that was queued gets cancelled due to user being offline, or no longer able to connect.
         /// </summary>
-        FallenFromQueue = 4096,
+        FallenFromQueue = 32768,
 
         /// <summary>
         ///     We abort because the size they give us is different from when we originally added it.
         ///     Note: This is the case when someone Scans shares, we browse them and queue as paused, they edit metadata
         ///             and then RESCAN shares.  And then we try to download.  i.e. they still have to rescan (at least on QT).
         /// </summary>
-        Aborted = 8192,
+        SizeMismatch = 65536,
     }
 }

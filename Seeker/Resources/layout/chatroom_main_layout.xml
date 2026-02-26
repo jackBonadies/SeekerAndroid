@@ -1,34 +1,37 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:id="@+id/chatroomMainLayoutId"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="?attr/pseudo_window_background_color"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+>
     <com.google.android.material.appbar.AppBarLayout
-    android:id="@+id/appbarLayout"
-    android:layout_width="match_parent"
-    android:theme="@style/AppTheme.AppBarOverlay"
-    android:layout_height="wrap_content">
+        android:id="@+id/appbarLayout"
+        android:fitsSystemWindows="true"
+        android:background="?attr/mainPurple"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_height="wrap_content"
+    >
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/chatroom_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/mainPurple"
+            android:minHeight="100dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp"
+        />
+    </com.google.android.material.appbar.AppBarLayout>
 
-  <androidx.appcompat.widget.Toolbar
-      android:id="@+id/chatroom_toolbar"
-      android:layout_width="match_parent"
-      android:layout_height="?attr/actionBarSize"
-      android:background="?attr/mainPurple"
-      android:minHeight="100dp"
-      android:theme="?attr/actionBarTheme"
-      tools:layout_editor_absoluteX="0dp"
-      tools:layout_editor_absoluteY="0dp" />
-
-</com.google.android.material.appbar.AppBarLayout>
-
-<FrameLayout
+    <FrameLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="match_parent"
+    />
 </LinearLayout>

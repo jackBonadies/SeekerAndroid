@@ -17,13 +17,15 @@
 
 namespace Soulseek
 {
+    using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using Soulseek.Messaging.Messages;
 
     /// <summary>
-    ///     The response to a peer browse request.
+    ///     A response to a peer browse request.
     /// </summary>
-    [System.Serializable]
     public class BrowseResponse
     {
         /// <summary>
@@ -38,12 +40,6 @@ namespace Soulseek
 
             LockedDirectories = (lockedDirectoryList?.ToList() ?? new List<Directory>()).AsReadOnly();
             LockedDirectoryCount = LockedDirectories.Count;
-        }
-
-        //this is for the serializer, otherwise it throws...
-        private BrowseResponse()
-        {
-
         }
 
         /// <summary>
@@ -65,5 +61,14 @@ namespace Soulseek
         ///     Gets the number of locked directories.
         /// </summary>
         public int LockedDirectoryCount { get; }
+
+        /// <summary>
+        ///     Serializes the response to the raw byte array sent over the network.
+        /// </summary>
+        /// <returns>The serialized response.</returns>
+        public byte[] ToByteArray()
+        {
+            return BrowseResponseFactory.ToByteArray(this);
+        }
     }
 }

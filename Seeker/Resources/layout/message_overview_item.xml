@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,28 +9,28 @@
     tools:context="android.PageFragment"
     android:orientation="vertical"
     android:foreground="?android:attr/selectableItemBackground"
-    android:id="@+id/linearLayoutMessageOverview">
-
+    android:id="@+id/linearLayoutMessageOverview"
+>
     <LinearLayout
-            android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:paddingEnd="12dp"
-         android:orientation="horizontal">
-    <TextView
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
+        android:orientation="horizontal"
+    >
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-        android:id="@+id/username"
-    android:text="usernameDummy"
-    android:textSize="20sp"
+            android:id="@+id/username"
+            android:text="usernameDummy"
+            android:textSize="20sp"
         />
-            <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-        android:id="@+id/dateTimeAgo"
-    android:text="Dec 22"
-            
-    android:textSize="14sp"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dateTimeAgo"
+            android:text="Dec 22"
+            android:textSize="14sp"
             android:layout_gravity="center_vertical"
         />
         <ImageView
@@ -41,9 +41,9 @@
             android:layout_gravity="center_vertical"
             android:visibility="gone"
             android:tint="@color/androidStockMessagesNewBlue"
-            app:srcCompat="@drawable/checkbox_blank_circle"/>
-    
-        </LinearLayout>
+            app:srcCompat="@drawable/checkbox_blank_circle"
+        />
+    </LinearLayout>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,5 +53,5 @@
         android:textSize="18sp"
         android:maxLines="2"
         android:lines="2"
-        />
+    />
 </LinearLayout>

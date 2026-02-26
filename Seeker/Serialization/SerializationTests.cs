@@ -49,12 +49,12 @@ namespace Seeker.Serialization
 
             var sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-            var test = SerializationHelper.LegacyBinarySerializeToString(messages);
+            var test = SerializationMigrationHelper.LegacyBinarySerializeToString(messages);
             var time1 = sw.ElapsedMilliseconds;
             log.Error("SEEKER", $"TIMER Binary Native Ser {time1}");
 
             sw.Start();
-            var obj12 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Message>>(test);
+            var obj12 = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<List<Message>>(test);
             var time132 = sw.ElapsedMilliseconds;
             log.Error("SEEKER", $"TIMER Binary Native Deser {time132}");
 
@@ -97,19 +97,18 @@ namespace Seeker.Serialization
             Debug.Assert(savedStates[1].LastSearchTerm == restored12[1].LastSearchTerm);
 
 
-            var uploadDir = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
-            uploadDir.ErrorState = UploadDirectoryError.CannotWrite;
-            uploadDir.IsSubdir = true;
+            var uploadDirInfo = new UploadDirectoryInfo("uploadUriTEST", true, false, false, "my fav folder");
+            uploadDirInfo.ErrorState = UploadDirectoryError.CannotWrite;
 
             List<UploadDirectoryInfo> uploadDirectoryInfos = new List<UploadDirectoryInfo>();
-            uploadDirectoryInfos.Add(uploadDir);
+            uploadDirectoryInfos.Add(uploadDirInfo);
 
             var serInfos = SerializationHelper.SerializeToString(uploadDirectoryInfos);
             var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(serInfos);
 
             Debug.Assert(infos.Count == uploadDirectoryInfos.Count);
-            Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirectoryInfos[0].UploadDataDirectoryUri);
-            Debug.Assert(infos[0].ErrorState != uploadDirectoryInfos[0].ErrorState);
+            Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirInfo.UploadDataDirectoryUri);
+            Debug.Assert(infos[0].ErrorState != uploadDirInfo.ErrorState);
 
             ConcurrentDictionary<string, byte> unreadUsernames = new ConcurrentDictionary<string, byte>();
             unreadUsernames["testuser1"] = 0;
@@ -196,8 +195,8 @@ namespace Seeker.Serialization
             var respones1 = MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(searchResponsesBytes, options: SerializationHelper.SearchResponseOptions);
 
             var dir1 = new Soulseek.Directory("dirname", null, true);
-            var resp123 = SerializationHelper.LegacyBinarySerializeToString<List<SearchResponse>>(listSearchResponse);
-            var resDir = SerializationHelper.LegacyBinaryDeserializeFromString<List<SearchResponse>>(resp123);
+            var resp123 = SerializationMigrationHelper.LegacyBinarySerializeToString<List<SearchResponse>>(listSearchResponse);
+            var resDir = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<List<SearchResponse>>(resp123);
         }
 
         public static void TestCustomBrowseResponseSerialization()
@@ -207,8 +206,8 @@ namespace Seeker.Serialization
             var dirBytes = MessagePack.MessagePackSerializer.Serialize(browseResponse, options: SerializationHelper.BrowseResponseOptions);
             var dirDeser1 = MessagePack.MessagePackSerializer.Deserialize<BrowseResponse>(dirBytes, options: SerializationHelper.BrowseResponseOptions);
 
-            var dir123 = SerializationHelper.LegacyBinarySerializeToString<BrowseResponse>(browseResponse);
-            var dir1234 = SerializationHelper.LegacyBinaryDeserializeFromString<BrowseResponse>(dir123);
+            var dir123 = SerializationMigrationHelper.LegacyBinarySerializeToString<BrowseResponse>(browseResponse);
+            var dir1234 = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<BrowseResponse>(dir123);
         }
 
 
@@ -219,8 +218,8 @@ namespace Seeker.Serialization
             var dirBytes = MessagePack.MessagePackSerializer.Serialize(dirList, options: SerializationHelper.BrowseResponseOptions);
             var dirDeser1 = MessagePack.MessagePackSerializer.Deserialize<List<Soulseek.Directory>>(dirBytes, options: SerializationHelper.BrowseResponseOptions);
 
-            var dir123 = SerializationHelper.LegacyBinarySerializeToString<List<Soulseek.Directory>>(dirList);
-            var dir1234 = SerializationHelper.LegacyBinaryDeserializeFromString<List<Soulseek.Directory>>(dir123);
+            var dir123 = SerializationMigrationHelper.LegacyBinarySerializeToString<List<Soulseek.Directory>>(dirList);
+            var dir1234 = SerializationMigrationHelper.LegacyBinaryDeserializeFromString<List<Soulseek.Directory>>(dir123);
         }
 
         public static void PopulateSharedPreferencesFromFile(Context c, ISharedPreferences sharedPrefs)
@@ -377,11 +376,10 @@ namespace Seeker.Serialization
                 var resourcesLayoutIds = new List<int>()
                         {
                 Resource.Layout.activity_main                                     ,
-                Resource.Layout.add_user_to_userlist                              ,
                 Resource.Layout.all_ticker_dialog                                 ,
+                Resource.Layout.autocomplete_user_dialog_content                  ,
                 Resource.Layout.autoSuggestionRow                                 ,
                 Resource.Layout.browse                                            ,
-                Resource.Layout.browse_chosen_user                                ,
                 Resource.Layout.browse_response_item                              ,
                 Resource.Layout.browse_response_item_dummy                        ,
                 Resource.Layout.changeresultsortorder                             ,
@@ -417,7 +415,6 @@ namespace Seeker.Serialization
                 Resource.Layout.import_item_view_dummy                            ,
                 Resource.Layout.import_list_layout                                ,
                 Resource.Layout.import_start_page                                 ,
-                Resource.Layout.invite_user_dialog_content                        ,
                 Resource.Layout.loggedin                                          ,
                 Resource.Layout.login                                             ,
                 Resource.Layout.material_progress_bar_pass_through                ,
@@ -429,7 +426,6 @@ namespace Seeker.Serialization
                 Resource.Layout.messages_inner_layout                             ,
                 Resource.Layout.messages_main_layout                              ,
                 Resource.Layout.messages_overview                                 ,
-                Resource.Layout.message_chosen_user                               ,
                 Resource.Layout.message_overview_item                             ,
                 Resource.Layout.message_overview_item_dummy                       ,
                 Resource.Layout.room_users_dialog                                 ,

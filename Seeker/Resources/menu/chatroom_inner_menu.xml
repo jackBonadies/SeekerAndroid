@@ -1,81 +1,85 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/view_user_list_action"
+        android:icon="@drawable/baseline_add_white_24"
+        android:title="@string/view_users"
+        app:showAsAction="never"
+    />
 
-xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/show_all_tickers_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/view_all_tickers"
+        app:showAsAction="never"
+    />
 
+    <item
+        android:id="@+id/set_ticker_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/setticker"
+        app:showAsAction="never"
+    />
 
-  <item
-      android:id="@+id/view_user_list_action"
-      android:icon="@drawable/baseline_add_white_24"
-      android:title="@string/view_users"
-      app:showAsAction="never"/>
+    <item
+        android:id="@+id/toggle_autojoin_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/auto_join_off"
+        app:showAsAction="never"
+    />
 
+    <item
+        android:id="@+id/toggle_notify_room_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/notification_off"
+        app:showAsAction="never"
+    />
 
-  <item
-    android:id="@+id/show_all_tickers_action"
-    android:icon="@drawable/baseline_refresh_white_24"
-    android:title="@string/view_all_tickers"
-    app:showAsAction="never"/>
+    <item
+        android:id="@+id/search_room_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/search_room"
+        app:showAsAction="never"
+    />
 
-  <item
-    android:id="@+id/set_ticker_action"
-    android:icon="@drawable/baseline_refresh_white_24"
-    android:title="@string/setticker"
-    app:showAsAction="never"/>
+    <item
+        android:id="@+id/invite_user_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/inviteuser"
+        app:showAsAction="never"
+    />
 
-  <item
-  android:id="@+id/toggle_autojoin_action"
-  android:icon="@drawable/baseline_refresh_white_24"
-  android:title="@string/auto_join_off"
-  app:showAsAction="never"/>
+    <item
+        android:id="@+id/give_up_room_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/give_up_room"
+        app:showAsAction="never"
+    />
 
-  <item
-  android:id="@+id/toggle_notify_room_action"
-  android:icon="@drawable/baseline_refresh_white_24"
-  android:title="@string/notification_off"
-  app:showAsAction="never"/>
+    <item
+        android:id="@+id/give_up_membership_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/give_up_membership"
+        app:showAsAction="never"
+    />
 
-  <item
-  android:id="@+id/search_room_action"
-  android:icon="@drawable/baseline_refresh_white_24"
-  android:title="@string/search_room"
-  app:showAsAction="never"/>
+    <item android:id="@+id/chatStyleOptions" android:title="@string/Options">
+        <menu>
+            <item
+                android:id="@+id/hide_show_ticker_action"
+                android:title="@string/HideTickerView"
+                android:iconifiedByDefault="false"
+                app:showAsAction="never"
+            />
 
-  <item
-  android:id="@+id/invite_user_action"
-  android:icon="@drawable/baseline_refresh_white_24"
-  android:title="@string/inviteuser"
-  app:showAsAction="never"/>
-
-  <item
-  android:id="@+id/give_up_room_action"
-  android:icon="@drawable/baseline_refresh_white_24"
-  android:title="@string/give_up_room"
-  app:showAsAction="never"/>
-
-  <item
-android:id="@+id/give_up_membership_action"
-android:icon="@drawable/baseline_refresh_white_24"
-android:title="@string/give_up_membership"
-app:showAsAction="never"/>
-
-	<item android:id="@+id/chatStyleOptions"
-	 android:title="@string/Options" >
-
-		<menu>
-
-			<item
-		  android:id="@+id/hide_show_ticker_action"
-		  android:title="@string/HideTickerView"
-          android:iconifiedByDefault="false"
-		  app:showAsAction="never"/>
-
-			<item
-		  android:id="@+id/hide_show_user_status_action"
-		  android:title="@string/HideStatusView"
-          android:iconifiedByDefault="false"
-		  app:showAsAction="never"/>
-		</menu>
-	</item>
-
-
+            <item
+                android:id="@+id/hide_show_user_status_action"
+                android:title="@string/HideStatusView"
+                android:iconifiedByDefault="false"
+                app:showAsAction="never"
+            />
+        </menu>
+    </item>
 </menu>

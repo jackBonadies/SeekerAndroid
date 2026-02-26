@@ -9,11 +9,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
+using static Seeker.Helpers.ServiceExtensions;
 
 namespace Seeker
 {
     //Services are natural singletons. There will be 0 or 1 instance of your service at any given time.
-    [Service(Name = "com.companyname.andriodapp1.DownloadService", ForegroundServiceType = Android.Content.PM.ForegroundService.TypeDataSync)]
+    [Service(Name = "com.companyname.andriodapp1.DownloadService", ForegroundServiceType = Android.Content.PM.ForegroundService.TypeDataSync | Android.Content.PM.ForegroundService.TypeSpecialUse)]
+    [MetaData(Constants.AndroidForegroundSpecialUseMetadata, Value = Constants.AndroidForegroundSpecialUseDescription)]
     public class DownloadForegroundService : Service
     {
         public const int NOTIF_ID = 111;
@@ -21,12 +24,11 @@ namespace Seeker
         public const string CHANNEL_NAME = "Foreground Download Service";
         public const string FromTransferString = "FromTransfer";
         public const int NonZeroRequestCode = 7672;
+
         public override IBinder OnBind(Intent intent)
         {
             return null; //does not allow binding. 
         }
-
-
 
         public static Notification CreateNotification(Context context, String contentText)
         {
@@ -39,7 +41,6 @@ namespace Seeker
             //a "channel" is a category in the UI to the end user.
             return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
         }
-
 
         public static string PluralDownloadsRemaining
         {
@@ -93,7 +94,7 @@ namespace Seeker
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("timer issue: " + e.Message + e.StackTrace);
+                Logger.Firebase("timer issue: " + e.Message + e.StackTrace);
             }
             //.setContentTitle(getText(R.string.notification_title))
             //.setContentText(getText(R.string.notification_message))
@@ -105,7 +106,7 @@ namespace Seeker
             try
             {
                 // can throw ForegroundServiceStartNotAllowedException
-                StartForeground(NOTIF_ID, notification);
+                this.StartForegroundSafe(NOTIF_ID, notification);
             }
             catch(System.Exception e)
             {
@@ -113,7 +114,7 @@ namespace Seeker
                 // you will still get notifications, it will just be a lower priority process
                 // also, next time this gets hit (i.e. if a user starts another set of downloads)
                 // the service can then maybe successfully get promoted.
-                MainActivity.LogFirebaseError($"Download service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
+                Logger.FirebaseError($"Download service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
 
             }
             //runs indefinitely until stop.

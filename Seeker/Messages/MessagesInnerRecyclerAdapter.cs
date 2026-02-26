@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
 
 namespace Seeker.Messages
 {
@@ -104,7 +105,7 @@ namespace Seeker.Messages
 
         public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            MainActivity.LogDebug("ShowSlskLinkContextMenu " + CommonHelpers.ShowSlskLinkContextMenu);
+            Logger.Debug("ShowSlskLinkContextMenu " + SimpleHelpers.ShowSlskLinkContextMenu);
 
             //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
             //in that case we still dont want to show anything.
@@ -112,10 +113,10 @@ namespace Seeker.Messages
             {
                 return;
             }
-            else if (CommonHelpers.ShowSlskLinkContextMenu)
+            else if (SimpleHelpers.ShowSlskLinkContextMenu)
             {
                 //closing wont turn this off since its invalid parse, so turn it off here...
-                CommonHelpers.ShowSlskLinkContextMenu = false;
+                SimpleHelpers.ShowSlskLinkContextMenu = false;
                 return;
             }
 
@@ -157,7 +158,7 @@ namespace Seeker.Messages
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
 
-            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewSentHolder");
+            Logger.Debug("OnCreateContextMenu MessageInnerViewSentHolder");
 
             MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
@@ -186,7 +187,7 @@ namespace Seeker.Messages
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
 
-            MainActivity.LogDebug("OnCreateContextMenu MessageInnerViewReceivedHolder");
+            Logger.Debug("OnCreateContextMenu MessageInnerViewReceivedHolder");
 
             MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
@@ -238,7 +239,7 @@ namespace Seeker.Messages
                     return SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
                 case SentStatus.Failed:
                     resourceIntColor = Resource.Color.hardErrorRed;
-                    if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                    if (OperatingSystem.IsAndroidVersionAtLeast(23))
                     {
                         return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
                     }
@@ -268,7 +269,7 @@ namespace Seeker.Messages
             {
                 viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
             }
-            CommonHelpers.SetMessageTextView(viewMessage, msg);
+            UiHelpers.SetMessageTextView(viewMessage, msg);
         }
 
         public Message DataItem;
@@ -306,7 +307,7 @@ namespace Seeker.Messages
         {
             DataItem = msg;
             viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
-            CommonHelpers.SetMessageTextView(viewMessage, msg);
+            UiHelpers.SetMessageTextView(viewMessage, msg);
         }
         public Message DataItem;
     }

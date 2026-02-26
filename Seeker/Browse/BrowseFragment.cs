@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Android.Content;
 using Android.OS;
 using Android.Text;
@@ -29,12 +30,15 @@ using Common;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Services;
 using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Seeker.Helpers;
+using Common.Browse;
 
 namespace Seeker
 {
@@ -71,10 +75,8 @@ namespace Seeker
         public static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>(); //indexOfItem, topmargin. for going up/down dirs.
         public static Tuple<int, int> ScrollPositionRestoreRotate = null; //for rotating..
 
-        public static bool FilteredResults = false;
-        public static string FilterString = string.Empty;
-        public static List<string> WordsToAvoid = new List<string>();
-        public static List<string> WordsToInclude = new List<string>();
+
+        private static TextFilter BrowseFilter = new TextFilter();
         public static List<int> SelectedPositionsState = new List<int>(); //this is used for restoring our state.  if its an empty list then thats fine, its just like if we didnt have one..
         public static System.Timers.Timer DebounceTimer = null;
         public static System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
@@ -105,7 +107,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + e.StackTrace);
+                Logger.Firebase(e.Message + e.StackTrace);
             }
         }
 
@@ -123,7 +125,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + e.StackTrace);
+                Logger.Firebase(e.Message + e.StackTrace);
             }
         }
 
@@ -139,7 +141,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + e.StackTrace);
+                Logger.Firebase(e.Message + e.StackTrace);
             }
 
         }
@@ -178,7 +180,7 @@ namespace Seeker
         {
             int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
 
-            CommonHelpers.SetMenuTitles(menu, username);
+            UiHelpers.SetMenuTitles(menu, username);
 
             if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
             {
@@ -212,7 +214,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -237,7 +239,7 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_show_folder_info:
-                    var folderSummary = GetFolderSummary(dataItemsForListView);
+                    var folderSummary = BrowseUtils.GetFolderSummary(dataItemsForListView);
                     ShowFolderSummaryDialog(folderSummary);
                     return true;
                 case Resource.Id.action_queue_selected_paused:
@@ -249,7 +251,7 @@ namespace Seeker
                     string fullDirName = dataItemsForListView[0].Node.Data.Name;
                     string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
-                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
@@ -257,7 +259,7 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
-                    UserListActivity.AddUserAPI(SeekerState.MainActivityRef, username, null);
+                    UserListService.AddUserAPI(SeekerState.MainActivityRef, username, null);
                     return true;
                 case Resource.Id.action_get_user_info:
                     RequestedUserInfoHelper.RequestUserInfoApi(username);
@@ -308,7 +310,7 @@ namespace Seeker
             Instance = this;
             this.HasOptionsMenu = true;
             SeekerState.InDarkModeCache = DownloadDialog.InNightMode(this.Context);
-            MainActivity.LogDebug("BrowseFragmentOnCreateView");
+            Logger.Debug("BrowseFragmentOnCreateView");
             this.rootView = inflater.Inflate(Resource.Layout.browse, container, false);
             UpdateForScreenSize();
             //this.rootView.FindViewById<Button>(Resource.Id.button2).Click += UpDirectory;
@@ -332,7 +334,7 @@ namespace Seeker
             //savedInstanceState can be null if first time.
             int[]? selectedPos = savedInstanceState?.GetIntArray("selectedPositions");
 
-            if (FilteredResults)
+            if (BrowseFilter.IsFiltered)
             {
                 //tempHackItemClick = true;
                 lock (filteredDataItemsForListView)
@@ -353,7 +355,7 @@ namespace Seeker
 
             if (dataItemsForListView.Count != 0)
             {
-                pathItems = GetPathItems(dataItemsForListView);
+                pathItems = BrowseUtils.GetPathItems(dataItemsForListView);
             }
 
             treePathRecyclerAdapter = new TreePathRecyclerAdapter(pathItems, this);
@@ -363,7 +365,7 @@ namespace Seeker
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
-            if (FilteredResults || IsResponseLoaded()) // if we are filtering then we already know how it works..
+            if (BrowseFilter.IsFiltered || IsResponseLoaded()) // if we are filtering then we already know how it works..
             {
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
@@ -373,7 +375,7 @@ namespace Seeker
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
             v.Focusable = true;
             //SetFocusable(int) was added in API26. bool was there since API1
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 v.SetFocusable(ViewFocusability.Focusable);
             }
@@ -433,7 +435,7 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -463,25 +465,25 @@ namespace Seeker
                 //Android.Views.InputMethods.InputMethodManager IMM = context.GetSystemService(Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
                 //Rect outRect = new Rect();
                 //this.rootView.GetWindowVisibleDisplayFrame(outRect);
-                //MainActivity.LogDebug("Window Visible Display Frame " + outRect.Height());
-                //MainActivity.LogDebug("Actual Height " + this.rootView.Height);
+                //Logger.Debug("Window Visible Display Frame " + outRect.Height());
+                //Logger.Debug("Actual Height " + this.rootView.Height);
                 //Type immType = IMM.GetType();
 
-                //MainActivity.LogDebug("Y Position " + rel.GetY());
+                //Logger.Debug("Y Position " + rel.GetY());
                 //int[] location = new int[2];
                 //rel.GetLocationOnScreen(location);
-                //MainActivity.LogDebug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
+                //Logger.Debug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
                 //var method = immType.GetProperty("InputMethodWindowVisibleHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 //foreach (var prop in immType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 //{
-                //    MainActivity.LogDebug(string.Format("Property Name: {0}", prop.Name));
+                //    Logger.Debug(string.Format("Property Name: {0}", prop.Name));
                 //}
                 //foreach(var meth in immType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 //{
-                //    MainActivity.LogDebug(string.Format("Property Name: {0}", meth.Name));
+                //    Logger.Debug(string.Format("Property Name: {0}", meth.Name));
                 //}
 
-                MainActivity.LogDebug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
+                Logger.Debug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
                 if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
                 {
@@ -523,7 +525,11 @@ namespace Seeker
                 e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
             {
-                MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                Logger.Debug("IME ACTION: " + e.ActionId.ToString());
+                if (rootView == null || SeekerState.MainActivityRef == null)
+                {
+                    return;
+                }
                 rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 rootView.FindViewById<View>(Resource.Id.relativeLayout1).RequestFocus();
                 //overriding this, the keyboard fails to go down by default for some reason.....
@@ -534,7 +540,7 @@ namespace Seeker
                 }
                 catch (System.Exception ex)
                 {
-                    MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                    Logger.Firebase(ex.Message + " error closing keyboard");
                 }
             }
         }
@@ -562,7 +568,7 @@ namespace Seeker
             //cant do this OnViewCreated since filterText.Text will always be empty...
             DebounceTimer.Stop();
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
-            filterText.Text = FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
+            filterText.Text = BrowseFilter.FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
             SearchFragment.UpdateDrawableState(filterText, true);
         }
 
@@ -629,91 +635,22 @@ namespace Seeker
         }
 
 
-        private void ParseFilterString()
-        {
-            List<string> filterStringSplit = FilterString.Split(' ').ToList();
-            WordsToAvoid.Clear();
-            WordsToInclude.Clear();
-            //FilterSpecialFlags.Clear();
-            foreach (string word in filterStringSplit)
-            {
-                //if (word.Contains("mbr:") || word.Contains("minbitrate:"))
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    try
-                //    {
-                //        FilterSpecialFlags.MinBitRateKBS = Integer.ParseInt(word.Split(':')[1]);
-                //    }
-                //    catch (System.Exception)
-                //    {
-
-                //    }
-                //}
-                //else if (word.Contains("mfs:") || word.Contains("minfilesize:"))
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    try
-                //    {
-                //        FilterSpecialFlags.MinFileSizeMB = (Integer.ParseInt(word.Split(':')[1]));
-                //    }
-                //    catch (System.Exception)
-                //    {
-
-                //    }
-                //}
-                //else if (word.Contains("mfif:") || word.Contains("minfilesinfolder:"))
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    try
-                //    {
-                //        FilterSpecialFlags.MinFoldersInFile = Integer.ParseInt(word.Split(':')[1]);
-                //    }
-                //    catch (System.Exception)
-                //    {
-
-                //    }
-                //}
-                //else if (word == "isvbr")
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    FilterSpecialFlags.IsVBR = true;
-                //}
-                //else if (word == "iscbr")
-                //{
-                //    FilterSpecialFlags.ContainsSpecialFlags = true;
-                //    FilterSpecialFlags.IsCBR = true;
-                //}
-                if (word.StartsWith('-'))
-                {
-                    if (word.Length > 1)//if just '-' dont remove everything. just skip it.
-                    {
-                        WordsToAvoid.Add(word.Substring(1)); //skip the '-'
-                    }
-                }
-                else
-                {
-                    WordsToInclude.Add(word);
-                }
-            }
-        }
 
 
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string oldFilterString = FilteredResults ? FilterString : string.Empty;
-            MainActivity.LogDebug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
+            string oldFilterString = BrowseFilter.IsFiltered ? BrowseFilter.FilterString : string.Empty;
+            Logger.Debug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
             if (e.Text != null && e.Text.ToString() != string.Empty && isPaused)
             {
                 return;//this is the case where going from search fragment to browse fragment this event gets fired
                 //with an old e.text value and so its impossible to autoclear the value.
             }
-            MainActivity.LogDebug("Text Changed: " + e.Text);
+            Logger.Debug("Text Changed: " + e.Text);
             if (e.Text != null && e.Text.ToString() != string.Empty)
             {
-                FilteredResults = true;
-                FilterString = e.Text.ToString();
-                ParseFilterString();
+                BrowseFilter.Set(e.Text.ToString());
 
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
@@ -725,7 +662,7 @@ namespace Seeker
             else
             {
                 DebounceTimer.Stop();
-                FilteredResults = false;
+                BrowseFilter.Reset();
                 lock (dataItemsForListView) //collection was modified exception here...
                 {
                     BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, dataItemsForListView, this);
@@ -744,305 +681,6 @@ namespace Seeker
             }
         }
 
-        private bool MatchesCriteriaShallow(DataItem di)
-        {
-            string fullyQualifiedName = string.Empty;
-            if (di.File != null)
-            {
-                //we are looking at files here...
-                fullyQualifiedName = di.Node.Data.Name + di.File.Filename;
-            }
-            else
-            {
-                fullyQualifiedName = di.Node.Data.Name;
-                //maybe here we should also do children...
-            }
-
-
-            if (WordsToAvoid != null)
-            {
-                foreach (string avoid in WordsToAvoid)
-                {
-                    if (fullyQualifiedName.Contains(avoid, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                        //badTerm = true;
-                    }
-                }
-            }
-            if (WordsToInclude != null)
-            {
-                foreach (string include in WordsToInclude)
-                {
-                    if (!fullyQualifiedName.Contains(include, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-
-
-        private bool MatchesCriteriaFull(DataItem di)
-        {
-            string fullyQualifiedName = string.Empty;
-            if (di.File != null)
-            {
-                //we are looking at files here...
-                fullyQualifiedName = di.Node.Data.Name + di.File.Filename;
-            }
-            else
-            {
-                fullyQualifiedName = di.Node.Data.Name;
-                //maybe here we should also do children...
-            }
-
-
-            if (WordsToAvoid != null)
-            {
-                foreach (string avoid in WordsToAvoid)
-                {
-                    if (fullyQualifiedName.Contains(avoid, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                        //badTerm = true;
-                    }
-                }
-            }
-            bool includesAll = true;
-            if (WordsToInclude != null)
-            {
-                foreach (string include in WordsToInclude)
-                {
-                    if (!fullyQualifiedName.Contains(include, StringComparison.OrdinalIgnoreCase))
-                    {
-                        includesAll = false;
-                    }
-                }
-            }
-            if (includesAll)
-            {
-                return true;
-            }
-            else
-            {
-                //search children for a match.. if there are children.. else we are done..
-                if (di.Node.Children.Count == 0 && (di.Directory == null || di.Directory.Files.Count == 0))
-                {
-                    return false;
-                }
-                else if (di.File != null)
-                {
-                    //then we are at the end
-                    return false;
-                }
-                else
-                {
-                    if (di.Node.Children.Count != 0)
-                    {
-                        foreach (TreeNode<Directory> child in di.Node.Children)
-                        {
-                            if (MatchesCriteriaFull(new DataItem(child.Data, child)))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    if (di.File == null && di.Directory != null && di.Directory.Files.Count != 0)
-                    {
-                        foreach (File f in di.Directory.Files)
-                        {
-                            if (MatchesCriteriaFull(new DataItem(f, di.Node)))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Flattens the tree
-        /// </summary>
-        /// <param name="di"></param>
-        /// <returns></returns>
-        public static List<FullFileInfo> GetRecursiveFullFileInfo(DataItem di)
-        {
-            List<FullFileInfo> listOfFiles = new List<FullFileInfo>();
-            AddFiles(listOfFiles, di);
-            return listOfFiles;
-        }
-
-        public static List<FullFileInfo> GetRecursiveFullFileInfo(List<DataItem> di)
-        {
-            List<FullFileInfo> listOfFiles = new List<FullFileInfo>();
-            foreach (var childNode in di)
-            {
-                AddFiles(listOfFiles, childNode);
-            }
-            return listOfFiles;
-        }
-
-        private static void AddFiles(List<FullFileInfo> fullFileList, DataItem d)
-        {
-            if (d.File != null)
-            {
-                FullFileInfo f = new FullFileInfo();
-                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                f.Size = d.File.Size;
-                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                fullFileList.Add(f);
-                return;
-            }
-            else
-            {
-                foreach (Soulseek.File slskFile in d.Directory.Files) //files in dir
-                {
-                    FullFileInfo f = new FullFileInfo();
-                    f.FullFileName = d.Node.Data.Name + @"\" + slskFile.Filename;
-                    f.Size = slskFile.Size;
-                    f.wasFilenameLatin1Decoded = slskFile.IsLatin1Decoded;
-                    f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                    fullFileList.Add(f);
-                }
-                foreach (var childNode in d.Node.Children) //dirs in dir
-                {
-                    AddFiles(fullFileList, new DataItem(childNode.Data, childNode));
-                }
-                return;
-            }
-        }
-
-
-        public class FolderSummary
-        {
-            public int LengthSeconds = 0;
-            public long SizeBytes = 0;
-            public int NumFiles = 0;
-            public int NumSubFolders = 0;
-            public void AddFile(Soulseek.File file)
-            {
-                if (file.Length.HasValue)
-                {
-                    LengthSeconds += file.Length.Value;
-                }
-                SizeBytes += file.Size;
-                NumFiles++;
-            }
-        }
-
-        public static FolderSummary GetFolderSummary(DataItem di)
-        {
-            FolderSummary folderSummary = new FolderSummary();
-            SumFiles(folderSummary, di);
-            return folderSummary;
-        }
-
-        public static FolderSummary GetFolderSummary(List<DataItem> di)
-        {
-            FolderSummary folderSummary = new FolderSummary();
-            foreach (var childNode in di)
-            {
-                SumFiles(folderSummary, childNode);
-            }
-            return folderSummary;
-        }
-
-        private static void SumFiles(FolderSummary fileSummary, DataItem d)
-        {
-            if (d.File != null)
-            {
-                fileSummary.AddFile(d.File);
-                return;
-            }
-            else
-            {
-                foreach (Soulseek.File slskFile in d.Directory.Files) //files in dir
-                {
-                    fileSummary.AddFile(slskFile);
-                }
-                foreach (var childNode in d.Node.Children) //dirs in dir
-                {
-                    fileSummary.NumSubFolders++;
-                    SumFiles(fileSummary, new DataItem(childNode.Data, childNode));
-                }
-                return;
-            }
-        }
-
-
-
-
-        private List<DataItem> FilterBrowseList(List<DataItem> unfiltered)
-        {
-            System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
-            s.Start();
-
-            List<DataItem> filtered = new List<DataItem>();
-            foreach (DataItem di in unfiltered)
-            {
-                if (MatchesCriteriaFull(di)) //change back to shallow...
-                {
-                    filtered.Add(di);
-                }
-            }
-            s.Stop();
-            MainActivity.LogDebug("total dir in tree: " + diagnostics_count + " total time: " + s.ElapsedMilliseconds);
-            return filtered;
-        }
-
-        /// <summary>
-        /// basically if the current filter is more restrictive, then we dont have to filter everything again, we can just filter the existing filtered data more.
-        /// </summary>
-        /// <param name="currentSearch"></param>
-        /// <param name="previousSearch"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// examples: 
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -ex","hello how are yo -excludeTerms");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms", "hello how are yo -excludeTerms");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms", "hello how are yo -excludeTerms -a");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -b -c", "hello how are yo -excludeTerms -a");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -a -b -c", "hello how are yo -excludeTerms -a");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -", "hello how are yo -excludeTerms");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -a", "hello how are yo -excludeTerms -");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -aa", "hello how are yo -excludeTerms -a");
-        /// bool no = IsCurrentSearchMoreRestrictive("hell", "hello");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello", "hell");
-        /// </remarks>
-        private static bool IsCurrentSearchMoreRestrictive(string currentSearch, string previousSearch)
-        {
-            var currentWords = currentSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var previousWords = previousSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var currentExcludeWords = currentWords.Where(s => s.StartsWith("-") && s.Length != 1);
-            var previousExcludeWords = previousWords.Where(s => s.StartsWith("-") && s.Length != 1);
-            var currentIncludeWords = currentWords.Where(s => !s.StartsWith("-"));
-            var previousIncludeWords = previousWords.Where(s => !s.StartsWith("-"));
-            string currentIncludeString = string.Join(' ', currentIncludeWords).Trim();
-            string previousIncludeString = string.Join(' ', previousIncludeWords).Trim();
-
-            if (currentExcludeWords.Count() < previousExcludeWords.Count())
-            {
-                //current is not necessarily more restrictive as it excludes less.
-                return false;
-            }
-
-            //and for each previous exlusion, the current exlusions are just as bad.
-            for (int i = 0; i < previousExcludeWords.Count(); i++)
-            {
-                if (!previousExcludeWords.ElementAt(i).Contains(currentExcludeWords.ElementAt(i)))
-                {
-                    return false;
-                }
-            }
-
-            return currentIncludeString.Contains(previousIncludeString);
-        }
 
         private void UpdateFilteredResponses()
         {
@@ -1052,19 +690,19 @@ namespace Seeker
                 //filteredBrowseTree = DownloadDialog.CreateTree(OriginalBrowseResponse,true,WordsToAvoid,WordsToInclude);
                 //string nameToFindInTheFilteredTree = OurCurrentLocation.Data.Name;
                 //TreeNode<Directory> item = GetNodeByName(filteredBrowseTree, nameToFindInTheFilteredTree);
-                if (cachedFilteredDataItemsForListView != null && IsCurrentSearchMoreRestrictive(FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
+                if (cachedFilteredDataItemsForListView != null && BrowseUtils.IsCurrentSearchMoreRestrictive(BrowseFilter.FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
                 {
-                    //MainActivity.LogDebug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
-                    var test = FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
+                    //Logger.Debug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
+                    var test = BrowseUtils.FilterBrowseList(cachedFilteredDataItemsForListView.Item2, BrowseFilter);
                     filteredDataItemsForListView.AddRange(test);//FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
                 }
                 else
                 {
-                    //MainActivity.LogDebug("current filter is less restrictive: " + FilterString);
-                    var test = FilterBrowseList(dataItemsForListView);
+                    //Logger.Debug("current filter is less restrictive: " + FilterString);
+                    var test = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
                     filteredDataItemsForListView.AddRange(test);
                 }
-                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(FilterString, filteredDataItemsForListView.ToList());
+                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(BrowseFilter.FilterString, filteredDataItemsForListView.ToList());
             }
         }
 
@@ -1084,18 +722,18 @@ namespace Seeker
 
         private void CopySelectedURLs()
         {
-            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
+            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
             {
-                Toast.MakeText(this.Context, Resource.String.NothingToCopy, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Long);
             }
             else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
             {
-                Toast.MakeText(this.Context, Resource.String.nothing_selected, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
             else
             {
                 List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (FilteredResults)
+                if (BrowseFilter.IsFiltered)
                 {
                     lock (filteredDataItemsForListView)
                     {
@@ -1151,11 +789,11 @@ namespace Seeker
                 CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
                 if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
                 {
-                    Toast.MakeText(this.Context, Resource.String.LinksCopied, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinksCopied), ToastLength.Short);
                 }
                 else
                 {
-                    Toast.MakeText(this.Context, Resource.String.LinkCopied, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                 }
             }
 
@@ -1164,18 +802,18 @@ namespace Seeker
 
         private void DownloadSelectedFiles(bool queuePaused)
         {
-            if ((!FilteredResults && dataItemsForListView.Count == 0) || (FilteredResults && filteredDataItemsForListView.Count == 0))
+            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
             {
-                Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
             }
             else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
             {
-                Toast.MakeText(this.Context, this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
             else
             {
                 List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (FilteredResults)
+                if (BrowseFilter.IsFiltered)
                 {
                     lock (filteredDataItemsForListView)
                     {
@@ -1216,12 +854,12 @@ namespace Seeker
                         }
                     }
                 }
-                if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+                if (SessionService.CurrentlyLoggedInButDisconnectedState())
                 {
                     //we disconnected. login then do the rest.
                     //this is due to temp lost connection
                     Task t;
-                    if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                    if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                     {
                         return;
                     }
@@ -1230,15 +868,15 @@ namespace Seeker
                     {
                         if (t.IsFaulted)
                         {
-                            SeekerApplication.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                            SeekerApplication.Toaster.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                             return;
                         }
-                        TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
+                        DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                     }));
                 }
                 else
                 {
-                    TransfersUtil.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
+                    DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
                 }
             }
         }
@@ -1249,19 +887,19 @@ namespace Seeker
             {
                 if (recusiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
+                Browse.BrowseService.DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
             }
             else
             {
                 if (topLevelFullFileInfoOnly.Count == 0)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
+                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
             }
         }
 
@@ -1269,7 +907,7 @@ namespace Seeker
         {
             if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
 
@@ -1302,7 +940,7 @@ namespace Seeker
                 }
                 if (containsSubDirs)
                 {
-                    recusiveFullFileInfo = GetRecursiveFullFileInfo(dataItemsForDownload);
+                    recusiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(dataItemsForDownload);
                     totalItems = recusiveFullFileInfo.Count;
                 }
             }
@@ -1330,7 +968,7 @@ namespace Seeker
                 }
                 if (containsSubDirs)
                 {
-                    recusiveFullFileInfo = GetRecursiveFullFileInfo(filteredDataItemsForDownload);
+                    recusiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(filteredDataItemsForDownload);
                     totalItems = recusiveFullFileInfo.Count;
                 }
             }
@@ -1339,9 +977,10 @@ namespace Seeker
             if (containsSubDirs)
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
+                // TODO2026
                 string topLevelStr = string.Empty;
                 if (toplevelItems == 1)
                 {
@@ -1379,11 +1018,11 @@ namespace Seeker
                     {
                         if (!justFilteredItems)
                         {
-                            TagDepths(dataItemsForDownload.First(), recusiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(dataItemsForDownload.First(), recusiveFullFileInfo);
                         }
                         else
                         {
-                            TagDepths(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
                         }
                     }
                     DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
@@ -1396,52 +1035,6 @@ namespace Seeker
             {
                 DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
             }
-        }
-
-        private static void TagDepths(DataItem d, List<FullFileInfo> recursiveFileInfo)
-        {
-            int lowestLevel = GetLevel(d.Node.Data.Name);
-            foreach (FullFileInfo fullFileInfo in recursiveFileInfo)
-            {
-                int level = GetLevel(fullFileInfo.FullFileName);
-                int depth = level - lowestLevel + 1;
-#if DEBUG
-                if (depth == 0)
-                {
-                    throw new Exception("depth is 0");
-                }
-#endif
-                fullFileInfo.Depth = depth;
-            }
-
-        }
-
-        //private static int GetMaxDepth(DataItem d, List<FullFileInfo> recursiveFileInfo)
-        //{
-        //    int lowestLevel = GetLevel(d.Node.Data.Name);
-        //    int highestLevel = int.MinValue;
-        //    foreach(FullFileInfo fullFileInfo in recursiveFileInfo)
-        //    {
-        //        int level = GetLevel(fullFileInfo.FullFileName);
-        //        if(level > highestLevel)
-        //        {
-        //            highestLevel = level;
-        //        }
-        //    }
-        //    return highestLevel - lowestLevel + 1;
-        //}
-
-        private static int GetLevel(string fileName)
-        {
-            int count = 0;
-            foreach (char c in fileName)
-            {
-                if (c == '\\')
-                {
-                    count++;
-                }
-            }
-            return count;
         }
 
         /// <summary>
@@ -1461,26 +1054,26 @@ namespace Seeker
             {
                 //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
                 dataItemsForDownload = new List<DataItem>();
-                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, FilteredResults);
+                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, BrowseFilter.IsFiltered);
                 if (itemSelected == null)
                 {
-                    CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
+                    UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
                     return; //else nullref
                 }
                 PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
-                filteredDataItemsForDownload = FilterBrowseList(dataItemsForDownload.ToList());
+                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload.ToList(), BrowseFilter);
             }
 
 
             if (dataItemsForDownload.Count == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
-            if (FilteredResults && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
+            if (BrowseFilter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
-                var b = new AndroidX.AppCompat.App.AlertDialog.Builder(SeekerState.ActiveActivityRef, Resource.Style.MyAlertDialogTheme);
+                var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 b.SetTitle(Resource.String.filter_is_on);
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -1503,46 +1096,6 @@ namespace Seeker
 
         }
 
-        /// <summary>
-        /// Safe entrypoint for anyone to call.
-        /// </summary>
-        /// <param name="slskFiles"></param>
-        /// <param name="queuePaused"></param>
-        /// <param name="_username"></param>
-        public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
-        {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
-                {
-                    return;
-                }
-
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            //fragment.Context returns null if the fragment has not been attached, or if it got detached. (detach and attach happens on screen rotate).
-                            //so best to use SeekerState.MainActivityRef which is static and so not null after MainActivity.OnCreate
-
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-
-                        });
-                        return;
-                    }
-                    TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
-                }));
-            }
-            else
-            {
-                TransfersUtil.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
-            }
-        }
 
         private void UpDirectory(object sender, System.EventArgs e)
         {
@@ -1561,7 +1114,7 @@ namespace Seeker
                 catch (IndexOutOfRangeException) //this did happen to me.... when filtering...
                 {
                     string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count}";
-                    MainActivity.LogFirebase(logMsg);
+                    Logger.Firebase(logMsg);
                     return null;
                 }
             }
@@ -1576,7 +1129,7 @@ namespace Seeker
                 catch (IndexOutOfRangeException)
                 {
                     string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count} isFilter {filteredResults}";
-                    MainActivity.LogFirebase(logMsg);
+                    Logger.Firebase(logMsg);
                     return null;
                 }
             }
@@ -1585,7 +1138,7 @@ namespace Seeker
         public static int ItemPositionLongClicked = -1;
         private void ListViewDirectories_ItemLongClick(object sender, AdapterView.ItemLongClickEventArgs e)
         {
-            bool filteredResults = FilteredResults;
+            bool filteredResults = BrowseFilter.IsFiltered;
             DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
             if (itemSelected == null)
             {
@@ -1598,7 +1151,7 @@ namespace Seeker
                 //SeekerState.ActiveActivityRef.Open
                 //this.RegisterForContextMenu(e.View);
                 ItemPositionLongClicked = e.Position;
-                MainActivity.LogInfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
+                Logger.InfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
                 this.listViewDirectories.ShowContextMenu();
                 //BrowseFragment.Instance.Context
 
@@ -1644,7 +1197,7 @@ namespace Seeker
         private void ListViewDirectories_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
             cachedFilteredDataItemsForListView = null;
-            bool filteredResults = FilteredResults;
+            bool filteredResults = BrowseFilter.IsFiltered;
             DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
             if (itemSelected == null)
             {
@@ -1660,7 +1213,7 @@ namespace Seeker
                     if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
                     {
                         //dont let them do this... if this happens then there is no way to get back up...
-                        Toast.MakeText(SeekerState.MainActivityRef, this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short);
                         return;
                     }
                     SaveScrollPosition();
@@ -1734,7 +1287,7 @@ namespace Seeker
         public bool GoUpDirectory(int additionalLevels = 0)
         {
             cachedFilteredDataItemsForListView = null;
-            bool filteredResults = FilteredResults;
+            bool filteredResults = BrowseFilter.IsFiltered;
             lock (dataItemsForListView)
             {
                 TreeNode<Directory> item = null;
@@ -1814,7 +1367,7 @@ namespace Seeker
         {
             if (toFilter)
             {
-                filteredDataItemsForListView = FilterBrowseList(dataItemsForListView);
+                filteredDataItemsForListView = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
                 listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this);
             }
             else
@@ -1822,7 +1375,7 @@ namespace Seeker
                 listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
             }
 
-            var items = GetPathItems(dataItemsForListView);
+            var items = BrowseUtils.GetPathItems(dataItemsForListView);
             pathItems.Clear();
             pathItems.AddRange(items);
             if (fullRefreshOfPathItems)
@@ -1848,47 +1401,6 @@ namespace Seeker
 
 
 
-        public static List<PathItem> GetPathItems(List<DataItem> nonFilteredDataItemsForListView)
-        {
-            if (nonFilteredDataItemsForListView.Count == 0)
-            {
-                return new List<PathItem>();
-            }
-            List<PathItem> pathItemsList = new List<PathItem>();
-            if (nonFilteredDataItemsForListView[0].IsDirectory())
-            {
-                GetPathItemsInternal(pathItemsList, nonFilteredDataItemsForListView[0].Node.Parent, true);
-            }
-            else
-            {
-                GetPathItemsInternal(pathItemsList, nonFilteredDataItemsForListView[0].Node, true);
-            }
-            pathItemsList.Reverse();
-            FixNullRootDisplayName(pathItemsList);
-            return pathItemsList;
-        }
-
-        private static void FixNullRootDisplayName(List<PathItem> pathItemsList)
-        {
-            if (pathItemsList.Count > 0 && pathItemsList[0].DisplayName == string.Empty)
-            {
-                pathItemsList[0].DisplayName = "root";
-            }
-        }
-
-        private static void GetPathItemsInternal(List<PathItem> pathItems, TreeNode<Directory> treeNode, bool lastChild)
-        {
-            string displayName = CommonHelpers.GetFileNameFromFile(treeNode.Data.Name);
-            pathItems.Add(new PathItem(displayName, lastChild));
-            if (treeNode.Parent == null)
-            {
-                return;
-            }
-            else
-            {
-                GetPathItemsInternal(pathItems, treeNode.Parent, false);
-            }
-        }
         //https://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
         //onContextItemSelected() is called for all currently existing fragments starting with the first added one.
         public const int UNIQUE_BROWSE_GROUP_ID = 304;
@@ -1914,16 +1426,16 @@ namespace Seeker
                         DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
                         return true;
                     case 2:
-                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
-                        var folderSummary = GetFolderSummary(itemSelected);
+                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
+                        var folderSummary = BrowseUtils.GetFolderSummary(itemSelected);
                         ShowFolderSummaryDialog(folderSummary);
                         return true;
                     case 3:
-                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, FilteredResults);
+                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
                         //bool isDir = itemSelected.IsDirectory();
                         string slskLink = CommonHelpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.LinkCopied, ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                         return true;
                 }
             }
@@ -1932,15 +1444,15 @@ namespace Seeker
 
         public void ShowFolderSummaryDialog(FolderSummary folderSummary)
         {
-            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", CommonHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
+            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
             string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
 
-            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", CommonHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
+            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
 
             string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
             string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
 
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
 
             void OnCloseClick(object sender, DialogClickEventArgs e)
             {
@@ -1983,10 +1495,7 @@ namespace Seeker
 
         private static void ClearFilterStringAndCached(bool force = false)
         {
-            FilterString = string.Empty;
-            FilteredResults = false;
-            WordsToAvoid.Clear();
-            WordsToInclude.Clear();
+            BrowseFilter.Reset();
             //FilterSpecialFlags.Clear();
             if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
@@ -2021,8 +1530,8 @@ namespace Seeker
 
                     if (staringPoint == null)
                     {
-                        MainActivity.LogFirebase("SeekerState_BrowseResponseReceived: startingPoint is null");
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long).Show(); });
+                        Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null");
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
@@ -2081,7 +1590,7 @@ namespace Seeker
             //tempHackItemClick =true; 
             //}
 
-            MainActivity.LogInfoFirebase("RefreshOnRecieved " + CurrentUsername);
+            Logger.InfoFirebase("RefreshOnRecieved " + CurrentUsername);
             //!!!collection was modified exception!!!
             //guessing from modifying dataItemsForListView which can happen in this method and in others...
             currentUsernameUI = CurrentUsername;
@@ -2098,11 +1607,11 @@ namespace Seeker
         {
             //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
-            MainActivity.LogInfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(c, Resource.Style.MyAlertDialogTheme); //failed to bind....
-            builder.SetTitle(c.Resources.GetString(Resource.String.browse_user_files));
+            Logger.InfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
+            builder.SetTitle(c.Resources.GetString(Resource.String.browse_user));
 
-            View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.browse_chosen_user, (ViewGroup)this.View, false);
+            View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)this.View, false);
 
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
@@ -2120,7 +1629,7 @@ namespace Seeker
                 string usernameToBrowse = input.Text;
                 if (string.IsNullOrWhiteSpace(usernameToBrowse))
                 {
-                    Toast.MakeText(this.Activity != null ? this.Activity : SeekerState.MainActivityRef, SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short);
                     if (sender is AndroidX.AppCompat.App.AlertDialog aDiag1) //actv
                     {
                         aDiag1.Dismiss();
@@ -2132,7 +1641,7 @@ namespace Seeker
                     return;
                 }
                 SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
-                DownloadDialog.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
+                BrowseService.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -2161,7 +1670,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -2172,7 +1681,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -2183,7 +1692,7 @@ namespace Seeker
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
-                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -2194,7 +1703,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -2217,39 +1726,37 @@ namespace Seeker
             try
             {
                 BrowseFragment.browseUserDialog.Show();
-                CommonHelpers.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
+                UiHelpers.DoNotEnablePositiveUntilText(BrowseFragment.browseUserDialog, input);
 
             }
             catch (WindowManagerBadTokenException e)
             {
                 if (SeekerState.MainActivityRef == null || this.Activity == null)
                 {
-                    MainActivity.LogFirebase("WindowManagerBadTokenException null activities");
+                    Logger.Firebase("WindowManagerBadTokenException null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.MainActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.Activity.IsFinishing;
-                    MainActivity.LogFirebase("WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.Firebase("WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
             catch (Exception err)
             {
                 if (SeekerState.MainActivityRef == null || this.Activity == null)
                 {
-                    MainActivity.LogFirebase("Exception null activities");
+                    Logger.Firebase("Exception null activities");
                 }
                 else
                 {
                     bool isCachedMainActivityFinishing = SeekerState.MainActivityRef.IsFinishing;
                     bool isOurActivityFinishing = this.Activity.IsFinishing;
-                    MainActivity.LogFirebase("Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                    Logger.Firebase("Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
             }
 
         }
-
-
 
         private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
         {
@@ -2259,79 +1766,10 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
     }
 
-    public class PathItem
-    {
-        public string DisplayName;
-        public bool IsLastNode;
-        public PathItem(string displayName, bool isLastNode)
-        {
-            DisplayName = displayName;
-            IsLastNode = isLastNode;
-        }
-    }
-
-
-    public class FullFileInfo
-    {
-        public long Size = 0;
-        public string FullFileName = string.Empty;
-        public int Depth = 1;
-        public bool wasFilenameLatin1Decoded = false;
-        public bool wasFolderLatin1Decoded = false;
-    }
-
-    public class DataItem
-    {
-        private string Name = "";
-        public Directory Directory;
-        public Soulseek.File File;
-        public TreeNode<Directory> Node;
-        public DataItem(Directory d, TreeNode<Directory> n)
-        {
-            Name = d.Name; //this is the full name (other than file).. i.e. primary:Music\\Soulseek Complete
-            Directory = d;
-            Node = n;
-        }
-        public DataItem(Soulseek.File f, TreeNode<Directory> n)
-        {
-            Name = f.Filename;
-            File = f;
-            Node = n;
-        }
-        public bool IsDirectory()
-        {
-            return Directory != null;
-        }
-        public string GetDisplayName()
-        {
-            if (IsDirectory())
-            {
-                if (this.Node.IsLocked)
-                {
-                    return new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFileNameFromFile(Name);
-                }
-                else
-                {
-                    return CommonHelpers.GetFileNameFromFile(Name);
-                }
-            }
-            else
-            {
-                if (this.Node.IsLocked)
-                {
-                    return new System.String(Java.Lang.Character.ToChars(0x1F512)) + Name;
-                }
-                else
-                {
-                    return Name;
-                }
-            }
-        }
-    }
 }

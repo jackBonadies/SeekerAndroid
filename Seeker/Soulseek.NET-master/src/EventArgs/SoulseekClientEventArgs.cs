@@ -22,7 +22,9 @@ namespace Soulseek
     /// <summary>
     ///     Generic event arguments for client events.
     /// </summary>
+#pragma warning disable S2094 // Classes should not be empty
     public abstract class SoulseekClientEventArgs : EventArgs
+#pragma warning restore S2094 // Classes should not be empty
     {
     }
 }

@@ -17,9 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Helpers;
-using Seeker.Managers;
-using Seeker.UPnP;
+using Seeker.Browse;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -33,9 +31,16 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Core.Content;
+using AndroidX.Core.View;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Common.Share;
+using Google.Android.Material.Divider;
+using Seeker.Helpers;
+using Seeker.Managers;
+using Seeker.Services;
+using Seeker.UPnP;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +51,7 @@ using System.Xml.Serialization;
 namespace Seeker
 {
     [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
-    public class SettingsActivity : ThemeableActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
+    public partial class SettingsActivity : ThemeableActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
     {
         private const int CHANGE_WRITE_EXTERNAL = 0x909;
         private const int CHANGE_WRITE_EXTERNAL_LEGACY = 0x910;
@@ -73,7 +78,7 @@ namespace Seeker
         public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
         private List<Tuple<int, int>> positionNumberPairs = new List<Tuple<int, int>>();
-        private CheckBox allowPrivateRoomInvitations;
+        internal CheckBox allowPrivateRoomInvitations;
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
@@ -115,14 +120,35 @@ namespace Seeker
             // goes to system settings to change per app language, it triggers 
             // ItemSelected with the old values (resetting the language preference)
             // ("onItemSelected method is also invoked when the view is being build")
-            Spinner languageSpinner = FindViewById<Spinner>(Resource.Id.languageSpinner);
-            languageSpinner.ItemSelected -= LanguageSpinner_ItemSelected;
-            String[] languageSpinnerOptionsStrings = new String[] { SeekerApplication.GetString(Resource.String.Automatic), "English", "Português (Brazil)", "Français", "ру́сский язы́к", "Español", "украї́нська мо́ва", "Nederlands", "čeština", "italiano" };
-            ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, languageSpinnerOptionsStrings);
+            AutoCompleteTextView languageSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.languageSpinner);
+            languageSpinner.ItemClick -= LanguageSpinner_ItemSelected;
+            String[] languageSpinnerOptionsStrings = new String[] {
+                SeekerApplication.GetString(Resource.String.Automatic),
+                "العربية",        // Arabic
+                "Català",          // Catalan
+                "čeština",         // Czech
+                "Dansk",           // Danish
+                "Deutsch",         // German
+                "English",
+                "Español",         // Spanish
+                "Français",        // French
+                "italiano",        // Italian
+                "Magyar",          // Hungarian
+                "Nederlands",      // Dutch
+                "Norsk",           // Norwegian
+                "Polski",          // Polish
+                "Português (Brazil)",
+                "Português (Portugal)",
+                "ру́сский язы́к",   // Russian
+                "Srpski",          // Serbian
+                "українська мо́ва", // Ukrainian
+                "简体中文",         // Chinese Simplified
+                "日本語",           // Japanese
+            };
+            ArrayAdapter<String> languageSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, languageSpinnerOptionsStrings);
             languageSpinner.Adapter = languageSpinnerOptions;
-            SetSpinnerPositionLangauge(languageSpinner);
-            languageSpinner.ItemSelected += LanguageSpinner_ItemSelected;
-            //languageSpinner.Post(new Action(() => { languageSpinner.ItemSelected += LanguageSpinner_ItemSelected; }));
+            SetSpinnerPositionLangauge(languageSpinner, languageSpinnerOptionsStrings);
+            languageSpinner.ItemClick += LanguageSpinner_ItemSelected;
 
         }
 
@@ -154,7 +180,7 @@ namespace Seeker
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                Toast.MakeText(this, Resource.String.upnp_success, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.upnp_success), ToastLength.Short);
                 SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
             });
         }
@@ -163,9 +189,9 @@ namespace Seeker
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
             {
-                if (SeekerState.ListenerEnabled && SeekerState.ListenerUPnpEnabled && UPnpManager.Instance.RunningStatus == UPnPRunningStatus.Finished && UPnpManager.Instance.DiagStatus != UPnPDiagStatus.Success)
+                if (PreferencesState.ListenerEnabled && PreferencesState.ListenerUPnpEnabled && UPnpManager.Instance.RunningStatus == UPnPRunningStatus.Finished && UPnpManager.Instance.DiagStatus != UPnPDiagStatus.Success)
                 {
-                    Toast.MakeText(this, Resource.String.upnp_search_finished, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.upnp_search_finished), ToastLength.Short);
                 }
                 SetUpnpStatusView(this.FindViewById<ImageView>(Resource.Id.UPnPStatus));
             });
@@ -258,165 +284,17 @@ namespace Seeker
         CheckBox useUPnPCheckBox;
         CheckBox showSmartFilters;
 
-
-        public class ReyclerUploadsAdapter : RecyclerView.Adapter
-        {
-            public List<UploadDirectoryInfo> localDataSet;
-            public override int ItemCount => localDataSet.Count;
-            private int position = -1;
-            public SettingsActivity settingsActivity;
-            public ReyclerUploadsAdapter(SettingsActivity activity, List<UploadDirectoryInfo> ti)
-            {
-                this.settingsActivity = activity;
-                localDataSet = ti;
-            }
-
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            {
-                (holder as RecyclerViewFolderHolder).folderView.setItem(localDataSet[position]);
-            }
-
-            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
-            {
-                RecyclerViewFolderView view = RecyclerViewFolderView.inflate(parent);
-                view.setupChildren();
-                view.SettingsActivity = this.settingsActivity;
-                (view as View).Click += view.FolderClick;
-                (view as View).LongClick += view.FolderLongClick;
-                return new RecyclerViewFolderHolder(view as View);
-            }
-
-            public void setPosition(int position)
-            {
-                this.position = position;
-            }
-        }
-        private static UploadDirectoryInfo ContextMenuItem = null;
-        public class RecyclerViewFolderHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
-        {
-            public RecyclerViewFolderView folderView;
-
-
-            public RecyclerViewFolderHolder(View view) : base(view)
-            {
-                folderView = (RecyclerViewFolderView)view;
-                folderView.ViewHolder = this;
-                folderView.SetOnCreateContextMenuListener(this);
-            }
-
-            public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-            {
-                RecyclerViewFolderView folderRowView = v as RecyclerViewFolderView;
-                ContextMenuItem = folderRowView.BoundItem;
-                if (ContextMenuItem.HasError())
-                {
-                    menu.Add(0, 1, 0, Resource.String.ViewErrorOptions);
-                }
-                else
-                {
-                    menu.Add(0, 1, 0, Resource.String.ViewFolderOptions);
-                }
-                menu.Add(0, 2, 1, Resource.String.Remove);
-            }
-        }
-        public class RecyclerViewFolderView : RelativeLayout
-        {
-            public UploadDirectoryInfo BoundItem;
-
-            public RecyclerViewFolderHolder ViewHolder;
-            public SettingsActivity SettingsActivity = null;
-            public TextView viewFolderName;
-            public ImageView viewFolderStatus;
-
-            public RecyclerViewFolderView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
-                setupChildren();
-            }
-            public RecyclerViewFolderView(Context context, IAttributeSet attrs) : base(context, attrs)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.upload_folder_row, this, true);
-                setupChildren();
-            }
-
-            public void FolderLongClick(object sender, View.LongClickEventArgs e)
-            {
-
-                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.AdapterPosition);
-                (sender as View).ShowContextMenu();
-            }
-
-            public void FolderClick(object sender, EventArgs e)
-            {
-
-                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.AdapterPosition);
-                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).settingsActivity.ShowDialogForUploadDir((sender as RecyclerViewFolderView).ViewHolder.folderView.BoundItem);
-            }
-
-            public static RecyclerViewFolderView inflate(ViewGroup parent)
-            {
-                RecyclerViewFolderView itemView = (RecyclerViewFolderView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.upload_folder_row_dummy, parent, false);
-                return itemView;
-            }
-
-            public void setupChildren()
-            {
-                viewFolderName = FindViewById<TextView>(Resource.Id.uploadFolderName);
-                viewFolderStatus = FindViewById<ImageView>(Resource.Id.uploadFolderStatus);
-
-            }
-
-            public void setItem(UploadDirectoryInfo item)
-            {
-                this.Clickable = SeekerState.SharingOn;
-                this.LongClickable = SeekerState.SharingOn;
-
-                BoundItem = item;
-                if (string.IsNullOrEmpty(item.DisplayNameOverride))
-                {
-                    viewFolderName.Text = item.GetLastPathSegment();
-                }
-                else
-                {
-                    viewFolderName.Text = item.GetLastPathSegment() + $" ({item.DisplayNameOverride})";
-                }
-
-                if (item.HasError())
-                {
-                    viewFolderStatus.Visibility = ViewStates.Visible;
-                    viewFolderStatus.SetImageResource(Resource.Drawable.alert_circle_outline);
-                }
-                else if (item.IsHidden)
-                {
-                    viewFolderStatus.Visibility = ViewStates.Visible;
-                    viewFolderStatus.SetImageResource(Resource.Drawable.hidden_lock_question);
-                }
-                else if (item.IsLocked)
-                {
-                    viewFolderStatus.Visibility = ViewStates.Visible;
-                    viewFolderStatus.SetImageResource(Resource.Drawable.lock_icon);
-                }
-                else
-                {
-                    viewFolderStatus.Visibility = ViewStates.Gone;
-                }
-            }
-        }
-
-
-
+        private static UploadDirectoryEntry ContextMenuItem = null;
 
         private ScrollView mainScrollView;
         private View sharingLayoutParent;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("Settings Created");
+            Logger.Debug("Settings Created");
 
 
             base.OnCreate(savedInstanceState);
-
-
 
             SeekerState.ActiveActivityRef = this;
             SetContentView(Resource.Layout.settings_layout);
@@ -439,48 +317,48 @@ namespace Seeker
             changeDirSettings.Click += ChangeDownloadDirectory;
 
             CheckBox autoClearComplete = FindViewById<CheckBox>(Resource.Id.autoClearComplete);
-            autoClearComplete.Checked = SeekerState.AutoClearCompleteDownloads;
+            autoClearComplete.Checked = PreferencesState.AutoClearCompleteDownloads;
             autoClearComplete.CheckedChange += AutoClearComplete_CheckedChange;
 
             CheckBox autoClearCompleteUploads = FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads);
-            autoClearCompleteUploads.Checked = SeekerState.AutoClearCompleteUploads;
+            autoClearCompleteUploads.Checked = PreferencesState.AutoClearCompleteUploads;
             autoClearCompleteUploads.CheckedChange += AutoClearCompleteUploads_CheckedChange;
 
             CheckBox freeUploadSlotsOnly = FindViewById<CheckBox>(Resource.Id.freeUploadSlots);
-            freeUploadSlotsOnly.Checked = SeekerState.FreeUploadSlotsOnly;
+            freeUploadSlotsOnly.Checked = PreferencesState.FreeUploadSlotsOnly;
             freeUploadSlotsOnly.CheckedChange += FreeUploadSlotsOnly_CheckedChange;
 
             CheckBox showLockedSearch = FindViewById<CheckBox>(Resource.Id.showLockedInSearch);
-            showLockedSearch.Checked = !SeekerState.HideLockedResultsInSearch;
+            showLockedSearch.Checked = !PreferencesState.HideLockedResultsInSearch;
             showLockedSearch.CheckedChange += ShowLockedSearch_CheckedChange;
 
             CheckBox showLockedBrowse = FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse);
-            showLockedBrowse.Checked = !SeekerState.HideLockedResultsInBrowse;
+            showLockedBrowse.Checked = !PreferencesState.HideLockedResultsInBrowse;
             showLockedBrowse.CheckedChange += ShowLockedBrowse_CheckedChange;
 
             allowPrivateRoomInvitations = FindViewById<CheckBox>(Resource.Id.allowPrivateRoomInvitations);
-            allowPrivateRoomInvitations.Checked = SeekerState.AllowPrivateRoomInvitations;
+            allowPrivateRoomInvitations.Checked = PreferencesState.AllowPrivateRoomInvitations;
             allowPrivateRoomInvitations.CheckedChange += AllowPrivateRoomInvitations_CheckedChange;
 
             CheckBox autoSetAwayStatusOnInactivity = FindViewById<CheckBox>(Resource.Id.autoSetAwayStatus);
-            autoSetAwayStatusOnInactivity.Checked = SeekerState.AutoAwayOnInactivity;
+            autoSetAwayStatusOnInactivity.Checked = PreferencesState.AutoAwayOnInactivity;
             autoSetAwayStatusOnInactivity.CheckedChange += AutoSetAwayStatusOnInactivity_CheckedChange;
 
             CheckBox showDownloadNotification = FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload);
-            showDownloadNotification.Checked = !SeekerState.DisableDownloadToastNotification;
+            showDownloadNotification.Checked = !PreferencesState.DisableDownloadToastNotification;
             showDownloadNotification.CheckedChange += ShowDownloadNotification_CheckedChange;
 
             CheckBox showFolderDownloadNotification = FindViewById<CheckBox>(Resource.Id.showNotificationOnFolderDownload);
-            showFolderDownloadNotification.Checked = SeekerState.NotifyOnFolderCompleted;
+            showFolderDownloadNotification.Checked = PreferencesState.NotifyOnFolderCompleted;
             showFolderDownloadNotification.CheckedChange += ShowFolderDownloadNotification_CheckedChange;
 
             CheckBox memoryFileDownloadSwitchCheckBox = FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox);
-            memoryFileDownloadSwitchCheckBox.Checked = !SeekerState.MemoryBackedDownload;
+            memoryFileDownloadSwitchCheckBox.Checked = !PreferencesState.MemoryBackedDownload;
             memoryFileDownloadSwitchCheckBox.CheckedChange += MemoryFileDownloadSwitchCheckBox_CheckedChange;
 
 
             CheckBox autoRetryBackOnline = FindViewById<CheckBox>(Resource.Id.autoRetryBackOnline);
-            autoRetryBackOnline.Checked = SeekerState.AutoRetryBackOnline;
+            autoRetryBackOnline.Checked = PreferencesState.AutoRetryBackOnline;
             autoRetryBackOnline.CheckedChange += AutoRetryBackOnline_CheckedChange;
 
             ImageView memoryFileDownloadSwitchIcon = FindViewById<ImageView>(Resource.Id.memoryFileDownloadSwitchIcon);
@@ -505,14 +383,14 @@ namespace Seeker
             moreInfoExport.Click += MoreInfoExport_Click;
 
             CheckBox rememberSearchHistory = FindViewById<CheckBox>(Resource.Id.searchHistoryRemember);
-            rememberSearchHistory.Checked = SeekerState.RememberSearchHistory;
+            rememberSearchHistory.Checked = PreferencesState.RememberSearchHistory;
             rememberSearchHistory.CheckedChange += RememberSearchHistory_CheckedChange;
 
             Button clearRecentUserHistory = FindViewById<Button>(Resource.Id.clearRecentUsers);
             clearRecentUserHistory.Click += ClearRecentUserHistory_Click;
 
             CheckBox rememberRecentUsers = FindViewById<CheckBox>(Resource.Id.rememberRecentUsers);
-            rememberRecentUsers.Checked = SeekerState.ShowRecentUsers;
+            rememberRecentUsers.Checked = PreferencesState.ShowRecentUsers;
             rememberRecentUsers.CheckedChange += RememberRecentUsers_CheckedChange;
 
 
@@ -544,31 +422,31 @@ namespace Seeker
             SetSpinnerPosition(searchNumSpinner);
             searchNumSpinner.ItemSelected += SearchNumSpinner_ItemSelected;
 
-            Spinner dayNightMode = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
-            dayNightMode.ItemSelected -= DayNightMode_ItemSelected;
+            AutoCompleteTextView dayNightMode = FindViewById<AutoCompleteTextView>(Resource.Id.nightModeSpinner);
+            dayNightMode.ItemClick -= DayNightMode_ItemSelected;
             String[] dayNightOptionsStrings = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
-            ArrayAdapter<String> dayNightOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayNightOptionsStrings);
+            ArrayAdapter<String> dayNightOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, dayNightOptionsStrings);
             dayNightMode.Adapter = dayNightOptions;
-            SetSpinnerPositionDayNight(dayNightMode);
-            dayNightMode.ItemSelected += DayNightMode_ItemSelected;
+            SetSpinnerPositionDayNight(dayNightMode, dayNightOptionsStrings);
+            dayNightMode.ItemClick += DayNightMode_ItemSelected;
 
 
-            Spinner dayVarientSpinner = FindViewById<Spinner>(Resource.Id.dayVarientSpinner);
-            dayVarientSpinner.ItemSelected -= DayVarient_ItemSelected;
-            String[] dayVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
-            ArrayAdapter<String> dayVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, dayVarientSpinnerOptionsStrings);
-            dayVarientSpinner.Adapter = dayVarientSpinnerOptions;
-            SetSpinnerPositionDayVarient(dayVarientSpinner);
-            dayVarientSpinner.ItemSelected += DayVarient_ItemSelected;
+            AutoCompleteTextView dayVariantSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.dayVarientSpinner);
+            dayVariantSpinner.ItemClick -= DayVariant_ItemSelected;
+            String[] dayVariantSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Red, ThemeHelper.Blue };
+            ArrayAdapter<String> dayVariantSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, dayVariantSpinnerOptionsStrings);
+            dayVariantSpinner.Adapter = dayVariantSpinnerOptions;
+            SetSpinnerPositionDayVariant(dayVariantSpinner, dayVariantSpinnerOptionsStrings);
+            dayVariantSpinner.ItemClick += DayVariant_ItemSelected;
 
 
-            Spinner nightVarientSpinner = FindViewById<Spinner>(Resource.Id.nightVarientSpinner);
-            nightVarientSpinner.ItemSelected -= NightVarient_ItemSelected;
-            String[] nightVarientSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
-            ArrayAdapter<String> nightVarientSpinnerOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, nightVarientSpinnerOptionsStrings);
-            nightVarientSpinner.Adapter = nightVarientSpinnerOptions;
-            SetSpinnerPositionNightVarient(nightVarientSpinner);
-            nightVarientSpinner.ItemSelected += NightVarient_ItemSelected;
+            AutoCompleteTextView nightVariantSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.nightVarientSpinner);
+            nightVariantSpinner.ItemClick -= NightVariant_ItemSelected;
+            String[] nightVariantSpinnerOptionsStrings = new String[] { ThemeHelper.ClassicPurple, ThemeHelper.Grey, ThemeHelper.Blue, ThemeHelper.AmoledClassicPurple, ThemeHelper.AmoledGrey };
+            ArrayAdapter<String> nightVariantSpinnerOptions = new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleListItem1, nightVariantSpinnerOptionsStrings);
+            nightVariantSpinner.Adapter = nightVariantSpinnerOptions;
+            SetSpinnerPositionNightVariant(nightVariantSpinner, nightVariantSpinnerOptionsStrings);
+            nightVariantSpinner.ItemClick += NightVariant_ItemSelected;
 
 
 
@@ -598,11 +476,11 @@ namespace Seeker
 
 
             CheckBox shareCheckBox = FindViewById<CheckBox>(Resource.Id.enableSharing);
-            shareCheckBox.Checked = SeekerState.SharingOn;
+            shareCheckBox.Checked = PreferencesState.SharingOn;
             shareCheckBox.CheckedChange += ShareCheckBox_CheckedChange;
 
             CheckBox unmeteredConnectionsOnlyCheckBox = FindViewById<CheckBox>(Resource.Id.shareOnlyOnUnmetered);
-            unmeteredConnectionsOnlyCheckBox.Checked = !SeekerState.AllowUploadsOnMetered;
+            unmeteredConnectionsOnlyCheckBox.Checked = !PreferencesState.AllowUploadsOnMetered;
             unmeteredConnectionsOnlyCheckBox.CheckedChange += UnmeteredConnectionsOnlyCheckBox_CheckedChange;
 
             ImageView moreInfoButton = FindViewById<ImageView>(Resource.Id.moreInfoButton);
@@ -625,7 +503,7 @@ namespace Seeker
             startupServiceMoreInfo.Click += StartupServiceMoreInfo_Click;
 
             CheckBox startServiceOnStartupCheckBox = FindViewById<CheckBox>(Resource.Id.startServiceOnStartupCheckBox);
-            startServiceOnStartupCheckBox.Checked = SeekerState.StartServiceOnStartup;
+            startServiceOnStartupCheckBox.Checked = PreferencesState.StartServiceOnStartup;
             startServiceOnStartupCheckBox.CheckedChange += StartServiceOnStartupCheckBox_CheckedChange;
 
             Button startupServiceButton = FindViewById<Button>(Resource.Id.startServiceOnStartupButton);
@@ -633,15 +511,15 @@ namespace Seeker
             SetButtonText(startupServiceButton);
 
             CheckBox enableListening = FindViewById<CheckBox>(Resource.Id.enableListening);
-            enableListening.Checked = SeekerState.ListenerEnabled;
+            enableListening.Checked = PreferencesState.ListenerEnabled;
             enableListening.CheckedChange += EnableListening_CheckedChange;
 
             CheckBox enableDlSpeedLimits = FindViewById<CheckBox>(Resource.Id.enable_dl_speed_limits);
-            enableDlSpeedLimits.Checked = SeekerState.SpeedLimitDownloadOn;
+            enableDlSpeedLimits.Checked = PreferencesState.SpeedLimitDownloadOn;
             enableDlSpeedLimits.CheckedChange += EnableDlSpeedLimits_CheckedChange;
 
             CheckBox enableUlSpeedLimits = FindViewById<CheckBox>(Resource.Id.enable_ul_speed_limits);
-            enableUlSpeedLimits.Checked = SeekerState.SpeedLimitUploadOn;
+            enableUlSpeedLimits.Checked = PreferencesState.SpeedLimitUploadOn;
             enableUlSpeedLimits.CheckedChange += EnableUlSpeedLimits_CheckedChange;
 
 
@@ -664,12 +542,12 @@ namespace Seeker
             concurrentDlSublayout = FindViewById<ViewGroup>(Resource.Id.limitConcurrentDownloadsSublayout2);
             concurrentDlLabel = FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel);
             concurrentDlCheckbox = FindViewById<CheckBox>(Resource.Id.limitConcurrentDownloadsCheckBox);
-            concurrentDlCheckbox.Checked = Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers;
+            concurrentDlCheckbox.Checked = PreferencesState.LimitSimultaneousDownloads;
             concurrentDlCheckbox.CheckedChange += ConcurrentDlCheckbox_CheckedChange;
 
             concurrentDlButton = FindViewById<Button>(Resource.Id.changeConcurrentDownloads);
             concurrentDlButton.Click += ConcurrentDlBottom_Click;
-            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+            concurrentDlLabel.Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + PreferencesState.MaxSimultaneousLimit;
 
 
 
@@ -730,7 +608,7 @@ namespace Seeker
             changePassword.Click += ChangePassword_Click;
 
             useUPnPCheckBox = FindViewById<CheckBox>(Resource.Id.useUPnPCheckBox);
-            useUPnPCheckBox.Checked = SeekerState.ListenerUPnpEnabled;
+            useUPnPCheckBox.Checked = PreferencesState.ListenerUPnpEnabled;
             useUPnPCheckBox.CheckedChange += UseUPnPCheckBox_CheckedChange;
 
             ImageView UpnpStatusView = FindViewById<ImageView>(Resource.Id.UPnPStatus);
@@ -772,16 +650,16 @@ namespace Seeker
             */
 
             createUsernameSubfoldersView = this.FindViewById<CheckBox>(Resource.Id.createUsernameSubfolders);
-            createUsernameSubfoldersView.Checked = SeekerState.CreateUsernameSubfolders;
+            createUsernameSubfoldersView.Checked = PreferencesState.CreateUsernameSubfolders;
             createUsernameSubfoldersView.CheckedChange += CreateUsernameSubfoldersView_CheckedChange;
             doNotCreateSubfoldersForSingleDownloads = this.FindViewById<CheckBox>(Resource.Id.doNotCreateSubfoldersForSingleDownloads);
-            doNotCreateSubfoldersForSingleDownloads.Checked = SeekerState.NoSubfolderForSingle;
+            doNotCreateSubfoldersForSingleDownloads.Checked = PreferencesState.NoSubfolderForSingle;
             doNotCreateSubfoldersForSingleDownloads.CheckedChange += DoNotCreateSubfoldersForSingleDownloads_CheckedChange;
             createCompleteAndIncompleteFoldersView = this.FindViewById<CheckBox>(Resource.Id.createCompleteAndIncompleteDirectories);
-            createCompleteAndIncompleteFoldersView.Checked = SeekerState.CreateCompleteAndIncompleteFolders;
+            createCompleteAndIncompleteFoldersView.Checked = PreferencesState.CreateCompleteAndIncompleteFolders;
             createCompleteAndIncompleteFoldersView.CheckedChange += CreateCompleteAndIncompleteFoldersView_CheckedChange;
             manuallyChooseIncompleteFolderView = this.FindViewById<CheckBox>(Resource.Id.manuallySetIncomplete);
-            manuallyChooseIncompleteFolderView.Checked = SeekerState.OverrideDefaultIncompleteLocations;
+            manuallyChooseIncompleteFolderView.Checked = PreferencesState.OverrideDefaultIncompleteLocations;
             manuallyChooseIncompleteFolderView.CheckedChange += ManuallyChooseIncompleteFolderView_CheckedChange;
             currentCompleteFolderView = this.FindViewById<TextView>(Resource.Id.completeFolderPath);
             currentIncompleteFolderView = this.FindViewById<TextView>(Resource.Id.incompleteFolderPath);
@@ -800,7 +678,7 @@ namespace Seeker
 
 
             showSmartFilters = this.FindViewById<CheckBox>(Resource.Id.smartFilterEnable);
-            showSmartFilters.Checked = SeekerState.ShowSmartFilters;
+            showSmartFilters.Checked = PreferencesState.ShowSmartFilters;
             showSmartFilters.CheckedChange += ShowSmartFilters_CheckedChange;
 
             Button configSmartFilters = FindViewById<Button>(Resource.Id.configureSmartFilters);
@@ -808,9 +686,10 @@ namespace Seeker
 
             mainScrollView = FindViewById<ScrollView>(Resource.Id.mainScrollView);
             sharingLayoutParent = FindViewById<ViewGroup>(Resource.Id.sharingLayoutParent);
+            var settingsDivider = FindViewById<View>(Resource.Id.settingsDivider);
             if (Intent != null && Intent.GetIntExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, -1) != -1)
             {
-                mainScrollView.Post(new Action(() => { mainScrollView.SmoothScrollTo(0, sharingLayoutParent.Top - 14); }));
+                mainScrollView.Post(new Action(() => { mainScrollView.SmoothScrollTo(0, settingsDivider.Top - 14); }));
             }
 
             UpdateLayoutParametersForScreenSize();
@@ -820,7 +699,7 @@ namespace Seeker
 
         private void MoreInfoExport_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.export_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -833,14 +712,14 @@ namespace Seeker
             intent.SetType("application/xml");
             intent.PutExtra(Android.Content.Intent.ExtraTitle, "seeker_data.xml");
             intent.AddCategory(Android.Content.Intent.CategoryOpenable);
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 intent.PutExtra(Android.Provider.DocumentsContract.ExtraInitialUri, Android.Net.Uri.Parse(DefaultDocumentsUri));
             }
             this.StartActivityForResult(intent, SAVE_SEEKER_SETTINGS);
         }
 
-        private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
             string selection = GetLanguageStringFromPosition(e.Position);
             if (SeekerApplication.GetLegacyLanguageString() == selection)
@@ -848,15 +727,10 @@ namespace Seeker
                 return;
             }
 
-            SeekerState.Language = selection;
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutString(KeyConsts.M_Lanuage, SeekerState.Language);
-                editor.Commit();
-            }
+            PreferencesState.Language = selection;
+            PreferencesManager.SaveLanguage();
 
-            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(SeekerState.Language);
+            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(PreferencesState.Language);
         }
 
         private void UpdateLayoutParametersForScreenSize()
@@ -878,33 +752,28 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("Unable to tweak layout " + ex);
+                Logger.Firebase("Unable to tweak layout " + ex);
             }
         }
 
         private void UnmeteredConnectionsOnlyCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            bool oldState = MainActivity.MeetsCurrentSharingConditions();
-            SeekerState.AllowUploadsOnMetered = !e.IsChecked;
-            bool newState = MainActivity.MeetsCurrentSharingConditions();
+            bool oldState = SharedFileService.MeetsCurrentSharingConditions();
+            PreferencesState.AllowUploadsOnMetered = !e.IsChecked;
+            bool newState = SharedFileService.MeetsCurrentSharingConditions();
             if (oldState != newState)
             {
-                MainActivity.SetUnsetSharingBasedOnConditions(true);
+                SharingService.SetUnsetSharingBasedOnConditions(true);
                 UpdateShareImageView();
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered, SeekerState.AllowUploadsOnMetered);
-                editor.Commit();
-            }
+            PreferencesManager.SaveAllowUploadsOnMetered();
         }
 
         private void ClearAllFoldersButton_Click(object sender, EventArgs e)
         {
             if (UploadDirectoryManager.UploadDirectories.Count > 1) //ask before doing.
             {
-                var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+                var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                 var diag = builder.SetMessage(String.Format(SeekerApplication.GetString(Resource.String.AreYouSureClearAllDirectories), UploadDirectoryManager.UploadDirectories.Count))
                     .SetPositiveButton(Resource.String.yes, (object sender, DialogClickEventArgs e) =>
                     {
@@ -927,73 +796,58 @@ namespace Seeker
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
-            SeekerState.SharedFileCache = SlskHelp.SharedFileCache.GetEmptySharedFileCache();
-            MainActivity.SharedFileCache_Refreshed(null, (0, 0));
+            SeekerState.SharedFileCache = SharedFileCache.GetEmptySharedFileCache();
+            SharedFileService.SharedFileCache_Refreshed(null, (0, 0));
             this.UpdateShareImageView();
         }
 
         private void ShowFolderDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            bool changed = SeekerState.NotifyOnFolderCompleted != e.IsChecked;
-            SeekerState.NotifyOnFolderCompleted = e.IsChecked;
+            bool changed = PreferencesState.NotifyOnFolderCompleted != e.IsChecked;
+            PreferencesState.NotifyOnFolderCompleted = e.IsChecked;
             if (changed)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, SeekerState.NotifyOnFolderCompleted);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveNotifyOnFolderCompleted();
             }
         }
 
         private void AutoRetryBackOnline_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            bool changed = SeekerState.AutoRetryBackOnline != e.IsChecked;
-            SeekerState.AutoRetryBackOnline = e.IsChecked;
+            bool changed = PreferencesState.AutoRetryBackOnline != e.IsChecked;
+            PreferencesState.AutoRetryBackOnline = e.IsChecked;
             if (changed)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, SeekerState.AutoRetryBackOnline);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveAutoRetryBackOnline();
             }
         }
 
         private void AutoSetAwayStatusOnInactivity_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            bool changed = SeekerState.AutoAwayOnInactivity != e.IsChecked;
-            SeekerState.AutoAwayOnInactivity = e.IsChecked;
+            bool changed = PreferencesState.AutoAwayOnInactivity != e.IsChecked;
+            PreferencesState.AutoAwayOnInactivity = e.IsChecked;
             if (changed)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, SeekerState.AutoAwayOnInactivity);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveAutoAwayOnInactivity();
             }
         }
 
         private void MoreInfoDiagnostics_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.diagnostics_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void MoreInfoConcurrent_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.concurrent_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void MoreInfoButtonClearIncomplete_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.clear_incomplete_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -1005,13 +859,14 @@ namespace Seeker
 
         private void ConcurrentDlCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers)
+            if (e.IsChecked == PreferencesState.LimitSimultaneousDownloads)
             {
                 return;
             }
-            Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers = e.IsChecked;
+            PreferencesState.LimitSimultaneousDownloads = e.IsChecked;
             this.UpdateConcurrentDownloadLimitsState();
             SaveMaxConcurrentDownloadsSettings();
+            SeekerApplication.Toaster.ShowToast("This will take effect on next startup", ToastLength.Short);
         }
 
         private void ConcurrentDlBottom_Click(object sender, EventArgs e)
@@ -1023,11 +878,11 @@ namespace Seeker
         {
             if (e.Position == 0)
             {
-                SeekerState.SpeedLimitUploadIsPerTransfer = true;
+                PreferencesState.SpeedLimitUploadIsPerTransfer = true;
             }
             else
             {
-                SeekerState.SpeedLimitUploadIsPerTransfer = false;
+                PreferencesState.SpeedLimitUploadIsPerTransfer = false;
             }
         }
 
@@ -1040,11 +895,11 @@ namespace Seeker
         {
             if (e.Position == 0)
             {
-                SeekerState.SpeedLimitDownloadIsPerTransfer = true;
+                PreferencesState.SpeedLimitDownloadIsPerTransfer = true;
             }
             else
             {
-                SeekerState.SpeedLimitDownloadIsPerTransfer = false;
+                PreferencesState.SpeedLimitDownloadIsPerTransfer = false;
             }
         }
 
@@ -1055,41 +910,41 @@ namespace Seeker
 
         private void EnableDlSpeedLimits_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == SeekerState.SpeedLimitDownloadOn)
+            if (e.IsChecked == PreferencesState.SpeedLimitDownloadOn)
             {
                 return;
             }
-            SeekerState.SpeedLimitDownloadOn = e.IsChecked;
+            PreferencesState.SpeedLimitDownloadOn = e.IsChecked;
             UpdateSpeedLimitsState();
-            SeekerApplication.SaveSpeedLimitState();
+            PreferencesManager.SaveSpeedLimitState();
         }
 
         private void EnableUlSpeedLimits_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == SeekerState.SpeedLimitUploadOn)
+            if (e.IsChecked == PreferencesState.SpeedLimitUploadOn)
             {
                 return;
             }
-            SeekerState.SpeedLimitUploadOn = e.IsChecked;
+            PreferencesState.SpeedLimitUploadOn = e.IsChecked;
             UpdateSpeedLimitsState();
-            SeekerApplication.SaveSpeedLimitState();
+            PreferencesManager.SaveSpeedLimitState();
         }
 
         private void ShowLockedBrowse_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.HideLockedResultsInBrowse = !e.IsChecked;
+            PreferencesState.HideLockedResultsInBrowse = !e.IsChecked;
         }
 
         private void ShowLockedSearch_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.HideLockedResultsInSearch = !e.IsChecked;
+            PreferencesState.HideLockedResultsInSearch = !e.IsChecked;
         }
 
         //private static AndroidX.AppCompat.App.AlertDialog configSmartFilters = null;
         private void ConfigSmartFilters_Click(object sender, EventArgs e)
         {
-            MainActivity.LogInfoFirebase("ConfigSmartFilters_Click");
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
+            Logger.InfoFirebase("ConfigSmartFilters_Click");
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             builder.SetTitle(Resource.String.ConfigureSmartFilters);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.smart_filter_config_layout, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
@@ -1098,7 +953,7 @@ namespace Seeker
 
 
 
-            RecyclerListAdapter adapter = new RecyclerListAdapter(this, null, SeekerState.SmartFilterOptions.GetAdapterItems());
+            RecyclerListAdapter adapter = new RecyclerListAdapter(this, null, PreferencesState.SmartFilterOptions.GetAdapterItems());
 
             recyclerViewFiltersConfig.HasFixedSize = (true);
             recyclerViewFiltersConfig.SetAdapter(adapter);
@@ -1111,7 +966,7 @@ namespace Seeker
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                SeekerState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
+                PreferencesState.SmartFilterOptions.FromAdapterItems(adapter.GetAdapterItems());
                 SeekerApplication.SaveSmartFilterState();
 
                 //int portNum = -1;
@@ -1126,7 +981,7 @@ namespace Seeker
                 //    return;
                 //}
                 //ReconfigureOptionsAPI(null, null, portNum);
-                //SeekerState.ListenerPort = portNum;
+                //PreferencesState.ListenerPort = portNum;
                 //UPnpManager.Instance.Feedback = true;
                 //UPnpManager.Instance.SearchAndSetMappingIfRequired();
                 //SeekerApplication.SaveListeningState();
@@ -1157,20 +1012,15 @@ namespace Seeker
 
         private void ShowSmartFilters_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.ShowSmartFilters = e.IsChecked;
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutBoolean(KeyConsts.M_ShowSmartFilters, SeekerState.ShowSmartFilters);
-                bool success = editor.Commit();
-            }
+            PreferencesState.ShowSmartFilters = e.IsChecked;
+            PreferencesManager.SaveShowSmartFilters();
         }
 
         private void ImportData_Click(object sender, EventArgs e)
         {
-            if (!SeekerState.currentlyLoggedIn || !SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
+            if (!PreferencesState.CurrentlyLoggedIn || !SeekerState.SoulseekClient.State.HasFlag(Soulseek.SoulseekClientStates.LoggedIn))
             {
-                Toast.MakeText(this, Resource.String.MustBeLoggedInToImport, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.MustBeLoggedInToImport), ToastLength.Long);
                 return;
             }
             Intent intent = new Intent(this, typeof(ImportWizardActivity));
@@ -1202,18 +1052,13 @@ namespace Seeker
                 SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
                 //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
                 SeekerApplication.SetDiagnosticState(SeekerApplication.LOG_DIAGNOSTICS);
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                    editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, SeekerApplication.LOG_DIAGNOSTICS);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveLogDiagnostics();
             }
         }
 
         private void RememberRecentUsers_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.ShowRecentUsers = e.IsChecked;
+            PreferencesState.ShowRecentUsers = e.IsChecked;
         }
 
         private void RescanSharesButton_Click(object sender, EventArgs e)
@@ -1255,22 +1100,22 @@ namespace Seeker
 
         public static bool UseIncompleteManualFolder()
         {
-            return (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null);
+            return (PreferencesState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null);
         }
 
         private static string GetFriendlyIncompleteDirectoryName()
         {
-            if (SeekerState.MemoryBackedDownload)
+            if (PreferencesState.MemoryBackedDownload)
             {
                 return SeekerApplication.GetString(Resource.String.NotInUse);
             }
-            if (SeekerState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
+            if (PreferencesState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
             {
                 return SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
             }
             else
             {
-                if (!SeekerState.CreateCompleteAndIncompleteFolders)
+                if (!PreferencesState.CreateCompleteAndIncompleteFolders)
                 {
                     return SeekerApplication.GetString(Resource.String.AppLocalStorage);
                 }
@@ -1299,7 +1144,7 @@ namespace Seeker
 
         private void SetIncompleteDirectoryState()
         {
-            if (SeekerState.OverrideDefaultIncompleteLocations)
+            if (PreferencesState.OverrideDefaultIncompleteLocations)
             {
                 incompleteFolderViewLayout.Enabled = true;
                 changeIncompleteDirectory.Enabled = true;
@@ -1321,16 +1166,16 @@ namespace Seeker
 
         private void SetCompleteFolderView()
         {
-            string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
+            string friendlyName = SimpleHelpers.AvoidLineBreaks(GetFriendlyDownloadDirectoryName());
             currentCompleteFolderView.Text = friendlyName;
-            CommonHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
+            UiHelpers.SetToolTipText(currentCompleteFolderView, friendlyName);
         }
 
         private void SetIncompleteFolderView()
         {
-            string friendlyName = CommonHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
+            string friendlyName = SimpleHelpers.AvoidLineBreaks(GetFriendlyIncompleteDirectoryName());
             currentIncompleteFolderView.Text = friendlyName;
-            CommonHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
+            UiHelpers.SetToolTipText(currentIncompleteFolderView, friendlyName);
         }
 
         private void SetSharedFolderView()
@@ -1355,13 +1200,13 @@ namespace Seeker
 
         //private static string GetIncompleteFolderLocation()
         //{
-        //    if (SeekerState.OverrideDefaultIncompleteLocations)
+        //    if (PreferencesState.OverrideDefaultIncompleteLocations)
         //    {
 
         //    }
         //    else
         //    {
-        //        if (SeekerState.CreateCompleteAndIncompleteFolders)
+        //        if (PreferencesState.CreateCompleteAndIncompleteFolders)
         //        {
 
         //        }
@@ -1374,49 +1219,49 @@ namespace Seeker
 
         private void ManuallyChooseIncompleteFolderView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.OverrideDefaultIncompleteLocations = e.IsChecked;
+            PreferencesState.OverrideDefaultIncompleteLocations = e.IsChecked;
             SetIncompleteDirectoryState();
             SetIncompleteFolderView();
         }
 
         private void CreateCompleteAndIncompleteFoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.CreateCompleteAndIncompleteFolders = e.IsChecked;
+            PreferencesState.CreateCompleteAndIncompleteFolders = e.IsChecked;
             SetIncompleteFolderView();
         }
 
         private void CreateUsernameSubfoldersView_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.CreateUsernameSubfolders = e.IsChecked;
+            PreferencesState.CreateUsernameSubfolders = e.IsChecked;
         }
 
         private void DoNotCreateSubfoldersForSingleDownloads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.NoSubfolderForSingle = e.IsChecked;
+            PreferencesState.NoSubfolderForSingle = e.IsChecked;
         }
 
         private void PrivHelp_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.privileges_more_info).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void CheckPriv_Click(object sender, EventArgs e)
         {
-            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
+            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
             PrivilegesManager.Instance.GetPrivilegesAPI(true);
         }
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if (MainActivity.IsNotLoggedIn())
+            if (SessionService.IsNotLoggedIn())
             {
-                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
             }
             //note: it seems that the Uri.Encode is not strictly necessary.  that is both "dog gone it" and "dog%20gone%20it" work just fine...
-            Android.Net.Uri uri = Android.Net.Uri.Parse("https://www.slsknet.org/userlogin.php?username=" + Android.Net.Uri.Encode(SeekerState.Username)); // missing 'http://' will cause crash.
+            Android.Net.Uri uri = Android.Net.Uri.Parse("https://www.slsknet.org/userlogin.php?username=" + Android.Net.Uri.Encode(PreferencesState.Username)); // missing 'http://' will cause crash.
             CommonHelpers.ViewUri(uri, this);
         }
 
@@ -1428,14 +1273,14 @@ namespace Seeker
 
         private void ChangePassword_Click(object sender, EventArgs e)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password), ToastLength.Short);
                 return;
             }
 
             // show dialog
-            MainActivity.LogInfoFirebase("ChangePasswordDialog" + this.IsFinishing + this.IsDestroyed);
+            Logger.InfoFirebase("ChangePasswordDialog" + this.IsFinishing + this.IsDestroyed);
 
             void OkayAction(object sender, string textInput)
             {
@@ -1446,11 +1291,11 @@ namespace Seeker
                 }
                 else
                 {
-                    CommonHelpers._dialogInstance?.Dismiss(); // todo: why?
+                    UiHelpers._dialogInstance?.Dismiss(); // todo: why?
                 }
             }
 
-            CommonHelpers.ShowSimpleDialog(
+            UiHelpers.ShowSimpleDialog(
                 this,
                 Resource.Layout.edit_text_password_dialog_content,
                 this.Resources.GetString(Resource.String.change_password),
@@ -1466,12 +1311,12 @@ namespace Seeker
 
         private void UseUPnPCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == SeekerState.ListenerUPnpEnabled)
+            if (e.IsChecked == PreferencesState.ListenerUPnpEnabled)
             {
                 return;
             }
-            SeekerState.ListenerUPnpEnabled = e.IsChecked;
-            SeekerApplication.SaveListeningState();
+            PreferencesState.ListenerUPnpEnabled = e.IsChecked;
+            PreferencesManager.SaveListeningState();
 
             if (e.IsChecked)
             {
@@ -1488,21 +1333,21 @@ namespace Seeker
 
         private void EnableListening_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == SeekerState.ListenerEnabled)
+            if (e.IsChecked == PreferencesState.ListenerEnabled)
             {
                 return;
             }
             if (e.IsChecked)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.enabling_listener, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.enabling_listener), ToastLength.Short);
             }
             else
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.disabling_listener, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.disabling_listener), ToastLength.Short);
             }
-            SeekerState.ListenerEnabled = e.IsChecked;
+            PreferencesState.ListenerEnabled = e.IsChecked;
             UpdateListeningViewState();
-            SeekerApplication.SaveListeningState();
+            PreferencesManager.SaveListeningState();
             ReconfigureOptionsAPI(null, e.IsChecked, null);
             if (e.IsChecked)
             {
@@ -1514,7 +1359,7 @@ namespace Seeker
 
         private void CheckStatus_Click(object sender, EventArgs e)
         {
-            Android.Net.Uri uri = Android.Net.Uri.Parse("http://www.slsknet.org/porttest.php?port=" + SeekerState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
+            Android.Net.Uri uri = Android.Net.Uri.Parse("http://www.slsknet.org/porttest.php?port=" + PreferencesState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
             CommonHelpers.ViewUri(uri, this);
         }
         private static AndroidX.AppCompat.App.AlertDialog changeDialog = null;
@@ -1528,7 +1373,7 @@ namespace Seeker
             List<string> doNotDelete = TransfersFragment.TransferItemManagerDL.GetInUseIncompleteFolderNames();
 
             bool useDownloadDir = false;
-            if (SeekerState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
+            if (PreferencesState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
             {
                 useDownloadDir = true;
             }
@@ -1574,22 +1419,22 @@ namespace Seeker
                 {
                     if (SeekerState.RootDocumentFile == null)
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.ErrorDownloadDirNotProperlySet, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.ErrorDownloadDirNotProperlySet), ToastLength.Long);
                         return;
                     }
                     rootdir = SeekerState.RootDocumentFile;
-                    MainActivity.LogDebug("using download dir" + rootdir.Uri.LastPathSegment);
+                    Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
                 }
                 else if (useTempDir)
                 {
                     Java.IO.File appPrivateExternal = SeekerState.ActiveActivityRef.GetExternalFilesDir(null);
                     rootdir = DocumentFile.FromFile(appPrivateExternal);
-                    MainActivity.LogDebug("using temp incomplete dir");
+                    Logger.Debug("using temp incomplete dir");
                 }
                 else if (useCustomDir)
                 {
                     rootdir = SeekerState.RootIncompleteDocumentFile;
-                    MainActivity.LogDebug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
+                    Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
                 }
 
                 folderExists = CleanIncompleteFolder(rootdir.FindFile("Soulseek Incomplete"), doNotDelete, out folderCount);
@@ -1597,11 +1442,11 @@ namespace Seeker
 
             if (!folderExists)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.IncompleteFolderEmpty, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.IncompleteFolderEmpty), ToastLength.Long);
             }
             else if (folderExists && folderCount == 0)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.NoEligibleToClear), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoEligibleToClear), ToastLength.Long);
             }
             else
             {
@@ -1610,7 +1455,7 @@ namespace Seeker
                 {
                     plural = "s";
                 }
-                Toast.MakeText(SeekerState.ActiveActivityRef, $"Cleared {folderCount} folder" + plural, ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast($"Cleared {folderCount} folder" + plural, ToastLength.Long);
             }
         }
 
@@ -1688,21 +1533,13 @@ namespace Seeker
             }
         }
 
-        public enum ChangeDialogType
-        {
-            ChangePort = 0,
-            ChangeDL = 1,
-            ChangeUL = 2,
-            ConcurrentDL = 3,
-        }
-
         private void ShowChangeDialog(ChangeDialogType changeDialogType)
         {
-            MainActivity.LogInfoFirebase("ShowChangePortDialog");
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //failed to bind....
+            Logger.InfoFirebase("ShowChangePortDialog");
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             if (changeDialogType == ChangeDialogType.ChangePort)
             {
-                builder.SetTitle(this.GetString(Resource.String.change_port) + ":");
+                builder.SetTitle(this.GetString(Resource.String.change_port));
             }
             else if (changeDialogType == ChangeDialogType.ChangeDL)
             {
@@ -1740,19 +1577,19 @@ namespace Seeker
                     int portNum = -1;
                     if (!int.TryParse(input.Text, out portNum))
                     {
-                        Toast.MakeText(this, Resource.String.port_failed_parse, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.port_failed_parse), ToastLength.Long);
                         return;
                     }
                     if (portNum < 1024 || portNum > 65535)
                     {
-                        Toast.MakeText(this, Resource.String.port_out_of_range, ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.port_out_of_range), ToastLength.Long);
                         return;
                     }
                     ReconfigureOptionsAPI(null, null, portNum);
-                    SeekerState.ListenerPort = portNum;
+                    PreferencesState.ListenerPort = portNum;
                     UPnpManager.Instance.Feedback = true;
                     UPnpManager.Instance.SearchAndSetMappingIfRequired();
-                    SeekerApplication.SaveListeningState();
+                    PreferencesManager.SaveListeningState();
                     SetPortViewText(FindViewById<TextView>(Resource.Id.portView));
                     changeDialog.Dismiss();
                 }
@@ -1761,26 +1598,26 @@ namespace Seeker
                     int dlSpeedKbs = -1;
                     if (!int.TryParse(input.Text, out dlSpeedKbs))
                     {
-                        Toast.MakeText(this, "Speed failed to parse", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Speed failed to parse", ToastLength.Long);
                         return;
                     }
                     if (dlSpeedKbs < 64)
                     {
-                        Toast.MakeText(this, "Minimum Speed is 64 kb/s", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Minimum Speed is 64 kb/s", ToastLength.Long);
                         return;
                     }
                     if (changeDialogType == ChangeDialogType.ChangeDL)
                     {
-                        SeekerState.SpeedLimitDownloadBytesSec = 1024 * dlSpeedKbs;
+                        PreferencesState.SpeedLimitDownloadBytesSec = 1024 * dlSpeedKbs;
                         SetSpeedTextView(FindViewById<TextView>(Resource.Id.downloadSpeed), false);
                     }
                     else
                     {
-                        SeekerState.SpeedLimitUploadBytesSec = 1024 * dlSpeedKbs;
+                        PreferencesState.SpeedLimitUploadBytesSec = 1024 * dlSpeedKbs;
                         SetSpeedTextView(FindViewById<TextView>(Resource.Id.uploadSpeed), true);
                     }
 
-                    SeekerApplication.SaveSpeedLimitState();
+                    PreferencesManager.SaveSpeedLimitState();
                     changeDialog.Dismiss();
                 }
                 else if (changeDialogType == ChangeDialogType.ConcurrentDL)
@@ -1788,20 +1625,21 @@ namespace Seeker
                     int concurrentDL = -1;
                     if (!int.TryParse(input.Text, out concurrentDL))
                     {
-                        Toast.MakeText(this, "Failed to Parse Number", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Failed to Parse Number", ToastLength.Long);
                         return;
                     }
                     if (concurrentDL < 1)
                     {
-                        Toast.MakeText(this, "Must be greater than 0", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Must be greater than 0", ToastLength.Long);
                         return;
                     }
 
-                    Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent = concurrentDL;
+                    PreferencesState.MaxSimultaneousLimit = concurrentDL;
                     // always add space as the resource string will always trim trailing spaces.
-                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent;
+                    FindViewById<TextView>(Resource.Id.concurrentDownloadsLabel).Text = SeekerApplication.GetString(Resource.String.MaxConcurrentIs) + " " + PreferencesState.MaxSimultaneousLimit;
 
                     SaveMaxConcurrentDownloadsSettings();
+                    SeekerApplication.Toaster.ShowToast("This will take effect on next startup", ToastLength.Short);
                     changeDialog.Dismiss();
                 }
 
@@ -1828,7 +1666,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -1839,7 +1677,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -1864,18 +1702,18 @@ namespace Seeker
             }
             catch (System.Exception err)
             {
-                MainActivity.LogFirebase("MainActivity_FocusChange" + err.Message);
+                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
         private static void SetPortViewText(TextView tv)
         {
-            tv.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.port) + ": " + SeekerState.ListenerPort.ToString();
+            tv.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.port) + ": " + PreferencesState.ListenerPort.ToString();
         }
 
         private static void SetSpeedTextView(TextView tv, bool isUpload)
         {
-            int speedKbs = isUpload ? (SeekerState.SpeedLimitUploadBytesSec / 1024) : (SeekerState.SpeedLimitDownloadBytesSec / 1024);
+            int speedKbs = isUpload ? (PreferencesState.SpeedLimitUploadBytesSec / 1024) : (PreferencesState.SpeedLimitDownloadBytesSec / 1024);
             tv.Text = speedKbs.ToString() + " kb/s";
         }
 
@@ -1883,7 +1721,7 @@ namespace Seeker
         {
             if (isUpload)
             {
-                if (SeekerState.SpeedLimitUploadIsPerTransfer)
+                if (PreferencesState.SpeedLimitUploadIsPerTransfer)
                 {
                     spinner.SetSelection(0);
                 }
@@ -1894,7 +1732,7 @@ namespace Seeker
             }
             else
             {
-                if (SeekerState.SpeedLimitDownloadIsPerTransfer)
+                if (PreferencesState.SpeedLimitDownloadIsPerTransfer)
                 {
                     spinner.SetSelection(0);
                 }
@@ -1916,7 +1754,7 @@ namespace Seeker
             //TODO
             Tuple<UPnpManager.ListeningIcon, string> info = UPnpManager.Instance.GetIconAndMessage();
             if (iv == null) return;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 iv.TooltipText = info.Item2; //api26+ otherwise crash...
             }
@@ -1943,19 +1781,19 @@ namespace Seeker
 
         private void ListeningMoreInfo_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.listening).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         public void MoreInfoForceFilesystem_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             var diag = builder.SetMessage(Resource.String.force_filesystem_message).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
             var origString = SeekerState.ActiveActivityRef.GetString(Resource.String.force_filesystem_message); //this is a literal CDATA string.
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 24)
+            if (OperatingSystem.IsAndroidVersionAtLeast(24))
             {
                 ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
             }
@@ -1969,7 +1807,7 @@ namespace Seeker
         private static bool HasManageStoragePermission(Context context)
         {
             bool hasExternalStoragePermissions = false;
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 30)
+            if (OperatingSystem.IsAndroidVersionAtLeast(30))
             {
                 hasExternalStoragePermissions = Android.OS.Environment.IsExternalStorageManager;
             }
@@ -1986,7 +1824,7 @@ namespace Seeker
 
             if (hasExternalStoragePermissions)
             {
-                Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.permission_already_successfully_granted), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.permission_already_successfully_granted), ToastLength.Long);
             }
             else
             {
@@ -2005,7 +1843,7 @@ namespace Seeker
 
         private void BrowseSelfButton_LongClick(object sender, View.LongClickEventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.BrowseWhich)
                 .SetPositiveButton(Resource.String.public_room, (object sender, DialogClickEventArgs e) => { BrowseSelf(true, false); OnCloseClick(sender, e); })
                 .SetNegativeButton(Resource.String.target_user_list, (object sender, DialogClickEventArgs e) => { BrowseSelf(false, true); OnCloseClick(sender, e); })
@@ -2015,19 +1853,19 @@ namespace Seeker
 
         private void BrowseSelf(bool forcePublic, bool forceFriend)
         {
-            if (!SeekerState.SharingOn || SeekerState.SharedFileCache == null || UploadDirectoryManager.UploadDirectories.Count == 0)
+            if (!PreferencesState.SharingOn || SeekerState.SharedFileCache == null || UploadDirectoryManager.UploadDirectories.Count == 0)
             {
-                Toast.MakeText(this, Resource.String.not_sharing, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.not_sharing), ToastLength.Short);
                 return;
             }
             if (SeekerState.IsParsing)
             {
-                Toast.MakeText(this, Resource.String.WaitForParsing, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.WaitForParsing), ToastLength.Short);
                 return;
             }
-            if (!SeekerState.SharedFileCache.SuccessfullyInitialized || SeekerState.SharedFileCache.GetBrowseResponseForUser(SeekerState.Username) == null)
+            if (!SeekerState.SharedFileCache.SuccessfullyInitialized || SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username) == null)
             {
-                Toast.MakeText(this, Resource.String.failed_to_parse_shares_post, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_parse_shares_post), ToastLength.Short);
                 return;
             }
             string errorMsgToToast = string.Empty;
@@ -2043,18 +1881,18 @@ namespace Seeker
             }
             else
             {
-                browseResponseToShow = SeekerState.SharedFileCache.GetBrowseResponseForUser(SeekerState.Username);
+                browseResponseToShow = SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username);
             }
 
-            TreeNode<Soulseek.Directory> tree = DownloadDialog.CreateTree(browseResponseToShow, false, null, null, SeekerState.Username, out errorMsgToToast);
+            TreeNode<Soulseek.Directory> tree = BrowseService.CreateTree(browseResponseToShow, false, null, null, PreferencesState.Username, out errorMsgToToast);
             if (errorMsgToToast != null && errorMsgToToast != string.Empty)
             {
-                Toast.MakeText(this, errorMsgToToast, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(errorMsgToToast, ToastLength.Short);
                 return;
             }
             if (tree != null)
             {
-                SeekerState.OnBrowseResponseReceived(SeekerState.SharedFileCache.GetBrowseResponseForUser(SeekerState.Username), tree, SeekerState.Username, null);
+                SeekerState.OnBrowseResponseReceived(SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username), tree, PreferencesState.Username, null);
             }
 
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
@@ -2094,32 +1932,27 @@ namespace Seeker
 
         private void StartServiceOnStartupCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.StartServiceOnStartup = e.IsChecked;
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutBoolean(KeyConsts.M_ServiceOnStartup, SeekerState.StartServiceOnStartup);
-                bool success = editor.Commit();
-            }
+            PreferencesState.StartServiceOnStartup = e.IsChecked;
+            PreferencesManager.SaveStartServiceOnStartup();
         }
 
         private void StartupServiceMoreInfo_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.keep_alive_service).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void AllowPrivateRoomInvitations_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (e.IsChecked == SeekerState.AllowPrivateRoomInvitations)
+            if (e.IsChecked == PreferencesState.AllowPrivateRoomInvitations)
             {
-                MainActivity.LogDebug("allow private: nothing to do");
+                Logger.Debug("allow private: nothing to do");
             }
             else
             {
                 string newstate = e.IsChecked ? this.GetString(Resource.String.allowed) : this.GetString(Resource.String.denied);
-                Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(this.GetString(Resource.String.setting_priv_invites), newstate), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.setting_priv_invites), newstate), ToastLength.Short);
                 ReconfigureOptionsAPI(e.IsChecked, null, null);
 
             }
@@ -2128,17 +1961,17 @@ namespace Seeker
         private void ReconfigureOptionsAPI(bool? allowPrivateInvites, bool? enableListener, int? newPort)
         {
             bool requiresConnection = allowPrivateInvites.HasValue;
-            if (!SeekerState.currentlyLoggedIn && requiresConnection) //note: you CAN in fact change listening and port without being logged in...
+            if (!PreferencesState.CurrentlyLoggedIn && requiresConnection) //note: you CAN in fact change listening and port without being logged in...
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_to_toggle_priv_invites, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_toggle_priv_invites), ToastLength.Short);
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
+            if (SessionService.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -2146,112 +1979,44 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
+                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
                 }));
             }
             else
             {
-                ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+                Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
             }
-        }
-
-        private static void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
-        {
-            //Toast.MakeText(this.Context, "Contacting user for directory list. Will appear in browse tab when complete", ToastLength.Short).Show();
-            Task<bool> reconfigTask = null;
-            try
-            {
-                Soulseek.SoulseekClientOptionsPatch patch = new Soulseek.SoulseekClientOptionsPatch(acceptPrivateRoomInvitations: allowPrivateInvites, enableListener: enableTheListener, listenPort: listenerPort);
-
-                reconfigTask = SeekerState.SoulseekClient.ReconfigureOptionsAsync(patch);
-            }
-            catch (Exception e)
-            {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                MainActivity.LogFirebase("reconfigure options: " + e.Message + e.StackTrace);
-                MainActivity.LogDebug("reconfigure options FAILED" + e.Message + e.StackTrace);
-                return;
-            }
-            Action<Task<bool>> continueWithAction = new Action<Task<bool>>((reconfigTask) =>
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    if (reconfigTask.IsFaulted)
-                    {
-                        MainActivity.LogDebug("reconfigure options FAILED");
-                        if (allowPrivateInvites.HasValue)
-                        {
-                            string enabledDisabled = allowPrivateInvites.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long).Show();
-                            if (SeekerState.ActiveActivityRef is SettingsActivity settingsActivity)
-                            {
-                                //set the check to false
-                                settingsActivity.allowPrivateRoomInvitations.Checked = SeekerState.AllowPrivateRoomInvitations; //old value
-                            }
-                        }
-
-                        if (enableTheListener.HasValue)
-                        {
-                            string enabledDisabled = enableTheListener.Value ? SeekerState.ActiveActivityRef.GetString(Resource.String.allowed) : SeekerState.ActiveActivityRef.GetString(Resource.String.denied);
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener), enabledDisabled), ToastLength.Long).Show();
-                        }
-
-                        if (listenerPort.HasValue)
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long).Show();
-                        }
-
-
-
-                    }
-                    else
-                    {
-                        if (allowPrivateInvites.HasValue)
-                        {
-                            MainActivity.LogDebug("reconfigure options SUCCESS, restart required? " + reconfigTask.Result);
-                            SeekerState.AllowPrivateRoomInvitations = allowPrivateInvites.Value;
-                            //set shared prefs...
-                            lock (MainActivity.SHARED_PREF_LOCK)
-                            {
-                                var editor = SeekerState.ActiveActivityRef.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                                editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, allowPrivateInvites.Value);
-                                bool success = editor.Commit();
-                            }
-                        }
-                    }
-                });
-            });
-            reconfigTask.ContinueWith(continueWithAction);
         }
 
         private void MemoryFileDownloadSwitchIcon_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.memory_file_backed).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
 
         private void MemoryFileDownloadSwitchCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.MemoryBackedDownload = !e.IsChecked;
+            PreferencesState.MemoryBackedDownload = !e.IsChecked;
             SetIncompleteFolderView();
         }
 
         private void ShowDownloadNotification_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.DisableDownloadToastNotification = !e.IsChecked;
+            PreferencesState.DisableDownloadToastNotification = !e.IsChecked;
         }
 
         private void FreeUploadSlotsOnly_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.FreeUploadSlotsOnly = e.IsChecked;
+            PreferencesState.FreeUploadSlotsOnly = e.IsChecked;
         }
 
         private void MoreInfoButton_Click(object sender, EventArgs e)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             var diag = builder.SetMessage(Resource.String.sharing_dialog).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
         }
@@ -2263,7 +2028,7 @@ namespace Seeker
 
         private void UpdateShareImageView()
         {
-            Tuple<SharingIcons, string> info = MainActivity.GetSharingMessageAndIcon(out bool isParsing);
+            Tuple<SharingIcons, string> info = SharingService.GetSharingMessageAndIcon(out bool isParsing);
             ImageView imageView = this.FindViewById<ImageView>(Resource.Id.sharedStatus);
             ProgressBar progressBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
             if (imageView == null || progressBar == null) return;
@@ -2280,7 +2045,7 @@ namespace Seeker
                     toolTip = toolTip + String.Format($" ({SeekerApplication.GetString(Resource.String.XFilesParsed)})", numParsed);
                 }
             }
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 26)
+            if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 imageView.TooltipText = toolTip; //api26+ otherwise crash...
                 progressBar.TooltipText = toolTip;
@@ -2336,7 +2101,7 @@ namespace Seeker
             return true;
         }
 
-        private void RemoveUploadDirFolder(UploadDirectoryInfo uploadDirInfo)
+        private void RemoveUploadDirFolder(UploadDirectoryEntry uploadDirEntry)
         {
             if (UploadDirectoryManager.UploadDirectories.Count == 1)
             {
@@ -2344,7 +2109,7 @@ namespace Seeker
             }
             else
             {
-                UploadDirectoryManager.UploadDirectories.Remove(uploadDirInfo);
+                UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
                 this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
                 SetSharedFolderView();
                 Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
@@ -2354,12 +2119,12 @@ namespace Seeker
 
         private void ShareCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.SharingOn = e.IsChecked;
-            MainActivity.SetUnsetSharingBasedOnConditions(true);
-            if (MainActivity.MeetsSharingConditions() && !SeekerState.IsParsing && !MainActivity.IsSharingSetUpSuccessfully())
+            PreferencesState.SharingOn = e.IsChecked;
+            SharingService.SetUnsetSharingBasedOnConditions(true);
+            if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
             {
                 //try to set up sharing...
-                MainActivity.SetUpSharing(UpdateShareImageView);
+                SharingService.SetUpSharing(UpdateShareImageView);
             }
             UpdateShareImageView();
             UpdateSharingViewState();
@@ -2371,7 +2136,7 @@ namespace Seeker
         {
             //this isnt winforms where disabling parent, disables all children..
 
-            if (SeekerState.SharingOn)
+            if (PreferencesState.SharingOn)
             {
                 sharingSubLayout1.Enabled = true;
                 sharingSubLayout1.Alpha = 1.0f;
@@ -2399,7 +2164,7 @@ namespace Seeker
 
         private void UpdateListeningViewState()
         {
-            if (SeekerState.ListenerEnabled)
+            if (PreferencesState.ListenerEnabled)
             {
                 listeningSubLayout2.Enabled = true;
                 listeningSubLayout3.Enabled = true;
@@ -2423,7 +2188,7 @@ namespace Seeker
 
         private void UpdateConcurrentDownloadLimitsState()
         {
-            if (Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers)
+            if (PreferencesState.LimitSimultaneousDownloads)
             {
                 concurrentDlSublayout.Enabled = true;
                 concurrentDlSublayout.Alpha = 1.0f;
@@ -2441,7 +2206,7 @@ namespace Seeker
 
         private void UpdateSpeedLimitsState()
         {
-            if (SeekerState.SpeedLimitDownloadOn)
+            if (PreferencesState.SpeedLimitDownloadOn)
             {
                 limitDlSpeedSubLayout.Enabled = true;
                 limitDlSpeedSubLayout.Alpha = 1.0f;
@@ -2464,7 +2229,7 @@ namespace Seeker
                 dlLimitPerTransfer.Enabled = false;
             }
 
-            if (SeekerState.SpeedLimitUploadOn)
+            if (PreferencesState.SpeedLimitUploadOn)
             {
                 limitUlSpeedSubLayout.Enabled = true;
                 limitUlSpeedSubLayout.Alpha = 1.0f;
@@ -2495,18 +2260,13 @@ namespace Seeker
         }
 
 
-        private void DayVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void DayVariant_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
-            var oldVarient = SeekerState.DayModeVarient;
-            SeekerState.DayModeVarient = (ThemeHelper.DayThemeType)(e.Position);
-            if (oldVarient != SeekerState.DayModeVarient)
+            var oldVariant = PreferencesState.DayModeVariant;
+            PreferencesState.DayModeVariant = (DayThemeType)(e.Position);
+            if (oldVariant != PreferencesState.DayModeVariant)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                    editor.PutInt(KeyConsts.M_DayVarient, (int)(SeekerState.DayModeVarient));
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveDayModeVariant();
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
@@ -2516,29 +2276,24 @@ namespace Seeker
             }
         }
 
-        private void NightVarient_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void NightVariant_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
-            var oldVarient = SeekerState.NightModeVarient;
+            var oldVariant = PreferencesState.NightModeVariant;
             switch (e.Position)
             {
                 case 3:
-                    SeekerState.NightModeVarient = ThemeHelper.NightThemeType.AmoledClassicPurple;
+                    PreferencesState.NightModeVariant = NightThemeType.AmoledClassicPurple;
                     break;
                 case 4:
-                    SeekerState.NightModeVarient = ThemeHelper.NightThemeType.AmoledGrey;
+                    PreferencesState.NightModeVariant = NightThemeType.AmoledGrey;
                     break;
                 default:
-                    SeekerState.NightModeVarient = (ThemeHelper.NightThemeType)(e.Position);
+                    PreferencesState.NightModeVariant = (NightThemeType)(e.Position);
                     break;
             }
-            if (oldVarient != SeekerState.NightModeVarient)
+            if (oldVariant != PreferencesState.NightModeVariant)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                    editor.PutInt(KeyConsts.M_NightVarient, (int)(SeekerState.NightModeVarient));
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveNightModeVariant();
                 SeekerApplication.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
@@ -2550,28 +2305,20 @@ namespace Seeker
 
 
 
-        private void DayNightMode_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
+        private void DayNightMode_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
 
-            MainActivity.LogDebug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + SeekerState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
+            Logger.Debug("DayNightMode_ItemSelected: Pos:" + e.Position + "state: " + PreferencesState.DayNightMode + "actual: " + AppCompatDelegate.DefaultNightMode);
 
             if (e.Position == 0)
             {
-                SeekerState.DayNightMode = -1;
+                PreferencesState.DayNightMode = -1;
             }
             else
             {
-                SeekerState.DayNightMode = e.Position;
+                PreferencesState.DayNightMode = e.Position;
             }
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = this.GetSharedPreferences("SoulSeekPrefs", 0).Edit();
-                editor.PutInt(KeyConsts.M_DayNightMode, SeekerState.DayNightMode);
-                bool success = editor.Commit();
-                int x = this.GetSharedPreferences("SoulSeekPrefs", 0).GetInt(KeyConsts.M_DayNightMode, -1);
-                MainActivity.LogDebug("was commit successful: " + success);
-                MainActivity.LogDebug("after writing and immediately reading: " + x);
-            }
+            PreferencesManager.SaveDayNightMode();
             //auto = 0, light = 1, dark = 2.  //NO we do NOT want to do AUTO, that is follow time.  we want to do FOLLOW SYSTEM i.e. -1.
             switch (e.Position)
             {
@@ -2615,7 +2362,7 @@ namespace Seeker
 
         private void RememberSearchHistory_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.RememberSearchHistory = e.IsChecked;
+            PreferencesState.RememberSearchHistory = e.IsChecked;
         }
 
         private void ClearHistory_Click(object sender, EventArgs e)
@@ -2625,12 +2372,12 @@ namespace Seeker
 
         private void AutoClearCompleteUploads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.AutoClearCompleteUploads = e.IsChecked;
+            PreferencesState.AutoClearCompleteUploads = e.IsChecked;
         }
 
         private void AutoClearComplete_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            SeekerState.AutoClearCompleteDownloads = e.IsChecked;
+            PreferencesState.AutoClearCompleteDownloads = e.IsChecked;
         }
 
         private void SetSpinnerPosition(Spinner s)
@@ -2638,7 +2385,7 @@ namespace Seeker
             int selectionIndex = 3;
             foreach (var pair in positionNumberPairs)
             {
-                if (pair.Item2 == SeekerState.NumberSearchResults)
+                if (pair.Item2 == PreferencesState.NumberSearchResults)
                 {
                     selectionIndex = pair.Item1;
                 }
@@ -2646,53 +2393,89 @@ namespace Seeker
             s.SetSelection(selectionIndex);
         }
 
-        private void SetSpinnerPositionDayNight(Spinner s)
+        private void SetSpinnerPositionDayNight(AutoCompleteTextView s, String[] options)
         {
-            s.SetSelection(Math.Max(SeekerState.DayNightMode, 0)); //-1 -> 0
+            int pos = Math.Max(PreferencesState.DayNightMode, 0); //-1 -> 0
+            s.SetText(options[pos], false);
         }
-        private void SetSpinnerPositionDayVarient(Spinner s)
+        private void SetSpinnerPositionDayVariant(AutoCompleteTextView s, String[] options)
         {
-            s.SetSelection((int)(SeekerState.DayModeVarient));
+            s.SetText(options[(int)(PreferencesState.DayModeVariant)], false);
         }
 
-        private void SetSpinnerPositionLangauge(Spinner s)
+        private void SetSpinnerPositionLangauge(AutoCompleteTextView s, String[] options)
         {
+            int pos = 0;
             switch (SeekerApplication.GetLegacyLanguageString())
             {
-                case SeekerState.FieldLangAuto:
-                    s.SetSelection(0);
+                case PreferencesState.FieldLangAuto:
+                    pos = 0;
                     break;
-                case SeekerState.FieldLangEn:
-                    s.SetSelection(1);
+                case PreferencesState.FieldLangAr:
+                    pos = 1;
                     break;
-                case SeekerState.FieldLangPtBr:
-                    s.SetSelection(2);
+                case PreferencesState.FieldLangCa:
+                    pos = 2;
                     break;
-                case SeekerState.FieldLangFr:
-                    s.SetSelection(3);
+                case PreferencesState.FieldLangCs:
+                    pos = 3;
                     break;
-                case SeekerState.FieldLangRu:
-                    s.SetSelection(4);
+                case PreferencesState.FieldLangDa:
+                    pos = 4;
                     break;
-                case SeekerState.FieldLangEs:
-                    s.SetSelection(5);
+                case PreferencesState.FieldLangDe:
+                    pos = 5;
                     break;
-                case SeekerState.FieldLangUk:
-                    s.SetSelection(6);
+                case PreferencesState.FieldLangEn:
+                    pos = 6;
                     break;
-                case SeekerState.FieldLangNl:
-                    s.SetSelection(7);
+                case PreferencesState.FieldLangEs:
+                    pos = 7;
                     break;
-                case SeekerState.FieldLangCs:
-                    s.SetSelection(8);
+                case PreferencesState.FieldLangFr:
+                    pos = 8;
                     break;
-                case SeekerState.FieldLangIt:
-                    s.SetSelection(9);
+                case PreferencesState.FieldLangIt:
+                    pos = 9;
+                    break;
+                case PreferencesState.FieldLangHu:
+                    pos = 10;
+                    break;
+                case PreferencesState.FieldLangNl:
+                    pos = 11;
+                    break;
+                case PreferencesState.FieldLangNo:
+                    pos = 12;
+                    break;
+                case PreferencesState.FieldLangPl:
+                    pos = 13;
+                    break;
+                case PreferencesState.FieldLangPtBr:
+                    pos = 14;
+                    break;
+                case PreferencesState.FieldLangPtPt:
+                    pos = 15;
+                    break;
+                case PreferencesState.FieldLangRu:
+                    pos = 16;
+                    break;
+                case PreferencesState.FieldLangSr:
+                    pos = 17;
+                    break;
+                case PreferencesState.FieldLangUk:
+                    pos = 18;
+                    break;
+                case PreferencesState.FieldLangZhCn:
+                    pos = 19;
+                    break;
+                case PreferencesState.FieldLangJa:
+                    pos = 20;
                     break;
                 default:
-                    s.SetSelection(0);
+                    pos = 0;
                     break;
             }
+            s.SetText(options[pos], false);
         }
 
         private string GetLanguageStringFromPosition(int pos)
@@ -2700,45 +2483,68 @@ namespace Seeker
             switch (pos)
             {
                 case 0:
-                    return SeekerState.FieldLangAuto;
+                    return PreferencesState.FieldLangAuto;
                 case 1:
-                    return SeekerState.FieldLangEn;
+                    return PreferencesState.FieldLangAr;
                 case 2:
-                    return SeekerState.FieldLangPtBr;
+                    return PreferencesState.FieldLangCa;
                 case 3:
-                    return SeekerState.FieldLangFr;
+                    return PreferencesState.FieldLangCs;
                 case 4:
-                    return SeekerState.FieldLangRu;
+                    return PreferencesState.FieldLangDa;
                 case 5:
-                    return SeekerState.FieldLangEs;
+                    return PreferencesState.FieldLangDe;
                 case 6:
-                    return SeekerState.FieldLangUk;
+                    return PreferencesState.FieldLangEn;
                 case 7:
-                    return SeekerState.FieldLangNl;
+                    return PreferencesState.FieldLangEs;
                 case 8:
-                    return SeekerState.FieldLangCs;
+                    return PreferencesState.FieldLangFr;
                 case 9:
-                    return SeekerState.FieldLangIt;
+                    return PreferencesState.FieldLangIt;
+                case 10:
+                    return PreferencesState.FieldLangHu;
+                case 11:
+                    return PreferencesState.FieldLangNl;
+                case 12:
+                    return PreferencesState.FieldLangNo;
+                case 13:
+                    return PreferencesState.FieldLangPl;
+                case 14:
+                    return PreferencesState.FieldLangPtBr;
+                case 15:
+                    return PreferencesState.FieldLangPtPt;
+                case 16:
+                    return PreferencesState.FieldLangRu;
+                case 17:
+                    return PreferencesState.FieldLangSr;
+                case 18:
+                    return PreferencesState.FieldLangUk;
+                case 19:
+                    return PreferencesState.FieldLangZhCn;
+                case 20:
+                    return PreferencesState.FieldLangJa;
                 default:
-                    return SeekerState.FieldLangAuto;
+                    return PreferencesState.FieldLangAuto;
             }
         }
 
-        private void SetSpinnerPositionNightVarient(Spinner s)
+        private void SetSpinnerPositionNightVariant(AutoCompleteTextView s, String[] options)
         {
-            switch (SeekerState.NightModeVarient)
+            int pos;
+            switch (PreferencesState.NightModeVariant)
             {
-                case ThemeHelper.NightThemeType.AmoledClassicPurple:
-                    s.SetSelection(3);
+                case NightThemeType.AmoledClassicPurple:
+                    pos = 3;
                     break;
-                case ThemeHelper.NightThemeType.AmoledGrey:
-                    s.SetSelection(4);
+                case NightThemeType.AmoledGrey:
+                    pos = 4;
                     break;
                 default:
-                    s.SetSelection((int)(SeekerState.NightModeVarient));
+                    pos = (int)(PreferencesState.NightModeVariant);
                     break;
             }
-
+            s.SetText(options[pos], false);
         }
         private void CloseButton_Click(object sender, EventArgs e)
         {
@@ -2747,47 +2553,48 @@ namespace Seeker
 
         private void RestoreDefaults_Click(object sender, EventArgs e)
         {
-            SeekerState.NumberSearchResults = MainActivity.DEFAULT_SEARCH_RESULTS;
-            SeekerState.AutoClearCompleteDownloads = false;
-            SeekerState.AutoClearCompleteUploads = false;
-            SeekerState.RememberSearchHistory = true;
-            SeekerState.ShowRecentUsers = true;
-            SeekerState.SharingOn = false;
-            SeekerState.FreeUploadSlotsOnly = true;
-            SeekerState.DisableDownloadToastNotification = true;
-            SeekerState.MemoryBackedDownload = false;
-            SeekerState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
-            SeekerState.HideLockedResultsInBrowse = true;
-            SeekerState.HideLockedResultsInSearch = true;
-            (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = SeekerState.AutoClearCompleteDownloads;
-            (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = SeekerState.AutoClearCompleteUploads;
-            (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = SeekerState.RememberSearchHistory;
-            (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = SeekerState.ShowRecentUsers;
-            (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = SeekerState.SharingOn;
-            (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = SeekerState.FreeUploadSlotsOnly;
-            (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !SeekerState.HideLockedResultsInBrowse;
-            (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !SeekerState.HideLockedResultsInSearch;
-            (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = SeekerState.DisableDownloadToastNotification;
-            (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !SeekerState.MemoryBackedDownload;
+            PreferencesState.NumberSearchResults = Constants.DefaultSearchResults;
+            PreferencesState.AutoClearCompleteDownloads = false;
+            PreferencesState.AutoClearCompleteUploads = false;
+            PreferencesState.RememberSearchHistory = true;
+            PreferencesState.ShowRecentUsers = true;
+            PreferencesState.SharingOn = false;
+            PreferencesState.FreeUploadSlotsOnly = true;
+            PreferencesState.DisableDownloadToastNotification = true;
+            PreferencesState.MemoryBackedDownload = false;
+            PreferencesState.DayNightMode = AppCompatDelegate.ModeNightFollowSystem;
+            PreferencesState.HideLockedResultsInBrowse = true;
+            PreferencesState.HideLockedResultsInSearch = true;
+            (FindViewById<CheckBox>(Resource.Id.autoClearComplete) as CheckBox).Checked = PreferencesState.AutoClearCompleteDownloads;
+            (FindViewById<CheckBox>(Resource.Id.autoClearCompleteUploads) as CheckBox).Checked = PreferencesState.AutoClearCompleteUploads;
+            (FindViewById<CheckBox>(Resource.Id.searchHistoryRemember) as CheckBox).Checked = PreferencesState.RememberSearchHistory;
+            (FindViewById<CheckBox>(Resource.Id.rememberRecentUsers) as CheckBox).Checked = PreferencesState.ShowRecentUsers;
+            (FindViewById<CheckBox>(Resource.Id.enableSharing) as CheckBox).Checked = PreferencesState.SharingOn;
+            (FindViewById<CheckBox>(Resource.Id.freeUploadSlots) as CheckBox).Checked = PreferencesState.FreeUploadSlotsOnly;
+            (FindViewById<CheckBox>(Resource.Id.showLockedInBrowseResponse) as CheckBox).Checked = !PreferencesState.HideLockedResultsInBrowse;
+            (FindViewById<CheckBox>(Resource.Id.showLockedInSearch) as CheckBox).Checked = !PreferencesState.HideLockedResultsInSearch;
+            (FindViewById<CheckBox>(Resource.Id.showToastNotificationOnDownload) as CheckBox).Checked = PreferencesState.DisableDownloadToastNotification;
+            (FindViewById<CheckBox>(Resource.Id.memoryFileDownloadSwitchCheckBox) as CheckBox).Checked = !PreferencesState.MemoryBackedDownload;
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
             SetSpinnerPosition(searchNumSpinner);
-            Spinner daynightSpinner = FindViewById<Spinner>(Resource.Id.nightModeSpinner);
-            SetSpinnerPositionDayNight(daynightSpinner);
+            AutoCompleteTextView daynightSpinner = FindViewById<AutoCompleteTextView>(Resource.Id.nightModeSpinner);
+            String[] dayNightResetOptions = new String[] { this.GetString(Resource.String.follow_system), this.GetString(Resource.String.always_light), this.GetString(Resource.String.always_dark) };
+            SetSpinnerPositionDayNight(daynightSpinner, dayNightResetOptions);
         }
 
         private void SearchNumSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            SeekerState.NumberSearchResults = positionNumberPairs[e.Position].Item2;
+            PreferencesState.NumberSearchResults = positionNumberPairs[e.Position].Item2;
         }
 
         private void ChangeDownloadDirectory(object sender, EventArgs e)
         {
-            ShowDirSettings(SeekerState.SaveDataDirectoryUri, DirectoryType.Download);
+            ShowDirSettings(PreferencesState.SaveDataDirectoryUri, DirectoryType.Download);
         }
 
         private bool needsMediaStorePermission()
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
                 return AndroidX.Core.Content.ContextCompat.CheckSelfPermission(this, Android.Manifest.Permission.ReadMediaAudio) == Android.Content.PM.Permission.Denied;
             }
@@ -2799,7 +2606,7 @@ namespace Seeker
 
         private void requestMediaStorePermission()
         {
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 33)
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
                 AndroidX.Core.App.ActivityCompat.RequestPermissions(this, new string[] { Android.Manifest.Permission.ReadMediaAudio }, READ_EXTERNAL_FOR_MEDIA_STORE);
             }
@@ -2831,7 +2638,7 @@ namespace Seeker
 
         private void ChangeIncompleteDirectory(object sender, EventArgs e)
         {
-            ShowDirSettings(SeekerState.ManualIncompleteDataDirectoryUri, DirectoryType.Incomplete);
+            ShowDirSettings(PreferencesState.ManualIncompleteDataDirectoryUri, DirectoryType.Incomplete);
         }
 
         private void UseInternalFilePicker(int requestCode)
@@ -2851,20 +2658,20 @@ namespace Seeker
                         DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result)); //from tree uri not added til 21 also.  from single uri returns a f.Exists=false file.
                         if (f == null)
                         {
-                            MainActivity.LogFirebase("api<21 f is null");
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
+                            Logger.Firebase("api<21 f is null");
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_reading_dir), ToastLength.Long);
                             return;
                         }
                         else if (!f.Exists())
                         {
-                            MainActivity.LogFirebase("api<21 f does not exist");
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_reading_dir, ToastLength.Long).Show(); });
+                            Logger.Firebase("api<21 f does not exist");
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_reading_dir), ToastLength.Long);
                             return;
                         }
                         else if (!f.IsDirectory)
                         {
-                            MainActivity.LogFirebase("api<21 NOT A DIRECTORY");
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.error_not_a_dir, ToastLength.Long).Show(); });
+                            Logger.Firebase("api<21 NOT A DIRECTORY");
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_not_a_dir), ToastLength.Long);
                             return;
                         }
 
@@ -2925,13 +2732,13 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
                     else
                     {
-                        MainActivity.LogFirebase("showDirSettings: " + e.Message + e.StackTrace);
+                        Logger.Firebase("showDirSettings: " + e.Message + e.StackTrace);
                         throw e;
                     }
                 }
@@ -2971,13 +2778,13 @@ namespace Seeker
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains(CommonHelpers.NoDocumentOpenTreeToHandle))
+                    if (e.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                     {
                         FallbackFileSelectionEntry(requestCode);
                     }
                     else
                     {
-                        MainActivity.LogFirebase("showDirSettings: " + e.Message + e.StackTrace);
+                        Logger.Firebase("showDirSettings: " + e.Message + e.StackTrace);
                         throw e;
                     }
                 }
@@ -3039,11 +2846,11 @@ namespace Seeker
                 //show error message...
                 if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
                 {
-                    MainActivity.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
+                    UiHelpers.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
                 }
                 else
                 {
-                    Toast.MakeText(this, SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.error_no_file_manager_dir), ToastLength.Long);
                 }
             }
         }
@@ -3054,8 +2861,8 @@ namespace Seeker
         {
             var x = uri;
             //SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-            SeekerState.SaveDataDirectoryUri = uri.ToString();
-            SeekerState.SaveDataDirectoryUriIsFromTree = !fromLegacyPicker;
+            PreferencesState.SaveDataDirectoryUri = uri.ToString();
+            PreferencesState.SaveDataDirectoryUriIsFromTree = !fromLegacyPicker;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
             DocumentFile docFile = null;
             if (fromLegacyPicker)
@@ -3070,21 +2877,21 @@ namespace Seeker
             this.RunOnUiThread(new Action(() =>
             {
                 SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long);
             }));
         }
 
         public static bool UseTempDirectory()
         {
-            return !UseIncompleteManualFolder() && !SeekerState.CreateCompleteAndIncompleteFolders;
+            return !UseIncompleteManualFolder() && !PreferencesState.CreateCompleteAndIncompleteFolders;
         }
 
         private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
             var x = uri;
             //SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-            SeekerState.ManualIncompleteDataDirectoryUri = uri.ToString();
-            SeekerState.ManualIncompleteDataDirectoryUriIsFromTree = !fromLegacyPicker;
+            PreferencesState.ManualIncompleteDataDirectoryUri = uri.ToString();
+            PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = !fromLegacyPicker;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
             DocumentFile docFile = null;
             if (fromLegacyPicker)
@@ -3099,13 +2906,13 @@ namespace Seeker
             this.RunOnUiThread(new Action(() =>
             {
                 SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long).Show();
+                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long);
             }));
         }
 
-        public void ShowDialogForUploadDir(UploadDirectoryInfo uploadInfo)
+        public void ShowDialogForUploadDir(UploadDirectoryEntry uploadInfo)
         {
-            if (uploadInfo.HasError())
+            if (uploadInfo.Info.HasError())
             {
                 ShowUploadDirectoryErrorDialog(uploadInfo);
             }
@@ -3114,12 +2921,12 @@ namespace Seeker
                 ShowUploadDirectoryOptionsDialog(uploadInfo);
             }
         }
-        private static UploadDirectoryInfo UploadDirToReplaceOnReselect = null;
-        public void ShowUploadDirectoryErrorDialog(UploadDirectoryInfo uploadInfo)
+        private static UploadDirectoryEntry UploadDirToReplaceOnReselect = null;
+        public void ShowUploadDirectoryErrorDialog(UploadDirectoryEntry uploadInfo)
         {
-            var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             builder.SetTitle(Resource.String.FolderError);
-            string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.ErrorState) + System.Environment.NewLine;
+            string diagMessage = SeekerApplication.GetString(Resource.String.ErrorForFolder) + uploadInfo.GetLastPathSegment() + System.Environment.NewLine + UploadDirectoryManager.GetErrorString(uploadInfo.Info.ErrorState) + System.Environment.NewLine;
             var diag = builder.SetMessage(diagMessage)
                 .SetNegativeButton(Resource.String.RemoveFolder, (object sender, DialogClickEventArgs e) =>
                 { //puts it slightly right
@@ -3129,7 +2936,7 @@ namespace Seeker
                 .SetPositiveButton(Resource.String.Reselect, (object sender, DialogClickEventArgs e) =>
                 { //puts it rightmost
                     UploadDirToReplaceOnReselect = uploadInfo;
-                    this.ShowDirSettings(uploadInfo.UploadDataDirectoryUri, DirectoryType.Upload, true);
+                    this.ShowDirSettings(uploadInfo.Info.UploadDataDirectoryUri, DirectoryType.Upload, true);
                     this.OnCloseClick(sender, e);
                 })
                 .SetNeutralButton(Resource.String.cancel, OnCloseClick) //puts it leftmost
@@ -3137,41 +2944,32 @@ namespace Seeker
             diag.Show();
         }
 
-        public void ShowUploadDirectoryOptionsDialog(UploadDirectoryInfo uploadDirInfo)
+        public void ShowUploadDirectoryOptionsDialog(UploadDirectoryEntry uploadDirEntry)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme); //used to be our cached main activity ref...
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this); //used to be our cached main activity ref...
             builder.SetTitle(Resource.String.UploadFolderOptions);
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.upload_folder_options, this.FindViewById<ViewGroup>(Android.Resource.Id.Content) as ViewGroup, false);
             EditText custromFolderNameEditText = viewInflated.FindViewById<EditText>(Resource.Id.customFolderNameEditText);
+            var folderNameInputLayout = (View)custromFolderNameEditText.Parent.Parent;
             CheckBox overrideFolderName = viewInflated.FindViewById<CheckBox>(Resource.Id.overrideFolderName);
             CheckBox hiddenCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.hiddenUserlistOnly);
             CheckBox lockedCheck = viewInflated.FindViewById<CheckBox>(Resource.Id.lockedUserlistOnly);
             overrideFolderName.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) =>
             {
-                if (e.IsChecked)
-                {
-                    custromFolderNameEditText.Enabled = true;
-                    custromFolderNameEditText.Alpha = 1.0f;
-                }
-                else
-                {
-                    custromFolderNameEditText.Enabled = false;
-                    custromFolderNameEditText.Alpha = 0.5f;
-                }
-
-
+                folderNameInputLayout.Enabled = e.IsChecked;
+                folderNameInputLayout.Alpha = e.IsChecked ? 1.0f : 0.5f;
             };
-            if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+            if (!string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride))
             {
-                custromFolderNameEditText.Text = uploadDirInfo.DisplayNameOverride;
+                custromFolderNameEditText.Text = uploadDirEntry.Info.DisplayNameOverride;
                 overrideFolderName.Checked = true;
             }
             else
             {
                 overrideFolderName.Checked = false;
             }
-            hiddenCheck.Checked = uploadDirInfo.IsHidden;
-            lockedCheck.Checked = uploadDirInfo.IsLocked;
+            hiddenCheck.Checked = uploadDirEntry.Info.IsHidden;
+            lockedCheck.Checked = uploadDirEntry.Info.IsLocked;
 
             builder.SetView(viewInflated);
 
@@ -3182,41 +2980,41 @@ namespace Seeker
 
                 //any changed?
 
-                bool hiddenChanged = uploadDirInfo.IsHidden != hiddenCheck.Checked;
-                bool lockedChanged = uploadDirInfo.IsLocked != lockedCheck.Checked;
+                bool hiddenChanged = uploadDirEntry.Info.IsHidden != hiddenCheck.Checked;
+                bool lockedChanged = uploadDirEntry.Info.IsLocked != lockedCheck.Checked;
                 bool overrideNameChanged =
-                    (string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
-                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride)) ||
-                    (overrideFolderName.Checked && uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text);
+                    (string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride) && overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text)) ||
+                    ((!overrideFolderName.Checked || string.IsNullOrEmpty(custromFolderNameEditText.Text)) && !string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride)) ||
+                    (overrideFolderName.Checked && uploadDirEntry.Info.DisplayNameOverride != custromFolderNameEditText.Text);
 
-                uploadDirInfo.IsHidden = hiddenCheck.Checked;
-                uploadDirInfo.IsLocked = lockedCheck.Checked;
-                string displayNameOld = uploadDirInfo.DisplayNameOverride;
+                uploadDirEntry.Info.IsHidden = hiddenCheck.Checked;
+                uploadDirEntry.Info.IsLocked = lockedCheck.Checked;
+                string displayNameOld = uploadDirEntry.Info.DisplayNameOverride;
 
                 if (overrideFolderName.Checked && !string.IsNullOrEmpty(custromFolderNameEditText.Text))
                 {
-                    if (uploadDirInfo.DisplayNameOverride != custromFolderNameEditText.Text)
+                    if (uploadDirEntry.Info.DisplayNameOverride != custromFolderNameEditText.Text)
                     {
                         //make sure that we CAN change it.
-                        uploadDirInfo.DisplayNameOverride = custromFolderNameEditText.Text;
-                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        uploadDirEntry.Info.DisplayNameOverride = custromFolderNameEditText.Text;
+                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirEntry, false))
                         {
-                            uploadDirInfo.DisplayNameOverride = displayNameOld;
-                            Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
+                            uploadDirEntry.Info.DisplayNameOverride = displayNameOld;
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.CannotChangeNameNotUnique), ToastLength.Long);
                             overrideNameChanged = false; //we prevented it
                         }
                     }
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(uploadDirInfo.DisplayNameOverride))
+                    if (!string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride))
                     {
                         //make sure that we CAN change it.
-                        uploadDirInfo.DisplayNameOverride = null;
-                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirInfo, false))
+                        uploadDirEntry.Info.DisplayNameOverride = null;
+                        if (!UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(uploadDirEntry, false))
                         {
-                            uploadDirInfo.DisplayNameOverride = displayNameOld;
-                            Toast.MakeText(this, Resource.String.CannotChangeNameNotUnique, ToastLength.Long).Show();
+                            uploadDirEntry.Info.DisplayNameOverride = displayNameOld;
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.CannotChangeNameNotUnique), ToastLength.Long);
                             overrideNameChanged = false; //we prevented it
                         }
                     }
@@ -3225,7 +3023,7 @@ namespace Seeker
                 this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
                 if (hiddenChanged || lockedChanged || overrideNameChanged)
                 {
-                    MainActivity.LogDebug("things changed re: folder options..");
+                    Logger.Debug("things changed re: folder options..");
                     Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
                 }
 
@@ -3255,57 +3053,45 @@ namespace Seeker
             {
                 if (SeekerState.IsParsing)
                 {
-                    this.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(this, Resource.String.AlreadyParsing, ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.AlreadyParsing), ToastLength.Long);
                     return;
                 }
                 if (UploadDirectoryManager.UploadDirectories.Count == 0)
                 {
-                    this.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(this, Resource.String.DirectoryNotSet, ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.DirectoryNotSet), ToastLength.Long);
                     return;
                 }
             }
 
             if (rescanClicked || newlyAddedUriIfApplicable != null)
             {
-                this.RunOnUiThread(new Action(() =>
-                {
-                    Toast.MakeText(this, Resource.String.parsing_files_wait, ToastLength.Long).Show();
-                }));
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.parsing_files_wait), ToastLength.Long);
             }
 
 
 
-            UploadDirectoryInfo newlyAddedDirectory = null;
+            UploadDirectoryEntry newlyAddedDirectory = null;
             if (newlyAddedUriIfApplicable != null)
             {
                 //RESELECT CASE
                 if (reselectCase)
                 {
-                    newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, UploadDirToReplaceOnReselect.IsLocked, UploadDirToReplaceOnReselect.IsHidden, UploadDirToReplaceOnReselect.DisplayNameOverride);
+                    newlyAddedDirectory = new UploadDirectoryEntry(new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, UploadDirToReplaceOnReselect.Info.IsLocked, UploadDirToReplaceOnReselect.Info.IsHidden, UploadDirToReplaceOnReselect.Info.DisplayNameOverride));
                     newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
                     UploadDirectoryManager.UploadDirectories.Remove(UploadDirToReplaceOnReselect);
                 }
                 else
                 {
-                    newlyAddedDirectory = new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null);
+                    newlyAddedDirectory = new UploadDirectoryEntry(new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, false, false, null));
                     newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
                 }
 
 
 
-                if (UploadDirectoryManager.UploadDirectories.Where(up => up.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
+                if (UploadDirectoryManager.UploadDirectories.Where(up => up.Info.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
                 {
                     //error!!
-                    this.RunOnUiThread(new Action(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.ErrorAlreadyAdded, ToastLength.Long).Show();
-                    }));
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.ErrorAlreadyAdded), ToastLength.Long);
                     return;
                     //throw new Exception("Directory is already added!");
                 }
@@ -3316,7 +3102,7 @@ namespace Seeker
             UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
             if (UploadDirectoryManager.AreAllFailed())
             {
-                throw new MainActivity.DirectoryAccessFailure("All Failed");
+                throw new DirectoryAccessFailure("All Failed");
             }
 
             if (newlyAddedDirectory != null)
@@ -3324,7 +3110,7 @@ namespace Seeker
                 bool isUnqiue = UploadDirectoryManager.DoesNewDirectoryHaveUniqueRootName(newlyAddedDirectory, true);
                 if (!isUnqiue)
                 {
-                    MainActivity.LogDebug("Root name was not unique. Updated it to be unique.");
+                    Logger.Debug("Root name was not unique. Updated it to be unique.");
                 }
                 UploadDirectoryChanged?.Invoke(null, new EventArgs());
             }
@@ -3332,14 +3118,14 @@ namespace Seeker
 
             if (SeekerState.IsParsing)
             {
-                MainActivity.LogDebug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
+                Logger.Debug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
                 MoreChangesHaveBeenMadeSoRescanWhenDone = true;
                 return;
             }
 
             try
             {
-                MainActivity.LogDebug("Parsing now......");
+                Logger.Debug("Parsing now......");
 
                 SeekerState.IsParsing = true;
                 int prevFiles = -1;
@@ -3356,7 +3142,7 @@ namespace Seeker
                 try
                 {
 
-                    success = MainActivity.InitializeDatabase(null, false, out string errorMessage);
+                    success = SharedFileService.InitializeDatabase(null, false, out string errorMessage);
                     if (!success)
                     {
                         throw new Exception("Failed to parse shared files: " + errorMessage);
@@ -3368,24 +3154,24 @@ namespace Seeker
                     SeekerState.IsParsing = false;
                     //SeekerState.UploadDataDirectoryUri = null;
                     //SeekerState.UploadDataDirectoryUriIsFromTree = true;
-                    MainActivity.ClearLegacyParsedCacheResults();
-                    MainActivity.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
-                    MainActivity.SetUnsetSharingBasedOnConditions(true);
-                    if (!(e is MainActivity.DirectoryAccessFailure))
+                    SharedFileService.ClearLegacyParsedCacheResults();
+                    SharedFileService.ClearParsedCacheResults(SeekerState.ActiveActivityRef);
+                    SharingService.SetUnsetSharingBasedOnConditions(true);
+                    if (!(e is DirectoryAccessFailure))
                     {
-                        MainActivity.LogFirebase("error parsing: " + e.Message + "  " + e.StackTrace);
+                        Logger.Firebase("error parsing: " + e.Message + "  " + e.StackTrace);
                     }
                     this.RunOnUiThread(new Action(() =>
                     {
                         UpdateShareImageView();
                         SetSharedFolderView();
-                        if (!(e is MainActivity.DirectoryAccessFailure))
+                        if (!(e is DirectoryAccessFailure))
                         {
-                            Toast.MakeText(this, e.Message, ToastLength.Long).Show();
+                            SeekerApplication.Toaster.ShowToast(e.Message, ToastLength.Long);
                         }
                         else
                         {
-                            Toast.MakeText(this, Resource.String.FailedGettingAccess, ToastLength.Long).Show(); //TODO get error from UploadManager..
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.FailedGettingAccess), ToastLength.Long); //TODO get error from UploadManager..
                         }
 
                     }));
@@ -3399,7 +3185,7 @@ namespace Seeker
                     this.ContentResolver.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                 }
                 //setup soulseek client with handlers if all conditions met
-                MainActivity.SetUnsetSharingBasedOnConditions(true, true);
+                SharingService.SetUnsetSharingBasedOnConditions(true, true);
                 this.RunOnUiThread(new Action(() =>
                 {
                     UpdateShareImageView();
@@ -3422,7 +3208,7 @@ namespace Seeker
                             }
                         }
                     }
-                    Toast.MakeText(this, msg, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
                 }));
             }
             finally
@@ -3430,7 +3216,7 @@ namespace Seeker
                 SeekerState.IsParsing = false;
                 if (MoreChangesHaveBeenMadeSoRescanWhenDone)
                 {
-                    MainActivity.LogDebug("okay now lets pick up our new changes");
+                    Logger.Debug("okay now lets pick up our new changes");
                     MoreChangesHaveBeenMadeSoRescanWhenDone = false;
                     ParseDatabaseAndUpdateUI(null, requestCode, fromLegacyPicker, false);
                 }
@@ -3453,11 +3239,11 @@ namespace Seeker
                 {
                     ParseDatabaseAndUpdateUI(newlyAddedUriIfApplicable, requestCode, fromLegacyPicker, rescanClicked, reselectCase);
                 }
-                catch (MainActivity.DirectoryAccessFailure)
+                catch (DirectoryAccessFailure)
                 {
                     if (rescanClicked)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(this, Resource.String.SharedFolderIssuesAllFailed, ToastLength.Long).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.SharedFolderIssuesAllFailed), ToastLength.Long);
                     }
                     else
                     {
@@ -3480,7 +3266,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.NoMediaStore, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoMediaStore), ToastLength.Short);
                     ShowDirSettings(null, DirectoryType.Upload);
                 }
             }
@@ -3500,7 +3286,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Toast.MakeText(this, Resource.String.NoPermissionsForDir, ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NoPermissionsForDir), ToastLength.Long);
                 }
             }
 
@@ -3511,13 +3297,13 @@ namespace Seeker
                 {
                     var x = data.Data;
                     SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    SeekerState.SaveDataDirectoryUri = data.Data.ToString();
-                    SeekerState.SaveDataDirectoryUriIsFromTree = true;
+                    PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
+                    PreferencesState.SaveDataDirectoryUriIsFromTree = true;
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
                         SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long);
                     }));
                 }
             }
@@ -3537,13 +3323,13 @@ namespace Seeker
                 {
                     var x = data.Data;
                     SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    SeekerState.ManualIncompleteDataDirectoryUri = data.Data.ToString();
-                    SeekerState.ManualIncompleteDataDirectoryUriIsFromTree = true;
+                    PreferencesState.ManualIncompleteDataDirectoryUri = data.Data.ToString();
+                    PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = true;
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
                         SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
-                        Toast.MakeText(this, string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long);
                     }));
                 }
             }
@@ -3592,7 +3378,7 @@ namespace Seeker
                         new XmlSerializer(typeof(SeekerImportExportData)).Serialize(writer, seekerImportExportData);
                     }
 
-                    Toast.MakeText(this, Resource.String.successfully_exported, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.successfully_exported), ToastLength.Short);
                 }
             }
 
@@ -3601,11 +3387,11 @@ namespace Seeker
                 bool hasPermision = HasManageStoragePermission(this);
                 if (hasPermision)
                 {
-                    Toast.MakeText(this, Resource.String.permission_successfully_granted, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.permission_successfully_granted), ToastLength.Short);
                 }
                 else
                 {
-                    Toast.MakeText(this, Resource.String.permission_failed, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.permission_failed), ToastLength.Short);
                 }
             }
         }
@@ -3627,252 +3413,27 @@ namespace Seeker
 
         public static void RestoreAdditionalDirectorySettingsFromSharedPreferences()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                SeekerState.CreateCompleteAndIncompleteFolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, true);
-                SeekerState.OverrideDefaultIncompleteLocations = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, false);
-                SeekerState.CreateUsernameSubfolders = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, false);
-                SeekerState.ManualIncompleteDataDirectoryUri = SeekerState.SharedPreferences.GetString(KeyConsts.M_ManualIncompleteDirectoryUri, string.Empty);
-                SeekerState.ManualIncompleteDataDirectoryUriIsFromTree = SeekerState.SharedPreferences.GetBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, true);
-            }
+            PreferencesManager.RestoreAdditionalDirectorySettings();
         }
 
         public static void SaveAdditionalDirectorySettingsToSharedPreferences()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, SeekerState.CreateCompleteAndIncompleteFolders);
-                editor.PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri, SeekerState.OverrideDefaultIncompleteLocations);
-                editor.PutBoolean(KeyConsts.M_AdditionalUsernameSubdirectories, SeekerState.CreateUsernameSubfolders);
-                editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle, SeekerState.NoSubfolderForSingle);
-                editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, SeekerState.ManualIncompleteDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveAdditionalDirectorySettings();
         }
 
         public static void SaveMaxConcurrentDownloadsSettings()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads, Soulseek.SimultaneousDownloadsGatekeeper.RestrictConcurrentUsers);
-                editor.PutInt(KeyConsts.M_MaxSimultaneousLimit, Soulseek.SimultaneousDownloadsGatekeeper.MaxUsersConcurrent);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveMaxConcurrentDownloadsSettings(
+                PreferencesState.LimitSimultaneousDownloads,
+                PreferencesState.MaxSimultaneousLimit);
         }
 
         public static void SaveManualIncompleteDirToSharedPreferences()
         {
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, SeekerState.ManualIncompleteDataDirectoryUri);
-                editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, SeekerState.ManualIncompleteDataDirectoryUriIsFromTree);
-                bool success = editor.Commit();
-            }
+            PreferencesManager.SaveManualIncompleteDir();
         }
 
     }
 
-    public static class ThemeHelper
-    {
-        public const string ClassicPurple = "Classic Purple";
-        public const string Grey = "Grey";
-        public const string Blue = "Blue";
-        public const string Red = "Red";
-        public const string AmoledClassicPurple = "Amoled - Classic Purple";
-        public const string AmoledGrey = "Amoled - Grey";
-
-        public enum DayThemeType : ushort
-        {
-            ClassicPurple = 0,
-            Red = 1,
-            Blue = 2,
-            Grey = 3,
-        }
-
-        public static DayThemeType FromDayThemeTypeString(string themeTypeString)
-        {
-            switch (themeTypeString)
-            {
-                case ClassicPurple:
-                    return DayThemeType.ClassicPurple;
-                case Grey:
-                    return DayThemeType.Grey;
-                case Blue:
-                    return DayThemeType.Blue;
-                case Red:
-                    return DayThemeType.Red;
-                default:
-                    throw new Exception("unknown");
-            }
-        }
-
-        public static string ToDayThemeString(DayThemeType dayTheme)
-        {
-            switch (dayTheme)
-            {
-                case DayThemeType.ClassicPurple:
-                    return ClassicPurple;
-                case DayThemeType.Grey:
-                    return Grey;
-                case DayThemeType.Blue:
-                    return Blue;
-                case DayThemeType.Red:
-                    return Red;
-                default:
-                    throw new Exception("unknown");
-            }
-        }
-
-        public static int ToDayThemeProper(DayThemeType dayTheme)
-        {
-            switch (dayTheme)
-            {
-                case DayThemeType.ClassicPurple:
-                    return Resource.Style.DefaultLight;
-                case DayThemeType.Grey:
-                    return Resource.Style.DefaultDark_Grey; //TODO
-                case DayThemeType.Blue:
-                    return Resource.Style.DefaultLight_Blue;
-                case DayThemeType.Red:
-                    return Resource.Style.DefaultLight_Red;
-                default:
-                    throw new Exception("unknown");
-            }
-        }
-
-        public enum NightThemeType : ushort
-        {
-            ClassicPurple = 0,
-            Grey = 1,
-            Blue = 2,
-            Red = 3,
-            AmoledClassicPurple = 4,
-            AmoledGrey = 5
-        }
-
-        public static NightThemeType FromNightThemeTypeString(string themeTypeString)
-        {
-            switch (themeTypeString)
-            {
-                case ClassicPurple:
-                    return NightThemeType.ClassicPurple;
-                case Grey:
-                    return NightThemeType.Grey;
-                case Blue:
-                    return NightThemeType.Blue;
-                case Red:
-                    return NightThemeType.Red;
-                case AmoledClassicPurple:
-                    return NightThemeType.ClassicPurple;
-                case AmoledGrey:
-                    return NightThemeType.AmoledGrey;
-                default:
-                    throw new Exception("unknown");
-            }
-        }
-
-
-        public static string ToNightThemeString(NightThemeType nightTheme)
-        {
-            switch (nightTheme)
-            {
-                case NightThemeType.ClassicPurple:
-                    return ClassicPurple;
-                case NightThemeType.Grey:
-                    return Grey;
-                case NightThemeType.Blue:
-                    return Blue;
-                case NightThemeType.Red:
-                    return Red;
-                case NightThemeType.AmoledClassicPurple:
-                    return ClassicPurple;
-                case NightThemeType.AmoledGrey:
-                    return AmoledGrey;
-                default:
-                    throw new Exception("unknown");
-            }
-        }
-
-        public static int ToNightThemeProper(NightThemeType nightTheme)
-        {
-            switch (nightTheme)
-            {
-                case NightThemeType.ClassicPurple:
-                    return Resource.Style.DefaultDark;
-                case NightThemeType.Grey:
-                    return Resource.Style.DefaultDark_Grey;
-                case NightThemeType.Blue:
-                    return Resource.Style.DefaultDark_Blue;
-                case NightThemeType.Red:
-                    return Resource.Style.DefaultDark_Blue; //doesnt exist
-                case NightThemeType.AmoledClassicPurple:
-                    return Resource.Style.Amoled;
-                case NightThemeType.AmoledGrey:
-                    return Resource.Style.Amoled_Grey;
-                default:
-                    throw new Exception("unknown");
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="isNightMode">This is for the SYSTEM</param>
-        /// <returns></returns>
-        public static int GetThemeInChosenDayNightMode(bool isNightMode, Context c)
-        {
-            Context contextToUse = c == null ? SeekerState.ActiveActivityRef : c;
-            if (contextToUse.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
-            {
-                if (isNightMode)
-                {
-                    return ThemeHelper.ToNightThemeProper(SeekerState.NightModeVarient);
-                }
-                else
-                {
-                    switch (SeekerState.NightModeVarient)
-                    {
-                        case NightThemeType.ClassicPurple:
-                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
-                        case NightThemeType.Blue:
-                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.Blue);
-                        default:
-                            return ThemeHelper.ToDayThemeProper(ThemeHelper.DayThemeType.ClassicPurple);
-                    }
-                }
-            }
-            else
-            {
-                if (!isNightMode)
-                {
-                    return ThemeHelper.ToDayThemeProper(SeekerState.DayModeVarient);
-                }
-                else
-                {
-                    switch (SeekerState.DayModeVarient)
-                    {
-                        case DayThemeType.ClassicPurple:
-                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
-                        case DayThemeType.Blue:
-                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.Blue);
-                        default:
-                            return ThemeHelper.ToNightThemeProper(ThemeHelper.NightThemeType.ClassicPurple);
-                    }
-                }
-            }
-        }
-
-    }
-
-    enum DirectoryType : ushort
-    {
-        Download = 0,
-        Upload = 1,
-        Incomplete = 2
-    }
 }
 

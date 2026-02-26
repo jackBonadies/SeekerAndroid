@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Messages;
 using Android.App;
@@ -27,6 +28,7 @@ using Android.Views;
 using Android.Widget;
 using System;
 
+using Common;
 namespace Seeker
 {
     [Activity(Label = "ViewUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
@@ -41,13 +43,13 @@ namespace Seeker
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            CommonHelpers.SetMenuTitles(menu, UserToView);
+            UiHelpers.SetMenuTitles(menu, UserToView);
             return base.OnPrepareOptionsMenu(menu);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
+            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
             {
                 return true;
             }
@@ -63,7 +65,7 @@ namespace Seeker
                     //    SeekerState.ActiveActivityRef.RunOnUiThread(() => {
                     //    Google.Android.Material.Snackbar.Snackbar sb = Google.Android.Material.Snackbar.Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), "Test anywhere snackbar", Google.Android.Material.Snackbar.Snackbar.LengthLong).SetAction("Go", (View v)=>{
 
-                    //        RequestedUserInfoHelper.LaunchUserInfoView(SeekerState.Username);
+                    //        RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username);
 
 
 
@@ -76,7 +78,7 @@ namespace Seeker
 
 
                     //do browse thing...
-                    DownloadDialog.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
+                    BrowseService.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -94,7 +96,7 @@ namespace Seeker
                     this.StartActivity(intentMsg);
                     return true;
                 case Resource.Id.addUser:
-                    UserListActivity.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -132,7 +134,7 @@ namespace Seeker
                 outState.PutInt("userData.AverageSpeed", userData.AverageSpeed);
                 outState.PutString("userData.CountryCode", userData.CountryCode);
                 outState.PutInt("userData.DirectoryCount", userData.DirectoryCount);
-                outState.PutLong("userData.DownloadCount", userData.DownloadCount);
+                outState.PutLong("userData.DownloadCount", userData.UploadCount);
                 outState.PutInt("userData.FileCount", userData.FileCount);
                 if (userData.SlotsFree.HasValue)
                 {
@@ -170,7 +172,7 @@ namespace Seeker
                         int ql = savedInstanceState.GetInt("UserInfo.QueueLength");
                         int uploadSlots = savedInstanceState.GetInt("UserInfo.UploadSlots");
                         bool freeSlot = savedInstanceState.GetBoolean("UserInfo.HasFreeUploadSlot");
-                        userInfo = new Soulseek.UserInfo(desc, pic, uploadSlots, ql, freeSlot);
+                        userInfo = new Soulseek.UserInfo(desc, uploadSlots, ql, freeSlot, pic);
                     }
 
                     if (savedInstanceState.ContainsKey("userData.AverageSpeed"))
@@ -210,17 +212,17 @@ namespace Seeker
             }
             if (UserToView == null)
             {
-                MainActivity.LogFirebase("UserToView==null");
+                Logger.Firebase("UserToView==null");
             }
             myToolbar.Title = this.GetString(Resource.String.user_) + " " + UserToView;
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
 
-            if (UserToView == SeekerState.Username)
+            if (UserToView == PreferencesState.Username)
             {
                 //for UserData we only care about Online Status, upload speed, file count, and dir count
-                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, SeekerState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
+                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = SeekerApplication.UserInfoResponseHandler(UserToView, null).Result; //the task is already completed.  (task.fromresult).
             }
             else if (UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
@@ -316,7 +318,7 @@ namespace Seeker
                 //clipboardManager.PrimaryClip = clip;
                 case 1: //"Save Image"
                     SaveImage(userInfo.Picture);
-                    Toast.MakeText(this, Resource.String.success_save, ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_save), ToastLength.Short);
                     return true;
             }
             return base.OnContextItemSelected(item);
@@ -339,9 +341,9 @@ namespace Seeker
                 //  which doesnt, a .txt, etc.). Nicotine for example allows any file to be selected.
                 if (loadedBitmap == null)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to decode the user's picture.", ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast("Failed to decode the user's picture.", ToastLength.Long);
                     string uname = userData != null ? userData.Username : "no user";
-                    MainActivity.LogFirebase("FAILURE TO DECODE USERS PICTURE " + uname);
+                    Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
                     return;
                 }
                 int h = loadedBitmap.Height;
@@ -438,10 +440,10 @@ namespace Seeker
         private void SaveImage(byte[] pic)
         {
             string ext = '.' + originalImageMimetype.Split('/')[1];
-            if (Android.OS.Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+            if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {
                 ContentValues valuesForContentResolver = GetContentValues();
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + CommonHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.RelativePath, "Pictures");
                 valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
                                                                                                                //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected. 
@@ -461,7 +463,7 @@ namespace Seeker
                 {
                     directory.Mkdirs();
                 }
-                string fileName = UserToView + CommonHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
+                string fileName = UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
                 Java.IO.File file = new Java.IO.File(directory, fileName);
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
@@ -475,7 +477,7 @@ namespace Seeker
         private ContentValues GetContentValues()
         {
             ContentValues valuesForContentResolver = new ContentValues();
-            DateTime now = CommonHelpers.GetDateTimeNowSafe();
+            DateTime now = SimpleHelpers.GetDateTimeNowSafe();
             long ms = new DateTimeOffset(now).ToUnixTimeMilliseconds();
             long s = ms / 1000;
             valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DateAdded, s);

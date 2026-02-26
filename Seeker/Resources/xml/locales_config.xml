@@ -1,15 +1,28 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
-   <locale android:name="en"/>
+    <locale android:name="ar" />
+    <locale android:name="ca" />
+    <locale android:name="cs" />
+    <locale android:name="da" />
+    <locale android:name="de" />
+    <locale android:name="en" />
+    <locale android:name="es" />
+    <locale android:name="fr" />
+    <locale android:name="hu" />
+    <locale android:name="it" />
+    <locale android:name="ja" />
+    <locale android:name="nl" />
+    <locale android:name="no" />
+    <locale android:name="pl" />
 
-	<!--Note: res file is pt-rBR-->
-   <locale android:name="pt-BR"/>
+    <!--Note: res dirs are pt-rBR and pt-rPT-->
+    <locale android:name="pt-BR" />
+    <locale android:name="pt-PT" />
 
-   <locale android:name="fr"/>
-   <locale android:name="ru"/>
-   <locale android:name="es"/>
-   <locale android:name="uk"/>
-	
-   <locale android:name="nl"/>
-   <locale android:name="cs"/>
+    <locale android:name="ru" />
+    <locale android:name="sr" />
+    <locale android:name="uk" />
+
+    <!--Note: res dir is zh-rCN-->
+    <locale android:name="zh-CN" />
 </locale-config>

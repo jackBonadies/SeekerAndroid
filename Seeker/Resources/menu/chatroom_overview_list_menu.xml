@@ -1,19 +1,18 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/create_room_action"
+        android:icon="@drawable/baseline_add_white_24"
+        android:title="@string/create_chatroom"
+        app:showAsAction="always"
+    />
 
-xmlns:app="http://schemas.android.com/apk/res-auto">
-
-  <item
-      android:id="@+id/create_room_action"
-      android:icon="@drawable/baseline_add_white_24"
-      android:title="@string/create_chatroom"
-      app:showAsAction="always"/>
-
-
-  <item
-    android:id="@+id/refresh_room_list_action"
-    android:icon="@drawable/baseline_refresh_white_24"
-    android:title="@string/refresh_room_list"
-    app:showAsAction="always"/>
-
-
+    <item
+        android:id="@+id/refresh_room_list_action"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title="@string/refresh_room_list"
+        app:showAsAction="always"
+    />
 </menu>

@@ -51,16 +51,12 @@ namespace Soulseek.Messaging.Messages
 
             var freeUploadSlots = reader.ReadByte();
             var uploadSpeed = reader.ReadInteger();
+            var queueLength = reader.ReadInteger();
 
-            long queueLength;
-
-            if (reader.Remaining == 4)
+            if (reader.HasMoreData)
             {
-                queueLength = reader.ReadInteger();
-            }
-            else
-            {
-                queueLength = reader.ReadLong();
+                // most clients send an unknown integer between queue length and the locked file count
+                _ = reader.ReadInteger();
             }
 
             IEnumerable<File> lockedFileList = Enumerable.Empty<File>();
@@ -71,7 +67,7 @@ namespace Soulseek.Messaging.Messages
                 lockedFileList = reader.ReadFiles(count);
             }
 
-            return new SearchResponse(username, token, freeUploadSlots, uploadSpeed, queueLength, fileList, lockedFileList);
+            return new SearchResponse(username, token, hasFreeUploadSlot: freeUploadSlots > 0, uploadSpeed, queueLength, fileList, lockedFileList);
         }
 
         /// <summary>
@@ -93,9 +89,10 @@ namespace Soulseek.Messaging.Messages
             }
 
             builder
-                .WriteByte((byte)searchResponse.FreeUploadSlots)
+                .WriteByte((byte)(searchResponse.HasFreeUploadSlot ? 1 : 0))
                 .WriteInteger(searchResponse.UploadSpeed)
-                .WriteLong(searchResponse.QueueLength);
+                .WriteInteger(searchResponse.QueueLength)
+                .WriteInteger(0); // unknown value included for compatibility
 
             builder.WriteInteger(searchResponse.LockedFileCount);
 

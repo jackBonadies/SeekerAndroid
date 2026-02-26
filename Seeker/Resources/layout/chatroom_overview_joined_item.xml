@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,19 +8,22 @@
     android:padding="4dp"
     android:orientation="horizontal"
     android:descendantFocusability="afterDescendants"
-    android:id="@+id/linearLayoutChatroomOverview">
+    android:id="@+id/linearLayoutChatroomOverview"
+>
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="6"
         android:orientation="horizontal"
-        >
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:id="@+id/roomName"
-        android:text="roomNameDummy"
-        android:textSize="22sp"
+    >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/roomName"
+			android:maxLines="1"
+			android:ellipsize="end"
+            android:text="roomNameDummy"
+            android:textSize="22sp"
         />
         <ImageView
             android:layout_width="12sp"
@@ -30,8 +33,8 @@
             android:layout_gravity="center_vertical"
             android:visibility="gone"
             android:tint="@color/androidStockMessagesNewBlue"
-            app:srcCompat="@drawable/checkbox_blank_circle"/>
-
+            app:srcCompat="@drawable/checkbox_blank_circle"
+        />
     </LinearLayout>
     <TextView
         android:layout_width="0dp"
@@ -39,12 +42,13 @@
         android:layout_marginStart="20dp"
         android:layout_weight="1.3"
         android:text="1000"
+        android:layout_gravity="right"
         android:id="@+id/usersInRoom"
         android:textSize="22sp"
         app:autoSizeMinTextSize="12sp"
         android:maxLines="1"
         app:autoSizeTextType="uniform"
-        />
+    />
     <ImageView
         android:layout_marginStart="6dp"
         android:layout_width="0dp"
@@ -54,5 +58,5 @@
         app:srcCompat="@drawable/outline_cancel_white_24"
         android:id="@+id/leaveRoom"
         android:tint="?attr/mainTextColor"
-        />
+    />
 </LinearLayout>

@@ -1,16 +1,20 @@
 ﻿using Android.App;
+using Seeker.Services;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.App;
+using Common;
+using Common.Messages;
+using Seeker.Helpers;
+using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace Seeker.Chatroom
 {
     public class ChatroomController
@@ -40,7 +44,6 @@ namespace Seeker.Chatroom
 
 
         public static bool IsInitialized;
-        public static int MAX_MESSAGES_PER_ROOM = 100;
 
         //these are the rooms that we are currnetly joined and connected to.  These clear on disconnect and get readded.  These will always be a subset of JoinedRoomNames.
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> CurrentlyJoinedRoomNames = null;
@@ -60,18 +63,6 @@ namespace Seeker.Chatroom
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomInfo> ModeratedRoomData = new System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomInfo>();
 
-        public struct StatusMessageUpdate
-        {
-            public StatusMessageType StatusType;
-            public string Username;
-            public DateTime DateTimeUtc;
-            public StatusMessageUpdate(StatusMessageType statusType, string username, DateTime dateTimeUtc)
-            {
-                StatusType = statusType;
-                Username = username;
-                DateTimeUtc = dateTimeUtc;
-            }
-        }
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>> JoinedRoomStatusUpdateMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>>();
 
@@ -108,7 +99,8 @@ namespace Seeker.Chatroom
                 List<string> noLongerConnectedRooms = JoinedRoomNames.ToList();
                 foreach (string room in noLongerConnectedRooms)
                 {
-                    Message m = new Message(CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, code);
+                    DateTime localNow = SimpleHelpers.GetDateTimeNowSafe();
+                    Message m = new Message(localNow, DateTime.UtcNow, code, getSpecialStatusMessageText(code, localNow));
                     ChatroomController.AddMessage(room, m); //background thread
                     ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(room, m));
                 }
@@ -116,6 +108,17 @@ namespace Seeker.Chatroom
             }
         }
 
+        private static String getSpecialStatusMessageText(SpecialMessageCode code, DateTime localNow)
+        {
+            switch (code)
+            {
+                case SpecialMessageCode.Disconnect:
+                    return string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_disconnected_at), CommonHelpers.GetNiceDateTime(localNow));
+                case SpecialMessageCode.Reconnect:
+                    return string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.chatroom_reconnected_at), CommonHelpers.GetNiceDateTime(localNow));
+            }
+            return null;
+        }
 
         public static bool IsPrivate(string roomName)
         {
@@ -150,16 +153,13 @@ namespace Seeker.Chatroom
 
         public static bool AreWeMod(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(SeekerState.Username);
+            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(PreferencesState.Username);
         }
 
         public static bool AreWeOwner(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Owner == SeekerState.Username;
+            return ChatroomController.JoinedRoomData[roomname].Owner == PreferencesState.Username;
         }
-
-        public static bool PutFriendsOnTop = false;
-        public static SortOrderChatroomUsers SortChatroomUsersBy = SortOrderChatroomUsers.Alphabetical;
 
         public static List<Soulseek.UserData> GetWrappedUserData(string roomName, bool isPrivate, string filterString = "")
         {
@@ -189,21 +189,14 @@ namespace Seeker.Chatroom
                     chatroomUserData.Add(GetChatroomUserData(user, userRole));
                 }
             }
-            chatroomUserData.Sort(new ChatroomUserDataComparer(PutFriendsOnTop, SortChatroomUsersBy));
+            chatroomUserData.Sort(new ChatroomUserDataComparer(UserListService.Instance, PreferencesState.PutFriendsOnTop, PreferencesState.SortChatroomUsersBy));
             return chatroomUserData;
         }
 
-        public enum SortOrderChatroomUsers
-        {
-            //DateJoinedAsc = 0,  //the user list is NOT given to us in any order.  so cant do these.
-            //DateJoinedDesc = 1,
-            Alphabetical = 2,
-            OnlineStatus = 3
-        }
 
-        public static Soulseek.ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
+        public static ChatroomUserData GetChatroomUserData(Soulseek.UserData ud, Soulseek.UserRole role)
         {
-            var wrappedUser = new Soulseek.ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.DownloadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
+            var wrappedUser = new ChatroomUserData(ud.Username, ud.Status, ud.AverageSpeed, ud.UploadCount, ud.FileCount, ud.DirectoryCount, ud.CountryCode, ud.SlotsFree);
             wrappedUser.ChatroomUserRole = role;
             return wrappedUser;
         }
@@ -224,7 +217,7 @@ namespace Seeker.Chatroom
                 if (t.IsFaulted)
                 {
                     msg.SentMsgStatus = SentStatus.Failed;
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_send_message), ToastLength.Long);
                 }
                 else
                 {
@@ -255,6 +248,7 @@ namespace Seeker.Chatroom
             }
         }
 
+        //TODO2026 move to lower
         public static List<Soulseek.RoomInfo> GetParsedList(Soulseek.RoomList roomList)
         {
             List<Soulseek.RoomInfo> ownedList = roomList.Owned.ToList();
@@ -265,7 +259,7 @@ namespace Seeker.Chatroom
 
             if (JoinedRoomNames.Count != 0)
             {
-                allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
+                allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.joined)));
                 //find the rooms and add them...
                 foreach (string roomName in JoinedRoomNames)
                 {
@@ -295,7 +289,7 @@ namespace Seeker.Chatroom
                 List<Soulseek.RoomInfo> filteredOwned = ownedList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 if (filteredOwned.Count > 0)
                 {
-                    allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
+                    allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.owned)));
                     filteredOwned.Sort(new RoomCountComparer());
                     allRooms.AddRange(filteredOwned);
                 }
@@ -306,7 +300,7 @@ namespace Seeker.Chatroom
                 List<Soulseek.RoomInfo> filtered = privateList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 if (filtered.Count > 0)
                 {
-                    allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
+                    allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.private_room)));
                     filtered.Sort(new RoomCountComparer());
                     allRooms.AddRange(filtered);
                 }
@@ -314,109 +308,14 @@ namespace Seeker.Chatroom
 
             if (roomList.PublicCount != 0)
             {
-                allRooms.Add(new Soulseek.RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
-                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !SpamList.Contains(roomInfo.Name) && !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
+                allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
+                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
                 noSpam.Sort(new RoomCountComparer());
                 allRooms.AddRange(noSpam);
             }
 
             return allRooms;
         }
-
-        public static List<string> SpamList = null;
-
-        static ChatroomController()
-        {
-            //we filter out unfortunate room names
-            SpamList = new List<string>();
-            SpamList.Add("! ! ! NO JEWS");
-            SpamList.Add("! ! ! NO FAGGOTS");
-            SpamList.Add("! ! ! NO NIGGERS");
-            SpamList.Add("! ! ! NO NIGGERS ! ! !");
-            SpamList.Add("! ! ! NO WOMEN");
-            SpamList.Add("! ! ! NO QUEERS");
-            SpamList.Add("dev");
-        }
-
-        public class RoomCountComparer : IComparer<Soulseek.RoomInfo>
-        {
-            // Compares by UserCount then Name
-            public int Compare(Soulseek.RoomInfo x, Soulseek.RoomInfo y)
-            {
-                if (x.UserCount.CompareTo(y.UserCount) != 0)
-                {
-                    return y.UserCount.CompareTo(x.UserCount); //high to low
-                }
-                else if (x.Name.CompareTo(y.Name) != 0)
-                {
-                    return x.Name.CompareTo(y.Name);
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-
-        public class ChatroomUserDataComparer : IComparer<Soulseek.UserData>
-        {
-            // Compares by UserCount then Name
-            public int Compare(Soulseek.UserData x, Soulseek.UserData y)
-            {
-                //always put owners and operators first in private rooms. this is the primary condition.
-                if (x is Soulseek.ChatroomUserData xData && y is Soulseek.ChatroomUserData yData)
-                {
-                    if ((int)yData.ChatroomUserRole != (int)xData.ChatroomUserRole)
-                    {
-                        return (int)yData.ChatroomUserRole - (int)xData.ChatroomUserRole;
-                    }
-                }
-
-                if (PutFriendsOnTop)
-                {
-                    bool xFriend = MainActivity.UserListContainsUser(x.Username);
-                    bool yFriend = MainActivity.UserListContainsUser(y.Username);
-                    if (xFriend && !yFriend)
-                    {
-                        return -1; //x is better
-                    }
-                    else if (yFriend && !xFriend)
-                    {
-                        return 1; //y is better
-                    }
-                    //else we continue on to the next criteria
-                }
-
-                switch (SortCriteria)
-                {
-                    case SortOrderChatroomUsers.Alphabetical:
-                        return x.Username.CompareTo(y.Username);
-                    case SortOrderChatroomUsers.OnlineStatus:
-                        if (x.Status == Soulseek.UserPresence.Online && y.Status != Soulseek.UserPresence.Online)
-                        {
-                            return -1;
-                        }
-                        else if (x.Status != Soulseek.UserPresence.Online && y.Status == Soulseek.UserPresence.Online)
-                        {
-                            return 1;
-                        }
-                        else
-                        {
-                            return x.Username.CompareTo(y.Username);
-                        }
-                }
-
-                return 0;
-            }
-            private bool PutFriendsOnTop = false;
-            private SortOrderChatroomUsers SortCriteria = SortOrderChatroomUsers.Alphabetical;
-            public ChatroomUserDataComparer(bool putFriendsOnTop, SortOrderChatroomUsers sortCriteria)
-            {
-                PutFriendsOnTop = putFriendsOnTop;
-                SortCriteria = sortCriteria;
-            }
-        }
-
 
 
         public static void ToggleAutoJoin(string roomName, bool feedback, Context c)
@@ -425,7 +324,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_off), roomName), ToastLength.Short);
                 }
                 AutoJoinRoomNames.Remove(roomName);
             }
@@ -433,7 +332,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.startup_room_on), roomName), ToastLength.Short);
                 }
                 AutoJoinRoomNames.Add(roomName);
             }
@@ -446,7 +345,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_off), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_off), roomName), ToastLength.Short);
                 }
                 NotifyRoomNames.Remove(roomName);
             }
@@ -454,7 +353,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    Toast.MakeText(c, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_on), roomName), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.notif_room_on), roomName), ToastLength.Short);
                 }
                 NotifyRoomNames.Add(roomName);
             }
@@ -468,18 +367,13 @@ namespace Seeker.Chatroom
             {
                 return;
             }
-            RootAutoJoinRoomNames[SeekerState.Username] = AutoJoinRoomNames;
+            RootAutoJoinRoomNames[PreferencesState.Username] = AutoJoinRoomNames;
 
             var joinedRoomsString = SerializationHelper.SaveAutoJoinRoomsListToString(RootAutoJoinRoomNames);
 
             if (joinedRoomsString != null && joinedRoomsString != string.Empty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveAutoJoinRooms(joinedRoomsString);
             }
         }
 
@@ -495,23 +389,20 @@ namespace Seeker.Chatroom
             else
             {
                 RootAutoJoinRoomNames = SerializationHelper.RestoreAutoJoinRoomsListFromString(joinedRooms);
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(SeekerState.Username))
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty && RootAutoJoinRoomNames.ContainsKey(PreferencesState.Username))
                 {
-                    AutoJoinRoomNames = RootAutoJoinRoomNames[SeekerState.Username];
-                    CurrentUsername = SeekerState.Username;
+                    AutoJoinRoomNames = RootAutoJoinRoomNames[PreferencesState.Username];
+                    CurrentUsername = PreferencesState.Username;
                 }
                 else
                 {
                     AutoJoinRoomNames = new List<string>();
-                    CurrentUsername = SeekerState.Username;
+                    CurrentUsername = PreferencesState.Username;
                 }
             }
         }
 
-
-
-
-
+        //TODO2026 move to lower
         public static void SaveNotifyRoomsToSharedPrefs()
         {
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
@@ -519,18 +410,13 @@ namespace Seeker.Chatroom
             {
                 return;
             }
-            RootNotifyRoomNames[SeekerState.Username] = NotifyRoomNames;
+            RootNotifyRoomNames[PreferencesState.Username] = NotifyRoomNames;
 
             string notifyRoomsString = SerializationHelper.SaveNotifyRoomsListToString(RootNotifyRoomNames);
 
             if (notifyRoomsString != null && notifyRoomsString != string.Empty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveNotifyRooms(notifyRoomsString);
             }
         }
 
@@ -546,28 +432,18 @@ namespace Seeker.Chatroom
             else
             {
                 RootNotifyRoomNames = SerializationHelper.RestoreNotifyRoomsListFromString(notifyRooms);
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(SeekerState.Username))
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty && RootNotifyRoomNames.ContainsKey(PreferencesState.Username))
                 {
-                    NotifyRoomNames = RootNotifyRoomNames[SeekerState.Username];
-                    CurrentUsername = SeekerState.Username;
+                    NotifyRoomNames = RootNotifyRoomNames[PreferencesState.Username];
+                    CurrentUsername = PreferencesState.Username;
                 }
                 else
                 {
                     NotifyRoomNames = new List<string>();
-                    CurrentUsername = SeekerState.Username;
+                    CurrentUsername = PreferencesState.Username;
                 }
             }
         }
-
-
-
-
-
-
-
-
-
-
 
         public static void Initialize()
         {
@@ -602,20 +478,22 @@ namespace Seeker.Chatroom
             IsInitialized = true;
         }
 
-        private static void SoulseekClient_UserStatusChanged(object sender, Soulseek.UserStatusChangedEventArgs e)
+        private static void SoulseekClient_UserStatusChanged(object sender, UserStatus e)
         {
             if (ChatroomController.JoinedRoomData != null && !ChatroomController.JoinedRoomData.IsEmpty)
             {
                 //its threadsafe to enumerate a concurrent dictionary values, use get enumerator, etc.
                 foreach (var kvp in ChatroomController.JoinedRoomData)
                 {
-                    //readonly so safe.
                     bool roomUserFound = false;
-                    foreach (var uData in kvp.Value.Users)
+                    var oldRoomData = kvp.Value;
+                    foreach (var uData in oldRoomData.Users)
                     {
                         if (uData.Username == e.Username)
                         {
-                            uData.Status = e.Status;
+                            var updatedUsers = oldRoomData.Users.Select(u =>
+                                u.Username == e.Username ? u.WithStatus(e.Presence) : u);
+                            JoinedRoomData[kvp.Key] = new Soulseek.RoomData(oldRoomData.Name, updatedUsers, oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
                             roomUserFound = true;
                             break;
                         }
@@ -624,10 +502,10 @@ namespace Seeker.Chatroom
                     {
                         //do event.. room user status updated..
                         //add the message and also possibly do the UI event...
-                        ChatroomController.StatusMessageUpdate statusMessageUpdate = new ChatroomController.StatusMessageUpdate(e.Status == Soulseek.UserPresence.Away ? ChatroomController.StatusMessageType.WentAway : ChatroomController.StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
+                        StatusMessageUpdate statusMessageUpdate = new StatusMessageUpdate(e.Presence == Soulseek.UserPresence.Away ? StatusMessageType.WentAway : StatusMessageType.CameBack, e.Username, DateTime.UtcNow);
                         ChatroomController.AddStatusMessage(kvp.Key, statusMessageUpdate);
-                        UserRoomStatusChanged?.Invoke(sender, new UserRoomStatusChangedEventArgs(kvp.Key, e.Username, e.Status, statusMessageUpdate));
-                        MainActivity.LogDebug("room user status updated: " + e.Username + " " + e.Status.ToString() + " " + kvp.Key);
+                        UserRoomStatusChanged?.Invoke(sender, new UserRoomStatusChangedEventArgs(kvp.Key, e.Username, e.Presence, statusMessageUpdate));
+                        Logger.Debug("room user status updated: " + e.Username + " " + e.Presence.ToString() + " " + kvp.Key);
                     }
                 }
             }
@@ -635,7 +513,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_OperatorInPrivateRoomAddedRemoved(object sender, Soulseek.OperatorAddedRemovedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_OperatorInPrivateRoomAddedRemoved " + e.RoomName + " " + e.Username + " " + e.Added);
+            Logger.Debug("SoulseekClient_OperatorInPrivateRoomAddedRemoved " + e.RoomName + " " + e.Username + " " + e.Added);
 
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
@@ -662,22 +540,22 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_PrivateRoomUserListReceived(object sender, Soulseek.RoomInfo e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModerationRemoved " + e.UserCount); //this is the same as the normal user list received event as far as I can tell...
+            Logger.Debug("SoulseekClient_PrivateRoomModerationRemoved " + e.UserCount); //this is the same as the normal user list received event as far as I can tell...
         }
 
         private static void SoulseekClient_PrivateRoomModerationRemoved(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModerationRemoved " + e); //this only happens on change... not useful I dont think...
+            Logger.Debug("SoulseekClient_PrivateRoomModerationRemoved " + e); //this only happens on change... not useful I dont think...
         }
 
         private static void SoulseekClient_PrivateRoomModerationAdded(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModerationAdded " + e); //this only happens on change... not useful I dont think...
+            Logger.Debug("SoulseekClient_PrivateRoomModerationAdded " + e); //this only happens on change... not useful I dont think...
         }
 
         private static void SoulseekClient_PrivateRoomModeratedUserListReceived(object sender, Soulseek.RoomInfo e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomModeratedUserListReceived " + e.UserCount);
+            Logger.Debug("SoulseekClient_PrivateRoomModeratedUserListReceived " + e.UserCount);
             ModeratedRoomData[e.Name] = e; //this is WHO ARE THE OPERATORS. and it will show everyone who is an OPERATOR but not an OWNER. So if your name is here you are an operator.. also this gets called every change.
             //update the room data
             if (JoinedRoomData.ContainsKey(e.Name))
@@ -690,7 +568,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_PrivateRoomMembershipRemoved(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomMembershipRemoved " + e);
+            Logger.Debug("SoulseekClient_PrivateRoomMembershipRemoved " + e);
             //if we remove ourselves or someone else removes us, then we need to back out of the room (and also refresh the list for good feedback).
 
             //removing should go here, that way we will not autojoin a room we are no longer part of.
@@ -712,7 +590,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_PrivateRoomMembershipAdded(object sender, string e)
         {
-            MainActivity.LogDebug("SoulseekClient_PrivateRoomMembershipAdded " + e);
+            Logger.Debug("SoulseekClient_PrivateRoomMembershipAdded " + e);
         }
 
         //public static void UpdateSameUserFlagIfApplicable(string roomName, Message msg)
@@ -762,14 +640,6 @@ namespace Seeker.Chatroom
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UnreadRooms = new System.Collections.Concurrent.ConcurrentDictionary<string, byte>();//basically a concurrent hashset.
 
-        public enum StatusMessageType
-        {
-            Joined = 1,
-            Left = 2,
-            WentAway = 3,
-            CameBack = 4,
-        }
-
         public static void AddStatusMessage(string roomName, StatusMessageUpdate statusMessageUpdate)
         {
             if (JoinedRoomStatusUpdateMessages.ContainsKey(roomName))
@@ -810,14 +680,14 @@ namespace Seeker.Chatroom
         {
             if (SeekerApplication.IsUserInIgnoreList(e.Username))
             {
-                MainActivity.LogDebug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
+                Logger.Debug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
                 return;
             }
 
-            MainActivity.LogDebug("room msg received: r:" + e.RoomName + " u: " + e.Username);
+            Logger.Debug("room msg received: r:" + e.RoomName + " u: " + e.Username);
 
-            Message msg = new Message(e.Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
-            if (e.Username == SeekerState.Username)
+            Message msg = new Message(e.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, e.Message, false);
+            if (e.Username == PreferencesState.Username)
             {
                 //we already logged it..
                 return;
@@ -845,13 +715,13 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomJoined(object sender, Soulseek.RoomJoinedEventArgs e)
         {
-            MainActivity.LogDebug("User Joined" + e.Username);
+            Logger.Debug("User Joined" + e.Username);
             if (JoinedRoomData.ContainsKey(e.RoomName))
             {
                 var oldRoomData = JoinedRoomData[e.RoomName];
                 JoinedRoomData[e.RoomName] = new Soulseek.RoomData(oldRoomData.Name, oldRoomData.Users.Append(e.UserData), oldRoomData.IsPrivate, oldRoomData.Owner, oldRoomData.Operators);
             }
-            else if (e.Username == SeekerState.Username)
+            else if (e.Username == PreferencesState.Username)
             {
                 //this is when we first join..
             }
@@ -867,7 +737,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomTickerAdded(object sender, Soulseek.RoomTickerAddedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_RoomTickerAdded");
+            Logger.Debug("SoulseekClient_RoomTickerAdded");
             if (JoinedRoomTickers.ContainsKey(e.RoomName))
             {
                 JoinedRoomTickers[e.RoomName].Add(e.Ticker);
@@ -881,14 +751,14 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomTickerRemoved(object sender, Soulseek.RoomTickerRemovedEventArgs e)
         {
-            MainActivity.LogDebug("RoomTickerRemovedEventArgs");
+            Logger.Debug("RoomTickerRemovedEventArgs");
             //idk what to do here
             RoomTickerRemoved?.Invoke(null, e);
         }
 
         private static void SoulseekClient_RoomTickerListReceived(object sender, Soulseek.RoomTickerListReceivedEventArgs e)
         {
-            MainActivity.LogDebug("SoulseekClient_RoomTickerListReceived");
+            Logger.Debug("SoulseekClient_RoomTickerListReceived");
             JoinedRoomTickers[e.RoomName] = e.Tickers.ToList();
             RoomTickerListReceived?.Invoke(null, e);
         }
@@ -934,7 +804,7 @@ namespace Seeker.Chatroom
             //if we got killed.
             if (StartingState != null && StartingState != string.Empty)
             {
-                MainActivity.LogDebug("starting state is not null " + StartingState);
+                Logger.Debug("starting state is not null " + StartingState);
                 JoinRoomApi(StartingState, true, false, false, false);
                 StartingState = null;
             }
@@ -962,11 +832,11 @@ namespace Seeker.Chatroom
 
         public static void ShowNotification(Message msg, string roomName)
         {
-            if (msg.Username == SeekerState.Username)
+            if (msg.Username == PreferencesState.Username)
             {
                 return;
             }
-            MainActivity.LogDebug("currently in room: " + currentlyInsideRoomName);
+            Logger.Debug("currently in room: " + currentlyInsideRoomName);
             if (roomName == currentlyInsideRoomName)
             {
                 return;
@@ -989,21 +859,18 @@ namespace Seeker.Chatroom
                 }
                 catch (System.Exception e)
                 {
-                    MainActivity.LogFirebase("ShowNotification failed: " + e.Message + e.StackTrace);
+                    Logger.Firebase("ShowNotification failed: " + e.Message + e.StackTrace);
                 }
             });
         }
 
         public static void GetRoomListApi(bool feedback = false)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 if (feedback)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_get_room_list), ToastLength.Short);
                 }
                 return;
             }
@@ -1011,18 +878,15 @@ namespace Seeker.Chatroom
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.requesting_room_list), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1030,7 +894,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
@@ -1065,10 +929,7 @@ namespace Seeker.Chatroom
                     RoomListParsed = GetParsedList(RoomList);
                     if (feedback)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.room_list_received), ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_list_received), ToastLength.Short);
                     }
                     RoomListReceived?.Invoke(null, new EventArgs());
                 }
@@ -1082,34 +943,31 @@ namespace Seeker.Chatroom
 
         public static void CreateRoomApi(string roomName, bool isPrivate, bool feedback)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_create_room), ToastLength.Short);
                 return;
             }
             if (feedback)
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                    if (isPrivate)
                     {
-                        if (isPrivate)
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.privateRoomCreation), ToastLength.Short).Show();
-                        }
-                        else
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.publicRoomCreation), ToastLength.Short).Show();
-                        }
-                    });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.privateRoomCreation), ToastLength.Short);
+                    }
+                    else
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.publicRoomCreation), ToastLength.Short);
+                    }
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1117,7 +975,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { CreateRoomLogic(roomName, isPrivate, feedback); }));
@@ -1131,9 +989,9 @@ namespace Seeker.Chatroom
 
         public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead = false)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_add_or_remove_user), ToastLength.Short);
                 return;
             }
             if (feedback)
@@ -1161,17 +1019,17 @@ namespace Seeker.Chatroom
                         {
                             msg = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.removing_user_from);
                         }
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(msg, roomName), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(string.Format(msg, roomName), ToastLength.Short);
 
                     });
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1179,7 +1037,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead); }));
@@ -1226,10 +1084,7 @@ namespace Seeker.Chatroom
             }
             catch (Exception e)
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
-                });
+                SeekerApplication.Toaster.ShowToast(failureMsg, ToastLength.Short);
                 return;
             }
             task.ContinueWith((Task task) =>
@@ -1238,10 +1093,7 @@ namespace Seeker.Chatroom
                 {
                     //TODO
 
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, failureMsg, ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(failureMsg, ToastLength.Short);
 
                 }
                 else
@@ -1250,10 +1102,7 @@ namespace Seeker.Chatroom
 
                     if (feedback)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, successMsg, ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(successMsg, ToastLength.Short);
                     }
 
                 }
@@ -1286,10 +1135,7 @@ namespace Seeker.Chatroom
 
                     if (feedback)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.create_and_refresh), ToastLength.Short).Show();
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.create_and_refresh), ToastLength.Short);
                     }
                     if (!JoinedRoomNames.Contains(roomName))
                     {
@@ -1312,10 +1158,10 @@ namespace Seeker.Chatroom
         {
             string ownershipString = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.ownership);
             string membershipString = SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.membership);
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
                 string membership = ownership ? ownershipString : membershipString;
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_drop_private), ToastLength.Short);
                 return;
             }
             if (feedback)
@@ -1323,18 +1169,15 @@ namespace Seeker.Chatroom
                 if (SeekerState.ActiveActivityRef != null)
                 {
                     string membership = ownership ? ownershipString : membershipString;
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1342,7 +1185,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { DropMembershipOrOwnershipLogic(roomName, ownership, feedback); }));
@@ -1375,8 +1218,8 @@ namespace Seeker.Chatroom
                     string ownershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.ownership);
                     string membershipString = SeekerState.ActiveActivityRef.GetString(Resource.String.membership);
                     string membership = ownership ? ownershipString : membershipString;
-                    SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
-                    MainActivity.LogFirebase("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                    Logger.Firebase("DropMembershipOrOwnershipLogic " + membership + e.Message + e.StackTrace);
                 }
                 return;
             }
@@ -1389,16 +1232,16 @@ namespace Seeker.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_remove), membership), ToastLength.Short);
                     }
-                    MainActivity.LogFirebase("DropMembershipOrOwnershipLogic " + task.Exception);
+                    Logger.Firebase("DropMembershipOrOwnershipLogic " + task.Exception);
                 }
                 else
                 {
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.successfully_removed), membership), ToastLength.Short);
                     }
 
                 }
@@ -1407,27 +1250,24 @@ namespace Seeker.Chatroom
 
         public static void SetTickerApi(string roomName, string tickerMessage, bool feedback)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_set_ticker), ToastLength.Short);
                 return;
             }
             if (feedback)
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.setting_ticker), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.setting_ticker), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1435,7 +1275,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { SetTickerLogic(roomName, tickerMessage, feedback); }));
@@ -1458,7 +1298,7 @@ namespace Seeker.Chatroom
             {
                 if (feedback)
                 {
-                    SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                    SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                 }
                 return;
             }
@@ -1468,7 +1308,7 @@ namespace Seeker.Chatroom
                 {
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_set_ticker), ToastLength.Short);
                     }
                 }
                 else
@@ -1476,7 +1316,7 @@ namespace Seeker.Chatroom
                     //I dont think there is anything we need to do... I think that our event will tell us about our new ticker...
                     if (feedback)
                     {
-                        SeekerApplication.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
+                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.successfully_set_ticker), ToastLength.Short);
                     }
                 }
             });
@@ -1486,28 +1326,25 @@ namespace Seeker.Chatroom
 
         public static void JoinRoomApi(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)
         {
-            MainActivity.LogDebug("JOINING ROOM" + roomName);
-            if (!SeekerState.currentlyLoggedIn)
+            Logger.Debug("JOINING ROOM" + roomName);
+            if (!PreferencesState.CurrentlyLoggedIn)
             {   //since this happens on startup its no good to have this logic...
-                MainActivity.LogDebug("CANT JOIN NOT LOGGED IN:" + roomName);
+                Logger.Debug("CANT JOIN NOT LOGGED IN:" + roomName);
                 return;
             }
             if (feedback && !joining)
             {
                 if (SeekerState.ActiveActivityRef != null)
                 {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                    {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short).Show();
-                    });
+                    SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 }
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -1515,7 +1352,7 @@ namespace Seeker.Chatroom
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin); }));
@@ -1550,16 +1387,16 @@ namespace Seeker.Chatroom
             {
                 if (task.IsFaulted)
                 {
-                    MainActivity.LogDebug(task.Exception.GetType().Name);
-                    MainActivity.LogDebug(task.Exception.Message);
+                    Logger.Debug(task.Exception.GetType().Name);
+                    Logger.Debug(task.Exception.Message);
                     if (fromAutoJoin)
                     {
                         if (task.Exception != null && task.Exception.InnerException != null && task.Exception.InnerException.InnerException != null)
                         {
                             if (task.Exception.InnerException.InnerException is Soulseek.RoomJoinForbiddenException)
                             {
-                                MainActivity.LogDebug("forbidden room exception!! remove it from autojoin.." + joining);
-                                MainActivity.LogFirebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
+                                Logger.Debug("forbidden room exception!! remove it from autojoin.." + joining);
+                                Logger.Firebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
                                 if (AutoJoinRoomNames != null && AutoJoinRoomNames.Contains(roomName))
                                 {
                                     AutoJoinRoomNames.Remove(roomName);
@@ -1569,10 +1406,10 @@ namespace Seeker.Chatroom
                         }
                         else
                         {
-                            MainActivity.LogDebug("failed to join autojoin... join?" + joining);
+                            Logger.Debug("failed to join autojoin... join?" + joining);
                         }
                     }
-                    MainActivity.LogDebug("join / leave task failed... join?" + joining);
+                    Logger.Debug("join / leave task failed... join?" + joining);
                 }
                 else
                 {
@@ -1600,7 +1437,7 @@ namespace Seeker.Chatroom
                     {
                         if (joining)
                         {
-                            MainActivity.LogDebug("WRONG TASK TYPE");
+                            Logger.Debug("WRONG TASK TYPE");
                         }
                         else
                         {
@@ -1615,7 +1452,7 @@ namespace Seeker.Chatroom
                     {
                         //this one will just update the existing list 
                         // marking the now joined rooms as such.
-                        MainActivity.LogDebug("FULL JOINED CHANGED");
+                        Logger.Debug("FULL JOINED CHANGED");
                         ChatroomController.UpdateJoinedRooms();
                     }
                     else if (isCurrentChanged)

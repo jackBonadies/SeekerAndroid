@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Seeker.Helpers;
 
 namespace Seeker.Messages
 {
@@ -48,8 +49,8 @@ namespace Seeker.Messages
                 {
                     //error
                     bool isNull = MessagesActivity.DELETED_DATA == null;
-                    MainActivity.LogFirebase("failure on undo uname:" + MessagesActivity.DELETED_USERNAME + " " + isNull + " " + MessagesActivity.DELETED_POSITION);
-                    Toast.MakeText(v.Context, Resource.String.failed_to_undo, ToastLength.Short).Show();
+                    Logger.Firebase("failure on undo uname:" + MessagesActivity.DELETED_USERNAME + " " + isNull + " " + MessagesActivity.DELETED_POSITION);
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
                     return;
                 }
                 MessageController.Messages[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_DATA;
@@ -89,7 +90,7 @@ namespace Seeker.Messages
         {
             base.OnChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             View itemView = viewHolder.ItemView;
-            MainActivity.LogDebug("dX" + dX);
+            Logger.Debug("dX" + dX);
             if (dX > 0)
             {
                 this.colorDrawable.SetBounds(itemView.Left, itemView.Top, itemView.Left + (int)dX, itemView.Bottom);
@@ -100,7 +101,7 @@ namespace Seeker.Messages
                 double margin = (itemView.Bottom - itemView.Top) * .15; //BOTTOM IS GREATER THAN TOP
                 int clipBounds = (int)((itemView.Bottom - itemView.Top) - 2 * margin);
                 int level = Math.Min((int)(Math.Abs((dX + margin) / (clipBounds)) * 10000), 10000);
-                MainActivity.LogDebug("level" + level);
+                Logger.Debug("level" + level);
                 if (level < 0)
                 {
                     level = 0;
@@ -251,7 +252,7 @@ namespace Seeker.Messages
             viewUsername.Text = username;
             Message m = MessageController.Messages[username].Last();
 
-            viewDateTimeAgo.Text = CommonHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
+            viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
             if (MessageController.UnreadUsernames.ContainsKey(username))
             {

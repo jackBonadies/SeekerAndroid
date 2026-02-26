@@ -25,6 +25,19 @@ namespace Soulseek.Diagnostics
     internal interface IDiagnosticFactory
     {
         /// <summary>
+        ///     Creates a <see cref="DiagnosticLevel.Trace"/> diagnostic message.
+        /// </summary>
+        /// <param name="message">The desired message.</param>
+        void Trace(string message);
+
+        /// <summary>
+        ///     Creates a <see cref="DiagnosticLevel.Trace"/> diagnostic message.
+        /// </summary>
+        /// <param name="message">The desired message.</param>
+        /// <param name="exception">An optional Exception.</param>
+        void Trace(string message, Exception exception);
+
+        /// <summary>
         ///     Creates a <see cref="DiagnosticLevel.Debug"/> diagnostic message.
         /// </summary>
         /// <param name="message">The desired message.</param>

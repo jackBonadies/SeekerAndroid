@@ -1,8 +1,11 @@
 ﻿using AndroidX.DocumentFile.Provider;
+using Seeker.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Seeker.Helpers;
 
+using Common;
 namespace Seeker
 {
     /// <summary>
@@ -20,13 +23,13 @@ namespace Seeker
 
         public static void CleanupEntry(IEnumerable<TransferItem> tis)
         {
-            MainActivity.LogDebug("launching cleanup entry");
+            Logger.Debug("launching cleanup entry");
             System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, tis);
         }
 
         public static void CleanupEntry(TransferItem ti)
         {
-            MainActivity.LogDebug("launching cleanup entry");
+            Logger.Debug("launching cleanup entry");
             System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, ti);
         }
 
@@ -34,7 +37,7 @@ namespace Seeker
         {
             try
             {
-                MainActivity.LogDebug("in cleanup entry");
+                Logger.Debug("in cleanup entry");
                 if (state is IEnumerable<TransferItem> tis)
                 {
                     PerfomCleanupItems(tis.ToList()); //added tolist() due to enumerable exception.
@@ -46,13 +49,13 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase("PeformCleanup: " + e.Message + e.StackTrace);
+                Logger.Firebase("PeformCleanup: " + e.Message + e.StackTrace);
             }
         }
 
         public IEnumerable<TransferItem> GetTransferItemsForUser(string username)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetTransferItemsForUser(username);
             }
@@ -62,27 +65,44 @@ namespace Seeker
             }
         }
 
+        private static TransferUIState CreateUIState()
+        {
+            var vs = TransfersViewState.Instance;
+            return new TransferUIState
+            {
+                GroupByFolder = vs.GroupByFolder,
+                CurrentlySelectedFolder = vs.GetCurrentlySelectedFolder(),
+                BatchSelectedItems = vs.BatchSelectedItems,
+            };
+        }
+
         public void CancelSelectedItems(bool prepareForClean)
         {
-            if (TransfersFragment.InUploadsMode)
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                Uploads.CancelSelectedItems(prepareForClean);
+                Uploads.CancelSelectedItems(uiState, prepareForClean);
             }
             else
             {
-                Downloads.CancelSelectedItems(prepareForClean);
+                Downloads.CancelSelectedItems(uiState, prepareForClean);
             }
         }
 
         public void ClearSelectedItemsAndClean()
         {
-            if (TransfersFragment.InUploadsMode)
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                Uploads.ClearSelectedItemsAndClean();
+                Uploads.ClearSelectedItemsReturnCleanupItems(uiState);
             }
             else
             {
-                Downloads.ClearSelectedItemsAndClean();
+                var cleanupItems = Downloads.ClearSelectedItemsReturnCleanupItems(uiState);
+                if (cleanupItems.Any())
+                {
+                    CleanupEntry(cleanupItems);
+                }
             }
         }
 
@@ -96,14 +116,14 @@ namespace Seeker
 
         public static void PerformCleanupItem(TransferItem ti)
         {
-            MainActivity.LogDebug("cleaning up: " + ti.Filename);
+            Logger.Debug("cleaning up: " + ti.Filename);
             //if (TransfersFragment.TransferItemManagerDL.ExistsAndInProcessing(ti.FullFilename, ti.Username, ti.Size))
             //{
             //    //this should rarely happen. its a race condition if someone clears a download and then goes back to the person they downloaded from to re-download.
             //    return;
             //}
             //api 21+
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 DocumentFile parent = null;
                 Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);
@@ -119,14 +139,14 @@ namespace Seeker
                 DocumentFile df = parent.FindFile(ti.Filename);
                 if (df == null || !df.Exists())
                 {
-                    MainActivity.LogDebug("delete failed - null or not exist");
-                    MainActivity.LogInfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + SeekerState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
+                    Logger.Debug("delete failed - null or not exist");
+                    Logger.InfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + PreferencesState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
                 }
                 if (!df.Delete()) //nullref
                 {
-                    MainActivity.LogDebug("delete failed");
+                    Logger.Debug("delete failed");
                 }
-                MainActivity.DeleteParentIfEmpty(parent);
+                FileSystemService.DeleteParentIfEmpty(parent);
             }
             else
             {
@@ -134,13 +154,13 @@ namespace Seeker
                 Java.IO.File f = parent.ListFiles().First((file) => file.Name == ti.Filename);
                 if (f == null || !f.Exists())
                 {
-                    MainActivity.LogDebug("delete failed LEGACY - null or not exist");
+                    Logger.Debug("delete failed LEGACY - null or not exist");
                 }
                 if (!f.Delete())
                 {
-                    MainActivity.LogDebug("delete failed LEGACY");
+                    Logger.Debug("delete failed LEGACY");
                 }
-                MainActivity.DeleteParentIfEmpty(parent);
+                FileSystemService.DeleteParentIfEmpty(parent);
             }
         }
 
@@ -160,11 +180,7 @@ namespace Seeker
 
         public static bool NeedsCleanUp(TransferItem ti)
         {
-            if (ti != null && ti.IncompleteParentUri != null && !ti.CancelAndClearFlag) //if cancel and clear flag is set then it will be cleaned up on continuation. that way we are sure the stream is closed.
-            {
-                return true;
-            }
-            return false;
+            return TransferItemManager.NeedsCleanUp(ti);
         }
 
 
@@ -182,13 +198,14 @@ namespace Seeker
 
         public object GetUICurrentList()
         {
-            if (TransfersFragment.InUploadsMode)
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                return Uploads.GetUICurrentList();
+                return Uploads.GetUICurrentList(uiState);
             }
             else
             {
-                return Downloads.GetUICurrentList();
+                return Downloads.GetUICurrentList(uiState);
             }
         }
 
@@ -206,13 +223,14 @@ namespace Seeker
 
         public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
         {
-            if (TransfersFragment.InUploadsMode && ti.IsUpload())
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode && ti.IsUpload())
             {
-                return Uploads.GetUserIndexForTransferItem(ti);
+                return Uploads.GetUserIndexForTransferItem(ti, uiState);
             }
-            else if (!TransfersFragment.InUploadsMode && !(ti.IsUpload()))
+            else if (!TransfersViewState.Instance.InUploadsMode && !(ti.IsUpload()))
             {
-                return Downloads.GetUserIndexForTransferItem(ti);
+                return Downloads.GetUserIndexForTransferItem(ti, uiState);
             }
             else
             {
@@ -222,25 +240,27 @@ namespace Seeker
 
         public ITransferItem GetItemAtUserIndex(int position)
         {
-            if (TransfersFragment.InUploadsMode)
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                return Uploads.GetItemAtUserIndex(position);
+                return Uploads.GetItemAtUserIndex(position, uiState);
             }
             else
             {
-                return Downloads.GetItemAtUserIndex(position);
+                return Downloads.GetItemAtUserIndex(position, uiState);
             }
         }
 
         public object RemoveAtUserIndex(int position)
         {
-            if (TransfersFragment.InUploadsMode)
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                return Uploads.RemoveAtUserIndex(position);
+                return Uploads.RemoveAtUserIndex(position, uiState);
             }
             else
             {
-                return Downloads.RemoveAtUserIndex(position);
+                return Downloads.RemoveAtUserIndex(position, uiState);
             }
         }
 
@@ -284,7 +304,7 @@ namespace Seeker
 
         public void CancelFolder(FolderItem fi)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.CancelFolder(fi);
             }
@@ -301,7 +321,7 @@ namespace Seeker
         /// <param name="prepareForClear"></param>
         public void CancelFolder(FolderItem fi, bool prepareForClear = false)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.CancelFolder(fi);
             }
@@ -313,7 +333,7 @@ namespace Seeker
 
         public void ClearAllFromFolder(FolderItem fi)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.ClearAllFromFolder(fi);
             }
@@ -325,19 +345,23 @@ namespace Seeker
 
         public void ClearAllFromFolderAndClean(FolderItem fi)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 Uploads.ClearAllFromFolder(fi);
             }
             else
             {
-                Downloads.ClearAllFromFolderAndClean(fi);
+                var cleanupItems = Downloads.ClearAllFromFolderReturnCleanupItems(fi);
+                if (cleanupItems.Any())
+                {
+                    CleanupEntry(cleanupItems);
+                }
             }
         }
 
         public int GetIndexForFolderItem(FolderItem folderItem)
         {
-            if (TransfersFragment.InUploadsMode)
+            if (TransfersViewState.Instance.InUploadsMode)
             {
                 return Uploads.GetIndexForFolderItem(folderItem);
             }
@@ -349,13 +373,14 @@ namespace Seeker
 
         public int GetUserIndexForITransferItem(ITransferItem iti)
         {
-            if (TransfersFragment.InUploadsMode)
+            var uiState = CreateUIState();
+            if (TransfersViewState.Instance.InUploadsMode)
             {
-                return Uploads.GetUserIndexForITransferItem(iti);
+                return Uploads.GetUserIndexForITransferItem(iti, uiState);
             }
             else
             {
-                return Downloads.GetUserIndexForITransferItem(iti);
+                return Downloads.GetUserIndexForITransferItem(iti, uiState);
             }
         }
     }

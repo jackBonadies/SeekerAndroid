@@ -61,11 +61,11 @@ namespace Common
                     List<SearchResponse> splitSearchResponses = new List<SearchResponse>();
                     foreach (var pair in folderFilePairs)
                     {
-                        splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, pair.Value, null));
+                        splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.HasFreeUploadSlot, origResponse.UploadSpeed, origResponse.QueueLength, pair.Value, null));
                     }
                     foreach (var pair in lockedFolderFilePairs)
                     {
-                        splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.FreeUploadSlots, origResponse.UploadSpeed, origResponse.QueueLength, null, pair.Value));
+                        splitSearchResponses.Add(new SearchResponse(origResponse.Username, origResponse.Token, origResponse.HasFreeUploadSlot, origResponse.UploadSpeed, origResponse.QueueLength, null, pair.Value));
                     }
                     //MainActivity.LogDebug("User: " + origResponse.Username + " got split into " + folderFilePairs.Keys.Count);
                     return new Tuple<bool, List<SearchResponse>>(true, splitSearchResponses);

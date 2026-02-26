@@ -35,12 +35,14 @@ namespace Soulseek
         /// <summary>
         ///     Initializes a new instance of the <see cref="SearchInternal"/> class.
         /// </summary>
-        /// <param name="searchText">The text for which to search.</param>
+        /// <param name="query">The search query.</param>
+        /// <param name="scope">The search scope.</param>
         /// <param name="token">The unique search token.</param>
         /// <param name="options">The options for the search.</param>
-        public SearchInternal(string searchText, int token, SearchOptions options = null)
+        public SearchInternal(SearchQuery query, SearchScope scope, int token, SearchOptions options = null)
         {
-            SearchText = searchText;
+            Query = query;
+            Scope = scope;
             Token = token;
 
             Options = options ?? new SearchOptions();
@@ -53,7 +55,6 @@ namespace Soulseek
             };
 
             SearchTimeoutTimer.Elapsed += (sender, e) => { Complete(SearchStates.TimedOut); };
-            SearchTimeoutTimer.Reset();
         }
 
         /// <summary>
@@ -72,6 +73,11 @@ namespace Soulseek
         public SearchOptions Options { get; }
 
         /// <summary>
+        ///     Gets the search query.
+        /// </summary>
+        public SearchQuery Query { get; }
+
+        /// <summary>
         ///     Gets the current number of responses received.
         /// </summary>
         public int ResponseCount => responseCount;
@@ -82,14 +88,14 @@ namespace Soulseek
         public Action<SearchResponse> ResponseReceived { get; set; }
 
         /// <summary>
-        ///     Gets the text for which to search.
+        ///     Gets the scope of the search.
         /// </summary>
-        public string SearchText { get; }
+        public SearchScope Scope { get; }
 
         /// <summary>
-        ///     Gets or sets the state of the search.
+        ///     Gets the state of the search.
         /// </summary>
-        public SearchStates State { get; set; } = SearchStates.None;
+        public SearchStates State { get; private set; } = SearchStates.None;
 
         /// <summary>
         ///     Gets the unique identifier for the search.
@@ -146,6 +152,22 @@ namespace Soulseek
         }
 
         /// <summary>
+        ///     Sets the Search <see cref="State"/>.
+        /// </summary>
+        /// <param name="state">The state to which the Search is to be set.</param>
+        public void SetState(SearchStates state)
+        {
+            var previousState = State;
+            State = state;
+
+            // ensure the timeout timer is reset only one time, immediately after the search request is sent to the server.
+            if (previousState != SearchStates.InProgress && State == SearchStates.InProgress)
+            {
+                SearchTimeoutTimer.Reset();
+            }
+        }
+
+        /// <summary>
         ///     Adds the specified <paramref name="response"/> to the list of responses after applying the filters specified in
         ///     the search options.
         /// </summary>
@@ -185,7 +207,7 @@ namespace Soulseek
                 Interlocked.Add(ref lockedFileCount, response.LockedFileCount);
 
                 ResponseReceived?.Invoke(response);
-                SearchTimeoutTimer.Reset(); // TODO firebase this is disposed
+                SearchTimeoutTimer.Reset();
 
                 if (responseCount >= Options.ResponseLimit)
                 {
@@ -206,10 +228,11 @@ namespace Soulseek
         public async Task WaitForCompletion(CancellationToken cancellationToken)
         {
             var cancellationTaskCompletionSource = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var taskCompletionSource = TaskCompletionSource;
 
             using (cancellationToken.Register(() => cancellationTaskCompletionSource.TrySetException(new OperationCanceledException("Operation cancelled"))))
             {
-                var completedTask = await Task.WhenAny(TaskCompletionSource.Task, cancellationTaskCompletionSource.Task).ConfigureAwait(false);
+                var completedTask = await Task.WhenAny(taskCompletionSource.Task, cancellationTaskCompletionSource.Task).ConfigureAwait(false);
                 await completedTask.ConfigureAwait(false);
             }
         }
@@ -218,7 +241,6 @@ namespace Soulseek
         {
             if (Options.FilterResponses && (
                     response.FileCount + response.LockedFileCount < Options.MinimumResponseFileCount ||
-                    response.FreeUploadSlots < Options.MinimumPeerFreeUploadSlots ||
                     response.UploadSpeed < Options.MinimumPeerUploadSpeed ||
                     response.QueueLength >= Options.MaximumPeerQueueLength))
             {

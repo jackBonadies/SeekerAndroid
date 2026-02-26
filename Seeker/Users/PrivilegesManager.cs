@@ -1,10 +1,13 @@
 ﻿using Android.Content;
+using Seeker.Services;
 using Android.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Managers
 {
     public class PrivilegesManager
@@ -35,9 +38,9 @@ namespace Seeker.Managers
             lock (PrivilegedUsersLock)
             {
                 PrivilegedUsers = privUsers;
-                if (SeekerState.Username != null && SeekerState.Username != string.Empty)
+                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
                 {
-                    IsPrivileged = CheckIfPrivileged(SeekerState.Username);
+                    IsPrivileged = CheckIfPrivileged(PreferencesState.Username);
                     if (IsPrivileged)
                     {
                         GetPrivilegesAPI(false);
@@ -160,12 +163,12 @@ namespace Seeker.Managers
                         {
                             if (t.Exception.InnerException is TimeoutException)
                             {
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
+                                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed) + ": " + SeekerApplication.GetString(Resource.String.timeout), ToastLength.Long);
                             }
                             else
                             {
-                                MainActivity.LogFirebase("Failed to get privileges" + t.Exception.InnerException.Message);
-                                SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed), ToastLength.Long);
+                                Logger.Firebase("Failed to get privileges" + t.Exception.InnerException.Message);
+                                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed), ToastLength.Long);
                             }
                         }
                         return;
@@ -184,7 +187,7 @@ namespace Seeker.Managers
                         LastCheckTime = DateTime.UtcNow;
                         if (feedback)
                         {
-                            SeekerApplication.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) + ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(), ToastLength.Long);
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) + ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(), ToastLength.Long);
                         }
                         PrivilegesChecked?.Invoke(null, new EventArgs());
                     }
@@ -193,15 +196,15 @@ namespace Seeker.Managers
 
         public void GetPrivilegesAPI(bool feedback)
         {
-            if (!SeekerState.currentlyLoggedIn)
+            if (!PreferencesState.CurrentlyLoggedIn)
             {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_check_privileges, ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_check_privileges), ToastLength.Short);
                 return;
             }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -209,12 +212,7 @@ namespace Seeker.Managers
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-
-                            Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.failed_to_connect, ToastLength.Short).Show();
-
-                        });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
                     SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });

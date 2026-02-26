@@ -78,7 +78,7 @@ namespace Seeker
             newSearch.Click += NewSearch_Click;
             //newSearch.CompoundDrawablePadding = 6;
             Android.Graphics.Drawables.Drawable drawable = null;
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Lollipop)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 drawable = this.Context.Resources.GetDrawable(Resource.Drawable.ic_add_black_24dp, this.Context.Theme);
             }
@@ -107,7 +107,7 @@ namespace Seeker
         {
             base.OnResume();
 
-            MainActivity.LogDebug("OnResume ran");
+            Logger.Debug("OnResume ran");
             //this.View.ViewTreeObserver.AddOnGlobalLayoutListener(this);
             //Window window = Dialog.Window;//  getDialog().getWindow();
 
@@ -119,7 +119,7 @@ namespace Seeker
 
             Dialog?.SetSizeProportional(.9, -1);
 
-            MainActivity.LogDebug("OnResume End");
+            Logger.Debug("OnResume End");
         }
 
         private List<int> GetSearchTabIds()

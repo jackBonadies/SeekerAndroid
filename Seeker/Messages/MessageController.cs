@@ -11,7 +11,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Seeker.Helpers;
+using Seeker.Services;
 
+using Common;
+using Common.Messages;
 namespace Seeker.Messages
 {
     public static class MessageController
@@ -55,7 +59,7 @@ namespace Seeker.Messages
             {
                 if (SeekerApplication.IsUserInIgnoreList(e.Username))
                 {
-                    MainActivity.LogDebug("IGNORED PM received: " + e.Username);
+                    Logger.Debug("IGNORED PM received: " + e.Username);
                     return;
                 }
 
@@ -63,19 +67,19 @@ namespace Seeker.Messages
                 Message msg = new Message(e.Username, e.Id, e.Replayed, e.Timestamp.ToLocalTime(), e.Timestamp, e.Message, false);
                 lock (MessageListLockObject)
                 {
-                    if (SeekerState.Username == null || SeekerState.Username == string.Empty)
+                    if (PreferencesState.Username == null || PreferencesState.Username == string.Empty)
                     {
-                        MainActivity.LogFirebase("we received a message while our username is still null");
+                        Logger.Firebase("we received a message while our username is still null");
                     }
-                    else if (!RootMessages.ContainsKey(SeekerState.Username))
+                    else if (!RootMessages.ContainsKey(PreferencesState.Username))
                     {
-                        RootMessages[SeekerState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessagesUsername = SeekerState.Username;
-                        Messages = RootMessages[SeekerState.Username];
+                        RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        MessagesUsername = PreferencesState.Username;
+                        Messages = RootMessages[PreferencesState.Username];
                     }
-                    else if (RootMessages.ContainsKey(SeekerState.Username))
+                    else if (RootMessages.ContainsKey(PreferencesState.Username))
                     {
-                        Messages = RootMessages[SeekerState.Username];
+                        Messages = RootMessages[PreferencesState.Username];
                     }
 
                     if (Messages.ContainsKey(e.Username))
@@ -104,7 +108,7 @@ namespace Seeker.Messages
                 }
                 catch (Exception error)
                 {
-                    MainActivity.LogFirebase("MessageReceived raise event failed: " + error.Message);
+                    Logger.Firebase("MessageReceived raise event failed: " + error.Message);
                 }
 
                 try
@@ -113,12 +117,12 @@ namespace Seeker.Messages
                 }
                 catch (Exception err)
                 {
-                    MainActivity.LogFirebase("AcknowledgePrivateMessageAsync: " + err.Message);
+                    Logger.Firebase("AcknowledgePrivateMessageAsync: " + err.Message);
                 }
             }
             catch (Exception exc)
             {
-                MainActivity.LogFirebase("msg received:" + exc.Message + exc.StackTrace);
+                Logger.Firebase("msg received:" + exc.Message + exc.StackTrace);
             }
         }
 
@@ -131,22 +135,15 @@ namespace Seeker.Messages
         {
             if (t.IsFaulted)
             {
-                MainActivity.LogFirebase("AcknowledgePrivateMessageAsync faulted: " + t.Exception.Message + t.Exception.StackTrace);
+                Logger.Firebase("AcknowledgePrivateMessageAsync faulted: " + t.Exception.Message + t.Exception.StackTrace);
             }
         }
 
-        public struct MessageNotifExtended
-        {
-            public bool IsSpecialMessage;
-            public string Username;
-            public bool IsOurMessage; //You
-            public string MessageText;
-        }
 
         private static Color GetYouTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use secondary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
                 if (useNightColors)
                 {
@@ -180,7 +177,7 @@ namespace Seeker.Messages
         private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
                 if (useNightColors)
                 {
@@ -203,7 +200,7 @@ namespace Seeker.Messages
         private static Color GetActionTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use primary color
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
                 return GetOtherTextColor(useNightColors, contextToUse);
             }
@@ -350,7 +347,7 @@ namespace Seeker.Messages
         /// <returns></returns>
         public static bool GetIfSystemIsInNightMode(Context contextToUse)
         {
-            if (SeekerState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
+            if (PreferencesState.DayNightMode == (int)(AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem))
             {
                 //if we follow the system then we can just return whether our app is in night mode.
                 return DownloadDialog.InNightMode(contextToUse);
@@ -371,12 +368,10 @@ namespace Seeker.Messages
             }
         }
 
-
-
-        public static string CHANNEL_ID = "Private Messages ID";
-        public static string CHANNEL_NAME = "Private Messages";
-        public static string FromUserName = "FromThisUser";
-        public static string ComingFromMessageTapped = "FromAMessage";
+        public const string CHANNEL_ID = "Private Messages ID";
+        public const string CHANNEL_NAME = "Private Messages";
+        public const string FromUserName = "FromThisUser";
+        public const string ComingFromMessageTapped = "FromAMessage";
 
         public static void ShowNotificationLogic(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureReason = "", Context broadcastContext = null)
         {
@@ -399,7 +394,7 @@ namespace Seeker.Messages
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(contextToUse);
 
                 //no direct reply in <26 and so the actions are rather pointless..
-                if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+                if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
 
                     bool systemIsInNightMode = GetIfSystemIsInNightMode(contextToUse);
@@ -483,7 +478,7 @@ namespace Seeker.Messages
                         .SetDeleteIntent(clearNotifPendingIntent);
 
                     //if android 12+ let the system pick the color.  it will make it Android.Resource.Color.SystemAccent1100 if dark Android.Resource.Color.SystemAccent1600 otherwise.
-                    if (Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.S)
+                    if (!OperatingSystem.IsAndroidVersionAtLeast(31))
                     {
                         builder.SetColor(GetNiceAndroidBlueNotifColor(systemIsInNightMode, contextToUse));
                     }
@@ -502,14 +497,14 @@ namespace Seeker.Messages
             }
             catch (System.Exception e)
             {
-                MainActivity.LogFirebase("ShowNotification failed: " + e.Message + e.StackTrace);
+                Logger.Firebase("ShowNotification failed: " + e.Message + e.StackTrace);
             }
 
         }
 
         public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "", Context broadcastContext = null)
         {
-            MessagesInnerFragment.BroadcastFriendlyRunOnUiThread(() =>
+            BroadcastFriendlyRunOnUiThread(() =>
             {
                 ShowNotificationLogic(msg, fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
             });
@@ -530,12 +525,7 @@ namespace Seeker.Messages
             }
             if (messagesString != null && messagesString != string.Empty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = sharedPrefs.Edit();
-                    editor.PutString(KeyConsts.M_Messages, messagesString);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveMessages(messagesString);
             }
         }
 
@@ -550,10 +540,10 @@ namespace Seeker.Messages
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
-                if (!string.IsNullOrEmpty(SeekerState.Username) && RootMessages.ContainsKey(SeekerState.Username))
+                if (!string.IsNullOrEmpty(PreferencesState.Username) && RootMessages.ContainsKey(PreferencesState.Username))
                 {
-                    Messages = RootMessages[SeekerState.Username];
-                    MessagesUsername = SeekerState.Username;
+                    Messages = RootMessages[PreferencesState.Username];
+                    MessagesUsername = PreferencesState.Username;
                 }
             }
         }
@@ -573,24 +563,14 @@ namespace Seeker.Messages
             }
             if (UnreadUsernames.IsEmpty)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = sharedPrefs.Edit();
-                    editor.PutString(KeyConsts.M_UnreadMessageUsernames, String.Empty);
-                    bool success = editor.Commit();
-                }
+                PreferencesManager.SaveUnreadMessageUsernames(String.Empty);
             }
             else
             {
                 var messagesString = SerializationHelper.SaveUnreadUsernamesToString(UnreadUsernames);
                 if (!string.IsNullOrEmpty(messagesString))
                 {
-                    lock (MainActivity.SHARED_PREF_LOCK)
-                    {
-                        var editor = sharedPrefs.Edit();
-                        editor.PutString(KeyConsts.M_UnreadMessageUsernames, messagesString);
-                        bool success = editor.Commit();
-                    }
+                    PreferencesManager.SaveUnreadMessageUsernames(messagesString);
                 }
             }
         }
@@ -608,7 +588,7 @@ namespace Seeker.Messages
                     //if we are already at this user then dont set as unread.
                     return;
                 }
-                MainActivity.LogDebug("set");
+                Logger.Debug("set");
                 UnreadUsernames.TryAdd(username, 0);
                 SaveUnreadStateDict(SeekerState.SharedPreferences);
             }
@@ -622,10 +602,150 @@ namespace Seeker.Messages
             }
             else
             {
-                MainActivity.LogDebug("unset");
+                Logger.Debug("unset");
                 UnreadUsernames.TryRemove(username, out _);
                 SaveUnreadStateDict(SeekerState.SharedPreferences);
             }
+        }
+
+        public static void BroadcastFriendlyRunOnUiThread(Action action)
+        {
+            if (SeekerState.ActiveActivityRef != null)
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(action);
+            }
+            else
+            {
+                new Handler(Looper.MainLooper).Post(action);
+            }
+        }
+
+        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
+        {
+            //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
+            //then soulseekclient will be good, but the activeActivityRef will be null. so use the broadcastContext.
+
+            Android.Content.Context contextToUse = broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext;
+
+            Logger.Debug("is soulseekclient null: " + (SeekerState.SoulseekClient == null).ToString());
+            Logger.Debug("is ActiveActivityRef null: " + (SeekerState.ActiveActivityRef == null).ToString());
+
+
+            if (string.IsNullOrEmpty(msg.MessageText))
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_text_to_send), ToastLength.Short);
+                if (fromDirectReplyAction)
+                {
+                    ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
+                }
+                return;
+            }
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                Logger.Debug("not currently logged in");
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
+                if (fromDirectReplyAction)
+                {
+                    ShowNotification(msg, true, true, "Failure - Currently Logged Out.");
+                }
+                return;
+            }
+
+            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
+            {
+
+                Logger.Debug("our continue with action is occuring!...");
+                if (t.IsFaulted)
+                {
+                    if (!(t.Exception.InnerException is FaultPropagationException))
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                    }
+                    if (fromDirectReplyAction)
+                    {
+                        ShowNotification(msg, true, true, "Failure - Cannot Log In.");
+                    }
+                    throw new FaultPropagationException();
+                }
+                BroadcastFriendlyRunOnUiThread(new Action(() =>
+                {
+                    SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
+                }));
+            });
+
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            {
+                Logger.Debug("currently logged in but disconnected...");
+
+                //we disconnected. login then do the rest.
+                //this is due to temp lost connection
+                Task t;
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
+                {
+                    return;
+                }
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
+            }
+            else
+            {
+                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
+                {
+                    Logger.Debug("on finish log in we will do it");
+                    return;
+                }
+                else
+                {
+                    SendMessageLogic(msg, fromDirectReplyAction);
+                }
+            }
+
+        }
+
+        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Android.Content.Context broadcastContext = null) //you can start out with a message...
+        {
+            Logger.Debug("SendMessageLogic");
+
+            string usernameToMessage = msg.Username;
+            if (Messages.Keys.Contains(usernameToMessage))
+            {
+                Messages[usernameToMessage].Add(msg);
+            }
+            else
+            {
+                Messages[usernameToMessage] = new List<Message>(); //our first message to them..
+                Messages[usernameToMessage].Add(msg);
+            }
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            RaiseMessageReceived(msg);
+            Action<Task> continueWithAction = new Action<Task>((Task t) =>
+            {
+                if (t.IsFaulted)
+                {
+                    Logger.Debug("faulted " + t.Exception.ToString());
+                    Logger.Debug("faulted " + t.Exception.InnerException.Message.ToString());
+                    msg.SentMsgStatus = SentStatus.Failed;
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_send_message), ToastLength.Long); //TODO
+
+                    if (fromDirectReplyAction)
+                    {
+                        ShowNotification(msg, true, true, "Failure - Cannot Send Message.", broadcastContext);
+                    }
+                }
+                else
+                {
+                    Logger.Debug("did not fault");
+                    msg.SentMsgStatus = SentStatus.Success;
+
+                    if (fromDirectReplyAction)
+                    {
+                        ShowNotification(msg, true, false, string.Empty, broadcastContext);
+                    }
+                }
+                SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                RaiseMessageReceived(msg);
+            });
+            Logger.Debug("useranme to mesasge " + usernameToMessage);
+            SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
         }
     }
 }

@@ -70,5 +70,10 @@ namespace Soulseek
         ///     Completed due to error.
         /// </summary>
         Errored = 128,
+
+        /// <summary>
+        ///     Queued.
+        /// </summary>
+        Queued = 256,
     }
 }

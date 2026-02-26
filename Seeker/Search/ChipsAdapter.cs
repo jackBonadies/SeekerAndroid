@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Common;
 namespace Seeker
 {
 
@@ -22,10 +23,10 @@ namespace Seeker
         /// <param name="searchTerm"></param>
         /// <param name="smartFilterOptions"></param>
         /// <returns></returns>
-        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, SeekerState.SmartFilterState smartFilterOptions)
+        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, PreferencesState.SmartFilterState smartFilterOptions)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-            bool hideHidden = SeekerState.HideLockedResultsInSearch;
+            bool hideHidden = PreferencesState.HideLockedResultsInSearch;
 
             //this is relevant to both
             if (smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
@@ -43,7 +44,7 @@ namespace Seeker
                     //create file type, file num, and keyword buckets.
                     //get counts to show in order
                     //there are parent child relationships between 'fileType' and 'fileType (vbr/kbps/samples/depth)'
-                    string ftype = searchResponse.GetDominantFileType(hideHidden, out _);
+                    string ftype = searchResponse.GetDominantFileTypeAndBitRate(hideHidden, out _);
                     if (string.IsNullOrEmpty(ftype))
                     {
                         continue;
@@ -242,7 +243,7 @@ namespace Seeker
 #if DEBUG
                     foreach (string ftype in sortedListPass1str)
                     {
-                        MainActivity.LogDebug(ftype + " : " + fileTypeCounts[ftype]);
+                        Logger.Debug(ftype + " : " + fileTypeCounts[ftype]);
                     }
 #endif
 
@@ -255,13 +256,13 @@ namespace Seeker
                     if (sortedListPass1str.Count > 14)
                     {
                         //a lot of times we have wayyy too many mp3 varients.
-                        //if more than 5 varients or if 2+ varients are less than 7.5% then group them up.
-                        List<Tuple<string, int, int>> varientsToGroupUp = new List<Tuple<string, int, int>>();
+                        //if more than 5 variants or if 2+ variants are less than 7.5% then group them up.
+                        List<Tuple<string, int, int>> variantsToGroupUp = new List<Tuple<string, int, int>>();
                         string currentBase = null;
                         int currentMax = -1;
                         int counter = 0;
                         bool cutoffConditionReached = false;
-                        int varientsPastCutoff = 0;
+                        int variantsPastCutoff = 0;
                         foreach (string ftype in sortedListPass1str)
                         {
 
@@ -270,18 +271,18 @@ namespace Seeker
                                 counter++;
                                 if (counter > 5 || (double)(fileTypeCounts[ftype]) / currentMax < .075)
                                 {
-                                    varientsPastCutoff++;
+                                    variantsPastCutoff++;
                                 }
                             }
                             else
                             {
                                 //we finished this grouping if applicable...
-                                if (currentBase != null && varientsPastCutoff >= 2)
+                                if (currentBase != null && variantsPastCutoff >= 2)
                                 {
-                                    varientsToGroupUp.Add(new Tuple<string, int, int>(currentBase, varientsPastCutoff, counter));
+                                    variantsToGroupUp.Add(new Tuple<string, int, int>(currentBase, variantsPastCutoff, counter));
                                 }
                                 currentBase = null;
-                                varientsPastCutoff = 0;
+                                variantsPastCutoff = 0;
                                 counter = 0;
                             }
 
@@ -294,7 +295,7 @@ namespace Seeker
                         }
 
                         //get the chips here...
-                        foreach (var tup in varientsToGroupUp)
+                        foreach (var tup in variantsToGroupUp)
                         {
                             int start_all = sortedListPass1str.IndexOf(tup.Item1 + " - all");
                             int start = start_all + tup.Item3 - tup.Item2;
@@ -580,7 +581,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                MainActivity.LogFirebase("keywords failed " + ex.Message + ex.StackTrace);
+                Logger.Firebase("keywords failed " + ex.Message + ex.StackTrace);
                 return new List<Tuple<string, HashSet<string>>>();
             }
         }
@@ -591,17 +592,17 @@ namespace Seeker
 
             public static string GetInvarientKey(string key)
             {
-                string invarientKey = key.ToLower();
-                invarientKey = invarientKey.Replace("and", "&");
-                invarientKey = invarientKey.Replace(",", "");  //todo more efficient replace...
-                invarientKey = invarientKey.Replace("'", "");
-                invarientKey = invarientKey.Replace("-", "");
-                invarientKey = invarientKey.Replace("_", "");
+                string invariantKey = key.ToLower();
+                invariantKey = invariantKey.Replace("and", "&");
+                invariantKey = invariantKey.Replace(",", "");  //todo more efficient replace...
+                invariantKey = invariantKey.Replace("'", "");
+                invariantKey = invariantKey.Replace("-", "");
+                invariantKey = invariantKey.Replace("_", "");
 
                 //sufjan.stevens 
 
                 //group these chars
-                switch (invarientKey)
+                switch (invariantKey)
                 {
                     case "cd1":
                         return "disc 1";
@@ -622,7 +623,7 @@ namespace Seeker
                     case "v.a.":
                         return "V.A.";
                 }
-                return invarientKey;
+                return invariantKey;
             }
 
             public static bool IsCommonAttribute(string key)
@@ -807,16 +808,16 @@ namespace Seeker
             }
 
 
-            public Dictionary<string, int> invarientKeyCounts = new Dictionary<string, int>();
+            public Dictionary<string, int> invariantKeyCounts = new Dictionary<string, int>();
             public Dictionary<string, int> realCounts = new Dictionary<string, int>();
-            public Dictionary<string, HashSet<string>> invarientToReal = new Dictionary<string, HashSet<string>>();
+            public Dictionary<string, HashSet<string>> invariantToReal = new Dictionary<string, HashSet<string>>();
 
             public void VoteIfExists(string term)
             {
                 string invariantTerm = GetInvarientKey(term);
-                if (invarientKeyCounts.ContainsKey(invariantTerm))
+                if (invariantKeyCounts.ContainsKey(invariantTerm))
                 {
-                    invarientKeyCounts[invariantTerm]++;
+                    invariantKeyCounts[invariantTerm]++;
                 }
                 else
                 {
@@ -832,27 +833,27 @@ namespace Seeker
                     realCounts[term] = 1;
                 }
 
-                if (invarientToReal.ContainsKey(invariantTerm))
+                if (invariantToReal.ContainsKey(invariantTerm))
                 {
-                    invarientToReal[invariantTerm].Add(term);
+                    invariantToReal[invariantTerm].Add(term);
                 }
                 else
                 {
-                    invarientToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    invarientToReal[invariantTerm].Add(term);
+                    invariantToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    invariantToReal[invariantTerm].Add(term);
                 }
             }
 
             public void AddKey(string term)
             {
                 string invariantTerm = GetInvarientKey(term);
-                if (invarientKeyCounts.ContainsKey(invariantTerm))
+                if (invariantKeyCounts.ContainsKey(invariantTerm))
                 {
-                    invarientKeyCounts[invariantTerm]++;
+                    invariantKeyCounts[invariantTerm]++;
                 }
                 else
                 {
-                    invarientKeyCounts[invariantTerm] = 1;
+                    invariantKeyCounts[invariantTerm] = 1;
                 }
 
                 if (realCounts.ContainsKey(term))
@@ -864,14 +865,14 @@ namespace Seeker
                     realCounts[term] = 1;
                 }
 
-                if (invarientToReal.ContainsKey(invariantTerm))
+                if (invariantToReal.ContainsKey(invariantTerm))
                 {
-                    invarientToReal[invariantTerm].Add(term);
+                    invariantToReal[invariantTerm].Add(term);
                 }
                 else
                 {
-                    invarientToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    invarientToReal[invariantTerm].Add(term);
+                    invariantToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    invariantToReal[invariantTerm].Add(term);
                 }
             }
 
@@ -879,24 +880,24 @@ namespace Seeker
             {
                 //weigh the years, and throw out the just file types.
                 string searchTermInvarient = GetInvarientKey(searchTerm);
-                foreach (string key in invarientKeyCounts.Keys.ToList())
+                foreach (string key in invariantKeyCounts.Keys.ToList())
                 {
                     if (IsSingleFileAttributeType(key)) //todo use collection...
                     {
-                        invarientKeyCounts.Remove(key);
+                        invariantKeyCounts.Remove(key);
                     }
                     else if (searchTermInvarient.Contains(key))
                     {
-                        invarientKeyCounts.Remove(key);
+                        invariantKeyCounts.Remove(key);
                     }
                     else if (IsYear(key))
                     {
-                        invarientKeyCounts[key] /= 4;
+                        invariantKeyCounts[key] /= 4;
                     }
                     else if (IsCommonAttribute(key))
                     {
 
-                        invarientKeyCounts[key] = (int)(invarientKeyCounts[key] * .6);
+                        invariantKeyCounts[key] = (int)(invariantKeyCounts[key] * .6);
                     }
                     else
                     {
@@ -913,7 +914,7 @@ namespace Seeker
                 //l.Sort((x, y) => y.Value.CompareTo(x.Value));
 
 
-                var l = invarientKeyCounts.ToList();
+                var l = invariantKeyCounts.ToList();
                 l.Sort((x, y) => y.Value.CompareTo(x.Value));
                 List<Tuple<string, HashSet<string>>> keyTerms = new List<Tuple<string, HashSet<string>>>();
                 if (topN > l.Count)
@@ -922,7 +923,7 @@ namespace Seeker
                 }
                 for (int i = 0; i < topN; i++)
                 {
-                    var hs = invarientToReal[l[i].Key];
+                    var hs = invariantToReal[l[i].Key];
                     if (hs.Count > 1)
                     {
                         int max = -1;
@@ -1011,7 +1012,7 @@ namespace Seeker
             //    CheckedItems.Remove(pos);
             //}
             var searchTab = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab];
-            searchTab.ChipsFilter = SearchFragment.ParseChips(searchTab);
+            searchTab.ChipsFilter = SearchFilter.ParseChips(searchTab.ChipDataItems);
             SearchFragment.Instance.RefreshOnChipChanged();
         }
 
@@ -1058,41 +1059,6 @@ namespace Seeker
             chipItemView = (ChipItemView)view;
             chipItemView.ViewHolder = this;
             //(ChatroomOverviewView as View).SetOnCreateContextMenuListener(this);
-        }
-    }
-
-    public enum ChipType
-    {
-        FileType = 0,
-        FileCount = 1,
-        Keyword = 2
-    }
-
-    public class ChipDataItem
-    {
-        public readonly string DisplayText;
-        public readonly List<string> Children; //this is for "other". this is what the chip actually represents..
-        public readonly ChipType ChipType;
-        public bool LastInGroup; //last in group AND there is more after it
-        public bool IsChecked = false;
-        public bool IsEnabled = true; //(-all case)
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText)
-        {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.DisplayText = displayText;
-            this.Children = null;
-        }
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, List<string> children)
-        {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.DisplayText = displayText;
-            this.Children = children;
-        }
-        public bool HasTag()
-        {
-            return this.Children != null;
         }
     }
 

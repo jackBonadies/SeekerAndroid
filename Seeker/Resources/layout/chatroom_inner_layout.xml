@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -6,7 +6,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:animateLayoutChanges="true"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,49 +18,47 @@
         android:ellipsize="end"
         android:text="@string/chatroom_loading_ticker"
         android:background="?attr/cell_shape_end"
-        />
-        <Seeker.RecyclerView2
+    />
+    <Seeker.RecyclerView2
         android:layout_width="match_parent"
         android:layout_height="82dp"
         android:id="@+id/room_statuses_recycler_view"
-        android:clickable="true"    
+        android:clickable="true"
         android:paddingBottom="4dp"
         android:background="?attr/cell_shape_end"
-        />
-        <RelativeLayout
+    />
+    <RelativeLayout
         android:id="@+id/test1"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:layout_marginBottom="8dp"
-        >
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_messages"
-        android:layout_height="fill_parent"
-        android:layout_width="match_parent"
+    >
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_messages"
+            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
         />
 
-
-               <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:visibility="gone"
-        android:background="?attr/floating_action_bar_to_bottom_background"
-        android:backgroundTint="?attr/floating_action_bar_to_bottom_background"
-        android:tint="?attr/floating_action_bar_to_bottom_icon"
-        app:backgroundTint="?attr/floating_action_bar_to_bottom_background"
-
-        app:fabSize="mini"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:visibility="gone"
+            android:background="?attr/floating_action_bar_to_bottom_background"
+            android:backgroundTint="?attr/floating_action_bar_to_bottom_background"
+            android:tint="?attr/floating_action_bar_to_bottom_icon"
+            app:backgroundTint="?attr/floating_action_bar_to_bottom_background"
+            app:fabSize="mini"
             android:elevation="1000dp"
             android:translationZ="100dp"
-        android:id="@+id/bsbutton"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-             android:layout_alignParentBottom="true"
+            android:id="@+id/bsbutton"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
         />
-        </RelativeLayout>
+    </RelativeLayout>
 
     <View
         android:id="@+id/view"
@@ -67,16 +66,14 @@
         android:layout_height="1dp"
         android:layout_weight="0"
         android:background="@color/chatBoxSplitterElevation"
-        />
+    />
 
     <RelativeLayout
         android:id="@+id/layout_gchat_chatbox"
         android:layout_width="match_parent"
         android:layout_weight="0"
         android:layout_height="wrap_content"
-        >
-
-
+    >
         <EditText
             android:layout_marginStart="16dp"
             android:id="@+id/edit_gchat_message"
@@ -89,18 +86,18 @@
             android:inputType="text"
             android:singleLine="true"
             android:imeOptions="actionSend"
-            tools:ignore="Autofill" />
+            tools:ignore="Autofill"
+        />
 
         <Button
             android:id="@+id/button_gchat_send"
-            android:layout_width="64dp"
+            android:layout_width="84dp"
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:background="?attr/selectableItemBackground"
+            app:backgroundTint="@null"
             android:text="@string/send_message"
-            android:textColor="?attr/buttonEnabledDisabledTextColor" />
-
+            android:textColor="?attr/buttonEnabledDisabledTextColor"
+        />
     </RelativeLayout>
-
-
 </LinearLayout>

@@ -1,24 +1,24 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/message_user_action"
+        android:icon="@drawable/baseline_add_white_24"
+        android:title="message user hidden"
+        app:showAsAction="always"
+    />
 
-xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_delete_all_messages"
+        android:icon="@drawable/baseline_delete_outline_white_24"
+        android:title="@string/delete_all_messages"
+        app:showAsAction="never"
+    />
 
-
-  <item
-      android:id="@+id/message_user_action"
-      android:icon="@drawable/baseline_add_white_24"
-      android:title="message user hidden"
-      app:showAsAction="always"/>
-
-  <item
-  android:id="@+id/action_delete_all_messages"
-  android:icon="@drawable/baseline_delete_outline_white_24"
-  android:title="@string/delete_all_messages"
-  app:showAsAction="never"/>
-
-  <!-- Settings, should always be in the overflow -->
-  <!--
+    <!-- Settings, should always be in the overflow -->
+    <!--
   <item android:id="@+id/action_settings"
         android:title="@string/abc_menu_enter_shortcut_label"
         app:showAsAction="always"/>-->
-
 </menu>

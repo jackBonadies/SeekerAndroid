@@ -20,47 +20,20 @@ namespace Soulseek
     /// <summary>
     ///     The response to a user info request.
     /// </summary>
-    [System.Serializable]
     public class UserInfo
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="UserInfo"/> class.
         /// </summary>
         /// <param name="description">The peer's description.</param>
-        /// <param name="uploadSlots">The number of configured upload slots.</param>
-        /// <param name="queueLength">The current queue length.</param>
-        /// <param name="hasFreeUploadSlot">A value indicating whether an upload slot is free.</param>
-        public UserInfo(string description, int uploadSlots, int queueLength, bool hasFreeUploadSlot)
-            : this(description, false, null, uploadSlots, queueLength, hasFreeUploadSlot)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="UserInfo"/> class.
-        /// </summary>
-        /// <param name="description">The peer's description.</param>
         /// <param name="picture">If configured, the picture data.</param>
         /// <param name="uploadSlots">The number of configured upload slots.</param>
         /// <param name="queueLength">The current queue length.</param>
         /// <param name="hasFreeUploadSlot">A value indicating whether an upload slot is free.</param>
-        public UserInfo(string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeUploadSlot)
-            : this(description, picture != null, picture, uploadSlots, queueLength, hasFreeUploadSlot)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="UserInfo"/> class.
-        /// </summary>
-        /// <param name="description">The peer's description.</param>
-        /// <param name="hasPicture">A value indicating whether a picture has been configured.</param>
-        /// <param name="picture">If configured, the picture data.</param>
-        /// <param name="uploadSlots">The number of configured upload slots.</param>
-        /// <param name="queueLength">The current queue length.</param>
-        /// <param name="hasFreeUploadSlot">A value indicating whether an upload slot is free.</param>
-        public UserInfo(string description, bool hasPicture, byte[] picture, int uploadSlots, int queueLength, bool hasFreeUploadSlot)
+        public UserInfo(string description, int uploadSlots, int queueLength, bool hasFreeUploadSlot, byte[] picture = null)
         {
             Description = description;
-            HasPicture = hasPicture;
+            HasPicture = picture != null;
             Picture = picture;
             UploadSlots = uploadSlots;
             QueueLength = queueLength;

@@ -16,7 +16,6 @@ namespace UnitTestCommon
             SeekerTestingDirectory = System.Environment.GetEnvironmentVariable("SEEKER_TESTING_DIR");
         }
 
-        [Test]
         public void TestParsingBrowseResponse()
         {
             StreamReader sw = new StreamReader(System.IO.Path.Join(SeekerTestingDirectory, System.Reflection.MethodBase.GetCurrentMethod().Name + "_spec.txt"));

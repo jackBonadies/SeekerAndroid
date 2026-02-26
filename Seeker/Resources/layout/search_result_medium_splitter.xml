@@ -1,56 +1,44 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-
-
-<LinearLayout    
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:id = "@+id/relativeLayout1"
-    android:layout_width = "fill_parent"
-    android:layout_height = "wrap_content"
-
-    android:descendantFocusability="beforeDescendants"
-    
-    android:foreground="?android:attr/selectableItemBackground"
-
-    >
-    <TextView
-        android:id = "@+id/folderNameTextView"
-        android:layout_width = "match_parent"
-        android:layout_height = "match_parent"
-        android:ellipsize = "end"
-        android:paddingStart= "5dp"
-
-
-        android:paddingTop = "3dp"
-        android:textColor="?attr/cellTextColor"
-        android:text = "1"
-        android:textSize="14sp"
-        android:singleLine = "true" />
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:id = "@+id/subLayout"
-    android:layout_width = "fill_parent"
-    android:layout_height = "wrap_content"
-
-
-    
-    >
-
+    android:orientation="vertical"
+    android:id="@+id/relativeLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="beforeDescendants"
+    android:foreground="?android:attr/selectableItemBackground"
+>
     <TextView
-        android:id = "@+id/userNameTextView"
-        android:layout_width = "fill_parent"
-        android:layout_height = "match_parent"
-        android:background = "?attr/cell_shape_end"
-        android:ellipsize = "end"
-        android:paddingBottom = "5dp"
-        android:paddingStart= "5dp"
+        android:id="@+id/folderNameTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:paddingStart="5dp"
+        android:paddingTop="3dp"
         android:textColor="?attr/cellTextColor"
-        android:text = "username  |  mp3(320kbs)  |  897kbsDummy"
-        android:textSize="12sp"
-        android:singleLine = "true" />
-
-</LinearLayout>
+        android:text="1"
+        android:textSize="14sp"
+        android:singleLine="true"
+    />
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:id="@+id/subLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+    >
+        <TextView
+            android:id="@+id/userNameTextView"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/cell_shape_end"
+            android:ellipsize="end"
+            android:paddingBottom="5dp"
+            android:paddingStart="5dp"
+            android:textColor="?attr/cellTextColor"
+            android:text="username  |  mp3(320kbs)  |  897kbsDummy"
+            android:textSize="12sp"
+            android:singleLine="true"
+        />
     </LinearLayout>
-
+</LinearLayout>

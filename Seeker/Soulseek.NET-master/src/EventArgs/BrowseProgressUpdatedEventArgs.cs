@@ -33,6 +33,8 @@ namespace Soulseek
         {
             BytesTransferred = bytesTransferred;
             Size = size;
+            BytesRemaining = Size - BytesTransferred;
+            PercentComplete = (BytesTransferred / (double)Size) * 100d;
         }
 
         /// <summary>
@@ -43,12 +45,12 @@ namespace Soulseek
         /// <summary>
         ///     Gets the number of remaining bytes to be transferred.
         /// </summary>
-        public long BytesRemaining => Size - BytesTransferred;
+        public long BytesRemaining { get; }
 
         /// <summary>
         ///     Gets the progress of the data transfer as a percentage of current and total data length.
         /// </summary>
-        public double PercentComplete => (BytesTransferred / (double)Size) * 100d;
+        public double PercentComplete { get; }
 
         /// <summary>
         ///     Gets the total expected length of the data transfer.

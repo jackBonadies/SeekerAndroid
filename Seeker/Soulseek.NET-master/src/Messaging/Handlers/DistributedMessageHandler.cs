@@ -18,8 +18,6 @@
 namespace Soulseek.Messaging.Handlers
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Soulseek.Diagnostics;
     using Soulseek.Messaging.Messages;
     using Soulseek.Network;
@@ -72,7 +70,10 @@ namespace Soulseek.Messaging.Handlers
             var connection = (IMessageConnection)sender;
             var code = new MessageReader<MessageCode.Distributed>(message).ReadCode();
 
-            Diagnostic.Debug($"Distributed child message received: {code} from {connection.Username} ({connection.IPEndPoint}) (id: {connection.Id})");
+            if (code != MessageCode.Distributed.Ping)
+            {
+                Diagnostic.Debug($"Distributed child message received: {code} from {connection.Username} ({connection.IPEndPoint}) (id: {connection.Id})");
+            }
 
             try
             {
@@ -106,7 +107,11 @@ namespace Soulseek.Messaging.Handlers
         {
             var connection = (IMessageConnection)sender;
             var code = new MessageReader<MessageCode.Distributed>(args.Message).ReadCode();
-            Diagnostic.Debug($"Distributed child message sent: {code} to {connection.Username} ({connection.IPEndPoint}) (id: {connection.Id})");
+
+            if (code != MessageCode.Distributed.Ping)
+            {
+                Diagnostic.Debug($"Distributed child message sent: {code} to {connection.Username} ({connection.IPEndPoint}) (id: {connection.Id})");
+            }
         }
 
         /// <summary>
@@ -129,7 +134,7 @@ namespace Soulseek.Messaging.Handlers
             var connection = (IMessageConnection)sender;
             var code = new MessageReader<MessageCode.Distributed>(message).ReadCode();
 
-            if (code != MessageCode.Distributed.SearchRequest && code != MessageCode.Distributed.EmbeddedMessage)
+            if (code != MessageCode.Distributed.SearchRequest && code != MessageCode.Distributed.EmbeddedMessage && code != MessageCode.Distributed.Ping)
             {
                 Diagnostic.Debug($"Distributed message received: {code} from {connection.Username} ({connection.IPEndPoint}) (id: {connection.Id})");
             }
@@ -163,6 +168,11 @@ namespace Soulseek.Messaging.Handlers
 
                                 _ = SoulseekClient.DistributedConnectionManager.BroadcastMessageAsync(embeddedMessage.DistributedMessage).ConfigureAwait(false);
 
+                                if (embeddedSearchRequest.Username == SoulseekClient.Username)
+                                {
+                                    break; // don't respond to our own searches
+                                }
+
                                 await SoulseekClient.SearchResponder.TryRespondAsync(embeddedSearchRequest.Username, embeddedSearchRequest.Token, embeddedSearchRequest.Query).ConfigureAwait(false);
 
                                 break;
@@ -178,6 +188,11 @@ namespace Soulseek.Messaging.Handlers
                         var searchRequest = DistributedSearchRequest.FromByteArray(message);
 
                         _ = SoulseekClient.DistributedConnectionManager.BroadcastMessageAsync(message).ConfigureAwait(false);
+
+                        if (searchRequest.Username == SoulseekClient.Username)
+                        {
+                            break; // don't respond to our own searches
+                        }
 
                         await SoulseekClient.SearchResponder.TryRespondAsync(searchRequest.Username, searchRequest.Token, searchRequest.Query).ConfigureAwait(false);
 

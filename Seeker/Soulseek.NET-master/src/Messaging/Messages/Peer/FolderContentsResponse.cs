@@ -17,6 +17,9 @@
 
 namespace Soulseek.Messaging.Messages
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     ///     The response to a peer folder contents request.
     /// </summary>
@@ -26,17 +29,32 @@ namespace Soulseek.Messaging.Messages
         ///     Initializes a new instance of the <see cref="FolderContentsResponse"/> class.
         /// </summary>
         /// <param name="token">The unique token for the request.</param>
-        /// <param name="directory">The directory contents.</param>
-        public FolderContentsResponse(int token, Directory directory)
+        /// <param name="directoryName">The name of the requested (root) directory.</param>
+        /// <param name="directories">The directory contents.</param>
+        public FolderContentsResponse(int token, string directoryName, IEnumerable<Directory> directories)
         {
             Token = token;
-            Directory = directory;
+
+            DirectoryName = directoryName;
+
+            Directories = directories.ToList().AsReadOnly();
+            DirectoryCount = Directories.Count;
         }
 
         /// <summary>
         ///     Gets the directory contents.
         /// </summary>
-        public Directory Directory { get; }
+        public IReadOnlyCollection<Directory> Directories { get; }
+
+        /// <summary>
+        ///     Gets the number of directories.
+        /// </summary>
+        public int DirectoryCount { get; }
+
+        /// <summary>
+        ///     Gets the name of the requested (root) directory.
+        /// </summary>
+        public string DirectoryName { get; }
 
         /// <summary>
         ///     Gets the token for the response.
@@ -44,7 +62,7 @@ namespace Soulseek.Messaging.Messages
         public int Token { get; }
 
         /// <summary>
-        ///     Creates a new instance of <see cref="BrowseResponse"/> from the specified <paramref name="bytes"/>.
+        ///     Creates a new instance of <see cref="FolderContentsResponse"/> from the specified <paramref name="bytes"/>.
         /// </summary>
         /// <param name="bytes">The byte array from which to parse.</param>
         /// <returns>The parsed instance.</returns>
@@ -61,12 +79,16 @@ namespace Soulseek.Messaging.Messages
             reader.Decompress();
 
             var token = reader.ReadInteger();
-            reader.ReadString(); // directory name, should always match that of the first directory
-            reader.ReadInteger(); // directory count, should always be 1
+            var rootDirectory = reader.ReadString(); // directory name, should always match that of the first directory
+            var directoryCount = reader.ReadInteger(); // directory count, should always be 1
+            var directoryList = new List<Directory>();
 
-            var directory = reader.ReadDirectory();
+            for (int i = 0; i < directoryCount; i++)
+            {
+                directoryList.Add(reader.ReadDirectory());
+            }
 
-            return new FolderContentsResponse(token, directory);
+            return new FolderContentsResponse(token, rootDirectory, directoryList);
         }
 
         /// <summary>
@@ -78,14 +100,12 @@ namespace Soulseek.Messaging.Messages
             var builder = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.FolderContentsResponse)
                 .WriteInteger(Token)
-                .WriteString(Directory.Name)
-                .WriteInteger(1) // always one directory
-                .WriteString(Directory.Name)
-                .WriteInteger(Directory.FileCount);
+                .WriteString(DirectoryName)
+                .WriteInteger(DirectoryCount);
 
-            foreach (var file in Directory.Files)
+            foreach (var directory in Directories)
             {
-                builder.WriteFile(file);
+                builder.WriteDirectory(directory);
             }
 
             builder.Compress();

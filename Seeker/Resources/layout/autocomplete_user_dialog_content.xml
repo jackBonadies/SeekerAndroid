@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="0dp"
+>
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/username"
+        app:endIconMode="none"
+    >
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/chosenUserEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:completionThreshold="0"
+            android:imeOptions="actionGo"
+            android:inputType="text"
+        />
+    </com.google.android.material.textfield.TextInputLayout>
+</FrameLayout>

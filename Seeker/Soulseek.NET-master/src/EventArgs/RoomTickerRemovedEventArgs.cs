@@ -38,35 +38,4 @@ namespace Soulseek
         /// </summary>
         public string Username { get; }
     }
-
-    /// <summary>
-    ///     Event arguments for operator added or removed to our room
-    /// </summary>
-    public class OperatorAddedRemovedEventArgs : System.EventArgs
-    {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="RoomTickerRemovedEventArgs"/> class.
-        /// </summary>
-        /// <param name="roomName">The name of the chat room from which the ticker was removed.</param>
-        /// <param name="username">The name of the user to which the ticker belonged.</param>
-        public OperatorAddedRemovedEventArgs(string roomName, string username, bool added)
-        {
-            RoomName = roomName;
-            Username = username;
-            Added = added;
-        }
-
-        /// <summary>
-        ///     Gets the name of the user
-        /// </summary>
-        public string Username { get; }
-        /// <summary>
-        ///     Gets the room name
-        /// </summary>
-        public string RoomName { get; }
-        /// <summary>
-        ///     Gets if Added (else removed)
-        /// </summary>
-        public bool Added { get; }
-    }
 }

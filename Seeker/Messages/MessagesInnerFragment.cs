@@ -12,7 +12,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Seeker.Helpers;
 
+using Common;
 namespace Seeker.Messages
 {
     public class MessagesInnerFragment : AndroidX.Fragment.App.Fragment
@@ -49,7 +51,7 @@ namespace Seeker.Messages
 
             MessageController.MessageReceived += OnMessageReceived;
             rootView = inflater.Inflate(Resource.Layout.messages_inner_layout, container, false);
-
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(rootView, new BottomOnlyInsetsListener());
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)MessagesActivity.MessagesActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
             myToolbar.InflateMenu(Resource.Menu.messages_inner_list_menu);
@@ -104,7 +106,7 @@ namespace Seeker.Messages
             {
                 e.Handled = true;
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -119,7 +121,7 @@ namespace Seeker.Messages
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
                 //send the message and record our send message..
-                SendMessageAPI(new Message(Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+                MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
                 editTextEnterMessage.Text = string.Empty;
             }
@@ -144,151 +146,12 @@ namespace Seeker.Messages
             base.OnSaveInstanceState(outState);
         }
 
-        public static void BroadcastFriendlyRunOnUiThread(Action action)
-        {
-            if (SeekerState.ActiveActivityRef != null)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(action);
-            }
-            else
-            {
-                new Handler(Looper.MainLooper).Post(action);
-            }
-        }
-
-        public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
-        {
-            //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
-            //then soulseekclient will be good, but the activeActivityRef will be null. so use the broadcastContext.
-
-            Android.Content.Context contextToUse = broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext;
-
-            MainActivity.LogDebug("is soulseekclient null: " + (SeekerState.SoulseekClient == null).ToString());
-            MainActivity.LogDebug("is ActiveActivityRef null: " + (SeekerState.ActiveActivityRef == null).ToString());
-
-
-            if (string.IsNullOrEmpty(msg.MessageText))
-            {
-                Toast.MakeText(contextToUse, Resource.String.must_type_text_to_send, ToastLength.Short).Show();
-                if (fromDirectReplyAction)
-                {
-                    MessageController.ShowNotification(msg, true, true, "Failure - Message Text is Empty.");
-                }
-                return;
-            }
-            if (!SeekerState.currentlyLoggedIn)
-            {
-                MainActivity.LogDebug("not currently logged in");
-                Toast.MakeText(contextToUse, Resource.String.must_be_logged_to_send_message, ToastLength.Short).Show();
-                if (fromDirectReplyAction)
-                {
-                    MessageController.ShowNotification(msg, true, true, "Failure - Currently Logged Out.");
-                }
-                return;
-            }
-
-            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
-            {
-
-                MainActivity.LogDebug("our continue with action is occuring!...");
-                if (t.IsFaulted)
-                {
-                    if (!(t.Exception.InnerException is FaultPropagationException))
-                    {
-                        BroadcastFriendlyRunOnUiThread(() => { Toast.MakeText(contextToUse, Resource.String.failed_to_connect, ToastLength.Short).Show(); });
-                    }
-                    if (fromDirectReplyAction)
-                    {
-                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Log In.");
-                    }
-                    throw new FaultPropagationException();
-                }
-                BroadcastFriendlyRunOnUiThread(new Action(() =>
-                {
-                    SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
-                }));
-            });
-
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                MainActivity.LogDebug("currently logged in but disconnected...");
-
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(contextToUse, false, out t))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
-            }
-            else
-            {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
-                {
-                    MainActivity.LogDebug("on finish log in we will do it");
-                    return;
-                }
-                else
-                {
-                    SendMessageLogic(msg, fromDirectReplyAction);
-                }
-            }
-
-        }
-
-        public static void SendMessageLogic(Message msg, bool fromDirectReplyAction, Android.Content.Context broadcastContext = null) //you can start out with a message...
-        {
-            MainActivity.LogDebug("SendMessageLogic");
-
-            string usernameToMessage = msg.Username;
-            if (MessageController.Messages.Keys.Contains(usernameToMessage))
-            {
-                MessageController.Messages[usernameToMessage].Add(msg);
-            }
-            else
-            {
-                MessageController.Messages[usernameToMessage] = new List<Message>(); //our first message to them..
-                MessageController.Messages[usernameToMessage].Add(msg);
-            }
-            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
-            MessageController.RaiseMessageReceived(msg);
-            Action<Task> continueWithAction = new Action<Task>((Task t) =>
-            {
-                if (t.IsFaulted)
-                {
-                    MainActivity.LogDebug("faulted " + t.Exception.ToString());
-                    MainActivity.LogDebug("faulted " + t.Exception.InnerException.Message.ToString());
-                    msg.SentMsgStatus = SentStatus.Failed;
-                    Toast.MakeText(broadcastContext == null ? SeekerState.ActiveActivityRef : broadcastContext, Resource.String.failed_to_send_message, ToastLength.Long).Show(); //TODO
-
-                    if (fromDirectReplyAction)
-                    {
-                        MessageController.ShowNotification(msg, true, true, "Failure - Cannot Send Message.", broadcastContext);
-                    }
-                }
-                else
-                {
-                    MainActivity.LogDebug("did not fault");
-                    msg.SentMsgStatus = SentStatus.Success;
-
-                    if (fromDirectReplyAction)
-                    {
-                        MessageController.ShowNotification(msg, true, false, string.Empty, broadcastContext);
-                    }
-                }
-                MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
-                MessageController.RaiseMessageReceived(msg);
-            });
-            MainActivity.LogDebug("useranme to mesasge " + usernameToMessage);
-            SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
-        }
 
 
         private void SendMessage_Click(object sender, EventArgs e)
         {
             //send the message and record our send message..
-            SendMessageAPI(new Message(Username, -1, false, CommonHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
+            MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
 
             editTextEnterMessage.Text = string.Empty;
         }
@@ -324,11 +187,11 @@ namespace Seeker.Messages
 
         public override void OnResume()
         {
-            MainActivity.LogDebug("inner frag resume");
+            Logger.Debug("inner frag resume");
 
             if (MessagesActivity.DirectReplyMessages.TryRemove(Username, out _))
             {
-                MainActivity.LogDebug("remove the notification history");
+                Logger.Debug("remove the notification history");
                 //remove the now possibly void notification
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                 // notificationId is a unique int for each notification that you must define
@@ -342,7 +205,7 @@ namespace Seeker.Messages
 
         public override void OnPause()
         {
-            MainActivity.LogDebug("inner frag pause");
+            Logger.Debug("inner frag pause");
             currentlyResumed = false;
             base.OnPause();
         }

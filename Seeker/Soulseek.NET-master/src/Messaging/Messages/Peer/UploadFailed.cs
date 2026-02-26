@@ -18,21 +18,21 @@
 namespace Soulseek.Messaging.Messages
 {
     /// <summary>
-    ///     The sent or received when an attempt to queue a file for downloading has failed.
+    ///     A notification that an upload has failed.
     /// </summary>
     internal sealed class UploadFailed : IIncomingMessage, IOutgoingMessage
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="UploadFailed"/> class.
         /// </summary>
-        /// <param name="filename">The filename which failed to be queued.</param>
+        /// <param name="filename">The filename which failed to be uploaded.</param>
         public UploadFailed(string filename)
         {
             Filename = filename;
         }
 
         /// <summary>
-        ///     Gets the filename which failed to be queued.
+        ///     Gets the filename which failed to be uploaded.
         /// </summary>
         public string Filename { get; }
 

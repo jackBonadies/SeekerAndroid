@@ -1,40 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:id = "@+id/mainDlLayout"
-    android:layout_width = "fill_parent"
-    android:layout_height = "wrap_content"
+    android:id="@+id/mainDlLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:paddingBottom="4dp"
     android:paddingTop="2dp"
-    android:background = "?attr/cell_shape_end_dldiag"
-    
+    android:background="?attr/cell_shape_end_dldiag"
     android:foreground="?android:attr/selectableItemBackground"
-    
-    
-    >
-
+>
     <TextView
-        android:id = "@+id/textView1"
-        android:layout_width = "match_parent"
-        android:layout_height = "wrap_content"
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:textSize="15sp"
         android:textColor="?attr/cellTextColor"
         android:paddingStart="5dp"
         android:ellipsize="end"
-        android:text = "1.5"
-        android:singleLine = "false" />
-
+        android:text="1.5"
+        android:singleLine="false"
+    />
 
     <TextView
-        android:id = "@+id/textView3"
-        android:layout_width = "match_parent"
-        android:layout_height = "wrap_content"
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:textSize="10sp"
         android:textColor="?attr/cellTextColorSubdued"
-        
-        android:ellipsize = "end"
+        android:ellipsize="end"
         android:paddingStart="5dp"
-        android:text = "15mb - 10:14 - 245kbps"
-        android:singleLine = "true" />
+        android:text="15mb - 10:14 - 245kbps"
+        android:singleLine="true"
+    />
 </LinearLayout>

@@ -1,30 +1,35 @@
-﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto">
-  <item android:id="@+id/action_add_to_user_list"
-      android:title="@string/add_to_user_list"
-      app:showAsAction="never"
-      />
-  <item android:id="@+id/action_browse_files"
-      android:title="@string/browse_files" 
-      app:showAsAction="never"
-      />
-  <item android:id="@+id/action_search_files"
-      android:title="@string/search_user_files"
-      app:showAsAction="never" 
-      />
-	<item android:id="@id/action_get_user_info"
-  android:title="@string/get_user_info"
-  app:showAsAction="never"
-      />
-  <item android:id="@+id/action_delete_messages"
- android:title="@string/delete_messages"
- app:showAsAction="never"
-      />
-	<item android:id="@+id/action_ignore"
- android:title="@string/ignore_user"
- app:showAsAction="never"
-      />
-
-
-
+﻿<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/action_add_to_user_list"
+        android:title="@string/add_to_user_list"
+        app:showAsAction="never"
+    />
+    <item
+        android:id="@+id/action_browse_files"
+        android:title="@string/browse_files"
+        app:showAsAction="never"
+    />
+    <item
+        android:id="@+id/action_search_files"
+        android:title="@string/search_user_files"
+        app:showAsAction="never"
+    />
+    <item
+        android:id="@id/action_get_user_info"
+        android:title="@string/get_user_info"
+        app:showAsAction="never"
+    />
+    <item
+        android:id="@+id/action_delete_messages"
+        android:title="@string/delete_messages"
+        app:showAsAction="never"
+    />
+    <item
+        android:id="@+id/action_ignore"
+        android:title="@string/ignore_user"
+        app:showAsAction="never"
+    />
 </menu>

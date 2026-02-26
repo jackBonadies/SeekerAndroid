@@ -2,6 +2,8 @@
 using Android.Content;
 using Android.OS;
 using AndroidX.AppCompat.App;
+using Seeker.Helpers;
+using System;
 
 namespace Seeker
 {
@@ -11,7 +13,7 @@ namespace Seeker
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            MainActivity.LogInfoFirebase("shutting down");
+            Logger.InfoFirebase("shutting down");
 
             //stop all soulseek connection.
             if (SeekerState.SoulseekClient != null)
@@ -40,13 +42,13 @@ namespace Seeker
             StartService(intent);
 
             //remove this final "closing" activity from task list.
-            if ((int)Android.OS.Build.VERSION.SdkInt < 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
-                this.FinishAffinity();
+                this.FinishAndRemoveTask();
             }
             else
             {
-                this.FinishAndRemoveTask();
+                this.FinishAffinity();
             }
 
             //actually unload all classes, statics, etc from JVM.

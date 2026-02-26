@@ -1,12 +1,14 @@
 ﻿using Android.Content;
 using Android.Widget;
 using Java.IO;
-using SlskHelp;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using Seeker.Helpers;
+using Common;
+using Common.Search;
 
 namespace Seeker.Helpers
 {
@@ -25,12 +27,12 @@ namespace Seeker.Helpers
             Java.IO.File fileForOurInternalStorage = new Java.IO.File(wishlist_dir, name);
             if (!fileForOurInternalStorage.Delete())
             {
-                MainActivity.LogDebug("HEADERS - Delete Search Results: FAILED TO DELETE");
-                MainActivity.LogFirebase("HEADERS - Delete Search Results: FAILED TO DELETE");
+                Logger.Debug("HEADERS - Delete Search Results: FAILED TO DELETE");
+                Logger.Firebase("HEADERS - Delete Search Results: FAILED TO DELETE");
             }
 
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - Delete Search Results: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - Delete Search Results: " + sw.ElapsedMilliseconds);
         }
 
 
@@ -42,7 +44,7 @@ namespace Seeker.Helpers
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
             if (tabsToSave.Count == 0)
             {
-                MainActivity.LogDebug("Nothing to Save");
+                Logger.Debug("Nothing to Save");
             }
             else
             {
@@ -52,7 +54,7 @@ namespace Seeker.Helpers
                 }
             }
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - Save ALL Search Results: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - Save ALL Search Results: " + sw.ElapsedMilliseconds);
         }
 
 #if BinaryFormatterAvailable
@@ -70,7 +72,7 @@ namespace Seeker.Helpers
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
             if (tabsToSave.Count == 0)
             {
-                MainActivity.LogDebug("Nothing to Save");
+                Logger.Debug("Nothing to Save");
             }
             else
             {
@@ -83,7 +85,7 @@ namespace Seeker.Helpers
                     }
                     catch (Exception ex)
                     {
-                        MainActivity.LogFirebase("Error Migrating Seach Tabs: " + ex.Message + ex.StackTrace);
+                        Logger.Firebase("Error Migrating Seach Tabs: " + ex.Message + ex.StackTrace);
                         RemoveTabFromSharedPrefs(tabIndex, c, true);
                     }
 
@@ -95,7 +97,7 @@ namespace Seeker.Helpers
                 }
             }
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - Restore ALL Search Results: " + sw.ElapsedMilliseconds);
         }
 #endif
 
@@ -140,9 +142,9 @@ namespace Seeker.Helpers
 
             using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri))
             {
-                MainActivity.LogDebug("HEADERS - get file: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - get file: " + sw.ElapsedMilliseconds);
 
-                MainActivity.LogDebug("HEADERS - read file: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - read file: " + sw.ElapsedMilliseconds);
 
                 var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
                 return restoredSearchResponses;
@@ -158,7 +160,7 @@ namespace Seeker.Helpers
             }
             catch(Exception e)
             {
-                MainActivity.LogFirebase("FAILED to restore search results from disk " + e.Message + e.StackTrace);
+                Logger.Firebase("FAILED to restore search results from disk " + e.Message + e.StackTrace);
             }
 
 
@@ -174,14 +176,14 @@ namespace Seeker.Helpers
                 else
                 {
                     //log error... but still safely fix the state. otherwise the user wont even be able to load the app without crash...
-                    MainActivity.LogFirebase("search tab does not exist on disk but it should... ");
+                    Logger.Firebase("search tab does not exist on disk but it should... ");
                     SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime = DateTime.MinValue;
                     SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResponseCount = 0;
                     SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount = 0;
                     try
                     {
                         //may not be on UI thread if from wishlist timer elapsed...
-                        Toast.MakeText(c, "Failed to restore wishlist search results from disk", ToastLength.Long).Show();
+                        SeekerApplication.Toaster.ShowToast("Failed to restore wishlist search results from disk", ToastLength.Long);
                     }
                     catch
                     {
@@ -189,15 +191,11 @@ namespace Seeker.Helpers
                     }
                 }
                 //safely fix the state. even in case of error...
-                SavedStateSearchTab tab = new SavedStateSearchTab();
-                tab.searchResponses = new List<SearchResponse>();
-                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SearchTabUtil.GetTabFromSavedState(new List<SearchResponse>(), SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
             }
             else
             {
-                SavedStateSearchTab tab = new SavedStateSearchTab();
-                tab.searchResponses = restoredSearchResults;
-                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SavedStateSearchTab.GetTabFromSavedState(tab, true, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SearchTabUtil.GetTabFromSavedState(restoredSearchResults, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
             }
         }
 
@@ -212,28 +210,23 @@ namespace Seeker.Helpers
             List<int> tabsToSave = SearchTabDialog.GetWishesTabIds();
             if (tabsToSave.Count == 0)
             {
-                MainActivity.LogDebug("Nothing to Save");
+                Logger.Debug("Nothing to Save");
             }
             else
             {
                 Dictionary<int, SavedStateSearchTabHeader> savedStates = new Dictionary<int, SavedStateSearchTabHeader>();
                 foreach (int tabIndex in tabsToSave)
                 {
-                    savedStates.Add(tabIndex, SavedStateSearchTabHeader.GetSavedStateHeaderFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
+                    savedStates.Add(tabIndex, SavedStateSearchTabHeaderHelper.GetSavedStateHeaderFromTab(SearchTabHelper.SearchTabCollection[tabIndex]));
                 }
 
                 stringToSave = SerializationHelper.SerializeToString(savedStates);
             }
 
-            lock (MainActivity.SHARED_PREF_LOCK)
-            {
-                var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchTabsState_Headers, stringToSave);
-                editor.Commit();
-            }
+            PreferencesManager.SaveSearchTabHeaders(stringToSave);
 
             sw.Stop();
-            MainActivity.LogDebug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);
+            Logger.Debug("HEADERS - SaveHeadersToSharedPrefs: " + sw.ElapsedMilliseconds);
         }
 
 #if BinaryFormatterAvailable
@@ -249,7 +242,7 @@ namespace Seeker.Helpers
             }
             else
             {
-                MainActivity.LogDebug("Converting Wishlists to New Format...");
+                Logger.Debug("Converting Wishlists to New Format...");
                 RestoreStateFromSharedPreferencesLegacy();
                 SeekerState.SharedPreferences.Edit().Remove(KeyConsts.M_SearchTabsState_LEGACY).Commit();
                 //string x = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchTabsState_LEGACY, string.Empty); //works, string is empty.
@@ -271,7 +264,7 @@ namespace Seeker.Helpers
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                MainActivity.LogDebug("HEADERS - base64 string length: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - base64 string length: " + sw.ElapsedMilliseconds);
 
                 Dictionary<int, SavedStateSearchTabHeader> savedStateDict = SerializationHelper.RestoreSavedStateHeaderDictFromString(savedState);
 
@@ -282,7 +275,7 @@ namespace Seeker.Helpers
                     {
                         lowestID = pair.Key;
                     }
-                    SearchTabCollection[pair.Key] = SavedStateSearchTabHeader.GetTabFromSavedState(pair.Value, null);
+                    SearchTabCollection[pair.Key] = SavedStateSearchTabHeaderHelper.GetTabFromSavedState(pair.Value, null);
                 }
                 if (lowestID != int.MaxValue)
                 {
@@ -290,7 +283,7 @@ namespace Seeker.Helpers
                 }
 
                 sw.Stop();
-                MainActivity.LogDebug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
+                Logger.Debug("HEADERS - RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
             //SeekerState.SharedPreferences.Edit().Remove
         }
@@ -307,11 +300,11 @@ namespace Seeker.Helpers
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
 
-                MainActivity.LogDebug("base64 string length: " + sw.ElapsedMilliseconds);
+                Logger.Debug("base64 string length: " + sw.ElapsedMilliseconds);
 
                 using (System.IO.MemoryStream memStream = new System.IO.MemoryStream(Convert.FromBase64String(savedState)))
                 {
-                    BinaryFormatter formatter = SerializationHelper.GetLegacyBinaryFormatter();
+                    BinaryFormatter formatter = SerializationMigrationHelper.GetLegacyBinaryFormatter();
                     var savedStateDict = formatter.Deserialize(memStream) as Dictionary<int, SavedStateSearchTab>;
                     int lowestID = int.MaxValue;
                     foreach (var pair in savedStateDict)
@@ -328,12 +321,10 @@ namespace Seeker.Helpers
                     }
                 }
                 sw.Stop();
-                MainActivity.LogDebug("RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
+                Logger.Debug("RestoreStateFromSharedPreferences: wishlist: " + sw.ElapsedMilliseconds);
             }
         }
 #endif
-
-
 
         static SearchTabHelper()
         {
@@ -478,28 +469,7 @@ namespace Seeker.Helpers
             }
         }
 
-        public static bool FilteredResults
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].FilteredResults;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].FilteredResults = value;
-            }
-        }
-        //public static bool FilterSticky
-        //{
-        //    get
-        //    {
-        //        return SearchTabCollection[CurrentTab].FilterSticky;
-        //    }
-        //    set
-        //    {
-        //        SearchTabCollection[CurrentTab].FilterSticky = value;
-        //    }
-        //}
+        public static TextFilter TextFilter => SearchTabCollection[CurrentTab].TextFilter;
 
         public static CancellationTokenSource CancellationTokenSource
         {
@@ -513,52 +483,6 @@ namespace Seeker.Helpers
             }
         }
 
-        public static string FilterString
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].FilterString;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].FilterString = value;
-            }
-        }
-        public static List<string> WordsToAvoid
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].WordsToAvoid;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].WordsToAvoid = value;
-            }
-        }
-        public static List<string> WordsToInclude
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].WordsToInclude;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].WordsToInclude = value;
-            }
-        }
-
-
-        public static FilterSpecialFlags FilterSpecialFlags
-        {
-            get
-            {
-                return SearchTabCollection[CurrentTab].FilterSpecialFlags;
-            }
-            set
-            {
-                SearchTabCollection[CurrentTab].FilterSpecialFlags = value;
-            }
-        }
 
         public static List<SearchResponse> UI_SearchResponses
         {

@@ -1,0 +1,20 @@
+﻿[
+  {
+    Username: xiuxiu4,
+    DoesNotExist: false,
+    UserStatus: {
+      Username: ,
+      Presence: Away,
+      IsPrivileged: false
+    },
+    UserData: {
+      Username: xiuxiu4,
+      Status: Online,
+      AverageSpeed: 294836,
+      UploadCount: 152,
+      FileCount: 6892,
+      DirectoryCount: 861,
+      CountryCode: 
+    }
+  }
+]

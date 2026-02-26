@@ -70,10 +70,10 @@ namespace Seeker
             if (SearchDialog.Instance != null && SearchDialog.Instance != this)
             {
                 //we only support 1 dialog, the most recent one..
-                MainActivity.LogDebug("cancelling old search dialog");
+                Logger.Debug("cancelling old search dialog");
                 this.Dismiss();
             }
-            MainActivity.LogDebug("resuming instance: " + guid.ToString());
+            Logger.Debug("resuming instance: " + guid.ToString());
 
             SetControlState();
             base.OnResume();
@@ -84,7 +84,7 @@ namespace Seeker
 
         public override void OnDestroy()
         {
-            MainActivity.LogDebug("OnDestroy SearchDialog");
+            Logger.Debug("OnDestroy SearchDialog");
             SearchDialog.Instance = null;
             base.OnDestroy();
         }
@@ -96,7 +96,7 @@ namespace Seeker
                 this.SetControlState();
                 if (failed)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, "Failed to parse search term from link. Contact Developer.", ToastLength.Long).Show();
+                    SeekerApplication.Toaster.ShowToast("Failed to parse search term from link. Contact Developer.", ToastLength.Long);
                 }
             }
             );
@@ -198,7 +198,7 @@ namespace Seeker
                 {
                     intent.PutExtra(Intent.ExtraSubject, subject);
                 }
-                MainActivity.LogDebug("SearchDialogDummyActivity launch intent");
+                Logger.Debug("SearchDialogDummyActivity launch intent");
                 this.StartActivity(intent);
                 this.Finish();
             }

@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using NUnit.Framework.Constraints;
-using SlskHelp;
 using Soulseek;
 using Common;
 using System;
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Share;
 
 namespace UnitTestCommon
 {
@@ -67,7 +67,7 @@ namespace UnitTestCommon
                 new File(100, "@test\\Music\\Other\\FavoriteAlbum\\4.mp3", 1000, "mp3"),
                 new File(100, "@test\\Rock\\test.mp3", 1000, "mp3"),
             };
-            var resp = new SearchResponse("username", 100, 100, 100, 100, files, lockedFiles);
+            var resp = new SearchResponse("username", 100, true, 100, 100, files, lockedFiles);
 
             var result1 = Common.SearchResponseUtil.SplitMultiDirResponse(false, resp);
             Assert.AreEqual(7, result1.Item2.Count);

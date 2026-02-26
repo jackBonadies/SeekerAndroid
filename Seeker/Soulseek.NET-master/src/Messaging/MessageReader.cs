@@ -21,6 +21,7 @@ namespace Soulseek.Messaging
     using System.Globalization;
     using System.IO;
     using System.Text;
+    using Soulseek.Diagnostics;
     using Soulseek.Messaging.Compression;
 
     /// <summary>
@@ -191,8 +192,27 @@ namespace Soulseek.Messaging
         /// <summary>
         ///     Reads a string at the head of the reader.
         /// </summary>
+        /// <remarks>
+        ///     If no <paramref name="encoding"/> is specified, <see cref="CharacterEncoding.UTF8"/> will be attempted first,
+        ///     falling back to <see cref="CharacterEncoding.ISO88591"/> if encoding fails.
+        /// </remarks>
+        /// <param name="encoding">The optional character encoding to use.</param>
         /// <returns>The read string.</returns>
-        public string ReadString()
+        public string ReadString(CharacterEncoding encoding = null)
+        {
+            return ReadStringAndEncoding(encoding).Value;
+        }
+
+        /// <summary>
+        ///     Reads a string at the head of the reader and returns both the string and the <see cref="CharacterEncoding"/> used to encode it.
+        /// </summary>
+        /// <remarks>
+        ///     If no <paramref name="encoding"/> is specified, <see cref="CharacterEncoding.UTF8"/> will be attempted first,
+        ///     falling back to <see cref="CharacterEncoding.ISO88591"/> if encoding fails.
+        /// </remarks>
+        /// <param name="encoding">The optional character encoding to use.</param>
+        /// <returns>The read string.</returns>
+        public (string Value, CharacterEncoding Encoding) ReadStringAndEncoding(CharacterEncoding encoding = null)
         {
             var length = ReadInteger();
 
@@ -201,20 +221,24 @@ namespace Soulseek.Messaging
                 throw new MessageReadException("Specified string length extends beyond the length of the message payload");
             }
 
+            encoding ??= CharacterEncoding.UTF8;
             var bytes = Payload.Slice(Position, length).ToArray();
             string retVal;
 
             try
             {
-                retVal = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
+                retVal = Encoding.GetEncoding(encoding, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                retVal = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
+                var requestedEncoding = encoding;
+                encoding = CharacterEncoding.ISO88591;
+                retVal = Encoding.GetEncoding(encoding).GetString(bytes);
+                GlobalDiagnostic.Trace($"Failed to decode {requestedEncoding} for string {retVal}; resorted to fallback encoding {CharacterEncoding.ISO88591} (base64: {Convert.ToBase64String(bytes)})", ex);
             }
 
             Position += length;
-            return retVal;
+            return (retVal, encoding);
         }
 
         /// <summary>

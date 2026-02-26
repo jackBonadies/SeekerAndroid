@@ -123,11 +123,7 @@ namespace Seeker
         }
     }
 
-    public class ConfigureChipItems
-    {
-        public bool Enabled;
-        public string Name;
-    }
+    // ConfigureChipItems has moved to Common/SearchEnums.cs
 
     public class RecyclerListAdapter : RecyclerView.Adapter
         , ItemTouchHelperAdapter

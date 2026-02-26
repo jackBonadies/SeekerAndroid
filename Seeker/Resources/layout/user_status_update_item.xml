@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -10,7 +10,8 @@
     android:paddingStart="2dp"
     android:orientation="horizontal"
     android:descendantFocusability="afterDescendants"
-    android:id="@+id/linearLayoutStatusRow">
+    android:id="@+id/linearLayoutStatusRow"
+>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,6 +20,5 @@
         android:textSize="14sp"
         android:padding="0dp"
         android:layout_margin="0dp"
-        />
-
+    />
 </LinearLayout>

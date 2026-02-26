@@ -15,27 +15,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Common;
 namespace Seeker
 {
-    public class FilterSpecialFlags
-    {
-        public bool ContainsSpecialFlags = false;
-        public int MinFoldersInFile = 0;
-        public int MinFileSizeMB = 0;
-        public int MinBitRateKBS = 0;
-        public bool IsVBR = false;
-        public bool IsCBR = false;
-        public void Clear()
-        {
-            ContainsSpecialFlags = false;
-            MinFoldersInFile = 0;
-            MinFileSizeMB = 0;
-            MinBitRateKBS = 0;
-            IsVBR = false;
-            IsCBR = false;
-        }
-    }
-
     public interface ISearchItemViewBase
     {
         void setupChildren();
@@ -85,7 +67,7 @@ namespace Seeker
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item);
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString(); //kb/s
 
             //TEST
@@ -131,16 +113,16 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SeekerState.HideLockedResultsInSearch;
+            hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
         public void setItem(SearchResponse item, int noop)
         {
             viewUsername.Text = item.Username;
-            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SlskHelp.CommonHelpers.STRINGS_KBS; //kbs
-            viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
-            if (item.FreeUploadSlots > 0)
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item); //todo maybe also cache this...
+            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS; //kbs
+            viewFileType.Text = item.GetDominantFileTypeAndBitRate(hideLocked, out _);
+            if (item.HasFreeUploadSlot)
             {
                 viewQueue.Text = "";
             }
@@ -149,7 +131,7 @@ namespace Seeker
                 viewQueue.Text = item.QueueLength.ToString();
             }
             //line separated..
-            //viewUsername.Text = item.Username + "  |  " + Helpers.GetDominantFileType(item) + "  |  " + (item.UploadSpeed / 1024).ToString() + "kbs";
+            //viewUsername.Text = item.Username + "  |  " + Helpers.GetDominantFileTypeAndBitRate(item) + "  |  " + (item.UploadSpeed / 1024).ToString() + "kbs";
 
         }
 
@@ -226,17 +208,17 @@ namespace Seeker
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             viewQueue = FindViewById<TextView>(Resource.Id.availability);
-            hideLocked = SeekerState.HideLockedResultsInSearch;
+            hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
         private bool hideLocked = false;
         public static void PopulateFilesListView(LinearLayout viewToHideShow, SearchResponse item)
         {
             viewToHideShow.RemoveAllViews();
-            foreach (Soulseek.File f in item.GetFiles(SeekerState.HideLockedResultsInSearch))
+            foreach (Soulseek.File f in item.GetFiles(PreferencesState.HideLockedResultsInSearch))
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 SetTextColor(tv, SeekerState.MainActivityRef);
-                tv.Text = CommonHelpers.GetFileNameFromFile(f.Filename);
+                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
                 viewToHideShow.AddView(tv);
             }
         }
@@ -245,9 +227,9 @@ namespace Seeker
         {
             bool opposite = this.AdapterRef.oppositePositions.Contains(position);
             viewUsername.Text = item.Username;
-            viewFoldername.Text = CommonHelpers.GetFolderNameForSearchResult(item);
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + "kbs"; //kb/s
-            if (item.FreeUploadSlots > 0)
+            if (item.HasFreeUploadSlot)
             {
                 viewQueue.Text = "";
             }
@@ -255,7 +237,7 @@ namespace Seeker
             {
                 viewQueue.Text = item.QueueLength.ToString();
             }
-            viewFileType.Text = item.GetDominantFileType(hideLocked, out _);
+            viewFileType.Text = item.GetDominantFileTypeAndBitRate(hideLocked, out _);
 
             if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll && opposite ||
                 SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)
@@ -311,7 +293,7 @@ namespace Seeker
             }
             else
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 23)
+                if (OperatingSystem.IsAndroidVersionAtLeast(23))
                 {
                     return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
                 }

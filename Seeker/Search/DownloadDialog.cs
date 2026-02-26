@@ -17,7 +17,6 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Extensions.SearchResponseExtensions;
 using Android.App;
 using Android.Content;
 using Android.Content.Res;
@@ -27,17 +26,21 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Common;
+using Common.Browse;
 using Google.Android.Material.Snackbar;
+using Seeker.Extensions.SearchResponseExtensions;
+using Seeker.Helpers;
+using Seeker.Services;
+using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log = Android.Util.Log;
-using Seeker.Helpers;
-using Seeker.Transfers;
 
 namespace Seeker
 {
@@ -53,7 +56,7 @@ namespace Seeker
         //private List<int> selectedPositions = new List<int>();
         public DownloadDialog(int pos, SearchResponse resp)
         {
-            MainActivity.LogDebug("DownloadDialog create");
+            Logger.Debug("DownloadDialog create");
             searchResponse = resp;
             searchPosition = pos;
             SearchResponseTemp = resp;
@@ -62,18 +65,19 @@ namespace Seeker
 
         public DownloadDialog()
         {
-            MainActivity.LogDebug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
+            Logger.Debug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
             searchResponse = SearchResponseTemp;
             searchPosition = SearchPositionTemp;
         }
 
+        // TODO2026 move
         private void UpdateSearchResponseWithFullDirectory(Soulseek.Directory d)
         {
             //normally files are like this "@@ynkmv\\Albums\\albumname (2012)\\02 - songname.mp3"
             //but when we get a dir response the files are just the end file names i.e. "02 - songname.mp3" so they cannot be downloaded like that...
             //can be fixed with d.Name + "\\" + f.Filename
             //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
-            bool hideLocked = SeekerState.HideLockedResultsInSearch;
+            bool hideLocked = PreferencesState.HideLockedResultsInSearch;
             List<File> fullFilenameCollection = new List<File>();
             foreach (File f in d.Files)
             {
@@ -94,22 +98,22 @@ namespace Seeker
                     fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
                 }
             }
-            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.FreeUploadSlots, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
+            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.HasFreeUploadSlot, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
         }
 
         public override void OnResume()
         {
             base.OnResume();
-            MainActivity.LogDebug("OnResume Start");
+            Logger.Debug("OnResume Start");
 
             Dialog?.SetSizeProportional(.9, .9);
 
-            MainActivity.LogDebug("OnResume End");
+            Logger.Debug("OnResume End");
         }
 
         public override void OnAttach(Context context)
         {
-            MainActivity.LogDebug("DownloadDialog OnAttach");
+            Logger.Debug("DownloadDialog OnAttach");
             base.OnAttach(context);
             if (context is Activity)
             {
@@ -123,7 +127,7 @@ namespace Seeker
 
         public override void OnDetach()
         {
-            MainActivity.LogDebug("DownloadDialog OnDetach");
+            Logger.Debug("DownloadDialog OnDetach");
             SearchFragment.dlDialogShown = false;
             base.OnDetach();
             this.activity = null;
@@ -150,7 +154,7 @@ namespace Seeker
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            MainActivity.LogDebug("DownloadDialog OnCreateView");
+            Logger.Debug("DownloadDialog OnCreateView");
             return inflater.Inflate(Resource.Layout.downloaddialog, container); //container is parent
         }
 
@@ -178,16 +182,11 @@ namespace Seeker
         /// <param name="savedInstanceState"></param>
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
-            //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
-            log.Debug(MainActivity.logCatTag, "Is View null: " + (view == null).ToString());
-
-            log.Debug(MainActivity.logCatTag, "Is savedInstanceState null: " + (savedInstanceState == null).ToString()); //this is null and it is fine..
             base.OnViewCreated(view, savedInstanceState);
             this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
             this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
             Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
-            log.Debug(MainActivity.logCatTag, "Is dl null: " + (dl == null).ToString());
             dl.Click += DownloadAll_Click;
             Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
             cancel.Click += Cancel_Click;
@@ -208,15 +207,14 @@ namespace Seeker
 
             if (searchResponse == null)
             {
-                log.Debug(MainActivity.logCatTag, "Is searchResponse null");
-                MainActivity.LogFirebase("DownloadDialog search response is null");
+                Logger.Firebase("DownloadDialog search response is null");
                 this.Dismiss(); //this is honestly pretty good behavior...
                 return;
             }
             userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
-            log.Debug(MainActivity.logCatTag, "Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
+            Logger.Debug("Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
             ListView listView = view.FindViewById<ListView>(Resource.Id.listView1);
             listView.ItemClick += ListView_ItemClick;
@@ -230,7 +228,7 @@ namespace Seeker
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
             List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
             adapterList.AddRange(searchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
-            if (!SeekerState.HideLockedResultsInSearch)
+            if (!PreferencesState.HideLockedResultsInSearch)
             {
                 adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
             }
@@ -242,7 +240,7 @@ namespace Seeker
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + CommonHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -269,219 +267,7 @@ namespace Seeker
                 //in response to a crash android.view.WindowManager.BadTokenException
                 //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
                 //in this case not showing it is probably best... as opposed to a crash...
-                MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
-            }
-        }
-
-        private static void RequestFilesLogic(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation)
-        {
-            try
-            {
-                Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("RequestFilesLogic: " + e.Message + e.StackTrace);
-            }
-            Task<BrowseResponse> browseResponseTask = null;
-            try
-            {
-                browseResponseTask = SeekerState.SoulseekClient.BrowseAsync(username);
-            }
-            catch (InvalidOperationException)
-            {   //this can still happen on ReqFiles_Click.. maybe for the first check we were logged in but for the second we somehow were not..
-                SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show(); });
-                return;
-            }
-            Action<Task<BrowseResponse>> continueWithAction = new Action<Task<BrowseResponse>>((br) =>
-            {
-                //var arrayOfDir = br.Result.Directories.ToArray();
-                //for(int i=0;i<arrayOfDir.Length;i++)
-                //{
-                //    Console.WriteLine(arrayOfDir[i].DirectoryName);
-                //    Console.WriteLine(arrayOfDir[i].FileCount);
-                //    if(i>100)
-                //    {
-                //        break;
-                //    }
-                //}
-                //Console.WriteLine(arrayOfDir.ToString());
-                MainActivity.LogDebug($"RequestFilesLogic {username} completed");
-
-                if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
-                {
-                    //timeout
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
-                    return;
-                }
-                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException is TimeoutException)
-                {
-                    //timeout - this time when the connection was established, but the user has not written to us in over 15 (timeout) seconds. I tested and generally this is fixed by simply retrying.
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_timeout), ToastLength.Short).Show(); });
-                    return;
-                }
-                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException != null && br.Exception.InnerException.InnerException.ToString().ToLower().Contains("network subsystem is down"))
-                {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.network_down), ToastLength.Short).Show(); });
-                    return;
-                }
-                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
-                {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short).Show(); });
-                    return;
-                }
-                else if (br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
-                {
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short).Show(); });
-                    return;
-                }
-                else if (br.IsFaulted)
-                {
-                    //shouldnt get here
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short).Show(); });
-                    MainActivity.LogFirebase("browse response faulted: " + username + br.Exception?.Message);
-                    return;
-                }
-                //TODO there is a case due to like button mashing or if you keep requesting idk. but its a SoulseekClient InnerException and it says peer disconnected unexpectedly and timeout.
-
-                //List<string> terms = new List<string>();
-                //terms.Add("Collective");
-                string errorString = string.Empty;
-                var tree = CreateTree(br.Result, false, null, null, username, out errorString);
-                if (tree != null)
-                {
-                    SeekerState.OnBrowseResponseReceived(br.Result, tree, username, atLocation);
-                }
-
-                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                {
-                    if (tree == null)
-                    {
-                        //error case
-                        if (errorString != null && errorString != string.Empty)
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, errorString, ToastLength.Long).Show();
-                        }
-                        else
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_wefailedtoparse), ToastLength.Long).Show();
-                        }
-                        return;
-                    }
-                    if (SeekerState.MainActivityRef != null && ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
-                    {
-                        if (SeekerState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Started))
-                        {
-                            return; //they are already there... they see it populating, no need to show them notification...
-                        }
-                    }
-
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
-                        SeekerState.ActiveActivityRef.StartActivity(intent);
-                        //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                    });
-
-                    try
-                    {
-                        Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SeekerState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                        (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
-                        sb.Show();
-                    }
-                    catch
-                    {
-                        try
-                        {
-                            Snackbar sb = Snackbar.Make(SeekerState.MainActivityRef.CurrentFocus, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SeekerState.ActiveActivityRef.GetString(Resource.String.go), action).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
-                            sb.Show();
-                        }
-                        catch
-                        {
-                            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), ToastLength.Short).Show();
-                        }
-                    }
-
-
-                });
-            });
-            browseResponseTask.ContinueWith(continueWithAction);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="dirname"></param>
-        /// <param name="isLegacy"></param>
-        /// <param name="continueWithAction"></param>
-        /// <exception cref="FaultPropagationException"></exception>
-        /// <remarks>
-        /// Older versions of Nicotine do not send us the token we sent them (the token we get is always 1).
-        /// This will result in a timeout error.
-        /// Regarding fixing the case where older Nicotine and older slsk.net send us a Latin1 encoded string
-        /// that is ambigious (i.e. fÃ¶r) if we sent it back properly we get a timeout.  I dont think its worth
-        /// retrying since the versions of Nicotine that send us a Latin1 string are the same versions that send
-        /// the token = 1.  Also, even if it did work, the the user would only get the folder after a full 30 second timeout.  
-        /// </remarks>
-        public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<Directory>> continueWithAction)
-        {
-            if (!SeekerState.currentlyLoggedIn)
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_be_logged_in_to_get_dir_contents, ToastLength.Short).Show();
-                return;
-            }
-
-            Action<Task> actualActionToPerform = new Action<Task>((Task connectionTask) =>
-            {
-
-                if (connectionTask.IsFaulted)
-                {
-                    if (!(connectionTask.Exception.InnerException is FaultPropagationException)) //i.e. only show it once.
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                        {
-                            Toast tst2 = Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                            tst2.Show();
-                        }));
-                    }
-                    throw new FaultPropagationException();
-                }
-                else
-                {
-                    //the original logic...
-                    Task<Directory> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
-                    t.ContinueWith(continueWithAction);
-                }
-
-            });
-
-
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task conTask;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out conTask))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = conTask.ContinueWith(actualActionToPerform);
-            }
-            else
-            {
-                if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
-                {
-                    MainActivity.LogDebug("on finish log in we will do it");
-                    return;
-                }
-                else
-                {
-                    Task<Directory> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
-                    t.ContinueWith(continueWithAction);
-                }
+                Logger.Firebase(error.Message + " POPUP BAD ERROR");
             }
         }
 
@@ -492,156 +278,7 @@ namespace Seeker
                 this.Dismiss();
                 ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
-            RequestFilesApi(searchResponse.Username, this.View, action, null);
-        }
-
-
-        public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)
-        {
-            if (!SeekerState.currentlyLoggedIn)
-            {
-                Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short).Show();
-                return;
-            }
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(SeekerState.ActiveActivityRef, false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
-                }));
-            }
-            else
-            {
-                RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation);
-            }
-        }
-
-
-
-
-        public static TreeNode<Directory> CreateTree(BrowseResponse b, bool filter, List<string> wordsToAvoid, List<string> wordsToInclude, string username, out string errorMsgToToast)
-        {
-            //logging code for unit tests / diagnostic.. //TODO comment out always
-            //#if DEBUG
-            //var root = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, Android.Net.Uri.Parse( SeekerState.SaveDataDirectoryUri) );
-            //DocumentFile exists = root.FindFile(username + "_dir_response");
-            ////save:
-            //if(exists==null || !exists.Exists())
-            //{
-            //    DocumentFile f = root.CreateFile(@"custom\binary",username + "_dir_response");
-
-            //    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
-            //    //Java.IO.File musicFile = new Java.IO.File(filePath);
-            //    //FileOutputStream stream = new FileOutputStream(mFile);
-            //    using (System.IO.MemoryStream userListStream = new System.IO.MemoryStream())
-            //    {
-            //        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //        formatter.Serialize(userListStream, b);
-
-            //    //write to binary..
-
-            //        stream.Write(userListStream.ToArray());
-            //        stream.Close();
-            //    }
-            //}
-            //#endif
-            //load
-            //string username_to_load = "x";
-            //exists = root.FindFile(username_to_load + "_dir_response");
-            //var str = SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(exists.Uri);
-
-            //System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //b = formatter.Deserialize(str) as BrowseResponse;
-
-            ////write to binary..
-
-            //str.Close();
-            //end logging code
-            bool hideLocked = SeekerState.HideLockedResultsInBrowse;
-            if (b.DirectoryCount == 0 && b.LockedDirectoryCount != 0 && hideLocked)
-            {
-                errorMsgToToast = SeekerState.ActiveActivityRef.GetString(Resource.String.browse_onlylocked);
-                return null;
-            }
-            else if (b.DirectoryCount == 0 && b.LockedDirectoryCount == 0)
-            {
-                errorMsgToToast = SeekerState.ActiveActivityRef.GetString(Resource.String.browse_none);
-                return null;
-            }
-
-            //if the user is sharing only 1 empty directory, then show a message.
-            //previously we let it through, but if they are sharing just 1 empty dir, that becomes the root dir
-            //and it looks strange. if 2+ empty dirs the same problem does not occur.
-            if (hideLocked && b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
-            {
-                errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
-                return null;
-            }
-            else if (!hideLocked && (b.DirectoryCount + b.LockedDirectoryCount == 1)) //if just 1 dir total
-            {
-                if (b.DirectoryCount == 1 && b.Directories.First().FileCount == 0)
-                {
-                    errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
-                    return null;
-                }
-                else if (b.LockedDirectoryCount == 1 && b.LockedDirectories.First().FileCount == 0)
-                {
-                    errorMsgToToast = String.Format(SeekerApplication.GetString(Resource.String.BrowseOnlyEmptyDir), username);
-                    return null;
-                }
-            }
-
-            TreeNode<Directory> rootNode = null;
-            try
-            {
-                errorMsgToToast = String.Empty;
-                rootNode = Common.Algorithms.CreateTreeCore(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
-            }
-            catch (Exception e)
-            {
-                MainActivity.LogFirebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
-                throw e;
-            }
-
-
-            //logging code for unit tests / diagnostic..
-            //var root2 = DocumentFile.FromTreeUri(SeekerState.MainActivityRef, Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri));
-            //DocumentFile exists2 = root.FindFile(username + "_parsed_answer");
-            //if (exists2 == null || !exists2.Exists())
-            //{
-            //    DocumentFile f = root2.CreateFile(@"custom\binary", username + "_parsed_answer");
-
-            //    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
-            //    //Java.IO.File musicFile = new Java.IO.File(filePath);
-            //    //FileOutputStream stream = new FileOutputStream(mFile);
-            //    using (System.IO.MemoryStream userListStream = new System.IO.MemoryStream())
-            //    {
-            //        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //        formatter.Serialize(userListStream, rootNode);
-
-            //        //write to binary..
-
-            //        stream.Write(userListStream.ToArray());
-            //        stream.Close();
-            //    }
-            //}
-            //end logging code for unit tests / diagnostic..
-
-
-            errorMsgToToast = "";
-            return rootNode;
+            Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, null);
         }
 
 
@@ -653,7 +290,7 @@ namespace Seeker
             {
 
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
@@ -669,7 +306,7 @@ namespace Seeker
             else
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     e.View.Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                     e.View.FindViewById(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
@@ -688,7 +325,7 @@ namespace Seeker
         private void SetDownloadSelectedButtonState()
         {
             //backgroundtintlist is api 21+ so lower than this, there is no disabled state change which is fine.
-            if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
             {
                 if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
                 {
@@ -734,7 +371,7 @@ namespace Seeker
         {
             if (this.customAdapter.SelectedPositions.Count == 0)
             {
-                Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
                 return;
             }
 
@@ -743,12 +380,12 @@ namespace Seeker
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
         {
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(this.Context, false, out t))
+                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -756,10 +393,10 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
-                        SeekerState.MainActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
                         return;
                     }
-                    MainActivity.LogDebug("DownloadDialog Dl_Click");
+                    Logger.Debug("DownloadDialog Dl_Click");
                     DownloadFiles(filesToDownload, username, false);
 
                 }));
@@ -770,22 +407,17 @@ namespace Seeker
                 }
                 catch (Exception exx)
                 {
-                    MainActivity.LogDebug("DownloadDialog DownloadWithContinuation: " + exx.Message);
+                    Logger.Debug("DownloadDialog DownloadWithContinuation: " + exx.Message);
                     return; //dont dismiss dialog.  that only happens on success..
                 }
                 Dismiss();
             }
             else
             {
-                MainActivity.LogDebug("DownloadDialog Dl_Click");
+                Logger.Debug("DownloadDialog Dl_Click");
                 DownloadFiles(filesToDownload, username, false);
                 Dismiss();
             }
-        }
-
-        private FullFileInfo[] GetFullFileInfos(IEnumerable<Soulseek.File> files)
-        {
-            return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
         }
 
         private FullFileInfo[] GetFilesToDownload(bool selectedOnly)
@@ -795,34 +427,22 @@ namespace Seeker
                 List<File> selectedFiles = new List<File>();
                 foreach (int position in this.customAdapter.SelectedPositions)
                 {
-                    var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, position);
+                    var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
                     selectedFiles.Add(file);
                 }
-                return GetFullFileInfos(selectedFiles.ToArray());
+                return BrowseUtils.GetFullFileInfos(selectedFiles.ToArray());
             }
             else
             {
-                return GetFullFileInfos(searchResponse.GetFiles(SeekerState.HideLockedResultsInSearch));
+                return BrowseUtils.GetFullFileInfos(searchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
             }
         }
 
         private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
         {
-            var task = TransfersUtil.CreateDownloadAllTask(files, queuePaused, username);
+            var task = DownloadService.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
-        }
-
-        public static int GetQueueLength(SearchResponse s)
-        {
-            if (s.FreeUploadSlots > 0)
-            {
-                return 0;
-            }
-            else
-            {
-                return (int)(s.QueueLength);
-            }
         }
 
         public void OnCloseClick(object sender, DialogClickEventArgs d)
@@ -849,7 +469,7 @@ namespace Seeker
             }
             catch (Exception e)
             {
-                MainActivity.LogFirebase(e.Message + " InNightMode");
+                Logger.Firebase(e.Message + " InNightMode");
                 return false;
             }
         }
@@ -863,7 +483,7 @@ namespace Seeker
         }
 
 
-        public void DirectoryReceivedContAction(Task<Directory> dirTask)
+        public void DirectoryReceivedContAction(Task<IReadOnlyCollection<Directory>> dirTask)
         {
 
             //if we have since closed the dialog, then this.View will be null
@@ -885,23 +505,24 @@ namespace Seeker
                     {
                         if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
                         {
-                            Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_timed_out), ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_timed_out), ToastLength.Short);
                         }
-                        MainActivity.LogDebug(dirTask.Exception.InnerException.Message);
+                        Logger.Debug(dirTask.Exception.InnerException.Message);
                     }
-                    Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_failed), ToastLength.Short).Show();
-                    MainActivity.LogDebug("DirectoryReceivedContAction faulted");
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_failed), ToastLength.Short);
+                    Logger.Debug("DirectoryReceivedContAction faulted");
                 }
                 else
                 {
-                    MainActivity.LogDebug("DirectoryReceivedContAction successful!");
+                    Logger.Debug("DirectoryReceivedContAction successful!");
                     ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
-                    if (listView.Count == dirTask.Result.Files.Count)
+                    var directory = dirTask.Result.First();
+                    if (listView.Count == directory.Files.Count)
                     {
-                        Toast.MakeText(SeekerState.MainActivityRef, SeekerState.MainActivityRef.GetString(Resource.String.folder_request_already_have), ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_already_have), ToastLength.Short);
                         return;
                     }
-                    this.UpdateSearchResponseWithFullDirectory(dirTask.Result);
+                    this.UpdateSearchResponseWithFullDirectory(directory);
                     this.UpdateListView();
                     this.UpdateSubHeader();
 
@@ -918,26 +539,26 @@ namespace Seeker
         {
             try
             {
-                var file = searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0);
-                string dirname = CommonHelpers.GetDirectoryRequestFolderName(file.Filename);
+                var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
+                string dirname = SimpleHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
-                    MainActivity.LogFirebase("The dirname is empty!!");
+                    Logger.Firebase("The dirname is empty!!");
                     stopRefreshing();
                     return;
                 }
-                if (!SeekerState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+                if (!PreferencesState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
                 {
-                    Toast.MakeText(SeekerState.ActiveActivityRef, SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short).Show();
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short);
                     stopRefreshing();
                     return;
                 }
-                GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
+                Browse.BrowseService.GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
             catch (Exception ex)
             {
-                CommonHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
-                MainActivity.LogFirebaseError($"{SeekerState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
+                UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
+                Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
             }
         }
 
@@ -949,29 +570,30 @@ namespace Seeker
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = CommonHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(SeekerState.HideLockedResultsInSearch, 0).Filename);
+                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
                     Action<View> action = new Action<View>((v) =>
                     {
                         this.Dismiss();
                         ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
-                    if (!SeekerState.HideLockedResultsInSearch && SeekerState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
                     {
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;
                     }
-                    RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
+                    Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
                     //transferItems.CopyTo(tempArry);
-                    var builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this.Context, Resource.Style.MyAlertDialogTheme);
+                    //TODOASAP - hasfreeupload slots is now a boolean, fix the string.
+                    var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
                         searchResponse.QueueLength +
                         System.Environment.NewLine +
                         System.Environment.NewLine +
                         this.Context.GetString(Resource.String.upload_slots_) +
-                        searchResponse.FreeUploadSlots).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+                        searchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
                     //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...
@@ -998,7 +620,7 @@ namespace Seeker
                     {
                         if (this.customAdapter.SelectedPositions.Count == 0)
                         {
-                            Toast.MakeText(Context, Context.GetString(Resource.String.nothing_selected_extra), ToastLength.Short).Show();
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
                             return true;
                         }
                         var filesToDownload = GetFilesToDownload(true);
@@ -1010,17 +632,6 @@ namespace Seeker
                     return false;
 
             }
-        }
-    }
-
-    public class FileLockedUnlockedWrapper
-    {
-        public Soulseek.File File;
-        public bool IsLocked;
-        public FileLockedUnlockedWrapper(Soulseek.File _file, bool _isLocked)
-        {
-            File = _file;
-            IsLocked = _isLocked;
         }
     }
 
@@ -1045,7 +656,7 @@ namespace Seeker
             if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
                     itemView.Background = cellbackSelected;
@@ -1062,7 +673,7 @@ namespace Seeker
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
 #pragma warning disable 0618
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     var cellbackNormal = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
                     itemView.Background = cellbackNormal;
@@ -1114,69 +725,13 @@ namespace Seeker
         {
             if (wrapper.IsLocked)
             {
-                viewFilename.Text = new System.String(Java.Lang.Character.ToChars(0x1F512)) + CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
             }
             else
             {
-                viewFilename.Text = CommonHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
             }
-            viewAttributes.Text = CommonHelpers.GetSizeLengthAttrString(wrapper.File);
-        }
-
-        /// <summary>
-        /// The other one cuts off 1 character..... They both do
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
-        //public static string GetFileNameFromFile(string filename)
-        //{
-        //    int begin = filename.LastIndexOf("\\");
-        //    string clipped = filename.Substring(begin + 1);
-        //    return clipped;
-        //}
-
-        private string GetStringFromAttributes(IReadOnlyCollection<Soulseek.FileAttribute> fileAttributes)
-        {
-            if (fileAttributes.Count == 0)
-            {
-                return "";
-            }
-            StringBuilder stringBuilder = new StringBuilder();
-            string attrString = "";
-            foreach (FileAttribute attr in fileAttributes)
-            {
-
-                if (attr.Type == FileAttributeType.BitDepth)
-                {
-                    attrString = attr.Value.ToString();
-                }
-                else if (attr.Type == FileAttributeType.SampleRate)
-                {
-                    attrString = (attr.Value / 1000.0).ToString();
-                }
-                else if (attr.Type == FileAttributeType.BitRate)
-                {
-                    attrString = attr.Value.ToString() + "kbs";
-                }
-                else if (attr.Type == FileAttributeType.VariableBitRate)
-                {
-                    attrString = attr.Value.ToString() + "kbs";
-                }
-                else if (attr.Type == FileAttributeType.Length)
-                {
-                    continue;
-                }
-                stringBuilder.Append(attrString);
-                stringBuilder.Append(", ");
-            }
-            if (stringBuilder.Length <= 3)
-            {
-                return "";
-            }
-            stringBuilder.Remove(stringBuilder.Length - 2, 2);
-            return stringBuilder.ToString();
+            viewAttributes.Text = SimpleHelpers.GetSizeLengthAttrString(wrapper.File);
         }
     }
-
-
 }

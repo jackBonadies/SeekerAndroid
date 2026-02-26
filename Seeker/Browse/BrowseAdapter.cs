@@ -68,7 +68,7 @@ namespace Seeker
             {
                 itemView.FolderIndicator.Visibility = ViewStates.Gone;
                 itemView.FileDetails.Visibility = ViewStates.Visible;
-                itemView.FileDetails.Text = CommonHelpers.GetSizeLengthAttrString(dataItem.File);
+                itemView.FileDetails.Text = SimpleHelpers.GetSizeLengthAttrString(dataItem.File);
                 //itemView.ContainingViewGroup.SetPadding(0,SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
             }
             itemView.DisplayName.Text = dataItem.GetDisplayName();
@@ -114,7 +114,7 @@ namespace Seeker
 #pragma warning disable 0618
             if (isSelected)
             {
-                if ((int)Android.OS.Build.VERSION.SdkInt >= 21)
+                if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
                     this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
                     //this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);

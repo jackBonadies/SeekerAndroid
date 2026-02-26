@@ -31,6 +31,8 @@ namespace Soulseek
         {
             Username = username;
             Id = id;
+
+            RequiresAcknowlegement = Id.HasValue;
         }
 
         /// <summary>
@@ -46,6 +48,6 @@ namespace Soulseek
         /// <summary>
         ///     Gets a value indicating whether the notification must be acknowleged.
         /// </summary>
-        public bool RequiresAcknowlegement => Id.HasValue;
+        public bool RequiresAcknowlegement { get; }
     }
 }

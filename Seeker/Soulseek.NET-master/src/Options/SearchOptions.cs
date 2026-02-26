@@ -31,9 +31,6 @@ namespace Soulseek
         /// <param name="responseLimit">The maximum number of search results to accept before the search is considered completed.</param>
         /// <param name="filterResponses">A value indicating whether responses are to be filtered.</param>
         /// <param name="minimumResponseFileCount">The minimum number of files a response must contain in order to be processed.</param>
-        /// <param name="minimumPeerFreeUploadSlots">
-        ///     The minimum number of free upload slots a peer must have in order for a response to be processed.
-        /// </param>
         /// <param name="maximumPeerQueueLength">The maximum queue depth a peer may have in order for a response to be processed.</param>
         /// <param name="minimumPeerUploadSpeed">
         ///     The minimum upload speed a peer must have in order for a response to be processed.
@@ -51,23 +48,21 @@ namespace Soulseek
             int responseLimit = 250,
             bool filterResponses = true,
             int minimumResponseFileCount = 1,
-            int minimumPeerFreeUploadSlots = 0,
             int maximumPeerQueueLength = int.MaxValue,
             int minimumPeerUploadSpeed = 0,
             int fileLimit = 25000,
             bool removeSingleCharacterSearchTerms = true,
             Func<SearchResponse, bool> responseFilter = null,
             Func<File, bool> fileFilter = null,
-            Action<SearchStateChangedEventArgs> stateChanged = null,
-            Action<SearchResponseReceivedEventArgs> responseReceived = null)
+            Action<(SearchStates PreviousState, Search Search)> stateChanged = null,
+            Action<(Search Search, SearchResponse Response)> responseReceived = null)
         {
             SearchTimeout = searchTimeout;
             ResponseLimit = responseLimit;
             FileLimit = fileLimit;
             FilterResponses = filterResponses;
             MinimumResponseFileCount = minimumResponseFileCount;
-            MinimumPeerFreeUploadSlots = minimumPeerFreeUploadSlots;
-            MaximumPeerQueueLength = maximumPeerQueueLength; //tried for both 613 and 47 and the downloads worked just fine...
+            MaximumPeerQueueLength = maximumPeerQueueLength;
             MinimumPeerUploadSpeed = minimumPeerUploadSpeed;
             ResponseFilter = responseFilter;
             FileFilter = fileFilter;
@@ -95,11 +90,6 @@ namespace Soulseek
         ///     Gets the maximum queue depth a peer may have in order for a response to be processed. (Default = maximum integer value).
         /// </summary>
         public int MaximumPeerQueueLength { get; }
-
-        /// <summary>
-        ///     Gets the minimum number of free upload slots a peer must have in order for a response to be processed. (Default = 0).
-        /// </summary>
-        public int MinimumPeerFreeUploadSlots { get; }
 
         /// <summary>
         ///     Gets the minimum upload speed a peer must have in order for a response to be processed. (Default = 0).
@@ -130,7 +120,7 @@ namespace Soulseek
         /// <summary>
         ///     Gets the Action to invoke when a new search response is received.
         /// </summary>
-        public Action<SearchResponseReceivedEventArgs> ResponseReceived { get; }
+        public Action<(Search Search, SearchResponse Response)> ResponseReceived { get; }
 
         /// <summary>
         ///     Gets the search timeout value, in milliseconds, used to determine when the search is complete. (Default = 15000).
@@ -141,6 +131,6 @@ namespace Soulseek
         /// <summary>
         ///     Gets the Action to invoke when the search changes state.
         /// </summary>
-        public Action<SearchStateChangedEventArgs> StateChanged { get; }
+        public Action<(SearchStates PreviousState, Search Search)> StateChanged { get; }
     }
 }

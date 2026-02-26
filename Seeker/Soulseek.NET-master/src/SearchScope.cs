@@ -39,7 +39,7 @@ namespace Soulseek
 
             if ((Type == SearchScopeType.Network || Type == SearchScopeType.Wishlist) && subjects.Length > 0)
             {
-                throw new ArgumentException($"The {Type} search scope accepts no subjects", nameof(subjects));
+                throw new ArgumentException($"The {Type} search scope can not be used with subjects", nameof(subjects));
             }
 
             if (Type == SearchScopeType.Room && (subjects.Length != 1 || string.IsNullOrEmpty(subjects[0])))

@@ -17,6 +17,7 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Messages;
 using Seeker.Users;
@@ -33,6 +34,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Common;
 namespace Seeker
 {
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
@@ -83,9 +85,9 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
             {
-                if (CommonHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
                 {
-                    MainActivity.LogDebug("handled by commons");
+                    Logger.Debug("handled by commons");
                     return true;
                 }
             }
@@ -101,7 +103,7 @@ namespace Seeker
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
-                    DownloadDialog.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
+                    BrowseService.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -112,7 +114,7 @@ namespace Seeker
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.removeUser:
-                    MainActivity.UserListRemoveUser(PopUpMenuOwnerHack);
+                    UserListService.Instance.RemoveUser(PopUpMenuOwnerHack);
                     this.NotifyItemRemoved(PopUpMenuOwnerHack);
                     return true;
                 case Resource.Id.removeUserFromIgnored:
@@ -171,7 +173,7 @@ namespace Seeker
 
             if (SeekerState.UserList == null)
             {
-                var sharedPref = this.GetSharedPreferences("SoulSeekPrefs", 0);
+                var sharedPref = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
                 SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPref.GetString(KeyConsts.M_UserList, ""));
             }
 
@@ -402,128 +404,16 @@ namespace Seeker
             //return base.OnNavigateUp();
         }
 
-        public static void AddUserLogic(Context c, string username, Action UIaction, bool massImportCase = false)
+
+        public static SortOrder UserListSortOrder
         {
-            if (!massImportCase)
-            {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.adding_user_), username), ToastLength.Short).Show();
-            }
-
-            Action<Task<Soulseek.UserData>> continueWithAction = (Task<Soulseek.UserData> t) =>
-            {
-                if (t == null || t.IsFaulted)
-                {
-                    //failed to add user
-                    if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.ToLower().Contains("the wait timed out"))
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            Toast.MakeText(c, Resource.String.error_adding_user_timeout, ToastLength.Short).Show();
-                        });
-                    }
-                    else if (t.Exception != null && t.Exception != null && t.Exception.InnerException is Soulseek.UserNotFoundException)
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                        {
-                            if (!massImportCase)
-                            {
-                                Toast.MakeText(c, Resource.String.error_adding_user_not_found, ToastLength.Short).Show();
-                            }
-                            else
-                            {
-                                Toast.MakeText(c, String.Format("Error adding {0}: user not found", username), ToastLength.Short).Show();
-                            }
-                        });
-                    }
-                }
-                else
-                {
-                    MainActivity.UserListAddUser(t.Result);
-                    if (!massImportCase)
-                    {
-                        if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
-                        {
-                            lock (MainActivity.SHARED_PREF_LOCK)
-                            {
-                                var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
-                                editor.Commit();
-                            }
-                        }
-                    }
-                    if (UIaction != null)
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(UIaction);
-                    }
-                }
-            };
-
-            //Add User Logic...
-            SeekerState.SoulseekClient.AddUserAsync(username).ContinueWith(continueWithAction);
+            get => (SortOrder)Common.PreferencesState.UserListSortOrder;
+            set => Common.PreferencesState.UserListSortOrder = (int)value;
         }
-
-        public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
-        {
-
-            if (username == string.Empty || username == null)
-            {
-                Toast.MakeText(c, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
-                return;
-            }
-
-            if (!SeekerState.currentlyLoggedIn)
-            {
-                Toast.MakeText(c, Resource.String.must_be_logged_to_add_or_remove_user, ToastLength.Short).Show();
-                return;
-            }
-
-            if (MainActivity.UserListContainsUser(username))
-            {
-                Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_user_), username), ToastLength.Short).Show();
-                return;
-            }
-
-            Action<Task> actualActionToPerform = new Action<Task>((Task t) =>
-            {
-                if (t.IsFaulted)
-                {
-                    //only show once for the original fault.
-                    MainActivity.LogDebug("task is faulted, prop? " + (t.Exception.InnerException is FaultPropagationException)); //t.Exception is always Aggregate Exception..
-                    if (!(t.Exception.InnerException is FaultPropagationException))
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show(); });
-                    }
-                    throw new FaultPropagationException();
-                }
-                SeekerState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
-            });
-
-            if (MainActivity.CurrentlyLoggedInButDisconnectedState())
-            {
-                MainActivity.LogDebug("CurrentlyLoggedInButDisconnectedState");
-                Task t;
-                if (!MainActivity.ShowMessageAndCreateReconnectTask(c, false, out t))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
-            }
-            else if (MainActivity.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "User will be added once login is complete."))
-            {
-                MainActivity.LogDebug("IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction");
-                return;
-            }
-            else
-            {
-                AddUserLogic(c, username, UIaction, massImportCase);
-            }
-        }
-
-        public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
         private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
         public void ShowSortUserListDialog()
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             builder.SetTitle(this.Resources.GetString(Resource.String.SortUsersBy));
 
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.change_sort_order_dialog, this.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
@@ -595,19 +485,14 @@ namespace Seeker
 
             if (prev != UserListSortOrder)
             {
-                lock (MainActivity.SHARED_PREF_LOCK)
-                {
-                    var editor = SeekerState.SharedPreferences.Edit();
-                    editor.PutInt(KeyConsts.M_UserListSortOrder, (int)UserListSortOrder);
-                    editor.Commit();
-                }
+                PreferencesManager.SaveUserListSortOrder();
                 this.RefreshUserList();
             }
         }
 
         public void ShowEditTextDialogAddUserToList(bool toIgnored)
         {
-            AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(this, Resource.Style.MyAlertDialogTheme);
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
             // the reason the title is plural is because, using enter, you can add multiple users without closing the dialog.
             if (toIgnored)
             {
@@ -620,10 +505,8 @@ namespace Seeker
                 builder.SetTitle(addUser);
             }
 
-            // I'm using fragment here so I'm using getView() to provide ViewGroup
-            // but you can provide here any other instance of ViewGroup from your Fragment / Activity
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.add_user_to_userlist, (ViewGroup)this.FindViewById<ViewGroup>(Resource.Layout.user_list_activity_layout), false);
-            // Set up the input
+            var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, rootView, false);
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
             SeekerApplication.SetupRecentUserAutoCompleteTextView(input, true);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
@@ -635,7 +518,7 @@ namespace Seeker
                 {
                     if (string.IsNullOrEmpty(input.Text))
                     {
-                        Toast.MakeText(SeekerState.ActiveActivityRef, Resource.String.must_type_a_username_to_add, ToastLength.Short).Show();
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_add), ToastLength.Short);
                         return;
                     }
 
@@ -648,7 +531,7 @@ namespace Seeker
                     {
                         SeekerState.RecentUsersManager.AddUserToTop(input.Text, true);
                     }
-                    AddUserAPI(SeekerState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
                 }
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
@@ -663,7 +546,7 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search)
                 {
-                    MainActivity.LogDebug("IME ACTION: " + e.ActionId.ToString());
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -674,7 +557,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -685,7 +568,7 @@ namespace Seeker
             {
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
-                    MainActivity.LogDebug("keypress: " + e.Event.KeyCode.ToString());
+                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
                     //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                     //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
                     //overriding this, the keyboard fails to go down by default for some reason.....
@@ -696,7 +579,7 @@ namespace Seeker
                     }
                     catch (System.Exception ex)
                     {
-                        MainActivity.LogFirebase(ex.Message + " error closing keyboard");
+                        Logger.Firebase(ex.Message + " error closing keyboard");
                     }
                     //Do the Browse Logic...
                     eventHandler(sender, null);
@@ -716,7 +599,7 @@ namespace Seeker
             // Set up the buttons
 
             var dialog = builder.Show();
-            CommonHelpers.DoNotEnablePositiveUntilText(dialog, input);
+            UiHelpers.DoNotEnablePositiveUntilText(dialog, input);
         }
 
 
@@ -736,7 +619,7 @@ namespace Seeker
         //        //in response to a crash android.view.WindowManager.BadTokenException
         //        //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
         //        //in this case not showing it is probably best... as opposed to a crash...
-        //        MainActivity.LogFirebase(error.Message + " IGNORE POPUP BAD ERROR");
+        //        Logger.Firebase(error.Message + " IGNORE POPUP BAD ERROR");
         //    }
         //}
 
@@ -757,7 +640,7 @@ namespace Seeker
         //        //in response to a crash android.view.WindowManager.BadTokenException
         //        //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
         //        //in this case not showing it is probably best... as opposed to a crash...
-        //        MainActivity.LogFirebase(error.Message + " POPUP BAD ERROR");
+        //        Logger.Firebase(error.Message + " POPUP BAD ERROR");
         //    }
         //}
     }

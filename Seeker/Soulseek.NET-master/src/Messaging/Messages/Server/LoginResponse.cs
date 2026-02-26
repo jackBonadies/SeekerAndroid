@@ -31,17 +31,35 @@ namespace Soulseek.Messaging.Messages
         /// <param name="succeeded">A value indicating whether the login was successful.</param>
         /// <param name="message">The reason for a login failure.</param>
         /// <param name="ipAddress">The client IP address, if the login was successful.</param>
-        public LoginResponse(bool succeeded, string message, IPAddress ipAddress = null)
+        /// <param name="hash">The MD5 hash of the username and password.</param>
+        /// <param name="isSupporter">
+        ///     A value indicating whether the user has purchased privileges, regardless of whether the user has active privileges
+        ///     at the present moment.
+        /// </param>
+        public LoginResponse(bool succeeded, string message, IPAddress ipAddress = null, string hash = null, bool? isSupporter = null)
         {
             Succeeded = succeeded;
             Message = message;
             IPAddress = ipAddress;
+            Hash = hash;
+            IsSupporter = isSupporter ?? false;
         }
+
+        /// <summary>
+        ///     Gets the MD5 hash of the username and password.
+        /// </summary>
+        public string Hash { get; }
 
         /// <summary>
         ///     Gets the client IP address, if the login was successful.
         /// </summary>
         public IPAddress IPAddress { get; }
+
+        /// <summary>
+        ///     Gets a value indicating whether the user has purchased privileges, regardless of whether the user has active
+        ///     privileges at the present moment.
+        /// </summary>
+        public bool IsSupporter { get; }
 
         /// <summary>
         ///     Gets the reason for a login failure.
@@ -72,15 +90,20 @@ namespace Soulseek.Messaging.Messages
             var msg = reader.ReadString();
 
             var ipAddress = default(IPAddress);
+            string hash = default;
+            bool isSupporter = false;
 
             if (succeeded)
             {
                 var ipBytes = reader.ReadBytes(4);
                 Array.Reverse(ipBytes);
                 ipAddress = new IPAddress(ipBytes);
+
+                hash = reader.ReadString();
+                isSupporter = reader.ReadByte() == 1;
             }
 
-            return new LoginResponse(succeeded, msg, ipAddress);
+            return new LoginResponse(succeeded, msg, ipAddress, hash, isSupporter);
         }
     }
 }

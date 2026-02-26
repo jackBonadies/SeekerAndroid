@@ -1,25 +1,28 @@
 <resources>
+    <style name="OutlinedRoundedBox" parent="">
+        <item name="shapeAppearanceOverlay">
+            @style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded
+        </item>
+    </style>
 
-	<style name="OutlinedRoundedBox" parent="">
-		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
-	</style>
+    <style
+        name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
+        parent=""
+    >
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
 
-	<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="Widget.Design.TextInputLayout">
-		<item name="cornerFamily">rounded</item>
-		<item name="cornerSize">8dp</item>
-	</style>
-
-
-	<!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.Material3.DayNight">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-		<item name="colorPrimaryDark">?attr/mainPurpleStatusBar</item>
+        <item name="colorPrimaryDark">?attr/mainPurpleStatusBar</item>
 
-		<item name="android:windowActionModeOverlay">true</item>
-		<item name="windowActionModeOverlay">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -27,62 +30,77 @@
         <item name="windowNoTitle">true</item>
         <item name="mainPurple">#4f58c4</item>
         <item name="swipeToRefreshProgress">#ffffffff</item>
-		<item name="swipeToRefreshBackground">#ff585858</item>
-		<item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
+        <item name="swipeToRefreshBackground">#ff585858</item>
+        <item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
 
+        <!--<item name="buttonStyle">@drawable/buttonStyle_4f58c4</item>-->
+        <item name="rounded_bottom_left_purple">
+            @drawable/rounded_bottom_left_purple_4f58c4
+        </item>
+        <item name="rounded_button">@drawable/rounded_button_4f58c4</item>
+        <item name="rounded_bottom_right_purple">
+            @drawable/rounded_bottom_right_purple_4f58c4
+        </item>
+        <item name="rounded_top_purple">
+            @drawable/rounded_top_purple_4f58c4
+        </item>
 
-		<!--<item name="buttonStyle">@drawable/buttonStyle_4f58c4</item>-->
-        <item name="rounded_bottom_left_purple">@drawable/rounded_bottom_left_purple_4f58c4</item>
-		<item name="rounded_button">@drawable/rounded_button_4f58c4</item>
-        <item name="rounded_bottom_right_purple">@drawable/rounded_bottom_right_purple_4f58c4</item>
-        <item name="rounded_top_purple">@drawable/rounded_top_purple_4f58c4</item>
-          <item name="bottom_nav_tab_background">@drawable/bottom_nav_tab_background_bcc1f7</item>
-         
-         <item name="checkBoxColor">@color/colorAccent</item>
+        <item name="whitePurpleForNavBar">#858ddd</item>
 
-         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
+        <item name="checkBoxColor">@color/colorAccent</item>
 
-         <item name="slskAccent">#437eab</item>
+        <item name="mainPurpleForNavBar">?attr/mainPurple</item>
 
+        <item name="slskAccent">#437eab</item>
 
-		<item name="windowActionModeOverlay">true</item>
-		<item name="android:actionModeBackground">?attr/mainPurple</item>
-		<item name="actionModeBackground">?attr/mainPurple</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:actionModeBackground">?attr/mainPurple</item>
+        <item name="actionModeBackground">?attr/mainPurple</item>
     </style>
 
-	<style name="MaterialThemeForChip" parent="Theme.MaterialComponents.Light.DarkActionBar">
-		<!-- Customize your theme here. -->
-		<item name="colorPrimary">@color/colorPrimary</item>
-		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-		<item name="colorAccent">@color/colorAccent</item>
-	</style>
+    <style
+        name="MaterialThemeForChip"
+        parent="Theme.MaterialComponents.Light.DarkActionBar"
+    >
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
 
-	<style name="SeekerButtonStyle">
-		<item name="android:textColor">#ffffff</item>
-		<item name="android:paddingLeft">10dp</item>
-		<item name="android:paddingRight">10dp</item>
-		<item name="android:background">?attr/rounded_button</item>
-	</style>
+    <style name="SeekerButtonStyle">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:background">?attr/rounded_button</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
 
-      <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
-    <item name="colorAccent">?attr/checkBoxColor</item>
-    <!--<item name="android:textColorSecondary">UNCHECKEDCOLOR</item>-->
-</style>
+    <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
+        <item name="colorAccent">?attr/checkBoxColor</item>
+        <!--<item name="android:textColorSecondary">UNCHECKEDCOLOR</item>-->
+    </style>
 
+    <style name="navTextInactive">
+        <item name="android:textColor">#ffffff</item>
+    </style>
 
-  <style name="navTextInactive">
-    <item name="android:textColor">#ffffff</item>
-  </style>
+    <style name="navTextActive">
+        <item name="android:textColor">#ffffff</item>
+    </style>
 
-  <style name="navTextActive">
-    <item name="android:textColor">#ffffff</item>
-  </style>
+    <style
+        name="AppTheme.AppBarOverlay"
+        parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"
+    />
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-  <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
+    <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
     <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
   </style>
 
@@ -90,7 +108,4 @@
     <item name="colorPrimary">@android:color/holo_blue_bright</item>
     <item name="colorOnPrimary">@android:color/holo_blue_bright</item>
   </style>-->
-  
-  
-
 </resources>

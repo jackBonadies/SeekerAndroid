@@ -1,15 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--For all properties see: https://aka.ms/android-menu-resource-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-
-  <item android:id="@+id/addUser"
-      android:title="@string/add_user" />
-  <item android:id="@+id/browseUsersFiles"
-      android:title="@string/browse_files" />
-  <item android:id="@+id/searchUserFiles"
-      android:title="@string/search_user_files" />
-  <item android:id="@+id/messageUser"
-    android:title="@string/msg_user" />
-
+    <item android:id="@+id/addUser" android:title="@string/add_user" />
+    <item
+        android:id="@+id/browseUsersFiles"
+        android:title="@string/browse_files"
+    />
+    <item
+        android:id="@+id/searchUserFiles"
+        android:title="@string/search_user_files"
+    />
+    <item android:id="@+id/messageUser" android:title="@string/msg_user" />
 </menu>

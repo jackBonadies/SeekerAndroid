@@ -1,123 +1,101 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id = "@+id/relativeLayoutMain"
+    android:id="@+id/relativeLayoutMain"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width = "fill_parent"
-    android:layout_height = "wrap_content"
-   android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
     android:descendantFocusability="beforeDescendants"
     android:background="?attr/cell_shape_end"
-    
-    
-    
-    >
-
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:id = "@+id/relativeLayout1"
-    android:layout_width = "fill_parent"
-    android:layout_weight="1"
-    android:layout_height = "wrap_content"
-    android:clickable="true"
-    android:focusable="true"
-        
-        android:foreground="?android:attr/selectableItemBackground"
-
-    >
-    <TextView
-        android:id = "@+id/folderNameTextView"
-        android:layout_width = "match_parent"
-        android:layout_height = "match_parent"
-        android:ellipsize = "end"
-        android:paddingStart= "5dp"
-
-
-        android:paddingTop = "3dp"
-        android:textColor="?attr/cellTextColor"
-        android:text = "1"
-        android:textSize="14sp"
-        android:singleLine = "true" />
+>
     <LinearLayout
-        android:orientation="horizontal"
-        android:id = "@+id/subLayout"
-        android:layout_width = "fill_parent"
-        android:layout_height = "wrap_content"
-
-
-
-        >
-
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:id="@+id/relativeLayout1"
+        android:layout_width="fill_parent"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+    >
         <TextView
-            android:id="@+id/userNameTextView"
-            android:layout_width="0dp"
-            android:layout_height="22dp"
-            android:layout_weight="1"
+            android:id="@+id/folderNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:ellipsize="end"
             android:paddingStart="5dp"
-            android:paddingBottom="5dp"
-
-
-            android:singleLine="true"
+            android:paddingTop="3dp"
+            android:textColor="?attr/cellTextColor"
             android:text="1"
-            android:textColor="?attr/cellTextColor"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id = "@+id/fileTypeTextView"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:layout_weight = "1"
-            android:textColor="?attr/cellTextColor"
-            android:ellipsize = "end"
-            android:textIsSelectable="false"
-
-            android:paddingBottom = "5dp"
-            android:paddingStart= "5dp"
-
-
-            android:text = "2"
-            android:textSize="12sp"
-            android:singleLine = "false" />
-        <TextView
-            android:id = "@+id/speedTextView"
-            android:layout_width = "0dp"
-            android:layout_height = "match_parent"
-            android:textColor="?attr/cellTextColor"
-
-
-            android:layout_weight = ".5"
-            android:ellipsize = "end"
-            android:focusable="false"
-
-
-            android:paddingBottom = "5dp"
-            android:paddingStart= "5dp"
-            android:text = "3"
-            android:textSize="12sp"
-            android:singleLine = "true" />
+            android:textSize="14sp"
+            android:singleLine="true"
+        />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:id="@+id/subLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+        >
             <TextView
-        android:id = "@+id/availability"
-        android:layout_width = "0dp"
-        android:layout_height = "match_parent"
-        android:textColor="@color/queueColor"
+                android:id="@+id/userNameTextView"
+                android:layout_width="0dp"
+                android:layout_height="22dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:paddingStart="5dp"
+                android:paddingBottom="5dp"
+                android:singleLine="true"
+                android:text="1"
+                android:textColor="?attr/cellTextColor"
+                android:textSize="12sp"
+            />
 
+            <TextView
+                android:id="@+id/fileTypeTextView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textColor="?attr/cellTextColor"
+                android:ellipsize="end"
+                android:textIsSelectable="false"
+                android:paddingBottom="5dp"
+                android:paddingStart="5dp"
+                android:text="2"
+                android:textSize="12sp"
+                android:singleLine="false"
+            />
+            <TextView
+                android:id="@+id/speedTextView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textColor="?attr/cellTextColor"
+                android:layout_weight=".5"
+                android:ellipsize="end"
+                android:focusable="false"
+                android:paddingBottom="5dp"
+                android:paddingStart="5dp"
+                android:text="3"
+                android:textSize="12sp"
+                android:singleLine="true"
+            />
+            <TextView
+                android:id="@+id/availability"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textColor="@color/queueColor"
+                android:layout_weight=".5"
+                android:ellipsize="end"
+                android:focusable="false"
+                android:paddingBottom="5dp"
+                android:paddingStart="5dp"
+                android:text="4"
+                android:textSize="12sp"
+                android:singleLine="true"
+            />
 
-        android:layout_weight = ".5"
-
-        android:ellipsize = "end"
-            android:focusable="false"
-
-
-        android:paddingBottom = "5dp"
-            android:paddingStart= "5dp"
-        android:text = "4"
-        android:textSize="12sp"
-        android:singleLine = "true" />
-
-        <!--   <TextView
+            <!--   <TextView
                android:id = "@+id/textView4"
                android:layout_width = "0dp"
                android:textColor="@android:color/black"
@@ -129,8 +107,8 @@
                android:textSize="12dp"
                android:text = "4"
                android:singleLine = "true" />-->
-    </LinearLayout>
-<!--        <ListView
+        </LinearLayout>
+        <!--        <ListView
             android:id="@+id/detailsExpandable"
             android:visibility="gone"
                     android:layout_width="match_parent"
@@ -142,10 +120,9 @@
             android:visibility="gone"
             android:paddingStart="18dp"
             android:id="@+id/detailsExpandable"
-            android:paddingBottom = "8dp"
-            >
-            </LinearLayout>
-</LinearLayout>
+            android:paddingBottom="8dp"
+        />
+    </LinearLayout>
     <ImageView
         android:id="@+id/expandableClick"
         android:clickable="true"
@@ -155,6 +132,6 @@
         android:tint="?attr/expandIconColor"
         app:srcCompat="@drawable/ic_expand_more_black_32dp"
         android:layout_width="40dp"
-        android:layout_height="44dp"/>
+        android:layout_height="44dp"
+    />
 </LinearLayout>
-

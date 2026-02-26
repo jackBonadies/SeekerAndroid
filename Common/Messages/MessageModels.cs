@@ -1,0 +1,75 @@
+﻿using Soulseek;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Common.Messages
+{
+
+    /// <summary>
+    /// Dummy RoomInfoCategory for Adapter
+    /// </summary>
+    public class RoomInfoCategory : RoomInfo
+    {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="RoomInfoCategory"/> class.
+        /// </summary>
+        /// <param name="name">The category name.</param>
+        /// <param name="userCount">The number of users in the room.</param>
+        public RoomInfoCategory(string name) : base(name, null)
+        {
+        }
+    }
+
+    public class ChatroomUserData : Soulseek.UserData
+    {
+
+
+        public ChatroomUserData(string username, Soulseek.UserPresence status, int averageSpeed, long downloadCount, int fileCount, int directoryCount, string countryCode, int? slotsFree = null) : base(username, status, averageSpeed, downloadCount, fileCount, directoryCount, countryCode, slotsFree)
+        {
+
+        }
+
+        /// <summary>
+        ///     Gets or sets chatroom user role.
+        /// </summary>
+        public Soulseek.UserRole ChatroomUserRole { get; set;}
+
+    }
+
+
+    public enum SortOrderChatroomUsers
+    {
+        //DateJoinedAsc = 0,  //the user list is NOT given to us in any order.  so cant do these.
+        //DateJoinedDesc = 1,
+        Alphabetical = 2,
+        OnlineStatus = 3
+    }
+    public struct MessageNotifExtended
+    {
+        public bool IsSpecialMessage;
+        public string Username;
+        public bool IsOurMessage; //You
+        public string MessageText;
+    }
+    public enum StatusMessageType
+    {
+        Joined = 1,
+        Left = 2,
+        WentAway = 3,
+        CameBack = 4,
+    }
+    public struct StatusMessageUpdate
+    {
+        public StatusMessageType StatusType;
+        public string Username;
+        public DateTime DateTimeUtc;
+        public StatusMessageUpdate(StatusMessageType statusType, string username, DateTime dateTimeUtc)
+        {
+            StatusType = statusType;
+            Username = username;
+            DateTimeUtc = dateTimeUtc;
+        }
+    }
+
+}

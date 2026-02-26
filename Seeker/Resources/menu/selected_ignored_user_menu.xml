@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--For all properties see: https://aka.ms/android-menu-resource-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
-  <item android:id="@+id/removeUserFromIgnored"
-      android:title="@string/remove_from_ignored" />
-  
+    <item
+        android:id="@+id/removeUserFromIgnored"
+        android:title="@string/remove_from_ignored"
+    />
 </menu>
