@@ -78,7 +78,7 @@ namespace Seeker.Services
         }
 
         /// <summary>
-        ///     Invoked upon a remote request to download a file.    THE ORIGINAL BUT WITHOUT ITRANSFERTRACKER!!!!
+        ///     Invoked upon a remote request to download a file.
         /// </summary>
         /// <param name="username">The username of the requesting user.</param>
         /// <param name="endpoint">The IP endpoint of the requesting user.</param>
@@ -88,6 +88,7 @@ namespace Seeker.Services
         /// <exception cref="Exception">Thrown on any other Exception other than a rejection.  A generic message will be passed to the remote user for security reasons.</exception>
         public static Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename)
         {
+            Logger.Debug("Upload Request Received");
             if (SeekerApplication.IsUserInIgnoreList(username))
             {
                 return Task.CompletedTask;

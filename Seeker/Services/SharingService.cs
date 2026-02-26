@@ -59,6 +59,7 @@ namespace Seeker.Services
 
         private static Task<BrowseResponse> BrowseResponseResolver(string username, IPEndPoint endpoint)
         {
+            Logger.Debug("Browse Request Received");
             if (SeekerApplication.IsUserInIgnoreList(username))
             {
                 return Task.FromResult(new BrowseResponse(Enumerable.Empty<Directory>()));
@@ -133,6 +134,7 @@ namespace Seeker.Services
         /// <returns>A Task resolving an instance of Soulseek.Directory containing the contents of the requested directory.</returns>
         private static Task<IEnumerable<Soulseek.Directory>> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
         {
+            Logger.Debug("Directory Request Received");
             //the directory is the presentable name.
             //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
             Tuple<string, string> fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault(); //TODO DICTIONARY>>>>>
