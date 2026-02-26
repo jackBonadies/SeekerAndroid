@@ -46,29 +46,10 @@ namespace Seeker.Browse
             });
 
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            if (!SessionService.RunWithReconnect(actualActionToPerform))
             {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task conTask;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out conTask))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = conTask.ContinueWith(actualActionToPerform);
-            }
-            else
-            {
-                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, null, null))
-                {
-                    Logger.Debug("on finish log in we will do it");
-                    return;
-                }
-                else
-                {
-                    Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
-                    t.ContinueWith(continueWithAction);
-                }
+                Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, isLegacy: isLegacy);
+                t.ContinueWith(continueWithAction);
             }
         }
 
@@ -79,29 +60,7 @@ namespace Seeker.Browse
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation); }));
-                }));
-            }
-            else
-            {
-                RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation);
-            }
+            SessionService.RunWithReconnect(() => RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation));
         }
 
         private static void RequestFilesLogic(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation)
@@ -281,30 +240,7 @@ namespace Seeker.Browse
 
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
-                }));
-            }
-            else
-            {
-                DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start();
-            }
+            SessionService.RunWithReconnect(() => DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start());
         }
 
         public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)

@@ -2507,39 +2507,10 @@ namespace Seeker
                 SearchTabHelper.CurrentlySearching = false;
                 return;
             }
-            else if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //re-connect if from wishlist as well. just do it quietly.
-                //if (fromWishlist)
-                //{
-                //    return;
-                //}
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(fromWishlist, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        if (!fromWishlist)
-                        {
-                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        }
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist); });
-
-                }));
-            }
             else
             {
-                //#endif
-                SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist);
-                //#if !DEBUG
+                SessionService.RunWithReconnect(() => SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist), silent: fromWishlist);
             }
-            //#endif
         }
     }
 

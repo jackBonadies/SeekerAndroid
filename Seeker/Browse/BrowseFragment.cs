@@ -854,30 +854,7 @@ namespace Seeker
                         }
                     }
                 }
-                if (SessionService.CurrentlyLoggedInButDisconnectedState())
-                {
-                    //we disconnected. login then do the rest.
-                    //this is due to temp lost connection
-                    Task t;
-                    if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                    {
-                        return;
-                    }
-
-                    t.ContinueWith(new Action<Task>((Task t) =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            SeekerApplication.Toaster.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                            return;
-                        }
-                        DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
-                    }));
-                }
-                else
-                {
-                    DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
-                }
+                SessionService.RunWithReconnect(() => DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start());
             }
         }
 

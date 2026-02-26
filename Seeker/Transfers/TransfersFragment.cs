@@ -292,31 +292,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_resume_all:
                     Logger.InfoFirebase("resume all Pressed");
-                    if (SessionService.CurrentlyLoggedInButDisconnectedState())
-                    {
-                        Task t;
-                        if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                        {
-                            return base.OnContextItemSelected(item);
-                        }
-                        t.ContinueWith(new Action<Task>((Task t) =>
-                        {
-                            if (t.IsFaulted)
-                            {
-                                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                                return;
-                            }
-                            if (ViewState.CurrentlySelectedDLFolder == null)
-                            {
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(false, true, null, false); });
-                            }
-                            else
-                            {
-                                DownloadService.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
-                            }
-                        }));
-                    }
-                    else
+                    SessionService.RunWithReconnect(() =>
                     {
                         if (ViewState.CurrentlySelectedDLFolder == null)
                         {
@@ -326,7 +302,7 @@ namespace Seeker
                         {
                             DownloadService.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
                         }
-                    }
+                    });
                     return true;
                 case Resource.Id.retry_all_failed:
                     RetryAllConditionEntry(true, false);
@@ -351,31 +327,7 @@ namespace Seeker
             //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
             var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
             Logger.InfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    if (ViewState.CurrentlySelectedDLFolder == null)
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi); });
-                    }
-                    else
-                    {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi); });
-                    }
-                }));
-            }
-            else
+            SessionService.RunWithReconnect(() =>
             {
                 if (ViewState.CurrentlySelectedDLFolder == null)
                 {
@@ -385,7 +337,7 @@ namespace Seeker
                 {
                     DownloadService.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
                 }
-            }
+            });
         }
 
 
@@ -1023,27 +975,7 @@ namespace Seeker
                             return true;
                         }
 
-                        if (SessionService.CurrentlyLoggedInButDisconnectedState())
-                        {
-                            Task t;
-                            if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                            {
-                                return base.OnContextItemSelected(item);
-                            }
-                            t.ContinueWith(new Action<Task>((Task t) =>
-                            {
-                                if (t.IsFaulted)
-                                {
-                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                                    return;
-                                }
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadRetryLogic(ti); });
-                            }));
-                        }
-                        else
-                        {
-                            DownloadRetryLogic(ti);
-                        }
+                        SessionService.RunWithReconnect(() => DownloadRetryLogic(ti));
                         //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
                         break;
                     case TransferContextMenuItem.ClearFromList:
@@ -1240,27 +1172,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("resume folder Pressed");
-                        if (SessionService.CurrentlyLoggedInButDisconnectedState())
-                        {
-                            Task t;
-                            if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                            {
-                                return base.OnContextItemSelected(item);
-                            }
-                            t.ContinueWith(new Action<Task>((Task t) =>
-                            {
-                                if (t.IsFaulted)
-                                {
-                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                                    return;
-                                }
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false); });
-                            }));
-                        }
-                        else
-                        {
-                            DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false);
-                        }
+                        SessionService.RunWithReconnect(() => DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
@@ -1273,27 +1185,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("retry folder Pressed");
-                        if (SessionService.CurrentlyLoggedInButDisconnectedState())
-                        {
-                            Task t;
-                            if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                            {
-                                return base.OnContextItemSelected(item);
-                            }
-                            t.ContinueWith(new Action<Task>((Task t) =>
-                            {
-                                if (t.IsFaulted)
-                                {
-                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                                    return;
-                                }
-                                SeekerState.ActiveActivityRef.RunOnUiThread(() => { DownloadService.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false); });
-                            }));
-                        }
-                        else
-                        {
-                            DownloadService.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false);
-                        }
+                        SessionService.RunWithReconnect(() => DownloadService.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");

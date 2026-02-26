@@ -278,35 +278,7 @@ namespace Seeker.Services
         public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    t.ContinueWith(new Action<Task>((Task t) =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            //if(!silent) //always silent..
-                            //{
-                            //    SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            //    {
-                            //        if (SeekerState.ActiveActivityRef != null)
-                            //        {
-                            //            Toast.MakeText(SeekerState.ActiveActivityRef, SeekerState.ActiveActivityRef.GetString(Resource.String.failed_to_connect), ToastLength.Short).Show();
-                            //        }
-                            //    });
-                            //}
-                            return;
-                        }
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded); });
-                    }));
-                }
-            }
-            else
-            {
-                GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded);
-            }
+            SessionService.RunWithReconnect(() => GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded), silent: true);
         }
 
 
@@ -322,32 +294,7 @@ namespace Seeker.Services
         public static void GetDownloadPlaceInQueue(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
         {
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    t.ContinueWith(new Action<Task>((Task t) =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-                            {
-                                if (SeekerState.ActiveActivityRef != null)
-                                {
-                                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                                }
-                            });
-                            return;
-                        }
-                        SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete); });
-                    }));
-                }
-            }
-            else
-            {
-                GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete);
-            }
+            SessionService.RunWithReconnect(() => GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete), silent: true);
         }
 
         private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)

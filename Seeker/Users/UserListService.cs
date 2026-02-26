@@ -195,22 +195,7 @@ namespace Seeker
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
             });
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Logger.Debug("CurrentlyLoggedInButDisconnectedState");
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
-            }
-            else if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "User will be added once login is complete."))
-            {
-                Logger.Debug("IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction");
-                return;
-            }
-            else
+            if (!SessionService.RunWithReconnect(actualActionToPerform, "User will be added once login is complete."))
             {
                 AddUserLogic(c, username, UIaction, massImportCase);
             }

@@ -797,28 +797,9 @@ namespace Seeker.Chatroom
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.empty_message_error), ToastLength.Short);
                 return;
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            if (!SessionService.RunWithReconnect(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
             {
-                Logger.Debug("CurrentlyLoggedInButDisconnectedState: TRUE");
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
-            }
-            else
-            {
-                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, SeekerApplication.GetString(Resource.String.messageWillSendOnReConnect)))
-                {
-                    return;
-                }
-                else
-                {
-                    ChatroomController.SendChatroomMessageLogic(roomName, msg);
-                }
+                ChatroomController.SendChatroomMessageLogic(roomName, msg);
             }
 
         }

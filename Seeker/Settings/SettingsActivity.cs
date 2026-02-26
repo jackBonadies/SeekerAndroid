@@ -1284,7 +1284,7 @@ namespace Seeker
 
             void OkayAction(object sender, string textInput)
             {
-                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput), SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password));
+                SessionService.RunWithReconnect(() => CommonHelpers.ChangePasswordLogic(textInput));
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -1966,28 +1966,13 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_toggle_priv_invites), ToastLength.Short);
                 return;
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
+            if (requiresConnection)
             {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
-                }));
+                SessionService.RunWithReconnect(() => SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort));
             }
             else
             {
-                Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+                SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
             }
         }
 

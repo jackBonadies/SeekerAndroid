@@ -673,30 +673,9 @@ namespace Seeker.Messages
                 }));
             });
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            if (!SessionService.RunWithReconnect(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
             {
-                Logger.Debug("currently logged in but disconnected...");
-
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
-            }
-            else
-            {
-                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
-                {
-                    Logger.Debug("on finish log in we will do it");
-                    return;
-                }
-                else
-                {
-                    SendMessageLogic(msg, fromDirectReplyAction);
-                }
+                SendMessageLogic(msg, fromDirectReplyAction);
             }
 
         }

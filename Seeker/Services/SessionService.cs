@@ -26,8 +26,6 @@ namespace Seeker.Services
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
             }
-            //if we are still not connected then creating the task will throw.
-            //also if the async part of the task fails we will get task.faulted.
             try
             {
                 connectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
@@ -69,6 +67,65 @@ namespace Seeker.Services
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Standard reconnect-then-act pattern. If disconnected, reconnects and runs action on success.
+        /// If already connected, runs action immediately.
+        /// </summary>
+        /// <returns>true if action was run or will be run after reconnect; false if reconnect could not be started.</returns>
+        public static bool RunWithReconnect(Action action, bool silent = false)
+        {
+            if (CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!ShowMessageAndCreateReconnectTask(silent, out t))
+                {
+                    return false;
+                }
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        if (!silent)
+                        {
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                        }
+                        return;
+                    }
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { action(); });
+                }));
+                return true;
+            }
+            else
+            {
+                action();
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Extended reconnect-then-act pattern. Handles disconnected OR mid-login states.
+        /// The caller provides a continuation that handles both fault propagation and the real action.
+        /// </summary>
+        /// <returns>true if the continuation was chained (disconnected or mid-login); false if caller should run action directly.</returns>
+        public static bool RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
+        {
+            if (CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!ShowMessageAndCreateReconnectTask(false, out t))
+                {
+                    return true; // reconnect failed, but we handled it (toast shown) — caller should not run action
+                }
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(continuationAction);
+                return true;
+            }
+            else if (IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(continuationAction, loggingInMsg, contextForMsg))
+            {
+                return true;
+            }
+            return false;
         }
 
         public static void SetStatusApi(bool away)
