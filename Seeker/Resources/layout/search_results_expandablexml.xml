@@ -2,7 +2,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/searchResultSelection"
-    android:background="?attr/cellback"
     android:orientation="vertical"
     android:paddingTop="25dp"
     android:paddingBottom="20dp"
@@ -30,7 +29,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/radioGroup"
     >
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search_result_style_expanded"
@@ -42,7 +41,7 @@
             android:textColor="?attr/mainTextColor"
         />
 
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search_result_style_collapsed"
@@ -53,7 +52,7 @@
             android:buttonTint="?attr/slskAccent"
             android:textColor="?attr/mainTextColor"
         />
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:layout_marginTop="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,7 +64,7 @@
             android:textColor="?attr/mainTextColor"
         />
 
-        <RadioButton
+        <com.google.android.material.radiobutton.MaterialRadioButton
             android:layout_marginTop="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
