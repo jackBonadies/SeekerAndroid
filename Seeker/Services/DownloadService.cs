@@ -21,13 +21,15 @@ namespace Seeker.Services
         private readonly IFileSystemService fileSystemService;
         private readonly ISessionService sessionService;
         private readonly IMainThreadRunner mainThreadRunner;
+        private readonly Func<SoulseekClient> soulseekClientFactory;
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
             this.sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
             this.mainThreadRunner = mainThreadRunner ?? throw new ArgumentNullException(nameof(mainThreadRunner));
+            this.soulseekClientFactory = soulseekClientFactory ?? throw new ArgumentNullException(nameof(soulseekClientFactory));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -235,7 +237,7 @@ namespace Seeker.Services
                     dlInfo.OutputMemoryStream = memStream;
                 }
                 dlTask =
-                    SeekerState.SoulseekClient.DownloadAsync(
+                    soulseekClientFactory().DownloadAsync(
                         username: username,
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<Stream>((Stream)memStream),
@@ -265,7 +267,7 @@ namespace Seeker.Services
                     dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory;
                 }
 
-                    return SeekerState.SoulseekClient.DownloadAsync(
+                    return soulseekClientFactory().DownloadAsync(
                         username: username,
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<System.IO.Stream>(
@@ -453,7 +455,7 @@ namespace Seeker.Services
             Task<int> getDownloadPlace = null;
             try
             {
-                getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
             }
             catch (TransferNotFoundException)
             {
@@ -499,7 +501,7 @@ namespace Seeker.Services
                     //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
                     try
                     {
-                        getDownloadPlace = SeekerState.SoulseekClient.GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                        getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
                         getDownloadPlace.ContinueWith(updateTask);
                     }
                     catch (Exception e)
@@ -914,7 +916,7 @@ namespace Seeker.Services
                 }
                 try
                 {
-                    SeekerState.SoulseekClient.WatchUserAsync(username);
+                    soulseekClientFactory().WatchUserAsync(username);
                 }
                 catch (System.Exception)
                 {
