@@ -12,7 +12,7 @@
         android:id="@+id/roomUsersDialogToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/mainPurple"
+        android:background="?attr/colorPrimary"
         android:minHeight="100dp"
         app:titleTextColor="@android:color/white"
         android:theme="@style/AppTheme.AppBarOverlay"

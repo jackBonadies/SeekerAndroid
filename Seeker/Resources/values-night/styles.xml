@@ -28,6 +28,7 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">#4f58c4</item>
         <item name="mainPurple">#4f58c4</item>
         <item name="swipeToRefreshProgress">#ffffffff</item>
         <item name="swipeToRefreshBackground">#ff585858</item>
@@ -54,8 +55,8 @@
         <item name="slskAccent">#437eab</item>
 
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/mainPurple</item>
-        <item name="actionModeBackground">?attr/mainPurple</item>
+        <item name="android:actionModeBackground">?attr/colorPrimary</item>
+        <item name="actionModeBackground">?attr/colorPrimary</item>
     </style>
 
     <style

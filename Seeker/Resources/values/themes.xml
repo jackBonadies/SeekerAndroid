@@ -86,15 +86,16 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurple</item>
+		<item name="background">?attr/colorPrimary</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
 	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
 	</style>
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
+        <item name="colorPrimary">#126291</item>
         <item name="mainPurple">#126291</item>
         <item name="swipeToRefreshProgress">#126291</item>
 
@@ -140,6 +141,7 @@
     </style>
 
     <style name="DefaultLight_Red" parent="DefaultLight">
+        <item name="colorPrimary">#B22525</item>
         <item name="mainPurple">#B22525</item>
         <item name="swipeToRefreshProgress">#B22525</item>
         <item name="mainPurpleStatusBar">#7B0000</item>
@@ -182,6 +184,7 @@
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
+        <item name="colorPrimary">#126291</item>
         <item name="mainPurple">#126291</item>
         <item name="mainPurpleStatusBar">#10496b</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
@@ -221,6 +224,7 @@
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">
+        <item name="colorPrimary">#202124</item>
         <item name="mainPurple">#202124</item>
         <item name="mainPurpleStatusBar">#000000</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_202124</item>-->
@@ -268,6 +272,7 @@
     </style>
 
     <style name="Amoled_Grey" parent="Amoled">
+        <item name="colorPrimary">#333333</item>
         <item name="mainPurple">#333333</item>
         <item name="mainPurpleStatusBar">#0c0c0c</item>
 
@@ -313,8 +318,7 @@
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
-        <item name="colorPrimary">#3598D8</item>
-        <item name="colorOnPrimary">#303030</item>
+        <item name="colorOnPrimary">#ffffff</item>
         <item name="colorSurface">#303030</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
