@@ -261,18 +261,18 @@ namespace Seeker.Services
                 // documentFile work - run this on background thread
                 dlTask = Task.Run(() =>
                 {
-                    FileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth,
+                    fileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth,
                         out incompleteUri, out incompleteUriDirectory, out partialLength);
                 }).ContinueWith(setupTask =>
                 {
                     // if GetOrCreateIncompleteLocation threw, rethrow
                     setupTask.GetAwaiter().GetResult();
 
-                if (dlInfo?.TransferItemReference != null)
-                {
-                    dlInfo.TransferItemReference.IncompleteUri = incompleteUri;
-                    dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory;
-                }
+                    if (dlInfo?.TransferItemReference != null)
+                    {
+                        dlInfo.TransferItemReference.IncompleteUri = incompleteUri;
+                        dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory;
+                    }
 
                     return soulseekClientFactory().DownloadAsync(
                         username: username,
