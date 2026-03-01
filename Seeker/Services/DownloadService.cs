@@ -233,36 +233,34 @@ namespace Seeker.Services
                 long partialLength = 0;
                 Android.Net.Uri incompleteUri = null;
                 Android.Net.Uri incompleteUriDirectory = null;
-                try
+
+                // documentFile work - run this on background thread
+                dlTask = Task.Run(() =>
                 {
-                    FileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth, out incompleteUri, out incompleteUriDirectory, out partialLength);
-                }
-                catch (DownloadDirectoryNotSetException ex)
+                    FileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth,
+                        out incompleteUri, out incompleteUriDirectory, out partialLength);
+                }).ContinueWith(setupTask =>
                 {
+                    // if GetOrCreateIncompleteLocation threw, rethrow
+                    setupTask.GetAwaiter().GetResult();
+
                     if (dlInfo?.TransferItemReference != null)
                     {
-                        MarkTransferItemAsDirNotSet(dlInfo.TransferItemReference);
+                        dlInfo.TransferItemReference.IncompleteUri = incompleteUri?.ToString();
+                        dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory?.ToString();
                     }
-                    SeekerApplication.Toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_");
-                    waitForNext = Task.CompletedTask;
-                    return Task.FromException(ex);
-                }
 
-                if (dlInfo?.TransferItemReference != null)
-                {
-                    dlInfo.TransferItemReference.IncompleteUri = incompleteUri?.ToString();
-                    dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory?.ToString();
-                }
-
-                dlTask = SeekerState.SoulseekClient.DownloadAsync(
+                    return SeekerState.SoulseekClient.DownloadAsync(
                         username: username,
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<System.IO.Stream>(
                             FileSystemService.OpenIncompleteStream(incompleteUri, partialLength)),
                         size: size,
                         startOffset: partialLength,
-                        options: new TransferOptions(disposeOutputStreamOnCompletion: true, governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
+                        options: new TransferOptions(disposeOutputStreamOnCompletion: true,
+                            governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
                         cancellationToken: cts.Token);
+                }, TaskContinuationOptions.ExecuteSynchronously).Unwrap();
             }
             waitForNext = Task.WhenAny(waitUntilEnqueue.Task, dlTask);
             return dlTask;
