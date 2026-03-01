@@ -9,14 +9,21 @@ using static Android.Provider.DocumentsContract;
 using Common;
 namespace Seeker.Services
 {
-    public class FileSystemService
+    public class FileSystemService : IFileSystemService
     {
         public static FileSystemService Instance { get; set; }
 
         private readonly object lock_toplevel_ifexist_create = new object();
         private readonly object lock_album_ifexist_create = new object();
 
-        public void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
+        public void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, out string incompleteUri, out string parentUri, out long partialLength)
+        {
+            GetOrCreateIncompleteLocationInternal(username, fullfilename, depth, out var incompleteUriNative, out var parentUriNative, out partialLength);
+            incompleteUri = incompleteUriNative?.ToString();
+            parentUri = parentUriNative?.ToString();
+        }
+
+        private void GetOrCreateIncompleteLocationInternal(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
             string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
@@ -285,7 +292,12 @@ namespace Seeker.Services
         /// <summary>
         /// Opens a stream for writing to the incomplete file. Call after GetOrCreateIncompleteLocation.
         /// </summary>
-        public System.IO.Stream OpenIncompleteStream(Android.Net.Uri incompleteUri, long partialLength)
+        public System.IO.Stream OpenIncompleteStream(string incompleteUri, long partialLength)
+        {
+            return OpenIncompleteStreamInternal(Android.Net.Uri.Parse(incompleteUri), partialLength);
+        }
+
+        private System.IO.Stream OpenIncompleteStreamInternal(Android.Net.Uri incompleteUri, long partialLength)
         {
             if (SeekerState.UseLegacyStorage() && incompleteUri.Scheme == "file")
             {
@@ -354,6 +366,24 @@ namespace Seeker.Services
         }
 
         public string SaveToFile(
+            string fullfilename,
+            string username,
+            byte[] bytes,
+            string uriOfIncomplete,
+            string parentUriOfIncomplete,
+            bool memoryMode,
+            int depth,
+            bool noSubFolder,
+            out string finalUri)
+        {
+            return SaveToFileInternal(
+                fullfilename, username, bytes,
+                uriOfIncomplete != null ? Android.Net.Uri.Parse(uriOfIncomplete) : null,
+                parentUriOfIncomplete != null ? Android.Net.Uri.Parse(parentUriOfIncomplete) : null,
+                memoryMode, depth, noSubFolder, out finalUri);
+        }
+
+        private string SaveToFileInternal(
             string fullfilename,
             string username,
             byte[] bytes,
@@ -879,7 +909,7 @@ namespace Seeker.Services
             //Logger.Debug(toDelete.ParentFile.Name + ":" + toDelete.ParentFile.ListFiles().Length.ToString());
         }
 
-        internal void SaveFileToMediaStore(string path)
+        public void SaveFileToMediaStore(string path)
         {
             //ContentValues contentValues = new ContentValues();
             //contentValues.Put(MediaStore.MediaColumns.DateAdded, Helpers.GetDateTimeNowSafe().Ticks / TimeSpan.TicksPerMillisecond);

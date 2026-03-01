@@ -18,10 +18,10 @@ namespace Seeker.Services
         public static DownloadService Instance { get; set; }
 
         private readonly IToaster toaster;
-        private readonly FileSystemService fileSystemService;
+        private readonly IFileSystemService fileSystemService;
         private readonly SessionService sessionService;
 
-        public DownloadService(IToaster toaster, FileSystemService fileSystemService, SessionService sessionService)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, SessionService sessionService)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
@@ -244,8 +244,8 @@ namespace Seeker.Services
             else
             {
                 long partialLength = 0;
-                Android.Net.Uri incompleteUri = null;
-                Android.Net.Uri incompleteUriDirectory = null;
+                string incompleteUri = null;
+                string incompleteUriDirectory = null;
 
                 // documentFile work - run this on background thread
                 dlTask = Task.Run(() =>
@@ -257,11 +257,11 @@ namespace Seeker.Services
                     // if GetOrCreateIncompleteLocation threw, rethrow
                     setupTask.GetAwaiter().GetResult();
 
-                    if (dlInfo?.TransferItemReference != null)
-                    {
-                        dlInfo.TransferItemReference.IncompleteUri = incompleteUri?.ToString();
-                        dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory?.ToString();
-                    }
+                if (dlInfo?.TransferItemReference != null)
+                {
+                    dlInfo.TransferItemReference.IncompleteUri = incompleteUri;
+                    dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory;
+                }
 
                     return SeekerState.SoulseekClient.DownloadAsync(
                         username: username,
@@ -879,7 +879,7 @@ namespace Seeker.Services
                     else if (e.dlInfo.TransferItemReference?.IncompleteUri != null)
                     {
                         //move file from incomplete to final location...
-                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteUri), Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteParentUri), false, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, e.dlInfo.TransferItemReference.IncompleteUri, e.dlInfo.TransferItemReference.IncompleteParentUri, false, e.dlInfo.Depth, noSubfolder, out finalUri);
                         fileSystemService.SaveFileToMediaStore(path);
                     }
                     else
