@@ -20,12 +20,14 @@ namespace Seeker.Services
         private readonly IToaster toaster;
         private readonly IFileSystemService fileSystemService;
         private readonly SessionService sessionService;
+        private readonly IMainThreadRunner mainThreadRunner;
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, SessionService sessionService)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, SessionService sessionService, IMainThreadRunner mainThreadRunner)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
             this.sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
+            this.mainThreadRunner = mainThreadRunner ?? throw new ArgumentNullException(nameof(mainThreadRunner));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -434,7 +436,7 @@ namespace Seeker.Services
 
                         if (actionOnComplete != null)
                         {
-                            SeekerState.ActiveActivityRef?.RunOnUiThread(() => { actionOnComplete(transferItemInQuestion); });
+                            mainThreadRunner.RunOnUiThread(() => { actionOnComplete(transferItemInQuestion); });
                         }
                         else
                         {
@@ -490,7 +492,7 @@ namespace Seeker.Services
                         }
                         if (!silent)
                         {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(a);
+                            mainThreadRunner.RunOnUiThread(a);
                         }
                         return; //otherwise null ref with task!
                     }
@@ -571,7 +573,7 @@ namespace Seeker.Services
                                 }
                                 if (action != null)
                                 {
-                                    SeekerState.ActiveActivityRef.RunOnUiThread(action);
+                                    mainThreadRunner.RunOnUiThread(action);
                                 }
                             }
                         }
@@ -850,7 +852,7 @@ namespace Seeker.Services
                             //action = () => { MainActivity.ToastUI(msgDebug1); MainActivity.ToastUI(msgDebug2); };
                             action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_unspecified), ToastLength.Long); };
                         }
-                        SeekerState.ActiveActivityRef.RunOnUiThread(action);
+                        mainThreadRunner.RunOnUiThread(action);
                         //System.Console.WriteLine(task.Exception.ToString());
                         return;
                     }
@@ -864,7 +866,7 @@ namespace Seeker.Services
                     if (!PreferencesState.DisableDownloadToastNotification)
                     {
                         action = () => { toaster.ShowToast(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading), ToastLength.Long); };
-                        SeekerState.ActiveActivityRef.RunOnUiThread(action);
+                        mainThreadRunner.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
                     bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
@@ -987,7 +989,7 @@ namespace Seeker.Services
                     }
                     if (!exceptionShown)
                     {
-                        SeekerState.ActiveActivityRef.RunOnUiThread(a);
+                        mainThreadRunner.RunOnUiThread(a);
                         exceptionShown = true;
                     }
                     return; //otherwise null ref with task!
@@ -1000,7 +1002,7 @@ namespace Seeker.Services
 
             var refreshOnlySelected = new Action(() =>
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(
+                mainThreadRunner.RunOnUiThread(
                     () =>
                     {
                         var uiState = ViewState.CreateDLUIState();
