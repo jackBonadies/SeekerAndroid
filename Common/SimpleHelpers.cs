@@ -145,8 +145,8 @@ namespace Seeker
             return false;
         }
 
-        public static readonly Regex MagnetLinkRegex = new Regex(@"magnet:\?xt=urn:[^ ""]+");
-        public static readonly Regex SlskLinkRegex = new Regex(@"slsk://[^ ""]+");
+        public static readonly Regex MagnetLinkRegex = new Regex(@"magnet:\?xt=urn:[^ ""]+", RegexOptions.None, TimeSpan.FromMilliseconds(2000));
+        public static readonly Regex SlskLinkRegex = new Regex(@"slsk://[^ ""]+", RegexOptions.None, TimeSpan.FromMilliseconds(2000));
 
         public static string ParseSpecialMessage(string msg)
         {
