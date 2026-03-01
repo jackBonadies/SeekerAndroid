@@ -27,22 +27,6 @@ namespace Seeker
         private View rootView = null;
 
 
-        public static TransferItemManager TransferItemManagerDL
-        {
-            get => TransferItems.TransferItemManagerDL;
-            set => TransferItems.TransferItemManagerDL = value;
-        }
-
-        public static TransferItemManager TransferItemManagerUploads
-        {
-            get => TransferItems.TransferItemManagerUploads;
-            set => TransferItems.TransferItemManagerUploads = value;
-        }
-        public static TransferItemManagerWrapper TransferItemManagerWrapped
-        {
-            get => TransferItems.TransferItemManagerWrapped;
-            set => TransferItems.TransferItemManagerWrapped = value;
-        }
 
 
         private static TransfersViewState ViewState => TransfersViewState.Instance;
@@ -224,11 +208,11 @@ namespace Seeker
                     Logger.InfoFirebase("Clear All Complete Pressed");
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
-                        TransferItemManagerDL.ClearAllComplete();
+                        TransferItems.TransferItemManagerDL.ClearAllComplete();
                     }
                     else
                     {
-                        TransferItemManagerDL.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedDLFolder);
+                        TransferItems.TransferItemManagerDL.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedDLFolder);
                     }
                     refreshListView();
                     return true;
@@ -248,11 +232,11 @@ namespace Seeker
                     Logger.InfoFirebase("Clear All Complete Pressed");
                     if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
-                        TransferItemManagerUploads.ClearAllComplete();
+                        TransferItems.TransferItemManagerUploads.ClearAllComplete();
                     }
                     else
                     {
-                        TransferItemManagerUploads.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedUploadFolder);
+                        TransferItems.TransferItemManagerUploads.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedUploadFolder);
                     }
                     refreshListView();
                     return true;
@@ -265,15 +249,15 @@ namespace Seeker
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
-                        TransferItemManagerDL.CancelAll(true);
-                        var cleanupItems = TransferItemManagerDL.ClearAllReturnCleanupItems();
-                        if (cleanupItems.Any()) TransferItemManagerWrapped.CleanupEntry(cleanupItems);
+                        TransferItems.TransferItemManagerDL.CancelAll(true);
+                        var cleanupItems = TransferItems.TransferItemManagerDL.ClearAllReturnCleanupItems();
+                        if (cleanupItems.Any()) TransferItems.TransferItemManagerWrapped.CleanupEntry(cleanupItems);
                     }
                     else
                     {
-                        TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder, true);
-                        var cleanupItems = TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(ViewState.CurrentlySelectedDLFolder);
-                        if (cleanupItems.Any()) TransferItemManagerWrapped.CleanupEntry(cleanupItems);
+                        TransferItems.TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder, true);
+                        var cleanupItems = TransferItems.TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(ViewState.CurrentlySelectedDLFolder);
+                        if (cleanupItems.Any()) TransferItems.TransferItemManagerWrapped.CleanupEntry(cleanupItems);
                     }
                     refreshListView();
                     return true;
@@ -282,11 +266,11 @@ namespace Seeker
                     SeekerState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
-                        TransferItemManagerUploads.CancelAll();
+                        TransferItems.TransferItemManagerUploads.CancelAll();
                     }
                     else
                     {
-                        TransferItemManagerUploads.CancelFolder(ViewState.CurrentlySelectedUploadFolder);
+                        TransferItems.TransferItemManagerUploads.CancelFolder(ViewState.CurrentlySelectedUploadFolder);
                     }
                     refreshListView();
                     return true;
@@ -295,11 +279,11 @@ namespace Seeker
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
-                        TransferItemManagerDL.CancelAll();
+                        TransferItems.TransferItemManagerDL.CancelAll();
                     }
                     else
                     {
-                        TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder);
+                        TransferItems.TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder);
                     }
                     refreshListView();
                     return true;
@@ -381,13 +365,13 @@ namespace Seeker
             else
             {
                 //restore the simple way via deserializing...
-                TransferItemManagerUploads = new TransferItemManager(true);
+                TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
                 using (var stream = new System.IO.StringReader(transferListv2))
                 {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerUploads.GetType());
-                    TransferItemManagerUploads = serializer.Deserialize(stream) as TransferItemManager;
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerUploads.GetType());
+                    TransferItems.TransferItemManagerUploads = serializer.Deserialize(stream) as TransferItemManager;
                     //BackwardsCompatFunction(transferItemsLegacy);
-                    TransferItemManagerUploads.OnRelaunch();
+                    TransferItems.TransferItemManagerUploads.OnRelaunch();
                 }
             }
         }
@@ -397,7 +381,7 @@ namespace Seeker
             string transferList = sharedPreferences.GetString(KeyConsts.M_TransferListUpload, string.Empty);
             if (transferList == string.Empty)
             {
-                TransferItemManagerUploads = new TransferItemManager(true);
+                TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
             }
             else
             {
@@ -410,11 +394,11 @@ namespace Seeker
                     OnRelaunch(transferItemsLegacy);
                 }
 
-                TransferItemManagerUploads = new TransferItemManager(true);
+                TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
                 //populate the new data structure.
                 foreach (var ti in transferItemsLegacy)
                 {
-                    TransferItemManagerUploads.Add(ti);
+                    TransferItems.TransferItemManagerUploads.Add(ti);
                 }
 
             }
@@ -432,13 +416,13 @@ namespace Seeker
             else
             {
                 //restore the simple way via deserializing...
-                TransferItemManagerDL = new TransferItemManager();
+                TransferItems.TransferItemManagerDL = new TransferItemManager();
                 using (var stream = new System.IO.StringReader(transferListv2))
                 {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerDL.GetType());
-                    TransferItemManagerDL = serializer.Deserialize(stream) as TransferItemManager;
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerDL.GetType());
+                    TransferItems.TransferItemManagerDL = serializer.Deserialize(stream) as TransferItemManager;
                     //BackwardsCompatFunction(transferItemsLegacy);
-                    TransferItemManagerDL.OnRelaunch();
+                    TransferItems.TransferItemManagerDL.OnRelaunch();
                 }
             }
 
@@ -450,7 +434,7 @@ namespace Seeker
             string transferList = sharedPreferences.GetString(KeyConsts.M_TransferList, string.Empty);
             if (transferList == string.Empty)
             {
-                TransferItemManagerDL = new TransferItemManager();
+                TransferItems.TransferItemManagerDL = new TransferItemManager();
             }
             else
             {
@@ -463,11 +447,11 @@ namespace Seeker
                     OnRelaunch(transferItemsLegacy);
                 }
 
-                TransferItemManagerDL = new TransferItemManager();
+                TransferItems.TransferItemManagerDL = new TransferItemManager();
                 //populate the new data structure.
                 foreach (var ti in transferItemsLegacy)
                 {
-                    TransferItemManagerDL.Add(ti);
+                    TransferItems.TransferItemManagerDL.Add(ti);
                 }
 
             }
@@ -519,7 +503,7 @@ namespace Seeker
         {
             if (ViewState.InUploadsMode)
             {
-                if (!(TransferItemManagerUploads.IsEmpty()))
+                if (!(TransferItems.TransferItemManagerUploads.IsEmpty()))
                 {
                     noTransfers.Visibility = ViewStates.Gone;
                     setupUpSharing.Visibility = ViewStates.Gone;
@@ -547,7 +531,7 @@ namespace Seeker
             else
             {
                 setupUpSharing.Visibility = ViewStates.Gone;
-                if (!(TransferItemManagerDL.IsEmpty()))
+                if (!(TransferItems.TransferItemManagerDL.IsEmpty()))
                 {
                     noTransfers.Visibility = ViewStates.Gone;
                 }
@@ -584,11 +568,11 @@ namespace Seeker
             //transferOptions.Click += TransferOptions_Click;
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
             sharedPreferences = SeekerState.SharedPreferences;
-            //if (TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
+            //if (TransferItems.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             //{
             //    RestoreDownloadTransferItems(sharedPreferences);
             //    RestoreUploadTransferItems(sharedPreferences);
-            //    TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
+            //    TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL);
             //}
 
             SetNoTransfersMessage();
@@ -640,7 +624,7 @@ namespace Seeker
 
         public void SetRecyclerAdapter(bool restoreState = false)
         {
-            lock (TransferItemManagerWrapped.GetUICurrentList())
+            lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
             {
                 int prevScrollPos = 0;
                 int scrollOffset = 0;
@@ -661,11 +645,11 @@ namespace Seeker
 
                 if (ViewState.GroupByFolder && !ViewState.CurrentlyInFolder())
                 {
-                    recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItemManagerWrapped.GetUICurrentList() as List<FolderItem>);
+                    recyclerTransferAdapter = new TransferAdapterRecyclerFolderItem(TransferItems.TransferItemManagerWrapped.GetUICurrentList() as List<FolderItem>);
                 }
                 else
                 {
-                    recyclerTransferAdapter = new TransferAdapterRecyclerIndividualItem(TransferItemManagerWrapped.GetUICurrentList() as List<TransferItem>);
+                    recyclerTransferAdapter = new TransferAdapterRecyclerIndividualItem(TransferItems.TransferItemManagerWrapped.GetUICurrentList() as List<TransferItem>);
                 }
                 recyclerTransferAdapter.TransfersFragment = this;
                 recyclerTransferAdapter.IsInBatchSelectMode = (TransfersActionMode != null);
@@ -757,7 +741,7 @@ namespace Seeker
             if (force || (SeekerApplication.TransfersDownloadsCompleteStale && DateTime.UtcNow.Subtract(SeekerApplication.TransfersLastSavedTime).TotalSeconds > maxSecondsUpdate)) //stale and we havent updated too recently..
             {
                 Logger.Debug("---- saving transfer items actual save ----");
-                if (TransferItemManagerDL?.AllTransferItems == null)
+                if (TransferItems.TransferItemManagerDL?.AllTransferItems == null)
                 {
                     return;
                 }
@@ -765,14 +749,14 @@ namespace Seeker
                 string listOfUploadItems = string.Empty;
                 using (var writer = new System.IO.StringWriter())
                 {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerDL.AllTransferItems.GetType());
-                    serializer.Serialize(writer, TransferItemManagerDL.AllTransferItems);
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerDL.AllTransferItems.GetType());
+                    serializer.Serialize(writer, TransferItems.TransferItemManagerDL.AllTransferItems);
                     listOfDownloadItems = writer.ToString();
                 }
                 using (var writer = new System.IO.StringWriter())
                 {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItemManagerUploads.AllTransferItems.GetType());
-                    serializer.Serialize(writer, TransferItemManagerUploads.AllTransferItems);
+                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerUploads.AllTransferItems.GetType());
+                    serializer.Serialize(writer, TransferItems.TransferItemManagerUploads.AllTransferItems);
                     listOfUploadItems = writer.ToString();
                 }
                 PreferencesManager.SaveTransferItems(listOfDownloadItems, listOfUploadItems);
@@ -802,7 +786,7 @@ namespace Seeker
             {
                 if (folderItems)
                 {
-                    var fi = TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as FolderItem;
+                    var fi = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as FolderItem;
                     foreach (TransferItem ti in fi.TransferItems)
                     {
                         if (selectFailed && ti.Failed)
@@ -817,7 +801,7 @@ namespace Seeker
                 }
                 else
                 {
-                    var ti = TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as TransferItem;
+                    var ti = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as TransferItem;
                     if (selectFailed && ti.Failed)
                     {
                         tis.Add(ti);
@@ -856,8 +840,8 @@ namespace Seeker
             string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             Logger.Debug("chosenFname? " + chosenFname);
-            TransferItem item1 = TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
-            int indexToRefresh = TransferItemManagerDL.GetUserIndexForTransferItem(item1, ViewState.CreateDLUIState());
+            TransferItem item1 = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
+            int indexToRefresh = TransferItems.TransferItemManagerDL.GetUserIndexForTransferItem(item1, ViewState.CreateDLUIState());
             Logger.Debug("item1 is null?" + (item1 == null).ToString());//tested
             if (item1 == null || indexToRefresh == -1)
             {
@@ -932,7 +916,7 @@ namespace Seeker
 
 
             });
-            lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
+            lock (TransferItems.TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
             { //also can update this to do a partial refresh...
                 refreshListView(refreshOnlySelected);
             }
@@ -964,7 +948,7 @@ namespace Seeker
                     Logger.InfoFirebase("ti is null");
                 }
 
-                int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
+                int position = TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(ti);
 
 
                 if (position == -1)
@@ -995,17 +979,17 @@ namespace Seeker
                         //clear complete?
                         //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                         Logger.InfoFirebase("Clear Complete item pressed");
-                        lock (TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
+                        lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
                         {
                             try
                             {
                                 if (ViewState.InUploadsMode)
                                 {
-                                    TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                                    TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
                                 }
                                 else
                                 {
-                                    TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
+                                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
                                 }
                             }
                             catch (ArgumentOutOfRangeException)
@@ -1024,7 +1008,7 @@ namespace Seeker
                         ITransferItem tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                            tItem = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(position);
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1039,26 +1023,26 @@ namespace Seeker
                             uptoken?.Cancel();
                             //TransferState.CancellationTokens[TransferState.ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
                             TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tti), out _);
-                            lock (TransferItemManagerWrapped.GetUICurrentList())
+                            lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
                                 if (ViewState.InUploadsMode)
                                 {
-                                    TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                                    TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
                                 }
                                 else
                                 {
-                                    TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
+                                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
                                 }
                                 recyclerTransferAdapter.NotifyItemRemoved(position);
                             }
                         }
                         else if (tItem is FolderItem fi)
                         {
-                            TransferItemManagerWrapped.CancelFolder(fi, true);
-                            TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
-                            lock (TransferItemManagerWrapped.GetUICurrentList())
+                            TransferItems.TransferItemManagerWrapped.CancelFolder(fi, true);
+                            TransferItems.TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
+                            lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
-                                //TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
+                                //TransferItems.TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
                                 recyclerTransferAdapter.NotifyItemRemoved(position);
                             }
                         }
@@ -1075,7 +1059,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState());
+                            tItem = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState());
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1107,7 +1091,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState()) as TransferItem;
+                            tItem = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState()) as TransferItem;
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1188,8 +1172,8 @@ namespace Seeker
                         SessionService.RunWithReconnect(() => DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
-                        TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
-                        int index = TransferItemManagerWrapped.GetIndexForFolderItem(ti as FolderItem);
+                        TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
+                        int index = TransferItems.TransferItemManagerWrapped.GetIndexForFolderItem(ti as FolderItem);
                         recyclerTransferAdapter.NotifyItemChanged(index);
                         break;
                     case TransferContextMenuItem.RetryFailedFiles: //retry failed downloads from folder
@@ -1205,7 +1189,7 @@ namespace Seeker
                         tItem = null;
                         try
                         {
-                            tItem = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                            tItem = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(position);
                         }
                         catch (ArgumentOutOfRangeException)
                         {
@@ -1219,22 +1203,22 @@ namespace Seeker
                         token?.Cancel();
                         //TransferState.CancellationTokens[TransferState.ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
                         TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(uploadToCancel), out _);
-                        lock (TransferItemManagerWrapped.GetUICurrentList())
+                        lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                         {
                             recyclerTransferAdapter.NotifyItemChanged(position);
                         }
                         break;
                     case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
                         Logger.InfoFirebase("Unshare User item pressed");
-                        IEnumerable<TransferItem> tItems = TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
+                        IEnumerable<TransferItem> tItems = TransferItems.TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
                         foreach (var tiToCancel in tItems)
                         {
                             TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
                             token1?.Cancel();
                             TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tiToCancel), out _);
-                            lock (TransferItemManagerWrapped.GetUICurrentList())
+                            lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
-                                int posOfCancelled = TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
+                                int posOfCancelled = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
                                 if (posOfCancelled != -1)
                                 {
                                     recyclerTransferAdapter.NotifyItemChanged(posOfCancelled);
@@ -1287,7 +1271,7 @@ namespace Seeker
             {
                 return;
             }
-            int userPostionBeingRemoved = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
+            int userPostionBeingRemoved = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
             if (userPostionBeingRemoved == -1)
             {
                 //it is not currently on our screen, perhaps it is in uploads (and we are in downloads) or we are inside a folder (and it is outside)
@@ -1348,7 +1332,7 @@ namespace Seeker
                     }
                     else
                     {
-                        int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(t, ViewState.CreateDLUIState());
+                        int indexOfItem = TransferItems.TransferItemManagerDL.GetUserIndexForTransferItem(t, ViewState.CreateDLUIState());
                         if (indexOfItem == -1 && ViewState.InUploadsMode)
                         {
                             return null;
@@ -1375,7 +1359,7 @@ namespace Seeker
                 {
                     return;
                 }
-                int indexOfItem = TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename, ViewState.CreateDLUIState());
+                int indexOfItem = TransferItems.TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename, ViewState.CreateDLUIState());
                 Logger.Debug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
                 Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
                 if (recyclerTransferAdapter.ItemCount == indexOfItem)
@@ -1639,7 +1623,7 @@ namespace Seeker
 
 
                         //partial refresh just update progress..
-                        //TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.ti.FullFilename, out index);
+                        //TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.ti.FullFilename, out index);
 
                         //Logger.Debug("Index is "+index+" TransferProgressUpdated"); //tested!
 
@@ -1648,7 +1632,7 @@ namespace Seeker
                         Activity?.RunOnUiThread(() =>
                         {
                             int index = -1;
-                            index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
+                            index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
                             if (index == -1)
                             {
                                 Logger.Debug("Index is -1 TransferProgressUpdated");
@@ -1675,7 +1659,7 @@ namespace Seeker
             Action action = new Action(() =>
             {
 
-                int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(ti); //todo null ti
+                int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(ti); //todo null ti
                 if (index == -1)
                 {
                     return; //this is likely an upload when we are on downloads page or vice versa.
@@ -1720,18 +1704,18 @@ namespace Seeker
             {
                 if (e.IsUpload() && ViewState.InUploadsMode)
                 {
-                    lock (TransferItemManagerWrapped.GetUICurrentList())
+                    lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                     { //todo can update this to do a partial refresh... just the index..
                         if (ViewState.GroupByFolder && !ViewState.CurrentlyInFolder())
                         {
                             //folderview - so we may insert or update
-                            //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
+                            //int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
                             refreshListView(); //just to be safe...
 
                         }
                         else
                         {
-                            //int index = TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
+                            //int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e);
                             //refreshListView(()=>{recyclerTransferAdapter.NotifyItemInserted(index); });
                             refreshListView(); //just to be safe...
                         }
@@ -1778,7 +1762,7 @@ namespace Seeker
             {
                 //occurs on nonUI thread...
                 //if there is any deadlock due to this, then do Thread.Start().
-                lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
+                lock (TransferItems.TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
                 { //todo can update this to do a partial refresh... just the index..
                     refreshListView();
                 }

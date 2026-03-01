@@ -52,7 +52,7 @@ namespace Seeker
                     List<TransferItem> transfersSelected = new List<TransferItem>();
                     foreach (int position in ViewState.BatchSelectedItems)
                     {
-                        var ti = TransferItemManagerWrapped.GetItemAtUserIndex(position);
+                        var ti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(position);
                         if (ti is TransferItem singleTi)
                         {
                             transfersSelected.Add(singleTi);
@@ -91,8 +91,8 @@ namespace Seeker
                     case Resource.Id.action_cancel_and_clear_all_batch:
                         Logger.InfoFirebase("action_cancel_and_clear_batch Pressed");
                         SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                        TransferItemManagerWrapped.CancelSelectedItems(true);
-                        TransferItemManagerWrapped.ClearSelectedItemsAndClean();
+                        TransferItems.TransferItemManagerWrapped.CancelSelectedItems(true);
+                        TransferItems.TransferItemManagerWrapped.ClearSelectedItemsAndClean();
                         var selected = ViewState.BatchSelectedItems.ToArray();
                         ViewState.BatchSelectedItems.Clear();
                         foreach (int pos in selected)
@@ -103,7 +103,7 @@ namespace Seeker
                         TransfersActionMode.Finish(); //TransfersActionMode can be null!
                         break;
                     case Resource.Id.pause_selected_batch:
-                        TransferItemManagerWrapped.CancelSelectedItems(false);
+                        TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
                         selected = ViewState.BatchSelectedItems.ToArray();
                         ViewState.BatchSelectedItems.Clear();
                         foreach (int pos in selected)

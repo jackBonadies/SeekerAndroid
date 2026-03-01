@@ -176,7 +176,7 @@ namespace Seeker
             public void SelectedDebugInfo(ITransferItem iti)
             {
 
-                int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
+                int position = TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
                 Logger.Debug($"position: {position} ti name: {iti.GetDisplayName()}");
 
             }
