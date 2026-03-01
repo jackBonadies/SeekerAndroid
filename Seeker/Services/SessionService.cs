@@ -12,7 +12,7 @@ namespace Seeker.Services
     /// <summary>
     /// Session lifecycle: login state, reconnect, status, and client configuration.
     /// </summary>
-    public class SessionService
+    public class SessionService : ISessionService
     {
         public static SessionService Instance { get; set; }
 

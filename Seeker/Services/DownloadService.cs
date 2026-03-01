@@ -19,10 +19,10 @@ namespace Seeker.Services
 
         private readonly IToaster toaster;
         private readonly IFileSystemService fileSystemService;
-        private readonly SessionService sessionService;
+        private readonly ISessionService sessionService;
         private readonly IMainThreadRunner mainThreadRunner;
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, SessionService sessionService, IMainThreadRunner mainThreadRunner)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
