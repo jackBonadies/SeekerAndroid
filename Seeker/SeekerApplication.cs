@@ -142,6 +142,28 @@ namespace Seeker
                 loggerBackend.CrashlyticsEnabled = false;
             }
 #endif
+
+#if DEBUG
+            Android.OS.StrictMode.SetThreadPolicy(
+                new Android.OS.StrictMode.ThreadPolicy.Builder()
+                    .DetectDiskReads()
+                    .DetectDiskWrites()
+                    .DetectNetwork()
+                    .DetectCustomSlowCalls()
+                    .PenaltyLog()       
+                    .PenaltyFlashScreen() 
+                    .PenaltyDeathOnNetwork()
+                    .Build());
+
+            Android.OS.StrictMode.SetVmPolicy(
+                new Android.OS.StrictMode.VmPolicy.Builder()
+                    .DetectLeakedClosableObjects()
+                    .DetectLeakedSqlLiteObjects()
+                    .DetectActivityLeaks()
+                    .PenaltyLog()
+                    .Build());
+#endif
+
             Logger.Backend = loggerBackend;
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
