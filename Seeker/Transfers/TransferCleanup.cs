@@ -37,7 +37,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed");
                 }
-                FileSystemService.DeleteParentIfEmpty(parent);
+                FileSystemService.Instance.DeleteParentIfEmpty(parent);
             }
             else
             {
@@ -51,7 +51,7 @@ namespace Seeker
                 {
                     Logger.Debug("delete failed LEGACY");
                 }
-                FileSystemService.DeleteParentIfEmpty(parent);
+                FileSystemService.Instance.DeleteParentIfEmpty(parent);
             }
         }
     }

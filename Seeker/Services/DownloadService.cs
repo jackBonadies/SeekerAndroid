@@ -18,10 +18,12 @@ namespace Seeker.Services
         public static DownloadService Instance { get; set; }
 
         private readonly IToaster toaster;
+        private readonly FileSystemService fileSystemService;
 
-        public DownloadService(IToaster toaster)
+        public DownloadService(IToaster toaster, FileSystemService fileSystemService)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
+            this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -263,7 +265,7 @@ namespace Seeker.Services
                         username: username,
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<System.IO.Stream>(
-                            FileSystemService.OpenIncompleteStream(incompleteUri, partialLength)),
+                            fileSystemService.OpenIncompleteStream(incompleteUri, partialLength)),
                         size: size,
                         startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true,
@@ -869,14 +871,14 @@ namespace Seeker.Services
                         byte[] bytes = e.dlInfo.OutputMemoryStream.ToArray();
                         e.dlInfo.OutputMemoryStream.Dispose();
                         e.dlInfo.OutputMemoryStream = null;
-                        string path = FileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, bytes, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
-                        FileSystemService.SaveFileToMediaStore(path);
+                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, bytes, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        fileSystemService.SaveFileToMediaStore(path);
                     }
                     else if (e.dlInfo.TransferItemReference?.IncompleteUri != null)
                     {
                         //move file from incomplete to final location...
-                        string path = FileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteUri), Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteParentUri), false, e.dlInfo.Depth, noSubfolder, out finalUri);
-                        FileSystemService.SaveFileToMediaStore(path);
+                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteUri), Android.Net.Uri.Parse(e.dlInfo.TransferItemReference.IncompleteParentUri), false, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        fileSystemService.SaveFileToMediaStore(path);
                     }
                     else
                     {
