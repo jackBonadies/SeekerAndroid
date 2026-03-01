@@ -18,6 +18,12 @@ namespace Seeker
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
+                var activity = SeekerState.ActiveActivityRef;
+                if (activity != null)
+                {
+                    var color = SearchItemViewExpandable.GetColorFromAttribute(activity, Resource.Attribute.mainPurple);
+                    activity.Window?.SetStatusBarColor(color);
+                }
                 return true;
             }
 
@@ -169,6 +175,7 @@ namespace Seeker
 
             public void OnDestroyActionMode(ActionMode mode)
             {
+                SeekerState.ActiveActivityRef?.Window?.SetStatusBarColor(Android.Graphics.Color.Transparent);
 
                 int[] prevSelectedItems = new int[ViewState.BatchSelectedItems.Count];
                 ViewState.BatchSelectedItems.CopyTo(prevSelectedItems);

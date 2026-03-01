@@ -12,12 +12,12 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurpleStatusBar</item>
+		<item name="background">?attr/mainPurple</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
 	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/normalTextColor</item>
+        <item name="android:textColor">#FFFFFF</item>
 	</style>
 
     <style name="OutlinedRoundedBox" parent="">
