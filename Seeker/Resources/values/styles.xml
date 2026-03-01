@@ -126,7 +126,9 @@
     <style
         name="AppTheme.AppBarOverlay"
         parent="ThemeOverlay.Material3.Dark.ActionBar"
-    />
+    >
+        <item name="actionModeStyle">@style/MyActionMode</item>
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 

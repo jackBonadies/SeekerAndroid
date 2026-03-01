@@ -82,7 +82,17 @@
         >
             ?attr/the_rounded_corner_dialog_background_drawable
         </item>
-    </style>
+		<item name="actionModeStyle">@style/MyActionMode</item>
+	</style>
+
+	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
+		<item name="background">?attr/mainPurpleStatusBar</item>
+		<item name="titleTextStyle">@style/MyActionModeTitle</item>
+	</style>
+
+	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">?attr/normalTextColor</item>
+	</style>
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
         <item name="mainPurple">#126291</item>
