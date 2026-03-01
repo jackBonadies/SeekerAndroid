@@ -1370,7 +1370,7 @@ namespace Seeker
 
         public void ClearIncompleteFolder()
         {
-            List<string> doNotDelete = TransfersFragment.TransferItemManagerDL.GetInUseIncompleteFolderNames();
+            List<string> doNotDelete = TransferItems.TransferItemManagerDL.GetInUseIncompleteFolderNames();
 
             bool useDownloadDir = false;
             if (PreferencesState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())

@@ -50,7 +50,7 @@
 	  <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
 	<AndroidKeyStore>true</AndroidKeyStore>
 	<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
 	<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>

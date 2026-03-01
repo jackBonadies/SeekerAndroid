@@ -900,13 +900,13 @@ namespace Seeker
                 Seeker.Services.DownloadService.AddToUserOffline(e.Transfer.Username);
             }
 
-            TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
+            TransferItem relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
             if (relevantItem == null)
             {
                 Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
             Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
-            //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
+            //TransferItem relevantItem = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
             if (relevantItem != null)
             {
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
@@ -1001,7 +1001,7 @@ namespace Seeker
                 {
                     if (PreferencesState.NotifyOnFolderCompleted && !isUpload)
                     {
-                        if (TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
+                        if (TransferItems.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
                         {
                             //relevantItem.TransferItemExtra // if single then change the notif text.
                             // RetryDL is on completed Succeeded dl?
@@ -1031,7 +1031,7 @@ namespace Seeker
             newStream = null;
             try
             {
-                var relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
+                var relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
                 if (startOffset == 0)
                 {
                     // all we need to do is update the size.
@@ -1096,21 +1096,21 @@ namespace Seeker
                 Logger.Firebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
             TransferItem relevantItem = null;
-            if (TransfersFragment.TransferItemManagerDL == null)
+            if (TransferItems.TransferItemManagerDL == null)
             {
                 Logger.Debug("transferItems Null " + e.Transfer.Filename);
                 return;
             }
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
-            relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
-            //relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
+            relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
+            //relevantItem = TransferItems.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
 
             if (relevantItem == null)
             {
                 //this happens on Clear and Cancel All.
                 Logger.Debug("Relevant Item Null " + e.Transfer.Filename);
-                Logger.Debug("transferItems.IsEmpty " + TransfersFragment.TransferItemManagerDL.IsEmpty());
+                Logger.Debug("transferItems.IsEmpty " + TransferItems.TransferItemManagerDL.IsEmpty());
                 return;
             }
             else
@@ -1129,7 +1129,7 @@ namespace Seeker
                     {
                         //int before = TransfersFragment.transferItems.Count;
                         TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
-                        TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
+                        TransferItems.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
                         //int after = TransfersFragment.transferItems.Count;
                         //Logger.Debug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
@@ -1960,11 +1960,11 @@ namespace Seeker
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
 
-                if (TransfersFragment.TransferItemManagerDL == null)
+                if (TransferItems.TransferItemManagerDL == null)
                 {
                     TransfersFragment.RestoreDownloadTransferItems(sharedPreferences);
                     TransfersFragment.RestoreUploadTransferItems(sharedPreferences);
-                    TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
+                    TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL, TransferCleanup.PerformCleanupItem);
                 }
             }
         }
@@ -2103,7 +2103,7 @@ namespace Seeker
                     {
                         Logger.Debug("the user came back who we previously dl from " + username);
                         //retry all failed downloads from them..
-                        List<TransferItem> items = TransfersFragment.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
+                        List<TransferItem> items = TransferItems.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
                         if (items.Count == 0)
                         {
                             //no offline, then remove this user.

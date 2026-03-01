@@ -36,7 +36,7 @@ namespace Seeker.Transfers
 
             if (SeekerState.AutoRequeueDownloadsAtStartup)
             {
-                var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
+                var queuedTransfers = TransferItems.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
                 if (queuedTransfers.Count > 0)
                 {
                     Logger.Debug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
@@ -59,7 +59,7 @@ namespace Seeker.Transfers
             {
                 return;
             }
-            var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
+            var queuedTransfers = TransferItems.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
             if (queuedTransfers.Count > 0)
             {
                 Logger.Debug("TransfersTimerElapsed - Lets get position of queued transfers...");

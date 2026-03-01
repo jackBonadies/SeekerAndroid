@@ -142,7 +142,7 @@ namespace Seeker.Services
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
-            transferItem = TransfersFragment.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
+            transferItem = TransferItems.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
 
             if (!exists) //else the state will simply be updated a bit later.
             {

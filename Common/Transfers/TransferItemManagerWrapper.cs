@@ -1,11 +1,8 @@
-﻿using AndroidX.DocumentFile.Provider;
-using Seeker.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Seeker.Helpers;
 
-using Common;
 namespace Seeker
 {
     /// <summary>
@@ -15,25 +12,28 @@ namespace Seeker
     {
         private TransferItemManager Uploads;
         private TransferItemManager Downloads;
-        public TransferItemManagerWrapper(TransferItemManager up, TransferItemManager down)
+        private readonly Action<TransferItem> performCleanupItem;
+
+        public TransferItemManagerWrapper(TransferItemManager up, TransferItemManager down, Action<TransferItem> cleanupAction)
         {
             Uploads = up;
             Downloads = down;
+            performCleanupItem = cleanupAction ?? throw new ArgumentNullException(nameof(cleanupAction));
         }
 
-        public static void CleanupEntry(IEnumerable<TransferItem> tis)
+        public void CleanupEntry(IEnumerable<TransferItem> tis)
         {
             Logger.Debug("launching cleanup entry");
             System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, tis);
         }
 
-        public static void CleanupEntry(TransferItem ti)
+        public void CleanupEntry(TransferItem ti)
         {
             Logger.Debug("launching cleanup entry");
             System.Threading.ThreadPool.QueueUserWorkItem(PeformCleanup, ti);
         }
 
-        static void PeformCleanup(object state)
+        void PeformCleanup(object state)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace Seeker
                 }
                 else
                 {
-                    PerformCleanupItem(state as TransferItem);
+                    performCleanupItem(state as TransferItem);
                 }
             }
             catch (Exception e)
@@ -106,62 +106,22 @@ namespace Seeker
             }
         }
 
-        public static void PerfomCleanupItems(IEnumerable<TransferItem> tis)
+        public void PerfomCleanupItems(IEnumerable<TransferItem> tis)
         {
             foreach (TransferItem ti in tis)
             {
-                PerformCleanupItem(ti);
+                performCleanupItem(ti);
             }
         }
 
-        public static void PerformCleanupItem(TransferItem ti)
+        public void PerformCleanup(TransferItem ti)
         {
-            Logger.Debug("cleaning up: " + ti.Filename);
-            //if (TransfersFragment.TransferItemManagerDL.ExistsAndInProcessing(ti.FullFilename, ti.Username, ti.Size))
-            //{
-            //    //this should rarely happen. its a race condition if someone clears a download and then goes back to the person they downloaded from to re-download.
-            //    return;
-            //}
-            //api 21+
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                DocumentFile parent = null;
-                Android.Net.Uri parentIncompleteUri = Android.Net.Uri.Parse(ti.IncompleteParentUri);
-                if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentIncompleteUri.Scheme == "file")
-                {
-                    parent = DocumentFile.FromFile(new Java.IO.File(parentIncompleteUri.Path));
-                }
-                else
-                {
-                    parent = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentIncompleteUri); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
-                }
+            performCleanupItem(ti);
+        }
 
-                DocumentFile df = parent.FindFile(ti.Filename);
-                if (df == null || !df.Exists())
-                {
-                    Logger.Debug("delete failed - null or not exist");
-                    Logger.InfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + PreferencesState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
-                }
-                if (!df.Delete()) //nullref
-                {
-                    Logger.Debug("delete failed");
-                }
-                FileSystemService.DeleteParentIfEmpty(parent);
-            }
-            else
-            {
-                Java.IO.File parent = new Java.IO.File(Android.Net.Uri.Parse(ti.IncompleteParentUri).Path);
-                Java.IO.File f = parent.ListFiles().First((file) => file.Name == ti.Filename);
-                if (f == null || !f.Exists())
-                {
-                    Logger.Debug("delete failed LEGACY - null or not exist");
-                }
-                if (!f.Delete())
-                {
-                    Logger.Debug("delete failed LEGACY");
-                }
-                FileSystemService.DeleteParentIfEmpty(parent);
-            }
+        public static bool NeedsCleanUp(TransferItem ti)
+        {
+            return TransferItemManager.NeedsCleanUp(ti);
         }
 
 
@@ -177,12 +137,6 @@ namespace Seeker
                 CleanupEntry(ti);
             }
         }
-
-        public static bool NeedsCleanUp(TransferItem ti)
-        {
-            return TransferItemManager.NeedsCleanUp(ti);
-        }
-
 
         public void Remove(TransferItem ti)
         {

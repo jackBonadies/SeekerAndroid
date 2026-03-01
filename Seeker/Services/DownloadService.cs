@@ -161,7 +161,7 @@ namespace Seeker.Services
                         Logger.Firebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
                     }
                 }
-                transferItem = TransfersFragment.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
+                transferItem = TransferItems.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
                 Logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
                 downloadInfo.TransferItemReference = transferItem;
 
@@ -180,7 +180,7 @@ namespace Seeker.Services
             {
                 if (!exists)
                 {
-                    TransfersFragment.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
+                    TransferItems.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
                 }
                 else
                 {
@@ -362,7 +362,7 @@ namespace Seeker.Services
                             //update the transferItem array
                             if (transferItemInQuestion == null)
                             {
-                                transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                                transferItemInQuestion = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                             }
 
                             if (transferItemInQuestion == null)
@@ -389,7 +389,7 @@ namespace Seeker.Services
                         //update the transferItem array
                         if (transferItemInQuestion == null)
                         {
-                            transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                            transferItemInQuestion = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                         }
 
                         if (transferItemInQuestion == null)
@@ -447,7 +447,7 @@ namespace Seeker.Services
                     //it is not downloading... therefore retry the download...
                     if (transferItemInQuestion == null)
                     {
-                        transferItemInQuestion = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
+                        transferItemInQuestion = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                     }
                     //TransferItem item1 = transferItems[info.Position];  
                     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -568,7 +568,7 @@ namespace Seeker.Services
                             Logger.Debug("continue with cleanup activity: " + e.dlInfo.fullFilename);
                             e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                             e.dlInfo.TransferItemReference.InProcessing = false;
-                            TransferItemManagerWrapper.PerformCleanupItem(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
+                            TransferItems.TransferItemManagerWrapped.PerformCleanup(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
                         }
 
                         return;
@@ -608,7 +608,7 @@ namespace Seeker.Services
                             {
                                 try
                                 {
-                                    TransferItemManagerWrapper.PerformCleanupItem(transferItem);
+                                    TransferItems.TransferItemManagerWrapped.PerformCleanup(transferItem);
                                 }
                                 catch (Exception ex)
                                 {
@@ -911,7 +911,7 @@ namespace Seeker.Services
 
         public static void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis = null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
         {
-            var TransferItemManagerDL = TransfersFragment.TransferItemManagerDL;
+            var TransferItemManagerDL = TransferItems.TransferItemManagerDL;
             var ViewState = TransfersViewState.Instance;
 
             IEnumerable<TransferItem> transferItemConditionList = new List<TransferItem>();

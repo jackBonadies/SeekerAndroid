@@ -27,9 +27,22 @@ namespace Seeker
         private View rootView = null;
 
 
-        public static TransferItemManager TransferItemManagerDL; //for downloads
-        public static TransferItemManager TransferItemManagerUploads; //for uploads
-        public static TransferItemManagerWrapper TransferItemManagerWrapped;
+        public static TransferItemManager TransferItemManagerDL
+        {
+            get => TransferItems.TransferItemManagerDL;
+            set => TransferItems.TransferItemManagerDL = value;
+        }
+
+        public static TransferItemManager TransferItemManagerUploads
+        {
+            get => TransferItems.TransferItemManagerUploads;
+            set => TransferItems.TransferItemManagerUploads = value;
+        }
+        public static TransferItemManagerWrapper TransferItemManagerWrapped
+        {
+            get => TransferItems.TransferItemManagerWrapped;
+            set => TransferItems.TransferItemManagerWrapped = value;
+        }
 
 
         private static TransfersViewState ViewState => TransfersViewState.Instance;
@@ -254,13 +267,13 @@ namespace Seeker
                     {
                         TransferItemManagerDL.CancelAll(true);
                         var cleanupItems = TransferItemManagerDL.ClearAllReturnCleanupItems();
-                        if (cleanupItems.Any()) TransferItemManagerWrapper.CleanupEntry(cleanupItems);
+                        if (cleanupItems.Any()) TransferItemManagerWrapped.CleanupEntry(cleanupItems);
                     }
                     else
                     {
                         TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder, true);
                         var cleanupItems = TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(ViewState.CurrentlySelectedDLFolder);
-                        if (cleanupItems.Any()) TransferItemManagerWrapper.CleanupEntry(cleanupItems);
+                        if (cleanupItems.Any()) TransferItemManagerWrapped.CleanupEntry(cleanupItems);
                     }
                     refreshListView();
                     return true;
