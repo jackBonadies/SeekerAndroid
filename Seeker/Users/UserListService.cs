@@ -195,7 +195,7 @@ namespace Seeker
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { AddUserLogic(c, username, UIaction, massImportCase); });
             });
 
-            SessionService.RunWithReconnect(actualActionToPerform, "User will be added once login is complete.");
+            SessionService.Instance.RunWithReconnect(actualActionToPerform, "User will be added once login is complete.");
         }
 
         /// <summary>

@@ -673,7 +673,7 @@ namespace Seeker.Messages
                 }));
             });
 
-            SessionService.RunWithReconnect(actualActionToPerform, "Message will send on connection re-establishment", contextToUse);
+            SessionService.Instance.RunWithReconnect(actualActionToPerform, "Message will send on connection re-establishment", contextToUse);
 
         }
 

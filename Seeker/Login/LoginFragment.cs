@@ -98,7 +98,7 @@ namespace Seeker
             HasOptionsMenu = true;
             Logger.Debug("LoginFragmentOnCreateView");
             StaticHacks.LoginFragment = this;
-            if (SessionService.IsNotLoggedIn())//you are not logged in if username or password is null
+            if (SessionService.Instance.IsNotLoggedIn())//you are not logged in if username or password is null
             {
                 PreferencesState.CurrentlyLoggedIn = false;
                 this.rootView = inflater.Inflate(Resource.Layout.login, container, false);

@@ -881,7 +881,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
                 }
             }
-            SessionService.RunWithReconnect(() => GetRoomListLogic(feedback));
+            SessionService.Instance.RunWithReconnect(() => GetRoomListLogic(feedback));
         }
 
         public static void GetRoomListLogic(bool feedback)
@@ -940,7 +940,7 @@ namespace Seeker.Chatroom
                     }
                 }
             }
-            SessionService.RunWithReconnect(() => CreateRoomLogic(roomName, isPrivate, feedback));
+            SessionService.Instance.RunWithReconnect(() => CreateRoomLogic(roomName, isPrivate, feedback));
         }
 
         public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead = false)
@@ -980,7 +980,7 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            SessionService.RunWithReconnect(() => AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead));
+            SessionService.Instance.RunWithReconnect(() => AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead));
         }
 
 
@@ -1106,7 +1106,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short);
                 }
             }
-            SessionService.RunWithReconnect(() => DropMembershipOrOwnershipLogic(roomName, ownership, feedback));
+            SessionService.Instance.RunWithReconnect(() => DropMembershipOrOwnershipLogic(roomName, ownership, feedback));
         }
 
         public static void DropMembershipOrOwnershipLogic(string roomName, bool ownership, bool feedback)
@@ -1174,7 +1174,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.setting_ticker), ToastLength.Short);
                 }
             }
-            SessionService.RunWithReconnect(() => SetTickerLogic(roomName, tickerMessage, feedback));
+            SessionService.Instance.RunWithReconnect(() => SetTickerLogic(roomName, tickerMessage, feedback));
         }
 
         public static void SetTickerLogic(string roomName, string tickerMessage, bool feedback)
@@ -1229,7 +1229,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 }
             }
-            SessionService.RunWithReconnect(() => JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin));
+            SessionService.Instance.RunWithReconnect(() => JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin));
         }
 
         public static void JoinRoomLogic(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)

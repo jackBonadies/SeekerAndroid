@@ -19,11 +19,13 @@ namespace Seeker.Services
 
         private readonly IToaster toaster;
         private readonly FileSystemService fileSystemService;
+        private readonly SessionService sessionService;
 
-        public DownloadService(IToaster toaster, FileSystemService fileSystemService)
+        public DownloadService(IToaster toaster, FileSystemService fileSystemService, SessionService sessionService)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
+            this.sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -289,7 +291,7 @@ namespace Seeker.Services
         public void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
 
-            SessionService.RunWithReconnect(() => GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded), silent: true);
+            sessionService.RunWithReconnect(() => GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded), silent: true);
         }
 
 
@@ -305,7 +307,7 @@ namespace Seeker.Services
         public void GetDownloadPlaceInQueue(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
         {
 
-            SessionService.RunWithReconnect(() => GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete), silent: true);
+            sessionService.RunWithReconnect(() => GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete), silent: true);
         }
 
         private void GetDownloadPlaceInQueueLogic(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)

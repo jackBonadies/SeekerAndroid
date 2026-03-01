@@ -458,7 +458,7 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_give_privileges), ToastLength.Short);
                 return false;
             }
-            return SessionService.RunWithReconnect(() => GivePrivilegesLogic(username, numDaysInt));
+            return SessionService.Instance.RunWithReconnect(() => GivePrivilegesLogic(username, numDaysInt));
         }
 
 

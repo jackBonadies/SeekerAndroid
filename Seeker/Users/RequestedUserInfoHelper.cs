@@ -82,7 +82,7 @@ namespace Seeker
                 return;
             }
 
-            SessionService.RunWithReconnect(() => RequestUserInfoLogic(uname));
+            SessionService.Instance.RunWithReconnect(() => RequestUserInfoLogic(uname));
         }
 
         public static void RequestUserInfoLogic(string uname)

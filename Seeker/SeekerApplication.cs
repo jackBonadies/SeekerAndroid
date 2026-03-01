@@ -130,8 +130,9 @@ namespace Seeker
             base.OnCreate();
             ApplicationContext = this;
             Toaster = new AndroidToaster();
+            Services.SessionService.Instance = new Services.SessionService();
             Services.FileSystemService.Instance = new Services.FileSystemService();
-            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance);
+            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance);
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
@@ -219,53 +220,53 @@ namespace Seeker
 
             SeekerApplication.SetNetworkState(this);
 
-                //need search response and enqueue download action...
-                //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SeekerState.SoulseekClient = new SoulseekClient(
-                    128,
-                    new SoulseekClientOptions(
-                        minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
-                        messageTimeout: 30000,
-                        enableListener: PreferencesState.ListenerEnabled,
-                        autoAcknowledgePrivateMessages: false,
-                        acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
-                        listenPort: PreferencesState.ListenerPort,
-                        maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
-                        serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
-                        addressResolver: ResolveAddressAsync,
-                        userInfoResolver: UserInfoResponseHandler));
-                SetDiagnosticState(LOG_DIAGNOSTICS);
-                SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
-                SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
-                SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
-                //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
-                SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
+            //need search response and enqueue download action...
+            //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
+            SeekerState.SoulseekClient = new SoulseekClient(
+                128,
+                new SoulseekClientOptions(
+                    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
+                    messageTimeout: 30000,
+                    enableListener: PreferencesState.ListenerEnabled,
+                    autoAcknowledgePrivateMessages: false,
+                    acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
+                    listenPort: PreferencesState.ListenerPort,
+                    maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+                    serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
+                    addressResolver: ResolveAddressAsync,
+                    userInfoResolver: UserInfoResponseHandler));
+            SetDiagnosticState(LOG_DIAGNOSTICS);
+            SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
+            SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
+            SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
+            //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
+            SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
-                SeekerState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
-                SeekerState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
+            SeekerState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
+            SeekerState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
 
-                SeekerState.SoulseekClient.Connected += SoulseekClient_Connected;
-                SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
-                SeekerState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
-                SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
-                SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
-                SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
+            SeekerState.SoulseekClient.Connected += SoulseekClient_Connected;
+            SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
+            SeekerState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
+            SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
+            SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
+            SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
 
-                SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
-                SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
+            SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
+            SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
 
-                MessageController.Initialize();
-                ChatroomController.Initialize();
+            MessageController.Initialize();
+            ChatroomController.Initialize();
 
 
-                SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
-                #if DEBUG
-                SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
-                SoulseekClient.DebugLogHandler += DebugLogHandler;
-                #endif
+            SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
+            #if DEBUG
+            SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
+            SoulseekClient.DebugLogHandler += DebugLogHandler;
+            #endif
 
-                SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
-                SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
+            SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
+            SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
@@ -1524,7 +1525,7 @@ namespace Seeker
                         }
                         else
                         {
-                            SessionService.SetStatusApi(true);
+                            SessionService.Instance.SetStatusApi(true);
                         }
                     }
 

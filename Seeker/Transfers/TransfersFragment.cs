@@ -289,7 +289,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_resume_all:
                     Logger.InfoFirebase("resume all Pressed");
-                    SessionService.RunWithReconnect(() =>
+                    SessionService.Instance.RunWithReconnect(() =>
                     {
                         if (ViewState.CurrentlySelectedDLFolder == null)
                         {
@@ -324,7 +324,7 @@ namespace Seeker
             //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
             var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
             Logger.InfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
-            SessionService.RunWithReconnect(() =>
+            SessionService.Instance.RunWithReconnect(() =>
             {
                 if (ViewState.CurrentlySelectedDLFolder == null)
                 {
@@ -972,7 +972,7 @@ namespace Seeker
                             return true;
                         }
 
-                        SessionService.RunWithReconnect(() => DownloadRetryLogic(ti));
+                        SessionService.Instance.RunWithReconnect(() => DownloadRetryLogic(ti));
                         //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
                         break;
                     case TransferContextMenuItem.ClearFromList:
@@ -1169,7 +1169,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("resume folder Pressed");
-                        SessionService.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
@@ -1182,7 +1182,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("retry folder Pressed");
-                        SessionService.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false));
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");

@@ -2509,7 +2509,7 @@ namespace Seeker
             }
             else
             {
-                SessionService.RunWithReconnect(() => SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist), silent: fromWishlist);
+                SessionService.Instance.RunWithReconnect(() => SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist), silent: fromWishlist);
             }
         }
     }

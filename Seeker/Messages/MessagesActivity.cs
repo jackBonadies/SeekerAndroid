@@ -219,7 +219,7 @@ namespace Seeker
 
         public void ShowEditTextMessageUserDialog()
         {
-            if (SessionService.IsNotLoggedIn())
+            if (SessionService.Instance.IsNotLoggedIn())
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
                 return;

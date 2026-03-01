@@ -46,7 +46,7 @@ namespace Seeker.Browse
             });
 
 
-            SessionService.RunWithReconnect(actualActionToPerform);
+            SessionService.Instance.RunWithReconnect(actualActionToPerform);
         }
 
         public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)
@@ -56,7 +56,7 @@ namespace Seeker.Browse
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
-            SessionService.RunWithReconnect(() => RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation));
+            SessionService.Instance.RunWithReconnect(() => RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation));
         }
 
         private static void RequestFilesLogic(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation)
@@ -236,7 +236,7 @@ namespace Seeker.Browse
 
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
-            SessionService.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start());
+            SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start());
         }
 
         public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)

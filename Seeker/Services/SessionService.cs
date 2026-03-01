@@ -12,15 +12,17 @@ namespace Seeker.Services
     /// <summary>
     /// Session lifecycle: login state, reconnect, status, and client configuration.
     /// </summary>
-    public static class SessionService
+    public class SessionService
     {
-        public static bool CurrentlyLoggedInButDisconnectedState()
+        public static SessionService Instance { get; set; }
+
+        public bool CurrentlyLoggedInButDisconnectedState()
         {
             return (PreferencesState.CurrentlyLoggedIn &&
                 (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
         }
 
-        public static bool ShowMessageAndCreateReconnectTask(bool silent, out Task connectTask)
+        public bool ShowMessageAndCreateReconnectTask(bool silent, out Task connectTask)
         {
             if (!silent)
             {
@@ -42,7 +44,7 @@ namespace Seeker.Services
             return false;
         }
 
-        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
+        public bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
@@ -74,7 +76,7 @@ namespace Seeker.Services
         /// If already connected, runs action immediately.
         /// </summary>
         /// <returns>true if action was run or will be run after reconnect; false if reconnect could not be started.</returns>
-        public static bool RunWithReconnect(Action action, bool silent = false)
+        public bool RunWithReconnect(Action action, bool silent = false)
         {
             if (CurrentlyLoggedInButDisconnectedState())
             {
@@ -108,7 +110,7 @@ namespace Seeker.Services
         /// Extended reconnect-then-act pattern. Handles disconnected, mid-login, and connected states.
         /// The caller provides a continuation that handles both fault propagation and the real action.
         /// </summary>
-        public static void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
+        public void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
         {
             if (CurrentlyLoggedInButDisconnectedState())
             {
@@ -127,7 +129,7 @@ namespace Seeker.Services
             }
         }
 
-        public static void SetStatusApi(bool away)
+        public void SetStatusApi(bool away)
         {
             if (IsNotLoggedIn())
             {
@@ -164,12 +166,12 @@ namespace Seeker.Services
             }
         }
 
-        public static bool IsNotLoggedIn()
+        public bool IsNotLoggedIn()
         {
             return (!PreferencesState.CurrentlyLoggedIn) || PreferencesState.Username == null || PreferencesState.Password == null || PreferencesState.Username == string.Empty;
         }
 
-        public static void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
+        public void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
         {
             Task<bool> reconfigTask = null;
             try

@@ -201,7 +201,7 @@ namespace Seeker.Managers
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_check_privileges), ToastLength.Short);
                 return;
             }
-            SessionService.RunWithReconnect(() => GetPrivilegesLogic(feedback));
+            SessionService.Instance.RunWithReconnect(() => GetPrivilegesLogic(feedback));
         }
 
         public bool CheckIfPrivileged(string username)

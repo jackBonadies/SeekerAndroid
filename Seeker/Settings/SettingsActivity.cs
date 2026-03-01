@@ -1255,7 +1255,7 @@ namespace Seeker
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if (SessionService.IsNotLoggedIn())
+            if (SessionService.Instance.IsNotLoggedIn())
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
@@ -1284,7 +1284,7 @@ namespace Seeker
 
             void OkayAction(object sender, string textInput)
             {
-                SessionService.RunWithReconnect(() => CommonHelpers.ChangePasswordLogic(textInput));
+                SessionService.Instance.RunWithReconnect(() => CommonHelpers.ChangePasswordLogic(textInput));
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -1968,11 +1968,11 @@ namespace Seeker
             }
             if (requiresConnection)
             {
-                SessionService.RunWithReconnect(() => SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort));
+                SessionService.Instance.RunWithReconnect(() => SessionService.Instance.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort));
             }
             else
             {
-                SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+                SessionService.Instance.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
             }
         }
 

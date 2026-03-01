@@ -446,7 +446,7 @@ namespace Seeker
         {
             setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.AdapterPosition);
             string roomName = localDataSet[position].Name;
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.Instance.CurrentlyLoggedInButDisconnectedState())
             {
                 ChatroomController.RemoveRoomFromJoinedAndOthers(roomName);
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
