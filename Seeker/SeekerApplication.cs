@@ -219,8 +219,6 @@ namespace Seeker
 
             SeekerApplication.SetNetworkState(this);
 
-            if (SeekerState.SoulseekClient == null)
-            {
                 //need search response and enqueue download action...
                 //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
                 SeekerState.SoulseekClient = new SoulseekClient(
@@ -268,7 +266,6 @@ namespace Seeker
 
                 SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
                 SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
-            }
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
