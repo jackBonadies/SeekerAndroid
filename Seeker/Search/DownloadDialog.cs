@@ -440,7 +440,7 @@ namespace Seeker
 
         private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
         {
-            var task = DownloadService.CreateDownloadAllTask(files, queuePaused, username);
+            var task = DownloadService.Instance.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }

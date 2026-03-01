@@ -13,12 +13,14 @@ using Common;
 namespace Seeker.Services
 {
     // Owns the entire download lifecycle: initiate, queue-poll, complete/retry/save
-    public static class DownloadService
+    public class DownloadService
     {
-        public static event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
+        public static DownloadService Instance { get; } = new DownloadService();
+
+        public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
 
 
-        public static void ClearDownloadAddedEventsFromTarget(object target)
+        public void ClearDownloadAddedEventsFromTarget(object target)
         {
             if (DownloadAddedUINotify == null)
             {
@@ -40,7 +42,7 @@ namespace Seeker.Services
             }
         }
 
-        public static Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
+        public Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
         {
             if (username == PreferencesState.Username)
             {
@@ -56,7 +58,7 @@ namespace Seeker.Services
             return task;
         }
 
-        public static async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
+        public async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
         {
             bool allExist = true; //only show the transfer exists if all transfers in question do already exist
             var isSingle = files.Count() == 1;
@@ -103,7 +105,7 @@ namespace Seeker.Services
         /// This would cause files do download out of order and other side effects.
         /// Update the logic to be more similar to slskd.
         /// </remarks>
-        private static async Task DownloadFiles(List<DownloadInfo> dlInfos, FullFileInfo[] files, string username)
+        private async Task DownloadFiles(List<DownloadInfo> dlInfos, FullFileInfo[] files, string username)
         {
             for (int i = 0; i < dlInfos.Count; i++)
             {
@@ -122,7 +124,7 @@ namespace Seeker.Services
         /// <summary>
         /// Adds a transfer to the database. Does not
         /// </summary>
-        public static DownloadInfo AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
+        public DownloadInfo AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
         {
             errorExists = false;
             Task dlTask = null;
@@ -198,7 +200,7 @@ namespace Seeker.Services
         /// takes care of resuming incomplete downloads, switching between mem and file backed, creating the incompleteUri dir.
         /// its the same as the old SeekerState.SoulseekClient.DownloadAsync but with a few bells and whistles...
         /// </summary>
-        public static Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, out Task waitForNext, DownloadInfo dlInfo, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
+        public Task DownloadFileAsync(string username, string fullfilename, long? size, CancellationTokenSource cts, out Task waitForNext, DownloadInfo dlInfo, int depth = 1, bool isFileDecodedLegacy = false, bool isFolderDecodedLegacy = false) //an indicator for how much of the full filename to use...
         {
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -267,7 +269,7 @@ namespace Seeker.Services
         }
 
 
-        public static void MarkTransferItemAsDirNotSet(TransferItem item)
+        public void MarkTransferItemAsDirNotSet(TransferItem item)
         {
             item.Failed = true;
             item.State = Soulseek.TransferStates.Errored;
@@ -275,14 +277,14 @@ namespace Seeker.Services
             item.InProcessing = false;
         }
 
-        public static void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
+        public void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
 
             SessionService.RunWithReconnect(() => GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded), silent: true);
         }
 
 
-        public static void GetDownloadPlaceInQueueBatchLogic(List<TransferItem> transferItems, bool addIfNotAdded, Func<TransferItem, object> actionOnComplete = null)
+        public void GetDownloadPlaceInQueueBatchLogic(List<TransferItem> transferItems, bool addIfNotAdded, Func<TransferItem, object> actionOnComplete = null)
         {
             foreach (TransferItem transferItem in transferItems)
             {
@@ -291,13 +293,13 @@ namespace Seeker.Services
         }
 
 
-        public static void GetDownloadPlaceInQueue(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
+        public void GetDownloadPlaceInQueue(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
         {
 
             SessionService.RunWithReconnect(() => GetDownloadPlaceInQueueLogic(username, fullFileName, addIfNotAdded, silent, transferItemInQuestion, actionOnComplete), silent: true);
         }
 
-        private static void GetDownloadPlaceInQueueLogic(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
+        private void GetDownloadPlaceInQueueLogic(string username, string fullFileName, bool addIfNotAdded, bool silent, TransferItem transferItemInQuestion = null, Func<TransferItem, object> actionOnComplete = null)
         {
 
             Action<Task<int>> updateTask = new Action<Task<int>>(
@@ -509,14 +511,14 @@ namespace Seeker.Services
             getDownloadPlace.ContinueWith(updateTask);
         }
 
-        public static EventHandler<TransferItem> TransferItemQueueUpdated; //for transferItemPage to update its recyclerView
+        public EventHandler<TransferItem> TransferItemQueueUpdated; //for transferItemPage to update its recyclerView
 
         /// <summary>
         /// This RETURNS the task for Continuewith
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        public static Action<Task> DownloadContinuationActionUI(DownloadAddedEventArgs e)
+        public Action<Task> DownloadContinuationActionUI(DownloadAddedEventArgs e)
         {
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
@@ -885,7 +887,7 @@ namespace Seeker.Services
             return continuationActionSaveFile;
         }
 
-        public static void AddToUserOffline(string username)
+        public void AddToUserOffline(string username)
         {
             if (TransferState.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
             {
@@ -909,7 +911,7 @@ namespace Seeker.Services
             }
         }
 
-        public static void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis = null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
+        public void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis = null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
         {
             var TransferItemManagerDL = TransferItems.TransferItemManagerDL;
             var ViewState = TransfersViewState.Instance;

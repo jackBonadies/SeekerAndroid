@@ -40,7 +40,7 @@ namespace Seeker.Transfers
                 if (queuedTransfers.Count > 0)
                 {
                     Logger.Debug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
-                    DownloadService.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
+                    DownloadService.Instance.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
                 }
             }
 
@@ -63,7 +63,7 @@ namespace Seeker.Transfers
             if (queuedTransfers.Count > 0)
             {
                 Logger.Debug("TransfersTimerElapsed - Lets get position of queued transfers...");
-                DownloadService.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
+                DownloadService.Instance.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
             }
 
         }

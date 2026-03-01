@@ -236,7 +236,7 @@ namespace Seeker.Browse
 
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
-            SessionService.RunWithReconnect(() => DownloadService.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start());
+            SessionService.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start());
         }
 
         public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)

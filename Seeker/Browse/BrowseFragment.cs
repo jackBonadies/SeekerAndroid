@@ -854,7 +854,7 @@ namespace Seeker
                         }
                     }
                 }
-                SessionService.RunWithReconnect(() => DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start());
+                SessionService.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start());
             }
         }
 

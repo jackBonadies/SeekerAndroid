@@ -897,7 +897,7 @@ namespace Seeker
             if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
             {
                 //user offline.
-                Seeker.Services.DownloadService.AddToUserOffline(e.Transfer.Username);
+                Seeker.Services.DownloadService.Instance.AddToUserOffline(e.Transfer.Username);
             }
 
             TransferItem relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
@@ -955,11 +955,11 @@ namespace Seeker
                     // TODO why is queue length max value
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                     {
-                        Seeker.Services.DownloadService.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
+                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                     else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
                     {
-                        Seeker.Services.DownloadService.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
+                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
@@ -2116,7 +2116,7 @@ namespace Seeker
                         {
                             try
                             {
-                                Seeker.Services.DownloadService.DownloadRetryAllConditionLogic(false, false, null, true, items);
+                                Seeker.Services.DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, null, true, items);
                             }
                             catch (Exception e)
                             {

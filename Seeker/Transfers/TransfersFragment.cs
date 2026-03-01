@@ -293,11 +293,11 @@ namespace Seeker
                     {
                         if (ViewState.CurrentlySelectedDLFolder == null)
                         {
-                            DownloadService.DownloadRetryAllConditionLogic(false, true, null, false);
+                            DownloadService.Instance.DownloadRetryAllConditionLogic(false, true, null, false);
                         }
                         else
                         {
-                            DownloadService.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
+                            DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
                         }
                     });
                     return true;
@@ -328,11 +328,11 @@ namespace Seeker
             {
                 if (ViewState.CurrentlySelectedDLFolder == null)
                 {
-                    DownloadService.DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
+                    DownloadService.Instance.DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
                 }
                 else
                 {
-                    DownloadService.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
+                    DownloadService.Instance.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
                 }
             });
         }
@@ -876,8 +876,8 @@ namespace Seeker
 
                 TransferState.SetupCancellationToken(item1, cancellationTokenSource, out _);
                 var dlInfo = new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, null, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 };
-                Task task = DownloadService.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
-                task.ContinueWith(DownloadService.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo))); //if paused do retry counter 0.
+                Task task = DownloadService.Instance.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
+                task.ContinueWith(DownloadService.Instance.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo))); //if paused do retry counter 0.
             }
             catch (DuplicateTransferException)
             {
@@ -1169,7 +1169,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("resume folder Pressed");
-                        SessionService.RunWithReconnect(() => DownloadService.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
+                        SessionService.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
@@ -1182,7 +1182,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("retry folder Pressed");
-                        SessionService.RunWithReconnect(() => DownloadService.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false));
+                        SessionService.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false));
                         break;
                     case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");
@@ -1348,7 +1348,7 @@ namespace Seeker
                 return null;
             });
 
-            DownloadService.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
+            DownloadService.Instance.GetDownloadPlaceInQueue(ttItem.Username, ttItem.FullFilename, true, false, ttItem, actionOnComplete);
         }
 
         public void UpdateQueueState(string fullFilename) //Add this to the event handlers so that when downloads are added they have their queue position.
@@ -1688,7 +1688,7 @@ namespace Seeker
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
             UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
-            DownloadService.TransferItemQueueUpdated += TranferQueueStateChanged;
+            DownloadService.Instance.TransferItemQueueUpdated += TranferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
             {
@@ -1734,7 +1734,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
-            DownloadService.TransferItemQueueUpdated -= TranferQueueStateChanged;
+            DownloadService.Instance.TransferItemQueueUpdated -= TranferQueueStateChanged;
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
@@ -1745,8 +1745,8 @@ namespace Seeker
         public override void OnCreate(Bundle savedInstanceState)
         {
 
-            DownloadService.ClearDownloadAddedEventsFromTarget(this);
-            DownloadService.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
+            DownloadService.Instance.ClearDownloadAddedEventsFromTarget(this);
+            DownloadService.Instance.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
             //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
             //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
             //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
