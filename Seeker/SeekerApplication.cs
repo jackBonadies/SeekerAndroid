@@ -130,6 +130,7 @@ namespace Seeker
             base.OnCreate();
             ApplicationContext = this;
             Toaster = new AndroidToaster();
+            Services.DownloadService.Instance = new Services.DownloadService(Toaster);
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
