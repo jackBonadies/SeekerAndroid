@@ -8,41 +8,36 @@ namespace Seeker
 {
     public static class MicroTagReader
     {
-        static List<List<int>> samplerates;
-        static List<int> channels_per_mode;
-        static List<List<List<int>>> bitrate_by_version_by_layer;
+        static readonly int[][] samplerates;
+        static readonly int[] channels_per_mode;
+        static readonly int[][][] bitrate_by_version_by_layer;
         static MicroTagReader()
         {
-            samplerates = new List<List<int>>();
-            var level1 = new List<int>() { 11025, 12000, 8000 };
-            samplerates.Add(level1);
-            var level2 = new List<int>();
-            samplerates.Add(level2);
-            var level3 = new List<int>() { 22050, 24000, 16000 };
-            samplerates.Add(level3);
-            var level4 = new List<int>() { 44100, 48000, 32000 };
-            samplerates.Add(level4);
+            samplerates = new int[][]
+            {
+                new[] { 11025, 12000, 8000 },
+                Array.Empty<int>(),
+                new[] { 22050, 24000, 16000 },
+                new[] { 44100, 48000, 32000 },
+            };
 
-            bitrate_by_version_by_layer = new List<List<List<int>>>();
+            int[] v1l1 = { 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0 };
+            int[] v1l2 = { 0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0 };
+            int[] v1l3 = { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
+            int[] v2l1 = { 0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, 0 };
+            int[] v2l2 = { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
+            int[] v2l3 = v2l2; // v2.5 layer3 shares values with v2 layer3
 
-            List<int> v1l1 = new List<int>() { 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0 };
-            List<int> v1l2 = new List<int>() { 0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 0 };
-            List<int> v1l3 = new List<int>() { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0 };
-            List<int> v2l1 = new List<int>() { 0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, 0 };
-            List<int> v2l2 = new List<int>() { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0 };
-            List<int> v2l3 = v2l2;
-
-            List<List<int>> v2_5 = new List<List<int>>() { null, v2l3, v2l2, v2l1 };
-            //List<List<int>> v2_5 = new List<List<int>>() { null, v2l3, v2l2, v2l1 }
-            List<List<int>> v2 = new List<List<int>>() { null, v2l3, v2l2, v2l1 };
-            List<List<int>> v1 = new List<List<int>>() { null, v1l3, v1l2, v1l1 };
-            bitrate_by_version_by_layer.Add(v2_5);
-            bitrate_by_version_by_layer.Add(null);
-            bitrate_by_version_by_layer.Add(v2);
-            bitrate_by_version_by_layer.Add(v1);
+            bitrate_by_version_by_layer = new int[][][]
+            {
+                new int[][] { null, v2l3, v2l2, v2l1 },  // MPEG 2.5
+                null,                                       // reserved
+                new int[][] { null, v2l3, v2l2, v2l1 },  // MPEG 2
+                new int[][] { null, v1l3, v1l2, v1l1 },  // MPEG 1
+            };
             //samples_per_frame = 1152  # the default frame size for mp3
 
-            channels_per_mode = new List<int>() { 2, 2, 2, 1 };
+            channels_per_mode = new[] { 2, 2, 2, 1 };
         }
 
         /// <summary>
