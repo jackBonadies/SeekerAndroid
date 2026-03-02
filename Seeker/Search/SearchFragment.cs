@@ -1760,10 +1760,10 @@ namespace Seeker
             base.OnDetach();
         }
         private AutoCompleteTextView searchEditText = null;
-        public override void OnAttach(Android.App.Activity activity)
+        public override void OnAttach(Context context)
         {
             Logger.Debug("search frag attach");
-            base.OnAttach(activity);
+            base.OnAttach(context);
         }
 
         private RecyclerView.LayoutManager recycleLayoutManager;
