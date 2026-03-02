@@ -132,7 +132,6 @@ namespace Seeker
             Toaster = new AndroidToaster();
             Services.SessionService.Instance = new Services.SessionService();
             Services.FileSystemService.Instance = new Services.FileSystemService();
-            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance, new Services.MainThreadRunner(), () => SeekerState.SoulseekClient);
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
@@ -142,6 +141,9 @@ namespace Seeker
                 loggerBackend.CrashlyticsEnabled = false;
             }
 #endif
+            Logger.Backend = loggerBackend;
+
+            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance, new Services.MainThreadRunner(), () => SeekerState.SoulseekClient, loggerBackend);
 
 #if DEBUG
             Android.OS.StrictMode.SetThreadPolicy(
@@ -150,8 +152,8 @@ namespace Seeker
                     .DetectDiskWrites()
                     .DetectNetwork()
                     .DetectCustomSlowCalls()
-                    .PenaltyLog()       
-                    .PenaltyFlashScreen() 
+                    .PenaltyLog()
+                    .PenaltyFlashScreen()
                     .PenaltyDeathOnNetwork()
                     .Build());
 
@@ -163,8 +165,6 @@ namespace Seeker
                     .PenaltyLog()
                     .Build());
 #endif
-
-            Logger.Backend = loggerBackend;
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));

@@ -21,14 +21,16 @@ namespace Seeker.Services
         private readonly ISessionService sessionService;
         private readonly IMainThreadRunner mainThreadRunner;
         private readonly Func<SoulseekClient> soulseekClientFactory;
+        private readonly ILoggerBackend logger;
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
             this.sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
             this.mainThreadRunner = mainThreadRunner ?? throw new ArgumentNullException(nameof(mainThreadRunner));
             this.soulseekClientFactory = soulseekClientFactory ?? throw new ArgumentNullException(nameof(soulseekClientFactory));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -174,11 +176,11 @@ namespace Seeker.Services
                     }
                     catch (Exception errr)
                     {
-                        Logger.Firebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                        logger.Firebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
                     }
                 }
                 transferItem = TransferItems.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
-                Logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
+                logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
                 downloadInfo.TransferItemReference = transferItem;
 
                 if (queuePaused)
@@ -218,13 +220,13 @@ namespace Seeker.Services
         {
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            Logger.Debug($"DownloadFileAsync: {fullfilename}");
+            logger.Debug($"DownloadFileAsync: {fullfilename}");
             Task dlTask = null;
             Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
             {
                 if (args.Transfer.State.HasFlag(TransferStates.Queued) || args.Transfer.State == TransferStates.Initializing)
                 {
-                    Logger.Debug($"Queued / Init: {fullfilename} We can proceed to download next file.");
+                    logger.Debug($"Queued / Init: {fullfilename} We can proceed to download next file.");
                     waitUntilEnqueue.TrySetResult(true);
                 }
             });
@@ -369,7 +371,7 @@ namespace Seeker.Services
                             {
                                 toaster.ShowToastDebounced($"Error getting queue position from {username}", "_9_", username);
                             }
-                            Logger.Firebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
+                            logger.Firebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
 
                         // 
@@ -391,7 +393,7 @@ namespace Seeker.Services
                             }
                             catch (Exception err)
                             {
-                                Logger.Firebase("cancellation token src issue: " + err.Message);
+                                logger.Firebase("cancellation token src issue: " + err.Message);
                             }
                             transferItemInQuestion.State = state;
                             //let the Cancel() update it.
@@ -427,11 +429,11 @@ namespace Seeker.Services
 
                             if (queuePositionChanged)
                             {
-                                Logger.Debug($"Queue Position of {fullFileName} has changed to {t.Result}");
+                                logger.Debug($"Queue Position of {fullFileName} has changed to {t.Result}");
                             }
                             else
                             {
-                                Logger.Debug($"Queue Position of {fullFileName} is still {t.Result}");
+                                logger.Debug($"Queue Position of {fullFileName} is still {t.Result}");
                             }
                         }
 
@@ -489,7 +491,7 @@ namespace Seeker.Services
                         }
                         else
                         {
-                            Logger.Firebase(error.Message + " OnContextItemSelected");
+                            logger.Firebase(error.Message + " OnContextItemSelected");
                         }
                         if (!silent)
                         {
@@ -505,13 +507,13 @@ namespace Seeker.Services
                     }
                     catch (Exception e)
                     {
-                        Logger.Firebase("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
+                        logger.Firebase("you likely called getdownloadplaceinqueueasync too soon..." + e.Message);
                     }
                     return;
                 }
                 else
                 {
-                    Logger.Debug("Transfer Item we are trying to get queue position of is not currently being downloaded.");
+                    logger.Debug("Transfer Item we are trying to get queue position of is not currently being downloaded.");
                     return;
                 }
 
@@ -519,7 +521,7 @@ namespace Seeker.Services
             }
             catch (System.Exception e)
             {
-                //Logger.Firebase("GetDownloadPlaceInQueue" + e.Message);
+                //logger.Firebase("GetDownloadPlaceInQueue" + e.Message);
                 return;
             }
             getDownloadPlace.ContinueWith(updateTask);
@@ -538,13 +540,13 @@ namespace Seeker.Services
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
-                Logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status);
+                logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status);
                 try
                 {
                     Action action = null;
                     if (task.IsCanceled)
                     {
-                        Logger.Debug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer).ToString());
+                        logger.Debug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer).ToString());
                         if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer) > 1000)
                         {
                             SeekerState.TaskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -571,7 +573,7 @@ namespace Seeker.Services
                                 }
                                 else
                                 {
-                                    Logger.Firebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
+                                    logger.Firebase("cancel and retry creation failed: " + e.Message + e.StackTrace);
                                 }
                                 if (action != null)
                                 {
@@ -582,7 +584,7 @@ namespace Seeker.Services
 
                         if (e.dlInfo.TransferItemReference.CancelAndClearFlag)
                         {
-                            Logger.Debug("continue with cleanup activity: " + e.dlInfo.fullFilename);
+                            logger.Debug("continue with cleanup activity: " + e.dlInfo.fullFilename);
                             e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                             e.dlInfo.TransferItemReference.InProcessing = false;
                             TransferItems.TransferItemManagerWrapped.PerformCleanup(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
@@ -615,7 +617,7 @@ namespace Seeker.Services
 
                             // update the size and rerequest.
                             // if we have partially downloaded the file already we need to delete it to prevent corruption.
-                            Logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
+                            logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
                             transferItem.Size = sizeException.RemoteSize;
                             e.dlInfo.Size = sizeException.RemoteSize;
                             retriable = true;
@@ -630,8 +632,8 @@ namespace Seeker.Services
                                 catch (Exception ex)
                                 {
                                     string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
-                                    Logger.Debug(exceptionString);
-                                    Logger.Firebase(exceptionString);
+                                    logger.Debug(exceptionString);
+                                    logger.Firebase(exceptionString);
                                 }
                             }
                         }
@@ -671,7 +673,7 @@ namespace Seeker.Services
                             {
                                 action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected, "_2_"); }; //needed
                             }
-                            Logger.Debug("rejected. is not shared: " + isFileNotShared);
+                            logger.Debug("rejected. is not shared: " + isFileNotShared);
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferException)
                         {
@@ -685,14 +687,14 @@ namespace Seeker.Services
                                 task.Exception.InnerException.Message != null &&
                                 task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            Logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
+                            logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_4_"); };
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                         {
                             retriable = true;
-                            //Logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
-                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            //logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
+                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
                             if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                             {
@@ -701,10 +703,10 @@ namespace Seeker.Services
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
                         {
-                            //Logger.Firebase("Network Subsystem is Down");
+                            //logger.Firebase("Network Subsystem is Down");
                             if (ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
                             {
-                                Logger.Debug("we do have internet");
+                                logger.Debug("we do have internet");
                                 action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
                                 retriable = true;
                                 if (NetworkHandoffDetector.HasHandoffOccuredRecently())
@@ -716,7 +718,7 @@ namespace Seeker.Services
                             {
                                 action = () => { toaster.ShowToastLong(StringKey.network_down); };
                             }
-                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
@@ -732,14 +734,14 @@ namespace Seeker.Services
                             //    retriable = true;
                             //}
                             retriable = true;
-                            //Logger.Firebase("Reported as failed by uploader");
-                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            //logger.Firebase("Reported as failed by uploader");
+                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastLong(StringKey.reported_as_failed); };
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
-                            //Logger.Firebase("failed to establish a direct or indirect message connection");
-                            Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                            //logger.Firebase("failed to establish a direct or indirect message connection");
+                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_5_"); };
                         }
                         else
@@ -754,7 +756,7 @@ namespace Seeker.Services
                                 //I get a lot of null refs from task.Exception.InnerException.Message
 
 
-                                Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
+                                logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                                 if (task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
                                 {
                                     action = () => { toaster.ShowToastLong(StringKey.error_no_space); };
@@ -780,7 +782,7 @@ namespace Seeker.Services
 
                                     if (unknownException)
                                     {
-                                        Logger.Firebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                        logger.Firebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
                                     }
 
 
@@ -788,10 +790,10 @@ namespace Seeker.Services
                                     //this is to help with the collection was modified
                                     if (task.Exception.InnerException.InnerException.InnerException != null && unknownException)
                                     {
-                                        Logger.InfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
+                                        logger.InfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
                                         var innerInner = task.Exception.InnerException.InnerException.InnerException;
                                         //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                        Logger.Firebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
+                                        logger.Firebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
                                         //this is to help with the collection was modified
                                     }
                                 }
@@ -802,28 +804,28 @@ namespace Seeker.Services
                                     {
                                         if (task.Exception.InnerException.StackTrace.Length > 1201)
                                         {
-                                            Logger.Firebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1000).ToString());
+                                            logger.Firebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1000).ToString());
                                         }
-                                        Logger.Firebase("xml Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                        logger.Firebase("xml Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
                                     }
                                     else
                                     {
-                                        Logger.Firebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
+                                        logger.Firebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
                                     }
                                 }
                             }
                             else if (task.Exception != null && unknownException)
                             {
-                                Logger.Firebase("Unhandled task exception (little info): " + task.Exception.Message);
-                                Logger.Debug("Unhandled task exception (little info):" + task.Exception.Message);
+                                logger.Firebase("Unhandled task exception (little info): " + task.Exception.Message);
+                                logger.Debug("Unhandled task exception (little info):" + task.Exception.Message);
                             }
                         }
 
 
                         if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SeekerState.AutoRetryDownload) && retriable))
                         {
-                            Logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
-                            //Logger.Debug("!!! try undo mojibake " + tryUndoMojibake);
+                            logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
+                            //logger.Debug("!!! try undo mojibake " + tryUndoMojibake);
                             try
                             {
                                 //retry download.
@@ -836,7 +838,7 @@ namespace Seeker.Services
                             }
                             catch (System.Exception e)
                             {
-                                Logger.Firebase("retry creation failed: " + e.Message + e.StackTrace);
+                                logger.Firebase("retry creation failed: " + e.Message + e.StackTrace);
                                 //if this happens at least log the normal message....
                             }
 
@@ -844,7 +846,7 @@ namespace Seeker.Services
 
                         if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                         {
-                            Logger.Firebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
+                            logger.Firebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
                         }
 
                         //Action action2 = () => { MainActivity.ToastUI(task.Exception.ToString());};
@@ -862,7 +864,7 @@ namespace Seeker.Services
 
                     if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
                     {
-                        Logger.Firebase("auto retry succeeded: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
+                        logger.Firebase("auto retry succeeded: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString());
                     }
 
                     if (!PreferencesState.DisableDownloadToastNotification)
@@ -888,7 +890,7 @@ namespace Seeker.Services
                     }
                     else
                     {
-                        Logger.Firebase("Very bad. No memory stream or incomplete URI available for saving file.");
+                        logger.Firebase("Very bad. No memory stream or incomplete URI available for saving file.");
                     }
                     e.dlInfo.TransferItemReference.IncompleteParentUri = null; //not needed anymore.
                     e.dlInfo.TransferItemReference.IncompleteUri = null;
@@ -987,7 +989,7 @@ namespace Seeker.Services
                     }
                     else
                     {
-                        Logger.Firebase(error.Message + " OnContextItemSelected");
+                        logger.Firebase(error.Message + " OnContextItemSelected");
                     }
                     if (!exceptionShown)
                     {
@@ -1014,13 +1016,13 @@ namespace Seeker.Services
                             int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti, uiState);
                             if (pos == -1)
                             {
-                                Logger.Debug("pos == -1!!");
+                                logger.Debug("pos == -1!!");
                                 continue;
                             }
 
                             if (indicesToUpdate.Contains(pos))
                             {
-                                Logger.Debug($"skipping same pos {pos}");
+                                logger.Debug($"skipping same pos {pos}");
                             }
                             else
                             {
@@ -1033,7 +1035,7 @@ namespace Seeker.Services
                         }
                         foreach (int i in indicesToUpdate)
                         {
-                            Logger.Debug($"updating {i}");
+                            logger.Debug($"updating {i}");
                             if (StaticHacks.TransfersFrag != null)
                             {
                                 StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
