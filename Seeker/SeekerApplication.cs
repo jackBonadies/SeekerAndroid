@@ -124,7 +124,7 @@ namespace Seeker
             set => Common.PreferencesState.LogDiagnostics = value;
         }
 
-        public static IToaster Toaster { get; private set; }
+        public static AndroidToaster Toaster { get; private set; }
         public override void OnCreate()
         {
             base.OnCreate();

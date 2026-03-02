@@ -22,6 +22,7 @@ namespace Seeker.Services
         private readonly IMainThreadRunner mainThreadRunner;
         private readonly Func<SoulseekClient> soulseekClientFactory;
         private readonly ILoggerBackend logger;
+        private long taskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
         public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger)
         {
@@ -546,10 +547,10 @@ namespace Seeker.Services
                     Action action = null;
                     if (task.IsCanceled)
                     {
-                        logger.Debug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer).ToString());
-                        if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.TaskWasCancelledToastDebouncer) > 1000)
+                        logger.Debug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - taskWasCancelledToastDebouncer).ToString());
+                        if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - taskWasCancelledToastDebouncer) > 1000)
                         {
-                            SeekerState.TaskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                            taskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         }
 
                         if (e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
@@ -822,7 +823,7 @@ namespace Seeker.Services
                         }
 
 
-                        if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (SeekerState.AutoRetryDownload) && retriable))
+                        if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (PreferencesState.AutoRetryDownload) && retriable))
                         {
                             logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
                             //logger.Debug("!!! try undo mojibake " + tryUndoMojibake);

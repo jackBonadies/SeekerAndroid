@@ -587,7 +587,7 @@ namespace Seeker
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
 
             Logger.InfoFirebase("AutoClear: " + PreferencesState.AutoClearCompleteDownloads);
-            Logger.InfoFirebase("AutoRetry: " + SeekerState.AutoRetryDownload);
+            Logger.InfoFirebase("AutoRetry: " + PreferencesState.AutoRetryDownload);
 
             return rootView;
         }

@@ -60,6 +60,7 @@ namespace Common
         public const string FieldLangZhCn = "zh-rCN";
 
         // Transfers
+        public const bool AutoRetryDownload = true;
         public static bool AutoClearCompleteDownloads = false;
         public static bool AutoClearCompleteUploads = false;
         public static bool NotifyOnFolderCompleted = true;

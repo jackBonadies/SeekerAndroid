@@ -29,7 +29,7 @@ namespace Seeker
         public static bool InDarkModeCache = false;
         public static bool logoutClicked = false; // TODO hack
 
-        public const bool AutoRetryDownload = true;
+
         public static bool AutoRequeueDownloadsAtStartup = true;
 
         public static SoulseekClient SoulseekClient = null;
@@ -77,12 +77,6 @@ namespace Seeker
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
         public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
-        /// <summary>
-        /// This is only for showing toasts.  The logic is as follows.  If we showed a cancelled toast
-        /// notification <1000ms ago then dont keep showing them. if >1s ago then its okay to show.
-        /// They all come in super fast
-        /// </summary>
-        public static long TaskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
         /// <summary>
         /// This is for when the cancelAndClear button was last pressed.  It is because of the massive amount of cancellation
