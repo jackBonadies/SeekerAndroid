@@ -1,7 +1,7 @@
 using Android.Content;
 using Common;
 using Common.Messages;
-using Seeker.Transfers;
+using System.Collections.Generic;
 
 namespace Seeker
 {
@@ -84,6 +84,22 @@ namespace Seeker
             PreferencesState.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
             PreferencesState.SearchResultStyle = prefs.GetInt(KeyConsts.M_SearchResultStyle, 1);
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
+
+            PreferencesState.SearchHistory = GetSearchHistory(prefs);
+        }
+
+        private static List<string> GetSearchHistory(ISharedPreferences prefs)
+        {
+            string searchHistoryXml = prefs.GetString(KeyConsts.M_SearchHistory, string.Empty);
+            if (!string.IsNullOrEmpty(searchHistoryXml))
+            {
+                using (var stream = new System.IO.StringReader(searchHistoryXml))
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<string>));
+                    return serializer.Deserialize(stream) as List<string> ?? new List<string>();
+                }
+            }
+            return new List<string>();
         }
 
         public static void RestoreSocialSettings(ISharedPreferences prefs)
@@ -571,7 +587,24 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
-                editor.Commit();
+                editor.Apply();
+            }
+        }
+
+        public static void SaveSearchHistory()
+        {
+            lock (SharedPrefLock)
+            {
+                string serialized;
+                using (var writer = new System.IO.StringWriter())
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<string>));
+                    serializer.Serialize(writer, PreferencesState.SearchHistory);
+                    serialized = writer.ToString();
+                }
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchHistory, serialized);
+                editor.Apply();
             }
         }
 
@@ -666,21 +699,20 @@ namespace Seeker
         }
 
         /// <summary>
-        /// Saves search history and optionally the sticky filter state from SearchFragment.OnPause.
+        /// Saves the sticky filter state and search result style from SearchFragment.OnPause.
         /// </summary>
-        public static void SaveSearchFragmentState(string searchHistory, bool filterSticky, string filterStickyString, int searchResultStyle)
+        public static void SaveSearchFragmentFilterState(bool filterSticky, string filterStickyString, int searchResultStyle)
         {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchHistory, searchHistory);
                 if (filterSticky)
                 {
                     editor.PutBoolean(KeyConsts.M_FilterSticky, filterSticky);
                     editor.PutString(KeyConsts.M_FilterStickyString, filterStickyString);
                 }
                 editor.PutInt(KeyConsts.M_SearchResultStyle, searchResultStyle);
-                editor.Commit();
+                editor.Apply();
             }
         }
 

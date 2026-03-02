@@ -28,6 +28,7 @@ namespace Common
         public static Seeker.SearchResultSorting DefaultSearchResultSortAlgorithm = Seeker.SearchResultSorting.Available;
         public static bool FilterSticky = false;
         public static string FilterStickyString = string.Empty;
+        public static List<string> SearchHistory = new List<string>();
         public static int SearchResultStyle = 1; // Medium
 
         // UI / Theme

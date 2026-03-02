@@ -50,8 +50,6 @@ namespace Seeker
         public View rootView = null;
 
         private Context context;
-        public static List<string> searchHistory = new List<string>();
-
 
         public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
 
@@ -562,39 +560,11 @@ namespace Seeker
             iv.Click += Iv_Click;
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
-            string searchHistoryXML = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchHistory, string.Empty);
-            if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
-            {
-                if (searchHistoryXML == string.Empty)
-                {
-                    searchHistory = new List<string>();
-                }
-                else
-                {
-                    using (var stream = new System.IO.StringReader(searchHistoryXML))
-                    {
-                        var serializer = new System.Xml.Serialization.XmlSerializer(searchHistory.GetType()); //this happens too often not allowing new things to be properly stored..
-                        searchHistory = serializer.Deserialize(stream) as List<string>;
-                    }
-                    //noTransfers.Visibility = ViewStates.Gone;
-                }
-
-            }
-
             SetSearchHintTarget(SearchTabHelper.SearchTarget, actv);
 
             Context contextToUse = SeekerState.ActiveActivityRef;
-            //if (SeekerState.ActiveActivityRef==null)
-            //{
-            //    Logger.Firebase("Active ActivityRef is null!!!");
-            //    //contextToUse = contextJustInCase;
-            //}
-            //else
-            //{
-            //    contextToUse = SeekerState.ActiveActivityRef;
-            //}
 
-            actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.search_dropdown_item, searchHistory);
+            actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
             actv.KeyPress -= Actv_KeyPressHELPER;
             actv.KeyPress += Actv_KeyPressHELPER;
             actv.FocusChange += MainActivity_FocusChange;
@@ -799,24 +769,6 @@ namespace Seeker
 
             //Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
             //clearFilter.Click += ClearFilter_Click;
-
-            string searchHistoryXML = SeekerState.SharedPreferences.GetString(KeyConsts.M_SearchHistory, string.Empty);
-            if (searchHistory == null || searchHistory.Count == 0) // i think we just have to deserialize once??
-            {
-                if (searchHistoryXML == string.Empty)
-                {
-                    searchHistory = new List<string>();
-                }
-                else
-                {
-                    using (var stream = new System.IO.StringReader(searchHistoryXML))
-                    {
-                        var serializer = new System.Xml.Serialization.XmlSerializer(searchHistory.GetType()); //this happens too often not allowing new things to be properly stored..
-                        searchHistory = serializer.Deserialize(stream) as List<string>;
-                    }
-                    //noTransfers.Visibility = ViewStates.Gone;
-                }
-            }
 
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
             recycleLayoutManager = new LinearLayoutManager(Activity);
@@ -1655,12 +1607,12 @@ namespace Seeker
 
         private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
         {
-            searchHistory = new List<string>();
+            PreferencesState.SearchHistory = new List<string>();
             PreferencesManager.ClearSearchHistory();
             if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
             {
                 AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, searchHistory);
+                actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
             }
         }
 
@@ -1682,15 +1634,7 @@ namespace Seeker
         {
             Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
-
-            string listOfSearchItems = string.Empty;
-            using (var writer = new System.IO.StringWriter())
-            {
-                var serializer = new System.Xml.Serialization.XmlSerializer(searchHistory.GetType());
-                serializer.Serialize(writer, searchHistory);
-                listOfSearchItems = writer.ToString();
-            }
-            PreferencesManager.SaveSearchFragmentState(listOfSearchItems, PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
+            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
@@ -2464,9 +2408,10 @@ namespace Seeker
                 //add a new item to our search history
                 if (PreferencesState.RememberSearchHistory)
                 {
-                    if (!searchHistory.Contains(searchString))
+                    if (!PreferencesState.SearchHistory.Contains(searchString))
                     {
-                        searchHistory.Add(searchString);
+                        PreferencesState.SearchHistory.Add(searchString);
+                        PreferencesManager.SaveSearchHistory();
                     }
                 }
                 var actv = SeekerState.MainActivityRef.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere); // lot of nullrefs with actv before this change....
@@ -2479,7 +2424,7 @@ namespace Seeker
                         return;
                     }
                 }
-                actv.Adapter = new ArrayAdapter<string>(SearchFragment.Instance.context, Resource.Layout.search_dropdown_item, searchHistory); //refresh adapter
+                actv.Adapter = new ArrayAdapter<string>(SearchFragment.Instance.context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory); //refresh adapter
             }
         }
 
