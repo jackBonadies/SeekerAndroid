@@ -534,8 +534,6 @@ namespace Seeker.Services
                         slskDir1 = rootdir;
                     }
 
-                    bool diagUsernameDirExistsAfterCreation = false;
-                    bool diagDidWeCreateUsernameDir = false;
                     if (PreferencesState.CreateUsernameSubfolders)
                     {
                         DocumentFile tempUsernameDir1 = null;
@@ -546,22 +544,9 @@ namespace Seeker.Services
                             {
                                 tempUsernameDir1 = slskDir1.CreateDirectory(username);
                                 Logger.Debug(string.Format("Creating {0} dir", username));
-                                diagDidWeCreateUsernameDir = true;
                             }
                         }
 
-                        if (tempUsernameDir1 == null)
-                        {
-                            diagUsernameDirExistsAfterCreation = false;
-                        }
-                        else if (!slskDir1.Exists())
-                        {
-                            diagUsernameDirExistsAfterCreation = false;
-                        }
-                        else
-                        {
-                            diagUsernameDirExistsAfterCreation = true;
-                        }
                         slskDir1 = tempUsernameDir1;
                     }
 

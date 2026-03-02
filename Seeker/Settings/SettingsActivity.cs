@@ -239,7 +239,6 @@ namespace Seeker
         private CheckBox manuallyChooseIncompleteFolderView;
         private TextView currentCompleteFolderView;
         private TextView currentIncompleteFolderView;
-        private TextView currentSharedFolderView;
 
         private ViewGroup incompleteFolderViewLayout;
         private Button changeIncompleteDirectory;
@@ -272,7 +271,6 @@ namespace Seeker
 
         TextView noSharedFoldersView;
         RecyclerView recyclerViewFolders;
-        LinearLayoutManager recyclerViewFoldersLayoutManager;
         ReyclerUploadsAdapter recyclerViewFoldersAdapter;
 
         Button browseSelfButton;

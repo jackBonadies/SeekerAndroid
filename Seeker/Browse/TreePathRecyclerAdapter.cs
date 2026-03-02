@@ -18,7 +18,6 @@ namespace Seeker
     {
         private List<PathItem> localDataSet; //tab id's
         public override int ItemCount => localDataSet.Count;
-        private int position = -1;
         public BrowseFragment Owner;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {

@@ -1759,7 +1759,6 @@ namespace Seeker
             Logger.Debug("search frag detach");
             base.OnDetach();
         }
-        private AutoCompleteTextView searchEditText = null;
         public override void OnAttach(Context context)
         {
             Logger.Debug("search frag attach");

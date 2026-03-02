@@ -261,7 +261,6 @@ namespace Seeker
                         string currentBase = null;
                         int currentMax = -1;
                         int counter = 0;
-                        bool cutoffConditionReached = false;
                         int variantsPastCutoff = 0;
                         foreach (string ftype in sortedListPass1str)
                         {
@@ -956,7 +955,6 @@ namespace Seeker
     {
         private List<ChipDataItem> localDataSet; //tab id's
         public override int ItemCount => localDataSet.Count;
-        private int position = -1;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 

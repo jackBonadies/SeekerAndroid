@@ -66,8 +66,6 @@ namespace Seeker
         private static List<DataItem> dataItemsForDownload = null;
         private static List<DataItem> filteredDataItemsForDownload = null;
 
-        private static bool refreshOnCreate = false;
-        private bool tempHackItemClick = false;
         private static string username = "";
         private bool isPaused = true;
         private View noBrowseView = null;
@@ -583,11 +581,7 @@ namespace Seeker
 
                 lock (dataItemsForListView)
                 {
-                    if (BrowseFragment.Instance == null || BrowseFragment.Instance.Context == null || BrowseFragment.Instance.rootView == null)
-                    {
-                        refreshOnCreate = true;
-                    }
-                    else
+                    if (BrowseFragment.Instance?.Context != null && BrowseFragment.Instance?.rootView != null)
                     {
                         BrowseFragment.Instance.RefreshOnRecieved();
                     }

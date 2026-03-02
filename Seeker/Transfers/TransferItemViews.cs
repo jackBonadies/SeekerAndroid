@@ -659,7 +659,6 @@ namespace Seeker
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
         private TextView viewUsername;
-        private TextView viewFoldername;
         private TextView viewFilename;
 
         private TextView viewStatus; //In Queue, Failed, Done, In Progress

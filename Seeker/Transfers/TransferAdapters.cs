@@ -29,7 +29,6 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                bool TYPE_TO_USE = true;
                 ITransferItemView view = TransferItemViewDetails.inflate(parent, this.showSizes, this.showSpeed);
 
                 view.setupChildren();

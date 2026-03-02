@@ -53,8 +53,6 @@ namespace Seeker
                     menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
                     menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
 
-                    TransferStates transferStates = TransferStates.None;
-                    bool failed = false;
                     List<TransferItem> transfersSelected = new List<TransferItem>();
                     foreach (int position in ViewState.BatchSelectedItems)
                     {

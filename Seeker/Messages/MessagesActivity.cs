@@ -74,7 +74,6 @@ namespace Seeker
             }
         }
 
-        bool savedStateAtInner = false;
         protected override void OnSaveInstanceState(Bundle outState)
         {
             var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
@@ -474,14 +473,12 @@ namespace Seeker
             var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
-            bool reborn = false;
             if (savedInstanceState == null)
             {
                 Logger.Debug("Messages Activity On Create NEW");
             }
             else
             {
-                reborn = true;
                 Logger.Debug("Messages Activity On Create REBORN");
             }
 
