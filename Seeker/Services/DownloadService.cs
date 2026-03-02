@@ -1,4 +1,3 @@
-using Android.Widget;
 using Seeker.Helpers;
 using Seeker.Transfers;
 using Soulseek;
@@ -332,7 +331,7 @@ namespace Seeker.Services
                             state = TransferStates.Errored | TransferStates.UserOffline | TransferStates.FallenFromQueue;
                             if (!silent)
                             {
-                                toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.UserXIsOffline), username), "_6_", username);
+                                toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.UserXIsOffline), username), "_6_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
@@ -344,7 +343,7 @@ namespace Seeker.Services
                             state = TransferStates.Errored | TransferStates.CannotConnect | TransferStates.FallenFromQueue;
                             if (!silent)
                             {
-                                toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.CannotConnectUserX), username), "_7_", username);
+                                toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.CannotConnectUserX), username), "_7_", username);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException is System.TimeoutException)
@@ -352,7 +351,7 @@ namespace Seeker.Services
                             transitionToNextState = false; //they may just not be sending queue position messages.  that is okay, we can still connect to them just fine for download time.
                             if (!silent)
                             {
-                                toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.TimeoutQueueUserX), username), "_8_", username, 6);
+                                toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.TimeoutQueueUserX), username), "_8_", username, 6);
                             }
                         }
                         else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.Contains("underlying Tcp connection is closed"))
@@ -483,7 +482,7 @@ namespace Seeker.Services
                     }
                     catch (System.Exception error)
                     {
-                        Action a = new Action(() => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                        Action a = new Action(() => { toaster.ShowToastLong(toaster.GetString(StringKey.error_) + error.Message); });
                         if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                         {
 
@@ -530,6 +529,7 @@ namespace Seeker.Services
 
         /// <summary>
         /// This RETURNS the task for Continuewith
+        /// This task does everything (show error, retry when applicable, save file to disk)
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
@@ -567,7 +567,7 @@ namespace Seeker.Services
                                 //disconnected error
                                 if (e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
                                 {
-                                    action = () => { toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.MustBeLoggedInToRetryDL), "_16_"); };
+                                    action = () => { toaster.ShowToastDebounced(StringKey.MustBeLoggedInToRetryDL, "_16_"); };
                                 }
                                 else
                                 {
@@ -607,7 +607,7 @@ namespace Seeker.Services
                         //transferItem.TryUndoMojibake = false;
                         if (task.Exception.InnerException is System.TimeoutException)
                         {
-                            action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.timeout_peer), ToastLength.Long); };
+                            action = () => { toaster.ShowToastLong(StringKey.timeout_peer); };
                         }
                         else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
                         {
@@ -638,7 +638,7 @@ namespace Seeker.Services
                         else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
                         {
                             MarkTransferItemAsDirNotSet(transferItem);
-                            action = () => { toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.FailedDownloadDirectoryNotSet), "_17_"); };
+                            action = () => { toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_"); };
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
                         {
@@ -665,17 +665,17 @@ namespace Seeker.Services
                             // always set this since it only shows if we DO NOT retry
                             if (isFileNotShared)
                             {
-                                action = () => { toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.transfer_rejected_file_not_shared), "_2_"); }; //needed
+                                action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected_file_not_shared, "_2_"); }; //needed
                             }
                             else
                             {
-                                action = () => { toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.transfer_rejected), "_2_"); }; //needed
+                                action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected, "_2_"); }; //needed
                             }
                             Logger.Debug("rejected. is not shared: " + isFileNotShared);
                         }
                         else if (task.Exception.InnerException is Soulseek.TransferException)
                         {
-                            action = () => { toaster.ShowToastDebounced(string.Format(SeekerApplication.GetString(Resource.String.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
+                            action = () => { toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
                         }
                         else if (task.Exception.InnerException is Soulseek.UserOfflineException)
                         {
@@ -686,14 +686,14 @@ namespace Seeker.Services
                                 task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             Logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_4_"); };
+                            action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_4_"); };
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
                         {
                             retriable = true;
                             //Logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.remote_conn_closed), ToastLength.Long); };
+                            action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
                             if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                             {
                                 resetRetryCount = true;
@@ -705,7 +705,7 @@ namespace Seeker.Services
                             if (ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
                             {
                                 Logger.Debug("we do have internet");
-                                action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.remote_conn_closed), ToastLength.Long); };
+                                action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
                                 retriable = true;
                                 if (NetworkHandoffDetector.HasHandoffOccuredRecently())
                                 {
@@ -714,7 +714,7 @@ namespace Seeker.Services
                             }
                             else
                             {
-                                action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.network_down), ToastLength.Long); };
+                                action = () => { toaster.ShowToastLong(StringKey.network_down); };
                             }
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
@@ -734,13 +734,13 @@ namespace Seeker.Services
                             retriable = true;
                             //Logger.Firebase("Reported as failed by uploader");
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.reported_as_failed), ToastLength.Long); };
+                            action = () => { toaster.ShowToastLong(StringKey.reported_as_failed); };
                         }
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             //Logger.Firebase("failed to establish a direct or indirect message connection");
                             Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToastDebounced(SeekerApplication.GetString(Resource.String.failed_to_establish_direct_or_indirect), "_5_"); };
+                            action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_5_"); };
                         }
                         else
                         {
@@ -757,7 +757,7 @@ namespace Seeker.Services
                                 Logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                                 if (task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
                                 {
-                                    action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_no_space), ToastLength.Long); };
+                                    action = () => { toaster.ShowToastLong(StringKey.error_no_space); };
                                     unknownException = false;
                                 }
 
@@ -768,7 +768,7 @@ namespace Seeker.Services
 
                                     if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)") || task.Exception.InnerException.InnerException.Message.Contains("Read error: Disk full."))
                                     {
-                                        action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_no_space), ToastLength.Long); };
+                                        action = () => { toaster.ShowToastLong(StringKey.error_no_space); };
                                         unknownException = false;
                                     }
 
@@ -852,7 +852,7 @@ namespace Seeker.Services
                         if (action == null)
                         {
                             //action = () => { MainActivity.ToastUI(msgDebug1); MainActivity.ToastUI(msgDebug2); };
-                            action = () => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_unspecified), ToastLength.Long); };
+                            action = () => { toaster.ShowToastLong(StringKey.error_unspecified); };
                         }
                         mainThreadRunner.RunOnUiThread(action);
                         //System.Console.WriteLine(task.Exception.ToString());
@@ -867,7 +867,7 @@ namespace Seeker.Services
 
                     if (!PreferencesState.DisableDownloadToastNotification)
                     {
-                        action = () => { toaster.ShowToast(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + SeekerApplication.GetString(Resource.String.FinishedDownloading), ToastLength.Long); };
+                        action = () => { toaster.ShowToastLong(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + toaster.GetString(StringKey.FinishedDownloading)); };
                         mainThreadRunner.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;
@@ -980,7 +980,7 @@ namespace Seeker.Services
                 }
                 catch (System.Exception error)
                 {
-                    Action a = new Action(() => { toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_) + error.Message, ToastLength.Long); });
+                    Action a = new Action(() => { toaster.ShowToastLong(toaster.GetString(StringKey.error_) + error.Message); });
                     if (error.Message != null && error.Message.ToString().Contains("must be connected and logged"))
                     {
 
