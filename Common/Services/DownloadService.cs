@@ -23,10 +23,12 @@ namespace Seeker.Services
         private readonly Func<SoulseekClient> soulseekClientFactory;
         private readonly ILoggerBackend logger;
         private readonly INetworkStatus networkStatus;
-        private readonly ITransferListUpdater transferListUpdater;
         private long taskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger, INetworkStatus networkStatus, ITransferListUpdater transferListUpdater)
+        public event EventHandler<int> TransferItemChanged;
+        public event EventHandler<Action> TransferListRefreshRequested;
+
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger, INetworkStatus networkStatus)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
@@ -35,7 +37,6 @@ namespace Seeker.Services
             this.soulseekClientFactory = soulseekClientFactory ?? throw new ArgumentNullException(nameof(soulseekClientFactory));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.networkStatus = networkStatus ?? throw new ArgumentNullException(nameof(networkStatus));
-            this.transferListUpdater = transferListUpdater ?? throw new ArgumentNullException(nameof(transferListUpdater));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -1041,7 +1042,7 @@ namespace Seeker.Services
                         foreach (int i in indicesToUpdate)
                         {
                             logger.Debug($"updating {i}");
-                            transferListUpdater.NotifyItemChanged(i);
+                            TransferItemChanged?.Invoke(null, i);
                         }
 
 
@@ -1050,7 +1051,7 @@ namespace Seeker.Services
             });
             lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState())) //TODO: test
             { //also can update this to do a partial refresh...
-                transferListUpdater.RefreshListView(refreshOnlySelected);
+                TransferListRefreshRequested?.Invoke(null, refreshOnlySelected);
             }
         }
 

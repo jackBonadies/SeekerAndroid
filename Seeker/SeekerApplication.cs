@@ -143,7 +143,7 @@ namespace Seeker
 #endif
             Logger.Backend = loggerBackend;
 
-            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance, new Services.MainThreadRunner(), () => SeekerState.SoulseekClient, loggerBackend, new Services.AndroidNetworkStatus(), new Services.AndroidTransferListUpdater());
+            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance, new Services.MainThreadRunner(), () => SeekerState.SoulseekClient, loggerBackend, new Services.AndroidNetworkStatus());
 
 #if DEBUG
             Android.OS.StrictMode.SetThreadPolicy(

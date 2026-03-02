@@ -702,6 +702,8 @@ namespace Seeker
         public override void OnResume()
         {
             StaticHacks.TransfersFrag = this;
+            DownloadService.Instance.TransferItemChanged += OnTransferItemChanged;
+            DownloadService.Instance.TransferListRefreshRequested += OnTransferListRefreshRequested;
             if (MainActivity.fromNotificationMoveToUploads)
             {
                 MainActivity.fromNotificationMoveToUploads = false;
@@ -722,10 +724,22 @@ namespace Seeker
 
         public override void OnPause()
         {
+            DownloadService.Instance.TransferItemChanged -= OnTransferItemChanged;
+            DownloadService.Instance.TransferListRefreshRequested -= OnTransferListRefreshRequested;
             base.OnPause();
             Logger.Debug("TransferFragment OnPause");  //this occurs when we move to the Account Tab or if we press the home button (i.e. to later kill the process)
                                                                 //so this is a good place to do it.
             SaveTransferItems(sharedPreferences);
+        }
+
+        private void OnTransferItemChanged(object sender, int position)
+        {
+            recyclerTransferAdapter?.NotifyItemChanged(position);
+        }
+
+        private void OnTransferListRefreshRequested(object sender, Action specificRefreshAction)
+        {
+            refreshListView(specificRefreshAction);
         }
 
         public static object TransferStateSaveLock = new object();
