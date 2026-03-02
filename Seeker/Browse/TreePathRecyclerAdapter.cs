@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Gms.Common.Logging;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
@@ -36,7 +37,15 @@ namespace Seeker
         private void View_Click(object sender, EventArgs e)
         {
             int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.AdapterPosition;
-            Owner.GoUpDirectory(localDataSet.Count - pos - 2);
+            Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos);
+            int additionalLevels = localDataSet.Count - pos - 2;
+            Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos + "  additional levels " + additionalLevels);
+            if (pos == RecyclerView.NoPosition)
+            {
+                Seeker.Helpers.Logger.Firebase("position is -1");
+                return;
+            }
+            Owner.GoUpDirectory(additionalLevels);
         }
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
