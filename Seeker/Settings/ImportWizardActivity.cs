@@ -1058,16 +1058,16 @@ namespace Seeker
             mTabSpacing = this.Resources.GetDimensionPixelSize(Resource.Dimension.step_pager_tab_spacing);
 
             mPrevTabPaint = new Paint();
-            mPrevTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(this, Resource.Color.prevPage));
+            mPrevTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.prevPage));
 
             mSelectedTabPaint = new Paint();
-            mSelectedTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(this, Resource.Color.currentPage));
+            mSelectedTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.currentPage));
 
             mSelectedLastTabPaint = new Paint();
             mSelectedLastTabPaint = mSelectedTabPaint;//Color.Red;
 
             mNextTabPaint = new Paint();
-            mNextTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(this, Resource.Color.nextPage));
+            mNextTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.nextPage));
         }
 
         //public void setOnPageSelectedListener(OnPageSelectedListener onPageSelectedListener)

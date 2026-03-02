@@ -891,7 +891,7 @@ namespace Seeker.Chatroom
             {
                 task = SeekerState.SoulseekClient.GetRoomListAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return;
             }
