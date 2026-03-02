@@ -927,6 +927,7 @@ namespace Seeker
             }
             Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
             TransferItemManager.MarkTransfersDirty();
+            TransfersFragment.SaveTransferItems(false, 30);
             if (relevantItem != null)
             {
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
@@ -1004,7 +1005,6 @@ namespace Seeker
                 if (!e.Transfer.State.HasFlag(TransferStates.Cancelled))
                 {
                     //clear queued flag...
-                    TransfersFragment.SaveTransferItems(false, 60);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
@@ -1121,6 +1121,7 @@ namespace Seeker
                 return;
             }
 
+            TransfersFragment.SaveTransferItems(false, 30);
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
             relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
             //relevantItem = TransferItems.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
@@ -1777,6 +1778,7 @@ namespace Seeker
                 return;
             }
             TransferItemManager.MarkTransfersDirty();
+            TransfersFragment.SaveTransferItems(false, 30);
             if (e.Transfer.State == TransferStates.InProgress)
             {
                 Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
@@ -1823,7 +1825,6 @@ namespace Seeker
                 {
                     Logger.Firebase("Upload Noficiation Failed" + err.Message + err.StackTrace);
                 }
-                TransfersFragment.SaveTransferItems(false, 60);
             }
         }
 

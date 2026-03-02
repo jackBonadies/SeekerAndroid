@@ -1196,7 +1196,6 @@ namespace Seeker
         {
             base.OnPause();
 
-            TransfersFragment.SaveTransferItems();
             string userListSerialized = SeekerState.UserList != null
                 ? SerializationHelper.SaveUserListToString(SeekerState.UserList)
                 : null;
