@@ -27,7 +27,7 @@ namespace Seeker
 
         // Misc (non-persisted)
         public static bool InDarkModeCache = false;
-        public static bool logoutClicked = false; // TODO hack
+        public static volatile LoginFragment LoginFragmentRef = null;
 
 
         public static bool AutoRequeueDownloadsAtStartup = true;

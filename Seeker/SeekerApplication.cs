@@ -1303,9 +1303,9 @@ namespace Seeker
                 //this is a "true" connected to disconnected
                 ChatroomController.ClearAndCacheJoined();
                 Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
-                if (SeekerState.logoutClicked)
+                if (e.Message == LoginFragment.LogoutMessage)
                 {
-                    SeekerState.logoutClicked = false;
+                    // User intentionally logged out — do not reconnect
                 }
                 else if (AUTO_CONNECT_ON && PreferencesState.CurrentlyLoggedIn)
                 {

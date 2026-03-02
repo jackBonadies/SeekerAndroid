@@ -913,24 +913,18 @@ namespace Seeker
                 Action showDirectoryButton = new Action(() =>
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_error), ToastLength.Long);
-                    AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
-                    if (!PreferencesState.CurrentlyLoggedIn)
+                    var loginFrag = SeekerState.LoginFragmentRef;
+                    if (loginFrag == null || loginFrag.View == null)
                     {
-                        MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
-                    }
-                    if (StaticHacks.LoginFragment.View == null)//this can happen...
-                    {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_choose_settings), ToastLength.Long);
-                        Logger.Firebase("StaticHacks.LoginFragment.View is null");
+                        Logger.Firebase("LoginFragmentRef or its View is null");
                         return;
                     }
-                    Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                    Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
-                    if (bttn != null)
+                    if (!PreferencesState.CurrentlyLoggedIn)
                     {
-                        bttn.Visibility = ViewStates.Visible;
-                        bttn.Click += MustSelectDirectoryClick;
+                        loginFrag.ShowLoginForm(prefill: true);
                     }
+                    loginFrag.ShowMustSelectDirectoryButton(MustSelectDirectoryClick);
                 });
 
                 if (NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
@@ -1002,8 +996,7 @@ namespace Seeker
 
                 Action hideButton = new Action(() =>
                 {
-                    Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                    bttn.Visibility = ViewStates.Gone;
+                    SeekerState.LoginFragmentRef?.HideMustSelectDirectoryButton();
                 });
 
                 if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
@@ -1178,148 +1171,7 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
-        /// <param name="force">the log in layout is full of hacks. that being said force 
-        ///   makes it so that if we are currently logged in to still add the logged in fragment
-        ///   if not there, which makes sense. </param>
-        public static void AddLoggedInLayout(View rootView = null, bool force = false)
-        {
-            View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-            View bttnTryTwo = rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-            bool bttnIsAttached = false;
-            bool bttnTwoIsAttached = false;
-            if (bttn != null && bttn.IsAttachedToWindow)
-            {
-                bttnIsAttached = true;
-            }
-            if (bttnTryTwo != null && bttnTryTwo.IsAttachedToWindow)
-            {
-                bttnTwoIsAttached = true;
-            }
 
-            if (!bttnIsAttached && !bttnTwoIsAttached && (!PreferencesState.CurrentlyLoggedIn || force))
-            {
-                //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
-                //ViewGroup relLayout = SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
-                //relLayout.LayoutParameters = new ViewGroup.LayoutParams(rootView.LayoutParameters);
-                var action1 = new Action(() =>
-                {
-                    (rootView as ViewGroup).AddView(SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false));
-                });
-                if (OnUIthread())
-                {
-                    action1();
-                }
-                else
-                {
-                    SeekerState.MainActivityRef.RunOnUiThread(action1);
-                }
-            }
-        }
-
-        // TODO2026 fix the whole hacks
-        public static void UpdateUIForLoggedIn(View rootView = null, EventHandler BttnClick = null, View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler SettingClick = null)
-        {
-            var action = new Action(() =>
-            {
-                //this is the case where it already has the loggedin fragment loaded.
-                Button bttn = null;
-                TextView welcome = null;
-                ViewGroup loggingInLayout = null;
-                ViewGroup logInLayout = null;
-
-                Button settings = null;
-                try
-                {
-                    if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
-                    {
-                        bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                        settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    }
-                    else
-                    {
-                        bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                        settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    }
-                }
-                catch
-                {
-
-                }
-                if (welcome != null)
-                {
-                    //meanwhile: rootView.FindViewById<TextView>(Resource.Id.userNameView).  so I dont think that the welcome here is the right one.. I dont think it exists.
-                    //try checking properties such as isAttachedToWindow, getWindowVisiblity etx...
-                    welcome.Visibility = ViewStates.Visible;
-
-                    bool isShown = welcome.IsShown;
-                    bool isAttachedToWindow = welcome.IsAttachedToWindow;
-                    bool isActivated = welcome.Activated;
-                    ViewStates viewState = welcome.WindowVisibility;
-
-
-                    //welcome = rootView.FindViewById(Resource.Id.userNameView) as Android.Widget.TextView;
-                    //if(welcome!=null)
-                    //{
-                    //isShown = welcome.IsShown;
-                    //isAttachedToWindow = welcome.IsAttachedToWindow;
-                    //isActivated = welcome.Activated;
-                    //viewState = welcome.WindowVisibility;
-                    //}
-
-
-                    bttn.Visibility = ViewStates.Visible;
-                    settings.Visibility = ViewStates.Visible;
-
-
-                    settings.Click -= SettingClick;
-                    settings.Click += SettingClick;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 90);
-                    bttn.Click -= BttnClick;
-                    bttn.Click += BttnClick;
-                    loggingInLayout.Visibility = ViewStates.Gone;
-                    welcome.Text = String.Format(SeekerApplication.GetString(Resource.String.welcome), PreferencesState.Username);
-                }
-                else if (cWelcome != null)
-                {
-                    cWelcome.Visibility = ViewStates.Visible;
-                    cbttn.Visibility = ViewStates.Visible;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(cbttn, 90);
-                    cLoading.Visibility = ViewStates.Gone;
-                }
-                else
-                {
-                    StaticHacks.UpdateUI = true;//if we arent ready rn then do it when we are..
-                }
-                if (logInLayout != null)
-                {
-                    logInLayout.Visibility = ViewStates.Gone;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
-                }
-
-            });
-            if (OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
 
 
         /// <summary>
@@ -1339,198 +1191,9 @@ namespace Seeker
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
-        public static void BackToLogInLayout(View rootView, EventHandler LogInClick, bool clearUserPass = true)
-        {
-            var action = new Action(() =>
-            {
-                //this is the case where it already has the loggedin fragment loaded.
-                Button bttn = null;
-                TextView welcome = null;
-                TextView loading = null;
-                //EditText editText = null;
-                //EditText editText2 = null;
-                //TextView textView = null;
-                ViewGroup loggingInLayout = null;
-                ViewGroup logInLayout = null;
-                Button buttonLogin = null;
-                //View noAccountHelp = null;
-                Button settings = null;
-                Logger.Debug("BackToLogInLayout");
-                try
-                {
-                    if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
-                    {
-                        Logger.Debug("StaticHacks.RootView != null");
-                        bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                        //this is the case we have a bad SAVED user pass....
-                        try
-                        {
-                            logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
-                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
-                            buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
-                            if (logInLayout == null)
-                            {
-                                ViewGroup relLayout = SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false) as ViewGroup;
-                                relLayout.LayoutParameters = new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
-                                //var action1 = new Action(() => {
-                                (StaticHacks.RootView as ViewGroup).AddView(SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
-                                //});
-                            }
-                            //editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etUsername);
-                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
-                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
-                            settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                            buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
-                            logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                            buttonLogin.Click -= LogInClick;
-                            (StaticHacks.LoginFragment as Seeker.LoginFragment).rootView = StaticHacks.RootView;
-                            (StaticHacks.LoginFragment as Seeker.LoginFragment).SetUpLogInLayout();
-                            //buttonLogin.Click += LogInClick;
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Debug("BackToLogInLayout" + ex.Message);
-                        }
-
-                    }
-                    else
-                    {
-                        Logger.Debug("StaticHacks.RootView == null");
-                        bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                        buttonLogin = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    }
-                }
-                catch
-                {
-
-                }
-                Logger.Debug("logInLayout is here? " + (logInLayout != null).ToString());
-                if (logInLayout != null)
-                {
-                    logInLayout.Visibility = ViewStates.Visible;
-                    if (!clearUserPass && !string.IsNullOrEmpty(PreferencesState.Username))
-                    {
-                        logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = PreferencesState.Username;
-                        logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = PreferencesState.Password;
-                    }
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
-
-                    if (loading == null)
-                    {
-                        MainActivity.AddLoggedInLayout(rootView);
-                        if (rootView != null)
-                        {
-                            bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                            welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                            settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        }
-                        if (rootView == null && loading == null && StaticHacks.RootView != null)
-                        {
-                            bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                            welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                            settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        }
-                    }
-                    loggingInLayout.Visibility = ViewStates.Gone; //can get nullref here!!! (at least before the .AddLoggedInLayout code..
-                    welcome.Visibility = ViewStates.Gone;
-                    settings.Visibility = ViewStates.Gone;
-                    bttn.Visibility = ViewStates.Gone;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
-
-
-                }
-
-            });
-            if (OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
-        public static void UpdateUIForLoggingInLoading(View rootView = null)
-        {
-            Logger.Debug("UpdateUIForLoggingInLoading");
-            var action = new Action(() =>
-            {
-                //this is the case where it already has the loggedin fragment loaded.
-                Button logoutButton = null;
-                TextView welcome = null;
-                ViewGroup loggingInView = null;
-                ViewGroup logInLayout = null;
-                Button settingsButton = null;
-                try
-                {
-                    if (StaticHacks.RootView != null && rootView == null)
-                    {
-                        logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInView = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                    }
-                    else
-                    {
-                        logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInView = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                    }
-                }
-                catch
-                {
-
-                }
-                if (logInLayout != null)
-                {
-                    logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
-                    loggingInView.Visibility = ViewStates.Visible;
-                    welcome.Visibility = ViewStates.Gone; //WE GET NULLREF HERE. FORCE connection already established exception and maybe see what is going on here...
-                    logoutButton.Visibility = ViewStates.Gone;
-                    settingsButton.Visibility = ViewStates.Gone;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logoutButton, 0);
-                }
-
-            });
-            if (OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
 
         protected override void OnPause()
         {
-            //Logger.Debug(".view is null " + (StaticHacks.LoginFragment.View==null).ToString()); it is null
             base.OnPause();
 
             TransfersFragment.SaveTransferItems(sharedPreferences);

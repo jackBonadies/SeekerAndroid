@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -32,20 +32,216 @@ using Seeker.Helpers;
 using Common;
 namespace Seeker
 {
-    public class LoginFragment : Fragment //, Android.Net.DnsResolver.ICallback //this class sadly gets recreating i.e. not just the view but everything many times. so members are kinda useless...
+    public class LoginFragment : Fragment
     {
-        public volatile View rootView;
-        private Button cbttn;
-        private TextView cWelcome;
-        private ViewGroup cLoading;
-        private bool refreshView = false;
+        public const string LogoutMessage = "UserLogout";
 
+        private static bool s_loginInFlight;
+
+        private ViewFlipper viewFlipper;
+        private View rootView;
+
+        // Login form views (child 0)
+        private Button loginButton;
+        private EditText usernameTextEdit;
+        private EditText passwordTextEdit;
+        private TextInputLayout usernameInputLayout;
+
+        // Logged-in views (child 2)
+        private Button logoutButton;
+        private Button settingsButton;
+        private Button mustSelectDirButton;
+        private TextView welcomeTextView;
+
+        private const int ChildLoginForm = 0;
+        private const int ChildLoading = 1;
+        private const int ChildLoggedIn = 2;
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
             inflater.Inflate(Resource.Menu.account_menu, menu);
             base.OnCreateOptionsMenu(menu, inflater);
         }
+
+        public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        {
+            HasOptionsMenu = true;
+            Logger.Debug("LoginFragmentOnCreateView");
+            SeekerState.LoginFragmentRef = this;
+
+            rootView = inflater.Inflate(Resource.Layout.login_viewflipper, container, false);
+            viewFlipper = rootView.FindViewById<ViewFlipper>(Resource.Id.loginViewFlipper);
+
+            SetUpLoginFormViews();
+            SetUpLoggedInViews();
+
+            if (SessionService.Instance.IsNotLoggedIn())
+            {
+                PreferencesState.CurrentlyLoggedIn = false;
+                viewFlipper.DisplayedChild = ChildLoginForm;
+            }
+            else if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn) && !s_loginInFlight)
+            {
+                viewFlipper.DisplayedChild = ChildLoading;
+                SeekerState.ManualResetEvent.Reset();
+                Task login = null;
+                try
+                {
+                    login = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
+                }
+                catch (InvalidOperationException)
+                {
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.we_are_already_logging_in), ToastLength.Short);
+                    Logger.Firebase("We are already logging in");
+                }
+                login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
+                login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
+                SeekerApplication.SetUpLoginContinueWith(login);
+            }
+            else if (PreferencesState.CurrentlyLoggedIn)
+            {
+                ShowLoggedIn();
+            }
+            else
+            {
+                viewFlipper.DisplayedChild = ChildLoading;
+            }
+
+            return rootView;
+        }
+
+        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated(view, savedInstanceState);
+            SeekerState.ManualResetEvent.Set();
+        }
+
+        private void SetUpLoginFormViews()
+        {
+            loginButton = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
+            loginButton.Click += LogInClick;
+            usernameTextEdit = rootView.FindViewById<EditText>(Resource.Id.etUsername);
+            passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
+            usernameInputLayout = rootView.FindViewById<TextInputLayout>(Resource.Id.usernameTextInputLayout);
+            usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
+            usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+            passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
+            passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+            bool hasError = ValidateUsername();
+            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
+        }
+
+        private void SetUpLoggedInViews()
+        {
+            logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
+            logoutButton.Click += LogoutClick;
+            settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
+            settingsButton.Click += Settings_Click;
+            mustSelectDirButton = rootView.FindViewById<Button>(Resource.Id.mustSelectDirectory);
+            welcomeTextView = rootView.FindViewById<TextView>(Resource.Id.userNameView);
+        }
+
+        // --- View-flipping methods ---
+
+        public void ShowLoginForm(bool prefill)
+        {
+            var action = new Action(() =>
+            {
+                if (prefill && !string.IsNullOrEmpty(PreferencesState.Username))
+                {
+                    usernameTextEdit.Text = PreferencesState.Username;
+                    passwordTextEdit.Text = PreferencesState.Password;
+                }
+                else
+                {
+                    usernameTextEdit.Text = string.Empty;
+                    passwordTextEdit.Text = string.Empty;
+                }
+                viewFlipper.DisplayedChild = ChildLoginForm;
+            });
+            if (MainActivity.OnUIthread())
+            {
+                action();
+            }
+            else
+            {
+                SeekerState.MainActivityRef.RunOnUiThread(action);
+            }
+        }
+
+        public void ShowLoading()
+        {
+            var action = new Action(() =>
+            {
+                viewFlipper.DisplayedChild = ChildLoading;
+            });
+            if (MainActivity.OnUIthread())
+            {
+                action();
+            }
+            else
+            {
+                SeekerState.MainActivityRef.RunOnUiThread(action);
+            }
+        }
+
+        public void ShowLoggedIn()
+        {
+            var action = new Action(() =>
+            {
+                welcomeTextView.Text = string.Format(SeekerApplication.GetString(Resource.String.welcome), PreferencesState.Username);
+                viewFlipper.DisplayedChild = ChildLoggedIn;
+            });
+            if (MainActivity.OnUIthread())
+            {
+                action();
+            }
+            else
+            {
+                SeekerState.MainActivityRef.RunOnUiThread(action);
+            }
+        }
+
+        public void ShowMustSelectDirectoryButton(EventHandler clickHandler)
+        {
+            var action = new Action(() =>
+            {
+                if (mustSelectDirButton != null)
+                {
+                    mustSelectDirButton.Visibility = ViewStates.Visible;
+                    mustSelectDirButton.Click += clickHandler;
+                }
+            });
+            if (MainActivity.OnUIthread())
+            {
+                action();
+            }
+            else
+            {
+                SeekerState.MainActivityRef.RunOnUiThread(action);
+            }
+        }
+
+        public void HideMustSelectDirectoryButton()
+        {
+            var action = new Action(() =>
+            {
+                if (mustSelectDirButton != null)
+                {
+                    mustSelectDirButton.Visibility = ViewStates.Gone;
+                }
+            });
+            if (MainActivity.OnUIthread())
+            {
+                action();
+            }
+            else
+            {
+                SeekerState.MainActivityRef.RunOnUiThread(action);
+            }
+        }
+
+        // --- Login/Logout logic ---
 
         private static void EnableDisableLoginButton(EditText uname, EditText passwd, Button login, bool hasError)
         {
@@ -69,108 +265,16 @@ namespace Seeker
             }
         }
 
-        private Button loginButton = null;
-        private EditText usernameTextEdit = null;
-        private EditText passwordTextEdit = null;
-        private TextInputLayout usernameInputLayout = null;
-
-
-        public void SetUpLogInLayout()
-        {
-            loginButton = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-            loginButton.Click += LogInClick;
-            usernameTextEdit = rootView.FindViewById<EditText>(Resource.Id.etUsername);
-            passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
-            usernameInputLayout = rootView.FindViewById<TextInputLayout>(Resource.Id.usernameTextInputLayout);
-            usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
-            usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
-            passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
-            passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
-            bool hasError = ValidateUsername();
-            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
-        }
-
-
-        //private bool firstTime = true;
-        public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-        {
-
-            HasOptionsMenu = true;
-            Logger.Debug("LoginFragmentOnCreateView");
-            StaticHacks.LoginFragment = this;
-            if (SessionService.Instance.IsNotLoggedIn())//you are not logged in if username or password is null
-            {
-                PreferencesState.CurrentlyLoggedIn = false;
-                this.rootView = inflater.Inflate(Resource.Layout.login, container, false);
-
-                SetUpLogInLayout();
-
-                //StaticHacks.RootView = this.rootView;
-                //firstTime = false;
-                return rootView;
-            }
-            else
-            {
-                if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn) && !StaticHacks.LoggingIn)
-                {
-                    SeekerState.ManualResetEvent.Reset();
-                    Task login = null;
-                    try
-                    {
-                        //there is a bug where we reach here with an empty Username and Password...
-                        login = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.we_are_already_logging_in), ToastLength.Short);
-                        Logger.Firebase("We are already logging in");
-                    }
-                    //Task login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, PreferencesState.Username, PreferencesState.Password);
-                    login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
-                    login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                    SeekerApplication.SetUpLoginContinueWith(login); //sets up a continue with if sharing is enabled, else noop
-                }
-                else if (!StaticHacks.LoggingIn || StaticHacks.UpdateUI)
-                {
-                    StaticHacks.UpdateUI = false;
-                    StaticHacks.LoggingIn = false;
-                    refreshView = true;
-                }
-
-                this.rootView = inflater.Inflate(Resource.Layout.loggedin, container, false);
-                StaticHacks.RootView = this.rootView;
-                Button bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-
-                bttn.Click += LogoutClick;
-                var welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                welcome.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.welcome), PreferencesState.Username);
-                welcome.Visibility = ViewStates.Gone;
-                bttn.Visibility = ViewStates.Gone;
-
-                Button settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                settings.Visibility = ViewStates.Gone;
-                settings.Click += Settings_Click;
-
-               AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
-                this.cbttn = bttn;
-                this.cLoading = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                this.cWelcome = welcome;
-                //firstTime = false;
-                return rootView;
-            }
-        }
-
         private readonly int[] All_Ascii = Enumerable.Range('\x1', 127).ToArray();
 
         private void UsernamePasswordTextEdit_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             bool hasError = ValidateUsername();
-            EnableDisableLoginButton(this.usernameTextEdit, this.passwordTextEdit, loginButton, hasError);
+            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
         }
 
         private bool ValidateUsername()
         {
-            // special chars and length check.
             bool hasError = false;
             if (!string.IsNullOrEmpty(usernameTextEdit.Text))
             {
@@ -203,37 +307,17 @@ namespace Seeker
             return hasError;
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void Settings_Click(object sender, EventArgs e)
         {
             Intent intent = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
-            //intent.PutExtra("SaveDataDirectoryUri", PreferencesState.SaveDataDirectoryUri); //CURRENT SETTINGS - never necessary... static
             SeekerState.MainActivityRef.StartActivityForResult(intent, 140);
-        }
-
-        public override void OnViewCreated(View view, Bundle savedInstanceState)
-        {
-            base.OnViewCreated(view, savedInstanceState);
-            SeekerState.ManualResetEvent.Set(); //the UI is ready for any modifications
-            if (refreshView)
-            {
-                refreshView = false;
-                UpdateLoginUI(null);
-            }
         }
 
         private void UpdateLoginUI(Task t)
         {
-            //all logins go to here...
-            if (SeekerApplication.DnsLookupFailed && (t != null && t.Status == TaskStatus.Faulted)) //task can be null and so if DNS lookup fails this will be a nullref...
+            if (SeekerApplication.DnsLookupFailed && (t != null && t.Status == TaskStatus.Faulted))
             {
-                //this can happen if we do not have internet....
-
+                // DNS failed and task also faulted — fall through to error handling below
             }
             else if (SeekerApplication.DnsLookupFailed)
             {
@@ -243,191 +327,154 @@ namespace Seeker
                     Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
                 });
                 SeekerState.MainActivityRef.RunOnUiThread(action);
-                SeekerApplication.DnsLookupFailed = false; // dont have to keep showing this... wait for next failure for it to be set...
+                SeekerApplication.DnsLookupFailed = false;
             }
 
-            Console.WriteLine("Update Login UI");
-            bool cannotLogin = false;
-            string msg = string.Empty;
-            string msgToLog = string.Empty;
-            bool clearUserPass = true;
+            Logger.Debug("Update Login UI");
+
             if (t != null && t.Status == TaskStatus.Faulted)
             {
-                if (t.Exception != null && t.Exception.InnerExceptions != null && t.Exception.InnerExceptions.Count != 0)
-                {
-                    Console.WriteLine(t.Exception.ToString());
-                    Console.WriteLine(t.Exception?.InnerExceptions?.Count);
-                    Console.WriteLine(t.Exception?.InnerExceptions?.ToString());
-                    if (t.Exception.InnerExceptions[0] is Soulseek.LoginRejectedException lre)
-                    {
-                        string loginRejectedMessage = lre.Message;
-                        cannotLogin = true;
-                        //"The server rejected login attempt: INVALIDUSERNAME"
-                        if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDUSERNAME"))
-                        {
-                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_username);
-                        }
-                        else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDPASS"))
-                        {
-                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_password);
-                        }
-                        else
-                        {
-                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
-                        }
-                    }
-                    else if (t.Exception.InnerExceptions[0] is Soulseek.SoulseekClientException)
-                    {
-                        if (t.Exception.InnerExceptions[0].Message.Contains("Network is unreachable"))
-                        {
-                            cannotLogin = true;
-                            clearUserPass = false;
-                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
-                        }
-                        else if (t.Exception.InnerExceptions[0].Message.Contains("Connection refused"))
-                        {
-                            cannotLogin = true;
-                            clearUserPass = false;
-                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
-                        }
-                        else
-                        {
-                            cannotLogin = true;
-                            clearUserPass = false;
-                            msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
-                            msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
-
-                        }
-                    }
-                    else if (t.Exception.InnerExceptions[0].Message != null &&
-                        (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || (t.Exception.InnerExceptions[0].Message.ToLower().Contains("operation timed out"))))
-                    {
-                        //this happens at work where slsk is banned. technically its due to connection RST. the timeout is not the tcp handshake timeout its instead a wait timeout in the connect async code. so this could probably be improved.
-                        cannotLogin = true;
-                        clearUserPass = false;
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
-                    }
-                    else
-                    {
-                        msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
-                        cannotLogin = true;
-                        clearUserPass = false;
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
-                    }
-                }
-                else
-                {
-                    if (t.Exception != null)
-                    {
-                        msgToLog = t.Exception.Message + t.Exception.StackTrace;
-                    }
-                    cannotLogin = true;
-                    msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
-                }
-
-                if (msgToLog != string.Empty)
-                {
-                    Logger.Debug(msgToLog);
-                    Logger.Firebase(msgToLog);
-                }
-
-                Logger.Debug("time to update layouts..");
-                MainActivity.AddLoggedInLayout(this.rootView);
-                MainActivity.BackToLogInLayout(this.rootView, LogInClick, clearUserPass);
-            }
-
-
-            Logger.Debug("Login Status: " + cannotLogin);
-            //SeekerState.ManualResetEvent.WaitOne();
-
-            if (cannotLogin == false)
-            {
-                StaticHacks.UpdateUI = true;
-                PreferencesState.CurrentlyLoggedIn = true; //when we recreate we lose the statics as they get overwritten by bundle
-                StaticHacks.LoggingIn = false;
-                //SeekerState.currentSessionLoggedIn = true;
-                //var tabLayout = (Android.Support.Design.Widget.TabLayout)SeekerState.MainActivityRef.FindViewById(Resource.Id.tabs);
-                //tabLayout.RemoveTabAt(0);
-
-                MainActivity.AddLoggedInLayout(this.rootView);
-
-                MainActivity.UpdateUIForLoggedIn(this.rootView, LogoutClick, cWelcome, cbttn, cLoading, Settings_Click);
-
-
+                var (msg, clearCreds) = ClassifyLoginError(t);
+                OnLoginFailed(msg, clearCreds);
             }
             else
             {
-                var action = new Action(() =>
-                {
-                    string message = msg;
-                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
-                    PreferencesState.CurrentlyLoggedIn = false; //this should maybe be removed???
-                    PreferencesState.Username = null;
-                    PreferencesState.Password = null;
-                    //this.Activity.Recreate();
-                    //SeekerState.MainActivityRef.Recreate();
-                });
-
-                SeekerState.MainActivityRef.RunOnUiThread(action);
+                OnLoginSucceeded();
             }
         }
 
+        private (string message, bool clearCredentials) ClassifyLoginError(Task t)
+        {
+            string msg;
+            string msgToLog = string.Empty;
+            bool clearCreds = true;
+
+            if (t.Exception != null && t.Exception.InnerExceptions != null && t.Exception.InnerExceptions.Count != 0)
+            {
+                Console.WriteLine(t.Exception.ToString());
+                if (t.Exception.InnerExceptions[0] is LoginRejectedException lre)
+                {
+                    string loginRejectedMessage = lre.Message;
+                    if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDUSERNAME"))
+                    {
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_username);
+                    }
+                    else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDPASS"))
+                    {
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_password);
+                    }
+                    else
+                    {
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
+                    }
+                }
+                else if (t.Exception.InnerExceptions[0] is SoulseekClientException)
+                {
+                    clearCreds = false;
+                    if (t.Exception.InnerExceptions[0].Message.Contains("Network is unreachable") ||
+                        t.Exception.InnerExceptions[0].Message.Contains("Connection refused"))
+                    {
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
+                    }
+                    else
+                    {
+                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
+                        msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
+                    }
+                }
+                else if (t.Exception.InnerExceptions[0].Message != null &&
+                    (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || t.Exception.InnerExceptions[0].Message.ToLower().Contains("operation timed out")))
+                {
+                    clearCreds = false;
+                    msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
+                }
+                else
+                {
+                    msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
+                    clearCreds = false;
+                    msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
+                }
+            }
+            else
+            {
+                if (t.Exception != null)
+                {
+                    msgToLog = t.Exception.Message + t.Exception.StackTrace;
+                }
+                msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
+            }
+
+            if (msgToLog != string.Empty)
+            {
+                Logger.Debug(msgToLog);
+                Logger.Firebase(msgToLog);
+            }
+
+            return (msg, clearCreds);
+        }
+
+        private void OnLoginFailed(string msg, bool clearCreds)
+        {
+            Logger.Debug("Login failed: " + msg);
+            s_loginInFlight = false;
+            var action = new Action(() =>
+            {
+                SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
+                PreferencesState.CurrentlyLoggedIn = false;
+                if (clearCreds)
+                {
+                    PreferencesState.Username = null;
+                    PreferencesState.Password = null;
+                }
+                ShowLoginForm(prefill: !clearCreds);
+            });
+            SeekerState.MainActivityRef.RunOnUiThread(action);
+        }
+
+        private void OnLoginSucceeded()
+        {
+            Logger.Debug("Login succeeded");
+            PreferencesState.CurrentlyLoggedIn = true;
+            s_loginInFlight = false;
+            ShowLoggedIn();
+        }
+
         private void LogoutClick(object sender, EventArgs e)
-        {//logout
+        {
             try
             {
-                SeekerState.logoutClicked = true;
-                SeekerState.SoulseekClient.Disconnect();
+                SeekerState.SoulseekClient.Disconnect(message: LogoutMessage);
             }
             catch
             {
-
             }
             PreferencesState.Username = null;
             PreferencesState.Password = null;
             PreferencesState.CurrentlyLoggedIn = false;
-            SeekerState.MainActivityRef.Recreate();
-
+            ShowLoginForm(prefill: false);
         }
 
         public void LogInClick(object sender, EventArgs e)
         {
-            var pager = (AndroidX.ViewPager.Widget.ViewPager)Activity.FindViewById(Resource.Id.pager);
             bool alreadyConnected = false;
             Task login = null;
             try
             {
-                //System.Net.IPAddress ipaddr = null;
-                //try
-                //{
-                //MUST DO THIS ON A SEPARATE THREAD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                //ipaddr = System.Net.Dns.GetHostEntry("vps.slsknet.org").AddressList[0];
-                //Android.Net.DnsResolver.Instance.Query(null, "vps.slsknet.org",Android.Net.DnsResolverFlag.Empty,this.Context.MainExecutor,null,this);
-                if (string.IsNullOrEmpty(this.usernameTextEdit.Text) || string.IsNullOrEmpty(this.passwordTextEdit.Text))
+                if (string.IsNullOrEmpty(usernameTextEdit.Text) || string.IsNullOrEmpty(passwordTextEdit.Text))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_empty_user_pass), ToastLength.Long);
                     return;
                 }
-                login = SeekerApplication.ConnectAndPerformPostConnectTasks(this.usernameTextEdit.Text, this.passwordTextEdit.Text);
+                login = SeekerApplication.ConnectAndPerformPostConnectTasks(usernameTextEdit.Text, passwordTextEdit.Text);
                 login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                //throw new InvalidOperationException("The client is already connected"); //bug catcher
-
-                //login.ContinueWith(t=>t.IsCompletedSuccessfully)
                 try
                 {
                     Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(this.usernameTextEdit.WindowToken, 0);
+                    imm.HideSoftInputFromWindow(usernameTextEdit.WindowToken, 0);
                 }
                 catch (System.Exception)
                 {
-
                 }
-                //}
-                //catch(AddressException)
-                //{
-                //    Toast.MakeText(this.Activity, "Failed to resolve soulseek server ip address from name. Trying hardcoded ip.", ToastLength.Long).Show();
-                //    login = SeekerState.SoulseekClient.ConnectAsync("208.76.170.59", 2271, user.Text, pass.Text);
-                //}
             }
             catch (AddressException)
             {
@@ -441,8 +488,7 @@ namespace Seeker
                 {
                     alreadyConnected = true;
                     PreferencesState.CurrentlyLoggedIn = true;
-                    MainActivity.AddLoggedInLayout(this.rootView, true);
-                    MainActivity.UpdateUIForLoggedIn(this.rootView);
+                    ShowLoggedIn();
                 }
                 else
                 {
@@ -453,42 +499,27 @@ namespace Seeker
             }
             try
             {
-                //PreferencesState.CurrentlyLoggedIn = true;
-                //LayoutInflater inflater = (LayoutInflater)Context.GetSystemService(Context.LayoutInflaterService);
-                //View rootView = inflater.Inflate(Resource.Layout.loggedin,null);
-                MainActivity.AddLoggedInLayout(this.rootView); //i.e. if not already
                 if (!alreadyConnected)
                 {
-                    MainActivity.UpdateUIForLoggingInLoading(this.rootView);
+                    ShowLoading();
                 }
-                PreferencesState.Username = this.usernameTextEdit.Text;
-                PreferencesState.Password = this.passwordTextEdit.Text;
+                PreferencesState.Username = usernameTextEdit.Text;
+                PreferencesState.Password = passwordTextEdit.Text;
                 if (!alreadyConnected)
                 {
-                    StaticHacks.LoggingIn = true;
+                    s_loginInFlight = true;
                 }
                 SeekerState.ManualResetEvent.Reset();
-                //if(login.IsCompleted)
-                //{
-                //    StaticHacks.UpdateUI = true;
-                //    PreferencesState.CurrentlyLoggedIn = true;
-                //    StaticHacks.LoggingIn = false;
-                //    Activity.Recreate();
-                //}
-                //else
-                //{
-                if (login == null) //i.e. if we threw bc we are already logged in or similar
+                if (login == null)
                 {
                     return;
                 }
                 login.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
-                //}
-                //if we get here then we logged in
             }
             catch (System.Exception ex)
             {
-                string message = string.Empty;
-                if (ex?.InnerException is Soulseek.LoginRejectedException)
+                string message;
+                if (ex?.InnerException is LoginRejectedException)
                 {
                     message = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
                 }
@@ -499,32 +530,6 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(message, ToastLength.Long);
                 PreferencesState.CurrentlyLoggedIn = false;
             }
-
-            //Activity.Recreate();
         }
-
-        //public void OnAnswer(Java.Lang.Object answer, int rcode)
-        //{
-        //    //NEVER GOT THIS WORKING. supposed to be a fallback if the dns resolve does not work.
-        //    //might be best to async try the System.Net.Dns resolve.  or to see if it has a timeout or error handling stuff.
-        //    //dont know why it happens...
-
-
-        //    //Java.Util.ArrayList ans = answer as Java.Util.ArrayList;
-        //    //IEnumerable<Java.Net.Inet4Address>  ans2 = answer as IEnumerable<Java.Net.Inet4Address>;
-        //    //Java.Net.Inet4Address ans3 = ans2.ToArray()[0] as Java.Net.Inet4Address;
-        //    //Java.Net.Inet4Address ans1 = ans.ToArray()[0] as Java.Net.Inet4Address;
-        //    //string a = ans1.HostAddress;
-
-        //    ////Java.Util.ArrayList<Java.Net.InetAddress> ans = answer as Java.Util.LinkedList<Java.Net.InetAddress>;
-        //    ////string a = ans[0].HostAddress;
-        //    ////System.Console.WriteLine(a);
-        //    //throw new NotImplementedException();
-        //}
-
-        //public void OnError(DnsResolver.DnsException error)
-        //{
-        //    //throw new NotImplementedException();
-        //}
     }
 }
