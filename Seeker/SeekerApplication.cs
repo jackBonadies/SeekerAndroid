@@ -142,6 +142,7 @@ namespace Seeker
             }
 #endif
             Logger.Backend = loggerBackend;
+            MicroTagReader.Instance = new MicroTagReader(loggerBackend);
 
             Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance, new Services.MainThreadRunner(), () => SeekerState.SoulseekClient, loggerBackend, new Services.AndroidNetworkStatus());
 
