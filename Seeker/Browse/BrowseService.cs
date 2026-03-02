@@ -151,7 +151,7 @@ namespace Seeker.Browse
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, true);
                         SeekerState.ActiveActivityRef.StartActivity(intent);
                     });
 

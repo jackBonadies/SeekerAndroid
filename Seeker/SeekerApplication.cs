@@ -2028,7 +2028,7 @@ namespace Seeker
                     CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                    notifIntent.PutExtra(FromFolderAlert, 2);
+                    notifIntent.PutExtra(FromFolderAlert, true);
                     notifIntent.PutExtra(FromFolderAlertUsername, username);
                     notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
                     PendingIntent pendingIntent =

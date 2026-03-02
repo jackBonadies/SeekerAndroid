@@ -34,7 +34,7 @@ namespace Seeker
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             //notifIntent.
             notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(FromTransferUploadString, 2);
+            notifIntent.PutExtra(FromTransferUploadString, true);
 
             PendingIntent pendingIntent =
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));

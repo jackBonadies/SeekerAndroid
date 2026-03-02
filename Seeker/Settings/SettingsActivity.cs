@@ -1897,7 +1897,7 @@ namespace Seeker
 
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
             intent.AddFlags(ActivityFlags.SingleTop);
-            intent.PutExtra(FromBrowseSelf, 3); //the tab to go to
+            intent.PutExtra(FromBrowseSelf, true);
             this.StartActivity(intent);
         }
 

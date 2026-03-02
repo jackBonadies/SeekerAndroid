@@ -99,7 +99,7 @@ namespace Seeker
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(IntentUserGoToBrowse, 3);
+                        intent.PutExtra(IntentUserGoToBrowse, true);
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
@@ -110,7 +110,7 @@ namespace Seeker
                     SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(IntentUserGoToSearch, 1);
+                    intent.PutExtra(IntentUserGoToSearch, true);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.removeUser:

@@ -140,14 +140,14 @@ namespace Seeker
                     SearchTabHelper.SearchTargetChosenUser = MessagesInnerFragment.Username;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
+                    intent.PutExtra(UserListActivity.IntentUserGoToSearch, true);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.action_browse_files:
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, true);
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);

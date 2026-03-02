@@ -220,15 +220,15 @@ protected override void OnCreate(Bundle savedInstanceState)
                 {
                     pager.SetCurrentItem(2, false);
                 }
-                else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+                else if (Intent.GetBooleanExtra(SeekerApplication.FromFolderAlert, false))
                 {
                     pager.SetCurrentItem(2, false);
                 }
-                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
+                else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToBrowse, false))
                 {
                     pager.SetCurrentItem(3, false);
                 }
-                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
+                else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToSearch, false))
                 {
                     //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                     //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
@@ -244,11 +244,11 @@ protected override void OnCreate(Bundle savedInstanceState)
                 {
                     HandleWishlistIntent();
                 }
-                else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
+                else if ((Intent.GetBooleanExtra(UploadForegroundService.FromTransferUploadString, false) || Intent.GetBooleanExtra(UPLOADS_NOTIF_EXTRA, false)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
                 {
                     HandleFromNotificationUploadIntent();
                 }
-                else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
+                else if (Intent.GetBooleanExtra(SettingsActivity.FromBrowseSelf, false))
                 {
                     Logger.InfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
@@ -559,20 +559,20 @@ protected override void OnCreate(Bundle savedInstanceState)
             {
                 HandleWishlistIntent();
             }
-            else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2))) //else every rotation will change Downloads to Uploads.
+            else if ((Intent.GetBooleanExtra(UploadForegroundService.FromTransferUploadString, false) || Intent.GetBooleanExtra(UPLOADS_NOTIF_EXTRA, false))) //else every rotation will change Downloads to Uploads.
             {
                 HandleFromNotificationUploadIntent();
             }
-            else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
+            else if (Intent.GetBooleanExtra(SettingsActivity.FromBrowseSelf, false))
             {
                 Logger.InfoFirebase("from browse self");
                 pager.SetCurrentItem(3, false);
             }
-            else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
+            else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToBrowse, false))
             {
                 pager.SetCurrentItem(3, false);
             }
-            else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
+            else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToSearch, false))
             {
                 //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
@@ -584,7 +584,7 @@ protected override void OnCreate(Bundle savedInstanceState)
             {
                 pager.SetCurrentItem(2, false);
             }
-            else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+            else if (Intent.GetBooleanExtra(SeekerApplication.FromFolderAlert, false))
             {
                 pager.SetCurrentItem(2, false);
             }
