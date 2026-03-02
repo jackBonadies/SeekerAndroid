@@ -464,13 +464,13 @@ namespace Seeker
 
         private void ImportItemCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            int pos = ((sender as TextView).Parent.Parent as ImportItemView).ViewHolder.AdapterPosition;
+            int pos = ((sender as TextView).Parent.Parent as ImportItemView).ViewHolder.BindingAdapterPosition;
             localDataSet[pos].isChecked = e.IsChecked;
         }
 
         //private void View_Click(object sender, EventArgs e)
         //{
-        //    int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.AdapterPosition;
+        //    int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.BindingAdapterPosition;
         //    Owner.GoUpDirectory(localDataSet.Count - pos - 2);
         //}
 
@@ -482,7 +482,7 @@ namespace Seeker
 
         //private void SearchTabLayout_Click(object sender, EventArgs e)
         //{
-        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
         //    int tabToGoTo = localDataSet[position];
         //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
         //    SearchTabDialog.Instance.Dismiss();

@@ -43,7 +43,7 @@ namespace Seeker
             {
                 if (IsInBatchSelectMode)
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
             }
 
@@ -56,7 +56,7 @@ namespace Seeker
                 }
                 else
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
             }
 
@@ -89,7 +89,7 @@ namespace Seeker
             {
                 if (IsInBatchSelectMode)
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
                 else
                 {
@@ -115,7 +115,7 @@ namespace Seeker
             {
                 if (IsInBatchSelectMode)
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
                 else
                 {

@@ -981,7 +981,7 @@ namespace Seeker
         private void Chip_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             //results need to update.
-            int pos = ((sender as View).Parent.Parent as ChipItemView).ViewHolder.AdapterPosition;
+            int pos = ((sender as View).Parent.Parent as ChipItemView).ViewHolder.BindingAdapterPosition;
             bool prevValue = localDataSet[pos].IsChecked;
             localDataSet[pos].IsChecked = e.IsChecked;
             if (prevValue != e.IsChecked)
@@ -1025,7 +1025,7 @@ namespace Seeker
 
         //private void SearchTabLayout_Click(object sender, EventArgs e)
         //{
-        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
         //    int tabToGoTo = localDataSet[position];
         //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
         //    SearchTabDialog.Instance.Dismiss();

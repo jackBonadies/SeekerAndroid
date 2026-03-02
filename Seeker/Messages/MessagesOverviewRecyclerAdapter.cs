@@ -146,7 +146,7 @@ namespace Seeker.Messages
 
         private void MessageOverviewClick(object sender, EventArgs e)
         {
-            setPosition((sender as MessageOverviewView).ViewHolder.AdapterPosition);
+            setPosition((sender as MessageOverviewView).ViewHolder.BindingAdapterPosition);
             MessagesActivity.MessagesActivityRef.ChangeToInnerFragment(localDataSet[position]);
         }
 

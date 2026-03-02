@@ -84,7 +84,7 @@ namespace Seeker
         public override bool OnMove(RecyclerView p0, RecyclerView.ViewHolder p1, RecyclerView.ViewHolder p2)
         {
             // Notify the adapter of the move
-            mAdapter.onItemMove(p1.AdapterPosition, p2.AdapterPosition);
+            mAdapter.onItemMove(p1.BindingAdapterPosition, p2.BindingAdapterPosition);
             return true;
         }
 
@@ -167,7 +167,7 @@ namespace Seeker
 
             (holder as ItemViewHolder).checkBoxEnable.CheckedChange += (object sender, CompoundButton.CheckedChangeEventArgs e) =>
             {
-                mItems[holder.AdapterPosition].Enabled = e.IsChecked;
+                mItems[holder.BindingAdapterPosition].Enabled = e.IsChecked;
             };
 
 

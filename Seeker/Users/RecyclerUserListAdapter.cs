@@ -200,13 +200,13 @@ namespace Seeker.Users
 
         public void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
         {
-            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.BindingAdapterPosition);
             (sender as View).ShowContextMenu();
         }
 
         public void UserRowView_Click(object sender, EventArgs e)
         {
-            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.BindingAdapterPosition);
             (sender as View).ShowContextMenu();
         }
 

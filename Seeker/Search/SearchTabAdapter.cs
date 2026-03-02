@@ -40,7 +40,7 @@ namespace Seeker
 
         private void RemoveSearch_Click(object sender, EventArgs e)
         {
-            position = ((sender as View).Parent.Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+            position = ((sender as View).Parent.Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
             if (position == -1) //in my case this happens if you delete too fast...
             {
                 return;
@@ -108,7 +108,7 @@ namespace Seeker
 
         private void SearchTabLayout_Click(object sender, EventArgs e)
         {
-            position = ((sender as View).Parent.Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+            position = ((sender as View).Parent.Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
             int tabToGoTo = localDataSet[position];
             SearchFragment.Instance.GoToTab(tabToGoTo, false);
             SearchTabDialog.Instance.Dismiss();

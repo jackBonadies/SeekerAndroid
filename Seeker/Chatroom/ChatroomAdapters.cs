@@ -397,7 +397,7 @@ namespace Seeker
 
         private void ChatroomOverviewClick(object sender, EventArgs e)
         {
-            setPosition((sender as IChatroomOverviewBase).ViewHolder.AdapterPosition);
+            setPosition((sender as IChatroomOverviewBase).ViewHolder.BindingAdapterPosition);
             ChatroomActivity.ChatroomActivityRef.ChangeToInnerFragment(localDataSet[position]);
         }
 
@@ -444,7 +444,7 @@ namespace Seeker
 
         private void ChatroomOverviewRecyclerAdapter_Click(object sender, EventArgs e)
         {
-            setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.AdapterPosition);
+            setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.BindingAdapterPosition);
             string roomName = localDataSet[position].Name;
             if (SessionService.Instance.CurrentlyLoggedInButDisconnectedState())
             {

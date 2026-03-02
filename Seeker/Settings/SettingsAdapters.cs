@@ -104,14 +104,14 @@ namespace Seeker
             public void FolderLongClick(object sender, View.LongClickEventArgs e)
             {
 
-                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.AdapterPosition);
+                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.BindingAdapterPosition);
                 (sender as View).ShowContextMenu();
             }
 
             public void FolderClick(object sender, EventArgs e)
             {
 
-                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.AdapterPosition);
+                (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).setPosition((sender as RecyclerViewFolderView).ViewHolder.BindingAdapterPosition);
                 (ViewHolder.BindingAdapter as ReyclerUploadsAdapter).settingsActivity.ShowDialogForUploadDir((sender as RecyclerViewFolderView).ViewHolder.folderView.BoundItem);
             }
 

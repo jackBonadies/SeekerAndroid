@@ -72,7 +72,7 @@ namespace Seeker
 
             private void View_Click(object sender, EventArgs e)
             {
-                GetSearchFragment().showEditDialog((sender as ISearchItemViewBase).ViewHolder.AdapterPosition);
+                GetSearchFragment().showEditDialog((sender as ISearchItemViewBase).ViewHolder.BindingAdapterPosition);
             }
 
             private SearchResultStyleEnum searchResultStyle;
