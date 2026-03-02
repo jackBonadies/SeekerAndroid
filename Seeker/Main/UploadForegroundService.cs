@@ -109,7 +109,7 @@ namespace Seeker
         {
             SeekerState.UploadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
-
+            TransfersFragment.SaveTransferItems();
             base.OnDestroy();
         }
 

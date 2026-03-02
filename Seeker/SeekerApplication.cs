@@ -738,14 +738,14 @@ namespace Seeker
             return false;
         }
 
-        public static bool TransfersDownloadsCompleteStale = false; //whether a dl completes since we have last saved transfers to disk.
-        public static DateTime TransfersLastSavedTime = DateTime.MinValue; //whether a dl completes since we have last saved transfers to disk.
+        public static DateTime TransfersLastSavedTime = DateTime.MinValue;
 
 
         public static volatile int UPLOAD_COUNT = -1; // a hack see below
 
         private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
+            TransferItemManager.MarkTransfersDirty();
             bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
             if (e.Count == 0 || abortAll)
             {
@@ -812,9 +812,7 @@ namespace Seeker
         //it works in the case of successfully finished, cancellation token used, etc.
         private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
         {
-            //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
-            //SeekerState.MainActivityRef.RunOnUiThread(()=>
-            //{
+            TransferItemManager.MarkTransfersDirty();
             Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
             Logger.Debug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
 
@@ -928,7 +926,7 @@ namespace Seeker
                 Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
             Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
-            //TransferItem relevantItem = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
+            TransferItemManager.MarkTransfersDirty();
             if (relevantItem != null)
             {
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
@@ -1006,8 +1004,7 @@ namespace Seeker
                 if (!e.Transfer.State.HasFlag(TransferStates.Cancelled))
                 {
                     //clear queued flag...
-                    SeekerApplication.TransfersDownloadsCompleteStale = true;
-                    TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 60);
+                    TransfersFragment.SaveTransferItems(false, 60);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
@@ -1137,6 +1134,7 @@ namespace Seeker
             }
             else
             {
+                TransferItemManager.MarkTransfersDirty();
                 bool fullRefresh = false;
                 double percentComplete = e.Transfer.PercentComplete;
                 relevantItem.Progress = (int)percentComplete;
@@ -1778,6 +1776,7 @@ namespace Seeker
             {
                 return;
             }
+            TransferItemManager.MarkTransfersDirty();
             if (e.Transfer.State == TransferStates.InProgress)
             {
                 Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
@@ -1824,6 +1823,7 @@ namespace Seeker
                 {
                     Logger.Firebase("Upload Noficiation Failed" + err.Message + err.StackTrace);
                 }
+                TransfersFragment.SaveTransferItems(false, 60);
             }
         }
 

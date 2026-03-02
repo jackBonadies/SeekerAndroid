@@ -10,6 +10,13 @@ namespace Seeker
     [Serializable]
     public class TransferItemManager
     {
+        public static volatile bool TransfersDirty = false;
+
+        public static void MarkTransfersDirty()
+        {
+            TransfersDirty = true;
+        }
+
         private bool isUploads;
         /// <summary>
         /// Do not use directly.  This is public only for default serialization.
@@ -585,6 +592,7 @@ namespace Seeker
                     folderItem.Add(ti);
                 }
             }
+            MarkTransfersDirty();
         }
 
         public void ClearAllComplete()
@@ -605,6 +613,7 @@ namespace Seeker
                 }
                 AllFolderItems.RemoveAll((FolderItem f) => { return f.IsEmpty(); });
             }
+            MarkTransfersDirty();
         }
 
         public void ClearAllCompleteFromFolder(FolderItem fi)
@@ -618,6 +627,7 @@ namespace Seeker
             {
                 AllFolderItems.Remove(fi);
             }
+            MarkTransfersDirty();
         }
 
         private static string GetFolderNameFromTransferItem(TransferItem ti)
@@ -653,6 +663,7 @@ namespace Seeker
             {
                 AllFolderItems.Clear();
             }
+            MarkTransfersDirty();
             return tisNeedingCleanup;
         }
 
@@ -689,6 +700,7 @@ namespace Seeker
                     }
                 }
             }
+            MarkTransfersDirty();
             return toCleanUp;
         }
 
@@ -702,6 +714,7 @@ namespace Seeker
             {
                 AllFolderItems.Clear();
             }
+            MarkTransfersDirty();
         }
 
         public void ClearAllFromFolder(FolderItem fi)
@@ -715,6 +728,7 @@ namespace Seeker
             }
             fi.TransferItems.Clear();
             AllFolderItems.Remove(fi);
+            MarkTransfersDirty();
         }
 
         public List<TransferItem> ClearAllFromFolderReturnCleanupItems(FolderItem fi)
@@ -729,6 +743,7 @@ namespace Seeker
             }
             fi.TransferItems.Clear();
             AllFolderItems.Remove(fi);
+            MarkTransfersDirty();
             return tisNeedingCleanup;
         }
 
@@ -753,6 +768,7 @@ namespace Seeker
                 }
                 TransferState.CancellationTokens.Clear();
             }
+            MarkTransfersDirty();
         }
 
         public void CancelSelectedItems(TransferUIState uiState, bool prepareForClear = false)
@@ -787,6 +803,7 @@ namespace Seeker
                     }
                 }
             }
+            MarkTransfersDirty();
         }
 
         public void CancelFolder(FolderItem fi, bool prepareForClear = false)
@@ -810,6 +827,7 @@ namespace Seeker
                     }
                 }
             }
+            MarkTransfersDirty();
         }
 
         /// <summary>
@@ -839,6 +857,7 @@ namespace Seeker
                     }
                 }
             }
+            MarkTransfersDirty();
         }
 
         /// <summary>

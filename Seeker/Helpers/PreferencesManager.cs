@@ -695,7 +695,7 @@ namespace Seeker
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_TransferList, downloads);
                     editor.PutString(KeyConsts.M_TransferListUpload, uploads);
-                    editor.Commit();
+                    editor.Apply();
                 }
         }
 

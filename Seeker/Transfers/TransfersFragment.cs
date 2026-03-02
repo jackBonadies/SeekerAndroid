@@ -727,9 +727,7 @@ namespace Seeker
             DownloadService.Instance.TransferItemChanged -= OnTransferItemChanged;
             DownloadService.Instance.TransferListRefreshRequested -= OnTransferListRefreshRequested;
             base.OnPause();
-            Logger.Debug("TransferFragment OnPause");  //this occurs when we move to the Account Tab or if we press the home button (i.e. to later kill the process)
-                                                                //so this is a good place to do it.
-            SaveTransferItems(sharedPreferences);
+            Logger.Debug("TransferFragment OnPause");
         }
 
         private void OnTransferItemChanged(object sender, int position)
@@ -742,7 +740,7 @@ namespace Seeker
             refreshListView(specificRefreshAction);
         }
 
-        public static void SaveTransferItems(ISharedPreferences sharedPreferences, bool force = true, int maxSecondsUpdate = 0)
+        public static void SaveTransferItems(bool force = false, int maxSecondsUpdate = 0)
         {
             Logger.Debug("---- saving transfer items enter ----");
 #if DEBUG
@@ -750,7 +748,7 @@ namespace Seeker
             sw.Start();
 #endif
 
-            if (force || (SeekerApplication.TransfersDownloadsCompleteStale && DateTime.UtcNow.Subtract(SeekerApplication.TransfersLastSavedTime).TotalSeconds > maxSecondsUpdate)) //stale and we havent updated too recently..
+            if (force || (TransferItemManager.TransfersDirty && DateTime.UtcNow.Subtract(SeekerApplication.TransfersLastSavedTime).TotalSeconds > maxSecondsUpdate)) //dirty and we havent updated too recently..
             {
                 Logger.Debug("---- saving transfer items actual save ----");
                 if (TransferItems.TransferItemManagerDL?.AllTransferItems == null)
@@ -785,7 +783,7 @@ namespace Seeker
                 }
                 PreferencesManager.SaveTransferItems(listOfDownloadItems, listOfUploadItems);
 
-                SeekerApplication.TransfersDownloadsCompleteStale = false;
+                TransferItemManager.TransfersDirty = false;
                 SeekerApplication.TransfersLastSavedTime = DateTime.UtcNow;
             }
 
