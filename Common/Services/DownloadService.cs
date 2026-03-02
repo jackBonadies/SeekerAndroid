@@ -22,9 +22,11 @@ namespace Seeker.Services
         private readonly IMainThreadRunner mainThreadRunner;
         private readonly Func<SoulseekClient> soulseekClientFactory;
         private readonly ILoggerBackend logger;
+        private readonly INetworkStatus networkStatus;
+        private readonly ITransferListUpdater transferListUpdater;
         private long taskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger, INetworkStatus networkStatus, ITransferListUpdater transferListUpdater)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
@@ -32,6 +34,8 @@ namespace Seeker.Services
             this.mainThreadRunner = mainThreadRunner ?? throw new ArgumentNullException(nameof(mainThreadRunner));
             this.soulseekClientFactory = soulseekClientFactory ?? throw new ArgumentNullException(nameof(soulseekClientFactory));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.networkStatus = networkStatus ?? throw new ArgumentNullException(nameof(networkStatus));
+            this.transferListUpdater = transferListUpdater ?? throw new ArgumentNullException(nameof(transferListUpdater));
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -697,7 +701,7 @@ namespace Seeker.Services
                             //logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
                             logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
-                            if (NetworkHandoffDetector.HasHandoffOccuredRecently())
+                            if (networkStatus.HasHandoffOccuredRecently())
                             {
                                 resetRetryCount = true;
                             }
@@ -705,12 +709,12 @@ namespace Seeker.Services
                         else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
                         {
                             //logger.Firebase("Network Subsystem is Down");
-                            if (ConnectionReceiver.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
+                            if (networkStatus.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
                             {
                                 logger.Debug("we do have internet");
                                 action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
                                 retriable = true;
-                                if (NetworkHandoffDetector.HasHandoffOccuredRecently())
+                                if (networkStatus.HasHandoffOccuredRecently())
                                 {
                                     resetRetryCount = true;
                                 }
@@ -1037,10 +1041,7 @@ namespace Seeker.Services
                         foreach (int i in indicesToUpdate)
                         {
                             logger.Debug($"updating {i}");
-                            if (StaticHacks.TransfersFrag != null)
-                            {
-                                StaticHacks.TransfersFrag.recyclerTransferAdapter?.NotifyItemChanged(i);
-                            }
+                            transferListUpdater.NotifyItemChanged(i);
                         }
 
 
@@ -1049,10 +1050,7 @@ namespace Seeker.Services
             });
             lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState())) //TODO: test
             { //also can update this to do a partial refresh...
-                if (StaticHacks.TransfersFrag != null)
-                {
-                    StaticHacks.TransfersFrag.refreshListView(refreshOnlySelected);
-                }
+                transferListUpdater.RefreshListView(refreshOnlySelected);
             }
         }
 
