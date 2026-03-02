@@ -757,18 +757,30 @@ namespace Seeker
                 {
                     return;
                 }
+                List<TransferItem> dlSnapshot;
+                lock (TransferItems.TransferItemManagerDL.AllTransferItems)
+                {
+                    dlSnapshot = TransferItems.TransferItemManagerDL.AllTransferItems.ToList();
+                }
+
+                List<TransferItem> ulSnapshot;
+                lock (TransferItems.TransferItemManagerUploads.AllTransferItems)
+                {
+                    ulSnapshot = TransferItems.TransferItemManagerUploads.AllTransferItems.ToList();
+                }
+
                 string listOfDownloadItems = string.Empty;
                 string listOfUploadItems = string.Empty;
                 using (var writer = new System.IO.StringWriter())
                 {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerDL.AllTransferItems.GetType());
-                    serializer.Serialize(writer, TransferItems.TransferItemManagerDL.AllTransferItems);
+                    var serializer = new System.Xml.Serialization.XmlSerializer(dlSnapshot.GetType());
+                    serializer.Serialize(writer, dlSnapshot);
                     listOfDownloadItems = writer.ToString();
                 }
                 using (var writer = new System.IO.StringWriter())
                 {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerUploads.AllTransferItems.GetType());
-                    serializer.Serialize(writer, TransferItems.TransferItemManagerUploads.AllTransferItems);
+                    var serializer = new System.Xml.Serialization.XmlSerializer(ulSnapshot.GetType());
+                    serializer.Serialize(writer, ulSnapshot);
                     listOfUploadItems = writer.ToString();
                 }
                 PreferencesManager.SaveTransferItems(listOfDownloadItems, listOfUploadItems);
