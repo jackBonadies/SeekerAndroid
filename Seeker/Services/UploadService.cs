@@ -43,7 +43,7 @@ namespace Seeker.Services
             string contextText = directoryString;
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(MainActivity.UPLOADS_NOTIF_EXTRA, true);
+            notifIntent.PutExtra(MainActivity.GoToUploadsExtra, true);
             PendingIntent pendingIntent =
                 PendingIntent.GetActivity(context, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.

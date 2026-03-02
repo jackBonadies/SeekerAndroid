@@ -1835,7 +1835,6 @@ namespace Seeker
             }
         }
 
-        public const string FromBrowseSelf = "FromBrowseSelf";
         private void BrowseSelfButton_Click(object sender, EventArgs e)
         {
             BrowseSelf(false, false);
@@ -1897,7 +1896,7 @@ namespace Seeker
 
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
             intent.AddFlags(ActivityFlags.SingleTop);
-            intent.PutExtra(FromBrowseSelf, true);
+            intent.PutExtra(MainActivity.GoToBrowseSelfExtra, true);
             this.StartActivity(intent);
         }
 

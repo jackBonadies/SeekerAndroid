@@ -2016,9 +2016,7 @@ namespace Seeker
 
         public const string CHANNEL_ID_FOLDER_ALERT = "Folder Finished Downloading Alerts ID";
         public const string CHANNEL_NAME_FOLDER_ALERT = "Folder Finished Downloading Alerts";
-        public const string FromFolderAlert = "FromFolderAlert";
-        public const string FromFolderAlertUsername = "FromFolderAlertUsername";
-        public const string FromFolderAlertFoldername = "FromFolderAlertFoldername";
+
         public static void ShowNotificationForCompletedFolder(string foldername, string username)
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
@@ -2028,9 +2026,9 @@ namespace Seeker
                     CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                    notifIntent.PutExtra(FromFolderAlert, true);
-                    notifIntent.PutExtra(FromFolderAlertUsername, username);
-                    notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
+                    notifIntent.PutExtra(MainActivity.FolderAlertExtra, true);
+                    notifIntent.PutExtra(MainActivity.FolderAlertUsernameExtra, username);
+                    notifIntent.PutExtra(MainActivity.FolderAlertFoldernameExtra, foldername);
                     PendingIntent pendingIntent =
                         PendingIntent.GetActivity(SeekerState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                     Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);

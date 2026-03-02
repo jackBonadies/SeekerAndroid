@@ -85,7 +85,7 @@ namespace Seeker
                     SearchTabHelper.SearchTargetChosenUser = this.UserToView;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(UserListActivity.IntentUserGoToSearch, true);
+                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.messageUser:

@@ -220,15 +220,15 @@ protected override void OnCreate(Bundle savedInstanceState)
                 {
                     pager.SetCurrentItem(2, false);
                 }
-                else if (Intent.GetBooleanExtra(SeekerApplication.FromFolderAlert, false))
+                else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
                 {
                     pager.SetCurrentItem(2, false);
                 }
-                else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToBrowse, false))
+                else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
                 {
                     pager.SetCurrentItem(3, false);
                 }
-                else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToSearch, false))
+                else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
                 {
                     //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                     //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
@@ -244,11 +244,11 @@ protected override void OnCreate(Bundle savedInstanceState)
                 {
                     HandleWishlistIntent();
                 }
-                else if ((Intent.GetBooleanExtra(UploadForegroundService.FromTransferUploadString, false) || Intent.GetBooleanExtra(UPLOADS_NOTIF_EXTRA, false)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
+                else if ((Intent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || Intent.GetBooleanExtra(GoToUploadsExtra, false)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
                 {
                     HandleFromNotificationUploadIntent();
                 }
-                else if (Intent.GetBooleanExtra(SettingsActivity.FromBrowseSelf, false))
+                else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
                 {
                     Logger.InfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
@@ -559,20 +559,20 @@ protected override void OnCreate(Bundle savedInstanceState)
             {
                 HandleWishlistIntent();
             }
-            else if ((Intent.GetBooleanExtra(UploadForegroundService.FromTransferUploadString, false) || Intent.GetBooleanExtra(UPLOADS_NOTIF_EXTRA, false))) //else every rotation will change Downloads to Uploads.
+            else if ((Intent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || Intent.GetBooleanExtra(GoToUploadsExtra, false))) //else every rotation will change Downloads to Uploads.
             {
                 HandleFromNotificationUploadIntent();
             }
-            else if (Intent.GetBooleanExtra(SettingsActivity.FromBrowseSelf, false))
+            else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
             {
                 Logger.InfoFirebase("from browse self");
                 pager.SetCurrentItem(3, false);
             }
-            else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToBrowse, false))
+            else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
             {
                 pager.SetCurrentItem(3, false);
             }
-            else if (Intent.GetBooleanExtra(UserListActivity.IntentUserGoToSearch, false))
+            else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
             {
                 //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
@@ -584,7 +584,7 @@ protected override void OnCreate(Bundle savedInstanceState)
             {
                 pager.SetCurrentItem(2, false);
             }
-            else if (Intent.GetBooleanExtra(SeekerApplication.FromFolderAlert, false))
+            else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
             {
                 pager.SetCurrentItem(2, false);
             }
@@ -682,7 +682,16 @@ protected override void OnCreate(Bundle savedInstanceState)
 
         public const string UPLOADS_CHANNEL_ID = "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
-        public const string UPLOADS_NOTIF_EXTRA = "From Upload";
+
+        // Intent extra keys — all intent extras targeting MainActivity are defined here.
+        public const string GoToBrowseExtra = "GoToBrowse";
+        public const string GoToSearchExtra = "GoToSearch";
+        public const string GoToUploadsExtra = "GoToUploads";
+        public const string GoToUploadsForegroundExtra = "GoToUploadsForeground";
+        public const string GoToBrowseSelfExtra = "GoToBrowseSelf";
+        public const string FolderAlertExtra = "FolderAlert";
+        public const string FolderAlertUsernameExtra = "FolderAlertUsername";
+        public const string FolderAlertFoldernameExtra = "FolderAlertFoldername";
 
         /// <summary>
         ///     Creates and returns an <see cref="IEnumerable{T}"/> of <see cref="Soulseek.Directory"/> in response to a remote request.

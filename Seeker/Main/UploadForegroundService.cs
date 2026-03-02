@@ -21,7 +21,7 @@ namespace Seeker
         public const int NonZeroRequestCode = 7671;
         public const string CHANNEL_ID = "my channel id - upload";
         public const string CHANNEL_NAME = "Foreground Upload Service";
-        public const string FromTransferUploadString = "FromTransfer_UPLOAD"; //todo update for onclick...
+
         public override IBinder OnBind(Intent intent)
         {
             return null; //does not allow binding. 
@@ -34,7 +34,7 @@ namespace Seeker
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             //notifIntent.
             notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(FromTransferUploadString, true);
+            notifIntent.PutExtra(MainActivity.GoToUploadsForegroundExtra, true);
 
             PendingIntent pendingIntent =
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));

@@ -41,8 +41,7 @@ namespace Seeker
     public class UserListActivity : ThemeableActivity
     {
         public static string PopUpMenuOwnerHack = string.Empty; //hack to get which listview item owns the popup menu (for on menu item click).
-        public static string IntentUserGoToBrowse = "GoToBrowse";
-        public static string IntentUserGoToSearch = "GoToSearch";
+
         public static string IntentSearchRoom = "SearchRoom";
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
@@ -99,7 +98,7 @@ namespace Seeker
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(IntentUserGoToBrowse, true);
+                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
@@ -110,7 +109,7 @@ namespace Seeker
                     SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(IntentUserGoToSearch, true);
+                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.removeUser:
