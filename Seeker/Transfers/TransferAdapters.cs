@@ -333,7 +333,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (tvh != null && fi != null && !(SimpleHelpers.IsUploadCompleteOrAborted(folderItemState))) ;
+                        if (tvh != null && fi != null && !(SimpleHelpers.IsUploadCompleteOrAborted(folderItemState)))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.AbortUploads);
                         }
