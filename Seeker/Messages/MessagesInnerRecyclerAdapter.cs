@@ -239,14 +239,7 @@ namespace Seeker.Messages
                     return SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
                 case SentStatus.Failed:
                     resourceIntColor = Resource.Color.hardErrorRed;
-                    if (OperatingSystem.IsAndroidVersionAtLeast(23))
-                    {
-                        return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
-                    }
-                    else
-                    {
-                        return SeekerState.ActiveActivityRef.Resources.GetColor(resourceIntColor);
-                    }
+                    return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
                 case SentStatus.None:
                     throw new Exception("Sent status should not be none");
             }

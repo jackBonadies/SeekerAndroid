@@ -5,6 +5,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.Core.Graphics.Drawable;
 using AndroidX.RecyclerView.Widget;
 using System;
@@ -317,7 +318,7 @@ namespace Seeker.Users
                     switch (status)
                     {
                         case Soulseek.UserPresence.Away:
-                            viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.away));
+                            viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.away)));
                             string awayString = SeekerState.ActiveActivityRef.GetString(Resource.String.away);
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
@@ -329,7 +330,7 @@ namespace Seeker.Users
                             }
                             break;
                         case Soulseek.UserPresence.Online:
-                            viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.online)); //added in api 8 :) SetTint made it a weird dark color..
+                            viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.online))); //added in api 8 :) SetTint made it a weird dark color..
                             string onlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.online);
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
@@ -341,7 +342,7 @@ namespace Seeker.Users
                             }
                             break;
                         case Soulseek.UserPresence.Offline:
-                            viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
+                            viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.offline)));
                             string offlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.offline);
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {

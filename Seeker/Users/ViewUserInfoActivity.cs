@@ -443,15 +443,15 @@ namespace Seeker
             if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {
                 ContentValues valuesForContentResolver = GetContentValues();
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DisplayName, UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.RelativePath, "Pictures");
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
-                                                                                                               //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected. 
-                                                                                                               // RELATIVE_PATH and IS_PENDING are introduced in API 29.
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.RelativePath, "Pictures");
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
+                                                                                                          //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected.
+                                                                                                          // RELATIVE_PATH and IS_PENDING are introduced in API 29.
 
                 Android.Net.Uri uri = this.ContentResolver.Insert(Android.Provider.MediaStore.Images.Media.ExternalContentUri, valuesForContentResolver);
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(uri));
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.IsPending, false);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.IsPending, false);
                 this.ContentResolver.Update(uri, valuesForContentResolver, null, null);
             }
             else
@@ -468,7 +468,7 @@ namespace Seeker
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
 
-                valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.Data, file.AbsolutePath);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.Data, file.AbsolutePath);
                 // .DATA is deprecated in API 29
                 this.ContentResolver.Insert(Android.Provider.MediaStore.Images.Media.ExternalContentUri, valuesForContentResolver);
             }
@@ -480,9 +480,9 @@ namespace Seeker
             DateTime now = SimpleHelpers.GetDateTimeNowSafe();
             long ms = new DateTimeOffset(now).ToUnixTimeMilliseconds();
             long s = ms / 1000;
-            valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DateAdded, s);
-            valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.DateTaken, ms); //this one is in milliseconds. whereas date added and date modified are in seconds. 
-            valuesForContentResolver.Put(Android.Provider.MediaStore.Images.ImageColumns.MimeType, originalImageMimetype);
+            valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DateAdded, s);
+            valuesForContentResolver.Put(Android.Provider.MediaStore.Images.IImageColumns.DateTaken, ms); //this one is in milliseconds. whereas date added and date modified are in seconds.
+            valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.MimeType, originalImageMimetype);
             return valuesForContentResolver;
         }
 

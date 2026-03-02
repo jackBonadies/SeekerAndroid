@@ -270,9 +270,9 @@ namespace Seeker.Messages
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Normal);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Normal);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Normal);
-                viewUsername.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewDateTimeAgo.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewMessage.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewUsername.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+                viewDateTimeAgo.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+                viewMessage.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
             }
 
             string msgText = m.MessageText;

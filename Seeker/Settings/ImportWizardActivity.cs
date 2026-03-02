@@ -7,6 +7,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using AndroidX.ViewPager.Widget;
@@ -1058,16 +1059,16 @@ namespace Seeker
             mTabSpacing = this.Resources.GetDimensionPixelSize(Resource.Dimension.step_pager_tab_spacing);
 
             mPrevTabPaint = new Paint();
-            mPrevTabPaint.Color = this.Resources.GetColor(Resource.Color.prevPage);
+            mPrevTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(this, Resource.Color.prevPage));
 
             mSelectedTabPaint = new Paint();
-            mSelectedTabPaint.Color = this.Resources.GetColor(Resource.Color.currentPage);
+            mSelectedTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(this, Resource.Color.currentPage));
 
             mSelectedLastTabPaint = new Paint();
             mSelectedLastTabPaint = mSelectedTabPaint;//Color.Red;
 
             mNextTabPaint = new Paint();
-            mNextTabPaint.Color = this.Resources.GetColor(Resource.Color.nextPage);
+            mNextTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(this, Resource.Color.nextPage));
         }
 
         //public void setOnPageSelectedListener(OnPageSelectedListener onPageSelectedListener)

@@ -7,6 +7,7 @@ using Android.Graphics;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.ConstraintLayout.Widget;
 using AndroidX.RecyclerView.Widget;
 using System;
@@ -656,8 +657,8 @@ namespace Seeker
 
                 viewRoomName.SetTypeface(null, TypefaceStyle.Normal);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Normal);
-                viewRoomName.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewUsersInRoom.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewRoomName.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+                viewUsersInRoom.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
             }
 
             if (ChatroomController.CurrentlyJoinedRoomNames.ContainsKey(roomInfo.Name))

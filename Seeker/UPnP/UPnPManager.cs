@@ -251,7 +251,9 @@ namespace Seeker.UPnP
                 {
                     return false;
                 }
-                return Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress) == LastSetLocalIP;
+                int ip = wm.ConnectionInfo.IpAddress;
+                string ipStr = new System.Net.IPAddress(new byte[] { (byte)(ip & 0xFF), (byte)((ip >> 8) & 0xFF), (byte)((ip >> 16) & 0xFF), (byte)((ip >> 24) & 0xFF) }).ToString();
+                return ipStr == LastSetLocalIP;
             }
             catch (Exception ex)
             {
@@ -294,7 +296,8 @@ namespace Seeker.UPnP
                     SearchFinished?.Invoke(null, new EventArgs());
                     return;
                 }
-                LocalIP = Mono.Nat.NatUtility.LocalIpAddress = Android.Text.Format.Formatter.FormatIpAddress(wm.ConnectionInfo.IpAddress);
+                int ip2 = wm.ConnectionInfo.IpAddress;
+                LocalIP = Mono.Nat.NatUtility.LocalIpAddress = new System.Net.IPAddress(new byte[] { (byte)(ip2 & 0xFF), (byte)((ip2 >> 8) & 0xFF), (byte)((ip2 >> 16) & 0xFF), (byte)((ip2 >> 24) & 0xFF) }).ToString();
                 //string gatewayAddress = Android.Text.Format.Formatter.FormatIpAddress(wm.DhcpInfo.Gateway);
                 Logger.Debug(LocalIP);
 
