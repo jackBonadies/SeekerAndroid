@@ -742,8 +742,6 @@ namespace Seeker
             refreshListView(specificRefreshAction);
         }
 
-        public static object TransferStateSaveLock = new object();
-
         public static void SaveTransferItems(ISharedPreferences sharedPreferences, bool force = true, int maxSecondsUpdate = 0)
         {
             Logger.Debug("---- saving transfer items enter ----");

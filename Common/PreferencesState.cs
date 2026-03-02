@@ -7,6 +7,7 @@ namespace Common
     public static class PreferencesState
     {
         // Account
+        // if user logged in (regardless of connection status)
         public static bool CurrentlyLoggedIn = false;
         public static string Username = null;
         public static string Password = null;

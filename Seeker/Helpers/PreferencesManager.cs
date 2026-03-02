@@ -8,6 +8,8 @@ namespace Seeker
     public static class PreferencesManager
     {
         private static object SharedPrefLock = new object();
+        private static object TransferStateSaveLock = new object();
+
         /// <summary>
         /// Restores all persisted preferences from the given shared preferences.
         /// Side-effect restores (UploadDirectoryManager, SearchTabHelper, TransfersFragment, etc.)
@@ -688,7 +690,7 @@ namespace Seeker
         public static void SaveTransferItems(string downloads, string uploads)
         {
             lock (SharedPrefLock)
-                lock (TransfersFragment.TransferStateSaveLock)
+                lock (TransferStateSaveLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_TransferList, downloads);
