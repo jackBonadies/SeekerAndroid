@@ -151,8 +151,7 @@ namespace Seeker
 
 
         private ISharedPreferences sharedPreferences;
-        private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
-        protected override void OnCreate(Bundle savedInstanceState)
+protected override void OnCreate(Bundle savedInstanceState)
         {
             bool reborn = false;
             if (savedInstanceState == null)
@@ -325,156 +324,53 @@ namespace Seeker
 
             UpdateForScreenSize();
 
-            // TODO2026 should this be moved to SeekerApplication
+            // Document files are initialized once per process in SeekerApplication.OnCreate.
+            // Here we only handle the things that require an Activity context.
             if (SeekerState.UseLegacyStorage())
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
                     ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
-                //file picker with legacy case
-                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
-                {
-                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                    bool canWrite = CheckDirectoryForWritePermission(chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download");
-                    if (canWrite)
-                    {
-                        SeekerState.RootDocumentFile = SeekerState.OpenRootFile(this, chosenUri);
-                    }
-                }
-
-                //now for incomplete
-                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
-                {
-                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                    bool canWrite = CheckDirectoryForWritePermission(chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete");
-                    if (canWrite)
-                    {
-                        SeekerState.RootIncompleteDocumentFile = SeekerState.OpenRootFile(this, chosenUri);
-                    }
-                }
             }
-            else
+            else if (SeekerState.RootDocumentFile == null)
             {
-                Android.Net.Uri res = null; 
-                if (string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
+                // SeekerApplication.InitializeDocumentFiles could not write the download directory —
+                // permission was revoked. Ask the user to re-select one.
+                Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
+                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+                var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
+                b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
+                b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
+                EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    res = Android.Net.Uri.Parse(defaultMusicUri);
-                }
-                else
-                {
-                    res = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                }
-
-                bool canWrite = CheckDirectoryForWritePermission(res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download");
-                if (!canWrite)
-                {
-                    var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-                    b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
-                    b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
-                    ManualResetEvent mre = new ManualResetEvent(false);
-                    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+                    var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
+                    var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
+                    intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
+                    intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
+                    try
                     {
-                        var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
-                        var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
-                        intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
-                        intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
-                        try
-                        {
-                            this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
-                            {
-                                FallbackFileSelectionEntry(false);
-                            }
-                            else
-                            {
-                                throw ex;
-                            }
-                        }
-                    });
-                    b.SetPositiveButton(Resource.String.okay, eventHandler);
-                    b.SetCancelable(false);
-                    b.Show();
-                }
-                else
-                {
-                    if (PreferencesState.SaveDataDirectoryUriIsFromTree)
-                    {
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
-
+                        this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(res.Path));
-                    }
-                }
-
-                bool manualSet = false;
-                //for incomplete case
-                Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
-                {
-                    manualSet = true;
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                }
-                else
-                {
-                    manualSet = false;
-                }
-
-                if (manualSet)
-                {
-                    bool canWriteIncomplete = CheckDirectoryForWritePermission(incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete");
-                    if (canWriteIncomplete)
-                    {
-                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
+                            FallbackFileSelectionEntry(false);
                         }
                         else
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                            throw ex;
                         }
                     }
-                }
+                });
+                b.SetPositiveButton(Resource.String.okay, eventHandler);
+                b.SetCancelable(false);
+                b.Show();
             }
         }
 
-        private bool CheckDirectoryForWritePermission(Android.Net.Uri chosenUri, bool directoryUriFromTree, string context)
-        {
-            bool canWrite = false;
-            try
-            {
-                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
-                {
-                    canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
-                }
-                else
-                {
-                    canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
-                }
-            }
-            catch (Exception e)
-            {
-                if (chosenUri != null)
-                {
-                    Logger.Firebase($"{context} DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
-                }
-                else
-                {
-                    Logger.Firebase($"{context} DocumentFile.FromTreeUri failed with null URI");
-                }
-            }
-            if (!canWrite)
-            {
-                Logger.Firebase($"canWrite = false for {context} Uri: " + chosenUri.ToString());
-            }
-            return canWrite;
-        }
 
         private void HandleWishlistIntent()
         {
@@ -1099,9 +995,9 @@ namespace Seeker
                 //}
                 //catch
                 //{
-                //    res = Android.Net.Uri.Parse(defaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
+                //    res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
                 //}
-                res = Android.Net.Uri.Parse(defaultMusicUri);
+                res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);
             }
             else
             {

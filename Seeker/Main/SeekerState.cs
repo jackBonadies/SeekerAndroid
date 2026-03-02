@@ -25,6 +25,8 @@ namespace Seeker
             downloadInfoList = new List<DownloadInfo>();
         }
 
+        public const string DefaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
+
         // Misc (non-persisted)
         public static bool InDarkModeCache = false;
         public static volatile LoginFragment LoginFragmentRef = null;

@@ -174,6 +174,7 @@ namespace Seeker
             //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
 
             RestoreSeekerState(sharedPrefs, this);
+            InitializeDocumentFiles(this);
             PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
@@ -296,6 +297,90 @@ namespace Seeker
             SimpleHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
             SimpleHelpers.UserListService = UserListService.Instance;
+        }
+
+        private static bool CheckDirectoryForWritePermission(Context context, Android.Net.Uri chosenUri, bool directoryUriFromTree, string logContext)
+        {
+            bool canWrite = false;
+            try
+            {
+                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
+                {
+                    canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
+                }
+                else
+                {
+                    canWrite = DocumentFile.FromTreeUri(context, chosenUri).CanWrite();
+                }
+            }
+            catch (Exception e)
+            {
+                if (chosenUri != null)
+                {
+                    Logger.Firebase($"{logContext} DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
+                }
+                else
+                {
+                    Logger.Firebase($"{logContext} DocumentFile.FromTreeUri failed with null URI");
+                }
+            }
+            if (!canWrite)
+            {
+                Logger.Firebase($"canWrite = false for {logContext} Uri: " + chosenUri.ToString());
+            }
+            return canWrite;
+        }
+
+        // Runs once per process in OnCreate. Sets SeekerState.RootDocumentFile and
+        // RootIncompleteDocumentFile. For non-legacy, leaves RootDocumentFile null if the
+        // download directory permission has been revoked; MainActivity checks for null and
+        // shows the re-selection dialog.
+        private static void InitializeDocumentFiles(Context context)
+        {
+            if (SeekerState.UseLegacyStorage())
+            {
+                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
+                {
+                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+                    if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download"))
+                    {
+                        SeekerState.RootDocumentFile = SeekerState.OpenRootFile(context, chosenUri);
+                    }
+                }
+                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
+                {
+                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
+                    if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete"))
+                    {
+                        SeekerState.RootIncompleteDocumentFile = SeekerState.OpenRootFile(context, chosenUri);
+                    }
+                }
+            }
+            else
+            {
+                Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
+                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+
+                if (CheckDirectoryForWritePermission(context, res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download"))
+                {
+                    SeekerState.RootDocumentFile = PreferencesState.SaveDataDirectoryUriIsFromTree
+                        ? DocumentFile.FromTreeUri(context, res)
+                        : DocumentFile.FromFile(new Java.IO.File(res.Path));
+                }
+                // else: RootDocumentFile stays null — MainActivity will detect this and show the re-selection dialog
+
+                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
+                {
+                    var incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
+                    if (CheckDirectoryForWritePermission(context, incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete"))
+                    {
+                        SeekerState.RootIncompleteDocumentFile = (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                            ? DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path))
+                            : DocumentFile.FromTreeUri(context, incompleteRes);
+                    }
+                }
+            }
         }
 
         private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
