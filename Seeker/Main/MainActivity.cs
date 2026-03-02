@@ -361,7 +361,7 @@ protected override void OnCreate(Bundle savedInstanceState)
                         }
                         else
                         {
-                            throw ex;
+                            throw;
                         }
                     }
                 });
@@ -1030,7 +1030,7 @@ protected override void OnCreate(Bundle savedInstanceState)
                 }
                 else
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }

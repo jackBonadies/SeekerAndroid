@@ -2721,7 +2721,7 @@ namespace Seeker
                     else
                     {
                         Logger.Firebase("showDirSettings: " + e.Message + e.StackTrace);
-                        throw e;
+                        throw;
                     }
                 }
             }
@@ -2767,7 +2767,7 @@ namespace Seeker
                     else
                     {
                         Logger.Firebase("showDirSettings: " + e.Message + e.StackTrace);
-                        throw e;
+                        throw;
                     }
                 }
             }

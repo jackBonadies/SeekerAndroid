@@ -194,7 +194,7 @@ namespace Seeker
                 }
                 else
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }

@@ -227,7 +227,7 @@ namespace Seeker.Browse
             catch (Exception e)
             {
                 Logger.Firebase("CreateTree " + username + "  " + hideLocked + " " + e.Message + e.StackTrace);
-                throw e;
+                throw;
             }
 
             errorMsgToToast = "";

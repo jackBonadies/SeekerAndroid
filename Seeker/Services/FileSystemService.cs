@@ -853,7 +853,7 @@ namespace Seeker.Services
                 }
                 else
                 {
-                    throw ex; //this might be important..
+                    throw; //this might be important..
                 }
             }
         }
