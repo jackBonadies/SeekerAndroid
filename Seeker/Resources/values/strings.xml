@@ -1279,4 +1279,10 @@ The standard way of requesting folder access does not always persist permissions
         to the developer.  \n\nAny information about the steps / conditions
         leading up to the issue is much appreciated.
     </string>
+
+    <string name="folder_request_user_returned_empty_response">
+		User returned an empty response for this folder
+	</string>
+	
+	
 </resources>
