@@ -38,7 +38,14 @@
     <MonoSymbolArchive>True</MonoSymbolArchive>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
+	<PropertyGroup>
+		<AndroidKeyStore>true</AndroidKeyStore>
+		<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
+		<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
+		<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
+		<AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
 	  <RunAOTCompilation>false</RunAOTCompilation>
