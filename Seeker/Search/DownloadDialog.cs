@@ -512,6 +512,12 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_failed), ToastLength.Short);
                     Logger.Debug("DirectoryReceivedContAction faulted");
                 }
+                else if (dirTask.Result.Count == 0)
+                {
+                    Logger.Firebase("User returned an empty folder response");
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_user_returned_empty_response), ToastLength.Short);
+                    return;
+                }
                 else
                 {
                     Logger.Debug("DirectoryReceivedContAction successful!");
@@ -553,6 +559,7 @@ namespace Seeker
                     stopRefreshing();
                     return;
                 }
+                Logger.InfoFirebase("requesting " + dirname + " from " + searchResponse.Username);
                 Browse.BrowseService.GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
             catch (Exception ex)
