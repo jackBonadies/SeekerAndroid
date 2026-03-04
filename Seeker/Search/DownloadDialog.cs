@@ -40,7 +40,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Firebase.Crashlytics.Internal.Model.CrashlyticsReport.Session;
 using log = Android.Util.Log;
 
 namespace Seeker

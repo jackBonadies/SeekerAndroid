@@ -1343,7 +1343,7 @@ namespace Seeker
         {
             if (e.WishlistInterval.HasValue)
             {
-                WishlistController.SearchIntervalMilliseconds = e.WishlistInterval.Value;
+                WishlistController.SearchIntervalMilliseconds = e.WishlistInterval.Value * 1000;
                 WishlistController.Initialize();
             }
             else
