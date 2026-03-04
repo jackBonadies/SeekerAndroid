@@ -45,6 +45,9 @@
         <item name="rounded_input_edit">
             @drawable/rounded_text_input_background_light
         </item>
+        <item name="chatInputBackground">
+            @drawable/chat_input_background_light
+        </item>
 
         <item name="android_default_notification_blue_color">#4978B8</item>
         <item name="android_default_notification_complementary_color">
@@ -366,6 +369,9 @@
 
         <item name="rounded_input_edit">
             @drawable/rounded_text_input_background_dark
+        </item>
+        <item name="chatInputBackground">
+            @drawable/chat_input_background_dark
         </item>
 
         <item name="dialog_background">#ff424242</item>

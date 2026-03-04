@@ -151,7 +151,7 @@ namespace Seeker
 
 
         private ISharedPreferences sharedPreferences;
-protected override void OnCreate(Bundle savedInstanceState)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
             bool reborn = false;
             if (savedInstanceState == null)

@@ -31,7 +31,7 @@ namespace Seeker.Chatroom
         private View rootView = null;
         private View fabScrollToNewest = null;
         private EditText editTextEnterMessage = null;
-        private Button sendMessage = null;
+        private ImageButton sendMessage = null;
         public TextView currentTickerView = null;
 
         private RecyclerView2 recyclerViewStatusesView;
@@ -427,7 +427,7 @@ namespace Seeker.Chatroom
 
 
             editTextEnterMessage = rootView.FindViewById<EditText>(Resource.Id.edit_gchat_message);
-            sendMessage = rootView.FindViewById<Button>(Resource.Id.button_gchat_send);
+            sendMessage = rootView.FindViewById<ImageButton>(Resource.Id.button_gchat_send);
 
             Soulseek.RoomData roomData = null;
             if (ChatroomController.HasRoomData(OurRoomInfo.Name))
@@ -505,10 +505,12 @@ namespace Seeker.Chatroom
             if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
             {
                 sendMessage.Enabled = false;
+                sendMessage.Alpha = 0.38f;
             }
             else
             {
                 sendMessage.Enabled = true;
+                sendMessage.Alpha = 1.0f;
             }
             editTextEnterMessage.TextChanged += EditTextEnterMessage_TextChanged;
             editTextEnterMessage.EditorAction += EditTextEnterMessage_EditorAction;
@@ -816,10 +818,12 @@ namespace Seeker.Chatroom
             if (e.Text != null && e.Text.ToString() != string.Empty) //ICharSequence..
             {
                 sendMessage.Enabled = true;
+                sendMessage.Alpha = 1.0f;
             }
             else
             {
                 sendMessage.Enabled = false;
+                sendMessage.Alpha = 0.38f;
             }
         }
     }
