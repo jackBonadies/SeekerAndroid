@@ -77,7 +77,6 @@ namespace Seeker
             if (DebounceTimer == null)
             {
                 DebounceTimer = new System.Timers.Timer(250);
-
                 DebounceTimer.AutoReset = false;
             }
             DiagStopWatch.Start();
@@ -138,7 +137,7 @@ namespace Seeker
 
         private void DebounceTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            UpdateFilteredResponses(); // this is the expensive function...
+            state.UpdateFilteredResponses(); // this is the expensive function...
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
                 lock (state.FilteredDataItems)
@@ -287,7 +286,6 @@ namespace Seeker
             SeekerState.InDarkModeCache = DownloadDialog.InNightMode(this.Context);
             Logger.Debug("BrowseFragmentOnCreateView");
             this.rootView = inflater.Inflate(Resource.Layout.browse, container, false);
-            UpdateForScreenSize();
             recyclerViewDirectories = this.rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
             browseLayoutManager = new LinearLayoutManager(this.Context);
             recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
@@ -330,7 +328,7 @@ namespace Seeker
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
-            if (state.Filter.IsFiltered || state.HasResponse())
+            if (state.HasResponse())
             {
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
@@ -339,14 +337,9 @@ namespace Seeker
 
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
             v.Focusable = true;
-            //SetFocusable(int) was added in API26. bool was there since API1
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 v.SetFocusable(ViewFocusability.Focusable);
-            }
-            else
-            {
-                //v.SetFocusable(true); no bool method in xamarin...
             }
 
             v.FocusableInTouchMode = true;
@@ -360,13 +353,13 @@ namespace Seeker
             SearchFragment.UpdateDrawableState(filterText, true);
 
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-            BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
-            bsb.Hideable = true;
-            bsb.PeekHeight = BOTTOM_SHEET_PEEK_HEIGHT;
-            bsb.State = BottomSheetBehavior.StateHidden;
-            View b = rootView.FindViewById<View>(Resource.Id.bsbutton);
-            (b as FloatingActionButton).SetImageResource(Resource.Drawable.ic_filter_list_white_24dp);
-            b.Click += B_Click;
+            BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.From(rel);
+            bottomSheetBehavior.Hideable = true;
+            bottomSheetBehavior.PeekHeight = BOTTOM_SHEET_PEEK_HEIGHT;
+            bottomSheetBehavior.State = BottomSheetBehavior.StateHidden;
+            View floatingActionButton = rootView.FindViewById<View>(Resource.Id.bsbutton);
+            (floatingActionButton as FloatingActionButton).SetImageResource(Resource.Drawable.ic_filter_list_white_24dp);
+            floatingActionButton.Click += FloatingActionButtonClick;
 
 
             return this.rootView;
@@ -385,9 +378,6 @@ namespace Seeker
                     //e.Handled = true;
                     editText.Text = string.Empty;
                     SearchFragment.UpdateDrawableState(editText, true);
-
-
-                    //editText.RequestFocus();
                 }
             }
         }
@@ -407,12 +397,9 @@ namespace Seeker
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
-
         }
 
-
-
-        private void B_Click(object sender, EventArgs e)
+        private void FloatingActionButtonClick(object sender, EventArgs e)
         {
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
@@ -483,14 +470,6 @@ namespace Seeker
             }
         }
 
-
-        private void ClearFilter_Click(object sender, EventArgs e)
-        {
-            //CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
-            //filterSticky.Checked = false;
-            ClearFilterStringAndCached(true);
-        }
-
         public override void OnSaveInstanceState(Bundle outState)
         {
             outState.PutIntArray("selectedPositions", BrowseAdapterInstance?.SelectedPositions?.ToArray());
@@ -528,7 +507,6 @@ namespace Seeker
             //if the fragment was never created then this.Context will be null
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
-
                 lock (state.DataItems)
                 {
                     if (BrowseFragment.Instance?.Context != null && BrowseFragment.Instance?.rootView != null)
@@ -598,10 +576,6 @@ namespace Seeker
 
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
-                //UpdateFilteredResponses(); // this is the expensive function...
-                //BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, state.FilteredDataItems);
-                //ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                //lv.Adapter = (customAdapter);
             }
             else
             {
@@ -623,31 +597,6 @@ namespace Seeker
             {
                 SearchFragment.UpdateDrawableState(sender as EditText, true);
             }
-        }
-
-
-        private void UpdateFilteredResponses()
-        {
-            lock (state.FilteredDataItems)
-            {
-                state.FilteredDataItems.Clear();
-                if (state.CachedFilteredDataItems != null && BrowseUtils.IsCurrentSearchMoreRestrictive(state.Filter.FilterString, state.CachedFilteredDataItems.Item1))//is less restrictive than the current search)
-                {
-                    var test = BrowseUtils.FilterBrowseList(state.CachedFilteredDataItems.Item2, state.Filter);
-                    state.FilteredDataItems.AddRange(test);
-                }
-                else
-                {
-                    var test = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
-                    state.FilteredDataItems.AddRange(test);
-                }
-                state.CachedFilteredDataItems = new Tuple<string, List<DataItem>>(state.Filter.FilterString, state.FilteredDataItems.ToList());
-            }
-        }
-
-        private void UpdateForScreenSize()
-        {
-            if (!SeekerState.IsLowDpi()) return;
         }
 
         private List<FullFileInfo> GetSelectedFileInfos()
@@ -877,8 +826,6 @@ namespace Seeker
             {
                 DownloadUserFilesEntryStage2(false, queuePaused);
             }
-
-
         }
 
 
@@ -905,8 +852,6 @@ namespace Seeker
             }
             else
             {
-                //!! firebase -- OnContextItemSelected --- DownloadUserFilesEntry
-                //!! firebase -- ListViewDirectories_ItemClick
                 try
                 {
                     itemSelected = state.DataItems[position]; //out of bounds here...
@@ -1023,62 +968,14 @@ namespace Seeker
             return GoUpDirectory();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>whether we can successfully go up.</returns>
         public bool GoUpDirectory(int additionalLevels = 0)
         {
-            state.CachedFilteredDataItems = null;
-            bool filteredResults = state.Filter.IsFiltered;
-            lock (state.DataItems)
+            bool res = state.GoUpDirectory(SetBrowseAdapters, additionalLevels);
+            if (res)
             {
-                TreeNode<Directory> item = null;
-                try
-                {
-                    if (state.DataItems[0].File != null)
-                    {
-                        item = state.DataItems[0]?.Node?.Parent;  //?.Parent; //This used to do grandparent.  Which is a bug I think, so I changed it.
-                    }
-                    else if (state.DataItems[0].Directory != null)
-                    {
-                        item = state.DataItems[0]?.Node?.Parent?.Parent;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                catch
-                {
-                    return false; //bad... 
-                }
-                if (item == null)
-                {
-                    return false; //we must be at or near the highest
-                }
-                for (int i = 0; i < additionalLevels; i++)
-                {
-                    item = item.Parent;
-                }
-                state.DataItems.Clear();
-                state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(item));
-                if (!filteredResults)
-                {
-                    SetBrowseAdapters(filteredResults, state.DataItems, false, true);
-                }
-
+                RestoreScrollPosition();
             }
-            lock (state.DataItems)
-            {
-                lock (state.FilteredDataItems)
-                {
-                    SetBrowseAdapters(filteredResults, state.DataItems, false, true);
-                }
-            }
-            RestoreScrollPosition();
-
-            return true;
+            return res;
         }
 
         /// <summary>
@@ -1191,10 +1088,8 @@ namespace Seeker
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
-        private static void ClearFilterStringAndCached(bool force = false)
+        private static void ClearFilterUIString(bool force = false)
         {
-            state.Filter.Reset();
-            //FilterSpecialFlags.Clear();
             if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
                 SeekerState.MainActivityRef.RunOnUiThread(() =>
@@ -1208,39 +1103,15 @@ namespace Seeker
 
         public static void SeekerState_BrowseResponseReceived(object sender, BrowseResponseEvent e)
         {
-            ClearFilterStringAndCached();
+            ClearFilterUIString();
             ScrollPositionRestore?.Clear();
             ScrollPositionRestoreRotate = null;
-            state.FilteredDataItems = new List<DataItem>();
-            state.CachedFilteredDataItems = null;
-            state.CurrentUsername = e.Username;
-            //OriginalBrowseResponse = e.OriginalBrowseResponse;
-            //OurCurrentLocation = e.BrowseResponseTree; //aka root
-            lock (state.DataItems) //on non UI thread.
+            var errorCode = state.SetBrowseResponse(e.Username, e.BrowseResponseTree, e.StartingLocation);
+            if (errorCode == BrowseStateError.CannotFindStartDirectory)
             {
-                state.DataItems.Clear();//clear old
-                //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
-                if (e.StartingLocation != null && e.StartingLocation != string.Empty)
-                {
-                    var startingPoint = BrowseUtils.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
-
-                    if (startingPoint == null)
-                    {
-                        Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);
-                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
-                        state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(e.BrowseResponseTree));
-                    } 
-                    else
-                    {
-                        state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(startingPoint));
-                    }
-                }
-                else
-                {
-                    state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(e.BrowseResponseTree));
-                }
+                Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);
+                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
             }
-
             BrowseResponseReceivedUI?.Invoke(null, new EventArgs());
         }
 
@@ -1262,9 +1133,6 @@ namespace Seeker
             currentUsernameUI = state.CurrentUsername;
             SetBrowseAdapters(false, state.DataItems, true);
         }
-
-
- 
 
         private void DismissKeyboard()
         {
@@ -1422,7 +1290,5 @@ namespace Seeker
                 Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
-
     }
-
 }
