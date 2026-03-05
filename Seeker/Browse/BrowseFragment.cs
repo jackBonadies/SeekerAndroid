@@ -48,7 +48,6 @@ namespace Seeker
         //the main copy will move up, down, etc.  so no need for the filtered copy to keep track of any of that
         //just do what we normally do and then generate the filtered copy as the very last step
 
-        //private static IParcelable listViewState = null; restoring this did not restore scroll pos
         public View rootView;
 
         private RecyclerView recyclerViewDirectories;
@@ -286,12 +285,6 @@ namespace Seeker
             base.OnDestroyView();
         }
 
-        //public override void OnDestroy() //this never gets called.
-        //{
-        //    DebounceTimer.Elapsed -= DebounceTimer_Elapsed; 
-        //    base.OnDestroy();
-        //}
-
         /// <summary>
         /// This is used to determine whether we should show the "No browse, to get started" message and whether we should use the browse full or empty.  
         /// I changed it from dataItems!=0 because its too confusing if you browse someone who is sharing an empty directory.
@@ -310,11 +303,6 @@ namespace Seeker
             Logger.Debug("BrowseFragmentOnCreateView");
             this.rootView = inflater.Inflate(Resource.Layout.browse, container, false);
             UpdateForScreenSize();
-            //this.rootView.FindViewById<Button>(Resource.Id.button2).Click += UpDirectory;
-            //this.rootView.FindViewById<Button>(Resource.Id.dlFiles).Click += BrowseFragment_Click;
-            //Java.Lang.IllegalStateException: 'The specified child already has a parent. You must call removeView() on the child's parent first.' if third param is not false above...
-            //if(!refreshOnCreate)
-            //{
             recyclerViewDirectories = this.rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
             browseLayoutManager = new LinearLayoutManager(this.Context);
             recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
@@ -331,7 +319,6 @@ namespace Seeker
 
             if (BrowseFilter.IsFiltered)
             {
-                //tempHackItemClick = true;
                 lock (filteredDataItemsForListView)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
@@ -340,7 +327,6 @@ namespace Seeker
             }
             else
             {
-                //tempHackItemClick = true;
                 lock (dataItemsForListView)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
@@ -356,7 +342,6 @@ namespace Seeker
             treePathRecyclerAdapter = new TreePathRecyclerAdapter(pathItems, this);
             treePathRecyclerView.SetAdapter(treePathRecyclerAdapter);
 
-            //}
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
@@ -452,32 +437,7 @@ namespace Seeker
             }
             else
             {
-                //if the keyboard is up and the edittext is in focus then maybe just put the keyboard down
-                //else put the bottom sheet down.  
-                //so make it two tiered.
-                //or maybe just unset the focus...
                 EditText test = rootView.FindViewById<EditText>(Resource.Id.filterText);
-                //Android.Views.InputMethods.InputMethodManager IMM = context.GetSystemService(Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
-                //Rect outRect = new Rect();
-                //this.rootView.GetWindowVisibleDisplayFrame(outRect);
-                //Logger.Debug("Window Visible Display Frame " + outRect.Height());
-                //Logger.Debug("Actual Height " + this.rootView.Height);
-                //Type immType = IMM.GetType();
-
-                //Logger.Debug("Y Position " + rel.GetY());
-                //int[] location = new int[2];
-                //rel.GetLocationOnScreen(location);
-                //Logger.Debug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
-                //var method = immType.GetProperty("InputMethodWindowVisibleHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                //foreach (var prop in immType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    Logger.Debug(string.Format("Property Name: {0}", prop.Name));
-                //}
-                //foreach(var meth in immType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    Logger.Debug(string.Format("Property Name: {0}", meth.Name));
-                //}
-
                 Logger.Debug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
                 if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
@@ -506,8 +466,6 @@ namespace Seeker
                     bsb.State = BottomSheetBehavior.StateHidden;
 
                 }
-                //test.ClearFocus(); //doesnt do anything. //maybe focus the search text.
-
                 bsb.State = BottomSheetBehavior.StateHidden;
             }
         }
@@ -678,18 +636,13 @@ namespace Seeker
             lock (filteredDataItemsForListView)
             {
                 filteredDataItemsForListView.Clear();
-                //filteredBrowseTree = DownloadDialog.CreateTree(OriginalBrowseResponse,true,WordsToAvoid,WordsToInclude);
-                //string nameToFindInTheFilteredTree = OurCurrentLocation.Data.Name;
-                //TreeNode<Directory> item = GetNodeByName(filteredBrowseTree, nameToFindInTheFilteredTree);
                 if (cachedFilteredDataItemsForListView != null && BrowseUtils.IsCurrentSearchMoreRestrictive(BrowseFilter.FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
                 {
-                    //Logger.Debug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
                     var test = BrowseUtils.FilterBrowseList(cachedFilteredDataItemsForListView.Item2, BrowseFilter);
-                    filteredDataItemsForListView.AddRange(test);//FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
+                    filteredDataItemsForListView.AddRange(test);
                 }
                 else
                 {
-                    //Logger.Debug("current filter is less restrictive: " + FilterString);
                     var test = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
                     filteredDataItemsForListView.AddRange(test);
                 }
@@ -700,15 +653,6 @@ namespace Seeker
         private void UpdateForScreenSize()
         {
             if (!SeekerState.IsLowDpi()) return;
-            try
-            {
-                //this.rootView.FindViewById<TextView>(Resource.Id.browseQueue).SetTextSize(ComplexUnitType.Dip, 8);
-                //this.rootView.FindViewById<TextView>(Resource.Id.browseKbs).SetTextSize(ComplexUnitType.Dip, 8);
-            }
-            catch
-            {
-                //not worth throwing over
-            }
         }
 
         private void CopySelectedURLs()
@@ -745,9 +689,6 @@ namespace Seeker
                 }
                 else
                 {
-                    //List<Soulseek.File> slskFile = new List<File>();
-                    //List<UserFilename> = new List<UserFilename>();
-
                     lock (dataItemsForListView)
                     {
                         for (int i = 0; i < dataItemsForListView.Count; i++)
@@ -765,7 +706,6 @@ namespace Seeker
                         }
                     }
                 }
-
 
                 string linkToCopy = string.Empty;
                 foreach (FullFileInfo ffi in slskFile)
@@ -825,9 +765,6 @@ namespace Seeker
                 }
                 else
                 {
-                    //List<Soulseek.File> slskFile = new List<File>();
-                    //List<UserFilename> = new List<UserFilename>();
-
                     lock (dataItemsForListView)
                     {
                         for (int i = 0; i < dataItemsForListView.Count; i++)
@@ -948,7 +885,6 @@ namespace Seeker
                 var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
-                // TODO2026
                 string topLevelStr = string.Empty;
                 if (toplevelItems == 1)
                 {
@@ -1239,7 +1175,6 @@ namespace Seeker
                 TreeNode<Directory> item = null;
                 try
                 {
-                    //var testItem = dataItemsForListView[0]?.Node;
                     if (dataItemsForListView[0].File != null)
                     {
                         item = dataItemsForListView[0]?.Node?.Parent;  //?.Parent; //This used to do grandparent.  Which is a bug I think, so I changed it.
@@ -1283,7 +1218,6 @@ namespace Seeker
                 if (!filteredResults)
                 {
                     SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
-                    //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
                 }
 
             }
@@ -1292,11 +1226,6 @@ namespace Seeker
                 lock (filteredDataItemsForListView)
                 {
                     SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
-                    //if (filteredResults)
-                    //{
-                    //    filteredDataItemsForListView = FilterBrowseList(dataItemsForListView);
-                    //    listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this);
-                    //}
                 }
             }
             RestoreScrollPosition();
@@ -1330,19 +1259,13 @@ namespace Seeker
             }
             else if (goingUp)
             {
-                treePathRecyclerAdapter.NotifyDataSetChanged(); //removed individual updates due to weird graphical glitches...
-                //treePathRecyclerAdapter.NotifyItemChanged(pathItems.Count-1); //since now the last node (remove separator)
-                //treePathRecyclerAdapter.NotifyItemRemoved(pathItems.Count);
+                treePathRecyclerAdapter.NotifyDataSetChanged();
             }
             else
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged();
-                //treePathRecyclerAdapter.NotifyItemChanged(pathItems.Count - 2); //since now no longer the last node (add separator)
-                //treePathRecyclerAdapter.NotifyItemInserted(pathItems.Count - 1);
                 treePathRecyclerView.ScrollToPosition(pathItems.Count - 1);
             }
-            //List<PathItem> pathItems = GetPathItems(dataItemsForListView);
-
         }
 
 
@@ -1529,17 +1452,9 @@ namespace Seeker
                 recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
             }
 
-
-
-            //tempHackItemClick =true; 
-            //}
-
             Logger.InfoFirebase("RefreshOnRecieved " + CurrentUsername);
-            //!!!collection was modified exception!!!
-            //guessing from modifying dataItemsForListView which can happen in this method and in others...
             currentUsernameUI = CurrentUsername;
             SetBrowseAdapters(false, dataItemsForListView, true);
-            //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this); //on UI thread. in a lock.
         }
 
 
@@ -1549,7 +1464,6 @@ namespace Seeker
 
         public void ShowEditTextBrowseUserDialog()
         {
-            //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             Logger.InfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
@@ -1615,9 +1529,6 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
                 {
                     Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
@@ -1637,9 +1548,6 @@ namespace Seeker
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
                     Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
