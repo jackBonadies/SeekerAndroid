@@ -121,10 +121,6 @@ namespace Seeker
                 }
                 DataItems.Clear();
                 DataItems.AddRange(BrowseUtils.GetDataItemsForNode(item));
-                if (!filteredResults)
-                {
-                    setBrowseAdapters(filteredResults, DataItems, false, true);
-                }
             }
             lock (DataItems)
             {
