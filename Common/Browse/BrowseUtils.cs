@@ -107,19 +107,6 @@ namespace Common.Browse
         /// <param name="currentSearch"></param>
         /// <param name="previousSearch"></param>
         /// <returns></returns>
-        /// <remarks>
-        /// examples: 
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -ex","hello how are yo -excludeTerms");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms", "hello how are yo -excludeTerms");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms", "hello how are yo -excludeTerms -a");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -b -c", "hello how are yo -excludeTerms -a");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -a -b -c", "hello how are yo -excludeTerms -a");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -", "hello how are yo -excludeTerms");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -a", "hello how are yo -excludeTerms -");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -aa", "hello how are yo -excludeTerms -a");
-        /// bool no = IsCurrentSearchMoreRestrictive("hell", "hello");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello", "hell");
-        /// </remarks>
         public static bool IsCurrentSearchMoreRestrictive(string currentSearch, string previousSearch)
         {
             var currentWords = currentSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
