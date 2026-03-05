@@ -659,6 +659,30 @@ namespace Seeker
             if (!SeekerState.IsLowDpi()) return;
         }
 
+        private List<FullFileInfo> GetSelectedFileInfos()
+        {
+            var result = new List<FullFileInfo>();
+            var selectedPositions = BrowseAdapterInstance.SelectedPositions;
+            var sourceList = BrowseFilter.IsFiltered ? filteredDataItemsForListView : dataItemsForListView;
+            lock (sourceList)
+            {
+                for (int i = 0; i < sourceList.Count; i++)
+                {
+                    if (selectedPositions.Contains(i))
+                    {
+                        DataItem d = sourceList[i];
+                        FullFileInfo f = new FullFileInfo();
+                        f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
+                        f.Size = d.File.Size;
+                        f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                        f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
+                        result.Add(f);
+                    }
+                }
+            }
+            return result;
+        }
+
         private void CopySelectedURLs()
         {
             if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
@@ -671,45 +695,7 @@ namespace Seeker
             }
             else
             {
-                List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (BrowseFilter.IsFiltered)
-                {
-                    lock (filteredDataItemsForListView)
-                    {
-                        for (int i = 0; i < filteredDataItemsForListView.Count; i++)
-                        {
-                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
-                            {
-                                DataItem d = filteredDataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    lock (dataItemsForListView)
-                    {
-                        for (int i = 0; i < dataItemsForListView.Count; i++)
-                        {
-                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
-                            {
-                                DataItem d = dataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
+                List<FullFileInfo> slskFile = GetSelectedFileInfos();
 
                 string linkToCopy = string.Empty;
                 foreach (FullFileInfo ffi in slskFile)
@@ -747,45 +733,7 @@ namespace Seeker
             }
             else
             {
-                List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (BrowseFilter.IsFiltered)
-                {
-                    lock (filteredDataItemsForListView)
-                    {
-                        for (int i = 0; i < filteredDataItemsForListView.Count; i++)
-                        {
-                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
-                            {
-                                DataItem d = filteredDataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    lock (dataItemsForListView)
-                    {
-                        for (int i = 0; i < dataItemsForListView.Count; i++)
-                        {
-                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
-                            {
-                                DataItem d = dataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
+                List<FullFileInfo> slskFile = GetSelectedFileInfos();
                 SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, CurrentUsername).Start());
             }
         }
