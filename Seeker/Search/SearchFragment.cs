@@ -28,13 +28,19 @@ namespace Seeker
 {
     public partial class SearchFragment : Fragment
     {
+        public View rootView = null;
+        private Context context;
+        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
+        public static IMenu ActionBarMenu = null;
+        public static int LastSearchResponseCount = -1;
+
         public override void OnStart()
         {
-            //this fixes the same bug as the MainActivity OnStart fixes.
             SearchFragment.Instance = this;
             Logger.Debug("SearchFragmentOnStart");
             base.OnStart();
         }
+
         public override void OnResume()
         {
             base.OnResume();
@@ -47,14 +53,6 @@ namespace Seeker
                 MainActivity.goToSearchTab = int.MaxValue;
             }
         }
-        public View rootView = null;
-
-        private Context context;
-
-        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
-
-        public static IMenu ActionBarMenu = null;
-        public static int LastSearchResponseCount = -1;
 
         private void ClearFilterStringAndCached(bool force = false)
         {
@@ -120,16 +118,7 @@ namespace Seeker
             {
                 GetTransitionDrawable().StartTransition(0);
             }
-            //ActionBar actionBar = getActionBar();
-            //// add the custom view to the action bar
-            //actionBar.setCustomView(R.layout.actionbar_view);
-            //SearchView searchView = (SearchView)(menu.FindItem(Resource.Id.action_search).ActionView);
-            //menu.FindItem(Resource.Id.action_search).ExpandActionView();
             base.OnCreateOptionsMenu(menu, inflater);
-
-            //IMenuItem searchItem = menu.FindItem(Resource.Id.action_search);
-
-
         }
 
         public static void SetCustomViewTabNumberInner(ImageView imgView, Context c)
@@ -309,22 +298,7 @@ namespace Seeker
                     {
                         SetTransitionDrawableState();
                     }//timing issue where menu options invalidate etc. may not be done yet...
-                    //bool isVisible = GetTransitionDrawable().IsVisible;
-                    //GetTransitionDrawable().InvalidateSelf();
-                    //(this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).RefreshDrawableState();
-                    //(this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidateOnAnimation();
-                    //(this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidate();
-                    //Handler handler = new Handler(Looper.MainLooper);
-                    //handler.PostDelayed(new Action(()=> {
-                    //    (this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).PostInvalidate();
-                    //    GetTransitionDrawable().InvalidateSelf();
-                    //    ActionBarMenu?.FindItem(Resource.Id.action_search).SetVisible(false);
-                    //    ActionBarMenu?.FindItem(Resource.Id.action_search).SetVisible(true);
-                    //}), 100);
-
                     SetFilterState();
-
-
 
                     if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering())
                     {
@@ -344,10 +318,6 @@ namespace Seeker
                     }
                     else
                     {
-                        //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
-                        //Logger.Debug("new tab refresh " + tabToGoTo + " count " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
-                        //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                        //lv.Adapter = (customAdapter);
                         SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
                         recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
                         recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
@@ -435,9 +405,6 @@ namespace Seeker
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
                     return true;
-                    //case Resource.Id.action_view_search_tabs:
-                    //    ShowSearchTabsDialog();
-                    //    return true;
             }
             return base.OnOptionsItemSelected(item);
         }
@@ -492,18 +459,9 @@ namespace Seeker
         public void ShowSearchTabsDialog()
         {
             SearchTabDialog searchTabDialog = new SearchTabDialog();
-            //bool isAdded = (((SeekerState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment).IsAdded; //this is EXTREMELY stale
             if (!this.IsAdded || this.Activity == null) //then child fragment manager will likely be null
             {
                 Logger.InfoFirebase("ShowSearchTabsDialog, fragment no longer attached...");
-
-                //foreach(Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
-                //{
-                //    if(frag is SearchFragment sfrag)
-                //    {
-                //        bool isAdded = sfrag.IsAdded;
-                //    }
-                //}
 
                 searchTabDialog.Show(SeekerState.MainActivityRef.SupportFragmentManager, "search tab dialog");
                 //I tested this many times (outside of this clause).  Works very well.x
@@ -542,7 +500,6 @@ namespace Seeker
                 actv.Text = SearchingText; //this works with string.Empty and emojis so I dont think its here...
                 UpdateDrawableState(actv);
                 actv.Touch += Actv_Touch;
-                //ContextCompat.GetDrawable(SeekerState.MainActivityRef,Resource.Drawable.ic_cancel_black_24dp);
             }
             catch (System.ArgumentException e)
             {
@@ -581,10 +538,8 @@ namespace Seeker
             {
                 if (e.Event.Action == MotionEventActions.Up)
                 {
-                    //e.Handled = true;
                     editText.Text = string.Empty;
                     UpdateDrawableState(editText);
-                    //editText.RequestFocus();
                 }
             }
         }
@@ -624,9 +579,6 @@ namespace Seeker
 
         public void SearchResultStyleChanged()
         {
-            //notify changed isnt enough if the xml is different... it is enough in the case of expandAll to collapseAll tho..
-
-            //(rootView.FindViewById<ListView>(Resource.Id.listView1).Adapter as SearchAdapter).NotifyDataSetChanged();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
@@ -640,15 +592,12 @@ namespace Seeker
                 SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 rv.SetAdapter(customAdapter);
             }
-
-            //(rootView.FindViewById<ListView>(Resource.Id.listView1).Adapter as SearchAdapter)
         }
 
 
 
         private static void Iv_Click(object sender, EventArgs e)
         {
-            //SearchFragment.Instance = GetSearchFragment(); //tested this and it works!
             if (!SearchFragment.Instance.IsAdded)
             {
                 SearchFragment f = GetSearchFragment(); //is there an attached fragment?? i.e. is our instance just a stale one..
@@ -667,26 +616,7 @@ namespace Seeker
                 }
                 Logger.Firebase("SearchFragment.Instance.IsAdded == false, currently searching: " + SearchTabHelper.CurrentlySearching);
             }
-            //try
-            //{
             SearchFragment.Instance.ShowSearchTabsDialog();
-            //}
-            //catch(Java.Lang.Exception ex)
-            //{
-            //    string currentMainState = SeekerState.MainActivityRef.Lifecycle.CurrentState.ToString();
-            //    string currentFragState = SearchFragment.Instance.Lifecycle.CurrentState.ToString();
-            //    string diagMessage = string.Format("Last Stopped: {0} Last Started: {1} currentMainState: {2} currentFragState: {3}", ForegroundLifecycleTracker.DiagLastStopped,ForegroundLifecycleTracker.DiagLastStarted, currentMainState, currentFragState);
-            //    System.Exception diagException = new System.Exception(diagMessage);
-            //    throw diagException;
-            //}
-            //catch(System.Exception ex)
-            //{
-            //    string currentMainState = SeekerState.MainActivityRef.Lifecycle.CurrentState.ToString();
-            //    string currentFragState = SearchFragment.Instance.Lifecycle.CurrentState.ToString();
-            //    string diagMessage = string.Format("Last Stopped: {0} Last Started: {1} currentMainState: {2} currentFragState: {3}", ForegroundLifecycleTracker.DiagLastStopped, ForegroundLifecycleTracker.DiagLastStarted, currentMainState, currentFragState);
-            //    System.Exception diagException = new System.Exception(diagMessage, ex);
-            //    throw diagException;
-            //}
         }
 
         public static void ShowChangeResultStyleBottomDialog()
@@ -703,32 +633,14 @@ namespace Seeker
         {
             Instance = this;
             HasOptionsMenu = true;
-            //SeekerState.MainActivityRef.SupportActionBar.SetDisplayShowCustomEnabled(true);
-            //SeekerState.MainActivityRef.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);//FindViewById< AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).(Resource.Layout.custom_menu_layout);
             Logger.Debug("SearchFragmentOnCreateView");
             Logger.Debug("SearchFragmentOnCreateView - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
             this.rootView = inflater.Inflate(Resource.Layout.searches, container, false);
-            UpdateForScreenSize();
-
-            //Button search = rootView.FindViewById<Button>(Resource.Id.button2);
-            //search.Click -= Search_Click;
-            //search.Click += Search_Click;
 
             context = this.Context;
 
-            //note: changing from AutoCompleteTextView to EditText fixes both the hardware keyboard issue, and the backspace issue.
-
-            //this.listView = rootView.FindViewById<ListView>(Resource.Id.listView1);
-
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
-            //if(PreferencesState.ShowSmartFilters)
-            //{
             recyclerViewChips.Visibility = ViewStates.Visible;
-            //}
-            //else
-            //{
-            //    recyclerViewChips.Visibility = ViewStates.Gone;
-            //}
 
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
@@ -762,13 +674,7 @@ namespace Seeker
             }
 
             v.FocusableInTouchMode = true;
-            //b.Focusable = true;
-            //b.SetFocusable(ViewFocusability.Focusable);
-            //b.FocusableInTouchMode = true;
             b.Click += B_Click;
-
-            //Button clearFilter = rootView.FindViewById<Button>(Resource.Id.clearFilter);
-            //clearFilter.Click += ClearFilter_Click;
 
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
             recycleLayoutManager = new LinearLayoutManager(Activity);
@@ -784,22 +690,13 @@ namespace Seeker
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
                 recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
-                //CustomAdapter customAdapter = new CustomAdapter(Context, SearchResponses);
-                //lv.Adapter = (customAdapter);
             }
 
-
-            //listView.ItemClick -= Lv_ItemClick;
-            //listView.ItemClick += Lv_ItemClick;
-            //listView.Clickable = true;
-            //listView.Focusable = true;
             SeekerState.ClearSearchHistoryEventsFromTarget(this);
             SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
             SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
-            //SeekerState.SoulseekClient.SearchResponseReceived -= SoulseekClient_SearchResponseReceived;
             int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
             Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
-            //SeekerState.SoulseekClient.SearchResponseReceived += SoulseekClient_SearchResponseReceived;
             Logger.Debug("SearchFragmentOnCreateViewEnd - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
@@ -860,12 +757,10 @@ namespace Seeker
             {
                 if (e.Event.Action == MotionEventActions.Up)
                 {
-                    //e.Handled = true;
                     editText.Text = string.Empty;
                     UpdateDrawableState(editText, true);
 
                     ClearFilterStringAndCached(true);
-                    //editText.RequestFocus();
                 }
             }
         }
@@ -898,13 +793,6 @@ namespace Seeker
             }
         }
 
-        //private void ClearFilter_Click(object sender, EventArgs e)
-        //{
-        //    CheckBox PreferencesState.FilterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
-        //    PreferencesState.FilterSticky.Checked = false;
-        //    ClearFilterStringAndCached(true);
-        //}
-
         private void B_Click(object sender, EventArgs e)
         {
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
@@ -915,32 +803,7 @@ namespace Seeker
             }
             else
             {
-                //if the keyboard is up and the edittext is in focus then maybe just put the keyboard down
-                //else put the bottom sheet down.  
-                //so make it two tiered.
-                //or maybe just unset the focus...
                 EditText test = rootView.FindViewById<EditText>(Resource.Id.filterText);
-                //Android.Views.InputMethods.InputMethodManager IMM = context.GetSystemService(Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
-                //Rect outRect = new Rect();
-                //this.rootView.GetWindowVisibleDisplayFrame(outRect);
-                //Logger.Debug("Window Visible Display Frame " + outRect.Height());
-                //Logger.Debug("Actual Height " + this.rootView.Height);
-                //Type immType = IMM.GetType();
-
-                //Logger.Debug("Y Position " + rel.GetY());
-                //int[] location = new int[2];
-                //rel.GetLocationOnScreen(location);
-                //Logger.Debug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
-                //var method = immType.GetProperty("InputMethodWindowVisibleHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                //foreach (var prop in immType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    Logger.Debug(string.Format("Property Name: {0}", prop.Name));
-                //}
-                //foreach(var meth in immType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    Logger.Debug(string.Format("Property Name: {0}", meth.Name));
-                //}
-
                 Logger.Debug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
                 if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
@@ -969,8 +832,6 @@ namespace Seeker
                     bsb.State = BottomSheetBehavior.StateHidden;
 
                 }
-                //test.ClearFocus(); //doesnt do anything. //maybe focus the search text.
-
                 bsb.State = BottomSheetBehavior.StateHidden;
             }
         }
@@ -986,9 +847,6 @@ namespace Seeker
 
         private static void Search_EditorActionHELPER(object sender, TextView.EditorActionEventArgs e)
         {
-            //bool x = SeekerState.MainActivityRef.IsDestroyed;
-
-            //SearchFragment searchFragment = ((SeekerState.MainActivityRef.FindViewById(Resource.Id.pager) as AndroidX.ViewPager.Widget.ViewPager).Adapter as TabsPagerAdapter).GetItem(1) as SearchFragment;
             SearchFragment.Instance.Search_EditorAction(sender, e);
         }
 
@@ -1006,12 +864,10 @@ namespace Seeker
                     EditText searchHere = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                     if (searchHere != null)
                     {
-                        //Logger.Firebase("editTextSearch is NULL only on cached activity");//these are both real cases that occur
                         editSearchText = searchHere.Text;
                     }
                     else
                     {
-                        //Logger.Firebase("editTextSearch is NULL from both cached and MainActivity"); //these are both real cases that occur
                         editSearchText = SearchingText;
                     }
                 }
@@ -1020,9 +876,6 @@ namespace Seeker
                     editSearchText = editTextSearch.Text;
                 }
                 Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                //overriding this, the keyboard fails to go down by default for some reason.....
                 try
                 {
                     Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
@@ -1287,10 +1140,6 @@ namespace Seeker
             }
         }
 
-
-
-
-
         private AutoCompleteTextView chooseUserInput = null;
         private View chooseUserInputLayout = null;
         private AutoCompleteTextView targetRoomInput = null;
@@ -1375,9 +1224,6 @@ namespace Seeker
                     e.ActionId == Android.Views.InputMethods.ImeAction.Search) //i get a lot of imenull..
                 {
                     Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
                     try
                     {
                         Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
@@ -1436,32 +1282,6 @@ namespace Seeker
             }
         }
 
-        //public class MyCallback : BottomSheetBehavior.BottomSheetCallback
-        //{
-        //    public override void OnSlide(View bottomSheet, float slideOffset)
-        //    {
-        //        //
-        //    }
-
-        //    public override void OnStateChanged(View bottomSheet, int newState)  //the main problem is the slow animation...
-        //    {
-        //        if(newState==BottomSheetBehavior.StateHidden)
-        //        {
-        //            try
-        //            {
-
-        //                //SeekerState.MainActivityRef.DispatchKeyEvent(new KeyEvent(new KeyEventActions(),Keycode.Enter));
-        //                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-        //                imm.HideSoftInputFromWindow(bottomSheet.WindowToken, 0);
-        //            }
-        //            catch
-        //            {
-        //                //not worth throwing over
-        //            }
-        //        }
-        //    }
-        //}
-
         //should be called whenever either the filter changes, new search results come in, the search gets cleared, etc.
         //includes chips
         private void UpdateFilteredResponses(SearchTab searchTab)
@@ -1499,34 +1319,18 @@ namespace Seeker
 
                 var oldList = SearchTabHelper.UI_SearchResponses.ToList();
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-
-
-
 #if DEBUG
 
                 int oldCount = oldList.Count;
                 int newCount = SearchTabHelper.UI_SearchResponses.Count();
                 Logger.Debug($"update filtered only - old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
-
 #endif
-
-                //DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.UI_SearchResponses), true);
-
-                //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
-                //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                //lv.Adapter = (customAdapter);
-
-                //res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
 #if DEBUG
                 sw.Stop();
 #endif
-                //DIFFUTIL is extremely extremely slow going from large to small number i.e. 1000 to 250 results.  
-                //it takes a full 700ms.  Whereas NotifyDataSetChanged and setting the adapter take 0-7ms. with notifydatasetcahnged being a bit faster.
-
                 recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top. (unlike old method)
 #if DEBUG
                 Logger.Debug($"old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
-
 #endif
 
             }
@@ -1538,23 +1342,10 @@ namespace Seeker
                     PreferencesState.FilterStickyString = string.Empty;
                 }
 
-
-
-                // DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(SearchTabHelper.UI_SearchResponses, SearchTabHelper.SearchResponses), true);
-
-
                 SearchTabHelper.UI_SearchResponses.Clear();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
-                //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
-                //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
-
-                //res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
-
-
-
 
                 recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top.
-                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
 
             if (oldFilterString == string.Empty && e.Text.ToString() != string.Empty)
@@ -1578,32 +1369,17 @@ namespace Seeker
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 
-                //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
-
                 recyclerSearchAdapter.NotifyDataSetChanged();
                 bool refSame = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.UI_SearchResponses);
                 bool refSame2 = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].UI_SearchResponses);
-                //SearchAdapter customAdapter = new SearchAdapter(context, SearchTabHelper.FilteredResponses);
-                //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-                //lv.Adapter = (customAdapter);
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses.Clear();// = SearchTabHelper.SearchResponses.ToList();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);// = SearchTabHelper.SearchResponses.ToList();
-                //recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                //recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
                 recyclerSearchAdapter.NotifyDataSetChanged();
             }
         }
-
-        //private void Actv_Click(object sender, EventArgs e)
-        //{
-        //    Android.Views.InputMethods.InputMethodManager im = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-        //    im.ShowSoftInput(sender as View, 0);
-        //    (sender as View).RequestFocus();
-        //}
 
         private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
         {
@@ -1613,20 +1389,6 @@ namespace Seeker
             {
                 AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
                 actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
-            }
-        }
-
-        private void UpdateForScreenSize()
-        {
-            if (!SeekerState.IsLowDpi()) return;
-            try
-            {
-                //this.rootView.FindViewById<TextView>(Resource.Id.searchesQueue).SetTextSize(ComplexUnitType.Dip,8);
-                //this.rootView.FindViewById<TextView>(Resource.Id.searchesKbs).SetTextSize(ComplexUnitType.Sp, 8);
-            }
-            catch
-            {
-                //not worth throwing over
             }
         }
 
@@ -1706,20 +1468,12 @@ namespace Seeker
 
         private static void SoulseekClient_SearchResponseReceived(object sender, SearchResponse response, int fromTab, bool fromWishlist)
         {
-            //Logger.Debug("SoulseekClient_SearchResponseReceived");
-            //Logger.Debug(e.Response.Username + " queuelength: " + e.Response.QueueLength + " free upload slots" + e.Response.FreeUploadSlots);
-            //Console.WriteLine("Response Received");
-            //CustomAdapter customAdapter = new CustomAdapter(Context, searchResponses);
-            //ListView lv = this.rootView.FindViewById<ListView>(Resource.Id.listView1);
-            //lv.Adapter = (customAdapter);
             if (response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch || !PreferencesState.HideLockedResultsInSearch && response.FileCount == 0 && response.LockedFileCount == 0)
             {
                 Logger.Debug("Skipping Locked or 0/0");
                 return;
             }
-            //Logger.Debug("SEARCH RESPONSE RECEIVED");
             refreshListView(response, fromTab, fromWishlist);
-            //SeekerState.MainActivityRef.RunOnUiThread(action);
 
         }
 
@@ -1748,8 +1502,6 @@ namespace Seeker
 
                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
-
-
             }
         }
 
@@ -1769,28 +1521,6 @@ namespace Seeker
         private RecyclerView recyclerViewTransferItems;
         private SearchAdapterRecyclerVersion recyclerSearchAdapter;
 
-
-
-
-        //public override void OnStop()
-        //{
-        //    searchEditText.KeyPress -= Actv_KeyPress;
-        //    searchEditText.EditorAction -= Search_EditorAction;
-
-        //    base.OnStop();
-        //}
-
-        //public override void OnResume()
-        //{
-
-        //    base.OnResume();
-        //    searchEditText = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity).SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-
-        //    searchEditText.KeyPress -= Actv_KeyPress;
-        //    searchEditText.KeyPress += Actv_KeyPress;
-        //    searchEditText.EditorAction -= Search_EditorAction;
-        //    searchEditText.EditorAction += Search_EditorAction;
-        //}
 
         private static List<SearchResponse> GetOldList(string filter)
         {
@@ -1871,10 +1601,6 @@ namespace Seeker
                 SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
             }
 
-            //if (fromTab == SearchTabHelper.CurrentTab)
-            //{
-            //    newList = SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Keys.ToList();
-            //}
             //only do fromWishlist if SearchFragment.Instance is not null...
 
             if ((!fromWishlist || SearchFragment.Instance != null) && fromTab == SearchTabHelper.CurrentTab)
@@ -1921,20 +1647,15 @@ namespace Seeker
                             //todo: place back
                             var recyclerViewState = SearchFragment.Instance.recycleLayoutManager.OnSaveInstanceState();//  recyclerView.getLayoutManager().onSaveInstanceState();
 
-
                             SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);
                             Logger.Debug("refreshListView  oldList: " + oldList.Count + " newList " + newList.Count);
                             DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses), true);
-                            //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.Clear();
-                            //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
                             res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
 
 
                             SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
                         }
                         SetOldList(SearchTabHelper.SearchTabCollection[fromTab].TextFilter.FilterString, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses.ToList());
-                        //SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses);
-                        //SearchFragment.Instance.listView.Adapter = (customAdapter);
                     }
                     else
                     {
@@ -1961,8 +1682,6 @@ namespace Seeker
                             }
 #endif
                             DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, newListx), true); //race condition where gototab sets oldList to empty and so in DiffUtil we get an index out of range.... or maybe a wishlist happening at thte same time does it??????
-                            //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Clear();
-                            //SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.AddRange(newList);
                             SearchFragment.Instance.recyclerSearchAdapter.localDataSet.Clear();
                             SearchFragment.Instance.recyclerSearchAdapter.localDataSet.AddRange(newListx);
                             res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
@@ -1972,22 +1691,13 @@ namespace Seeker
 
                         //when I was adding an empty list here updates only took 1 millisecond (though updating was choppy and weird)... whereas with an actual diff it takes 10 - 50ms but looks a lot nicer.
                         SetOldList(null, newListx);
-                        // 
-
-                        //SearchAdapter customAdapter = new SearchAdapter(SearchFragment.Instance.context, SearchTabHelper.SearchTabCollection[fromTab].SearchResponses);
-                        //SearchFragment.Instance.listView.Adapter = (customAdapter);
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = total;
                     Seeker.SearchFragment.StopWatch.Stop();
-                    //Logger.Debug("time it takes to set adapter for " + total + " results: " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
 #if DEBUG
                     Seeker.SearchFragment.StopWatch.Reset();
                     Seeker.SearchFragment.StopWatch.Start();
 #endif
-
-                    //                    oldList = newList.ToList();
-
-                    //Logger.Debug("END _ ui thread response received - search collection: " + total);
                 });
 
                 SeekerState.MainActivityRef?.RunOnUiThread(a);
@@ -2001,21 +1711,14 @@ namespace Seeker
         private void Lv_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
             showEditDialog(e.Position);
-            //throw new NotImplementedException();
         }
 
-        //private long lastClickTime = 0;
         public static bool dlDialogShown = false;
 
         public void showEditDialog(int pos)
         {
             try
             {
-                //if (SystemClock.ElapsedRealtime() - lastClickTime < 500)
-                //{
-                //    return;
-                //}
-                //lastClickTime = SystemClock.ElapsedRealtime();
                 if (dlDialogShown)
                 {
                     dlDialogShown = false; //just in the worst case we dont want to prevent too badly.
@@ -2093,8 +1796,6 @@ namespace Seeker
             {
                 //not worth throwing over
             }
-            //MainActivity.ShowAlert(new System.Exception("test"),this.Context);
-            //EditText editTextSearch = null;
             try
             {
                 //all click event handlers occur on UI thread.
@@ -2103,23 +1804,6 @@ namespace Seeker
             }
             catch (System.Exception e)
             {
-                //if(SeekerState.MainActivityRef==null)
-                //{
-                //    Logger.Firebase("Search Logic: MainActivityRef is null");
-                //}
-                //else if(SeekerState.MainActivityRef.SupportActionBar==null)
-                //{
-                //    Logger.Firebase("Search Logic: Support Action Bar");
-                //}
-                //else if(SeekerState.MainActivityRef.SupportActionBar.CustomView == null)
-                //{
-                //    Logger.Firebase("Search Logic: SupportActionBar.CustomView");
-                //}
-                //else if(SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere)==null)
-                //{
-                //    Logger.Firebase("Search Logic: searchHere");
-                //}
-                //throw e;
             }
             //in my testing:
             // if someone has 0 free upload slots I could never download from them (even if queue was 68, 250) the progress bar just never moves, though no error, nothing.. ****
@@ -2196,8 +1880,6 @@ namespace Seeker
 
                     if (t.IsCanceled)
                     {
-                        //then the user pressed the button so we dont need to change it back...
-                        //GetSearchFragment().GetTransitionDrawable().ResetTransition(); //this does it immediately.
                     }
                     else
                     {
@@ -2377,13 +2059,6 @@ namespace Seeker
                 }));
                 return;
             }
-            //catch(InvalidOperationException)
-            //{
-            //    //this means that we lost connection to the client.  lets re-login and try search again..
-            //    //idealy we do this on a separate thread but for testing..
-
-            //    //SeekerState.SoulseekClient.SearchAsync(SearchQuery.FromText(editTextSearch.Text), options: searchOptions);
-            //}
             catch (System.Exception ue)
             {
 
