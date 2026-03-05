@@ -31,12 +31,10 @@ using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
 using Seeker.Services;
-using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Seeker.Helpers;
 using Common.Browse;
 
@@ -51,23 +49,20 @@ namespace Seeker
         private const int BROWSE_TAB_INDEX = 3;
         private const int BOTTOM_SHEET_PEEK_HEIGHT = 320;
 
-        public View rootView;
-
-        private RecyclerView recyclerViewDirectories;
+        private static BrowseState state = new BrowseState();
+        private DataItem DataItemSelectedForLongClick = null;
         private BrowseAdapter BrowseAdapterInstance => recyclerViewDirectories?.GetAdapter() as BrowseAdapter;
+
+        public View rootView;
+        private RecyclerView recyclerViewDirectories;
         private LinearLayoutManager browseLayoutManager;
         private RecyclerView treePathRecyclerView;
         private LinearLayoutManager treePathLayoutManager;
         private TreePathRecyclerAdapter treePathRecyclerAdapter;
 
-        private static BrowseState state = new BrowseState();
-        public static BrowseState State => state;
-        public static string CurrentUsername { get => state.CurrentUsername; set => state.CurrentUsername = value; }
-
         private static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>();
         private static Tuple<int, int> ScrollPositionRestoreRotate = null;
 
-        private DataItem DataItemSelectedForLongClick = null;
 
         private bool isPaused = true;
         private View noBrowseView = null;
@@ -160,7 +155,7 @@ namespace Seeker
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            if (IsResponseLoaded())
+            if (state.HasResponse())
             {
                 inflater.Inflate(Resource.Menu.browse_menu_full, menu);
             }
@@ -175,7 +170,7 @@ namespace Seeker
         {
             int numSelected = BrowseAdapterInstance?.SelectedPositions?.Count ?? 0;
 
-            UiHelpers.SetMenuTitles(menu, CurrentUsername);
+            UiHelpers.SetMenuTitles(menu, state.CurrentUsername);
 
             if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
             {
@@ -209,7 +204,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), CurrentUsername, SeekerState.ActiveActivityRef, null))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), state.CurrentUsername, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -244,7 +239,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_copy_folder_url:
                     string fullDirName = state.DataItems[0].Node.Data.Name;
-                    string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
+                    string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, state.CurrentUsername);
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                     return true;
@@ -254,10 +249,10 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
-                    UserListService.AddUserAPI(SeekerState.MainActivityRef, CurrentUsername, null);
+                    UserListService.AddUserAPI(SeekerState.MainActivityRef, state.CurrentUsername, null);
                     return true;
                 case Resource.Id.action_get_user_info:
-                    RequestedUserInfoHelper.RequestUserInfoApi(CurrentUsername);
+                    RequestedUserInfoHelper.RequestUserInfoApi(state.CurrentUsername);
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -284,15 +279,6 @@ namespace Seeker
             base.OnDestroyView();
         }
 
-        /// <summary>
-        /// This is used to determine whether we should show the "No browse, to get started" message and whether we should use the browse full or empty.  
-        /// I changed it from dataItems!=0 because its too confusing if you browse someone who is sharing an empty directory.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsResponseLoaded()
-        {
-            return !string.IsNullOrEmpty(CurrentUsername); //(state.DataItems.Count != 0);
-        }
         public static BrowseFragment Instance = null;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -320,7 +306,7 @@ namespace Seeker
             {
                 lock (state.FilteredDataItems)
                 { //on ui thread.
-                    currentUsernameUI = CurrentUsername;
+                    currentUsernameUI = state.CurrentUsername;
                     recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this, selectedPos));
                 }
             }
@@ -328,7 +314,7 @@ namespace Seeker
             {
                 lock (state.DataItems)
                 { //on ui thread.
-                    currentUsernameUI = CurrentUsername;
+                    currentUsernameUI = state.CurrentUsername;
                     recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this, selectedPos));
                 }
             }
@@ -344,7 +330,7 @@ namespace Seeker
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
-            if (state.Filter.IsFiltered || IsResponseLoaded()) // if we are filtering then we already know how it works..
+            if (state.Filter.IsFiltered || state.HasResponse())
             {
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
@@ -524,8 +510,18 @@ namespace Seeker
             SearchFragment.UpdateDrawableState(filterText, true);
         }
 
+        // this is on the fragment in case we go back to the old mainActivity on the backstack
         private string currentUsernameUI;
         public static EventHandler<EventArgs> BrowseResponseReceivedUI;
+
+        public static string GetTabTitle(Android.Content.Context context)
+        {
+            if (string.IsNullOrEmpty(state.CurrentUsername))
+            {
+                return context.GetString(Resource.String.browse_tab);
+            }
+            return context.GetString(Resource.String.browse_tab) + ": " + state.CurrentUsername;
+        }
 
         public void BrowseResponseReceivedUI_Handler(object sender, EventArgs args)
         {
@@ -543,7 +539,7 @@ namespace Seeker
                 var pager = (AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
                 if (pager != null && pager.CurrentItem == BROWSE_TAB_INDEX)
                 {
-                    SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                    SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
                     SeekerState.MainActivityRef.InvalidateOptionsMenu();
                 }
 
@@ -553,16 +549,16 @@ namespace Seeker
         public override void OnResume()
         {
             base.OnResume();
-            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
-                && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername)
+            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(state.CurrentUsername)
+                && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + state.CurrentUsername)
                 && SeekerState.MainActivityRef.OnBrowseTab())
             {
-                SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
             }
             BrowseResponseReceivedUI += BrowseResponseReceivedUI_Handler;
-            if (currentUsernameUI != CurrentUsername)
+            if (currentUsernameUI != state.CurrentUsername)
             {
-                currentUsernameUI = CurrentUsername;
+                currentUsernameUI = state.CurrentUsername;
                 BrowseResponseReceivedUI_Handler(null, new EventArgs());
             }
             Instance = this;
@@ -688,7 +684,7 @@ namespace Seeker
                     {
                         linkToCopy = linkToCopy + " \n";
                     }
-                    linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
+                    linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, state.CurrentUsername);
                 }
                 CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
                 if (BrowseAdapterInstance.SelectedPositions.Count > 1)
@@ -717,7 +713,7 @@ namespace Seeker
             else
             {
                 List<FullFileInfo> slskFile = GetSelectedFileInfos();
-                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, CurrentUsername).Start());
+                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, state.CurrentUsername).Start());
             }
         }
 
@@ -730,7 +726,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                Browse.BrowseService.DownloadListOfFiles(recursiveFullFileInfo, queuePaused, CurrentUsername);
+                Browse.BrowseService.DownloadListOfFiles(recursiveFullFileInfo, queuePaused, state.CurrentUsername);
             }
             else
             {
@@ -739,7 +735,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, CurrentUsername);
+                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, state.CurrentUsername);
             }
         }
 
@@ -1155,7 +1151,7 @@ namespace Seeker
                         ShowFolderSummaryDialog(folderSummary);
                         return true;
                     case CONTEXT_COPY_URL:
-                        string slskLink = CommonHelpers.CreateSlskLink(true, DataItemSelectedForLongClick.Directory.Name, currentUsernameUI);
+                        string slskLink = CommonHelpers.CreateSlskLink(true, DataItemSelectedForLongClick.Directory.Name, state.CurrentUsername);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                         return true;
@@ -1217,7 +1213,7 @@ namespace Seeker
             ScrollPositionRestoreRotate = null;
             state.FilteredDataItems = new List<DataItem>();
             state.CachedFilteredDataItems = null;
-            CurrentUsername = e.Username;
+            state.CurrentUsername = e.Username;
             //OriginalBrowseResponse = e.OriginalBrowseResponse;
             //OurCurrentLocation = e.BrowseResponseTree; //aka root
             lock (state.DataItems) //on non UI thread.
@@ -1262,8 +1258,8 @@ namespace Seeker
                 recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
             }
 
-            Logger.InfoFirebase("RefreshOnRecieved " + CurrentUsername);
-            currentUsernameUI = CurrentUsername;
+            Logger.InfoFirebase("RefreshOnRecieved " + state.CurrentUsername);
+            currentUsernameUI = state.CurrentUsername;
             SetBrowseAdapters(false, state.DataItems, true);
         }
 

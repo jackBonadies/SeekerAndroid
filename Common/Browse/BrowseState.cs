@@ -14,5 +14,9 @@ namespace Seeker
         public List<DataItem> FilteredDataItemsForDownload { get; set; }
         public TextFilter Filter { get; } = new TextFilter();
         public string CurrentUsername { get; set; }
+        public bool HasResponse()
+        {
+            return !string.IsNullOrEmpty(CurrentUsername);
+        }
     }
 }

@@ -1216,14 +1216,7 @@ namespace Seeker
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                    if (string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
-                    {
-                        this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
-                    }
-                    else
-                    {
-                        this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
-                    }
+                    this.SupportActionBar.Title = BrowseFragment.GetTabTitle(this);
                     this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
                     break;
             }
