@@ -493,10 +493,10 @@ namespace Seeker
             }
             else
             {
-                FolderItem folder = null;
+                FolderItem? folder = null;
                 lock (AllFolderItems)
                 {
-                    folder = GetMatchingFolder(ti).FirstOrDefault();
+                    folder = GetMatchingFolder(ti);
                 }
                 if (folder == null)
                 {
@@ -517,20 +517,16 @@ namespace Seeker
             return true;
         }
 
-        private IEnumerable<FolderItem> GetMatchingFolder(TransferItem ti)
+        private FolderItem? GetMatchingFolder(TransferItem ti)
         {
             lock (AllFolderItems)
             {
-                string foldername = string.Empty;
-                if (string.IsNullOrEmpty(ti.FolderName))
-                {
-                    foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
-                }
-                else
-                {
-                    foldername = ti.FolderName;
-                }
-                return AllFolderItems.Where((folder) => folder.FolderName == foldername && folder.Username == ti.Username);
+                var foldername = string.IsNullOrEmpty(ti.FolderName)
+                    ? Common.Helpers.GetFolderNameFromFile(ti.FullFilename)
+                    : ti.FolderName;
+
+                return AllFolderItems.FirstOrDefault(f =>
+                    f.FolderName == foldername && f.Username == ti.Username);
             }
         }
 
@@ -582,14 +578,13 @@ namespace Seeker
             lock (AllFolderItems)
             {
                 var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder.Count() == 0)
+                if (matchingFolder == null)
                 {
                     AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
                 }
                 else
                 {
-                    var folderItem = matchingFolder.First();
-                    folderItem.Add(ti);
+                    matchingFolder.Add(ti);
                 }
             }
             MarkTransfersDirty();
@@ -837,17 +832,16 @@ namespace Seeker
             lock (AllFolderItems)
             {
                 var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder.Count() == 0)
+                if (matchingFolder == null)
                 {
                     //error folder not found...
                 }
                 else
                 {
-                    var folderItem = matchingFolder.First();
-                    folderItem.Remove(ti);
-                    if (folderItem.IsEmpty())
+                    matchingFolder.Remove(ti);
+                    if (matchingFolder.IsEmpty())
                     {
-                        AllFolderItems.Remove(folderItem);
+                        AllFolderItems.Remove(matchingFolder);
                     }
                 }
             }
