@@ -666,19 +666,15 @@ namespace Seeker
             var sourceList = BrowseFilter.IsFiltered ? filteredDataItemsForListView : dataItemsForListView;
             lock (sourceList)
             {
-                for (int i = 0; i < sourceList.Count; i++)
+                result = selectedPositions.Where(i => i < sourceList.Count).Select(i => sourceList[i]).Select(item =>
                 {
-                    if (selectedPositions.Contains(i))
-                    {
-                        DataItem d = sourceList[i];
-                        FullFileInfo f = new FullFileInfo();
-                        f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                        f.Size = d.File.Size;
-                        f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                        f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                        result.Add(f);
-                    }
-                }
+                    FullFileInfo f = new FullFileInfo();
+                    f.FullFileName = item.Node.Data.Name + @"\" + item.File.Filename;
+                    f.Size = item.File.Size;
+                    f.wasFilenameLatin1Decoded = item.File.IsLatin1Decoded;
+                    f.wasFolderLatin1Decoded = item.Node.Data.DecodedViaLatin1;
+                    return f;
+                }).ToList();
             }
             return result;
         }
