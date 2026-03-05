@@ -289,6 +289,7 @@ namespace Seeker
             recyclerViewDirectories = this.rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
             browseLayoutManager = new LinearLayoutManager(this.Context);
             recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
+            recyclerViewDirectories.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             this.RegisterForContextMenu(recyclerViewDirectories);
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
 
@@ -1078,6 +1079,7 @@ namespace Seeker
             {
                 browseLayoutManager = new LinearLayoutManager(this.Context);
                 recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
+                recyclerViewDirectories.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             }
 
             Logger.InfoFirebase("RefreshOnRecieved " + state.CurrentUsername);
