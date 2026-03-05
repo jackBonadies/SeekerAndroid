@@ -321,5 +321,24 @@ namespace Common.Browse
             }
             return count;
         }
+        public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
+        {
+            if (rootTree.Data.Name == nameToFindDirName)
+            {
+                return rootTree;
+            }
+            else
+            {
+                foreach (TreeNode<Directory> d in rootTree.Children)
+                {
+                    var node = GetNodeByName(d, nameToFindDirName);
+                    if (node != null)
+                    {
+                        return node;
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

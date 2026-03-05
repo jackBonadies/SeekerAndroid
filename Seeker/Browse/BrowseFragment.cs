@@ -1248,26 +1248,6 @@ namespace Seeker
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
-        public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
-        {
-            if (rootTree.Data.Name == nameToFindDirName)
-            {
-                return rootTree;
-            }
-            else
-            {
-                foreach (TreeNode<Directory> d in rootTree.Children)
-                {
-                    var node = GetNodeByName(d, nameToFindDirName);
-                    if (node != null)
-                    {
-                        return node;
-                    }
-                }
-            }
-            return null;
-        }
-
         private static void ClearFilterStringAndCached(bool force = false)
         {
             BrowseFilter.Reset();
@@ -1299,7 +1279,7 @@ namespace Seeker
                 //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
                 if (e.StartingLocation != null && e.StartingLocation != string.Empty)
                 {
-                    var startingPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
+                    var startingPoint = BrowseUtils.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
 
                     if (startingPoint == null)
                     {
