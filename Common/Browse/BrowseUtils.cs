@@ -149,6 +149,17 @@ namespace Common.Browse
             return currentIncludeString.Contains(previousIncludeString);
         }
 
+        public static FullFileInfo ToFullFileInfo(DataItem d)
+        {
+            return new FullFileInfo
+            {
+                FullFileName = d.Node.Data.Name + @"\" + d.File.Filename,
+                Size = d.File.Size,
+                wasFilenameLatin1Decoded = d.File.IsLatin1Decoded,
+                wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1
+            };
+        }
+
         public static FullFileInfo[] GetFullFileInfos(IEnumerable<Soulseek.File> files)
         {
             return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
