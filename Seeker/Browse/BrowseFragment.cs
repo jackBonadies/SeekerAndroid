@@ -48,6 +48,9 @@ namespace Seeker
         //the main copy will move up, down, etc.  so no need for the filtered copy to keep track of any of that
         //just do what we normally do and then generate the filtered copy as the very last step
 
+        private const int BROWSE_TAB_INDEX = 3;
+        private const int BOTTOM_SHEET_PEEK_HEIGHT = 320;
+
         public View rootView;
 
         private RecyclerView recyclerViewDirectories;
@@ -272,8 +275,8 @@ namespace Seeker
                 var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 if (navigator != null)
                 {
-                    navigator.Menu.GetItem(3).SetCheckable(true);
-                    navigator.Menu.GetItem(3).SetChecked(true);
+                    navigator.Menu.GetItem(BROWSE_TAB_INDEX).SetCheckable(true);
+                    navigator.Menu.GetItem(BROWSE_TAB_INDEX).SetChecked(true);
                 }
             }
             base.SetMenuVisibility(menuVisible);
@@ -377,7 +380,7 @@ namespace Seeker
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
             bsb.Hideable = true;
-            bsb.PeekHeight = 320;
+            bsb.PeekHeight = BOTTOM_SHEET_PEEK_HEIGHT;
             bsb.State = BottomSheetBehavior.StateHidden;
             View b = rootView.FindViewById<View>(Resource.Id.bsbutton);
             (b as FloatingActionButton).SetImageResource(Resource.Drawable.ic_filter_list_white_24dp);
@@ -542,7 +545,7 @@ namespace Seeker
                     }
                 }
                 var pager = (AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
-                if (pager != null && pager.CurrentItem == 3)
+                if (pager != null && pager.CurrentItem == BROWSE_TAB_INDEX)
                 {
                     SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
                     SeekerState.MainActivityRef.InvalidateOptionsMenu();
@@ -1478,7 +1481,7 @@ namespace Seeker
 
             Action<View> goSnackBarAction = new Action<View>((View v) =>
             {
-                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(BROWSE_TAB_INDEX, true);
             });
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
