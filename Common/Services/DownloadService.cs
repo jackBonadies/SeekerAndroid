@@ -954,6 +954,38 @@ namespace Seeker.Services
             DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfPausedFromFolder(folder).Select(tup => tup.Item1));
         }
 
+        /// <summary>
+        /// Initiates a retry for a single transfer item. If the transfer is currently in-flight,
+        /// sets CancelAndRetryFlag and cancels it (the continuation will re-download).
+        /// Returns true if a fresh download was initiated, false if cancel-and-retry.
+        /// </summary>
+        public bool RetryDownloadItem(TransferItem item)
+        {
+            if (soulseekClientFactory().IsTransferInDownloads(item.Username, item.FullFilename))
+            {
+                item.CancelAndRetryFlag = true;
+                if (item.CancellationTokenSource != null)
+                {
+                    if (!item.CancellationTokenSource.IsCancellationRequested)
+                    {
+                        item.CancellationTokenSource.Cancel();
+                    }
+                }
+                else
+                {
+                    logger.Firebase("CTS is null. this should not happen. we should always set it before downloading.");
+                }
+                return false;
+            }
+
+            var cts = new CancellationTokenSource();
+            TransferState.SetupCancellationToken(item, cts, out _);
+            var dlInfo = new DownloadInfo(item.Username, item.FullFilename, item.Size, null, cts, item.QueueLength, item.Failed ? 1 : 0, item.GetDirectoryLevel()) { TransferItemReference = item };
+            Task task = DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cts, out _, dlInfo, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
+            task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
+            return true;
+        }
+
         public void DownloadRetryAll(IEnumerable<TransferItem> transferItemConditionList)
         {
             var TransferItemManagerDL = TransferItems.TransferItemManagerDL;
@@ -961,13 +993,9 @@ namespace Seeker.Services
             bool exceptionShown = false;
             foreach (TransferItem item in transferItemConditionList)
             {
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 try
                 {
-                    TransferState.SetupCancellationToken(item, cancellationTokenSource, out _);
-                    var dlInfo = new DownloadInfo(item.Username, item.FullFilename, item.Size, null, cancellationTokenSource, item.QueueLength, 0, item.GetDirectoryLevel()) { TransferItemReference = item };
-                    Task task = DownloadFileAsync(item.Username, item.FullFilename, item.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item.ShouldEncodeFolderLatin1());
-                    task.ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
+                    RetryDownloadItem(item);
                 }
                 catch (DuplicateTransferException)
                 {
@@ -992,10 +1020,7 @@ namespace Seeker.Services
                     }
                     return; //otherwise null ref with task!
                 }
-                item.Progress = 0; //no longer red... some good user feedback
-                item.Failed = false;
-                item.TransferItemExtra &= ~TransferItemExtras.DirNotSet;
-
+                item.ClearStateForRetry();
             }
 
             var refreshOnlySelected = new Action(() =>

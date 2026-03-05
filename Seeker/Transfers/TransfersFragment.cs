@@ -580,6 +580,7 @@ namespace Seeker
             refreshListView(specificRefreshAction);
         }
 
+        // TODO Move
         private List<TransferItem> GetBatchSelectedItemsForRetryCondition(bool selectFailed)
         {
             bool folderItems = false;
@@ -622,9 +623,7 @@ namespace Seeker
             return tis;
         }
 
-
-
-
+        // TODO
         private void DownloadRetryLogic(ITransferItem transferItem)
         {
             string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
@@ -639,34 +638,9 @@ namespace Seeker
                 return;
             }
 
-            //int tokenNum = int.MinValue;
-            if (SeekerState.SoulseekClient.IsTransferInDownloads(item1.Username, item1.FullFilename/*, out tokenNum*/))
-            {
-                Logger.Debug("transfer is in Downloads !!! " + item1.FullFilename);
-                item1.CancelAndRetryFlag = true;
-                ClearTransferForRetry(item1, indexToRefresh);
-                if (item1.CancellationTokenSource != null)
-                {
-                    if (!item1.CancellationTokenSource.IsCancellationRequested)
-                    {
-                        item1.CancellationTokenSource.Cancel();
-                    }
-                }
-                else
-                {
-                    Logger.Firebase("CTS is null. this should not happen. we should always set it before downloading.");
-                }
-                return; //the dl continuation method will take care of it....
-            }
-
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             try
             {
-
-                TransferState.SetupCancellationToken(item1, cancellationTokenSource, out _);
-                var dlInfo = new DownloadInfo(item1.Username, item1.FullFilename, item1.Size, null, cancellationTokenSource, item1.QueueLength, item1.Failed ? 1 : 0, item1.GetDirectoryLevel()) { TransferItemReference = item1 };
-                Task task = DownloadService.Instance.DownloadFileAsync(item1.Username, item1.FullFilename, item1.GetSizeForDL(), cancellationTokenSource, out _, dlInfo, isFileDecodedLegacy: item1.ShouldEncodeFileLatin1(), isFolderDecodedLegacy: item1.ShouldEncodeFolderLatin1());
-                task.ContinueWith(DownloadService.Instance.DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo))); //if paused do retry counter 0.
+                DownloadService.Instance.RetryDownloadItem(item1);
             }
             catch (DuplicateTransferException)
             {
@@ -759,6 +733,7 @@ namespace Seeker
                         break;
                     case TransferContextMenuItem.ClearFromList:
                         Logger.InfoFirebase("Clear Complete item pressed");
+                        // TODO MOVE
                         lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
                         {
                             try
@@ -797,6 +772,7 @@ namespace Seeker
                             TransferState.CancelAndRemoveToken(tti);
                             lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
+                        // TODO MOVE
                                 if (ViewState.InUploadsMode)
                                 {
                                     TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
@@ -841,7 +817,7 @@ namespace Seeker
                         //the folder implementation will re-request all queued files
                         //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
 
-
+                        // TODO MOVE
                         if (tItem is TransferItem)
                         {
                             GetQueuePosition(tItem as TransferItem);
@@ -1449,5 +1425,4 @@ namespace Seeker
         }
 
     }
-
 }
