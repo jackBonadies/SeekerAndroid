@@ -176,7 +176,7 @@ namespace Seeker
             {
 
                 int position = TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
-                Logger.Debug($"position: {position} ti name: {iti.GetDisplayName()}");
+                Logger.Debug($"position: {position} ti name: {iti.GetFolderName()}");
 
             }
 #endif

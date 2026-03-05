@@ -50,9 +50,8 @@ namespace Seeker
         }
 
         /// <summary>
-        /// transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
-        /// add users where failure occured due to them being offline to dict so we can efficiently check it in response
-        /// to status changed events AND we can AddUser to get their status updates.
+        /// On relaunch, cancel any transfers that were active or pending before shutdown,
+        /// and track users whose transfers failed due to being offline.
         /// </summary>
         public void OnRelaunch()
         {
@@ -60,13 +59,14 @@ namespace Seeker
             {
                 foreach (var ti in AllTransferItems)
                 {
-                    if (ti.State.HasFlag(TransferStates.InProgress))
-                    {
-                        ti.State = TransferStates.Cancelled;
-                        ti.RemainingTime = null;
-                    }
+                    const TransferStates activeOrAborted =
+                        TransferStates.InProgress |
+                        TransferStates.Initializing |
+                        TransferStates.Queued |
+                        TransferStates.Requested |
+                        TransferStates.Aborted;
 
-                    if (ti.State.HasFlag(TransferStates.Aborted))
+                    if ((ti.State & activeOrAborted) != 0)
                     {
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;

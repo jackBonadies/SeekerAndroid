@@ -9,13 +9,28 @@ namespace Seeker
     [Serializable]
     public class FolderItem : ITransferItem
     {
-        public bool IsUpload()
+        public string FolderName; //this is always ex "Album Name" or for depth > 1 "GrandParent/Parent".  Display Folder name is reversed.
+        public string Username;
+        public List<TransferItem> TransferItems;
+
+        public FolderItem(string folderName, string username, TransferItem initialTransferItem)
         {
-            if (TransferItems.Count == 0)
+            TransferItems = new List<TransferItem>();
+            Add(initialTransferItem);
+            if (folderName == null)
             {
-                return false; //usually this is if we are in the process of clearing the folder....
+                folderName = Common.Helpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
             }
-            return TransferItems[0].IsUpload();
+            FolderName = folderName;
+            Username = username;
+        }
+
+        /// <summary>
+        /// default public constructor for serialization.
+        /// </summary>
+        public FolderItem()
+        {
+            TransferItems = new List<TransferItem>();
         }
 
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -34,9 +49,13 @@ namespace Seeker
             return AvgSpeed;
         }
 
-        public string GetDisplayName()
+        public bool IsUpload()
         {
-            return FolderName;
+            if (TransferItems.Count == 0)
+            {
+                return false; //usually this is if we are in the process of clearing the folder....
+            }
+            return TransferItems[0].IsUpload();
         }
 
         public string GetFolderName()
@@ -217,30 +236,6 @@ namespace Seeker
                 }
                 return folderState;
             }
-        }
-
-        public string FolderName; //this is always ex "Album Name" or for depth > 1 "GrandParent/Parent".  Display Folder name is reversed.
-        public string Username;
-        public List<TransferItem> TransferItems;
-
-        public FolderItem(string folderName, string username, TransferItem initialTransferItem)
-        {
-            TransferItems = new List<TransferItem>();
-            Add(initialTransferItem);
-            if (folderName == null)
-            {
-                folderName = Common.Helpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
-            }
-            FolderName = folderName;
-            Username = username;
-        }
-
-        /// <summary>
-        /// default public constructor for serialization.
-        /// </summary>
-        public FolderItem()
-        {
-            TransferItems = new List<TransferItem>();
         }
 
         public void ClearAllComplete()
