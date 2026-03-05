@@ -127,7 +127,7 @@ namespace Seeker
             SeekerState.DownloadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
             //save once complete
-            TransferPersistence.SaveTransferItems();
+            TransferPersistenceWrapper.SaveTransferItems();
             base.OnDestroy();
         }
 

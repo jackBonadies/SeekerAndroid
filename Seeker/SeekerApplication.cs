@@ -1012,7 +1012,7 @@ namespace Seeker
             }
             Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
             TransferItemManager.MarkTransfersDirty();
-            TransferPersistence.SaveTransferItems(false, 30);
+            TransferPersistenceWrapper.SaveTransferItems(false, 30);
             if (relevantItem != null)
             {
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
@@ -1206,7 +1206,7 @@ namespace Seeker
                 return;
             }
 
-            TransferPersistence.SaveTransferItems(false, 30);
+            TransferPersistenceWrapper.SaveTransferItems(false, 30);
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
             relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
             //relevantItem = TransferItems.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
@@ -1863,7 +1863,7 @@ namespace Seeker
                 return;
             }
             TransferItemManager.MarkTransfersDirty();
-            TransferPersistence.SaveTransferItems(false, 30);
+            TransferPersistenceWrapper.SaveTransferItems(false, 30);
             if (e.Transfer.State == TransferStates.InProgress)
             {
                 Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
@@ -2068,8 +2068,8 @@ namespace Seeker
 
                 if (TransferItems.TransferItemManagerDL == null)
                 {
-                    TransferPersistence.RestoreDownloadTransferItems(sharedPreferences);
-                    TransferPersistence.RestoreUploadTransferItems(sharedPreferences);
+                    TransferPersistenceWrapper.RestoreDownloadTransferItems(sharedPreferences);
+                    TransferPersistenceWrapper.RestoreUploadTransferItems(sharedPreferences);
                     TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL, TransferCleanup.PerformCleanupItem);
                 }
             }
