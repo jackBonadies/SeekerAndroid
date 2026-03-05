@@ -51,7 +51,8 @@ namespace Seeker
         //private static IParcelable listViewState = null; restoring this did not restore scroll pos
         public View rootView;
 
-        private ListView listViewDirectories;
+        private RecyclerView recyclerViewDirectories;
+        private LinearLayoutManager browseLayoutManager;
         private RecyclerView treePathRecyclerView;
         private LinearLayoutManager treePathLayoutManager;
         private TreePathRecyclerAdapter treePathRecyclerAdapter;
@@ -98,9 +99,9 @@ namespace Seeker
         {
             try
             {
-                int index = listViewDirectories.FirstVisiblePosition;
-                View v = listViewDirectories.GetChildAt(0);
-                int top = (v == null) ? 0 : (v.Top - listViewDirectories.PaddingTop);
+                int index = browseLayoutManager.FindFirstVisibleItemPosition();
+                View v = browseLayoutManager.FindViewByPosition(index);
+                int top = (v == null) ? 0 : (v.Top - recyclerViewDirectories.PaddingTop);
                 ScrollPositionRestore.Push(new Tuple<int, int>(index, top));
             }
             catch (Exception e)
@@ -116,9 +117,9 @@ namespace Seeker
         {
             try
             {
-                int index = listViewDirectories.FirstVisiblePosition;
-                View v = listViewDirectories.GetChildAt(0);
-                int top = (v == null) ? 0 : (v.Top - listViewDirectories.PaddingTop);
+                int index = browseLayoutManager.FindFirstVisibleItemPosition();
+                View v = browseLayoutManager.FindViewByPosition(index);
+                int top = (v == null) ? 0 : (v.Top - recyclerViewDirectories.PaddingTop);
                 ScrollPositionRestoreRotate = new Tuple<int, int>(index, top);
             }
             catch (Exception e)
@@ -135,7 +136,7 @@ namespace Seeker
             try
             {
                 Tuple<int, int> pos = ScrollPositionRestore.Pop();
-                listViewDirectories.SetSelectionFromTop(pos.Item1, pos.Item2);
+                browseLayoutManager.ScrollToPositionWithOffset(pos.Item1, pos.Item2);
             }
             catch (Exception e)
             {
@@ -151,11 +152,11 @@ namespace Seeker
             {
                 lock (filteredDataItemsForListView)
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
-                    ListView lv = rootView?.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                    if (lv != null)
+                    BrowseAdapter customAdapter = new BrowseAdapter(filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
+                    RecyclerView rv = rootView?.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+                    if (rv != null)
                     {
-                        lv.Adapter = (customAdapter);
+                        rv.SetAdapter(customAdapter);
                     }
                 }
             });
@@ -176,7 +177,7 @@ namespace Seeker
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
+            int numSelected = (recyclerViewDirectories?.GetAdapter() as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
 
             UiHelpers.SetMenuTitles(menu, username);
 
@@ -233,7 +234,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_download_selected_files:
                     DownloadSelectedFiles(false);
-                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
+                    (recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_show_folder_info:
@@ -242,7 +243,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_queue_selected_paused:
                     DownloadSelectedFiles(true);
-                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
+                    (recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_copy_folder_url:
@@ -253,7 +254,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
-                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
+                    (recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
@@ -316,12 +317,10 @@ namespace Seeker
             //Java.Lang.IllegalStateException: 'The specified child already has a parent. You must call removeView() on the child's parent first.' if third param is not false above...
             //if(!refreshOnCreate)
             //{
-            listViewDirectories = this.rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-            listViewDirectories.ItemClick -= ListViewDirectories_ItemClick; //there may be a change of this not getting attached which would be bad
-            listViewDirectories.ItemClick += ListViewDirectories_ItemClick; //there may be a change of this not getting attached which would be bad
-            listViewDirectories.ItemLongClick -= ListViewDirectories_ItemLongClick;
-            listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
-            this.RegisterForContextMenu(listViewDirectories);
+            recyclerViewDirectories = this.rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+            browseLayoutManager = new LinearLayoutManager(this.Context);
+            recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
+            this.RegisterForContextMenu(recyclerViewDirectories);
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
 
             treePathRecyclerView = this.rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewHorizontalPath);
@@ -338,7 +337,7 @@ namespace Seeker
                 lock (filteredDataItemsForListView)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
-                    listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this, selectedPos);
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(filteredDataItemsForListView, this, selectedPos));
                 }
             }
             else
@@ -347,7 +346,7 @@ namespace Seeker
                 lock (dataItemsForListView)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
-                    listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this, selectedPos);
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(dataItemsForListView, this, selectedPos));
                 }
             }
 
@@ -553,7 +552,7 @@ namespace Seeker
 
         public override void OnSaveInstanceState(Bundle outState)
         {
-            outState.PutIntArray("selectedPositions", (this.listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.ToArray());
+            outState.PutIntArray("selectedPositions", (this.recyclerViewDirectories?.GetAdapter() as BrowseAdapter)?.SelectedPositions?.ToArray());
             base.OnSaveInstanceState(outState);
         }
 
@@ -612,10 +611,10 @@ namespace Seeker
                 BrowseResponseReceivedUI_Handler(null, new EventArgs());
             }
             Instance = this;
-            if (listViewDirectories != null && ScrollPositionRestoreRotate != null)
+            if (recyclerViewDirectories != null && browseLayoutManager != null && ScrollPositionRestoreRotate != null)
             {
                 //restore scroll
-                listViewDirectories.SetSelectionFromTop(ScrollPositionRestoreRotate.Item1, ScrollPositionRestoreRotate.Item2);
+                browseLayoutManager.ScrollToPositionWithOffset(ScrollPositionRestoreRotate.Item1, ScrollPositionRestoreRotate.Item2);
             }
             isPaused = false;
         }
@@ -659,9 +658,9 @@ namespace Seeker
                 BrowseFilter.Reset();
                 lock (dataItemsForListView) //collection was modified exception here...
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, dataItemsForListView, this);
-                    ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                    lv.Adapter = (customAdapter);
+                    BrowseAdapter customAdapter = new BrowseAdapter(dataItemsForListView, this);
+                    RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+                    rv.SetAdapter(customAdapter);
                 }
             }
 
@@ -720,7 +719,7 @@ namespace Seeker
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Long);
             }
-            else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
+            else if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
@@ -733,7 +732,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < filteredDataItemsForListView.Count; i++)
                         {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
                             {
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -755,7 +754,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < dataItemsForListView.Count; i++)
                         {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -781,7 +780,7 @@ namespace Seeker
                     linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
                 }
                 CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
-                if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
+                if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Count > 1)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinksCopied), ToastLength.Short);
                 }
@@ -800,7 +799,7 @@ namespace Seeker
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
             }
-            else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
+            else if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
@@ -813,7 +812,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < filteredDataItemsForListView.Count; i++)
                         {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
                             {
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -835,7 +834,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < dataItemsForListView.Count; i++)
                         {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
+                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -1082,7 +1081,7 @@ namespace Seeker
                 {
                     itemSelected = filteredDataItemsForListView[position];
                 }
-                catch (IndexOutOfRangeException) //this did happen to me.... when filtering...
+                catch (ArgumentOutOfRangeException) //this did happen to me.... when filtering...
                 {
                     string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count}";
                     Logger.Firebase(logMsg);
@@ -1097,7 +1096,7 @@ namespace Seeker
                 {
                     itemSelected = dataItemsForListView[position]; //out of bounds here...
                 }
-                catch (IndexOutOfRangeException)
+                catch (ArgumentOutOfRangeException)
                 {
                     string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count} isFilter {filteredResults}";
                     Logger.Firebase(logMsg);
@@ -1107,34 +1106,24 @@ namespace Seeker
             return itemSelected;
         }
         public static int ItemPositionLongClicked = -1;
-        private void ListViewDirectories_ItemLongClick(object sender, AdapterView.ItemLongClickEventArgs e)
+        public void OnItemLongClick(int position, View view)
         {
             bool filteredResults = BrowseFilter.IsFiltered;
-            DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
+            DataItem itemSelected = GetItemSelected(position, filteredResults);
             if (itemSelected == null)
             {
                 return;
             }
             if (itemSelected.IsDirectory())
             {
-                e.Handled = true;
-                //show options
-                //SeekerState.ActiveActivityRef.Open
-                //this.RegisterForContextMenu(e.View);
-                ItemPositionLongClicked = e.Position;
+                ItemPositionLongClicked = position;
                 Logger.InfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
-                this.listViewDirectories.ShowContextMenu();
-                //BrowseFragment.Instance.Context
-
-                //e.Handled = true;
-                //e.View.ShowContextMenu(); //causes stack overflow...
-                //this.UnregisterForContextMenu(e.View);
-
+                view.ShowContextMenu();
             }
             else
             {
                 //no special long click event if file.
-                this.ListViewDirectories_ItemClick(sender, new AdapterView.ItemClickEventArgs(e.Parent, e.View, e.Position, e.Id));
+                this.OnItemClick(position);
             }
         }
 
@@ -1165,11 +1154,11 @@ namespace Seeker
             }
         }
 
-        private void ListViewDirectories_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        public void OnItemClick(int position)
         {
             cachedFilteredDataItemsForListView = null;
             bool filteredResults = BrowseFilter.IsFiltered;
-            DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
+            DataItem itemSelected = GetItemSelected(position, filteredResults);
             if (itemSelected == null)
             {
                 return;
@@ -1178,7 +1167,6 @@ namespace Seeker
             bool isFile = false;
             lock (dataItemsForListView)
             {
-                //DataItem itemSelected = dataItemsForListView[e.Position];
                 if (itemSelected.IsDirectory())
                 {
                     if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
@@ -1194,26 +1182,23 @@ namespace Seeker
                     if (!filteredResults)
                     {
                         SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
-                        //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
                     }
                 }
                 else
                 {
                     isFile = true;
 
-
-                    bool alreadySelected = (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains<int>(e.Position);
+                    var adapter = (recyclerViewDirectories.GetAdapter() as BrowseAdapter);
+                    bool alreadySelected = adapter.SelectedPositions.Contains(position);
                     if (!alreadySelected)
                     {
-                        (e.View as BrowseResponseItemView).SetSelectedBackground(true);
-                        (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Add(e.Position);
+                        adapter.SelectedPositions.Add(position);
                     }
                     else
                     {
-                        (e.View as BrowseResponseItemView).SetSelectedBackground(false);
-                        (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Remove(e.Position);
+                        adapter.SelectedPositions.Remove(position);
                     }
-
+                    adapter.NotifyItemChanged(position);
                 }
 
             }
@@ -1232,17 +1217,14 @@ namespace Seeker
         private void ClearAllSelectedPositions()
         {
             //nullref crash was here.. not worth crashing over...
-            if (listViewDirectories == null)
+            if (recyclerViewDirectories == null)
             {
                 return;
             }
-            for (int i = 0; i < listViewDirectories.Count; i++)
+            var adapter = recyclerViewDirectories.GetAdapter() as BrowseAdapter;
+            if (adapter != null)
             {
-                View v = listViewDirectories.GetChildAt(i);
-                if (v != null)
-                {
-                    listViewDirectories.GetChildAt(i).Background = null;
-                }
+                adapter.NotifyDataSetChanged();
             }
         }
 
@@ -1339,11 +1321,11 @@ namespace Seeker
             if (toFilter)
             {
                 filteredDataItemsForListView = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
-                listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this);
+                recyclerViewDirectories.SetAdapter(new BrowseAdapter(filteredDataItemsForListView, this));
             }
             else
             {
-                listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
+                recyclerViewDirectories.SetAdapter(new BrowseAdapter(dataItemsForListView, this));
             }
 
             var items = BrowseUtils.GetPathItems(dataItemsForListView);
@@ -1548,13 +1530,12 @@ namespace Seeker
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
             }
-            listViewDirectories = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-            //if(!tempHackItemClick)
-            //{
-            listViewDirectories.ItemClick -= ListViewDirectories_ItemClick;
-            listViewDirectories.ItemClick += ListViewDirectories_ItemClick;
-            listViewDirectories.ItemLongClick -= ListViewDirectories_ItemLongClick;
-            listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
+            recyclerViewDirectories = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+            if (browseLayoutManager == null)
+            {
+                browseLayoutManager = new LinearLayoutManager(this.Context);
+                recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
+            }
 
 
 
