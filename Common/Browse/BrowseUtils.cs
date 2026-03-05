@@ -321,6 +321,23 @@ namespace Common.Browse
             }
             return count;
         }
+        public static List<DataItem> GetDataItemsForNode(TreeNode<Directory> node)
+        {
+            var items = new List<DataItem>();
+            foreach (TreeNode<Directory> child in node.Children)
+            {
+                items.Add(new DataItem(child.Data, child));
+            }
+            if (node.Data != null && node.Data.FileCount != 0)
+            {
+                foreach (Soulseek.File f in node.Data.OrderedFiles)
+                {
+                    items.Add(new DataItem(f, node));
+                }
+            }
+            return items;
+        }
+
         public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
         {
             if (rootTree.Data.Name == nameToFindDirName)

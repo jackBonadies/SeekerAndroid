@@ -964,28 +964,7 @@ namespace Seeker
         private void PopulateDataItemsToItemSelected(List<DataItem> dirs, DataItem itemSelected)
         {
             dirs.Clear();
-            if (itemSelected.Node.Children.Count != 0) //then more directories
-            {
-                foreach (TreeNode<Directory> d in itemSelected.Node.Children)
-                {
-                    dirs.Add(new DataItem(d.Data, d));
-                }
-                //here we do files as well......
-                if (itemSelected.Directory != null && itemSelected.Directory.FileCount != 0)
-                {
-                    foreach (File f in itemSelected.Directory.OrderedFiles)
-                    {
-                        dirs.Add(new DataItem(f, itemSelected.Node));
-                    }
-                }
-            }
-            else
-            {
-                foreach (File f in itemSelected.Directory.OrderedFiles)
-                {
-                    dirs.Add(new DataItem(f, itemSelected.Node));
-                }
-            }
+            dirs.AddRange(BrowseUtils.GetDataItemsForNode(itemSelected.Node));
         }
 
         public void OnItemClick(int position)
@@ -1106,20 +1085,7 @@ namespace Seeker
                     item = item.Parent;
                 }
                 dataItemsForListView.Clear();
-
-                foreach (TreeNode<Directory> d in item.Children) //nullref TODO TODO
-                {
-                    dataItemsForListView.Add(new DataItem(d.Data, d));
-                }
-
-                //here we do files as well......
-                if (item.Data != null && item.Data.FileCount != 0)
-                {
-                    foreach (File f in item.Data.OrderedFiles)
-                    {
-                        dataItemsForListView.Add(new DataItem(f, item));
-                    }
-                }
+                dataItemsForListView.AddRange(BrowseUtils.GetDataItemsForNode(item));
                 if (!filteredResults)
                 {
                     SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
@@ -1288,35 +1254,11 @@ namespace Seeker
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
-                    //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
-                    foreach (TreeNode<Directory> d in startingPoint.Children)
-                    {
-                        dataItemsForListView.Add(new DataItem(d.Data, d));
-                    }
-                    //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
-
-
-                    foreach (File f in startingPoint.Data.OrderedFiles)
-                    {
-                        dataItemsForListView.Add(new DataItem(f, startingPoint));
-                    }
+                    dataItemsForListView.AddRange(BrowseUtils.GetDataItemsForNode(startingPoint));
                 }
                 else
                 {
-                    foreach (TreeNode<Directory> d in e.BrowseResponseTree.Children)
-                    {
-                        dataItemsForListView.Add(new DataItem(d.Data, d));
-                    }
-
-                    //here we do files as well......  **I added this bc on your first browse you will not get any root dir files....
-                    if (e.BrowseResponseTree.Data != null && e.BrowseResponseTree.Data.FileCount != 0)
-                    {
-                        foreach (File f in e.BrowseResponseTree.Data.OrderedFiles)
-                        {
-                            dataItemsForListView.Add(new DataItem(f, e.BrowseResponseTree));
-                        }
-                    }
-                    //**I added this bc on your first browse you will not get any root dir files....
+                    dataItemsForListView.AddRange(BrowseUtils.GetDataItemsForNode(e.BrowseResponseTree));
                 }
             }
 
