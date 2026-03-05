@@ -786,16 +786,16 @@ namespace Seeker
             }
         }
 
-        private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recusiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly, bool queuePaused)
+        private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recursiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly, bool queuePaused)
         {
             if (downloadSubfolders)
             {
-                if (recusiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
+                if (recursiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
                 {
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                Browse.BrowseService.DownloadListOfFiles(recusiveFullFileInfo, queuePaused, CurrentUsername);
+                Browse.BrowseService.DownloadListOfFiles(recursiveFullFileInfo, queuePaused, CurrentUsername);
             }
             else
             {
@@ -819,7 +819,7 @@ namespace Seeker
             bool containsSubDirs = false;
             int totalItems = -1; //this one we set.
             int toplevelItems = 0; //this one we increment.
-            List<FullFileInfo> recusiveFullFileInfo = new List<FullFileInfo>();
+            List<FullFileInfo> recursiveFullFileInfo = new List<FullFileInfo>();
             List<FullFileInfo> topLevelFullFileInfoOnly = new List<FullFileInfo>();
             if (!justFilteredItems)
             {
@@ -845,8 +845,8 @@ namespace Seeker
                 }
                 if (containsSubDirs)
                 {
-                    recusiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(dataItemsForDownload);
-                    totalItems = recusiveFullFileInfo.Count;
+                    recursiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(dataItemsForDownload);
+                    totalItems = recursiveFullFileInfo.Count;
                 }
             }
             else
@@ -873,8 +873,8 @@ namespace Seeker
                 }
                 if (containsSubDirs)
                 {
-                    recusiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(filteredDataItemsForDownload);
-                    totalItems = recusiveFullFileInfo.Count;
+                    recursiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(filteredDataItemsForDownload);
+                    totalItems = recursiveFullFileInfo.Count;
                 }
             }
 
@@ -914,7 +914,7 @@ namespace Seeker
                 }
                 EventHandler<DialogClickEventArgs> eventHandlerCurrentFolder = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
+                    DownloadUserFilesEntryStage3(false, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
@@ -922,14 +922,14 @@ namespace Seeker
                     {
                         if (!justFilteredItems)
                         {
-                            BrowseUtils.SetDepthTags(dataItemsForDownload.First(), recusiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(dataItemsForDownload.First(), recursiveFullFileInfo);
                         }
                         else
                         {
-                            BrowseUtils.SetDepthTags(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(filteredDataItemsForDownload.First(), recursiveFullFileInfo);
                         }
                     }
-                    DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
+                    DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
                 builder.SetNegativeButton(Resource.String.current_folder_only, eventHandlerCurrentFolder);
@@ -937,7 +937,7 @@ namespace Seeker
             }
             else
             {
-                DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
+                DownloadUserFilesEntryStage3(false, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
             }
         }
 
@@ -1394,9 +1394,9 @@ namespace Seeker
                 //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
                 if (e.StartingLocation != null && e.StartingLocation != string.Empty)
                 {
-                    var staringPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
+                    var startingPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
 
-                    if (staringPoint == null)
+                    if (startingPoint == null)
                     {
                         Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null");
                         SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
@@ -1404,16 +1404,16 @@ namespace Seeker
                     }
 
                     //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
-                    foreach (TreeNode<Directory> d in staringPoint.Children)
+                    foreach (TreeNode<Directory> d in startingPoint.Children)
                     {
                         dataItemsForListView.Add(new DataItem(d.Data, d));
                     }
                     //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
 
 
-                    foreach (File f in staringPoint.Data.OrderedFiles)
+                    foreach (File f in startingPoint.Data.OrderedFiles)
                     {
-                        dataItemsForListView.Add(new DataItem(f, staringPoint));
+                        dataItemsForListView.Add(new DataItem(f, startingPoint));
                     }
                 }
                 else
