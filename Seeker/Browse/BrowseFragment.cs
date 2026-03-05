@@ -760,6 +760,34 @@ namespace Seeker
             }
         }
 
+        private (List<FullFileInfo> topLevel, List<FullFileInfo> recursive, bool containsSubDirs) BuildDownloadFileInfos(bool justFilteredItems)
+        {
+            bool containsSubDirs = false;
+            var topLevel = new List<FullFileInfo>();
+            var sourceList = justFilteredItems ? filteredDataItemsForDownload : dataItemsForDownload;
+            lock (sourceList)
+            {
+                foreach (DataItem d in sourceList)
+                {
+                    if (d.IsDirectory())
+                    {
+                        containsSubDirs = true;
+                    }
+                    else
+                    {
+                        FullFileInfo f = new FullFileInfo();
+                        f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
+                        f.Size = d.File.Size;
+                        f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
+                        f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
+                        topLevel.Add(f);
+                    }
+                }
+            }
+            var recursive = containsSubDirs ? BrowseUtils.GetRecursiveFullFileInfo(sourceList) : new List<FullFileInfo>();
+            return (topLevel, recursive, containsSubDirs);
+        }
+
         private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
         {
             if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
@@ -768,67 +796,9 @@ namespace Seeker
                 return;
             }
 
-            bool containsSubDirs = false;
-            int totalItems = -1; //this one we set.
-            int toplevelItems = 0; //this one we increment.
-            List<FullFileInfo> recursiveFullFileInfo = new List<FullFileInfo>();
-            List<FullFileInfo> topLevelFullFileInfoOnly = new List<FullFileInfo>();
-            if (!justFilteredItems)
-            {
-                lock (dataItemsForDownload)
-                {
-                    foreach (DataItem d in dataItemsForDownload)
-                    {
-                        if (d.IsDirectory())
-                        {
-                            containsSubDirs = true;
-                        }
-                        else
-                        {
-                            FullFileInfo f = new FullFileInfo();
-                            f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                            f.Size = d.File.Size;
-                            f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                            f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                            topLevelFullFileInfoOnly.Add(f);
-                            toplevelItems++;
-                        }
-                    }
-                }
-                if (containsSubDirs)
-                {
-                    recursiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(dataItemsForDownload);
-                    totalItems = recursiveFullFileInfo.Count;
-                }
-            }
-            else
-            {
-                lock (filteredDataItemsForDownload)
-                {
-                    foreach (DataItem d in filteredDataItemsForDownload)
-                    {
-                        if (d.IsDirectory())
-                        {
-                            containsSubDirs = true;
-                        }
-                        else
-                        {
-                            FullFileInfo f = new FullFileInfo();
-                            f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                            f.Size = d.File.Size;
-                            f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                            f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                            topLevelFullFileInfoOnly.Add(f);
-                            toplevelItems++;
-                        }
-                    }
-                }
-                if (containsSubDirs)
-                {
-                    recursiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(filteredDataItemsForDownload);
-                    totalItems = recursiveFullFileInfo.Count;
-                }
-            }
+            var (topLevelFullFileInfoOnly, recursiveFullFileInfo, containsSubDirs) = BuildDownloadFileInfos(justFilteredItems);
+            int toplevelItems = topLevelFullFileInfoOnly.Count;
+            int totalItems = recursiveFullFileInfo.Count;
 
             //show message with total num of files...
             if (containsSubDirs)
