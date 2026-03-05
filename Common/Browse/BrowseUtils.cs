@@ -338,6 +338,25 @@ namespace Common.Browse
             return items;
         }
 
+        public static (List<FullFileInfo> topLevel, List<FullFileInfo> recursive, bool containsSubDirs) BuildDownloadFileInfos(List<DataItem> sourceList)
+        {
+            bool containsSubDirs = false;
+            var topLevel = new List<FullFileInfo>();
+            foreach (DataItem d in sourceList)
+            {
+                if (d.IsDirectory())
+                {
+                    containsSubDirs = true;
+                }
+                else
+                {
+                    topLevel.Add(ToFullFileInfo(d));
+                }
+            }
+            var recursive = containsSubDirs ? GetRecursiveFullFileInfo(sourceList) : new List<FullFileInfo>();
+            return (topLevel, recursive, containsSubDirs);
+        }
+
         public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
         {
             if (rootTree.Data.Name == nameToFindDirName)

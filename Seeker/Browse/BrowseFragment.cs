@@ -750,25 +750,11 @@ namespace Seeker
 
         private (List<FullFileInfo> topLevel, List<FullFileInfo> recursive, bool containsSubDirs) BuildDownloadFileInfos(bool justFilteredItems)
         {
-            bool containsSubDirs = false;
-            var topLevel = new List<FullFileInfo>();
             var sourceList = justFilteredItems ? filteredDataItemsForDownload : dataItemsForDownload;
             lock (sourceList)
             {
-                foreach (DataItem d in sourceList)
-                {
-                    if (d.IsDirectory())
-                    {
-                        containsSubDirs = true;
-                    }
-                    else
-                    {
-                        topLevel.Add(BrowseUtils.ToFullFileInfo(d));
-                    }
-                }
+                return BrowseUtils.BuildDownloadFileInfos(sourceList);
             }
-            var recursive = containsSubDirs ? BrowseUtils.GetRecursiveFullFileInfo(sourceList) : new List<FullFileInfo>();
-            return (topLevel, recursive, containsSubDirs);
         }
 
         private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
