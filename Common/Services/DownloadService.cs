@@ -934,42 +934,30 @@ namespace Seeker.Services
             }
         }
 
-        public void DownloadRetryAllConditionLogic(bool selectFailed, bool all, FolderItem specifiedFolderOnly, bool batchSelectedOnly, List<TransferItem> batchSelectedTis = null) //if true DownloadRetryAllFailed if false Resume All Paused. if not all then specified folder
+        public void RetryAllFailed()
+        {
+            DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfFailed().Select(tup => tup.Item1));
+        }
+
+        public void ResumeAllPaused()
+        {
+            DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfPaused().Select(tup => tup.Item1));
+        }
+
+        public void RetryFailedFromFolder(FolderItem folder)
+        {
+            DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfFailedFromFolder(folder).Select(tup => tup.Item1));
+        }
+
+        public void ResumePausedFromFolder(FolderItem folder)
+        {
+            DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfPausedFromFolder(folder).Select(tup => tup.Item1));
+        }
+
+        public void DownloadRetryAll(IEnumerable<TransferItem> transferItemConditionList)
         {
             var TransferItemManagerDL = TransferItems.TransferItemManagerDL;
             var ViewState = TransfersViewState.Instance;
-
-            IEnumerable<TransferItem> transferItemConditionList = new List<TransferItem>();
-            if (batchSelectedOnly)
-            {
-                if (batchSelectedTis == null)
-                {
-                    throw new System.Exception("No batch selected transfer items provided");
-                }
-                transferItemConditionList = batchSelectedTis;
-            }
-            else if (all)
-            {
-                if (selectFailed)
-                {
-                    transferItemConditionList = TransferItemManagerDL.GetListOfFailed().Select(tup => tup.Item1);
-                }
-                else
-                {
-                    transferItemConditionList = TransferItemManagerDL.GetListOfPaused().Select(tup => tup.Item1);
-                }
-            }
-            else
-            {
-                if (selectFailed)
-                {
-                    transferItemConditionList = TransferItemManagerDL.GetListOfFailedFromFolder(specifiedFolderOnly).Select(tup => tup.Item1);
-                }
-                else
-                {
-                    transferItemConditionList = TransferItemManagerDL.GetListOfPausedFromFolder(specifiedFolderOnly).Select(tup => tup.Item1);
-                }
-            }
             bool exceptionShown = false;
             foreach (TransferItem item in transferItemConditionList)
             {

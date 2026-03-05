@@ -204,6 +204,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
                     Logger.InfoFirebase("Clear All Complete Pressed");
+                    // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         TransferItems.TransferItemManagerDL.ClearAllComplete();
@@ -228,6 +229,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
                     Logger.InfoFirebase("Clear All Complete Pressed");
+                    // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
                         TransferItems.TransferItemManagerUploads.ClearAllComplete();
@@ -245,6 +247,7 @@ namespace Seeker
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         TransferItems.TransferItemManagerDL.CancelAll(true);
@@ -262,6 +265,7 @@ namespace Seeker
                 case Resource.Id.action_abort_all: //abort all
                     Logger.InfoFirebase("action_abort_all_pressed");
                     SeekerState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
                         TransferItems.TransferItemManagerUploads.CancelAll();
@@ -275,6 +279,7 @@ namespace Seeker
                 case Resource.Id.action_pause_all:
                     Logger.InfoFirebase("pause all Pressed");
                     SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
                         TransferItems.TransferItemManagerDL.CancelAll();
@@ -287,16 +292,13 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_resume_all:
                     Logger.InfoFirebase("resume all Pressed");
+                    // TODO: move to helper (either TranferItemManager or Wrapper)
                     SessionService.Instance.RunWithReconnect(() =>
                     {
                         if (ViewState.CurrentlySelectedDLFolder == null)
-                        {
-                            DownloadService.Instance.DownloadRetryAllConditionLogic(false, true, null, false);
-                        }
+                            DownloadService.Instance.ResumeAllPaused();
                         else
-                        {
-                            DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, ViewState.CurrentlySelectedDLFolder, false);
-                        }
+                            DownloadService.Instance.ResumePausedFromFolder(ViewState.CurrentlySelectedDLFolder);
                     });
                     return true;
                 case Resource.Id.retry_all_failed:
@@ -322,13 +324,20 @@ namespace Seeker
             Logger.InfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
             SessionService.Instance.RunWithReconnect(() =>
             {
-                if (ViewState.CurrentlySelectedDLFolder == null)
+                if (batchSelectedOnly)
                 {
-                    DownloadService.Instance.DownloadRetryAllConditionLogic(failed, true, null, batchSelectedOnly, listTi);
+                    DownloadService.Instance.DownloadRetryAll(listTi);
+                }
+                else if (ViewState.CurrentlySelectedDLFolder == null)
+                {
+                    if (failed) DownloadService.Instance.RetryAllFailed();
+                    else        DownloadService.Instance.ResumeAllPaused();
                 }
                 else
                 {
-                    DownloadService.Instance.DownloadRetryAllConditionLogic(failed, false, ViewState.CurrentlySelectedDLFolder, batchSelectedOnly, listTi);
+                    var folder = ViewState.CurrentlySelectedDLFolder;
+                    if (failed) DownloadService.Instance.RetryFailedFromFolder(folder);
+                    else        DownloadService.Instance.ResumePausedFromFolder(folder);
                 }
             });
         }
@@ -936,7 +945,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("resume folder Pressed");
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, ti as FolderItem, false));
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.ResumePausedFromFolder(ti as FolderItem));
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
@@ -949,7 +958,7 @@ namespace Seeker
                             return true;
                         }
                         Logger.InfoFirebase("retry folder Pressed");
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.DownloadRetryAllConditionLogic(true, false, ti as FolderItem, false));
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.RetryFailedFromFolder(ti as FolderItem));
                         break;
                     case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");

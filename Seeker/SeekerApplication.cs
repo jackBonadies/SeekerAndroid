@@ -2222,7 +2222,7 @@ namespace Seeker
                         {
                             try
                             {
-                                Seeker.Services.DownloadService.Instance.DownloadRetryAllConditionLogic(false, false, null, true, items);
+                                Seeker.Services.DownloadService.Instance.DownloadRetryAll(items);
                             }
                             catch (Exception e)
                             {
