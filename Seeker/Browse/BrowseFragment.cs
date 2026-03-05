@@ -61,14 +61,12 @@ namespace Seeker
         private static List<PathItem> pathItems = new List<PathItem>();
         public static string CurrentUsername;
         private static Tuple<string, List<DataItem>> cachedFilteredDataItemsForListView = null;//to help with superSetQueries new Tuple<string, List<DataItem>>; 
-        private static int diagnostics_count;
         private static List<DataItem> filteredDataItemsForListView = new List<DataItem>();
 
         private static List<DataItem> dataItemsForDownload = null;
         private static List<DataItem> filteredDataItemsForDownload = null;
         private DataItem DataItemSelectedForLongClick = null;
 
-        private static string username = "";
         private bool isPaused = true;
         private View noBrowseView = null;
         private View separator = null;
@@ -77,9 +75,8 @@ namespace Seeker
 
 
         private static TextFilter BrowseFilter = new TextFilter();
-        public static List<int> SelectedPositionsState = new List<int>(); //this is used for restoring our state.  if its an empty list then thats fine, its just like if we didnt have one..
-        public static System.Timers.Timer DebounceTimer = null;
-        public static System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
+        private System.Timers.Timer DebounceTimer = null;
+        private System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
         public static long lastTime = -1;
 
         public BrowseFragment() : base()
@@ -180,7 +177,7 @@ namespace Seeker
         {
             int numSelected = (recyclerViewDirectories?.GetAdapter() as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
 
-            UiHelpers.SetMenuTitles(menu, username);
+            UiHelpers.SetMenuTitles(menu, CurrentUsername);
 
             if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
             {
@@ -214,7 +211,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), CurrentUsername, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -259,10 +256,10 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
-                    UserListService.AddUserAPI(SeekerState.MainActivityRef, username, null);
+                    UserListService.AddUserAPI(SeekerState.MainActivityRef, CurrentUsername, null);
                     return true;
                 case Resource.Id.action_get_user_info:
-                    RequestedUserInfoHelper.RequestUserInfoApi(username);
+                    RequestedUserInfoHelper.RequestUserInfoApi(CurrentUsername);
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -302,7 +299,7 @@ namespace Seeker
         /// <returns></returns>
         public bool IsResponseLoaded()
         {
-            return !string.IsNullOrEmpty(username); //(dataItemsForListView.Count != 0);
+            return !string.IsNullOrEmpty(CurrentUsername); //(dataItemsForListView.Count != 0);
         }
         public static BrowseFragment Instance = null;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -848,7 +845,7 @@ namespace Seeker
                         }
                     }
                 }
-                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start());
+                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, CurrentUsername).Start());
             }
         }
 
@@ -861,7 +858,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                Browse.BrowseService.DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
+                Browse.BrowseService.DownloadListOfFiles(recusiveFullFileInfo, queuePaused, CurrentUsername);
             }
             else
             {
@@ -870,7 +867,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                     return;
                 }
-                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
+                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, CurrentUsername);
             }
         }
 
@@ -1353,12 +1350,16 @@ namespace Seeker
         //https://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
         //onContextItemSelected() is called for all currently existing fragments starting with the first added one.
         public const int UNIQUE_BROWSE_GROUP_ID = 304;
+        private const int CONTEXT_DOWNLOAD_FOLDER = 0;
+        private const int CONTEXT_QUEUE_FOLDER_PAUSED = 1;
+        private const int CONTEXT_SHOW_FOLDER_INFO = 2;
+        private const int CONTEXT_COPY_URL = 3;
         public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 0, 0, Resource.String.download_folder);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 1, 1, Resource.String.QueueFolderAsPaused);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 2, 2, Resource.String.ShowFolderInfo);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 3, 3, Resource.String.CopyURL);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_DOWNLOAD_FOLDER, CONTEXT_DOWNLOAD_FOLDER, Resource.String.download_folder);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_QUEUE_FOLDER_PAUSED, CONTEXT_QUEUE_FOLDER_PAUSED, Resource.String.QueueFolderAsPaused);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_SHOW_FOLDER_INFO, CONTEXT_SHOW_FOLDER_INFO, Resource.String.ShowFolderInfo);
+            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_COPY_URL, CONTEXT_COPY_URL, Resource.String.CopyURL);
             base.OnCreateContextMenu(menu, v, menuInfo);
         }
 
@@ -1368,18 +1369,17 @@ namespace Seeker
             {
                 switch (item.ItemId)
                 {
-                    case 0:
+                    case CONTEXT_DOWNLOAD_FOLDER:
                         DownloadUserFilesEntry(false, false, DataItemSelectedForLongClick);
                         return true;
-                    case 1:
+                    case CONTEXT_QUEUE_FOLDER_PAUSED:
                         DownloadUserFilesEntry(true, false, DataItemSelectedForLongClick);
                         return true;
-                    case 2:
+                    case CONTEXT_SHOW_FOLDER_INFO:
                         var folderSummary = BrowseUtils.GetFolderSummary(DataItemSelectedForLongClick);
                         ShowFolderSummaryDialog(folderSummary);
                         return true;
-                    case 3:
-                        //bool isDir = itemSelected.IsDirectory();
+                    case CONTEXT_COPY_URL:
                         string slskLink = CommonHelpers.CreateSlskLink(true, DataItemSelectedForLongClick.Directory.Name, currentUsernameUI);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
@@ -1463,14 +1463,12 @@ namespace Seeker
             filteredDataItemsForListView = new List<DataItem>();
             cachedFilteredDataItemsForListView = null;
             CurrentUsername = e.Username;
-            diagnostics_count = e.OriginalBrowseResponse.DirectoryCount;
             //OriginalBrowseResponse = e.OriginalBrowseResponse;
             //OurCurrentLocation = e.BrowseResponseTree; //aka root
             lock (dataItemsForListView) //on non UI thread.
             {
                 dataItemsForListView.Clear();//clear old
                 //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
-                username = e.Username;
                 if (e.StartingLocation != null && e.StartingLocation != string.Empty)
                 {
                     var staringPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
