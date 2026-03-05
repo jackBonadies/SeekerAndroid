@@ -320,7 +320,7 @@ namespace Seeker
         {
             //get the batch selected transfer items ahead of time, because the next thing we do is clear the batch selected indices
             //AND also the user can add or clear transfers in the case where we continue on logging in for this, so the positions will be wrong..
-            var listTi = batchSelectedOnly ? GetBatchSelectedItemsForRetryCondition(failed) : null;
+            var listTi = batchSelectedOnly ? TransferItems.TransferItemManagerDL.GetBatchSelectedForRetryCondition(ViewState.CreateDLUIState(), failed) : null;
             Logger.InfoFirebase("retry all failed Pressed batch? " + batchSelectedOnly);
             SessionService.Instance.RunWithReconnect(() =>
             {
@@ -580,54 +580,11 @@ namespace Seeker
             refreshListView(specificRefreshAction);
         }
 
-        // TODO Move
-        private List<TransferItem> GetBatchSelectedItemsForRetryCondition(bool selectFailed)
-        {
-            bool folderItems = false;
-            if (ViewState.GroupByFolder && !ViewState.CurrentlyInFolder())
-            {
-                folderItems = true;
-            }
-            var uiState = ViewState.CreateDLUIState();
-            List<TransferItem> tis = new List<TransferItem>();
-            foreach (int pos in ViewState.BatchSelectedItems)
-            {
-                if (folderItems)
-                {
-                    var fi = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as FolderItem;
-                    foreach (TransferItem ti in fi.TransferItems)
-                    {
-                        if (selectFailed && ti.Failed)
-                        {
-                            tis.Add(ti);
-                        }
-                        else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
-                        {
-                            tis.Add(ti);
-                        }
-                    }
-                }
-                else
-                {
-                    var ti = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(pos, uiState) as TransferItem;
-                    if (selectFailed && ti.Failed)
-                    {
-                        tis.Add(ti);
-                    }
-                    else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
-                    {
-                        tis.Add(ti);
-                    }
-                }
-            }
-            return tis;
-        }
 
-        // TODO
-        private void DownloadRetryLogic(ITransferItem transferItem)
+        private void DownloadRetryLogic(TransferItem transferItem)
         {
-            string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
-            string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
+            string chosenFname = transferItem.FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
+            string chosenUname = transferItem.Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             Logger.Debug("chosenFname? " + chosenFname);
             TransferItem item1 = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(chosenFname, chosenUname, out int _);
             int indexToRefresh = TransferItems.TransferItemManagerDL.GetUserIndexForTransferItem(item1, ViewState.CreateDLUIState());
@@ -728,7 +685,7 @@ namespace Seeker
                             return true;
                         }
 
-                        SessionService.Instance.RunWithReconnect(() => DownloadRetryLogic(ti));
+                        SessionService.Instance.RunWithReconnect(() => DownloadRetryLogic(ti as TransferItem));
                         //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
                         break;
                     case TransferContextMenuItem.ClearFromList:

@@ -182,6 +182,43 @@ namespace Seeker
             return transferItemConditionList;
         }
 
+        public List<TransferItem> GetBatchSelectedForRetryCondition(TransferUIState uiState, bool selectFailed)
+        {
+            bool folderItems = uiState.GroupByFolder && uiState.CurrentlySelectedFolder == null;
+            List<TransferItem> tis = new List<TransferItem>();
+            foreach (int pos in uiState.BatchSelectedItems)
+            {
+                if (folderItems)
+                {
+                    var fi = GetItemAtUserIndex(pos, uiState) as FolderItem;
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        if (selectFailed && ti.Failed)
+                        {
+                            tis.Add(ti);
+                        }
+                        else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                        {
+                            tis.Add(ti);
+                        }
+                    }
+                }
+                else
+                {
+                    var ti = GetItemAtUserIndex(pos, uiState) as TransferItem;
+                    if (selectFailed && ti.Failed)
+                    {
+                        tis.Add(ti);
+                    }
+                    else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                    {
+                        tis.Add(ti);
+                    }
+                }
+            }
+            return tis;
+        }
+
         public List<TransferItem> GetListOfCondition(TransferStates state)
         {
             List<TransferItem> transferItemConditionList = new List<TransferItem>();
