@@ -692,9 +692,7 @@ namespace Seeker
 
         public void MoveToUploadForNotif()
         {
-            ViewState.InUploadsMode = true;
-            ViewState.CurrentlySelectedDLFolder = null;
-            ViewState.CurrentlySelectedUploadFolder = null;
+            ViewState.SwitchToUploadsMode();
             this.RefreshForModeSwitch();
             SeekerState.MainActivityRef.InvalidateOptionsMenu();
         }
@@ -1485,66 +1483,50 @@ namespace Seeker
 
         private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
         {
-            bool needsRefresh = (e.ti.IsUpload() && ViewState.InUploadsMode) || (!(e.ti.IsUpload()) && !(ViewState.InUploadsMode));
-            if (!needsRefresh)
+            if (e.ti.IsUpload() != ViewState.InUploadsMode)
             {
                 return;
             }
-            if (e.percentComplete != 0)
+            if (e.percentComplete == 0)
             {
-                if (e.fullRefresh)
+                return;
+            }
+            if (e.fullRefresh)
+            {
+                Activity?.RunOnUiThread(refreshListViewSafe); //in case of rotation it is the ACTIVITY which will be null!!!!
+                return;
+            }
+            try
+            {
+                DateTime now = DateTime.UtcNow;
+                string throttleKey = e.ti.GetThrottleKey();
+                DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(throttleKey, now);
+                bool isNew = lastUpdated == now;
+                bool shouldUpdate = isNew
+                    || e.wasFailed
+                    || now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE;
+
+                if (!shouldUpdate)
                 {
-
-                    Action action = refreshListViewSafe;
-                    Activity?.RunOnUiThread(action); //in case of rotation it is the ACTIVITY which will be null!!!!
+                    return;
                 }
-                else
+
+                ProgressUpdatedThrottler[throttleKey] = now;
+
+                Activity?.RunOnUiThread(() =>
                 {
-                    try
+                    int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
+                    if (index == -1)
                     {
-                        DateTime now = DateTime.UtcNow;
-                        string throttleKey = e.ti.FullFilename + e.ti.Username;
-                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(throttleKey, now);
-                        bool isNew = lastUpdated == now;
-                        if (now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
-                        {
-                            ProgressUpdatedThrottler[throttleKey] = now;
-                        }
-                        else if (e.wasFailed)
-                        {
-                            //still update..
-                        }
-                        else
-                        {
-                            //there was a bug where there were multiple instances of tabspageradapter and one would always get their event handler before the other
-                            //basically updating a recyclerview that wasnt even visible, while the other was never getting to update due to the throttler.
-                            //this is fixed by attaching and dettaching the event handlers on start / stop.
-                            return;
-                        }
-
-
-                        Activity?.RunOnUiThread(() =>
-                        {
-                            int index = -1;
-                            index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
-                            if (index == -1)
-                            {
-                                Logger.Debug("Index is -1 TransferProgressUpdated");
-                                return;
-                            }
-                            Logger.Debug("UI THREAD TRANSFER PROGRESS UPDATED"); //this happens every 20ms.  so less often then tranfer progress updated.  usually 6 of those can happen before 2 of these.
-                            refreshItemProgress(index, e.ti.Progress, e.ti, e.wasFailed, e.avgspeedBytes);
-
-                        });
-
-
-
+                        Logger.Debug("Index is -1 TransferProgressUpdated");
+                        return;
                     }
-                    catch (System.Exception error)
-                    {
-                        Logger.Firebase(error.Message + " partial update");
-                    }
-                }
+                    refreshItemProgress(index, e.ti.Progress, e.ti, e.wasFailed, e.avgspeedBytes);
+                });
+            }
+            catch (System.Exception error)
+            {
+                Logger.Firebase(error.Message + " partial update");
             }
         }
 

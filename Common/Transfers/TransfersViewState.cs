@@ -8,8 +8,8 @@ namespace Seeker
 
         public bool GroupByFolder;
         public volatile bool InUploadsMode;
-        public FolderItem CurrentlySelectedDLFolder;
-        public FolderItem CurrentlySelectedUploadFolder;
+        public FolderItem? CurrentlySelectedDLFolder;
+        public FolderItem? CurrentlySelectedUploadFolder;
         public List<int> BatchSelectedItems = new List<int>();
         public int ScrollPositionBeforeMovingIntoFolder = int.MinValue;
         public int ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
@@ -19,7 +19,7 @@ namespace Seeker
             return CurrentlySelectedDLFolder != null || CurrentlySelectedUploadFolder != null;
         }
 
-        public FolderItem GetCurrentlySelectedFolder()
+        public FolderItem? GetCurrentlySelectedFolder()
         {
             if (InUploadsMode)
                 return CurrentlySelectedUploadFolder;
@@ -35,6 +35,16 @@ namespace Seeker
                 CurrentlySelectedFolder = CurrentlySelectedDLFolder,
                 BatchSelectedItems = BatchSelectedItems,
             };
+        }
+
+        public void SwitchToUploadsMode()
+        {
+            InUploadsMode = true;
+            CurrentlySelectedDLFolder = null;
+            CurrentlySelectedUploadFolder = null;
+            BatchSelectedItems.Clear();
+            ScrollPositionBeforeMovingIntoFolder = int.MinValue;
+            ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
         }
     }
 }

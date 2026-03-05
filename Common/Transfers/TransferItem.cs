@@ -140,5 +140,10 @@ namespace Seeker
         {
             return WasFilenameLatin1Decoded;
         }
+
+        public string GetThrottleKey()
+        {
+            return Username + " : " + FullFilename;
+        }
     }
 }
