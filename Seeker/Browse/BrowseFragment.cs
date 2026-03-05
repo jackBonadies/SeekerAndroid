@@ -1382,6 +1382,19 @@ namespace Seeker
 
  
 
+        private void DismissKeyboard()
+        {
+            try
+            {
+                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
+            }
+            catch (System.Exception ex)
+            {
+                Logger.Firebase(ex.Message + " error closing keyboard");
+            }
+        }
+
         private static AndroidX.AppCompat.App.AlertDialog browseUserDialog = null;
 
         public void ShowEditTextBrowseUserDialog()
@@ -1445,22 +1458,13 @@ namespace Seeker
 
             System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
             {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
+                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
                 {
                     Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
+                    DismissKeyboard();
                     eventHandler(sender, null);
                 }
             };
@@ -1470,16 +1474,7 @@ namespace Seeker
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
                     Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
+                    DismissKeyboard();
                     eventHandler(sender, null);
                 }
                 else
