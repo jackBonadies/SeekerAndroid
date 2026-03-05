@@ -60,27 +60,22 @@ namespace Seeker
         private LinearLayoutManager treePathLayoutManager;
         private TreePathRecyclerAdapter treePathRecyclerAdapter;
 
-        private static List<DataItem> dataItemsForListView = new List<DataItem>();
-        private static List<PathItem> pathItems = new List<PathItem>();
-        public static string CurrentUsername;
-        private static Tuple<string, List<DataItem>> cachedFilteredDataItemsForListView = null;//to help with superSetQueries new Tuple<string, List<DataItem>>; 
-        private static List<DataItem> filteredDataItemsForListView = new List<DataItem>();
+        private static BrowseState state = new BrowseState();
+        public static BrowseState State => state;
+        public static string CurrentUsername { get => state.CurrentUsername; set => state.CurrentUsername = value; }
 
-        private static List<DataItem> dataItemsForDownload = null;
-        private static List<DataItem> filteredDataItemsForDownload = null;
+        private static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>();
+        private static Tuple<int, int> ScrollPositionRestoreRotate = null;
+
         private DataItem DataItemSelectedForLongClick = null;
 
         private bool isPaused = true;
         private View noBrowseView = null;
         private View separator = null;
-        public static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>(); //indexOfItem, topmargin. for going up/down dirs.
-        public static Tuple<int, int> ScrollPositionRestoreRotate = null; //for rotating..
 
-
-        private static TextFilter BrowseFilter = new TextFilter();
         private System.Timers.Timer DebounceTimer = null;
         private System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
-        public static long lastTime = -1;
+        private long lastTime = -1;
 
         public BrowseFragment() : base()
         {
@@ -151,9 +146,9 @@ namespace Seeker
             UpdateFilteredResponses(); // this is the expensive function...
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
+                    BrowseAdapter customAdapter = new BrowseAdapter(state.FilteredDataItems, this); //enumeration exception (that is, before I added the lock)
                     RecyclerView rv = rootView?.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
                     if (rv != null)
                     {
@@ -239,7 +234,7 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_show_folder_info:
-                    var folderSummary = BrowseUtils.GetFolderSummary(dataItemsForListView);
+                    var folderSummary = BrowseUtils.GetFolderSummary(state.DataItems);
                     ShowFolderSummaryDialog(folderSummary);
                     return true;
                 case Resource.Id.action_queue_selected_paused:
@@ -248,7 +243,7 @@ namespace Seeker
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_copy_folder_url:
-                    string fullDirName = dataItemsForListView[0].Node.Data.Name;
+                    string fullDirName = state.DataItems[0].Node.Data.Name;
                     string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
@@ -296,7 +291,7 @@ namespace Seeker
         /// <returns></returns>
         public bool IsResponseLoaded()
         {
-            return !string.IsNullOrEmpty(CurrentUsername); //(dataItemsForListView.Count != 0);
+            return !string.IsNullOrEmpty(CurrentUsername); //(state.DataItems.Count != 0);
         }
         public static BrowseFragment Instance = null;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -321,35 +316,35 @@ namespace Seeker
             //savedInstanceState can be null if first time.
             int[]? selectedPos = savedInstanceState?.GetIntArray("selectedPositions");
 
-            if (BrowseFilter.IsFiltered)
+            if (state.Filter.IsFiltered)
             {
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
-                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(filteredDataItemsForListView, this, selectedPos));
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this, selectedPos));
                 }
             }
             else
             {
-                lock (dataItemsForListView)
+                lock (state.DataItems)
                 { //on ui thread.
                     currentUsernameUI = CurrentUsername;
-                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(dataItemsForListView, this, selectedPos));
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this, selectedPos));
                 }
             }
 
-            if (dataItemsForListView.Count != 0)
+            if (state.DataItems.Count != 0)
             {
-                pathItems = BrowseUtils.GetPathItems(dataItemsForListView);
+                state.PathItems = BrowseUtils.GetPathItems(state.DataItems);
             }
 
-            treePathRecyclerAdapter = new TreePathRecyclerAdapter(pathItems, this);
+            treePathRecyclerAdapter = new TreePathRecyclerAdapter(state.PathItems, this);
             treePathRecyclerView.SetAdapter(treePathRecyclerAdapter);
 
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
-            if (BrowseFilter.IsFiltered || IsResponseLoaded()) // if we are filtering then we already know how it works..
+            if (state.Filter.IsFiltered || IsResponseLoaded()) // if we are filtering then we already know how it works..
             {
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
@@ -525,7 +520,7 @@ namespace Seeker
             //cant do this OnViewCreated since filterText.Text will always be empty...
             DebounceTimer.Stop();
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
-            filterText.Text = BrowseFilter.FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
+            filterText.Text = state.Filter.FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
             SearchFragment.UpdateDrawableState(filterText, true);
         }
 
@@ -538,7 +533,7 @@ namespace Seeker
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
 
-                lock (dataItemsForListView)
+                lock (state.DataItems)
                 {
                     if (BrowseFragment.Instance?.Context != null && BrowseFragment.Instance?.rootView != null)
                     {
@@ -592,7 +587,7 @@ namespace Seeker
 
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string oldFilterString = BrowseFilter.IsFiltered ? BrowseFilter.FilterString : string.Empty;
+            string oldFilterString = state.Filter.IsFiltered ? state.Filter.FilterString : string.Empty;
             Logger.Debug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
             if (e.Text != null && e.Text.ToString() != string.Empty && isPaused)
@@ -603,22 +598,22 @@ namespace Seeker
             Logger.Debug("Text Changed: " + e.Text);
             if (e.Text != null && e.Text.ToString() != string.Empty)
             {
-                BrowseFilter.Set(e.Text.ToString());
+                state.Filter.Set(e.Text.ToString());
 
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
                 //UpdateFilteredResponses(); // this is the expensive function...
-                //BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, filteredDataItemsForListView);
+                //BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, state.FilteredDataItems);
                 //ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
                 //lv.Adapter = (customAdapter);
             }
             else
             {
                 DebounceTimer.Stop();
-                BrowseFilter.Reset();
-                lock (dataItemsForListView) //collection was modified exception here...
+                state.Filter.Reset();
+                lock (state.DataItems) //collection was modified exception here...
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(dataItemsForListView, this);
+                    BrowseAdapter customAdapter = new BrowseAdapter(state.DataItems, this);
                     RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
                     rv.SetAdapter(customAdapter);
                 }
@@ -637,20 +632,20 @@ namespace Seeker
 
         private void UpdateFilteredResponses()
         {
-            lock (filteredDataItemsForListView)
+            lock (state.FilteredDataItems)
             {
-                filteredDataItemsForListView.Clear();
-                if (cachedFilteredDataItemsForListView != null && BrowseUtils.IsCurrentSearchMoreRestrictive(BrowseFilter.FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
+                state.FilteredDataItems.Clear();
+                if (state.CachedFilteredDataItems != null && BrowseUtils.IsCurrentSearchMoreRestrictive(state.Filter.FilterString, state.CachedFilteredDataItems.Item1))//is less restrictive than the current search)
                 {
-                    var test = BrowseUtils.FilterBrowseList(cachedFilteredDataItemsForListView.Item2, BrowseFilter);
-                    filteredDataItemsForListView.AddRange(test);
+                    var test = BrowseUtils.FilterBrowseList(state.CachedFilteredDataItems.Item2, state.Filter);
+                    state.FilteredDataItems.AddRange(test);
                 }
                 else
                 {
-                    var test = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
-                    filteredDataItemsForListView.AddRange(test);
+                    var test = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
+                    state.FilteredDataItems.AddRange(test);
                 }
-                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(BrowseFilter.FilterString, filteredDataItemsForListView.ToList());
+                state.CachedFilteredDataItems = new Tuple<string, List<DataItem>>(state.Filter.FilterString, state.FilteredDataItems.ToList());
             }
         }
 
@@ -663,7 +658,7 @@ namespace Seeker
         {
             var result = new List<FullFileInfo>();
             var selectedPositions = BrowseAdapterInstance.SelectedPositions;
-            var sourceList = BrowseFilter.IsFiltered ? filteredDataItemsForListView : dataItemsForListView;
+            var sourceList = state.Filter.IsFiltered ? state.FilteredDataItems : state.DataItems;
             lock (sourceList)
             {
                 result = selectedPositions.Where(i => i < sourceList.Count).Select(i => sourceList[i]).Select(item => BrowseUtils.ToFullFileInfo(item)).ToList();
@@ -673,7 +668,7 @@ namespace Seeker
 
         private void CopySelectedURLs()
         {
-            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
+            if ((!state.Filter.IsFiltered && state.DataItems.Count == 0) || (state.Filter.IsFiltered && state.FilteredDataItems.Count == 0))
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Long);
             }
@@ -711,7 +706,7 @@ namespace Seeker
 
         private void DownloadSelectedFiles(bool queuePaused)
         {
-            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
+            if ((!state.Filter.IsFiltered && state.DataItems.Count == 0) || (state.Filter.IsFiltered && state.FilteredDataItems.Count == 0))
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
             }
@@ -750,7 +745,7 @@ namespace Seeker
 
         private (List<FullFileInfo> topLevel, List<FullFileInfo> recursive, bool containsSubDirs) BuildDownloadFileInfos(bool justFilteredItems)
         {
-            var sourceList = justFilteredItems ? filteredDataItemsForDownload : dataItemsForDownload;
+            var sourceList = justFilteredItems ? state.FilteredDataItemsForDownload : state.DataItemsForDownload;
             lock (sourceList)
             {
                 return BrowseUtils.BuildDownloadFileInfos(sourceList);
@@ -759,7 +754,7 @@ namespace Seeker
 
         private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
         {
-            if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
+            if (justFilteredItems && state.FilteredDataItemsForDownload.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
@@ -813,11 +808,11 @@ namespace Seeker
                     {
                         if (!justFilteredItems)
                         {
-                            BrowseUtils.SetDepthTags(dataItemsForDownload.First(), recursiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(state.DataItemsForDownload.First(), recursiveFullFileInfo);
                         }
                         else
                         {
-                            BrowseUtils.SetDepthTags(filteredDataItemsForDownload.First(), recursiveFullFileInfo);
+                            BrowseUtils.SetDepthTags(state.FilteredDataItemsForDownload.First(), recursiveFullFileInfo);
                         }
                     }
                     DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
@@ -842,29 +837,29 @@ namespace Seeker
         {
             if (downloadShownInListView)
             {
-                dataItemsForDownload = dataItemsForListView.ToList();
-                filteredDataItemsForDownload = filteredDataItemsForListView.ToList();
+                state.DataItemsForDownload = state.DataItems.ToList();
+                state.FilteredDataItemsForDownload = state.FilteredDataItems.ToList();
             }
             else
             {
                 //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
-                dataItemsForDownload = new List<DataItem>();
+                state.DataItemsForDownload = new List<DataItem>();
                 if (itemSelected == null)
                 {
                     UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
                     return; //else nullref
                 }
-                PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
-                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload.ToList(), BrowseFilter);
+                PopulateDataItemsToItemSelected(state.DataItemsForDownload, itemSelected);
+                state.FilteredDataItemsForDownload = BrowseUtils.FilterBrowseList(state.DataItemsForDownload.ToList(), state.Filter);
             }
 
 
-            if (dataItemsForDownload.Count == 0)
+            if (state.DataItemsForDownload.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
-            if (BrowseFilter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
+            if (state.Filter.IsFiltered && (state.DataItemsForDownload.Count != state.FilteredDataItemsForDownload.Count))
             {
                 //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
@@ -903,11 +898,11 @@ namespace Seeker
             {
                 try
                 {
-                    itemSelected = filteredDataItemsForListView[position];
+                    itemSelected = state.FilteredDataItems[position];
                 }
                 catch (ArgumentOutOfRangeException) //this did happen to me.... when filtering...
                 {
-                    string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count}";
+                    string logMsg = $"ListViewDirectories_ItemClick position: {position} state.FilteredDataItems.Count: {state.FilteredDataItems.Count}";
                     Logger.Firebase(logMsg);
                     return null;
                 }
@@ -918,11 +913,11 @@ namespace Seeker
                 //!! firebase -- ListViewDirectories_ItemClick
                 try
                 {
-                    itemSelected = dataItemsForListView[position]; //out of bounds here...
+                    itemSelected = state.DataItems[position]; //out of bounds here...
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count} isFilter {filteredResults}";
+                    string logMsg = $"ListViewDirectories_ItemClick position: {position} state.FilteredDataItems.Count: {state.FilteredDataItems.Count} isFilter {filteredResults}";
                     Logger.Firebase(logMsg);
                     return null;
                 }
@@ -931,7 +926,7 @@ namespace Seeker
         }
         public void OnItemLongClick(int position, View view)
         {
-            DataItemSelectedForLongClick = GetItemSelected(position, BrowseFilter.IsFiltered);
+            DataItemSelectedForLongClick = GetItemSelected(position, state.Filter.IsFiltered);
             if (DataItemSelectedForLongClick == null)
             {
                 return;
@@ -955,8 +950,8 @@ namespace Seeker
 
         public void OnItemClick(int position)
         {
-            cachedFilteredDataItemsForListView = null;
-            bool filteredResults = BrowseFilter.IsFiltered;
+            state.CachedFilteredDataItems = null;
+            bool filteredResults = state.Filter.IsFiltered;
             DataItem itemSelected = GetItemSelected(position, filteredResults);
             if (itemSelected == null)
             {
@@ -964,7 +959,7 @@ namespace Seeker
             }
 
             bool isFile = false;
-            lock (dataItemsForListView)
+            lock (state.DataItems)
             {
                 if (itemSelected.IsDirectory())
                 {
@@ -976,11 +971,11 @@ namespace Seeker
                     }
                     SaveScrollPosition();
 
-                    PopulateDataItemsToItemSelected(dataItemsForListView, itemSelected);
+                    PopulateDataItemsToItemSelected(state.DataItems, itemSelected);
 
                     if (!filteredResults)
                     {
-                        SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
+                        SetBrowseAdapters(filteredResults, state.DataItems, false, false);
                     }
                 }
                 else
@@ -1001,13 +996,13 @@ namespace Seeker
                 }
 
             }
-            lock (dataItemsForListView)
+            lock (state.DataItems)
             {
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 {
                     if (!isFile && filteredResults)
                     {
-                        SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
+                        SetBrowseAdapters(filteredResults, state.DataItems, false, false);
                     }
                 }
             }
@@ -1038,20 +1033,20 @@ namespace Seeker
         /// <returns>whether we can successfully go up.</returns>
         public bool GoUpDirectory(int additionalLevels = 0)
         {
-            cachedFilteredDataItemsForListView = null;
-            bool filteredResults = BrowseFilter.IsFiltered;
-            lock (dataItemsForListView)
+            state.CachedFilteredDataItems = null;
+            bool filteredResults = state.Filter.IsFiltered;
+            lock (state.DataItems)
             {
                 TreeNode<Directory> item = null;
                 try
                 {
-                    if (dataItemsForListView[0].File != null)
+                    if (state.DataItems[0].File != null)
                     {
-                        item = dataItemsForListView[0]?.Node?.Parent;  //?.Parent; //This used to do grandparent.  Which is a bug I think, so I changed it.
+                        item = state.DataItems[0]?.Node?.Parent;  //?.Parent; //This used to do grandparent.  Which is a bug I think, so I changed it.
                     }
-                    else if (dataItemsForListView[0].Directory != null)
+                    else if (state.DataItems[0].Directory != null)
                     {
-                        item = dataItemsForListView[0]?.Node?.Parent?.Parent;
+                        item = state.DataItems[0]?.Node?.Parent?.Parent;
                     }
                     else
                     {
@@ -1070,19 +1065,19 @@ namespace Seeker
                 {
                     item = item.Parent;
                 }
-                dataItemsForListView.Clear();
-                dataItemsForListView.AddRange(BrowseUtils.GetDataItemsForNode(item));
+                state.DataItems.Clear();
+                state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(item));
                 if (!filteredResults)
                 {
-                    SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
+                    SetBrowseAdapters(filteredResults, state.DataItems, false, true);
                 }
 
             }
-            lock (dataItemsForListView)
+            lock (state.DataItems)
             {
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 {
-                    SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
+                    SetBrowseAdapters(filteredResults, state.DataItems, false, true);
                 }
             }
             RestoreScrollPosition();
@@ -1099,17 +1094,17 @@ namespace Seeker
         {
             if (toFilter)
             {
-                filteredDataItemsForListView = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
-                recyclerViewDirectories.SetAdapter(new BrowseAdapter(filteredDataItemsForListView, this));
+                state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
+                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this));
             }
             else
             {
-                recyclerViewDirectories.SetAdapter(new BrowseAdapter(dataItemsForListView, this));
+                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this));
             }
 
-            var items = BrowseUtils.GetPathItems(dataItemsForListView);
-            pathItems.Clear();
-            pathItems.AddRange(items);
+            var items = BrowseUtils.GetPathItems(state.DataItems);
+            state.PathItems.Clear();
+            state.PathItems.AddRange(items);
             if (fullRefreshOfPathItems)
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged();
@@ -1121,7 +1116,7 @@ namespace Seeker
             else
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged();
-                treePathRecyclerView.ScrollToPosition(pathItems.Count - 1);
+                treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
         }
 
@@ -1202,7 +1197,7 @@ namespace Seeker
 
         private static void ClearFilterStringAndCached(bool force = false)
         {
-            BrowseFilter.Reset();
+            state.Filter.Reset();
             //FilterSpecialFlags.Clear();
             if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
@@ -1220,14 +1215,14 @@ namespace Seeker
             ClearFilterStringAndCached();
             ScrollPositionRestore?.Clear();
             ScrollPositionRestoreRotate = null;
-            filteredDataItemsForListView = new List<DataItem>();
-            cachedFilteredDataItemsForListView = null;
+            state.FilteredDataItems = new List<DataItem>();
+            state.CachedFilteredDataItems = null;
             CurrentUsername = e.Username;
             //OriginalBrowseResponse = e.OriginalBrowseResponse;
             //OurCurrentLocation = e.BrowseResponseTree; //aka root
-            lock (dataItemsForListView) //on non UI thread.
+            lock (state.DataItems) //on non UI thread.
             {
-                dataItemsForListView.Clear();//clear old
+                state.DataItems.Clear();//clear old
                 //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
                 if (e.StartingLocation != null && e.StartingLocation != string.Empty)
                 {
@@ -1240,11 +1235,11 @@ namespace Seeker
                         return; //we might be in a bad state just returning like this... idk...
                     }
 
-                    dataItemsForListView.AddRange(BrowseUtils.GetDataItemsForNode(startingPoint));
+                    state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(startingPoint));
                 }
                 else
                 {
-                    dataItemsForListView.AddRange(BrowseUtils.GetDataItemsForNode(e.BrowseResponseTree));
+                    state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(e.BrowseResponseTree));
                 }
             }
 
@@ -1267,7 +1262,7 @@ namespace Seeker
 
             Logger.InfoFirebase("RefreshOnRecieved " + CurrentUsername);
             currentUsernameUI = CurrentUsername;
-            SetBrowseAdapters(false, dataItemsForListView, true);
+            SetBrowseAdapters(false, state.DataItems, true);
         }
 
 
