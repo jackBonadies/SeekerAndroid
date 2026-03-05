@@ -24,17 +24,15 @@ namespace Seeker
 {
     public partial class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
     {
-        private View rootView = null;
-
-
-
-
         private static TransfersViewState ViewState => TransfersViewState.Instance;
 
-        //private ListView primaryListView = null;
+        private View rootView = null;
         private TextView noTransfers = null;
         private Button setupUpSharing = null;
-        private ISharedPreferences sharedPreferences = null;
+        private RecyclerView.LayoutManager recycleLayoutManager;
+        private RecyclerView recyclerViewTransferItems;
+        public TransferAdapterRecyclerVersion recyclerTransferAdapter;
+
         private static System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> ProgressUpdatedThrottler = new System.Collections.Concurrent.ConcurrentDictionary<string, DateTime>();
         public const int THROTTLE_PROGRESS_UPDATED_RATE = 200;//in ms;
 
@@ -337,11 +335,6 @@ namespace Seeker
             });
         }
 
-
-        private RecyclerView.LayoutManager recycleLayoutManager;
-        private RecyclerView recyclerViewTransferItems;
-        public TransferAdapterRecyclerVersion recyclerTransferAdapter;
-
         public override void OnDestroy()
         {
             try
@@ -567,7 +560,6 @@ namespace Seeker
             //View transferOptions = rootView.FindViewById<View>(Resource.Id.transferOptions);
             //transferOptions.Click += TransferOptions_Click;
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
-            sharedPreferences = SeekerState.SharedPreferences;
             //if (TransferItems.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
             //{
             //    RestoreDownloadTransferItems(sharedPreferences);
