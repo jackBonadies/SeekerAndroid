@@ -20,7 +20,7 @@ namespace Seeker
             if (SeekerApplication.Activities.Count == 0)
             {
                 Logger.Debug("----- On Destory ------ Last Activity ------");
-                TransfersFragment.SaveTransferItems();
+                TransferPersistence.SaveTransferItems();
             }
             else
             {
