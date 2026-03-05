@@ -1230,12 +1230,14 @@ namespace Seeker
 
                     if (startingPoint == null)
                     {
-                        Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null");
+                        Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);
                         SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
-                        return; //we might be in a bad state just returning like this... idk...
+                        state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(e.BrowseResponseTree));
+                    } 
+                    else
+                    {
+                        state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(startingPoint));
                     }
-
-                    state.DataItems.AddRange(BrowseUtils.GetDataItemsForNode(startingPoint));
                 }
                 else
                 {

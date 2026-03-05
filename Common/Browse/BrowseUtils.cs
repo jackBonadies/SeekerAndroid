@@ -321,6 +321,7 @@ namespace Common.Browse
             }
             return count;
         }
+
         public static List<DataItem> GetDataItemsForNode(TreeNode<Directory> node)
         {
             var items = new List<DataItem>();
