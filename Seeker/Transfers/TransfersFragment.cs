@@ -692,18 +692,11 @@ namespace Seeker
 
         private void ClearTransferForRetry(TransferItem item1, int position)
         {
-            item1.Progress = 0; //no longer red... some good user feedback
-            item1.QueueLength = int.MaxValue; //let the State Changed update this for us...
-            item1.Failed = false;
-            item1.TransferItemExtra &= ~TransferItemExtras.DirNotSet;
+            item1.ClearStateForRetry();
             var refreshOnlySelected = new Action(() =>
             {
-
                 Logger.Debug("notifyItemChanged " + position);
-
                 recyclerTransferAdapter.NotifyItemChanged(position);
-
-
             });
             lock (TransferItems.TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState()))
             { //also can update this to do a partial refresh...

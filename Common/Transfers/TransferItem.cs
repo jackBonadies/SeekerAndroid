@@ -124,5 +124,13 @@ namespace Seeker
         {
             return Username + " : " + FullFilename;
         }
+
+        public void ClearStateForRetry()
+        {
+            Progress = 0; //no longer red... some good user feedback
+            QueueLength = int.MaxValue; //let the State Changed update this for us...
+            Failed = false;
+            TransferItemExtra &= ~TransferItemExtras.DirNotSet;
+        }
     }
 }
