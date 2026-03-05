@@ -36,5 +36,14 @@ namespace Seeker
         {
             return fullFilename + size.ToString() + username;
         }
+
+        public static void CancelAndRemoveToken(TransferItem ti)
+        {
+            var key = ProduceCancellationTokenKey(ti);
+            if (CancellationTokens.TryRemove(key, out CancellationTokenSource token))
+            {
+                token.Cancel();
+            }
+        }
     }
 }

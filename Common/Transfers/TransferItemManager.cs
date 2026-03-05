@@ -818,13 +818,7 @@ namespace Seeker
                     {
                         ti.CancelAndClearFlag = true;
                     }
-                    var key = TransferState.ProduceCancellationTokenKey(ti);
-                    TransferState.CancellationTokens.TryGetValue(key, out CancellationTokenSource token);
-                    if (token != null)
-                    {
-                        token.Cancel();
-                        TransferState.CancellationTokens.Remove(key, out _);
-                    }
+                    TransferState.CancelAndRemoveToken(ti);
                 }
             }
             MarkTransfersDirty();

@@ -305,8 +305,6 @@ namespace Seeker
                 case Resource.Id.batch_select:
                     TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                     ForceOutIfZeroSelected = false;
-                    //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
-                    //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                     TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
                     TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), 0);
@@ -551,27 +549,14 @@ namespace Seeker
             {
                 this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
             }
-            //this.primaryListView = rootView.FindViewById<ListView>(Resource.Id.listView1);
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerView1);
             this.noTransfers = rootView.FindViewById<TextView>(Resource.Id.noTransfersView);
             this.setupUpSharing = rootView.FindViewById<Button>(Resource.Id.setUpSharing);
             this.setupUpSharing.Click += SetupUpSharing_Click;
 
-            //View transferOptions = rootView.FindViewById<View>(Resource.Id.transferOptions);
-            //transferOptions.Click += TransferOptions_Click;
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
-            //if (TransferItems.TransferItemManagerDL == null)//bc our sharedPref string can be older than the transferItems
-            //{
-            //    RestoreDownloadTransferItems(sharedPreferences);
-            //    RestoreUploadTransferItems(sharedPreferences);
-            //    TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL);
-            //}
 
             SetNoTransfersMessage();
-
-
-            //TransferAdapter customAdapter = new TransferAdapter(Context, transferItems);
-            //primaryListView.Adapter = (customAdapter);
 
             recycleLayoutManager = new CustomLinearLayoutManager(Activity);
             SetRecyclerAdapter();
@@ -659,7 +644,7 @@ namespace Seeker
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TranferQueueStateChanged(object sender, TransferItem e)
+        private void TransferQueueStateChanged(object sender, TransferItem e)
         {
             SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
             {
@@ -834,23 +819,6 @@ namespace Seeker
 
         private void DownloadRetryLogic(ITransferItem transferItem)
         {
-            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
-            //its possible that in between creating this contextmenu and getting here that the transfer items changed especially if maybe a re-login was done...
-            //either position changed, or someone just straight up cleared them in the meantime...
-            //maybe we can add the filename in the menuinfo to match it with, rather than the index..
-
-            //NEVER USE GetChildAt!!!  IT WILL RETURN NULL IF YOU HAVE MORE THAN ONE PAGE OF DATA
-            //FindViewByPosition works PERFECTLY.  IT RETURNS THE VIEW CORRESPONDING TO THE TRANSFER LIST..
-
-            //ITransferItemView targetView = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(position) as ITransferItemView;
-
-            //TransferItem item1 = null;
-            //Logger.Debug("targetView is null? " + (targetView == null).ToString());
-            //if (targetView == null)
-            //{
-            //    SeekerApplication.ShowToast(SeekerState.MainActivityRef.GetString(Resource.String.chosen_transfer_doesnt_exist), ToastLength.Short);
-            //    return;
-            //}
             string chosenFname = (transferItem as TransferItem).FullFilename; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             string chosenUname = (transferItem as TransferItem).Username; //  targetView.FindViewById<TextView>(Resource.Id.textView2).Text;
             Logger.Debug("chosenFname? " + chosenFname);
@@ -883,7 +851,6 @@ namespace Seeker
                 return; //the dl continuation method will take care of it....
             }
 
-            //TransferItem item1 = transferItems[info.Position];  
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             try
             {
@@ -990,8 +957,6 @@ namespace Seeker
                         //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
                         break;
                     case TransferContextMenuItem.ClearFromList:
-                        //clear complete?
-                        //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                         Logger.InfoFirebase("Clear Complete item pressed");
                         lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
                         {
@@ -1008,16 +973,13 @@ namespace Seeker
                             }
                             catch (ArgumentOutOfRangeException)
                             {
-                                //Logger.Firebase("case1: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
-                                SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
+                                    SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                                 return base.OnContextItemSelected(item);
                             }
-                            recyclerTransferAdapter.NotifyItemRemoved(position);  //UI
-                            //refreshListView();
+                            recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
                         break;
                     case TransferContextMenuItem.CancelAndClear: //cancel and clear (downloads) OR abort and clear (uploads)
-                        //info = (AdapterView.AdapterContextMenuInfo)item.MenuInfo;
                         Logger.InfoFirebase("Cancel and Clear item pressed");
                         ITransferItem tItem = null;
                         try
@@ -1026,17 +988,12 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //Logger.Firebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
                         if (tItem is TransferItem tti)
                         {
-                            bool wasInProgress = tti.State.HasFlag(TransferStates.InProgress);
-                            TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(tti), out CancellationTokenSource uptoken);
-                            uptoken?.Cancel();
-                            //TransferState.CancellationTokens[TransferState.ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                            TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tti), out _);
+                            TransferState.CancelAndRemoveToken(tti);
                             lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
                                 if (ViewState.InUploadsMode)
@@ -1056,7 +1013,6 @@ namespace Seeker
                             TransferItems.TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
                             lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
-                                //TransferItems.TransferItemManagerDL.RemoveAtUserIndex(position); we already removed
                                 recyclerTransferAdapter.NotifyItemRemoved(position);
                             }
                         }
@@ -1077,7 +1033,6 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //Logger.Firebase("case3: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
@@ -1109,7 +1064,6 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //Logger.Firebase("case4: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
@@ -1207,16 +1161,11 @@ namespace Seeker
                         }
                         catch (ArgumentOutOfRangeException)
                         {
-                            //Logger.Firebase("case2: info.Position: " + position + " transferItems.Count is: " + transferItems.Count);
                             SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                             return base.OnContextItemSelected(item);
                         }
                         TransferItem uploadToCancel = tItem as TransferItem;
-
-                        TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(uploadToCancel), out CancellationTokenSource token);
-                        token?.Cancel();
-                        //TransferState.CancellationTokens[TransferState.ProduceCancellationTokenKey(tItem)]?.Cancel(); throws if does not exist.
-                        TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(uploadToCancel), out _);
+                        TransferState.CancelAndRemoveToken(uploadToCancel);
                         lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                         {
                             recyclerTransferAdapter.NotifyItemChanged(position);
@@ -1227,9 +1176,7 @@ namespace Seeker
                         IEnumerable<TransferItem> tItems = TransferItems.TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
                         foreach (var tiToCancel in tItems)
                         {
-                            TransferState.CancellationTokens.TryGetValue(TransferState.ProduceCancellationTokenKey(tiToCancel), out CancellationTokenSource token1);
-                            token1?.Cancel();
-                            TransferState.CancellationTokens.Remove(TransferState.ProduceCancellationTokenKey(tiToCancel), out _);
+                            TransferState.CancelAndRemoveToken(tiToCancel);
                             lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
                             {
                                 int posOfCancelled = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(tiToCancel);
@@ -1244,8 +1191,6 @@ namespace Seeker
                     case TransferContextMenuItem.BatchSelect: //batch selection mode
                         TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
                         ForceOutIfZeroSelected = true;
-                        //AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)SeekerState.MainActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
-                        //TransfersActionMode = myToolbar.StartActionMode(TransfersActionModeCallback);
                         TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                         recyclerTransferAdapter.IsInBatchSelectMode = true;
                         ToggleItemBatchSelect(recyclerTransferAdapter, position);
@@ -1285,24 +1230,24 @@ namespace Seeker
             {
                 return;
             }
-            int userPostionBeingRemoved = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
-            if (userPostionBeingRemoved == -1)
+            int userPositionBeingRemoved = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
+            if (userPositionBeingRemoved == -1)
             {
                 //it is not currently on our screen, perhaps it is in uploads (and we are in downloads) or we are inside a folder (and it is outside)
                 Logger.Debug("batch on, different screen item removed");
                 return;
             }
-            Logger.Debug("batch on, updating: " + userPostionBeingRemoved);
+            Logger.Debug("batch on, updating: " + userPositionBeingRemoved);
             //adjust numbers
             int cnt = ViewState.BatchSelectedItems.Count;
             for (int i = cnt - 1; i >= 0; i--)
             {
                 int position = ViewState.BatchSelectedItems[i];
-                if (position < userPostionBeingRemoved)
+                if (position < userPositionBeingRemoved)
                 {
                     continue;
                 }
-                else if (position == userPostionBeingRemoved)
+                else if (position == userPositionBeingRemoved)
                 {
                     ViewState.BatchSelectedItems.RemoveAt(i);
                 }
@@ -1333,7 +1278,7 @@ namespace Seeker
             {
                 try
                 {
-                    if (queueLenOld == t.QueueLength) //always true bc its a reference...
+                    if (queueLenOld == t.QueueLength) //queueLenOld is a value type snapshot, so this checks if the queue position changed
                     {
                         if (queueLenOld == int.MaxValue)
                         {
@@ -1347,7 +1292,7 @@ namespace Seeker
                     else
                     {
                         int indexOfItem = TransferItems.TransferItemManagerDL.GetUserIndexForTransferItem(t, ViewState.CreateDLUIState());
-                        if (indexOfItem == -1 && ViewState.InUploadsMode)
+                        if (indexOfItem == -1)
                         {
                             return null;
                         }
@@ -1374,13 +1319,10 @@ namespace Seeker
                     return;
                 }
                 int indexOfItem = TransferItems.TransferItemManagerDL.GetUserIndexForTransferItem(fullFilename, ViewState.CreateDLUIState());
-                Logger.Debug("NotifyItemChanged + UpdateQueueState" + indexOfItem);
-                Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: " + fullFilename);
-                if (recyclerTransferAdapter.ItemCount == indexOfItem)
+                if (indexOfItem < 0 || indexOfItem >= recyclerTransferAdapter.ItemCount)
                 {
-
+                    return;
                 }
-                Logger.Debug("UI thread: " + Looper.MainLooper.IsCurrentThread);
                 recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
             }
             catch (System.Exception)
@@ -1418,17 +1360,7 @@ namespace Seeker
 
         private void refreshItemProgress(int indexToRefresh, int progress, TransferItem relevantItem, bool wasFailed, double avgSpeedBytes)
         {
-            //View v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh);
-
-
-            //METHOD 1 of updating... (causes flicker)
-            //recyclerViewTransferItems.GetAdapter().NotifyItemChanged(indexToRefresh); //this index is the index in the transferItem list...
-
-            //METHOD 2 of updating (no flicker)
-
-            //so this guys adapter is good and up to date.  but anything regarding View is bogus. Including the Views TextViews and InnerTransferItems. but its Adapter is good and visually everything looks fine...
-
-            ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView; //its doing the wrong one!!! also its a bogus view, not shown anywhere on screen...
+            ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView;
             if (v != null) //it scrolled out of view which is find bc it will get updated when it gets rebound....
             {
                 if (v is TransferItemViewFolder)
@@ -1504,9 +1436,6 @@ namespace Seeker
         }
         private void refreshListViewSpecificItem(int indexOfItem)
         {
-            //creating the TransferAdapter can cause a Collection was Modified error due to transferItems.
-            //maybe a better way to do this is .ToList().... rather than locking...
-            //TransferAdapter customAdapter = null;
             if (Context == null)
             {
                 if (SeekerState.MainActivityRef == null)
@@ -1514,11 +1443,6 @@ namespace Seeker
                     Logger.Firebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
                 }
-                //customAdapter = new TransferAdapter(SeekerState.MainActivityRef, transferItems);
-            }
-            else
-            {
-                //customAdapter = new TransferAdapter(Context, transferItems);
             }
             if (this.noTransfers == null)
             {
@@ -1526,22 +1450,15 @@ namespace Seeker
                 return;
             }
             SetNoTransfersMessage();
-            Logger.Debug("NotifyItemChanged" + indexOfItem);
-            Logger.Debug("item count: " + recyclerTransferAdapter.ItemCount + " indexOfItem " + indexOfItem + "itemName: ");
-            Logger.Debug("UI thread: " + Looper.MainLooper.IsCurrentThread);
-            if (recyclerTransferAdapter.ItemCount == indexOfItem)
+            if (indexOfItem < 0 || indexOfItem >= recyclerTransferAdapter.ItemCount)
             {
-
+                return;
             }
             recyclerTransferAdapter.NotifyItemChanged(indexOfItem);
-
         }
 
         public void refreshListView(Action specificRefreshAction = null)
         {
-            //creating the TransferAdapter can cause a Collection was Modified error due to transferItems.
-            //maybe a better way to do this is .ToList().... rather than locking...
-            //TransferAdapter customAdapter = null;
             if (Context == null)
             {
                 if (SeekerState.MainActivityRef == null)
@@ -1549,9 +1466,6 @@ namespace Seeker
                     Logger.Firebase("cannot refreshListView on TransferStateUpdated, MainActivityRef and Context are null");
                     return;
                 }
-            }
-            else
-            {
             }
             if (this.noTransfers == null)
             {
@@ -1569,10 +1483,6 @@ namespace Seeker
             }
         }
 
-        //public string const IndividualItemType = 1;
-        //public string const FolderItemType = 2;
-
-
         private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
         {
             bool needsRefresh = (e.ti.IsUpload() && ViewState.InUploadsMode) || (!(e.ti.IsUpload()) && !(ViewState.InUploadsMode));
@@ -1585,43 +1495,20 @@ namespace Seeker
                 if (e.fullRefresh)
                 {
 
-                    Action action = refreshListViewSafe; //notify data set changed...
-                                                         //if (indexRemoved!=-1)
-                                                         //{
-
-                    //    var refreshOnlySelected = new Action(() => {
-
-                    //        Logger.Debug("notifyItemRemoved " + indexRemoved + "count: " + recyclerTransferAdapter.ItemCount);
-                    //        if(indexRemoved == recyclerTransferAdapter.ItemCount)
-                    //        {
-
-                    //        }
-                    //        recyclerTransferAdapter?.NotifyItemRemoved(indexRemoved);
-
-
-                    //    });
-
-                    //    var refresh1 = new Action(()  => refreshListView(refreshOnlySelected) );
-
-                    //    action = refreshOnlySelected;
-                    //}
-                    //else
-                    //{
-                    //    action = refreshListViewSafe;
-                    //}
+                    Action action = refreshListViewSafe;
                     Activity?.RunOnUiThread(action); //in case of rotation it is the ACTIVITY which will be null!!!!
                 }
                 else
                 {
                     try
                     {
-                        bool isNew = !ProgressUpdatedThrottler.ContainsKey(e.ti.FullFilename + e.ti.Username);
-
                         DateTime now = DateTime.UtcNow;
-                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(e.ti.FullFilename + e.ti.Username, now); //this returns now if the key is not in the dictionary!
+                        string throttleKey = e.ti.FullFilename + e.ti.Username;
+                        DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(throttleKey, now);
+                        bool isNew = lastUpdated == now;
                         if (now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE || isNew)
                         {
-                            ProgressUpdatedThrottler[e.ti.FullFilename + e.ti.Username] = now;
+                            ProgressUpdatedThrottler[throttleKey] = now;
                         }
                         else if (e.wasFailed)
                         {
@@ -1635,13 +1522,6 @@ namespace Seeker
                             return;
                         }
 
-
-                        //partial refresh just update progress..
-                        //TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.ti.FullFilename, out index);
-
-                        //Logger.Debug("Index is "+index+" TransferProgressUpdated"); //tested!
-
-                        //int indexToUpdate = transferItems.IndexOf(relevantItem);
 
                         Activity?.RunOnUiThread(() =>
                         {
@@ -1701,8 +1581,8 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex += TransferStateChanged;
             SeekerApplication.StateChangedForItem += TransferStateChangedItem;
             SeekerApplication.ProgressUpdated += TransferProgressUpdated;
-            UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; ; //todo this should eventually be for downloads too.
-            DownloadService.Instance.TransferItemQueueUpdated += TranferQueueStateChanged;
+            UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; //todo this should eventually be for downloads too.
+            DownloadService.Instance.TransferItemQueueUpdated += TransferQueueStateChanged;
 
             if (recyclerTransferAdapter != null)
             {
@@ -1748,7 +1628,7 @@ namespace Seeker
             SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
             SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
             SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
-            DownloadService.Instance.TransferItemQueueUpdated -= TranferQueueStateChanged;
+            DownloadService.Instance.TransferItemQueueUpdated -= TransferQueueStateChanged;
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
