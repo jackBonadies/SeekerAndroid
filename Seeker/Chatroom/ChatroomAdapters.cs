@@ -171,6 +171,7 @@ namespace Seeker
             {
                 MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
                 view.setupChildren();
+                view.IsGroupChat = true;
                 (view as View).LongClick += ChatroomReceivedAdapter_LongClick;
                 return new MessageInnerViewSentHolder(view as View);
             }

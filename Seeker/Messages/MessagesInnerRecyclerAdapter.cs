@@ -196,6 +196,7 @@ namespace Seeker.Messages
     public class MessageInnerViewSent : LinearLayout
     {
         public MessageInnerViewSentHolder ViewHolder { get; set; }
+        public bool IsGroupChat { get; set; }
         private TextView viewTimeStamp;
         private TextView viewMessage;
         private AndroidX.CardView.Widget.CardView cardView;
@@ -260,7 +261,9 @@ namespace Seeker.Messages
             }
             else
             {
-                viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
+                viewTimeStamp.Text = IsGroupChat
+                    ? CommonHelpers.GetNiceDateTimeGroupChat(msg.LocalDateTime)
+                    : CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
             }
             UiHelpers.SetMessageTextView(viewMessage, msg);
         }
